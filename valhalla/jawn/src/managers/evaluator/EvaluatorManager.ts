@@ -126,12 +126,12 @@ export class EvaluatorManager extends BaseManager {
       }
 
       const llmAsAJudge = new LLMAsAJudge({
-        openAIApiKey: OPENAI_KEY!,
         scoringType,
         llmTemplate: evaluator.llm_template,
         inputRecord,
         output: JSON.stringify(content),
         evaluatorName: evaluator.name,
+        organizationId: this.authParams.organizationId,
       });
       try {
         const result = await llmAsAJudge.evaluate();

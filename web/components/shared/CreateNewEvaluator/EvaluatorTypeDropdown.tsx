@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LLMEvaluatorConfigFormPreset } from "./LLMEvaluatorConfigForm";
 import { TestInput } from "./types";
 

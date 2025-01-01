@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from "react";
 import { Col, Row } from "@/components/layout/common";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { openAITemplateToOpenAIFunctionParams } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { LLMEvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
+import useNotification from "@/components/shared/notification/useNotification";
+import { SimpleTable } from "@/components/shared/table/simpleTable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,13 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import Link from "next/link";
-import { SimpleTable } from "@/components/shared/table/simpleTable";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -28,14 +24,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import useNotification from "@/components/shared/notification/useNotification";
+import { Input } from "@/components/ui/input";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { PlusIcon, TrashIcon } from "lucide-react";
+import Link from "next/link";
+import React, { useMemo, useState } from "react";
 import AddOnlineEvaluatorForm from "./AddOnlineEvaluatorForm";
 import { useEvaluators } from "./EvaluatorHook";
-import {
-  OpenAIFunctionToFunctionParams,
-  openAITemplateToOpenAIFunctionParams,
-} from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
-import { LLMEvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
 
 type NotUndefined<T> = T extends undefined ? never : T;
 type NotNull<T> = T extends null ? never : T;

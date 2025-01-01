@@ -11,8 +11,6 @@ import { useState } from "react";
 
 import { EvaluatorTestResult, TestInput } from "../types";
 import MarkdownEditor from "../../markdownEditor";
-import { ScrollBar } from "@/components/ui/scroll-area";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 
 interface TestEvaluatorProps {

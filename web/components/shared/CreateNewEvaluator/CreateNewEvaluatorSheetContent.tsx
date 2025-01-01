@@ -14,10 +14,7 @@ import {
   LLM_AS_A_JUDGE_OPTIONS,
   COMPOSITE_OPTIONS,
 } from "./EvaluatorTypeDropdown";
-import {
-  LLMEvaluatorConfigFormPreset,
-  LLMEvaluatorConfigForm,
-} from "./LLMEvaluatorConfigForm";
+import { LLMEvaluatorConfigForm } from "./LLMEvaluatorConfigForm";
 import { PythonEvaluatorConfigForm } from "./PythonEvaluatorConfigForm";
 
 export const CreateNewEvaluatorSheetContent: React.FC<{

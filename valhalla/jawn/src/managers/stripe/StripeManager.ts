@@ -478,6 +478,7 @@ WHERE (${builtFilter.filter})`,
     Result<
       Stripe.Response<Stripe.UpcomingInvoice> & {
         experiments_usage: LLMUsage[];
+        evaluators_usage: LLMUsage[];
       },
       string
     >

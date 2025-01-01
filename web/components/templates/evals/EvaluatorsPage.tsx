@@ -1,4 +1,4 @@
-import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
@@ -13,20 +13,8 @@ import { Button } from "@/components/ui/button";
 
 // Import Recharts components
 import ThemedTable from "@/components/shared/themed/table/themedTable";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { ChartLineIcon, Check, ChevronsUpDown } from "lucide-react";
+
+import { ChartLineIcon } from "lucide-react";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";

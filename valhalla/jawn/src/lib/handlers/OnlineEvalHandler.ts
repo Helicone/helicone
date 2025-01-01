@@ -68,7 +68,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
       };
 
       const llmAsAJudge = new LLMAsAJudge({
-        openAIApiKey: OPENAI_KEY!,
+        organizationId: orgId,
         scoringType: onlineEval.evaluator_scoring_type as
           | "LLM-CHOICE"
           | "LLM-BOOLEAN"

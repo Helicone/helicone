@@ -201,6 +201,7 @@ export class StripeController extends Controller {
       tax: result.data?.tax ?? null,
       total: result.data?.total ?? 0,
       experiments_usage: result.data?.experiments_usage ?? [],
+      evaluators_usage: result.data?.evaluators_usage ?? [],
     };
   }
 

@@ -11,12 +11,7 @@ import { useState } from "react";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
+
 import { LLMUsageItem } from "./InvoiceSheetLLMUsage";
 
 export const InvoiceSheet: React.FC = () => {

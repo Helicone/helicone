@@ -312,7 +312,6 @@ export class EvaluatorController extends Controller {
     }
   ) {
     const llmAsAJudge = new LLMAsAJudge({
-      openAIApiKey: OPENAI_KEY!,
       scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
         | "LLM-CHOICE"
         | "LLM-BOOLEAN"
