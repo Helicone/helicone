@@ -2710,7 +2710,7 @@ Json: JsonObject;
         alerts?: boolean;
       };
     };
-    ExperimentUsage: {
+    LLMUsage: {
       model: string;
       provider: string;
       /** Format: double */
@@ -5804,7 +5804,8 @@ export interface operations {
       200: {
         content: {
           "application/json": ({
-            experiments_usage: components["schemas"]["ExperimentUsage"][];
+            evaluators_usage: components["schemas"]["LLMUsage"][];
+            experiments_usage: components["schemas"]["LLMUsage"][];
             /** Format: double */
             total: number;
             /** Format: double */

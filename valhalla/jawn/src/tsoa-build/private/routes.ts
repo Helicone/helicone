@@ -2882,7 +2882,7 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ExperimentUsage": {
+    "LLMUsage": {
         "dataType": "refObject",
         "properties": {
             "model": {"dataType":"string","required":true},

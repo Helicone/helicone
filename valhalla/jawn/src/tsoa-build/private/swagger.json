@@ -8205,7 +8205,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ExperimentUsage": {
+			"LLMUsage": {
 				"properties": {
 					"model": {
 						"type": "string"
@@ -16584,9 +16584,15 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"evaluators_usage": {
+											"items": {
+												"$ref": "#/components/schemas/LLMUsage"
+											},
+											"type": "array"
+										},
 										"experiments_usage": {
 											"items": {
-												"$ref": "#/components/schemas/ExperimentUsage"
+												"$ref": "#/components/schemas/LLMUsage"
 											},
 											"type": "array"
 										},
@@ -16682,6 +16688,7 @@
 										}
 									},
 									"required": [
+										"evaluators_usage",
 										"experiments_usage",
 										"total",
 										"tax",
