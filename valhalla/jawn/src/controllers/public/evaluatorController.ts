@@ -17,9 +17,12 @@ import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
+  EvaluatorConfig,
   OnlineEvalStore,
   OnlineEvaluatorByEvaluatorId,
 } from "../../lib/stores/OnlineEvalStore";
+import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
+import { OPENAI_KEY } from "../../lib/clients/constant";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
@@ -51,6 +54,16 @@ type EvaluatorExperiment = {
 
 type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
+};
+
+type TestInput = {
+  inputBody: string;
+  outputBody: string;
+  inputs: {
+    inputs: Record<string, string>;
+    autoInputs?: Record<string, string>;
+  };
+  prompt?: string;
 };
 
 @Route("v1/evaluator")
@@ -261,8 +274,7 @@ export class EvaluatorController extends Controller {
     @Body()
     requestBody: {
       code: string;
-      requestBodyString: string;
-      responseString: string;
+      testInput: TestInput;
     }
   ): Promise<
     Result<
@@ -277,8 +289,8 @@ export class EvaluatorController extends Controller {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.testPythonEvaluator({
       code: requestBody.code,
-      requestBodyString: requestBody.requestBodyString,
-      responseString: requestBody.responseString,
+      requestBodyString: requestBody.testInput.inputBody,
+      responseString: requestBody.testInput.outputBody,
     });
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -287,5 +299,33 @@ export class EvaluatorController extends Controller {
       this.setStatus(200);
       return ok(result.data);
     }
+  }
+
+  @Post("/llm/test")
+  public async testLLMEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      evaluatorConfig: EvaluatorConfig;
+      testInput: TestInput;
+      evaluatorName: string;
+    }
+  ) {
+    const llmAsAJudge = new LLMAsAJudge({
+      openAIApiKey: OPENAI_KEY!,
+      scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
+        | "LLM-CHOICE"
+        | "LLM-BOOLEAN"
+        | "LLM-RANGE",
+      llmTemplate: JSON.parse(
+        requestBody.evaluatorConfig.evaluator_llm_template
+      ),
+      inputRecord: requestBody.testInput.inputs,
+      output: requestBody.testInput.outputBody,
+      evaluatorName: requestBody.evaluatorName,
+      organizationId: request.authParams.organizationId,
+    });
+    const result = await llmAsAJudge.evaluate();
+    return result;
   }
 }

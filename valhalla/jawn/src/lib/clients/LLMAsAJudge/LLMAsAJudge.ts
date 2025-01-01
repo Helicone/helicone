@@ -1,5 +1,7 @@
 import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
+import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
+import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
 
 interface ScoreResult {
   score: number | boolean;
@@ -8,7 +10,6 @@ interface ScoreResult {
 export class LLMAsAJudge {
   constructor(
     private params: {
-      openAIApiKey: string;
       scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
       llmTemplate: any;
       inputRecord: {
@@ -17,6 +18,7 @@ export class LLMAsAJudge {
       };
       output: string;
       evaluatorName: string;
+      organizationId: string;
     }
   ) {}
 
@@ -58,17 +60,30 @@ export class LLMAsAJudge {
       autoInputs: [],
     });
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.params.openAIApiKey}`,
-      },
-      body: JSON.stringify(requestBody),
+    const requestPath = `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`;
+
+    const heliconeApiKey = await generateTempHeliconeAPIKey(
+      this.params.organizationId,
+      "LLMAsAJudge"
+    );
+    console.log("OPENROUTER_KEY", OPENROUTER_KEY);
+
+    const res = await heliconeApiKey.data?.with(async (apiKey) => {
+      return await fetch(requestPath, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENROUTER_KEY}`,
+          "Helicone-Auth": `Bearer ${apiKey}`,
+          "Helicone-Property-Helicone-Evaluator": this.params.evaluatorName,
+        },
+        body: JSON.stringify(requestBody),
+      });
     });
 
-    if (!res.ok) {
-      console.error("error calling llm as a judge", res);
+    if (!res?.ok) {
+      const body = await res?.text();
+      console.error("error calling llm as a judge", res, body);
       throw new Error("error calling llm as a judge");
     }
     const data = await res.json();

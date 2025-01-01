@@ -1,19 +1,31 @@
 import { CodeSandbox } from "@codesandbox/sdk";
 import { err, ok, Result } from "../../lib/shared/result";
-import { SandboxPool } from "./SanboxPool";
+import { SandboxCache, SandboxPool } from "./SanboxPool";
+import { KVCache } from "../../lib/cache/kvCache";
 
 const pool = new SandboxPool({ concurrency: 50, opts: {} });
+
+function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout")), timeout)
+    ),
+  ]);
+}
 
 export async function testPythonEvaluator({
   code,
   requestBodyString,
   responseString,
   orgId,
+  uniqueId,
 }: {
   code: string;
   requestBodyString: string;
   responseString: string;
   orgId: string;
+  uniqueId: string;
 }): Promise<
   Result<
     {
@@ -24,9 +36,9 @@ export async function testPythonEvaluator({
     string
   >
 > {
-  console.log("Creating sandbox");
-
   const sandbox = await pool.getSandbox({ id: orgId });
+
+  console.log("Got sandbox:", sandbox.id);
 
   process.on("SIGINT", () => {
     sandbox.shutdown();
@@ -36,39 +48,49 @@ export async function testPythonEvaluator({
     sandbox.shutdown();
   });
 
-  // process.on("SIGQUIT", () => {
-  //   sandbox.shutdown();
-  // });
-
-  // process.on("SIGKILL", () => {
-  //   sandbox.shutdown();
-  // });
-
   const traces: string[] = [];
   try {
-    await Promise.all([
-      sandbox.fs.writeFile(
-        "/tmp/request.json",
-        new TextEncoder().encode(requestBodyString)
-      ),
+    console.log("Writing files");
+    await withTimeout(
+      Promise.all([
+        sandbox.fs.writeFile(
+          `/tmp/${uniqueId}/request.json`,
+          new TextEncoder().encode(requestBodyString),
+          {
+            create: true,
+            overwrite: true,
+          }
+        ),
 
-      await sandbox.fs.writeFile(
-        "/tmp/response.json",
-        new TextEncoder().encode(responseString)
-      ),
-    ]);
+        await sandbox.fs.writeFile(
+          `/tmp/${uniqueId}/response.json`,
+          new TextEncoder().encode(responseString),
+          {
+            create: true,
+            overwrite: true,
+          }
+        ),
+      ]),
+      10000
+    );
 
-    const result = await sandbox.shells.python.run(code);
+    const result = await withTimeout(
+      sandbox.shells.python.run(`HELICONE_EXECUTION_ID="${uniqueId}"\n${code}`),
+      10000
+    );
     traces.push(result.output);
 
     let output = "";
     try {
-      output = await sandbox.fs
-        .readFile("/tmp/output.txt")
-        .then((r) => r.toString());
+      output = await withTimeout(
+        sandbox.fs.readFile(`/tmp/${uniqueId}/output.txt`),
+        10000
+      ).then((r) => r.toString());
     } catch (e) {
       console.error(e);
     }
+
+    await withTimeout(sandbox.shells.run(`rm -rf /tmp/${uniqueId}`), 10000);
 
     return ok({
       output: output.toString(),
@@ -80,7 +102,5 @@ export async function testPythonEvaluator({
     return err(JSON.stringify(e));
   } finally {
     console.log("Shutting down sandbox");
-
-    sandbox.shutdown();
   }
 }

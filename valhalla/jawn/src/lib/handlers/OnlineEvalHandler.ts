@@ -33,7 +33,10 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         sampleRate > 100 ||
         Math.random() * 100 > sampleRate ||
         (context.processedLog.request.properties &&
-          "Helicone-Experiment-Id" in context.processedLog.request.properties)
+          "Helicone-Experiment-Id" in
+            context.processedLog.request.properties) ||
+        (context.processedLog.request.properties &&
+          "Helicone-Evaluator" in context.processedLog.request.properties)
       ) {
         continue;
       }

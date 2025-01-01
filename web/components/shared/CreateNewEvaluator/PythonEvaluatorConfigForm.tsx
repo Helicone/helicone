@@ -5,6 +5,7 @@ import { Col, Row } from "@/components/layout/common";
 import React, { useState } from "react";
 import MarkdownEditor from "../markdownEditor";
 import useNotification from "../notification/useNotification";
+import { TestEvaluator } from "./components/TestEvaluator";
 import { CompositeOption } from "./EvaluatorTypeDropdown";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
@@ -26,73 +27,52 @@ export const PythonEvaluatorConfigForm: React.FC<{
 
   const notification = useNotification();
 
-  const jawn = useJawnClient();
   const [text, setText] = useState<string>(configFormParams.code);
 
-  const [result, setResult] = useState<
-    | {
-        output: string;
-        traces: string[];
-        statusCode?: number;
-        _type: "completed";
-      }
-    | {
-        _type: "running";
-      }
-    | {
-        _type: "error";
-        error: string;
-      }
-    | null
-  >(null);
+  const jawn = useJawnClient();
+
   return (
-    <Col className="h-full flex flex-col">
-      <MarkdownEditor
-        text={text}
-        setText={setText}
-        language={"python"}
-        monaco={true}
-      />
-      <div>
-        {" "}
-        {result?._type === "running" && <div>Running...</div>}
-        {result?._type === "completed" && (
-          <div>
-            <div>{result.output}</div>
-            <div>{result.traces.join("\n")}</div>
-          </div>
-        )}
-        {result?._type === "error" && <div>{result.error}</div>}
-      </div>
-      <Row className="justify-between">
-        <Button
-          variant="outline"
-          onClick={async () => {
-            setResult({ _type: "running" });
+    <Col className="h-full flex flex-col gap-10">
+      <Col className="h-full flex flex-col gap-5">
+        <MarkdownEditor
+          text={text}
+          setText={setText}
+          language={"python"}
+          monaco={true}
+        />
+
+        <TestEvaluator
+          defaultTest={configFormParams.testInput}
+          test={async () => {
             const result = await jawn.POST("/v1/evaluator/python/test", {
               body: {
                 code: text,
-                requestBodyString: configFormParams.testInput,
-                responseString: configFormParams.testOutput,
+                testInput: configFormParams.testInput,
               },
             });
             if (result?.data?.data) {
-              setResult({
+              return {
                 ...(result?.data?.data ?? {}),
                 _type: "completed",
-              });
+              };
             } else {
-              setResult({
+              return {
                 _type: "error",
-                error: result?.data?.error ?? "Unknown error",
-              });
+                error: result?.data?.error ?? "Unknown error - try again",
+              };
             }
           }}
-        >
-          Test
-        </Button>
+        />
+      </Col>
 
-        <Button>Submit</Button>
+      <Row>
+        <Button
+          variant={"secondary"}
+          className="w-full"
+          onClick={async () => {}}
+        >
+          Save
+        </Button>
       </Row>
     </Col>
   );

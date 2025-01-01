@@ -67,6 +67,8 @@ export class EvaluatorManager extends BaseManager {
       code,
       requestBodyString,
       responseString,
+      orgId: this.authParams.organizationId,
+      uniqueId: "0",
     });
   }
   async getExperiments(evaluatorId: string) {

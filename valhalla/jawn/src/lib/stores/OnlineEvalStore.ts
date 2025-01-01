@@ -2,14 +2,17 @@ import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, PromiseGenericResult } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
+export type EvaluatorConfig = {
+  evaluator_scoring_type: string;
+  evaluator_llm_template: string;
+};
+
 export type OnlineEvaluatorByOrgId = {
   id: string;
   evaluator_id: string;
-  evaluator_scoring_type: string;
   evaluator_name: string;
-  evaluator_llm_template: string;
   config: any;
-};
+} & EvaluatorConfig;
 
 export type OnlineEvaluatorByEvaluatorId = {
   id: string;

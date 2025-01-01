@@ -56,7 +56,7 @@ export const CreateNewEvaluatorSheetContent: React.FC<{
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="w-[800px] sm:max-w-[800px] flex flex-col"
+          className="w-full sm:max-w-7xl flex flex-col overflow-y-auto"
         >
           <SheetHeader>
             <SheetTitle>{"Create New Evaluator"}</SheetTitle>

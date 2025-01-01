@@ -12,6 +12,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LLMEvaluatorConfigFormPreset } from "./LLMEvaluatorConfigForm";
+import { TestInput } from "./types";
 
 export type LLMOption = {
   name: string;
@@ -25,9 +26,91 @@ export type CompositeOption = {
   preset: {
     code: string;
     description: string;
-    testInput: string;
-    testOutput: string;
+    testInput: TestInput;
   };
+};
+
+const exTestInput: TestInput = {
+  inputBody: JSON.stringify(
+    {
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: [
+            {
+              text: `Hello my name is John`,
+              type: "text",
+            },
+          ],
+        },
+      ],
+    },
+    null,
+    4
+  ),
+  outputBody: JSON.stringify(
+    {
+      id: "chatcmpl-AijHFxqZKjpyWX5A6h06Wkhvrt3DB",
+      object: "chat.completion",
+      created: 1735223841,
+      model: "gpt-3.5-turbo-0125",
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: "assistant",
+            content: "Hello world! I am an assistant",
+            refusal: null,
+          },
+          logprobs: null,
+          finish_reason: "stop",
+        },
+      ],
+      usage: {
+        prompt_tokens: 2222,
+        completion_tokens: 116,
+        total_tokens: 2338,
+        prompt_tokens_details: {
+          cached_tokens: 0,
+          audio_tokens: 0,
+        },
+        completion_tokens_details: {
+          reasoning_tokens: 0,
+          audio_tokens: 0,
+          accepted_prediction_tokens: 0,
+          rejected_prediction_tokens: 0,
+        },
+      },
+      system_fingerprint: null,
+    },
+    null,
+    4
+  ),
+  inputs: {
+    inputs: {
+      name: "John",
+    },
+    autoInputs: {},
+  },
+  prompt: JSON.stringify(
+    {
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: [
+            {
+              text: `Hello my name is <helicone-prompt-input key="name" />`,
+              type: "text",
+            },
+          ],
+        },
+      ],
+    },
+    null,
+    4
+  ),
 };
 
 export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
@@ -47,6 +130,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
       name: "Response Quality",
       rangeMin: 1,
       rangeMax: 5,
+      testInput: exTestInput,
     },
     _type: "llm",
   },
@@ -66,6 +150,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
       name: "Humor",
       rangeMin: 1,
       rangeMax: 100,
+      testInput: exTestInput,
     },
     _type: "llm",
   },
@@ -78,6 +163,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
       name: "SQL",
       rangeMin: 1,
       rangeMax: 5,
+      testInput: exTestInput,
     },
     _type: "llm",
   },
@@ -90,6 +176,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
       name: "Moderation",
       rangeMin: 1,
       rangeMax: 5,
+      testInput: exTestInput,
     },
     _type: "llm",
   },
@@ -102,6 +189,7 @@ export const LLM_AS_A_JUDGE_OPTIONS: LLMOption[] = [
       name: "Language - English",
       rangeMin: 1,
       rangeMax: 5,
+      testInput: exTestInput,
     },
     _type: "llm",
   },
@@ -113,102 +201,35 @@ export const COMPOSITE_OPTIONS: CompositeOption[] = [
     _type: "composite",
     preset: {
       code: `import os
+import os
 import json
 
 class HeliconeEvaluator:
     @staticmethod
     def request():
-      with open("/tmp/request.json", "r") as f:
-        return json.load(f)
+        with open(f"/tmp/{HELICONE_EXECUTION_ID}/request.json", "r") as f:
+            return json.load(f)
     
     @staticmethod
     def response():
-      with open("/tmp/response.json", "r") as f:
-        return json.load(f)
+        with open(f"/tmp/{HELICONE_EXECUTION_ID}/response.json", "r") as f:
+            return json.load(f)
 
     @staticmethod
     def output(output: int | bool):
-      if isinstance(output, bool) or isinstance(output, int):
-        with open("/tmp/output.txt", "w") as f:
-          f.write(str(output))
-      else:
-        raise ValueError("Output must be a boolean or an integer")
+        if isinstance(output, bool) or isinstance(output, int):
+            with open(f"/tmp/{HELICONE_EXECUTION_ID}/output.txt", "w") as f:
+                f.write(str(output))
+        else:
+            raise ValueError("Output must be a boolean or an integer")
 
 if ("Hello" in HeliconeEvaluator.response()["choices"][0]["message"]["content"]):
-  HeliconeEvaluator.output(1)
+    HeliconeEvaluator.output(1)
 else:
-  HeliconeEvaluator.output(0)
-      
+    HeliconeEvaluator.output(0)
 `,
       description: "Check if the response contains the input",
-      testInput: JSON.stringify({
-        id: "chatcmpl-AijHFxqZKjpyWX5A6h06Wkhvrt3DB",
-        object: "chat.completion",
-        created: 1735223841,
-        model: "gpt-3.5-turbo-0125",
-        choices: [
-          {
-            index: 0,
-            message: {
-              role: "assistant",
-              content: "Hello world! I am an assistant",
-              refusal: null,
-            },
-            logprobs: null,
-            finish_reason: "stop",
-          },
-        ],
-        usage: {
-          prompt_tokens: 2222,
-          completion_tokens: 116,
-          total_tokens: 2338,
-          prompt_tokens_details: {
-            cached_tokens: 0,
-            audio_tokens: 0,
-          },
-          completion_tokens_details: {
-            reasoning_tokens: 0,
-            audio_tokens: 0,
-            accepted_prediction_tokens: 0,
-            rejected_prediction_tokens: 0,
-          },
-        },
-        system_fingerprint: null,
-      }),
-      testOutput: JSON.stringify({
-        id: "chatcmpl-AijHFxqZKjpyWX5A6h06Wkhvrt3DB",
-        object: "chat.completion",
-        created: 1735223841,
-        model: "gpt-3.5-turbo-0125",
-        choices: [
-          {
-            index: 0,
-            message: {
-              role: "assistant",
-              content: "Hello world! I am an assistant",
-              refusal: null,
-            },
-            logprobs: null,
-            finish_reason: "stop",
-          },
-        ],
-        usage: {
-          prompt_tokens: 2222,
-          completion_tokens: 116,
-          total_tokens: 2338,
-          prompt_tokens_details: {
-            cached_tokens: 0,
-            audio_tokens: 0,
-          },
-          completion_tokens_details: {
-            reasoning_tokens: 0,
-            audio_tokens: 0,
-            accepted_prediction_tokens: 0,
-            rejected_prediction_tokens: 0,
-          },
-        },
-        system_fingerprint: null,
-      }),
+      testInput: exTestInput,
     },
   },
   {
@@ -217,8 +238,7 @@ else:
     preset: {
       code: "return response.includes(input)",
       description: "Check if the response contains the input",
-      testInput: "hello",
-      testOutput: "hello world",
+      testInput: exTestInput,
     },
   },
 ];
@@ -298,7 +318,7 @@ export const EvaluatorTypeDropdown: React.FC<{
         <TabsTrigger value="python">
           Python <span className="text-xs text-gray-500 px-3"></span>
         </TabsTrigger>
-        <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger>
+        {/* <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger> */}
         <TabsTrigger value="typescript" disabled>
           Typescript <span className="text-xs text-gray-500 px-3">(soon)</span>
         </TabsTrigger>
