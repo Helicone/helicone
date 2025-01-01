@@ -102,17 +102,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: FlaskConicalIcon,
             current: pathname.includes("/experiments"),
           },
-          ...(!user?.email?.includes("@helicone.ai") ||
-          !!user?.email?.includes("@greptile")
-            ? []
-            : [
-                {
-                  name: "Evaluators",
-                  href: "/evaluators",
-                  icon: ChartLineIcon,
-                  current: pathname.includes("/evaluators"),
-                },
-              ]),
+          {
+            name: "Evaluators",
+            href: "/evaluators",
+            icon: ChartLineIcon,
+            current: pathname.includes("/evaluators"),
+          },
           {
             name: "Datasets",
             href: "/datasets",
