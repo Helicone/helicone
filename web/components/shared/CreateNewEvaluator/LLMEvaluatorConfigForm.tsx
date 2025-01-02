@@ -371,7 +371,9 @@ export const LLMEvaluatorConfigForm: React.FC<{
           )}
         </Col>
       </ScrollArea>
-
+      <i className="text-xs text-gray-500">
+        You will be charged for the LLM usage of this evaluator.
+      </i>
       <Row className="justify-between mt-4">
         <Button
           className="w-full"

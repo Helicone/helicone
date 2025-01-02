@@ -328,6 +328,12 @@ export class EvaluatorController extends Controller {
       organizationId: request.authParams.organizationId,
     });
     const result = await llmAsAJudge.evaluate();
-    return result;
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
+    }
   }
 }

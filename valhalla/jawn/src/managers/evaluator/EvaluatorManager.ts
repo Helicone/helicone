@@ -115,7 +115,10 @@ export class EvaluatorManager extends BaseManager {
         organizationId: this.authParams.organizationId,
       });
       const result = await llmAsAJudge.evaluate();
-      return ok({ score: result.score });
+      if (result.error) {
+        return err(result.error);
+      }
+      return ok({ score: result.data!.score });
     } else if (evaluator.code_template) {
       const codeResult = await pythonEvaluator({
         code: evaluator.code_template,

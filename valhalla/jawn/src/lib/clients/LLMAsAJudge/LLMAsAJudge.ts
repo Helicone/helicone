@@ -2,10 +2,15 @@ import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
 import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
 import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
+import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
+import { err, ok, Result } from "../../shared/result";
 
-interface ScoreResult {
+type Score = {
   score: number | boolean;
-}
+};
+type ScoreResult = Result<Score, string>;
+
+const TIERS = ["pro-20240913", "enterprise"];
 
 export class LLMAsAJudge {
   constructor(
@@ -22,7 +27,7 @@ export class LLMAsAJudge {
     }
   ) {}
 
-  private async evaluateChoice(result: any): Promise<ScoreResult> {
+  private async evaluateChoice(result: any): Promise<Score> {
     const evaluatorName = this.params.evaluatorName;
     const score = JSON.parse(
       result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
@@ -32,7 +37,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateBoolean(result: any): Promise<ScoreResult> {
+  private async evaluateBoolean(result: any): Promise<Score> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -40,7 +45,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateRange(result: any): Promise<ScoreResult> {
+  private async evaluateRange(result: any): Promise<Score> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -91,7 +96,7 @@ export class LLMAsAJudge {
     return data;
   }
 
-  async evaluate(): Promise<ScoreResult> {
+  private async evaluateScore(): Promise<Score> {
     const result = await this.callLLM();
 
     switch (this.params.scoringType) {
@@ -103,6 +108,23 @@ export class LLMAsAJudge {
         return this.evaluateRange(result);
       default:
         throw new Error(`Unsupported scoring type: ${this.params.scoringType}`);
+    }
+  }
+
+  async evaluate(): Promise<ScoreResult> {
+    const organizationManager = new OrganizationManager({
+      organizationId: this.params.organizationId,
+    });
+
+    const org = await organizationManager.getOrg();
+    if (!TIERS.includes(org.data?.tier ?? "")) {
+      return err("You are not authorized to use this evaluator");
+    }
+
+    try {
+      return ok(await this.evaluateScore());
+    } catch (e) {
+      return err(JSON.stringify(e));
     }
   }
 }
