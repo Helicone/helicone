@@ -28,7 +28,7 @@ import EvaluatorDetailsSheet, {
 const EvalsPage = () => {
   const {
     evalScores,
-    evaluators: LLMAsJudgeEvaluators,
+    evaluators: evaluators,
     scoreDistributions,
     defaultEvaluators,
     filterMap,
@@ -43,9 +43,16 @@ const EvalsPage = () => {
   const evals = useMemo(() => {
     const allEvaluators =
       defaultEvaluators?.data?.data?.data?.map((evalRow) => {
-        const isLLMAsJudge = LLMAsJudgeEvaluators.data?.data?.data
-          ?.map((e) => getEvaluatorScoreName(e.name, e.scoring_type))
-          .includes(evalRow.name);
+        const evaluator = evaluators.data?.data?.data?.find(
+          (x) => x.scoring_type === evalRow.name
+        );
+
+        let evalType = "Default";
+        if (evaluator?.llm_template) {
+          evalType = "LLM as a judge";
+        } else if (evaluator?.code_template) {
+          evalType = "Python";
+        }
         return {
           ...evalRow,
           scoreDistribution:
@@ -55,18 +62,24 @@ const EvalsPage = () => {
           valueType: evalRow.name.includes("-hcone-bool")
             ? "Boolean"
             : "# Number",
-          type: isLLMAsJudge ? "LLM as a judge" : "Default",
+          type: evalType,
           id: evalRow.name,
         };
       }) ?? [];
 
-    for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
+    for (const evaluator of evaluators.data?.data?.data ?? []) {
       const scoreName = getEvaluatorScoreName(
         evaluator.name,
         evaluator.scoring_type
       );
       if (allEvaluators.find((e) => e.name === scoreName)) {
       } else {
+        let evalType = "Default";
+        if (evaluator?.llm_template) {
+          evalType = "LLM as a judge";
+        } else if (evaluator?.code_template) {
+          evalType = "Python";
+        }
         allEvaluators.push({
           averageOverTime: [],
           averageScore: 0,
@@ -77,7 +90,7 @@ const EvalsPage = () => {
           name: evaluator.name,
           overTime: [],
           scoreDistribution: [],
-          type: "LLM as a judge",
+          type: evalType,
           valueType: "# Number",
         });
       }
@@ -87,10 +100,10 @@ const EvalsPage = () => {
   }, [
     defaultEvaluators?.data?.data?.data,
     scoreDistributions?.data?.data?.data,
-    LLMAsJudgeEvaluators.data?.data?.data,
+    evaluators.data?.data?.data,
   ]);
 
-  const [selectedEvaluator, setSelectedEvaluator] = useState<EvalMetric | null>(
+  const [selectedEvaluatorId, setSelectedEvaluatorId] = useState<string | null>(
     null
   );
 
@@ -118,7 +131,7 @@ const EvalsPage = () => {
               <CreateNewEvaluator
                 key="create-new-evaluator"
                 onSubmit={() => {
-                  LLMAsJudgeEvaluators.refetch();
+                  evaluators.refetch();
                 }}
                 buttonJSX={
                   <Button>
@@ -133,9 +146,9 @@ const EvalsPage = () => {
       ) : (
         <>
           <EvaluatorDetailsSheet
-            selectedEvaluator={selectedEvaluator}
-            setSelectedEvaluator={setSelectedEvaluator}
-            LLMAsJudgeEvaluators={LLMAsJudgeEvaluators}
+            selectedEvaluatorId={selectedEvaluatorId}
+            setSelectedEvaluatorId={setSelectedEvaluatorId}
+            evaluators={evaluators}
             deleteEvaluator={deleteEvaluator}
           />
           <ThemedTable
@@ -166,13 +179,13 @@ const EvalsPage = () => {
               },
             }}
             onRowSelect={(row) => {
-              setSelectedEvaluator(row);
+              setSelectedEvaluatorId(row.id ?? null);
             }}
             customButtons={[
               <CreateNewEvaluator
                 key="create-new-evaluator"
                 onSubmit={() => {
-                  LLMAsJudgeEvaluators.refetch();
+                  evaluators.refetch();
                 }}
               />,
             ]}

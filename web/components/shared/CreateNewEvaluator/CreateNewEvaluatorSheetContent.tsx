@@ -94,6 +94,9 @@ export const CreateNewEvaluatorSheetContent: React.FC<{
                   ? presets.preset
                   : COMPOSITE_OPTIONS[0].preset
               }
+              name={presets.name}
+              onSubmit={onSubmit}
+              key={presets.name}
             />
           </TabsContent>
         </SheetContent>

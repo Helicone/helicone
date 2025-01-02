@@ -5,12 +5,14 @@ import { BaseStore } from "./baseStore";
 export type EvaluatorConfig = {
   evaluator_scoring_type: string;
   evaluator_llm_template: string;
+  evaluator_code_template: string;
 };
 
 export type OnlineEvaluatorByOrgId = {
   id: string;
   evaluator_id: string;
   evaluator_name: string;
+  evaluator_created_at: string;
   config: any;
 } & EvaluatorConfig;
 
@@ -34,6 +36,8 @@ export class OnlineEvalStore extends BaseStore {
         evaluator.scoring_type as evaluator_scoring_type,
         evaluator.name as evaluator_name,
         evaluator.llm_template as evaluator_llm_template,
+        evaluator.code_template as evaluator_code_template,
+        evaluator.created_at as evaluator_created_at,
         online_evaluators.config
       FROM online_evaluators 
       JOIN evaluator ON online_evaluators.evaluator = evaluator.id 

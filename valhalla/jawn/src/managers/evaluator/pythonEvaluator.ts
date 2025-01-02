@@ -1,7 +1,5 @@
-import { CodeSandbox } from "@codesandbox/sdk";
 import { err, ok, Result } from "../../lib/shared/result";
-import { SandboxCache, SandboxPool } from "./SanboxPool";
-import { KVCache } from "../../lib/cache/kvCache";
+import { SandboxPool } from "./SanboxPool";
 
 const pool = new SandboxPool({ concurrency: 50, opts: {} });
 
@@ -14,7 +12,7 @@ function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
   ]);
 }
 
-export async function testPythonEvaluator({
+export async function pythonEvaluator({
   code,
   requestBodyString,
   responseString,

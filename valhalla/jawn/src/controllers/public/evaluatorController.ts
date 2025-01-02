@@ -26,13 +26,15 @@ import { OPENAI_KEY } from "../../lib/clients/constant";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
-  llm_template: any;
+  llm_template?: any;
   name: string;
+  code_template?: any;
 }
 
 export interface UpdateEvaluatorParams {
   scoring_type?: string;
   llm_template?: any;
+  code_template?: any;
   name?: string;
 }
 
@@ -44,6 +46,7 @@ export interface EvaluatorResult {
   organization_id: string;
   updated_at: string;
   name: string;
+  code_template: any;
 }
 
 type EvaluatorExperiment = {

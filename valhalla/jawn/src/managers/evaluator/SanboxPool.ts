@@ -10,7 +10,6 @@ export interface SandboxCache {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
   values(): Promise<string[]>;
-  clear(): Promise<void>;
 }
 
 class InMemorySanboxCache implements SandboxCache {
@@ -26,10 +25,6 @@ class InMemorySanboxCache implements SandboxCache {
 
   public async values(): Promise<string[]> {
     return Array.from(this.cache.values());
-  }
-
-  public async clear(): Promise<void> {
-    this.cache.clear();
   }
 }
 
@@ -126,7 +121,6 @@ export class SandboxPool {
     for (const sandbox of await this.sandboxes.values()) {
       this.sdk.sandbox.shutdown(sandbox);
     }
-    this.sandboxes.clear();
 
     for (const waiting of this.waitingResolvers) {
       waiting();

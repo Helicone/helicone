@@ -6,7 +6,10 @@ import { sanitizeObject } from "../../utils/sanitize";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
 import { LLMAsAJudge } from "../clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../clients/constant";
-import { getEvaluatorScoreName } from "../../managers/evaluator/EvaluatorManager";
+import {
+  EvaluatorManager,
+  getEvaluatorScoreName,
+} from "../../managers/evaluator/EvaluatorManager";
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -67,28 +70,41 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         autoInputs?: Record<string, string>;
       };
 
-      const llmAsAJudge = new LLMAsAJudge({
-        organizationId: orgId,
-        scoringType: onlineEval.evaluator_scoring_type as
-          | "LLM-CHOICE"
-          | "LLM-BOOLEAN"
-          | "LLM-RANGE",
-        llmTemplate: onlineEval.evaluator_llm_template,
-        inputRecord,
-        output: JSON.stringify(context.processedLog.response.body),
-        evaluatorName: onlineEval.evaluator_name,
+      const evaluatorManager = new EvaluatorManager({
+        organizationId: context.authParams?.organizationId ?? "",
       });
 
       try {
-        const result = await llmAsAJudge.evaluate();
+        const result = await evaluatorManager.runLLMEvaluatorScore({
+          evaluator: {
+            code_template: onlineEval.evaluator_code_template,
+            created_at: onlineEval.evaluator_created_at,
+            id: onlineEval.evaluator_id,
+            llm_template: onlineEval.evaluator_llm_template,
+            name: onlineEval.evaluator_name,
+            organization_id: context.authParams?.organizationId ?? "",
+            scoring_type: onlineEval.evaluator_scoring_type,
+            updated_at: "n/a",
+          },
+          inputRecord,
+          request_id: context.message.log.request.id,
+          requestBody: context.processedLog.request.body,
+          responseBody: context.processedLog.response.body,
+        });
+
+        if (result.error) {
+          console.error(result.error);
+          continue;
+        }
 
         const scoreName =
           getEvaluatorScoreName(onlineEval.evaluator_name) +
-          (typeof result.score === "boolean" ? "-hcone-bool" : "");
+          (typeof result.data?.score === "boolean" ? "-hcone-bool" : "");
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};
-        context.processedLog.request.scores[scoreName] = result.score ?? 0;
+        context.processedLog.request.scores[scoreName] =
+          result.data?.score ?? 0;
         context.processedLog.request.scores_evaluatorIds =
           context.processedLog.request.scores_evaluatorIds ?? {};
         context.processedLog.request.scores_evaluatorIds[scoreName] =

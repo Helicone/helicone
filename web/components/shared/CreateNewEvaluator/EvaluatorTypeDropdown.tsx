@@ -26,7 +26,7 @@ export type CompositeOption = {
   preset: {
     code: string;
     description: string;
-    testInput: TestInput;
+    testInput?: TestInput;
   };
 };
 
