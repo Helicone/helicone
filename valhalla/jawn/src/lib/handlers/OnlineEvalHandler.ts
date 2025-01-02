@@ -30,16 +30,16 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );
 
+      const properties = Object.keys(
+        context.processedLog.request.properties ?? {}
+      ).map((property) => property.toLowerCase());
       if (
         isNaN(sampleRate) ||
         sampleRate < 0 ||
         sampleRate > 100 ||
         Math.random() * 100 > sampleRate ||
-        (context.processedLog.request.properties &&
-          "Helicone-Experiment-Id" in
-            context.processedLog.request.properties) ||
-        (context.processedLog.request.properties &&
-          "Helicone-Evaluator" in context.processedLog.request.properties)
+        properties.includes("helicone-experiment-id") ||
+        properties.includes("helicone-evaluator")
       ) {
         continue;
       }
@@ -88,8 +88,8 @@ export class OnlineEvalHandler extends AbstractLogHandler {
           },
           inputRecord,
           request_id: context.message.log.request.id,
-          requestBody: context.processedLog.request.body,
-          responseBody: context.processedLog.response.body,
+          requestBody: JSON.stringify(context.processedLog.request.body),
+          responseBody: JSON.stringify(context.processedLog.response.body),
         });
 
         if (result.error) {

@@ -75,7 +75,8 @@ export class LLMAsAJudge {
           "Content-Type": "application/json",
           Authorization: `Bearer ${OPENROUTER_KEY}`,
           "Helicone-Auth": `Bearer ${apiKey}`,
-          "Helicone-Property-Helicone-Evaluator": this.params.evaluatorName,
+          "Helicone-Property-Helicone-Evaluator":
+            this.params.evaluatorName ?? "deault-name",
         },
         body: JSON.stringify(requestBody),
       });
