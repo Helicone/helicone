@@ -24,6 +24,8 @@ import { useEvaluators } from "./EvaluatorHook";
 import EvaluatorDetailsSheet, {
   getEvaluatorScoreName,
 } from "./EvaluatorDetailsSheet";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 const EvalsPage = () => {
   const {
@@ -39,6 +41,8 @@ const EvalsPage = () => {
     timeFilter,
     deleteEvaluator,
   } = useEvaluators();
+
+  const org = useOrg();
 
   const evals = useMemo(() => {
     const allEvaluators =
@@ -106,6 +110,19 @@ const EvalsPage = () => {
   const [selectedEvaluatorId, setSelectedEvaluatorId] = useState<string | null>(
     null
   );
+
+  if (org?.currentOrg?.tier === "free") {
+    return (
+      <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
+        <FeatureUpgradeCard
+          title="Unlock Evaluators"
+          description="The Free plan does not include the Evaluators feature, but getting access is easy."
+          infoBoxText="Evaluate your prompts and models to drive improvements."
+          documentationLink="https://docs.helicone.ai/features/sessions"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-screen">

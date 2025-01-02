@@ -28,16 +28,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
 
   const org = useOrg();
 
-  const hasAccess = useMemo(() => {
-    return (
-      org?.currentOrg?.tier === "growth" ||
-      org?.currentOrg?.tier === "enterprise" ||
-      (org?.currentOrg?.tier === "pro-20240913" &&
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
-    );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
-
   return (
     <>
       <AuthHeader title={"Datasets"} />
