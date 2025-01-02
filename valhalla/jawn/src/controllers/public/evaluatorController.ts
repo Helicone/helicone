@@ -320,7 +320,7 @@ export class EvaluatorController extends Controller {
         | "LLM-BOOLEAN"
         | "LLM-RANGE",
       llmTemplate: JSON.parse(
-        requestBody.evaluatorConfig.evaluator_llm_template
+        requestBody.evaluatorConfig.evaluator_llm_template ?? "{}"
       ),
       inputRecord: requestBody.testInput.inputs,
       output: requestBody.testInput.outputBody,

@@ -4,8 +4,8 @@ import { BaseStore } from "./baseStore";
 
 export type EvaluatorConfig = {
   evaluator_scoring_type: string;
-  evaluator_llm_template: string;
-  evaluator_code_template: string;
+  evaluator_llm_template?: string;
+  evaluator_code_template?: string;
 };
 
 export type OnlineEvaluatorByOrgId = {

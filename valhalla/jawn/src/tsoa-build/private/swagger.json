@@ -430,8 +430,6 @@
 					}
 				},
 				"required": [
-					"evaluator_code_template",
-					"evaluator_llm_template",
 					"evaluator_scoring_type"
 				],
 				"type": "object"

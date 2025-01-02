@@ -652,8 +652,8 @@ export interface components {
       score: number | boolean;
     };
     EvaluatorConfig: {
-      evaluator_code_template: string;
-      evaluator_llm_template: string;
+      evaluator_code_template?: string;
+      evaluator_llm_template?: string;
       evaluator_scoring_type: string;
     };
     /** @enum {string} */
