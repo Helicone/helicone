@@ -18,7 +18,7 @@ import { ChartLineIcon } from "lucide-react";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
-import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
+import { INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
 
 import EvaluatorDetailsSheet, {

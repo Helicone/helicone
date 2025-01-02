@@ -197,7 +197,7 @@ export class EvaluatorManager extends BaseManager {
       const scoreResult = await this.runLLMEvaluatorScore({
         evaluator,
         inputRecord,
-        run,
+        request_id: run.request_id,
         requestBody,
         responseBody,
       });
