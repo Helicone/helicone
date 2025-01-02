@@ -36,9 +36,9 @@ const PythonEvaluatorDetails: React.FC<PythonEvaluatorDetailsProps> = ({
 
         <PythonEvaluatorConfigForm
           configFormParams={{
-            code: evaluator.code_template?.code ?? "",
-            description: evaluator.code_template?.description ?? "",
-            testInput: evaluator.code_template?.test_input,
+            code: (evaluator.code_template as any)?.code ?? "",
+            description: (evaluator.code_template as any)?.description ?? "",
+            testInput: (evaluator.code_template as any)?.test_input,
           }}
           onSubmit={() => {}}
           name={evaluator.name}
