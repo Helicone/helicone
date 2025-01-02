@@ -216,7 +216,17 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "rag-chunking-strategies",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "openai-o3",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gemini-2.0-flash",
     },
   },
   {

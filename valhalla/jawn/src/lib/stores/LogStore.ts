@@ -216,6 +216,7 @@ export class LogStore {
     newPromptRecord: PromptRecord,
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
+    const INVALID_TEMPLATE_ERROR = "Invalid template";
     const { promptId, orgId, requestId, heliconeTemplate, model } =
       newPromptRecord;
 
@@ -225,7 +226,7 @@ export class LogStore {
 
     if (typeof heliconeTemplate.template === "string") {
       heliconeTemplate.template = {
-        error: "Invalid template",
+        error: INVALID_TEMPLATE_ERROR,
         template: heliconeTemplate.template,
       };
     }
@@ -326,7 +327,13 @@ export class LogStore {
         console.error("Error updating and inserting prompt version", error);
         throw error;
       }
-    } else if (shouldBump.shouldUpdateNotBump) {
+    } else if (
+      shouldBump.shouldUpdateNotBump &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
+      )
+    ) {
       try {
         const updateQuery = `
         UPDATE prompts_versions
