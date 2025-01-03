@@ -1,20 +1,14 @@
 import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
-import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
-import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
-import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
-import { err, ok, Result } from "../../shared/result";
 
-type EvaluatorScore = {
+interface ScoreResult {
   score: number | boolean;
-};
-export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
-
-const TIERS = ["pro-20240913", "enterprise"];
+}
 
 export class LLMAsAJudge {
   constructor(
     private params: {
+      openAIApiKey: string;
       scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
       llmTemplate: any;
       inputRecord: {
@@ -23,11 +17,10 @@ export class LLMAsAJudge {
       };
       output: string;
       evaluatorName: string;
-      organizationId: string;
     }
   ) {}
 
-  private async evaluateChoice(result: any): Promise<EvaluatorScore> {
+  private async evaluateChoice(result: any): Promise<ScoreResult> {
     const evaluatorName = this.params.evaluatorName;
     const score = JSON.parse(
       result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
@@ -37,7 +30,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateBoolean(result: any): Promise<EvaluatorScore> {
+  private async evaluateBoolean(result: any): Promise<ScoreResult> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -45,7 +38,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateRange(result: any): Promise<EvaluatorScore> {
+  private async evaluateRange(result: any): Promise<ScoreResult> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -65,38 +58,24 @@ export class LLMAsAJudge {
       autoInputs: [],
     });
 
-    const requestPath = `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`;
-
-    const heliconeApiKey = await generateTempHeliconeAPIKey(
-      this.params.organizationId,
-      "LLMAsAJudge"
-    );
-    console.log("OPENROUTER_KEY", OPENROUTER_KEY);
-
-    const res = await heliconeApiKey.data?.with(async (apiKey) => {
-      return await fetch(requestPath, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENROUTER_KEY}`,
-          "Helicone-Auth": `Bearer ${apiKey}`,
-          "Helicone-Property-Helicone-Evaluator":
-            this.params.evaluatorName ?? "deault-name",
-        },
-        body: JSON.stringify(requestBody),
-      });
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.params.openAIApiKey}`,
+      },
+      body: JSON.stringify(requestBody),
     });
 
-    if (!res?.ok) {
-      const body = await res?.text();
-      console.error("error calling llm as a judge", res, body);
+    if (!res.ok) {
+      console.error("error calling llm as a judge", res);
       throw new Error("error calling llm as a judge");
     }
     const data = await res.json();
     return data;
   }
 
-  private async evaluateScore(): Promise<EvaluatorScore> {
+  async evaluate(): Promise<ScoreResult> {
     const result = await this.callLLM();
 
     switch (this.params.scoringType) {
@@ -108,23 +87,6 @@ export class LLMAsAJudge {
         return this.evaluateRange(result);
       default:
         throw new Error(`Unsupported scoring type: ${this.params.scoringType}`);
-    }
-  }
-
-  async evaluate(): Promise<EvaluatorScoreResult> {
-    const organizationManager = new OrganizationManager({
-      organizationId: this.params.organizationId,
-    });
-
-    const org = await organizationManager.getOrg();
-    if (!TIERS.includes(org.data?.tier ?? "")) {
-      return err("You are not authorized to use this evaluator");
-    }
-
-    try {
-      return ok(await this.evaluateScore());
-    } catch (e) {
-      return err(JSON.stringify(e));
     }
   }
 }

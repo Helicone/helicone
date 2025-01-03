@@ -49,9 +49,8 @@ export class DashboardController extends Controller {
       score_sum: number;
     }>(requestBody, {
       orgId: request.authParams.organizationId,
-      countColumns: [
+      countColumn:
         "avg(mapValues(scores)[indexOf(mapKeys(scores), score_key)]) AS score_sum",
-      ],
       groupByColumns: ["arrayJoin(mapKeys(scores)) AS score_key"],
     });
   }

@@ -20,7 +20,7 @@ export interface UpgradeToProRequest {
   };
 }
 
-export interface LLMUsage {
+export interface ExperimentUsage {
   model: string;
   provider: string;
   prompt_tokens: number;
@@ -181,8 +181,7 @@ export class StripeController extends Controller {
     subtotal: number;
     tax: number | null;
     total: number;
-    experiments_usage: LLMUsage[];
-    evaluators_usage: LLMUsage[];
+    experiments_usage: ExperimentUsage[];
   } | null> {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getUpcomingInvoice();
@@ -201,7 +200,6 @@ export class StripeController extends Controller {
       tax: result.data?.tax ?? null,
       total: result.data?.total ?? 0,
       experiments_usage: result.data?.experiments_usage ?? [],
-      evaluators_usage: result.data?.evaluators_usage ?? [],
     };
   }
 

@@ -74,16 +74,17 @@ export async function getXOverTime<T>(
   {
     timeFilter,
     userFilter,
+
     dbIncrement,
     timeZoneDifference,
   }: DataOverTimeRequest,
   {
     orgId,
-    countColumns,
+    countColumn,
     groupByColumns = [],
   }: {
     orgId: string;
-    countColumns: string[];
+    countColumn: string;
     groupByColumns?: string[];
   }
 ): Promise<
@@ -150,7 +151,7 @@ export async function getXOverTime<T>(
   -- getXOverTime
 SELECT
   ${dateTrunc} as created_at_trunc,
-  ${groupByColumns.concat(countColumns).join(", ")}
+  ${groupByColumns.concat([countColumn]).join(", ")}
 FROM request_response_rmt
 WHERE (
   ${builtFilter}
