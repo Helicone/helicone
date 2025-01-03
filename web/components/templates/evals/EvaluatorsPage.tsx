@@ -1,4 +1,4 @@
-import { ChartBarIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
@@ -13,34 +13,24 @@ import { Button } from "@/components/ui/button";
 
 // Import Recharts components
 import ThemedTable from "@/components/shared/themed/table/themedTable";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+
+import { ChartLineIcon } from "lucide-react";
 
 // Import Shadcn UI components for dropdown
 import { CreateNewEvaluator } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluator";
-import { EvalMetric, INITIAL_COLUMNS } from "./EvaluratorColumns";
+import { INITIAL_COLUMNS } from "./EvaluratorColumns";
 import { useEvaluators } from "./EvaluatorHook";
 
 import EvaluatorDetailsSheet, {
   getEvaluatorScoreName,
 } from "./EvaluatorDetailsSheet";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 const EvalsPage = () => {
   const {
     evalScores,
-    evaluators: LLMAsJudgeEvaluators,
+    evaluators: evaluators,
     scoreDistributions,
     defaultEvaluators,
     filterMap,
@@ -52,12 +42,21 @@ const EvalsPage = () => {
     deleteEvaluator,
   } = useEvaluators();
 
+  const org = useOrg();
+
   const evals = useMemo(() => {
     const allEvaluators =
       defaultEvaluators?.data?.data?.data?.map((evalRow) => {
-        const isLLMAsJudge = LLMAsJudgeEvaluators.data?.data?.data
-          ?.map((e) => getEvaluatorScoreName(e.name, e.scoring_type))
-          .includes(evalRow.name);
+        const evaluator = evaluators.data?.data?.data?.find(
+          (x) => x.scoring_type === evalRow.name
+        );
+
+        let evalType = "Default";
+        if (evaluator?.llm_template) {
+          evalType = "LLM as a judge";
+        } else if (evaluator?.code_template) {
+          evalType = "Python";
+        }
         return {
           ...evalRow,
           scoreDistribution:
@@ -66,19 +65,25 @@ const EvalsPage = () => {
             )?.distribution ?? [],
           valueType: evalRow.name.includes("-hcone-bool")
             ? "Boolean"
-            : "Numeric",
-          type: isLLMAsJudge ? "LLM as a judge" : "Default",
+            : "# Number",
+          type: evalType,
           id: evalRow.name,
         };
       }) ?? [];
 
-    for (const evaluator of LLMAsJudgeEvaluators.data?.data?.data ?? []) {
+    for (const evaluator of evaluators.data?.data?.data ?? []) {
       const scoreName = getEvaluatorScoreName(
         evaluator.name,
         evaluator.scoring_type
       );
       if (allEvaluators.find((e) => e.name === scoreName)) {
       } else {
+        let evalType = "Default";
+        if (evaluator?.llm_template) {
+          evalType = "LLM as a judge";
+        } else if (evaluator?.code_template) {
+          evalType = "Python";
+        }
         allEvaluators.push({
           averageOverTime: [],
           averageScore: 0,
@@ -89,8 +94,8 @@ const EvalsPage = () => {
           name: evaluator.name,
           overTime: [],
           scoreDistribution: [],
-          type: "LLM as a judge",
-          valueType: "Numeric",
+          type: evalType,
+          valueType: "# Number",
         });
       }
     }
@@ -99,161 +104,117 @@ const EvalsPage = () => {
   }, [
     defaultEvaluators?.data?.data?.data,
     scoreDistributions?.data?.data?.data,
-    LLMAsJudgeEvaluators.data?.data?.data,
+    evaluators.data?.data?.data,
   ]);
 
-  const [evalsToShow, setEvalsToShow] = useState<string[]>([]);
-  const allEvalScores = evalScores.data?.data?.data || [];
-
-  const handleSelectAll = () => {
-    setEvalsToShow(allEvalScores);
-  };
-
-  const handleDeselectAll = () => {
-    setEvalsToShow([]);
-  };
-
-  const [selectedEvaluator, setSelectedEvaluator] = useState<EvalMetric | null>(
+  const [selectedEvaluatorId, setSelectedEvaluatorId] = useState<string | null>(
     null
   );
 
-  return (
-    <>
-      <AuthHeader
-        title="Evaluators"
-        actions={[
-          <div key="select-evals" className="flex items-center space-x-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[300px] justify-between">
-                  {evalsToShow.length > 0
-                    ? `${evalsToShow.length} selected`
-                    : "Select evals"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[300px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search evals..." />
-                  <CommandEmpty>No eval found.</CommandEmpty>
-                  <CommandGroup>
-                    {allEvalScores.map((evalScore) => (
-                      <CommandItem
-                        key={evalScore}
-                        onSelect={() => {
-                          setEvalsToShow((prev) =>
-                            prev.includes(evalScore)
-                              ? prev.filter((item) => item !== evalScore)
-                              : [...prev, evalScore]
-                          );
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            evalsToShow.includes(evalScore)
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {evalScore}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <Button
-              variant="link"
-              onClick={
-                evalsToShow.length > 0 ? handleDeselectAll : handleSelectAll
-              }
-            >
-              {evalsToShow.length > 0 ? "Deselect All" : "Select All"}
-            </Button>
-          </div>,
-        ]}
-      />
-      <div className="space-y-4">
-        {defaultEvaluators.isLoading && <LoadingAnimation />}
-        {!defaultEvaluators.isLoading && evals.length === 0 && (
-          <div className="flex flex-col w-full mt-12 justify-center items-center">
-            <div className="flex flex-col items-center max-w-3xl">
-              <ChartBarIcon className="h-12 w-12 text-black dark:text-white" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-6">
-                No Evals
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
-                Start adding evals to your requests to see them here.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <Button variant="outline" asChild>
-                  <Link href="https://docs.helicone.ai/features/advanced-usage/evals">
-                    View Docs
-                  </Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/requests">
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Add Evals
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <EvaluatorDetailsSheet
-          selectedEvaluator={selectedEvaluator}
-          setSelectedEvaluator={setSelectedEvaluator}
-          LLMAsJudgeEvaluators={LLMAsJudgeEvaluators}
-          deleteEvaluator={deleteEvaluator}
-        />
-        <ThemedTable
-          advancedFilters={{
-            filterMap: filterMap,
-            setAdvancedFilters: setAdvancedFilters,
-            filters: advancedFilters,
-            searchPropertyFilters: searchPropertyFilters,
-          }}
-          timeFilter={{
-            currentTimeFilter: timeFilter,
-            defaultValue: "all",
-            onTimeSelectHandler: (key: TimeInterval, value: string) => {
-              if ((key as string) === "custom") {
-                value = value.replace("custom:", "");
-                const start = new Date(value.split("_")[0]);
-                const end = new Date(value.split("_")[1]);
-                setTimeFilter({
-                  start,
-                  end,
-                });
-              } else {
-                setTimeFilter({
-                  start: getTimeIntervalAgo(key),
-                  end: new Date(),
-                });
-              }
-            },
-          }}
-          onRowSelect={(row) => {
-            setSelectedEvaluator(row);
-          }}
-          customButtons={[
-            <CreateNewEvaluator
-              key="create-new-evaluator"
-              onSubmit={() => {
-                LLMAsJudgeEvaluators.refetch();
-              }}
-            />,
-          ]}
-          dataLoading={defaultEvaluators.isLoading}
-          skeletonLoading={defaultEvaluators.isLoading}
-          id="evals-table"
-          defaultColumns={INITIAL_COLUMNS}
-          defaultData={evals}
+  if (org?.currentOrg?.tier === "free") {
+    return (
+      <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
+        <FeatureUpgradeCard
+          title="Unlock Evaluators"
+          description="The Free plan does not include the Evaluators feature, but getting access is easy."
+          infoBoxText="Evaluate your prompts and models to drive improvements."
+          documentationLink="https://docs.helicone.ai/features/sessions"
         />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="flex flex-col w-full h-screen">
+      <AuthHeader title="Evaluators" actions={[]} />
+      {defaultEvaluators.isLoading && <LoadingAnimation />}
+      {!defaultEvaluators.isLoading && evals.length === 0 ? (
+        <div className="flex flex-col w-full justify-center items-center h-full">
+          <div className="flex flex-col items-center max-w-3xl">
+            <ChartLineIcon className="h-12 w-12 text-black dark:text-white" />
+            <p className="text-xl text-black dark:text-white font-semibold mt-6">
+              No evaluators yet
+            </p>
+            <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
+              Create an evaluator to help you measure prompt performance and
+              drive improvements.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button variant="outline" asChild>
+                <Link href="https://docs.helicone.ai/features/advanced-usage/evals">
+                  View Docs
+                </Link>
+              </Button>
+              <CreateNewEvaluator
+                key="create-new-evaluator"
+                onSubmit={() => {
+                  evaluators.refetch();
+                }}
+                buttonJSX={
+                  <Button>
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Create Evaluator
+                  </Button>
+                }
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <EvaluatorDetailsSheet
+            selectedEvaluatorId={selectedEvaluatorId}
+            setSelectedEvaluatorId={setSelectedEvaluatorId}
+            evaluators={evaluators}
+            deleteEvaluator={deleteEvaluator}
+          />
+          <ThemedTable
+            advancedFilters={{
+              filterMap: filterMap,
+              setAdvancedFilters: setAdvancedFilters,
+              filters: advancedFilters,
+              searchPropertyFilters: searchPropertyFilters,
+            }}
+            timeFilter={{
+              currentTimeFilter: timeFilter,
+              defaultValue: "all",
+              onTimeSelectHandler: (key: TimeInterval, value: string) => {
+                if ((key as string) === "custom") {
+                  value = value.replace("custom:", "");
+                  const start = new Date(value.split("_")[0]);
+                  const end = new Date(value.split("_")[1]);
+                  setTimeFilter({
+                    start,
+                    end,
+                  });
+                } else {
+                  setTimeFilter({
+                    start: getTimeIntervalAgo(key),
+                    end: new Date(),
+                  });
+                }
+              },
+            }}
+            onRowSelect={(row) => {
+              setSelectedEvaluatorId(row.id ?? null);
+            }}
+            customButtons={[
+              <CreateNewEvaluator
+                key="create-new-evaluator"
+                onSubmit={() => {
+                  evaluators.refetch();
+                }}
+              />,
+            ]}
+            dataLoading={defaultEvaluators.isLoading}
+            skeletonLoading={defaultEvaluators.isLoading}
+            id="evals-table"
+            defaultColumns={INITIAL_COLUMNS}
+            defaultData={evals}
+          />
+        </>
+      )}
+    </div>
   );
 };
 

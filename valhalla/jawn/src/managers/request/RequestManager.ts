@@ -81,8 +81,12 @@ export class RequestManager extends BaseManager {
       if (!bodyResponse.ok) {
         return err("Error fetching request body");
       }
-      const bodyData = (await bodyResponse.json())?.["request"];
-      return ok({ ...request.data, request_body: bodyData });
+      const bodyData = await bodyResponse.json();
+      return ok({
+        ...request.data,
+        request_body: bodyData?.["request"],
+        response_body: bodyData?.["response"],
+      });
     } catch (e) {
       return err("Error fetching request body");
     }

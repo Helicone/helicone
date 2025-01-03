@@ -1,18 +1,16 @@
-import { BaseManager } from "../BaseManager";
-import { AuthParams } from "../../lib/db/supabase";
-import { supabaseServer } from "../../lib/db/supabase";
 import Stripe from "stripe";
-import { Result, ok, err } from "../../lib/shared/result";
-import { ENVIRONMENT } from "../..";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import {
-  ExperimentUsage,
+  LLMUsage,
   UpgradeToProRequest,
 } from "../../controllers/public/stripeController";
-import { OrganizationManager } from "../organization/OrganizationManager";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { Result, err, ok } from "../../lib/shared/result";
 import { costOf } from "../../packages/cost";
+import { BaseManager } from "../BaseManager";
+import { OrganizationManager } from "../organization/OrganizationManager";
 
 const proProductPrices = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
@@ -354,12 +352,11 @@ WHERE (${builtFilter.filter})`,
 
     return ok(subscription);
   }
-
-  private async getExperimentsUsage({
+  private async getEvaluatorsUsage({
     startTime,
   }: {
     startTime: Date;
-  }): Promise<Result<ExperimentUsage[], string>> {
+  }): Promise<Result<LLMUsage[], string>> {
     const orgId = this.authParams.organizationId;
 
     const query = `
@@ -372,17 +369,14 @@ WHERE (${builtFilter.filter})`,
     FROM request_response_rmt
     WHERE organization_id = {val_0: String}
       AND request_created_at >= {val_1: DateTime}
-      AND properties['Helicone-Experiment-Id'] IS NOT NULL
-      AND properties['Helicone-Experiment-Id'] != ''
+      AND properties['Helicone-Evaluator'] IS NOT NULL
+      AND properties['Helicone-Evaluator'] != ''
       AND status >= 200
       AND status < 300
     GROUP BY model, provider
   `;
 
-    const result = await dbQueryClickhouse<ExperimentUsage>(query, [
-      orgId,
-      startTime,
-    ]);
+    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
 
     return ok(
       result.data
@@ -414,14 +408,75 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is ExperimentUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? []
+    );
+  }
+
+  private async getExperimentsUsage({
+    startTime,
+  }: {
+    startTime: Date;
+  }): Promise<Result<LLMUsage[], string>> {
+    const orgId = this.authParams.organizationId;
+
+    const query = `
+    SELECT 
+      model,
+      provider,
+      sum(prompt_tokens) as prompt_tokens,
+      sum(completion_tokens) as completion_tokens,
+      count(*) as total_count
+    FROM request_response_rmt
+    WHERE organization_id = {val_0: String}
+      AND request_created_at >= {val_1: DateTime}
+      AND properties['Helicone-Experiment-Id'] IS NOT NULL
+      AND properties['Helicone-Experiment-Id'] != ''
+      AND status >= 200
+      AND status < 300
+    GROUP BY model, provider
+  `;
+
+    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
+
+    return ok(
+      result.data
+        ?.map((model) => {
+          const totalCost = costOf({
+            model: model.model,
+            provider: model.provider.toUpperCase(),
+          });
+
+          if (!model || !totalCost) return null;
+
+          return {
+            amount:
+              (totalCost.completion_token * model.completion_tokens +
+                totalCost.prompt_token * model.prompt_tokens) *
+              100,
+            description: `${model.completion_tokens.toLocaleString()} completion tokens, ${model.prompt_tokens.toLocaleString()} prompt tokens, at $${(
+              (totalCost.completion_token * 1_000_000) /
+              100
+            ).toPrecision(6)}/million completion tokens, $${(
+              (totalCost.prompt_token * 1_000_000) /
+              100
+            ).toPrecision(6)}/million prompt tokens`,
+            totalCost: totalCost,
+            model: model.model,
+            provider: model.provider,
+            prompt_tokens: model.prompt_tokens,
+            completion_tokens: model.completion_tokens,
+            total_count: model.total_count,
+          };
+        })
+        .filter((item): item is LLMUsage => item !== null) ?? []
     );
   }
 
   public async getUpcomingInvoice(): Promise<
     Result<
       Stripe.Response<Stripe.UpcomingInvoice> & {
-        experiments_usage: ExperimentUsage[];
+        experiments_usage: LLMUsage[];
+        evaluators_usage: LLMUsage[];
       },
       string
     >
@@ -444,9 +499,14 @@ WHERE (${builtFilter.filter})`,
         startTime: new Date(upcomingInvoice.period_start * 1000),
       });
 
+      const evaluatorsUsage = await this.getEvaluatorsUsage({
+        startTime: new Date(upcomingInvoice.period_start * 1000),
+      });
+
       return ok({
         ...upcomingInvoice,
         experiments_usage: experimentsUsage.data ?? [],
+        evaluators_usage: evaluatorsUsage.data ?? [],
       });
     } catch (error: any) {
       return err(`Error retrieving upcoming invoice: ${error.message}`);
