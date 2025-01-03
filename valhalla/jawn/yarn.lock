@@ -939,11 +939,6 @@
     node-abort-controller "^3.0.1"
     uuid "^9.0.0"
 
-"@codesandbox/sdk@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@codesandbox/sdk/-/sdk-0.0.10.tgz#e8eae4535243c18cc5472fef763e0527070ac083"
-  integrity sha512-5AMcAnfX5koKKO2YNoItq2KrXJFquzHOcMgl6M1qOC2YvVQbUZijD0tvKWD/qMTCwYW3ry8346eeTtyBKosDjw==
-
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"

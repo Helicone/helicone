@@ -190,7 +190,7 @@ export class PiController extends Controller {
       cost: number;
     }>(requestBody, {
       orgId: request.authParams.organizationId,
-      countColumns: [`${clickhousePriceCalc("request_response_rmt")} as cost`],
+      countColumn: `${clickhousePriceCalc("request_response_rmt")} as cost`,
       groupByColumns: ["created_at_trunc"],
     });
   }

@@ -26,7 +26,7 @@ export type EvalMetric = {
 export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Eval Name",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
         {info.getValue()
@@ -34,24 +34,7 @@ export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
           : "No Eval Name"}
       </span>
     ),
-    minSize: 50,
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: (info) => (
-      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
-    ),
-    minSize: 50,
-  },
-  {
-    accessorKey: "valueType",
-    header: "Value",
-    cell: (info) => (
-      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
-    ),
-    minSize: 100,
-    size: 100,
+    minSize: 300,
   },
   {
     accessorKey: "overTime",
@@ -91,6 +74,22 @@ export const INITIAL_COLUMNS: ColumnDef<EvalMetric>[] = [
         />
       ),
     minSize: 100,
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: (info) => (
+      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
+    ),
+    minSize: 300,
+  },
+  {
+    accessorKey: "valueType",
+    header: "Value Type",
+    cell: (info) => (
+      <Badge variant={"outline"}>{info.getValue() as string}</Badge>
+    ),
+    minSize: 300,
   },
   {
     accessorKey: "count",

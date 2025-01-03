@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/sheet";
 import React, { useMemo } from "react";
 import { useEvaluators } from "./EvaluatorHook";
-import LLMAsJudgeEvaluatorDetails from "./details/LLMAsJudgeEvaluatorDetails";
-import PythonEvaluatorDetails from "./details/PythonEvaluatorDetails";
+import { EvalMetric } from "./EvaluratorColumns";
+import LLMAsJudgeEvaluatorDetails from "./LLMAsJudgeEvaluatorDetails";
 
 export function getEvaluatorScoreName(
   evaluatorName: string,
@@ -25,57 +25,45 @@ export function getEvaluatorScoreName(
 }
 
 interface EvaluatorDetailsSheetProps {
-  selectedEvaluatorId: string | null;
-  setSelectedEvaluatorId: (evaluatorId: string | null) => void;
-  evaluators: ReturnType<typeof useEvaluators>["evaluators"];
+  selectedEvaluator: EvalMetric | null;
+  setSelectedEvaluator: (evaluator: EvalMetric | null) => void;
+  LLMAsJudgeEvaluators: ReturnType<typeof useEvaluators>["evaluators"];
   deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"];
 }
 
 const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
-  selectedEvaluatorId,
-  setSelectedEvaluatorId,
-  evaluators: evaluators,
+  selectedEvaluator,
+  setSelectedEvaluator,
+  LLMAsJudgeEvaluators,
   deleteEvaluator,
 }) => {
-  const evaluator = useMemo(() => {
-    return evaluators.data?.data?.data?.find(
+  const LLMAsJudgeEvaluator = useMemo(() => {
+    return LLMAsJudgeEvaluators.data?.data?.data?.find(
       (e) =>
-        getEvaluatorScoreName(e.name, e.scoring_type) === selectedEvaluatorId ||
-        e.name === selectedEvaluatorId
+        getEvaluatorScoreName(e.name, e.scoring_type) ===
+          selectedEvaluator?.name || e.name === selectedEvaluator?.name
     );
-  }, [evaluators, selectedEvaluatorId]);
+  }, [LLMAsJudgeEvaluators, selectedEvaluator]);
 
   return (
     <Sheet
-      open={!!selectedEvaluatorId}
-      onOpenChange={() => setSelectedEvaluatorId(null)}
+      open={!!selectedEvaluator}
+      onOpenChange={() => setSelectedEvaluator(null)}
     >
       <SheetTrigger asChild>
         <span style={{ display: "none" }}></span>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto ">
+      <SheetContent className="w-[50vw] max-w-[50vw] sm:max-w-[50vw]">
         <SheetHeader>
-          <SheetTitle>{evaluator?.name}</SheetTitle>
+          <SheetTitle>{selectedEvaluator?.name}</SheetTitle>
         </SheetHeader>
         <SheetDescription>
-          {evaluator ? (
-            evaluator.llm_template ? (
-              <LLMAsJudgeEvaluatorDetails
-                evaluator={evaluator}
-                deleteEvaluator={deleteEvaluator}
-                setSelectedEvaluator={(evalVar) => {
-                  setSelectedEvaluatorId(evalVar?.id ?? null);
-                }}
-              />
-            ) : (
-              <PythonEvaluatorDetails
-                evaluator={evaluator}
-                deleteEvaluator={deleteEvaluator}
-                setSelectedEvaluator={(evalVar) => {
-                  setSelectedEvaluatorId(evalVar?.id ?? null);
-                }}
-              />
-            )
+          {LLMAsJudgeEvaluator ? (
+            <LLMAsJudgeEvaluatorDetails
+              evaluator={LLMAsJudgeEvaluator}
+              deleteEvaluator={deleteEvaluator}
+              setSelectedEvaluator={setSelectedEvaluator}
+            />
           ) : (
             <p>This evaluator is a default evaluator.</p>
           )}
