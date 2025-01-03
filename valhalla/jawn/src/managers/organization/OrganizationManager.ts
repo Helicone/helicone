@@ -1,4 +1,4 @@
-import { ENVIRONMENT } from "../..";
+import { ENVIRONMENT } from "../../lib/clients/constant";
 import { Database } from "../../lib/db/database.types";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
