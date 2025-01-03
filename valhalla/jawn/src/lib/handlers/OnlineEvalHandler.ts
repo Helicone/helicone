@@ -6,10 +6,7 @@ import { sanitizeObject } from "../../utils/sanitize";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
 import { LLMAsAJudge } from "../clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../clients/constant";
-import {
-  EvaluatorManager,
-  getEvaluatorScoreName,
-} from "../../managers/evaluator/EvaluatorManager";
+import { getEvaluatorScoreName } from "../../managers/evaluator/EvaluatorManager";
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -30,16 +27,13 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );
 
-      const properties = Object.keys(
-        context.processedLog.request.properties ?? {}
-      ).map((property) => property.toLowerCase());
       if (
         isNaN(sampleRate) ||
         sampleRate < 0 ||
         sampleRate > 100 ||
         Math.random() * 100 > sampleRate ||
-        properties.includes("helicone-experiment-id") ||
-        properties.includes("helicone-evaluator")
+        (context.processedLog.request.properties &&
+          "Helicone-Experiment-Id" in context.processedLog.request.properties)
       ) {
         continue;
       }
@@ -70,41 +64,28 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         autoInputs?: Record<string, string>;
       };
 
-      const evaluatorManager = new EvaluatorManager({
-        organizationId: context.authParams?.organizationId ?? "",
+      const llmAsAJudge = new LLMAsAJudge({
+        openAIApiKey: OPENAI_KEY!,
+        scoringType: onlineEval.evaluator_scoring_type as
+          | "LLM-CHOICE"
+          | "LLM-BOOLEAN"
+          | "LLM-RANGE",
+        llmTemplate: onlineEval.evaluator_llm_template,
+        inputRecord,
+        output: JSON.stringify(context.processedLog.response.body),
+        evaluatorName: onlineEval.evaluator_name,
       });
 
       try {
-        const result = await evaluatorManager.runLLMEvaluatorScore({
-          evaluator: {
-            code_template: onlineEval.evaluator_code_template,
-            created_at: onlineEval.evaluator_created_at,
-            id: onlineEval.evaluator_id,
-            llm_template: onlineEval.evaluator_llm_template,
-            name: onlineEval.evaluator_name,
-            organization_id: context.authParams?.organizationId ?? "",
-            scoring_type: onlineEval.evaluator_scoring_type,
-            updated_at: "n/a",
-          },
-          inputRecord,
-          request_id: context.message.log.request.id,
-          requestBody: JSON.stringify(context.processedLog.request.body),
-          responseBody: JSON.stringify(context.processedLog.response.body),
-        });
-
-        if (result.error) {
-          console.error(result.error);
-          continue;
-        }
+        const result = await llmAsAJudge.evaluate();
 
         const scoreName =
           getEvaluatorScoreName(onlineEval.evaluator_name) +
-          (typeof result.data?.score === "boolean" ? "-hcone-bool" : "");
+          (typeof result.score === "boolean" ? "-hcone-bool" : "");
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};
-        context.processedLog.request.scores[scoreName] =
-          result.data?.score ?? 0;
+        context.processedLog.request.scores[scoreName] = result.score ?? 0;
         context.processedLog.request.scores_evaluatorIds =
           context.processedLog.request.scores_evaluatorIds ?? {};
         context.processedLog.request.scores_evaluatorIds[scoreName] =

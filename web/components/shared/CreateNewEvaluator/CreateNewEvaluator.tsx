@@ -4,16 +4,11 @@ import { Sheet } from "@/components/ui/sheet";
 
 export const CreateNewEvaluator: React.FC<{
   onSubmit: (evaluatorId: string) => void;
-  buttonJSX?: React.ReactNode;
-}> = ({ onSubmit, buttonJSX }) => {
+}> = ({ onSubmit }) => {
   return (
     <>
       <Sheet>
-        <CreateNewEvaluatorSheetContent
-          onSubmit={onSubmit}
-          buttonJSX={buttonJSX}
-          hideButton={!!buttonJSX}
-        />
+        <CreateNewEvaluatorSheetContent onSubmit={onSubmit} />
       </Sheet>
     </>
   );

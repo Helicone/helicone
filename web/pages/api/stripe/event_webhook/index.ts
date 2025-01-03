@@ -3,10 +3,7 @@ import Stripe from "stripe";
 import { buffer } from "micro";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
-import {
-  getEvaluatorUsage,
-  getExperimentUsage,
-} from "@/lib/api/stripe/llmUsage";
+import { getExperimentUsage } from "@/lib/api/stripe/experimentUsage";
 import { costOf } from "@/packages/cost";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -183,23 +180,11 @@ const InvoiceHandlers = {
           subscriptionStartDate,
           subscriptionEndDate
         );
-
         if (experimentUsage.error || !experimentUsage.data) {
           console.error(
             "Error getting experiment usage:",
             experimentUsage.error
           );
-          return;
-        }
-
-        const evaluatorUsage = await getEvaluatorUsage(
-          orgId,
-          subscriptionStartDate,
-          subscriptionEndDate
-        );
-
-        if (evaluatorUsage.error || !evaluatorUsage.data) {
-          console.error("Error getting evaluator usage:", evaluatorUsage.error);
           return;
         }
 
@@ -224,39 +209,7 @@ const InvoiceHandlers = {
                   totalCost.prompt_token * usage.prompt_tokens) *
                   100
               ),
-              description: `Experiment: ${usage.provider}/${
-                usage.model
-              }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
-                totalCost.completion_token * 1000
-              ).toPrecision(6)}/1K completion tokens, $${+(
-                totalCost.prompt_token * 1000
-              ).toPrecision(6)}/1K prompt tokens`,
-            });
-          }
-        }
-
-        if (evaluatorUsage.data.length !== 0) {
-          for (const usage of evaluatorUsage.data) {
-            const totalCost = costOf({
-              model: usage.model,
-              provider: usage.provider.toUpperCase(),
-            });
-
-            if (!totalCost) {
-              console.error("No cost found for", usage.model, usage.provider);
-              continue;
-            }
-
-            await stripe.invoiceItems.create({
-              customer: customerID,
-              invoice: invoice.id,
-              currency: "usd",
-              amount: Math.ceil(
-                (totalCost.completion_token * usage.completion_tokens +
-                  totalCost.prompt_token * usage.prompt_tokens) *
-                  100
-              ),
-              description: `Evaluator: ${usage.provider}/${
+              description: `${usage.provider}/${
                 usage.model
               }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
                 totalCost.completion_token * 1000

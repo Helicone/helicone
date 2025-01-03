@@ -30,12 +30,6 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
     delete: operations["DeleteOnlineEvaluator"];
   };
-  "/v1/evaluator/python/test": {
-    post: operations["TestPythonEvaluator"];
-  };
-  "/v1/evaluator/llm/test": {
-    post: operations["TestLLMEvaluator"];
-  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -558,7 +552,6 @@ export interface components {
       organization_id: string;
       updated_at: string;
       name: string;
-      code_template: unknown;
     };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
@@ -573,9 +566,8 @@ export interface components {
     "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
     CreateEvaluatorParams: {
       scoring_type: string;
-      llm_template?: unknown;
+      llm_template: unknown;
       name: string;
-      code_template?: unknown;
     };
     "ResultSuccess_EvaluatorResult-Array_": {
       data: components["schemas"]["EvaluatorResult"][];
@@ -586,8 +578,6 @@ export interface components {
     UpdateEvaluatorParams: {
       scoring_type?: string;
       llm_template?: unknown;
-      code_template?: unknown;
-      name?: string;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -624,44 +614,9 @@ export interface components {
     CreateOnlineEvaluatorParams: {
       config: components["schemas"]["Record_string.any_"];
     };
-    "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
-      data: {
-        /** Format: double */
-        statusCode?: number;
-        traces: string[];
-        output: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__output-string--traces-string-Array--statusCode_63_-number_.string_": components["schemas"]["ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"] | components["schemas"]["ResultError_string_"];
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
       [key: string]: string;
-    };
-    TestInput: {
-      prompt?: string;
-      inputs: {
-        autoInputs?: components["schemas"]["Record_string.string_"];
-        inputs: components["schemas"]["Record_string.string_"];
-      };
-      outputBody: string;
-      inputBody: string;
-    };
-    EvaluatorScore: {
-      score: number | boolean;
-    };
-    ResultSuccess_EvaluatorScore_: {
-      data: components["schemas"]["EvaluatorScore"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorScore.string_": components["schemas"]["ResultSuccess_EvaluatorScore_"] | components["schemas"]["ResultError_string_"];
-    EvaluatorScoreResult: components["schemas"]["Result_EvaluatorScore.string_"];
-    EvaluatorConfig: {
-      evaluator_code_template?: string;
-      evaluator_llm_template?: string;
-      evaluator_scoring_type: string;
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS";
@@ -1409,8 +1364,6 @@ Json: JsonObject;
       offset?: number;
       /** Format: double */
       limit?: number;
-      /** Format: double */
-      timeZoneDifference?: number;
     };
     ScoreDistribution: {
       name: string;
@@ -2911,7 +2864,7 @@ Json: JsonObject;
         alerts?: boolean;
       };
     };
-    LLMUsage: {
+    ExperimentUsage: {
       model: string;
       provider: string;
       /** Format: double */
@@ -3367,43 +3320,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  TestPythonEvaluator: {
-    requestBody: {
-      content: {
-        "application/json": {
-          testInput: components["schemas"]["TestInput"];
-          code: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__output-string--traces-string-Array--statusCode_63_-number_.string_"];
-        };
-      };
-    };
-  };
-  TestLLMEvaluator: {
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorName: string;
-          testInput: components["schemas"]["TestInput"];
-          evaluatorConfig: components["schemas"]["EvaluatorConfig"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["EvaluatorScoreResult"];
         };
       };
     };
@@ -5982,8 +5898,7 @@ export interface operations {
       200: {
         content: {
           "application/json": ({
-            evaluators_usage: components["schemas"]["LLMUsage"][];
-            experiments_usage: components["schemas"]["LLMUsage"][];
+            experiments_usage: components["schemas"]["ExperimentUsage"][];
             /** Format: double */
             total: number;
             /** Format: double */

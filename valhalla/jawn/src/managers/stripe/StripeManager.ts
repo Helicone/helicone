@@ -8,7 +8,7 @@ import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import {
-  LLMUsage,
+  ExperimentUsage,
   UpgradeToProRequest,
 } from "../../controllers/public/stripeController";
 import { OrganizationManager } from "../organization/OrganizationManager";
@@ -354,71 +354,12 @@ WHERE (${builtFilter.filter})`,
 
     return ok(subscription);
   }
-  private async getEvaluatorsUsage({
-    startTime,
-  }: {
-    startTime: Date;
-  }): Promise<Result<LLMUsage[], string>> {
-    const orgId = this.authParams.organizationId;
-
-    const query = `
-    SELECT 
-      model,
-      provider,
-      sum(prompt_tokens) as prompt_tokens,
-      sum(completion_tokens) as completion_tokens,
-      count(*) as total_count
-    FROM request_response_rmt
-    WHERE organization_id = {val_0: String}
-      AND request_created_at >= {val_1: DateTime}
-      AND properties['Helicone-Evaluator'] IS NOT NULL
-      AND properties['Helicone-Evaluator'] != ''
-      AND status >= 200
-      AND status < 300
-    GROUP BY model, provider
-  `;
-
-    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
-
-    return ok(
-      result.data
-        ?.map((model) => {
-          const totalCost = costOf({
-            model: model.model,
-            provider: model.provider.toUpperCase(),
-          });
-
-          if (!model || !totalCost) return null;
-
-          return {
-            amount:
-              (totalCost.completion_token * model.completion_tokens +
-                totalCost.prompt_token * model.prompt_tokens) *
-              100,
-            description: `${model.completion_tokens.toLocaleString()} completion tokens, ${model.prompt_tokens.toLocaleString()} prompt tokens, at $${(
-              (totalCost.completion_token * 1_000_000) /
-              100
-            ).toPrecision(6)}/million completion tokens, $${(
-              (totalCost.prompt_token * 1_000_000) /
-              100
-            ).toPrecision(6)}/million prompt tokens`,
-            totalCost: totalCost,
-            model: model.model,
-            provider: model.provider,
-            prompt_tokens: model.prompt_tokens,
-            completion_tokens: model.completion_tokens,
-            total_count: model.total_count,
-          };
-        })
-        .filter((item): item is LLMUsage => item !== null) ?? []
-    );
-  }
 
   private async getExperimentsUsage({
     startTime,
   }: {
     startTime: Date;
-  }): Promise<Result<LLMUsage[], string>> {
+  }): Promise<Result<ExperimentUsage[], string>> {
     const orgId = this.authParams.organizationId;
 
     const query = `
@@ -438,7 +379,10 @@ WHERE (${builtFilter.filter})`,
     GROUP BY model, provider
   `;
 
-    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
+    const result = await dbQueryClickhouse<ExperimentUsage>(query, [
+      orgId,
+      startTime,
+    ]);
 
     return ok(
       result.data
@@ -470,15 +414,14 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is LLMUsage => item !== null) ?? []
+        .filter((item): item is ExperimentUsage => item !== null) ?? []
     );
   }
 
   public async getUpcomingInvoice(): Promise<
     Result<
       Stripe.Response<Stripe.UpcomingInvoice> & {
-        experiments_usage: LLMUsage[];
-        evaluators_usage: LLMUsage[];
+        experiments_usage: ExperimentUsage[];
       },
       string
     >
@@ -501,14 +444,9 @@ WHERE (${builtFilter.filter})`,
         startTime: new Date(upcomingInvoice.period_start * 1000),
       });
 
-      const evaluatorsUsage = await this.getEvaluatorsUsage({
-        startTime: new Date(upcomingInvoice.period_start * 1000),
-      });
-
       return ok({
         ...upcomingInvoice,
         experiments_usage: experimentsUsage.data ?? [],
-        evaluators_usage: evaluatorsUsage.data ?? [],
       });
     } catch (error: any) {
       return err(`Error retrieving upcoming invoice: ${error.message}`);

@@ -4,7 +4,6 @@ import {
   Get,
   Path,
   Post,
-  Put,
   Request,
   Route,
   Security,
@@ -40,7 +39,6 @@ export interface EvalQueryParams {
   };
   offset?: number;
   limit?: number;
-  timeZoneDifference?: number;
 }
 
 const kvCache = new KVCache(5 * 60 * 1000); // 5 minutes
