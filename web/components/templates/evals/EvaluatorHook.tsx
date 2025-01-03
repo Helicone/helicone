@@ -32,7 +32,7 @@ const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
     };
   } else {
     range = {
-      start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+      start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
       end: new Date(),
     };
   }

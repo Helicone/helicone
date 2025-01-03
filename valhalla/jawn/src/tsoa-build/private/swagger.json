@@ -27,7 +27,8 @@
 					},
 					"name": {
 						"type": "string"
-					}
+					},
+					"code_template": {}
 				},
 				"required": [
 					"id",
@@ -36,7 +37,8 @@
 					"llm_template",
 					"organization_id",
 					"updated_at",
-					"name"
+					"name",
+					"code_template"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -99,11 +101,11 @@
 					"llm_template": {},
 					"name": {
 						"type": "string"
-					}
+					},
+					"code_template": {}
 				},
 				"required": [
 					"scoring_type",
-					"llm_template",
 					"name"
 				],
 				"type": "object",
@@ -147,7 +149,11 @@
 					"scoring_type": {
 						"type": "string"
 					},
-					"llm_template": {}
+					"llm_template": {},
+					"code_template": {},
+					"name": {
+						"type": "string"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -301,6 +307,55 @@
 				],
 				"type": "object"
 			},
+			"ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"statusCode": {
+								"type": "number",
+								"format": "double"
+							},
+							"traces": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"output": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"traces",
+							"output"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__output-string--traces-string-Array--statusCode_63_-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Record_string.string_": {
 				"properties": {},
 				"additionalProperties": {
@@ -308,6 +363,108 @@
 				},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
+			},
+			"TestInput": {
+				"properties": {
+					"prompt": {
+						"type": "string"
+					},
+					"inputs": {
+						"properties": {
+							"autoInputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"inputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						},
+						"required": [
+							"inputs"
+						],
+						"type": "object"
+					},
+					"outputBody": {
+						"type": "string"
+					},
+					"inputBody": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"inputs",
+					"outputBody",
+					"inputBody"
+				],
+				"type": "object"
+			},
+			"EvaluatorScore": {
+				"properties": {
+					"score": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					}
+				},
+				"required": [
+					"score"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_EvaluatorScore_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorScore"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorScore.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorScore_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"EvaluatorScoreResult": {
+				"$ref": "#/components/schemas/Result_EvaluatorScore.string_"
+			},
+			"EvaluatorConfig": {
+				"properties": {
+					"evaluator_code_template": {
+						"type": "string"
+					},
+					"evaluator_llm_template": {
+						"type": "string"
+					},
+					"evaluator_scoring_type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"evaluator_scoring_type"
+				],
+				"type": "object"
 			},
 			"ProviderName": {
 				"type": "string",
@@ -3175,6 +3332,10 @@
 						"format": "double"
 					},
 					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeZoneDifference": {
 						"type": "number",
 						"format": "double"
 					}
@@ -8081,7 +8242,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ExperimentUsage": {
+			"LLMUsage": {
 				"properties": {
 					"model": {
 						"type": "string"
@@ -9596,6 +9757,106 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/evaluator/python/test": {
+			"post": {
+				"operationId": "TestPythonEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__output-string--traces-string-Array--statusCode_63_-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"testInput",
+									"code"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/llm/test": {
+			"post": {
+				"operationId": "TestLLMEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/EvaluatorScoreResult"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"evaluatorName": {
+										"type": "string"
+									},
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"evaluatorConfig": {
+										"$ref": "#/components/schemas/EvaluatorConfig"
+									}
+								},
+								"required": [
+									"evaluatorName",
+									"testInput",
+									"evaluatorConfig"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/request/query": {
@@ -16360,9 +16621,15 @@
 							"application/json": {
 								"schema": {
 									"properties": {
+										"evaluators_usage": {
+											"items": {
+												"$ref": "#/components/schemas/LLMUsage"
+											},
+											"type": "array"
+										},
 										"experiments_usage": {
 											"items": {
-												"$ref": "#/components/schemas/ExperimentUsage"
+												"$ref": "#/components/schemas/LLMUsage"
 											},
 											"type": "array"
 										},
@@ -16458,6 +16725,7 @@
 										}
 									},
 									"required": [
+										"evaluators_usage",
 										"experiments_usage",
 										"total",
 										"tax",
