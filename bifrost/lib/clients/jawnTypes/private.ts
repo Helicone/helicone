@@ -36,6 +36,61 @@ export interface paths {
   "/v1/evaluator/llm/test": {
     post: operations["TestLLMEvaluator"];
   };
+  "/v2/experiment/create/empty": {
+    post: operations["CreateEmptyExperiment"];
+  };
+  "/v2/experiment/create/from-request/{requestId}": {
+    post: operations["CreateExperimentFromRequest"];
+  };
+  "/v2/experiment/new": {
+    post: operations["CreateNewExperiment"];
+  };
+  "/v2/experiment": {
+    get: operations["GetExperiments"];
+  };
+  "/v2/experiment/{experimentId}": {
+    get: operations["GetExperimentById"];
+  };
+  "/v2/experiment/{experimentId}/prompt-version": {
+    post: operations["CreateNewPromptVersionForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/prompt-versions": {
+    get: operations["GetPromptVersionsForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/input-keys": {
+    get: operations["GetInputKeysForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/add-manual-row": {
+    post: operations["AddManualRowToExperiment"];
+  };
+  "/v2/experiment/{experimentId}/row/insert/batch": {
+    post: operations["CreateExperimentTableRowBatch"];
+  };
+  "/v2/experiment/{experimentId}/row/update": {
+    post: operations["UpdateExperimentTableRow"];
+  };
+  "/v2/experiment/{experimentId}/run-hypothesis": {
+    post: operations["RunHypothesis"];
+  };
+  "/v2/experiment/{experimentId}/evaluators": {
+    get: operations["GetExperimentEvaluators"];
+    post: operations["CreateExperimentEvaluator"];
+  };
+  "/v2/experiment/{experimentId}/evaluators/{evaluatorId}": {
+    delete: operations["DeleteExperimentEvaluator"];
+  };
+  "/v2/experiment/{experimentId}/evaluators/run": {
+    post: operations["RunExperimentEvaluators"];
+  };
+  "/v2/experiment/{experimentId}/should-run-evaluators": {
+    get: operations["ShouldRunEvaluators"];
+  };
+  "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
+    get: operations["GetExperimentPromptVersionScores"];
+  };
+  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
+    get: operations["GetExperimentScore"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -103,337 +158,8 @@ export interface paths {
   "/v1/prompt/{user_defined_id}/template": {
     post: operations["GetPromptVersionTemplates"];
   };
-  "/v2/experiment/create/empty": {
-    post: operations["CreateEmptyExperiment"];
-  };
-  "/v2/experiment/create/from-request/{requestId}": {
-    post: operations["CreateExperimentFromRequest"];
-  };
-  "/v2/experiment/new": {
-    post: operations["CreateNewExperiment"];
-  };
-  "/v2/experiment": {
-    get: operations["GetExperiments"];
-  };
-  "/v2/experiment/{experimentId}": {
-    get: operations["GetExperimentById"];
-  };
-  "/v2/experiment/{experimentId}/prompt-version": {
-    post: operations["CreateNewPromptVersionForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/prompt-versions": {
-    get: operations["GetPromptVersionsForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/input-keys": {
-    get: operations["GetInputKeysForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/add-manual-row": {
-    post: operations["AddManualRowToExperiment"];
-  };
-  "/v2/experiment/{experimentId}/row/insert/batch": {
-    post: operations["CreateExperimentTableRowBatch"];
-  };
-  "/v2/experiment/{experimentId}/row/update": {
-    post: operations["UpdateExperimentTableRow"];
-  };
-  "/v2/experiment/{experimentId}/run-hypothesis": {
-    post: operations["RunHypothesis"];
-  };
-  "/v2/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/should-run-evaluators": {
-    get: operations["ShouldRunEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
-    get: operations["GetExperimentPromptVersionScores"];
-  };
-  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
-    get: operations["GetExperimentScore"];
-  };
-  "/v1/admin/feature-flags": {
-    post: operations["UpdateFeatureFlags"];
-    delete: operations["DeleteFeatureFlag"];
-  };
-  "/v1/admin/feature-flags/query": {
-    post: operations["GetFeatureFlags"];
-  };
-  "/v1/admin/orgs/top-usage": {
-    post: operations["GetTopOrgsByUsage"];
-  };
-  "/v1/admin/orgs/top": {
-    post: operations["GetTopOrgs"];
-  };
-  "/v1/admin/admins/query": {
-    get: operations["GetAdmins"];
-  };
-  "/v1/admin/whodis": {
-    post: operations["Whodis"];
-  };
-  "/v1/admin/settings/{name}": {
-    get: operations["GetSetting"];
-  };
-  "/v1/admin/azure/run-test": {
-    post: operations["AzureTest"];
-  };
-  "/v1/admin/settings": {
-    post: operations["UpdateSetting"];
-  };
-  "/v1/admin/orgs/query": {
-    post: operations["FindAllOrgs"];
-  };
-  "/v1/admin/orgs/over-time/query": {
-    post: operations["NewOrgsOverTime"];
-  };
-  "/v1/admin/admins/org/query": {
-    post: operations["AddAdminsToOrg"];
-  };
-  "/v1/admin/alert_banners": {
-    post: operations["CreateAlertBanner"];
-    patch: operations["UpdateAlertBanner"];
-  };
-  "/v1/evals/query": {
-    post: operations["QueryEvals"];
-  };
-  "/v1/evals/scores": {
-    get: operations["GetEvalScores"];
-  };
-  "/v1/evals/{requestId}": {
-    post: operations["AddEval"];
-  };
-  "/v1/evals/score-distributions/query": {
-    post: operations["QueryScoreDistributions"];
-  };
-  "/v1/webhooks": {
-    get: operations["GetWebhooks"];
-    post: operations["NewWebhook"];
-  };
-  "/v1/webhooks/{webhookId}": {
-    delete: operations["DeleteWebhook"];
-  };
-  "/v1/public/waitlist/experiments": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/vault/add": {
-    post: operations["AddKey"];
-  };
-  "/v1/vault/keys": {
-    get: operations["GetKeys"];
-  };
-  "/v1/vault/key/{providerKeyId}": {
-    get: operations["GetKeyById"];
-  };
-  "/v1/vault/update/{id}": {
-    patch: operations["UpdateKey"];
-  };
-  "/v1/session/query": {
-    post: operations["GetSessions"];
-  };
-  "/v1/session/name/query": {
-    post: operations["GetNames"];
-  };
-  "/v1/session/metrics/query": {
-    post: operations["GetMetrics"];
-  };
-  "/v1/session/{sessionId}/feedback": {
-    post: operations["UpdateSessionFeedback"];
-  };
-  "/v1/user/metrics-overview/query": {
-    post: operations["GetUserMetricsOverview"];
-  };
-  "/v1/user/metrics/query": {
-    post: operations["GetUserMetrics"];
-  };
-  "/v1/user/query": {
-    post: operations["GetUsers"];
-  };
-  "/v1/trace/log": {
-    post: operations["LogTrace"];
-  };
-  "/v1/trace/log-python": {
-    post: operations["LogPythonTrace"];
-  };
-  "/v1/log/request": {
-    post: operations["GetRequests"];
-  };
-  "/v1/key/generateHash": {
-    post: operations["GenerateHash"];
-  };
-  "/v1/dataset/{datasetId}/fine-tune": {
-    post: operations["DatasetFineTune"];
-  };
-  "/v1/fine-tune": {
-    post: operations["FineTune"];
-  };
-  "/v1/fine-tune/{jobId}/stats": {
-    get: operations["FineTuneJobStats"];
-  };
-  "/v1/demo/completion": {
-    post: operations["DemoCompletion"];
-  };
-  "/v1/alert/query": {
-    get: operations["GetAlerts"];
-  };
-  "/v1/alert/create": {
-    post: operations["CreateAlert"];
-  };
-  "/v1/alert/{alertId}": {
-    delete: operations["DeleteAlert"];
-  };
-  "/v1/property/query": {
-    post: operations["GetProperties"];
-  };
-  "/v1/integration": {
-    get: operations["GetIntegrations"];
-    post: operations["CreateIntegration"];
-  };
-  "/v1/integration/{integrationId}": {
-    get: operations["GetIntegration"];
-    post: operations["UpdateIntegration"];
-  };
-  "/v1/integration/type/{type}": {
-    get: operations["GetIntegrationByType"];
-  };
-  "/v1/integration/slack/settings": {
-    get: operations["GetSlackSettings"];
-  };
-  "/v1/integration/slack/channels": {
-    get: operations["GetSlackChannels"];
-  };
-  "/v1/experiment/dataset": {
-    post: operations["AddDataset"];
-  };
-  "/v1/experiment/dataset/random": {
-    post: operations["AddRandomDataset"];
-  };
-  "/v1/experiment/dataset/query": {
-    post: operations["GetDatasets"];
-  };
-  "/v1/experiment/dataset/{datasetId}/row/insert": {
-    post: operations["InsertDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
-    post: operations["CreateDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/inputs/query": {
-    post: operations["GetDataset"];
-  };
-  "/v1/experiment/dataset/{datasetId}/mutate": {
-    post: operations["MutateDataset"];
-  };
-  "/v1/experiment/new-empty": {
-    post: operations["CreateNewEmptyExperiment"];
-  };
-  "/v1/experiment/table/new": {
-    post: operations["CreateNewExperimentTable"];
-  };
-  "/v1/experiment/table/{experimentTableId}/query": {
-    post: operations["GetExperimentTableById"];
-  };
-  "/v1/experiment/table/{experimentTableId}/metadata/query": {
-    post: operations["GetExperimentTableMetadata"];
-  };
-  "/v1/experiment/tables/query": {
-    post: operations["GetExperimentTables"];
-  };
-  "/v1/experiment/table/{experimentTableId}/cell": {
-    post: operations["CreateExperimentCell"];
-    patch: operations["UpdateExperimentCell"];
-  };
-  "/v1/experiment/table/{experimentTableId}/column": {
-    post: operations["CreateExperimentColumn"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/new": {
-    post: operations["CreateExperimentTableRow"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/{rowIndex}": {
-    delete: operations["DeleteExperimentTableRow"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/insert/batch": {
-    post: operations["CreateExperimentTableRowWithCellsBatch"];
-  };
-  "/v1/experiment/update-meta": {
-    post: operations["UpdateExperimentMeta"];
-  };
-  "/v1/experiment": {
-    post: operations["CreateNewExperimentOld"];
-  };
-  "/v1/experiment/hypothesis": {
-    post: operations["CreateNewExperimentHypothesis"];
-  };
-  "/v1/experiment/hypothesis/{hypothesisId}/scores/query": {
-    post: operations["GetExperimentHypothesisScores"];
-  };
-  "/v1/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluatorOld"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluatorsOld"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluatorOld"];
-  };
-  "/v1/experiment/query": {
-    post: operations["GetExperimentsOld"];
-  };
-  "/v1/helicone-dataset": {
-    post: operations["AddHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/mutate": {
-    post: operations["MutateHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/query": {
-    post: operations["QueryHeliconeDatasetRows"];
-  };
-  "/v1/helicone-dataset/{datasetId}/count": {
-    post: operations["CountHeliconeDatasetRows"];
-  };
-  "/v1/helicone-dataset/query": {
-    post: operations["QueryHeliconeDataset"];
-  };
-  "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
-    post: operations["UpdateHeliconeDatasetRequest"];
-  };
-  "/v1/public/dataisbeautiful/total-values": {
-    post: operations["GetTotalValues"];
-  };
-  "/v1/public/dataisbeautiful/model/usage/overtime": {
-    post: operations["GetModelUsageOverTime"];
-  };
-  "/v1/public/dataisbeautiful/provider/usage/overtime": {
-    post: operations["GetProviderUsageOverTime"];
-  };
-  "/v1/public/dataisbeautiful/total-requests": {
-    post: operations["GetTotalRequests"];
-  };
-  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
-    post: operations["GetTTFTvsPromptInputLength"];
-  };
-  "/v1/public/dataisbeautiful/model/percentage": {
-    post: operations["GetModelPercentage"];
-  };
-  "/v1/public/dataisbeautiful/model/cost": {
-    post: operations["GetModelCost"];
-  };
-  "/v1/public/dataisbeautiful/provider/percentage": {
-    post: operations["GetProviderPercentage"];
-  };
-  "/v1/public/dataisbeautiful/model/percentage/overtime": {
-    post: operations["GetModelPercentageOverTime"];
-  };
-  "/v1/customer/{customerId}/usage/query": {
-    post: operations["GetCustomerUsage"];
-  };
-  "/v1/customer/query": {
-    post: operations["GetCustomers"];
+  "/v1/settings/query": {
+    get: operations["GetSettings"];
   };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
@@ -511,38 +237,73 @@ export interface paths {
   "/v1/organization/setup-demo": {
     post: operations["SetupDemo"];
   };
-  "/v1/dashboard/scores/query": {
-    post: operations["GetScoresOverTime"];
+  "/v1/log/request": {
+    post: operations["GetRequests"];
   };
-  "/v1/public/status/provider": {
-    get: operations["GetAllProviderStatus"];
+  "/v1/key/generateHash": {
+    post: operations["GenerateHash"];
   };
-  "/v1/public/status/provider/{provider}": {
-    get: operations["GetProviderStatus"];
+  "/v1/dataset/{datasetId}/fine-tune": {
+    post: operations["DatasetFineTune"];
   };
-  "/v1/public/compare/models": {
-    post: operations["GetModelComparison"];
+  "/v1/fine-tune": {
+    post: operations["FineTune"];
   };
-  "/v1/public/pi/get-api-key": {
-    post: operations["GetApiKey"];
+  "/v1/fine-tune/{jobId}/stats": {
+    get: operations["FineTuneJobStats"];
   };
-  "/v1/pi/session": {
-    post: operations["AddSession"];
+  "/v1/demo/completion": {
+    post: operations["DemoCompletion"];
   };
-  "/v1/pi/org-name/query": {
-    post: operations["GetOrgName"];
+  "/v1/alert/query": {
+    get: operations["GetAlerts"];
   };
-  "/v1/pi/total-costs": {
-    post: operations["GetTotalCosts"];
+  "/v1/alert/create": {
+    post: operations["CreateAlert"];
   };
-  "/v1/pi/total_requests": {
-    post: operations["GetTotalRequests"];
+  "/v1/alert/{alertId}": {
+    delete: operations["DeleteAlert"];
   };
-  "/v1/pi/costs-over-time/query": {
-    post: operations["GetCostsOverTime"];
+  "/v1/admin/feature-flags": {
+    post: operations["UpdateFeatureFlags"];
+    delete: operations["DeleteFeatureFlag"];
   };
-  "/v1/settings/query": {
-    get: operations["GetSettings"];
+  "/v1/admin/feature-flags/query": {
+    post: operations["GetFeatureFlags"];
+  };
+  "/v1/admin/orgs/top-usage": {
+    post: operations["GetTopOrgsByUsage"];
+  };
+  "/v1/admin/orgs/top": {
+    post: operations["GetTopOrgs"];
+  };
+  "/v1/admin/admins/query": {
+    get: operations["GetAdmins"];
+  };
+  "/v1/admin/whodis": {
+    post: operations["Whodis"];
+  };
+  "/v1/admin/settings/{name}": {
+    get: operations["GetSetting"];
+  };
+  "/v1/admin/azure/run-test": {
+    post: operations["AzureTest"];
+  };
+  "/v1/admin/settings": {
+    post: operations["UpdateSetting"];
+  };
+  "/v1/admin/orgs/query": {
+    post: operations["FindAllOrgs"];
+  };
+  "/v1/admin/orgs/over-time/query": {
+    post: operations["NewOrgsOverTime"];
+  };
+  "/v1/admin/admins/org/query": {
+    post: operations["AddAdminsToOrg"];
+  };
+  "/v1/admin/alert_banners": {
+    post: operations["CreateAlertBanner"];
+    patch: operations["UpdateAlertBanner"];
   };
 }
 
@@ -663,6 +424,151 @@ export interface components {
       evaluator_llm_template?: string;
       evaluator_scoring_type: string;
     };
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+    };
+    "ResultSuccess_ExperimentV2-Array_": {
+      data: components["schemas"]["ExperimentV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2Output: {
+      id: string;
+      request_id: string;
+      is_original: boolean;
+      prompt_version_id: string;
+      created_at: string;
+      input_record_id: string;
+    };
+    ExperimentV2Row: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      prompt_version: string;
+      requests: components["schemas"]["ExperimentV2Output"][];
+      auto_prompt_inputs: unknown[];
+    };
+    ExtendedExperimentData: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+      rows: components["schemas"]["ExperimentV2Row"][];
+    };
+    ResultSuccess_ExtendedExperimentData_: {
+      data: components["schemas"]["ExtendedExperimentData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
+      updated_at?: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
+    CreateNewPromptVersionForExperimentParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+      parentPromptVersionId: string;
+    };
+Json: JsonObject;
+    ExperimentV2PromptVersion: {
+      created_at: string | null;
+      experiment_id: string | null;
+      helicone_template: components["schemas"]["Json"] | null;
+      id: string;
+      /** Format: double */
+      major_version: number;
+      metadata: components["schemas"]["Json"] | null;
+      /** Format: double */
+      minor_version: number;
+      model: string | null;
+      organization: string;
+      prompt_v2: string;
+      soft_delete: boolean | null;
+    };
+    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
+      data: components["schemas"]["ExperimentV2PromptVersion"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_boolean_: {
+      data: boolean;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
+    ScoreV2: {
+      valueType: string;
+      value: number | string;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.ScoreV2_": {
+      [key: string]: components["schemas"]["ScoreV2"];
+    };
+    "ResultSuccess_Record_string.ScoreV2__": {
+      data: components["schemas"]["Record_string.ScoreV2_"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ScoreV2-or-null_": {
+      data: components["schemas"]["ScoreV2"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS";
     Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
@@ -1078,27 +984,6 @@ export interface components {
       heliconeTemplate: unknown;
       experimentId?: string;
     };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      helicone_template: string;
-      created_at: string;
-      metadata: components["schemas"]["Record_string.any_"];
-      parent_prompt_version?: string | null;
-      experiment_id?: string | null;
-      updated_at?: string;
-    };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
@@ -1202,530 +1087,126 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
+    UpgradeToProRequest: {
+      addons?: {
+        prompts?: boolean;
+        alerts?: boolean;
       };
-      /** @enum {number|null} */
-      error: null;
     };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-    };
-    "ResultSuccess_ExperimentV2-Array_": {
-      data: components["schemas"]["ExperimentV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2Output: {
-      id: string;
-      request_id: string;
-      is_original: boolean;
-      prompt_version_id: string;
-      created_at: string;
-      input_record_id: string;
-    };
-    ExperimentV2Row: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      prompt_version: string;
-      requests: components["schemas"]["ExperimentV2Output"][];
-      auto_prompt_inputs: unknown[];
-    };
-    ExtendedExperimentData: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-      rows: components["schemas"]["ExperimentV2Row"][];
-    };
-    ResultSuccess_ExtendedExperimentData_: {
-      data: components["schemas"]["ExtendedExperimentData"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
-    CreateNewPromptVersionForExperimentParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-      parentPromptVersionId: string;
-    };
-Json: JsonObject;
-    ExperimentV2PromptVersion: {
-      created_at: string | null;
-      experiment_id: string | null;
-      helicone_template: components["schemas"]["Json"] | null;
-      id: string;
-      /** Format: double */
-      major_version: number;
-      metadata: components["schemas"]["Json"] | null;
-      /** Format: double */
-      minor_version: number;
-      model: string | null;
-      organization: string;
-      prompt_v2: string;
-      soft_delete: boolean | null;
-    };
-    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
-      data: components["schemas"]["ExperimentV2PromptVersion"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_boolean_: {
-      data: boolean;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
-    ScoreV2: {
-      valueType: string;
-      value: number | string;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreV2_": {
-      [key: string]: components["schemas"]["ScoreV2"];
-    };
-    "ResultSuccess_Record_string.ScoreV2__": {
-      data: components["schemas"]["Record_string.ScoreV2_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ScoreV2-or-null_": {
-      data: components["schemas"]["ScoreV2"] | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
-      data: {
-          flags: string[];
-          name: string;
-          organization_id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
-    KafkaSettings: {
-      /** Format: double */
-      miniBatchSize: number;
-    };
-    AzureExperiment: {
-      azureBaseUri: string;
-      azureApiVersion: string;
-      azureDeploymentName: string;
-      azureApiKey: string;
-    };
-    ApiKey: {
-      apiKey: string;
-    };
-    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
-    /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey";
-    /**
-     * @description The URL interface represents an object providing static methods used for creating object URLs.
-     *
-     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
-     * `URL` class is a global reference for `import { URL } from 'node:url'`
-     * https://nodejs.org/api/url.html#the-whatwg-url-api
-     */
-    "url.URL": string;
-    Eval: {
-      name: string;
-      /** Format: double */
-      averageScore: number;
-      /** Format: double */
-      minScore: number;
-      /** Format: double */
-      maxScore: number;
-      /** Format: double */
-      count: number;
-      overTime: {
-          /** Format: double */
-          count: number;
-          date: string;
-        }[];
-      averageOverTime: {
-          /** Format: double */
-          value: number;
-          date: string;
-        }[];
-    };
-    "ResultSuccess_Eval-Array_": {
-      data: components["schemas"]["Eval"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Eval-Array.string_": components["schemas"]["ResultSuccess_Eval-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-    };
-    FilterLeafSubset_request_response_rmt_: components["schemas"]["Pick_FilterLeaf.request_response_rmt_"];
-    EvalFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["EvalFilterBranch"] | "all";
-    EvalFilterBranch: {
-      right: components["schemas"]["EvalFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["EvalFilterNode"];
-    };
-    EvalQueryParams: {
-      filter: components["schemas"]["EvalFilterNode"];
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-      /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
-      /** Format: double */
-      timeZoneDifference?: number;
-    };
-    ScoreDistribution: {
-      name: string;
-      distribution: {
-          /** Format: double */
-          value: number;
-          /** Format: double */
-          upper: number;
-          /** Format: double */
-          lower: number;
-        }[];
-    };
-    "ResultSuccess_ScoreDistribution-Array_": {
-      data: components["schemas"]["ScoreDistribution"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    WebhookData: {
-      destination: string;
-      config: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
-      data: {
-          hmac_key: string;
-          config: string;
-          version: string;
-          destination: string;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultError_any_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    AddVaultKeyParams: {
-      key: string;
+    LLMUsage: {
+      model: string;
       provider: string;
-      name?: string;
-    };
-    DecryptedProviderKey: {
-      provider_key_name: string | null;
-      provider_name: string | null;
-      provider_key: string | null;
-      org_id: string | null;
-      id: string | null;
-    };
-    "ResultSuccess_DecryptedProviderKey-Array_": {
-      data: components["schemas"]["DecryptedProviderKey"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_DecryptedProviderKey_: {
-      data: components["schemas"]["DecryptedProviderKey"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
-    SessionResult: {
-      created_at: string;
-      latest_request_created_at: string;
-      session_id: string;
-      session_name: string;
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_requests: number;
       /** Format: double */
       prompt_tokens: number;
       /** Format: double */
       completion_tokens: number;
       /** Format: double */
-      total_tokens: number;
-    };
-    "ResultSuccess_SessionResult-Array_": {
-      data: components["schemas"]["SessionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionQueryParams: {
-      search: string;
-      timeFilter: {
-        /** Format: double */
-        endTimeUnixMs: number;
-        /** Format: double */
-        startTimeUnixMs: number;
-      };
-      nameEquals?: string;
+      total_count: number;
       /** Format: double */
-      timezoneDifference: number;
-      filter: components["schemas"]["RequestFilterNode"];
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
     };
-    SessionNameResult: {
+    NewOrganizationParams: {
+      tier?: string | null;
+      subscription_status?: string | null;
+      stripe_subscription_item_id?: string | null;
+      stripe_subscription_id?: string | null;
+      stripe_metadata?: components["schemas"]["Json"];
+      stripe_customer_id?: string | null;
+      soft_delete?: boolean;
+      size?: string | null;
+      reseller_id?: string | null;
+      /** Format: double */
+      request_limit?: number | null;
+      referral?: string | null;
+      /** Format: double */
+      percent_to_log?: number | null;
+      owner: string;
+      organization_type?: string;
+      org_provider_key?: string | null;
       name: string;
-      created_at: string;
-      /** Format: double */
-      total_cost: number;
-      last_used: string;
-      first_used: string;
-      /** Format: double */
-      session_count: number;
-    };
-    "ResultSuccess_SessionNameResult-Array_": {
-      data: components["schemas"]["SessionNameResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
-    SessionNameQueryParams: {
-      nameContains: string;
-      /** Format: double */
-      timezoneDifference: number;
-      /** @enum {string} */
-      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
-      useInterquartile?: boolean;
-    };
-    HistogramRow: {
-      range_start: string;
-      range_end: string;
-      /** Format: double */
-      value: number;
-    };
-    SessionMetrics: {
-      session_count: components["schemas"]["HistogramRow"][];
-      session_duration: components["schemas"]["HistogramRow"][];
-      session_cost: components["schemas"]["HistogramRow"][];
-    };
-    ResultSuccess_SessionMetrics_: {
-      data: components["schemas"]["SessionMetrics"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
-      data: {
-        user_cost: components["schemas"]["HistogramRow"][];
-        request_count: components["schemas"]["HistogramRow"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
+      logo_path?: string | null;
+      limits?: components["schemas"]["Json"] | null;
+      is_personal?: boolean;
+      id?: string;
+      icon?: string;
+      has_onboarded?: boolean;
+      domain?: string | null;
+      created_at?: string | null;
+      color?: string;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+      name: string;
+      color?: string;
+      icon?: string;
+      org_provider_key?: string;
+      limits?: components["schemas"]["Json"];
+      reseller_id?: string;
+      organization_type?: string;
     };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
-    UserFilterBranch: {
-      right: components["schemas"]["UserFilterNode"];
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
+      variant?: string;
+    };
+    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
+    UIFilterRowNode: {
       /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["UserFilterNode"];
+      operator: "and" | "or";
+      rows: components["schemas"]["UIFilterRowTree"][];
     };
-    /** @enum {string} */
-    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
-    UserMetricsResult: {
-      user_id: string;
+    FilterRow: {
+      value: string;
       /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
+      operatorIdx: number;
       /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
+      filterMapIdx: number;
     };
-    "ResultSuccess_UserMetricsResult-Array_": {
-      data: components["schemas"]["UserMetricsResult"][];
+    OrganizationFilter: {
+      softDelete: boolean;
+      createdAt?: string;
+      filter: components["schemas"]["UIFilterRowTree"][];
+      name: string;
+      id: string;
+    };
+    OrganizationLayout: {
+      filters: components["schemas"]["OrganizationFilter"][];
+      type: string;
+      organization_id: string;
+      id: string;
+    };
+    ResultSuccess_OrganizationLayout_: {
+      data: components["schemas"]["OrganizationLayout"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_UserMetricsResult-Array.string_": components["schemas"]["ResultSuccess_UserMetricsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    UserMetricsQueryParams: {
-      filter: components["schemas"]["UserFilterNode"];
-      /** Format: double */
-      offset: number;
-      /** Format: double */
-      limit: number;
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-      /** Format: double */
-      timeZoneDifferenceMinutes?: number;
+    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
+    OrganizationMember: {
+      org_role: string;
+      member: string;
+      email: string;
     };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_": {
-      data: {
-          /** Format: double */
-          cost_usd: number;
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
-        }[];
+    "ResultSuccess_OrganizationMember-Array_": {
+      data: components["schemas"]["OrganizationMember"][];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array_"] | components["schemas"]["ResultError_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
+    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
+    OrganizationOwner: {
+      tier: string;
+      email: string;
     };
-    OTELTrace: {
-      resourceSpans: {
-          scopeSpans: {
-              spans: {
-                  /** Format: double */
-                  droppedLinksCount: number;
-                  links: unknown[];
-                  status: {
-                    /** Format: double */
-                    code: number;
-                  };
-                  /** Format: double */
-                  droppedEventsCount: number;
-                  events: unknown[];
-                  /** Format: double */
-                  droppedAttributesCount: number;
-                  attributes: {
-                      value: {
-                        /** Format: double */
-                        intValue?: number;
-                        stringValue?: string;
-                      };
-                      key: string;
-                    }[];
-                  endTimeUnixNano: string;
-                  startTimeUnixNano: string;
-                  /** Format: double */
-                  kind: number;
-                  name: string;
-                  spanId: string;
-                  traceId: string;
-                }[];
-              scope: {
-                version: string;
-                name: string;
-              };
-            }[];
-          resource: {
-            /** Format: double */
-            droppedAttributesCount: number;
-            attributes: {
-                value: {
-                  arrayValue?: {
-                    values: {
-                        stringValue: string;
-                      }[];
-                  };
-                  /** Format: double */
-                  intValue?: number;
-                  stringValue?: string;
-                };
-                key: string;
-              }[];
-          };
-        }[];
+    "ResultSuccess_OrganizationOwner-Array_": {
+      data: components["schemas"]["OrganizationOwner"][];
+      /** @enum {number|null} */
+      error: null;
     };
+    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
       heliconeManualAccessKey?: string;
       lytixHost?: string;
@@ -2385,828 +1866,40 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
-    Property: {
-      property: string;
-    };
-    "ResultSuccess_Property-Array_": {
-      data: components["schemas"]["Property"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
-    IntegrationCreateParams: {
-      integration_name: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    Integration: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-      id: string;
-    };
-    ResultSuccess_Array_Integration__: {
-      data: components["schemas"]["Integration"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
-    IntegrationUpdateParams: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    ResultSuccess_Integration_: {
-      data: components["schemas"]["Integration"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Array__id-string--name-string___": {
+    "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
+          flags: string[];
           name: string;
-          id: string;
+          organization_id: string;
         }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__datasetId-string__": {
-      data: {
-        datasetId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
-    DatasetMetadata: {
-      promptVersionId?: string;
-      inputRecordsIds?: string[];
-    };
-    NewDatasetParams: {
-      datasetName: string;
-      requestIds: string[];
-      /** @enum {string} */
-      datasetType: "experiment" | "helicone";
-      meta?: components["schemas"]["DatasetMetadata"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.request-or-prompts_versions_": {
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
-    };
-    "FilterLeafSubset_request-or-prompts_versions_": components["schemas"]["Pick_FilterLeaf.request-or-prompts_versions_"];
-    DatasetFilterNode: components["schemas"]["FilterLeafSubset_request-or-prompts_versions_"] | components["schemas"]["DatasetFilterBranch"] | "all";
-    DatasetFilterBranch: {
-      right: components["schemas"]["DatasetFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["DatasetFilterNode"];
-    };
-    RandomDatasetParams: {
-      datasetName: string;
-      filter: components["schemas"]["DatasetFilterNode"];
+    "Result__organization_id-string--name-string--flags-string-Array_-Array.string_": components["schemas"]["ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_"] | components["schemas"]["ResultError_string_"];
+    KafkaSettings: {
       /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
+      miniBatchSize: number;
     };
-    DatasetResult: {
-      id: string;
-      name: string;
-      created_at: string;
-      meta?: components["schemas"]["DatasetMetadata"];
+    AzureExperiment: {
+      azureBaseUri: string;
+      azureApiVersion: string;
+      azureDeploymentName: string;
+      azureApiKey: string;
     };
-    "ResultSuccess_DatasetResult-Array_": {
-      data: components["schemas"]["DatasetResult"][];
-      /** @enum {number|null} */
-      error: null;
+    ApiKey: {
+      apiKey: string;
     };
-    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess___-Array_": {
-      data: Record<string, never>[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__tableId-string--experimentId-string__": {
-      data: {
-        experimentId: string;
-        tableId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__tableId-string--experimentId-string_.string_": components["schemas"]["ResultSuccess__tableId-string--experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    CreateExperimentTableParams: {
-      datasetId: string;
-      experimentMetadata: components["schemas"]["Record_string.any_"];
-      promptVersionId: string;
-      newHeliconeTemplate: string;
-      isMajorVersion: boolean;
-      promptSubversionMetadata: components["schemas"]["Record_string.any_"];
-      experimentTableMetadata?: components["schemas"]["Record_string.any_"];
-    };
-    ExperimentTableColumn: {
-      id: string;
-      columnName: string;
-      columnType: string;
-      hypothesisId?: string;
-      cells: ({
-          metadata?: components["schemas"]["Record_string.any_"];
-          value: string | null;
-          requestId?: string;
-          /** Format: double */
-          rowIndex: number;
-          id: string;
-        })[];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ExperimentTable: {
-      id: string;
-      name: string;
-      experimentId: string;
-      columns: components["schemas"]["ExperimentTableColumn"][];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_ExperimentTable_: {
-      data: components["schemas"]["ExperimentTable"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTable.string_": components["schemas"]["ResultSuccess_ExperimentTable_"] | components["schemas"]["ResultError_string_"];
-    ExperimentTableSimplified: {
-      id: string;
-      name: string;
-      experimentId: string;
-      createdAt: string;
-      metadata?: unknown;
-      columns: {
-          columnType: string;
-          columnName: string;
-          id: string;
-        }[];
-    };
-    ResultSuccess_ExperimentTableSimplified_: {
-      data: components["schemas"]["ExperimentTableSimplified"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTableSimplified.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ExperimentTableSimplified-Array_": {
-      data: components["schemas"]["ExperimentTableSimplified"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTableSimplified-Array.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified-Array_"] | components["schemas"]["ResultError_string_"];
+    Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
+    /** @enum {string} */
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey";
     /**
-     * @description Error format
+     * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
-     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `import { URL } from 'node:url'`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
-    PostgrestError: {
-      name: string;
-      message: string;
-      stack?: string;
-      details: string;
-      hint: string;
-      code: string;
-    };
-    ResultError_PostgrestError_: {
-      /** @enum {number|null} */
-      data: null;
-      error: components["schemas"]["PostgrestError"];
-    };
-    NewExperimentParams: {
-      datasetId: string;
-      promptVersion: string;
-      model: string;
-      providerKeyId: string;
-      meta?: unknown;
-    };
-    "ResultSuccess__hypothesisId-string__": {
-      data: {
-        hypothesisId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
-    Score: {
-      valueType: string;
-      value: number | string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.Score_": {
-      [key: string]: components["schemas"]["Score"];
-    };
-    "ResultSuccess__runsCount-number--scores-Record_string.Score___": {
-      data: {
-        scores: components["schemas"]["Record_string.Score_"];
-        /** Format: double */
-        runsCount: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__runsCount-number--scores-Record_string.Score__.string_": components["schemas"]["ResultSuccess__runsCount-number--scores-Record_string.Score___"] | components["schemas"]["ResultError_string_"];
-    ResponseObj: {
-      body: unknown;
-      createdAt: string;
-      /** Format: double */
-      completionTokens: number;
-      /** Format: double */
-      promptTokens: number;
-      /** Format: double */
-      delayMs: number;
-      model: string;
-    };
-    RequestObj: {
-      id: string;
-      provider: string;
-    };
-    ExperimentDatasetRow: {
-      rowId: string;
-      inputRecord: {
-        request: components["schemas"]["RequestObj"];
-        response: components["schemas"]["ResponseObj"];
-        autoInputs: components["schemas"]["Record_string.string_"][];
-        inputs: components["schemas"]["Record_string.string_"];
-        requestPath: string;
-        requestId: string;
-        id: string;
-      };
-      /** Format: double */
-      rowIndex: number;
-      columnId: string;
-      scores: components["schemas"]["Record_string.Score_"];
-    };
-    ExperimentScores: {
-      dataset: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-      hypothesis: {
-        scores: components["schemas"]["Record_string.Score_"];
-        /** Format: double */
-        runsCount: number;
-      };
-    };
-    Experiment: {
-      id: string;
-      organization: string;
-      dataset: {
-        rows: components["schemas"]["ExperimentDatasetRow"][];
-        name: string;
-        id: string;
-      };
-      meta: unknown;
-      createdAt: string;
-      hypotheses: {
-          runs: {
-              request?: components["schemas"]["RequestObj"];
-              scores: components["schemas"]["Record_string.Score_"];
-              response?: components["schemas"]["ResponseObj"];
-              resultRequestId: string;
-              datasetRowId: string;
-            }[];
-          providerKey: string;
-          createdAt: string;
-          status: string;
-          model: string;
-          parentPromptVersion?: {
-            template: unknown;
-          };
-          promptVersion?: {
-            template: unknown;
-          };
-          promptVersionId: string;
-          id: string;
-        }[];
-      scores: components["schemas"]["ExperimentScores"] | null;
-      tableId: string | null;
-    };
-    "ResultSuccess_Experiment-Array_": {
-      data: components["schemas"]["Experiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ExperimentToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.experiment_": {
-      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
-    };
-    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
-    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
-    ExperimentFilterBranch: {
-      right: components["schemas"]["ExperimentFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["ExperimentFilterNode"];
-    };
-    IncludeExperimentKeys: {
-      /** @enum {boolean} */
-      inputs?: true;
-      /** @enum {boolean} */
-      promptVersion?: true;
-      /** @enum {boolean} */
-      responseBodies?: true;
-      /** @enum {boolean} */
-      score?: true;
-    };
-    HeliconeDatasetMetadata: {
-      promptVersionId?: string;
-      inputRecordsIds?: string[];
-    };
-    NewHeliconeDatasetParams: {
-      datasetName: string;
-      requestIds: string[];
-      meta?: components["schemas"]["HeliconeDatasetMetadata"];
-    };
-    MutateParams: {
-      addRequests: string[];
-      removeRequests: string[];
-    };
-    HeliconeDatasetRow: {
-      id: string;
-      origin_request_id: string;
-      dataset_id: string;
-      created_at: string;
-      signed_url: components["schemas"]["Result_string.string_"];
-    };
-    "ResultSuccess_HeliconeDatasetRow-Array_": {
-      data: components["schemas"]["HeliconeDatasetRow"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeDatasetRow-Array.string_": components["schemas"]["ResultSuccess_HeliconeDatasetRow-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_number_: {
-      /** Format: double */
-      data: number;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-    HeliconeDataset: {
-      created_at: string | null;
-      dataset_type: string;
-      id: string;
-      meta: components["schemas"]["Json"] | null;
-      name: string | null;
-      organization: string;
-      /** Format: double */
-      requests_count: number;
-    };
-    "ResultSuccess_HeliconeDataset-Array_": {
-      data: components["schemas"]["HeliconeDataset"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_any_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    TotalValuesForAllOfTime: {
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_tokens: number;
-      /** Format: double */
-      total_requests: number;
-    };
-    ResultSuccess_TotalValuesForAllOfTime_: {
-      data: components["schemas"]["TotalValuesForAllOfTime"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_TotalValuesForAllOfTime.string_": components["schemas"]["ResultSuccess_TotalValuesForAllOfTime_"] | components["schemas"]["ResultError_string_"];
-    ModelUsageOverTime: {
-      /** Format: double */
-      tokens: number;
-      date: string;
-      model: string;
-    };
-    "ResultSuccess_ModelUsageOverTime-Array_": {
-      data: components["schemas"]["ModelUsageOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    ProviderUsageOverTime: {
-      /** Format: double */
-      tokens: number;
-      date: string;
-      provider: string;
-    };
-    "ResultSuccess_ProviderUsageOverTime-Array_": {
-      data: components["schemas"]["ProviderUsageOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ProviderUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description *
-     * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
-     * @enum {string}
-     */
-    TimeSpan: "7d" | "1m" | "3m";
-    /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
-    /** @enum {string} */
-    OpenStatsProviderName: "OPENAI" | "ANTHROPIC" | "OPENROUTER" | "MISTRAL" | "META";
-    DataIsBeautifulRequestBody: {
-      provider?: components["schemas"]["OpenStatsProviderName"];
-      models?: components["schemas"]["ModelName"][];
-      timespan: components["schemas"]["TimeSpan"];
-    };
-    TTFTvsPromptLength: {
-      /** Format: double */
-      prompt_length: number;
-      /** Format: double */
-      ttft_normalized_p75: number;
-      /** Format: double */
-      ttft_normalized_p99: number;
-      /** Format: double */
-      ttft_normalized: number;
-      /** Format: double */
-      ttft_p75: number;
-      /** Format: double */
-      ttft_p99: number;
-      /** Format: double */
-      ttft: number;
-    };
-    "ResultSuccess_TTFTvsPromptLength-Array_": {
-      data: components["schemas"]["TTFTvsPromptLength"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelBreakdown: {
-      /** Format: double */
-      percent: number;
-      matched_model: string;
-    };
-    "ResultSuccess_ModelBreakdown-Array_": {
-      data: components["schemas"]["ModelBreakdown"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelCost: {
-      /** Format: double */
-      percent: number;
-      matched_model: string;
-    };
-    "ResultSuccess_ModelCost-Array_": {
-      data: components["schemas"]["ModelCost"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
-    ProviderBreakdown: {
-      /** Format: double */
-      percent: number;
-      provider: string;
-    };
-    "ResultSuccess_ProviderBreakdown-Array_": {
-      data: components["schemas"]["ProviderBreakdown"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelBreakdownOverTime: {
-      date: string;
-    } & components["schemas"]["ModelBreakdown"];
-    "ResultSuccess_ModelBreakdownOverTime-Array_": {
-      data: components["schemas"]["ModelBreakdownOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    CustomerUsage: {
-      id: string;
-      name: string;
-      /** Format: double */
-      cost: number;
-      /** Format: double */
-      count: number;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-    };
-    Customer: {
-      id: string;
-      name: string;
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-    };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
-        /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
-      };
-    };
-    NewOrganizationParams: {
-      tier?: string | null;
-      subscription_status?: string | null;
-      stripe_subscription_item_id?: string | null;
-      stripe_subscription_id?: string | null;
-      stripe_metadata?: components["schemas"]["Json"];
-      stripe_customer_id?: string | null;
-      soft_delete?: boolean;
-      size?: string | null;
-      reseller_id?: string | null;
-      /** Format: double */
-      request_limit?: number | null;
-      referral?: string | null;
-      /** Format: double */
-      percent_to_log?: number | null;
-      owner: string;
-      organization_type?: string;
-      org_provider_key?: string | null;
-      name: string;
-      logo_path?: string | null;
-      limits?: components["schemas"]["Json"] | null;
-      is_personal?: boolean;
-      id?: string;
-      icon?: string;
-      has_onboarded?: boolean;
-      domain?: string | null;
-      created_at?: string | null;
-      color?: string;
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
-      name: string;
-      color?: string;
-      icon?: string;
-      limits?: components["schemas"]["Json"];
-      org_provider_key?: string;
-      organization_type?: string;
-      reseller_id?: string;
-    };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
-      variant?: string;
-    };
-    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
-    UIFilterRowNode: {
-      /** @enum {string} */
-      operator: "and" | "or";
-      rows: components["schemas"]["UIFilterRowTree"][];
-    };
-    FilterRow: {
-      value: string;
-      /** Format: double */
-      operatorIdx: number;
-      /** Format: double */
-      filterMapIdx: number;
-    };
-    OrganizationFilter: {
-      softDelete: boolean;
-      createdAt?: string;
-      filter: components["schemas"]["UIFilterRowTree"][];
-      name: string;
-      id: string;
-    };
-    OrganizationLayout: {
-      filters: components["schemas"]["OrganizationFilter"][];
-      type: string;
-      organization_id: string;
-      id: string;
-    };
-    ResultSuccess_OrganizationLayout_: {
-      data: components["schemas"]["OrganizationLayout"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
-    OrganizationMember: {
-      org_role: string;
-      member: string;
-      email: string;
-    };
-    "ResultSuccess_OrganizationMember-Array_": {
-      data: components["schemas"]["OrganizationMember"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationMember-Array.string_": components["schemas"]["ResultSuccess_OrganizationMember-Array_"] | components["schemas"]["ResultError_string_"];
-    OrganizationOwner: {
-      tier: string;
-      email: string;
-    };
-    "ResultSuccess_OrganizationOwner-Array_": {
-      data: components["schemas"]["OrganizationOwner"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__score_key-string--score_sum-number--created_at_trunc-string_-Array_": {
-      data: {
-          created_at_trunc: string;
-          /** Format: double */
-          score_sum: number;
-          score_key: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__score_key-string--score_sum-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__score_key-string--score_sum-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    RequestClickhouseFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["RequestClickhouseFilterBranch"] | "all";
-    RequestClickhouseFilterBranch: {
-      right: components["schemas"]["RequestClickhouseFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["RequestClickhouseFilterNode"];
-    };
-    /** @enum {string} */
-    TimeIncrement: "min" | "hour" | "day" | "week" | "month" | "year";
-    DataOverTimeRequest: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-      userFilter: components["schemas"]["RequestClickhouseFilterNode"];
-      dbIncrement: components["schemas"]["TimeIncrement"];
-      /** Format: double */
-      timeZoneDifference: number;
-    };
-    MetricsData: {
-      /** Format: double */
-      totalRequests: number;
-      /** Format: double */
-      requestCountPrevious24h: number;
-      /** Format: double */
-      requestVolumeChange: number;
-      /** Format: double */
-      errorRate24h: number;
-      /** Format: double */
-      errorRatePrevious24h: number;
-      /** Format: double */
-      errorRateChange: number;
-      /** Format: double */
-      averageLatency: number;
-      /** Format: double */
-      averageLatencyPerToken: number;
-      /** Format: double */
-      latencyChange: number;
-      /** Format: double */
-      latencyPerTokenChange: number;
-      /** Format: double */
-      recentRequestCount: number;
-      /** Format: double */
-      recentErrorCount: number;
-    };
-    TimeSeriesDataPoint: {
-      /** Format: date-time */
-      timestamp: string;
-      /** Format: double */
-      errorCount: number;
-      /** Format: double */
-      requestCount: number;
-      /** Format: double */
-      averageLatency: number;
-      /** Format: double */
-      averageLatencyPerCompletionToken: number;
-    };
-    ProviderMetrics: {
-      providerName: string;
-      metrics: components["schemas"]["MetricsData"] & {
-        timeSeriesData: components["schemas"]["TimeSeriesDataPoint"][];
-      };
-    };
-    "ResultSuccess_ProviderMetrics-Array_": {
-      data: components["schemas"]["ProviderMetrics"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderMetrics-Array.string_": components["schemas"]["ResultSuccess_ProviderMetrics-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_ProviderMetrics_: {
-      data: components["schemas"]["ProviderMetrics"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    TimeFrame: "24h" | "7d" | "30d";
-    MetricStats: {
-      /** Format: double */
-      p99: number;
-      /** Format: double */
-      p95: number;
-      /** Format: double */
-      p90: number;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-      /** Format: double */
-      median: number;
-      /** Format: double */
-      average: number;
-    };
-    TokenMetricStats: components["schemas"]["MetricStats"] & {
-      /** Format: double */
-      medianPer1000Tokens: number;
-    };
-    TimeSeriesMetric: {
-      /** Format: double */
-      value: number;
-      timestamp: string;
-    };
-    Model: {
-      timeSeriesData: {
-        errorRate: components["schemas"]["TimeSeriesMetric"][];
-        successRate: components["schemas"]["TimeSeriesMetric"][];
-        ttft: components["schemas"]["TimeSeriesMetric"][];
-        latency: components["schemas"]["TimeSeriesMetric"][];
-      };
-      requestStatus: {
-        /** Format: double */
-        errorRate: number;
-        /** Format: double */
-        successRate: number;
-      };
-      geographicTtft: {
-          /** Format: double */
-          median: number;
-          countryCode: string;
-        }[];
-      geographicLatency: {
-          /** Format: double */
-          median: number;
-          countryCode: string;
-        }[];
-      feedback: {
-        /** Format: double */
-        negativePercentage: number;
-        /** Format: double */
-        positivePercentage: number;
-      };
-      costs: {
-        /** Format: double */
-        completion_token: number;
-        /** Format: double */
-        prompt_token: number;
-      };
-      ttft: components["schemas"]["MetricStats"];
-      latency: components["schemas"]["TokenMetricStats"];
-      provider: string;
-      model: string;
-    };
-    "ResultSuccess_Model-Array_": {
-      data: components["schemas"]["Model"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Model-Array.string_": components["schemas"]["ResultSuccess_Model-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelsToCompare: {
-      provider: string;
-      names: string[];
-      parent: string;
-    };
-    "ResultSuccess__apiKey-string__": {
-      data: {
-        apiKey: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__apiKey-string_.string_": components["schemas"]["ResultSuccess__apiKey-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
-      data: {
-          created_at_trunc: string;
-          /** Format: double */
-          cost: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__cost-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__cost-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "url.URL": string;
   };
   responses: {
   };
@@ -3404,6 +2097,334 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["EvaluatorScoreResult"];
+        };
+      };
+    };
+  };
+  CreateEmptyExperiment: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentFromRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          originalPromptVersion: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentById: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
+        };
+      };
+    };
+  };
+  CreateNewPromptVersionForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
+        };
+      };
+    };
+  };
+  GetInputKeysForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  AddManualRowToExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowBatch: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rows: {
+              autoInputs: unknown[];
+              inputs: components["schemas"]["Record_string.string_"];
+              inputRecordId: string;
+            }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentTableRow: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RunHypothesis: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          evaluatorId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RunExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  ShouldRunEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentPromptVersionScores: {
+    parameters: {
+      path: {
+        experimentId: string;
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentScore: {
+    parameters: {
+      path: {
+        experimentId: string;
+        requestId: string;
+        scoreKey: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
         };
       };
     };
@@ -3845,2043 +2866,14 @@ export interface operations {
       };
     };
   };
-  CreateEmptyExperiment: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentFromRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          originalPromptVersion: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperiments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentById: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
-        };
-      };
-    };
-  };
-  CreateNewPromptVersionForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionsForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
-        };
-      };
-    };
-  };
-  GetInputKeysForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  AddManualRowToExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowBatch: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rows: {
-              autoInputs: unknown[];
-              inputs: components["schemas"]["Record_string.string_"];
-              inputRecordId: string;
-            }[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunHypothesis: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputRecordId: string;
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  ShouldRunEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentPromptVersionScores: {
-    parameters: {
-      path: {
-        experimentId: string;
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentScore: {
-    parameters: {
-      path: {
-        experimentId: string;
-        requestId: string;
-        scoreKey: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
-        };
-      };
-    };
-  };
-  UpdateFeatureFlags: {
-    requestBody: {
-      content: {
-        "application/json": {
-          orgId: string;
-          flag: string;
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  DeleteFeatureFlag: {
-    requestBody: {
-      content: {
-        "application/json": {
-          orgId: string;
-          flag: string;
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  GetFeatureFlags: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__organization_id-string--name-string--flags-string-Array_-Array.string_"];
-        };
-      };
-    };
-  };
-  GetTopOrgsByUsage: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          minRequests: number;
-          /** Format: double */
-          limit: number;
-        };
-      };
-    };
+  GetSettings: {
     responses: {
       /** @description Ok */
       200: {
         content: {
           "application/json": {
-            organizations: ({
-                usage: {
-                  /** Format: double */
-                  all_time_count: number;
-                  monthly_usage: {
-                      /** Format: double */
-                      requestCount: number;
-                      month: string;
-                    }[];
-                  /** Format: double */
-                  requests_last_30_days: number;
-                  /** Format: double */
-                  total_requests: number;
-                };
-                organization: {
-                  members: ({
-                      last_sign_in_at: string | null;
-                      role: string;
-                      name: string;
-                      email: string;
-                      id: string;
-                    })[];
-                  subscription_status: string | null;
-                  stripe_subscription_id: string | null;
-                  stripe_customer_id: string | null;
-                  tier: string;
-                  owner: string;
-                  created_at: string;
-                  name: string;
-                  id: string;
-                };
-              })[];
+            useAzureForExperiment: boolean;
           };
-        };
-      };
-    };
-  };
-  GetTopOrgs: {
-    requestBody: {
-      content: {
-        "application/json": {
-          emailContains?: string[];
-          orgsNameContains?: string[];
-          orgsId?: string[];
-          /** @enum {string} */
-          tier: "all" | "pro" | "free" | "growth" | "enterprise";
-          endDate: string;
-          startDate: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-              /** Format: double */
-              ct: number;
-              organization_id: string;
-              members: {
-                  last_active: string;
-                  role: string;
-                  email: string;
-                  id: string;
-                }[];
-              name: string;
-              owner_last_login: string;
-              owner_email: string;
-              tier: string;
-              id: string;
-              overTime: {
-                  organization_id: string;
-                  dt: string;
-                  /** Format: double */
-                  count: number;
-                }[];
-            }[];
-        };
-      };
-    };
-  };
-  GetAdmins: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": ({
-              user_id: string | null;
-              user_email: string | null;
-              /** Format: double */
-              id: number;
-              created_at: string;
-            })[];
-        };
-      };
-    };
-  };
-  Whodis: {
-    requestBody: {
-      content: {
-        "application/json": {
-          email?: string;
-          userId?: string;
-          organizationId?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            organizations: ({
-                usage: {
-                  /** Format: double */
-                  all_time_count: number;
-                  monthly_usage: {
-                      /** Format: double */
-                      requestCount: number;
-                      month: string;
-                    }[];
-                  /** Format: double */
-                  requests_last_30_days: number;
-                  /** Format: double */
-                  total_requests: number;
-                };
-                organization: {
-                  members: ({
-                      last_sign_in_at: string | null;
-                      role: string;
-                      name: string;
-                      email: string;
-                      id: string;
-                    })[];
-                  subscription_status: string | null;
-                  stripe_subscription_id: string | null;
-                  stripe_customer_id: string | null;
-                  tier: string;
-                  owner: string;
-                  created_at: string;
-                  name: string;
-                  id: string;
-                };
-              })[];
-          };
-        };
-      };
-    };
-  };
-  GetSetting: {
-    parameters: {
-      path: {
-        name: components["schemas"]["SettingName"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Setting"];
-        };
-      };
-    };
-  };
-  AzureTest: {
-    requestBody: {
-      content: {
-        "application/json": {
-          requestBody: unknown;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            fetchParams: {
-              body: string;
-              headers: {
-                [key: string]: string;
-              };
-              url: components["schemas"]["url.URL"];
-            };
-            resultText: string;
-          };
-        };
-      };
-    };
-  };
-  UpdateSetting: {
-    requestBody: {
-      content: {
-        "application/json": {
-          settings: components["schemas"]["Setting"];
-          name: components["schemas"]["SettingName"];
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  FindAllOrgs: {
-    requestBody: {
-      content: {
-        "application/json": {
-          orgName: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            orgs: {
-                id: string;
-                name: string;
-              }[];
-          };
-        };
-      };
-    };
-  };
-  NewOrgsOverTime: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          groupBy: "hour" | "day" | "week" | "month";
-          /** @enum {string} */
-          timeFilter: "1 days" | "7 days" | "1 month" | "3 months" | "6 months" | "12 months" | "24 months";
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            usersOverTime: {
-                day: string;
-                count: string;
-              }[];
-            newUsersOvertime: {
-                day: string;
-                count: string;
-              }[];
-            newOrgsOvertime: {
-                day: string;
-                count: string;
-              }[];
-          };
-        };
-      };
-    };
-  };
-  AddAdminsToOrg: {
-    requestBody: {
-      content: {
-        "application/json": {
-          adminIds: string[];
-          orgId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  CreateAlertBanner: {
-    requestBody: {
-      content: {
-        "application/json": {
-          message: string;
-          title: string;
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  UpdateAlertBanner: {
-    requestBody: {
-      content: {
-        "application/json": {
-          active: boolean;
-          /** Format: double */
-          id: number;
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  QueryEvals: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EvalQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Eval-Array.string_"];
-        };
-      };
-    };
-  };
-  GetEvalScores: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  AddEval: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          score: number;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  QueryScoreDistributions: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EvalQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
-        };
-      };
-    };
-  };
-  GetWebhooks: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  NewWebhook: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookData"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
-        };
-      };
-    };
-  };
-  DeleteWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_any_"];
-        };
-      };
-    };
-  };
-  AddKey: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AddVaultKeyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
-        };
-      };
-    };
-  };
-  GetKeyById: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
-        };
-      };
-    };
-  };
-  UpdateKey: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          active?: boolean;
-          name?: string;
-          key?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetSessions: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetNames: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionNameResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_SessionMetrics.string_"];
-        };
-      };
-    };
-  };
-  UpdateSessionFeedback: {
-    parameters: {
-      path: {
-        sessionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetricsOverview: {
-    requestBody: {
-      content: {
-        "application/json": {
-          useInterquartile: boolean;
-          pSize: components["schemas"]["PSize"];
-          filter: components["schemas"]["UserFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserMetricsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_UserMetricsResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost_usd-number_-Array.string_"];
-        };
-      };
-    };
-  };
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogPythonTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  GenerateHash: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateHashQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error?: {
-              details?: string;
-              message?: string;
-            };
-            success?: boolean;
-          };
-        };
-      };
-    };
-  };
-  DatasetFineTune: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBodyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["FineTuneResult"];
-        };
-      };
-    };
-  };
-  FineTune: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FineTuneBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            data: {
-              url: string;
-              fineTuneJob: string;
-            };
-            success: boolean;
-          };
-        };
-      };
-    };
-  };
-  FineTuneJobStats: {
-    parameters: {
-      path: {
-        jobId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            error: string;
-          } | {
-            events: unknown;
-            job: unknown;
-          };
-        };
-      };
-    };
-  };
-  DemoCompletion: {
-    requestBody: {
-      content: {
-        "application/json": {
-          cache_enabled?: boolean;
-          /** Format: double */
-          max_tokens?: number;
-          tool_choice?: components["schemas"]["ChatCompletionToolChoiceOption"];
-          tools?: components["schemas"]["ChatCompletionTool"][];
-          sessionPath?: string;
-          sessionName?: string;
-          sessionId?: string;
-          userEmail?: string;
-          promptId: string;
-          messages: components["schemas"]["ChatCompletionMessageParam"][];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ChatCompletion.string_"];
-        };
-      };
-    };
-  };
-  GetAlerts: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_AlertResponse.string_"];
-        };
-      };
-    };
-  };
-  CreateAlert: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AlertRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  DeleteAlert: {
-    parameters: {
-      path: {
-        alertId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetProperties: {
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Property-Array.string_"];
-        };
-      };
-    };
-  };
-  GetIntegrations: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
-        };
-      };
-    };
-  };
-  CreateIntegration: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationCreateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  UpdateIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationUpdateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetIntegrationByType: {
-    parameters: {
-      path: {
-        type: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackChannels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
-        };
-      };
-    };
-  };
-  AddDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  AddRandomDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RandomDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetDatasets: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptVersionId?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
-        };
-      };
-    };
-  };
-  InsertDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          originalColumnId?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          sourceRequest?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetDataset: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
-        };
-      };
-    };
-  };
-  MutateDataset: {
-    requestBody: {
-      content: {
-        "application/json": {
-          removeRequests: string[];
-          addRequests: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result___-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateNewEmptyExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetId: string;
-          metadata: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentTable: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateExperimentTableParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__tableId-string--experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTableById: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTable.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTableMetadata: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTableSimplified.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTables: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTableSimplified-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentCell: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          value: string | null;
-          /** Format: double */
-          rowIndex: number;
-          columnId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentCell: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          updateInputs?: boolean;
-          metadata?: string;
-          value?: string;
-          status?: string;
-          cellId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentColumn: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputKeys?: string[];
-          promptVersionId?: string;
-          hypothesisId?: string;
-          columnType: string;
-          columnName: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs?: components["schemas"]["Record_string.string_"];
-          sourceRequest?: string;
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-        rowIndex: number;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowWithCellsBatch: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rows: ({
-              sourceRequest?: string;
-              cells: ({
-                  metadata?: unknown;
-                  value: string | null;
-                  columnId: string;
-                })[];
-              datasetId: string;
-              inputs: components["schemas"]["Record_string.string_"];
-              inputRecordId: string;
-            })[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentMeta: {
-    requestBody: {
-      content: {
-        "application/json": {
-          meta: components["schemas"]["Record_string.string_"];
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_PostgrestError_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentOld: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentHypothesis: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-          providerKeyId: string;
-          promptVersion: string;
-          model: string;
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentHypothesisScores: {
-    parameters: {
-      path: {
-        hypothesisId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__runsCount-number--scores-Record_string.Score__.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluatorOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluatorsOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluatorOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentsOld: {
-    requestBody: {
-      content: {
-        "application/json": {
-          include?: components["schemas"]["IncludeExperimentKeys"];
-          filter: components["schemas"]["ExperimentFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
-        };
-      };
-    };
-  };
-  AddHeliconeDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewHeliconeDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  MutateHeliconeDataset: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MutateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  QueryHeliconeDatasetRows: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          limit: number;
-          /** Format: double */
-          offset: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeDatasetRow-Array.string_"];
-        };
-      };
-    };
-  };
-  CountHeliconeDatasetRows: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  QueryHeliconeDataset: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetIds?: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeDataset-Array.string_"];
-        };
-      };
-    };
-  };
-  UpdateHeliconeDatasetRequest: {
-    parameters: {
-      path: {
-        datasetId: string;
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          responseBody: components["schemas"]["Json"];
-          requestBody: components["schemas"]["Json"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
-        };
-      };
-    };
-  };
-  GetTotalValues: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_TotalValuesForAllOfTime.string_"];
-        };
-      };
-    };
-  };
-  GetModelUsageOverTime: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelUsageOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetProviderUsageOverTime: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderUsageOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetTotalRequests: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetTTFTvsPromptInputLength: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelPercentage: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelCost: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
-        };
-      };
-    };
-  };
-  GetProviderPercentage: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelPercentageOverTime: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetCustomerUsage: {
-    parameters: {
-      path: {
-        customerId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["CustomerUsage"] | null;
-        };
-      };
-    };
-  };
-  GetCustomers: {
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Customer"][];
         };
       };
     };
@@ -6314,142 +3306,522 @@ export interface operations {
       };
     };
   };
-  GetScoresOverTime: {
+  GenerateHash: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DataOverTimeRequest"];
+        "application/json": components["schemas"]["GenerateHashQueryParams"];
       };
     };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__score_key-string--score_sum-number--created_at_trunc-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  GetAllProviderStatus: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderMetrics-Array.string_"];
-        };
-      };
-    };
-  };
-  GetProviderStatus: {
-    parameters: {
-      query: {
-        timeFrame: components["schemas"]["TimeFrame"];
-      };
-      path: {
-        provider: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
-        };
-      };
-    };
-  };
-  GetModelComparison: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ModelsToCompare"][];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Model-Array.string_"];
-        };
-      };
-    };
-  };
-  GetApiKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          sessionUUID: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__apiKey-string_.string_"];
-        };
-      };
-    };
-  };
-  AddSession: {
-    requestBody: {
-      content: {
-        "application/json": {
-          sessionUUID: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetOrgName: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetTotalCosts: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetCostsOverTime: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataOverTimeRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__cost-number--created_at_trunc-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  GetSettings: {
     responses: {
       /** @description Ok */
       200: {
         content: {
           "application/json": {
-            useAzureForExperiment: boolean;
+            error?: {
+              details?: string;
+              message?: string;
+            };
+            success?: boolean;
           };
         };
+      };
+    };
+  };
+  DatasetFineTune: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FineTuneBodyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["FineTuneResult"];
+        };
+      };
+    };
+  };
+  FineTune: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FineTuneBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          } | {
+            data: {
+              url: string;
+              fineTuneJob: string;
+            };
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  FineTuneJobStats: {
+    parameters: {
+      path: {
+        jobId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          } | {
+            events: unknown;
+            job: unknown;
+          };
+        };
+      };
+    };
+  };
+  DemoCompletion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          cache_enabled?: boolean;
+          /** Format: double */
+          max_tokens?: number;
+          tool_choice?: components["schemas"]["ChatCompletionToolChoiceOption"];
+          tools?: components["schemas"]["ChatCompletionTool"][];
+          sessionPath?: string;
+          sessionName?: string;
+          sessionId?: string;
+          userEmail?: string;
+          promptId: string;
+          messages: components["schemas"]["ChatCompletionMessageParam"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ChatCompletion.string_"];
+        };
+      };
+    };
+  };
+  GetAlerts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_AlertResponse.string_"];
+        };
+      };
+    };
+  };
+  CreateAlert: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AlertRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  DeleteAlert: {
+    parameters: {
+      path: {
+        alertId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateFeatureFlags: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  DeleteFeatureFlag: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          flag: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  GetFeatureFlags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__organization_id-string--name-string--flags-string-Array_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTopOrgsByUsage: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          minRequests: number;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
+  GetTopOrgs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          emailContains?: string[];
+          orgsNameContains?: string[];
+          orgsId?: string[];
+          /** @enum {string} */
+          tier: "all" | "pro" | "free" | "growth" | "enterprise";
+          endDate: string;
+          startDate: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+              /** Format: double */
+              ct: number;
+              organization_id: string;
+              members: {
+                  last_active: string;
+                  role: string;
+                  email: string;
+                  id: string;
+                }[];
+              name: string;
+              owner_last_login: string;
+              owner_email: string;
+              tier: string;
+              id: string;
+              overTime: {
+                  organization_id: string;
+                  dt: string;
+                  /** Format: double */
+                  count: number;
+                }[];
+            }[];
+        };
+      };
+    };
+  };
+  GetAdmins: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": ({
+              user_id: string | null;
+              user_email: string | null;
+              /** Format: double */
+              id: number;
+              created_at: string;
+            })[];
+        };
+      };
+    };
+  };
+  Whodis: {
+    requestBody: {
+      content: {
+        "application/json": {
+          email?: string;
+          userId?: string;
+          organizationId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
+  GetSetting: {
+    parameters: {
+      path: {
+        name: components["schemas"]["SettingName"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Setting"];
+        };
+      };
+    };
+  };
+  AzureTest: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestBody: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            fetchParams: {
+              body: string;
+              headers: {
+                [key: string]: string;
+              };
+              url: components["schemas"]["url.URL"];
+            };
+            resultText: string;
+          };
+        };
+      };
+    };
+  };
+  UpdateSetting: {
+    requestBody: {
+      content: {
+        "application/json": {
+          settings: components["schemas"]["Setting"];
+          name: components["schemas"]["SettingName"];
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  FindAllOrgs: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            orgs: {
+                id: string;
+                name: string;
+              }[];
+          };
+        };
+      };
+    };
+  };
+  NewOrgsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          groupBy: "hour" | "day" | "week" | "month";
+          /** @enum {string} */
+          timeFilter: "1 days" | "7 days" | "1 month" | "3 months" | "6 months" | "12 months" | "24 months";
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            usersOverTime: {
+                day: string;
+                count: string;
+              }[];
+            newUsersOvertime: {
+                day: string;
+                count: string;
+              }[];
+            newOrgsOvertime: {
+                day: string;
+                count: string;
+              }[];
+          };
+        };
+      };
+    };
+  };
+  AddAdminsToOrg: {
+    requestBody: {
+      content: {
+        "application/json": {
+          adminIds: string[];
+          orgId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  CreateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          message: string;
+          title: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  UpdateAlertBanner: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
