@@ -495,7 +495,7 @@ export function ExperimentTable({
       jawn.POST("/v1/evaluator", {
         body: {
           llm_template: openAIFunction,
-          scoring_type: `LLM-CHOICE`,
+          scoring_type: "LLM-CHOICE",
           name: "Humor",
         },
       });

@@ -11,15 +11,6 @@ import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 
-interface MarkdownEditorProps {
-  text: string;
-  setText: (text: string) => void;
-  language: "json" | "markdown";
-  disabled?: boolean;
-  className?: string;
-  textareaClassName?: string;
-}
-
 const MAX_EDITOR_HEIGHT = 500;
 const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const {
@@ -76,10 +67,11 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
 interface MarkdownEditorProps {
   text: string;
   setText: (text: string) => void;
-  language: "json" | "markdown";
+  language: "json" | "markdown" | "python";
   disabled?: boolean;
   className?: string;
   textareaClassName?: string;
+  monaco?: boolean;
 }
 
 const LARGE_TEXT_THRESHOLD = 50;
@@ -92,6 +84,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     disabled = false,
     className,
     textareaClassName,
+    monaco = false,
   } = props;
 
   const languageMap = {
@@ -103,10 +96,14 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       lang: languages.markdown,
       ref: "markdown",
     },
+    python: {
+      lang: languages.python,
+      ref: "python",
+    },
   };
 
   const { lang, ref } = languageMap[language];
-  if (text.split("\n").length > LARGE_TEXT_THRESHOLD) {
+  if (text.split("\n").length > LARGE_TEXT_THRESHOLD || monaco) {
     return <MonacoMarkdownEditor {...props} />;
   }
 

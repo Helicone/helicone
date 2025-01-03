@@ -1,4 +1,4 @@
-import { ENVIRONMENT } from "../..";
+import { ENVIRONMENT } from "../clients/constant";
 import {
   getAllSignedURLsFromInputs,
   InputsManager,
