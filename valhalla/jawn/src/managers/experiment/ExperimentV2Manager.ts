@@ -26,7 +26,6 @@ export interface ScoreV2 {
 export interface ExperimentOutputForScores {
   request_id: string;
   input_record: {
-    id: string;
     inputs: Record<string, string>;
     autoInputs: Record<string, string>;
   };

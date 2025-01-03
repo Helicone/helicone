@@ -288,6 +288,7 @@ export type Database = {
       }
       evaluator: {
         Row: {
+          code_template: Json | null
           created_at: string
           id: string
           llm_template: Json | null
@@ -297,6 +298,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          code_template?: Json | null
           created_at?: string
           id?: string
           llm_template?: Json | null
@@ -306,6 +308,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          code_template?: Json | null
           created_at?: string
           id?: string
           llm_template?: Json | null
@@ -1017,6 +1020,7 @@ export type Database = {
           key_permissions: string | null
           organization_id: string
           soft_delete: boolean
+          temp_key: boolean
           user_id: string
         }
         Insert: {
@@ -1027,6 +1031,7 @@ export type Database = {
           key_permissions?: string | null
           organization_id: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id: string
         }
         Update: {
@@ -1037,6 +1042,7 @@ export type Database = {
           key_permissions?: string | null
           organization_id?: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id?: string
         }
         Relationships: [
@@ -1517,6 +1523,45 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      online_evaluators: {
+        Row: {
+          config: Json | null
+          created_at: string
+          evaluator: string
+          id: number
+          organization: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          evaluator: string
+          id?: number
+          organization: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          evaluator?: string
+          id?: number
+          organization?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_online_evaluators_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_online_evaluators_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]
@@ -2482,6 +2527,7 @@ export type Database = {
       score_attribute: {
         Row: {
           created_at: string | null
+          evaluator_id: string | null
           id: string
           organization: string
           score_key: string
@@ -2489,6 +2535,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization: string
           score_key: string
@@ -2496,6 +2543,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -2507,6 +2555,13 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_score_attribute_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
             referencedColumns: ["id"]
           },
         ]
