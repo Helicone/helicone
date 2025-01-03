@@ -4,6 +4,7 @@ import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface Property {
   property: string;
+  visibility: "hidden" | "visible";
 }
 
 export async function getProperties(
