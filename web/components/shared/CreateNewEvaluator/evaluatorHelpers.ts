@@ -57,6 +57,69 @@ function generateOpenAIFunction({
   return JSON.stringify(baseFunction, null, 2);
 }
 
+function OpenAIFunctionToFunctionParams(
+  expectedValueType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE",
+  template:
+    | {
+        name: string;
+        description: string;
+        parameters: {
+          type: string;
+          properties: {
+            [key: string]: {
+              description: string;
+              type: string;
+              oneOf?: { const: number; title: string }[];
+              minimum?: number;
+              maximum?: number;
+            };
+          };
+          required: string[];
+        };
+      }
+    | undefined
+): OpenAIFunctionParams {
+  if (!template || !template?.parameters?.properties) {
+    return {
+      name: "",
+      description: "",
+      expectedValueType: "boolean",
+    };
+  }
+
+  // Get the first property key since OpenAI functions only have one property
+  const propertyKey = Object.keys(template.parameters.properties)[0];
+  const property = template.parameters.properties[propertyKey];
+
+  const params: OpenAIFunctionParams = {
+    name: propertyKey,
+    description: property.description,
+    expectedValueType: expectedValueType.split("-")[1].toLowerCase() as
+      | "boolean"
+      | "choice"
+      | "range",
+  };
+
+  // Add additional parameters based on the expectedValueType
+  switch (expectedValueType) {
+    case "LLM-CHOICE":
+      params.choiceScores = property.oneOf?.map((choice) => ({
+        score: choice.const,
+        description: choice.title,
+      }));
+      break;
+    case "LLM-RANGE":
+      params.rangeMin = property.minimum;
+      params.rangeMax = property.maximum;
+      break;
+    case "LLM-BOOLEAN":
+      params.expectedValueType = "boolean";
+      break;
+  }
+
+  return params;
+}
+
 export function generateOpenAITemplate({
   name,
   description,
@@ -113,4 +176,18 @@ Here was the output of the LLM:
     null,
     2
   );
+}
+
+export function openAITemplateToOpenAIFunctionParams(
+  template: any,
+  scoringType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
+): OpenAIFunctionParams & { model: string } {
+  const parsedTemplate = template;
+  return {
+    ...OpenAIFunctionToFunctionParams(
+      scoringType,
+      parsedTemplate.tools[0].function
+    ),
+    model: parsedTemplate.model,
+  };
 }
