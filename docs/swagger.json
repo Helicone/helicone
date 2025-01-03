@@ -872,9 +872,20 @@
 				],
 				"type": "object"
 			},
-			"ResultSuccess_unknown_": {
+			"ResultSuccess__score-number__": {
 				"properties": {
-					"data": {},
+					"data": {
+						"properties": {
+							"score": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"score"
+						],
+						"type": "object"
+					},
 					"error": {
 						"type": "number",
 						"enum": [
@@ -890,23 +901,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultError_unknown_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
+			"Result__score-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__score-number__"
 					},
-					"error": {}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"EvaluatorConfig": {
 				"properties": {
@@ -2486,6 +2489,24 @@
 			"url.URL": {
 				"type": "string",
 				"description": "The URL interface represents an object providing static methods used for creating object URLs.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `import { URL } from 'node:url'`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
+			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultError_any_": {
 				"properties": {
@@ -6892,6 +6913,24 @@
 					}
 				]
 			},
+			"ResultError_unknown_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess_any_": {
 				"properties": {
 					"data": {},
@@ -9920,14 +9959,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										}
-									]
+									"$ref": "#/components/schemas/Result__score-number_.string_"
 								}
 							}
 						}

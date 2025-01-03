@@ -397,9 +397,20 @@
 				],
 				"type": "object"
 			},
-			"ResultSuccess_unknown_": {
+			"ResultSuccess__score-number__": {
 				"properties": {
-					"data": {},
+					"data": {
+						"properties": {
+							"score": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"score"
+						],
+						"type": "object"
+					},
 					"error": {
 						"type": "number",
 						"enum": [
@@ -415,23 +426,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultError_unknown_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
+			"Result__score-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__score-number__"
 					},
-					"error": {}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"EvaluatorConfig": {
 				"properties": {
@@ -3401,6 +3404,42 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_unknown_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"WebhookData": {
 				"properties": {
@@ -9764,14 +9803,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										}
-									]
+									"$ref": "#/components/schemas/Result__score-number_.string_"
 								}
 							}
 						}

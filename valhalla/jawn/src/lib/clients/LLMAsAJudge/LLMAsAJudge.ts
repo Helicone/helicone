@@ -8,7 +8,7 @@ import { err, ok, Result } from "../../shared/result";
 type Score = {
   score: number | boolean;
 };
-type ScoreResult = Result<Score, string>;
+export type ScoreResult = Result<Score, string>;
 
 const TIERS = ["pro-20240913", "enterprise"];
 

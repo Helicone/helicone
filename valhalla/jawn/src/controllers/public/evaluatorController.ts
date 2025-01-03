@@ -21,7 +21,10 @@ import {
   OnlineEvalStore,
   OnlineEvaluatorByEvaluatorId,
 } from "../../lib/stores/OnlineEvalStore";
-import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
+import {
+  LLMAsAJudge,
+  ScoreResult,
+} from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../../lib/clients/constant";
 
 export interface CreateEvaluatorParams {
@@ -313,7 +316,7 @@ export class EvaluatorController extends Controller {
       testInput: TestInput;
       evaluatorName: string;
     }
-  ) {
+  ): Promise<ScoreResult> {
     const llmAsAJudge = new LLMAsAJudge({
       scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
         | "LLM-CHOICE"
@@ -330,10 +333,7 @@ export class EvaluatorController extends Controller {
     const result = await llmAsAJudge.evaluate();
     if (result.error) {
       this.setStatus(500);
-      return err(result.error);
-    } else {
-      this.setStatus(200);
-      return ok(result.data);
     }
+    return result;
   }
 }

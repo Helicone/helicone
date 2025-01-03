@@ -796,16 +796,15 @@ export interface components {
       outputBody: string;
       inputBody: string;
     };
-    ResultSuccess_unknown_: {
-      data: unknown;
+    "ResultSuccess__score-number__": {
+      data: {
+        /** Format: double */
+        score: number;
+      };
       /** @enum {number|null} */
       error: null;
     };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
+    "Result__score-number_.string_": components["schemas"]["ResultSuccess__score-number__"] | components["schemas"]["ResultError_string_"];
     EvaluatorConfig: {
       evaluator_code_template?: string;
       evaluator_llm_template?: string;
@@ -1174,6 +1173,11 @@ Json: JsonObject;
      * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
     ResultError_any_: {
       /** @enum {number|null} */
       data: null;
@@ -2567,6 +2571,11 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeDataset-Array.string_": components["schemas"]["ResultSuccess_HeliconeDataset-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
     ResultSuccess_any_: {
       data: unknown;
       /** @enum {number|null} */
@@ -3457,7 +3466,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["Result__score-number_.string_"];
         };
       };
     };

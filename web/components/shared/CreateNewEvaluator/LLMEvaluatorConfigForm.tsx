@@ -354,10 +354,10 @@ export const LLMEvaluatorConfigForm: React.FC<{
                     evaluatorName: configFormParams.name,
                   },
                 });
-                if (result?.data?.score !== undefined) {
+                if (result?.data?.data?.score !== undefined) {
                   return {
                     traces: [],
-                    output: result.data.score.toString(),
+                    output: result.data.data.score.toString(),
                     _type: "completed",
                   };
                 } else {

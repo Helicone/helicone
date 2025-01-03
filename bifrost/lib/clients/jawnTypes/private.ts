@@ -648,16 +648,15 @@ export interface components {
       outputBody: string;
       inputBody: string;
     };
-    ResultSuccess_unknown_: {
-      data: unknown;
+    "ResultSuccess__score-number__": {
+      data: {
+        /** Format: double */
+        score: number;
+      };
       /** @enum {number|null} */
       error: null;
     };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
+    "Result__score-number_.string_": components["schemas"]["ResultSuccess__score-number__"] | components["schemas"]["ResultError_string_"];
     EvaluatorConfig: {
       evaluator_code_template?: string;
       evaluator_llm_template?: string;
@@ -1429,6 +1428,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
     WebhookData: {
       destination: string;
       config: components["schemas"]["Record_string.any_"];
@@ -3393,7 +3402,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["Result__score-number_.string_"];
         };
       };
     };
