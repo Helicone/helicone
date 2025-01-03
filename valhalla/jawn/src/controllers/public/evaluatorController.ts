@@ -23,7 +23,7 @@ import {
 } from "../../lib/stores/OnlineEvalStore";
 import {
   LLMAsAJudge,
-  ScoreResult,
+  EvaluatorScoreResult,
 } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../../lib/clients/constant";
 
@@ -316,7 +316,7 @@ export class EvaluatorController extends Controller {
       testInput: TestInput;
       evaluatorName: string;
     }
-  ): Promise<ScoreResult> {
+  ): Promise<EvaluatorScoreResult> {
     const llmAsAJudge = new LLMAsAJudge({
       scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
         | "LLM-CHOICE"

@@ -5,10 +5,10 @@ import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey
 import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
 import { err, ok, Result } from "../../shared/result";
 
-type Score = {
+type EvaluatorScore = {
   score: number | boolean;
 };
-export type ScoreResult = Result<Score, string>;
+export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
 
 const TIERS = ["pro-20240913", "enterprise"];
 
@@ -27,7 +27,7 @@ export class LLMAsAJudge {
     }
   ) {}
 
-  private async evaluateChoice(result: any): Promise<Score> {
+  private async evaluateChoice(result: any): Promise<EvaluatorScore> {
     const evaluatorName = this.params.evaluatorName;
     const score = JSON.parse(
       result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
@@ -37,7 +37,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateBoolean(result: any): Promise<Score> {
+  private async evaluateBoolean(result: any): Promise<EvaluatorScore> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -45,7 +45,7 @@ export class LLMAsAJudge {
     };
   }
 
-  private async evaluateRange(result: any): Promise<Score> {
+  private async evaluateRange(result: any): Promise<EvaluatorScore> {
     return {
       score: JSON.parse(
         result.choices[0].message.tool_calls[0].function.arguments
@@ -96,7 +96,7 @@ export class LLMAsAJudge {
     return data;
   }
 
-  private async evaluateScore(): Promise<Score> {
+  private async evaluateScore(): Promise<EvaluatorScore> {
     const result = await this.callLLM();
 
     switch (this.params.scoringType) {
@@ -111,7 +111,7 @@ export class LLMAsAJudge {
     }
   }
 
-  async evaluate(): Promise<ScoreResult> {
+  async evaluate(): Promise<EvaluatorScoreResult> {
     const organizationManager = new OrganizationManager({
       organizationId: this.params.organizationId,
     });
