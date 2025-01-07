@@ -47,8 +47,6 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
           onSubmit={() => {}}
           existingEvaluatorId={evaluator.id}
         />
-
-        <span>Editing is not yet supported for LLM as a judge evaluators.</span>
       </Col>
       {onlineEvaluators.data?.data?.data && (
         <OnlineEvaluatorsSection
