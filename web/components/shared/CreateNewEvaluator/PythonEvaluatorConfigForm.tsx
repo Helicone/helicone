@@ -1,16 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-
 import { Col, Row } from "@/components/layout/common";
+import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
+import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
+import {
+  CompositeOption,
+  TestFunction,
+} from "@/components/templates/evals/testing/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 import React, { useEffect, useState } from "react";
 import MarkdownEditor from "../markdownEditor";
 import useNotification from "../notification/useNotification";
-import { CompositeOption } from "./types";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
-import { TestFunction } from "@/components/templates/evals/panels/types";
-import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
