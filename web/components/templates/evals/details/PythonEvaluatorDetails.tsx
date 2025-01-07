@@ -44,8 +44,6 @@ const PythonEvaluatorDetails: React.FC<PythonEvaluatorDetailsProps> = ({
           name={evaluator.name}
           existingEvaluatorId={evaluator.id}
         />
-
-        <span>Editing is not yet supported for LLM as a judge evaluators.</span>
       </Col>
       {onlineEvaluators.data?.data?.data && (
         <OnlineEvaluatorsSection
