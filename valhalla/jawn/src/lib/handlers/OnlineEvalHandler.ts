@@ -1,15 +1,11 @@
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { err, ok, PromiseGenericResult } from "../shared/result";
-import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
-import { sanitizeObject } from "../../utils/sanitize";
-import { OnlineEvalStore } from "../stores/OnlineEvalStore";
-import { LLMAsAJudge } from "../clients/LLMAsAJudge/LLMAsAJudge";
-import { OPENAI_KEY } from "../clients/constant";
 import {
   EvaluatorManager,
   getEvaluatorScoreName,
 } from "../../managers/evaluator/EvaluatorManager";
+import { err, PromiseGenericResult } from "../shared/result";
+import { OnlineEvalStore } from "../stores/OnlineEvalStore";
+import { AbstractLogHandler } from "./AbstractLogHandler";
+import { HandlerContext } from "./HandlerContext";
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {

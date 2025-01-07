@@ -366,7 +366,7 @@
 			},
 			"TestInput": {
 				"properties": {
-					"prompt": {
+					"promptTemplate": {
 						"type": "string"
 					},
 					"inputs": {

@@ -2,13 +2,16 @@ import { Button } from "@/components/ui/button";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 
 import { Col, Row } from "@/components/layout/common";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MarkdownEditor from "../markdownEditor";
 import useNotification from "../notification/useNotification";
 import { TestEvaluator } from "./components/TestEvaluator";
-import { CompositeOption } from "./EvaluatorTypeDropdown";
+import { CompositeOption } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
+import { TestFunction } from "@/components/templates/evals/panels/types";
+import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -25,20 +28,32 @@ export type EvaluatorConfigFormPreset = {
 export const PythonEvaluatorConfigForm: React.FC<{
   configFormParams: CompositeOption["preset"];
   name: string;
-  onSubmit: (evaluatorId: string) => void;
   existingEvaluatorId?: string;
+  onSubmit: () => void;
+  openTestPanel?: (testFunction: TestFunction) => void;
 }> = ({
   configFormParams,
-  onSubmit,
   name: defaultName,
   existingEvaluatorId,
+  openTestPanel,
+  onSubmit,
 }) => {
   const notification = useNotification();
+  const { invalidate } = useInvalidateEvaluators();
 
   const [text, setText] = useState<string>(configFormParams.code);
+  const { setTestData } = useTestDataStore();
 
   const jawn = useJawnClient();
   const [name, setName] = useState<string>(defaultName);
+  useEffect(() => {
+    setTestData({
+      _type: "python",
+      code: text,
+      evaluator_name: name,
+      testInput: configFormParams.testInput!,
+    });
+  }, [text, configFormParams.testInput, setTestData, name]);
 
   return (
     <Col className="h-full flex flex-col gap-10">
@@ -68,10 +83,10 @@ export const PythonEvaluatorConfigForm: React.FC<{
           monaco={true}
         />
 
-        {configFormParams.testInput && (
-          <TestEvaluator
-            defaultTest={configFormParams.testInput}
-            test={async () => {
+        <Button
+          onClick={() =>
+            openTestPanel &&
+            openTestPanel(async () => {
               const result = await jawn.POST("/v1/evaluator/python/test", {
                 body: {
                   code: text,
@@ -89,9 +104,11 @@ export const PythonEvaluatorConfigForm: React.FC<{
                   error: result?.data?.error ?? "Unknown error - try again",
                 };
               }
-            }}
-          />
-        )}
+            })
+          }
+        >
+          Test
+        </Button>
       </Col>
 
       <Row>
@@ -140,7 +157,8 @@ export const PythonEvaluatorConfigForm: React.FC<{
                       "Evaluator created successfully",
                       "success"
                     );
-                    onSubmit(res.data.data.id);
+                    invalidate();
+                    onSubmit();
                   } else {
                     notification.setNotification(
                       "Failed to create evaluator",

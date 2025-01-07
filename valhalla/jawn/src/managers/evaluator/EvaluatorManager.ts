@@ -110,7 +110,9 @@ export class EvaluatorManager extends BaseManager {
           | "LLM-RANGE",
         llmTemplate: evaluator.llm_template,
         inputRecord,
-        output: responseBody,
+        outputBody: responseBody,
+        inputBody: requestBody,
+        promptTemplate: evaluator.llm_template.promptTemplate,
         evaluatorName: evaluator.name,
         organizationId: this.authParams.organizationId,
       });

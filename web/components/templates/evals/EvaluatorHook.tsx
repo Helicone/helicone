@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
@@ -148,5 +148,18 @@ export const useEvaluators = () => {
     setAdvancedFilters,
     searchPropertyFilters,
     deleteEvaluator,
+  };
+};
+
+export const useInvalidateEvaluators = () => {
+  const queryClient = useQueryClient();
+  const org = useOrg();
+
+  return {
+    invalidate: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["evaluators", org?.currentOrg?.id],
+      });
+    },
   };
 };

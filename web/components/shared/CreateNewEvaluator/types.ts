@@ -21,5 +21,5 @@ export type TestInput = {
     inputs: Record<string, string>;
     autoInputs?: Record<string, string>;
   };
-  prompt?: string;
+  promptTemplate?: string;
 };

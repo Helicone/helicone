@@ -1,7 +1,10 @@
 import { Col, Row } from "@/components/layout/common";
-import { CreateNewEvaluatorSheetContent } from "@/components/shared/CreateNewEvaluator/CreateNewEvaluatorSheetContent";
-import { Button } from "@/components/ui/button";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -12,15 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { CheckIcon, Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
-import { memo, useState, useEffect } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { useRouter } from "next/router";
+import { memo, useEffect, useState } from "react";
 
 const ScoresEvaluatorsConfig = memo(
   ({ experimentId }: { experimentId: string }) => {
@@ -100,9 +99,7 @@ const ScoresEvaluatorsConfig = memo(
           value={value}
           onValueChange={(value) => {
             if (value === "helicone-new-custom") {
-              // addEvaluator.mutate(value);/
-              setOpen(true);
-              setValue("");
+              window.open("/evaluators", "_blank");
             } else {
               addEvaluator.mutate(value);
               setValue("");
@@ -170,16 +167,6 @@ const ScoresEvaluatorsConfig = memo(
             </SelectGroup>
           </SelectContent>
         </Select>
-
-        <Sheet open={open} onOpenChange={setOpen}>
-          <CreateNewEvaluatorSheetContent
-            onSubmit={(evaluatorId) => {
-              addEvaluator.mutate(evaluatorId);
-              setOpen(false);
-            }}
-            hideButton={true}
-          />
-        </Sheet>
 
         <ScrollArea className="flex-1">
           <div className="flex gap-2 justify-start items-start">

@@ -65,11 +65,12 @@ type CreateOnlineEvaluatorParams = {
 type TestInput = {
   inputBody: string;
   outputBody: string;
+
   inputs: {
     inputs: Record<string, string>;
     autoInputs?: Record<string, string>;
   };
-  prompt?: string;
+  promptTemplate?: string;
 };
 
 @Route("v1/evaluator")
@@ -326,7 +327,9 @@ export class EvaluatorController extends Controller {
         requestBody.evaluatorConfig.evaluator_llm_template ?? "{}"
       ),
       inputRecord: requestBody.testInput.inputs,
-      output: requestBody.testInput.outputBody,
+      outputBody: requestBody.testInput.outputBody,
+      inputBody: requestBody.testInput.inputBody,
+      promptTemplate: requestBody.testInput.promptTemplate ?? "",
       evaluatorName: requestBody.evaluatorName,
       organizationId: request.authParams.organizationId,
     });
