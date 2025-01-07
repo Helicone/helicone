@@ -401,7 +401,7 @@ export interface components {
       [key: string]: string;
     };
     TestInput: {
-      prompt?: string;
+      promptTemplate?: string;
       inputs: {
         autoInputs?: components["schemas"]["Record_string.string_"];
         inputs: components["schemas"]["Record_string.string_"];

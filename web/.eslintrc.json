@@ -7,7 +7,6 @@
     "ecmaVersion": 13
   },
   "rules": {
-    "unused-imports/no-unused-imports": "error",
-    "import/no-cycle": "error"
+    "unused-imports/no-unused-imports": "error"
   }
 }

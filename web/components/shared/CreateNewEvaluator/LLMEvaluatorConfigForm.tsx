@@ -1,22 +1,13 @@
+import { Col, Row } from "@/components/layout/common";
+import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
+import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
-
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
-import React, { useMemo, useState } from "react";
-import useNotification from "../notification/useNotification";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Col, Row } from "@/components/layout/common";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -24,8 +15,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { TestEvaluator } from "./components/TestEvaluator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { InfoIcon } from "lucide-react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import {
+  exTestInput,
+  LLM_AS_A_JUDGE_OPTIONS,
+} from "../../templates/evals/testing/examples";
+import useNotification from "../notification/useNotification";
 import { TestInput } from "./types";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
@@ -34,6 +40,12 @@ export type LLMEvaluatorConfigFormPreset = {
   name: string;
   description: string;
   expectedValueType: "boolean" | "choice" | "range";
+  includedVariables: {
+    inputs: boolean;
+    promptTemplate: boolean;
+    inputBody: boolean;
+    outputBody: boolean;
+  };
   choiceScores?: Array<{ score: number; description: string }>;
   rangeMin?: number;
   rangeMax?: number;
@@ -41,30 +53,52 @@ export type LLMEvaluatorConfigFormPreset = {
   testInput?: TestInput;
 };
 
+const useLLMConfigStore = create<{
+  LLMEvaluatorConfigFormPreset: LLMEvaluatorConfigFormPreset;
+  setLLMEvaluatorConfigFormPreset: Dispatch<
+    SetStateAction<LLMEvaluatorConfigFormPreset>
+  >;
+}>()(
+  devtools(
+    persist(
+      (set) => ({
+        LLMEvaluatorConfigFormPreset: LLM_AS_A_JUDGE_OPTIONS[0].preset,
+        setLLMEvaluatorConfigFormPreset: (by) => {
+          if (typeof by === "function") {
+            set((state) => ({
+              LLMEvaluatorConfigFormPreset: by(
+                state.LLMEvaluatorConfigFormPreset
+              ),
+            }));
+          } else {
+            set((state) => ({
+              LLMEvaluatorConfigFormPreset: by,
+            }));
+          }
+        },
+      }),
+      {
+        name: "llm-config-store",
+      }
+    )
+  )
+);
+
 export const LLMEvaluatorConfigForm: React.FC<{
-  evaluatorType: string;
-  onSubmit: (evaluatorId: string) => void;
-  configFormParams: LLMEvaluatorConfigFormPreset;
-  setConfigFormParams: (params: LLMEvaluatorConfigFormPreset) => void;
+  onSubmit: () => void;
   existingEvaluatorId?: string;
-}> = ({
-  evaluatorType,
-  onSubmit,
-  configFormParams,
-  setConfigFormParams,
-  existingEvaluatorId,
-}) => {
-  const updateConfigFormParams = (
-    updates: Partial<LLMEvaluatorConfigFormPreset>
-  ) => {
-    setConfigFormParams({ ...configFormParams, ...updates });
-  };
-
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
+  openTestPanel?: () => void;
+}> = ({ existingEvaluatorId, onSubmit, openTestPanel }) => {
   const notification = useNotification();
 
   const jawn = useJawnClient();
+  const { invalidate } = useInvalidateEvaluators();
+  const { setTestData } = useTestDataStore();
+
+  const {
+    LLMEvaluatorConfigFormPreset: configFormParams,
+    setLLMEvaluatorConfigFormPreset: setConfigFormParams,
+  } = useLLMConfigStore();
 
   const openAIFunction = useMemo(() => {
     return generateOpenAITemplate({
@@ -75,8 +109,33 @@ export const LLMEvaluatorConfigForm: React.FC<{
       rangeMin: configFormParams.rangeMin,
       rangeMax: configFormParams.rangeMax,
       model: configFormParams.model,
+      includedVariables: configFormParams.includedVariables,
     });
   }, [configFormParams]);
+
+  const updateConfigFormParams = (
+    updates: Partial<LLMEvaluatorConfigFormPreset>
+  ) => {
+    const updatedConfigFormParams = { ...configFormParams, ...updates };
+    console.log(updatedConfigFormParams.includedVariables);
+    setConfigFormParams(updatedConfigFormParams);
+  };
+
+  useEffect(() => {
+    setTestData({
+      _type: "llm",
+      evaluator_llm_template: openAIFunction,
+      evaluator_scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
+      evaluator_name: configFormParams.name,
+      testInput: configFormParams.testInput ?? exTestInput,
+    });
+  }, [
+    openAIFunction,
+    configFormParams.expectedValueType,
+    configFormParams.name,
+    configFormParams.testInput,
+    setTestData,
+  ]);
 
   return (
     <Col className="h-full flex flex-col">
@@ -176,35 +235,31 @@ export const LLMEvaluatorConfigForm: React.FC<{
                   <Input
                     type="number"
                     value={item.score}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const choiceScores = configFormParams.choiceScores ?? [];
+                      choiceScores[index] = {
+                        score: Number(e.target.value),
+                        description: item.description,
+                      };
                       updateConfigFormParams({
-                        choiceScores: [
-                          ...(configFormParams.choiceScores || []),
-                          {
-                            score: Number(e.target.value),
-                            description: item.description,
-                          },
-                        ],
-                      })
-                    }
+                        choiceScores,
+                      });
+                    }}
                     className="w-24"
                   />
                   <Input
                     type="text"
                     value={item.description}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const choiceScores = configFormParams.choiceScores ?? [];
+                      choiceScores[index] = {
+                        score: item.score,
+                        description: e.target.value,
+                      };
                       updateConfigFormParams({
-                        choiceScores: configFormParams.choiceScores?.map(
-                          (item, index) =>
-                            index === index
-                              ? {
-                                  score: item.score,
-                                  description: e.target.value,
-                                }
-                              : item
-                        ),
-                      })
-                    }
+                        choiceScores,
+                      });
+                    }}
                     placeholder="Short description"
                     className="flex-grow"
                   />
@@ -300,8 +355,82 @@ export const LLMEvaluatorConfigForm: React.FC<{
               }
             />
           </div>
-          <Row className="justify-between">
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <Label htmlFor="description">Included Variables</Label>
+            <br />
+            <Row className="gap-2">
+              <Row className="items-center space-x-2">
+                <Checkbox
+                  variant="ghost"
+                  id="inputs"
+                  checked={configFormParams.includedVariables.inputs}
+                  onCheckedChange={(checked) => {
+                    updateConfigFormParams({
+                      ...configFormParams,
+                      includedVariables: {
+                        ...configFormParams.includedVariables,
+                        inputs: checked.valueOf() as boolean,
+                      },
+                    });
+                  }}
+                />
+                <Label htmlFor="inputs">Inputs</Label>
+              </Row>
+              <Row className="items-center space-x-2">
+                <Checkbox
+                  variant="ghost"
+                  id="promptTemplate"
+                  checked={configFormParams.includedVariables.promptTemplate}
+                  onCheckedChange={(checked) => {
+                    updateConfigFormParams({
+                      ...configFormParams,
+                      includedVariables: {
+                        ...configFormParams.includedVariables,
+                        promptTemplate: checked.valueOf() as boolean,
+                      },
+                    });
+                  }}
+                />
+                <Label htmlFor="promptTemplate">Prompt Template</Label>
+              </Row>
+              <Row className="items-center space-x-2">
+                <Checkbox
+                  id="inputBody"
+                  variant="ghost"
+                  checked={configFormParams.includedVariables.inputBody}
+                  onCheckedChange={(checked) => {
+                    updateConfigFormParams({
+                      ...configFormParams,
+                      includedVariables: {
+                        ...configFormParams.includedVariables,
+                        inputBody: checked.valueOf() as boolean,
+                      },
+                    });
+                  }}
+                />
+                <Label htmlFor="inputBody">Input Body</Label>
+              </Row>
+              <Row className="items-center space-x-2">
+                <Checkbox
+                  id="outputBody"
+                  variant="ghost"
+                  checked={configFormParams.includedVariables.outputBody}
+                  onCheckedChange={(checked) => {
+                    updateConfigFormParams({
+                      ...configFormParams,
+                      includedVariables: {
+                        ...configFormParams.includedVariables,
+                        outputBody: checked.valueOf() as boolean,
+                      },
+                    });
+                  }}
+                />
+                <Label htmlFor="outputBody">Output Body</Label>
+              </Row>
+            </Row>
+          </div>
+          <Row className="justify-end gap-5">
+            <Row className="gap-2 items-center">
               <Label htmlFor="model">Model</Label>
               <Select
                 defaultValue="gpt-4o"
@@ -323,52 +452,11 @@ export const LLMEvaluatorConfigForm: React.FC<{
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsPreviewOpen(true)}
-                >
-                  Preview OpenAI Function
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                <pre className="text-xs whitespace-pre-wrap bg-gray-100 p-4 rounded-md overflow-x-auto">
-                  {openAIFunction}
-                </pre>
-              </DialogContent>
-            </Dialog>
+            </Row>
+            <Button variant="outline" onClick={openTestPanel}>
+              Open Test Panel
+            </Button>
           </Row>
-          {configFormParams.testInput !== undefined && (
-            <TestEvaluator
-              defaultTest={configFormParams.testInput}
-              test={async () => {
-                const result = await jawn.POST("/v1/evaluator/llm/test", {
-                  body: {
-                    evaluatorConfig: {
-                      evaluator_scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
-                      evaluator_llm_template: openAIFunction,
-                    },
-                    testInput: configFormParams.testInput!,
-                    evaluatorName: configFormParams.name,
-                  },
-                });
-                if (result?.data?.data?.score !== undefined) {
-                  return {
-                    traces: [],
-                    output: result.data.data.score.toString(),
-                    _type: "completed",
-                  };
-                } else {
-                  return {
-                    _type: "error",
-                    error: result?.error ?? "Unknown error - try again",
-                  };
-                }
-              }}
-            />
-          )}
         </Col>
       </ScrollArea>
       <i className="text-xs text-gray-500">
@@ -376,8 +464,6 @@ export const LLMEvaluatorConfigForm: React.FC<{
       </i>
       <Row className="justify-between mt-4">
         <Button
-          className="w-full"
-          variant={"secondary"}
           onClick={() => {
             if (existingEvaluatorId) {
               jawn
@@ -416,7 +502,8 @@ export const LLMEvaluatorConfigForm: React.FC<{
                       "Evaluator created successfully",
                       "success"
                     );
-                    onSubmit(res.data.data.id);
+                    invalidate();
+                    onSubmit();
                   } else {
                     notification.setNotification(
                       "Failed to create evaluator",
