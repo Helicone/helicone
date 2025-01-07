@@ -22,7 +22,7 @@ export function TestEvaluator() {
   const { testData, setTestData } = useTestDataStore();
 
   const [promptTemplate, setPromptTemplate] = useState<string | undefined>(
-    testData?.testInput.prompt ?? ""
+    testData?.testInput.promptTemplate ?? ""
   );
   const [result, setResult] = useState<EvaluatorTestResult>(null);
   const [activeTab, setActiveTab] = useState("inputs");
