@@ -3,10 +3,8 @@ import { XIcon } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
 import { Col, Row } from "@/components/layout/common";
-import { useTestDataStore } from "../testing/testingStore";
 import { PanelType } from "./types";
 import { TestEvaluator } from "@/components/shared/CreateNewEvaluator/components/TestEvaluator";
-import { testEvaluator } from "../testing/test";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 export const TestPanel = ({
   setPanels,

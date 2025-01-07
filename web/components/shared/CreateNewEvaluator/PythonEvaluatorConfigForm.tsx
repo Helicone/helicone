@@ -5,7 +5,6 @@ import { Col, Row } from "@/components/layout/common";
 import React, { useEffect, useState } from "react";
 import MarkdownEditor from "../markdownEditor";
 import useNotification from "../notification/useNotification";
-import { TestEvaluator } from "./components/TestEvaluator";
 import { CompositeOption } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

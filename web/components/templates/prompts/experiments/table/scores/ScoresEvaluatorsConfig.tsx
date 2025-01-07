@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { CheckIcon, Loader2, TriangleAlertIcon, XIcon } from "lucide-react";
-import { useRouter } from "next/router";
 import { memo, useEffect, useState } from "react";
 
 const ScoresEvaluatorsConfig = memo(
