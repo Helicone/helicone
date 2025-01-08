@@ -10,6 +10,12 @@ interface OpenAIFunctionParams {
   choiceScores?: ChoiceScore[];
   rangeMin?: number;
   rangeMax?: number;
+  includedVariables?: {
+    inputs: boolean;
+    promptTemplate: boolean;
+    inputBody: boolean;
+    outputBody: boolean;
+  };
 }
 
 function generateOpenAIFunction({
@@ -128,8 +134,15 @@ export function generateOpenAITemplate({
   rangeMin,
   rangeMax,
   model,
+  includedVariables,
 }: OpenAIFunctionParams & {
   model: string;
+  includedVariables?: {
+    inputs: boolean;
+    promptTemplate: boolean;
+    inputBody: boolean;
+    outputBody: boolean;
+  };
 }): string {
   return JSON.stringify(
     {
@@ -141,15 +154,44 @@ export function generateOpenAITemplate({
               type: "text",
               text: `Please call the scorer function and use the following context to evaluate the output.
 
-Here were the inputs into the LLM:
+
+
+${
+  includedVariables?.inputs
+    ? `Here were the inputs into the LLM:
 ### INPUT BEGIN ###
 <helicone-prompt-input key="inputs" />
-### INPUT END ###
+### INPUT END ###`
+    : ""
+}
 
-Here was the output of the LLM:
+${
+  includedVariables?.outputBody
+    ? `Here was the output of the LLM:
 ### OUTPUT BEGIN ###
-<helicone-prompt-input key="outputs" />
-### OUTPUT END ###`,
+<helicone-prompt-input key="outputBody" />
+### OUTPUT END ###`
+    : ""
+}
+
+${
+  includedVariables?.promptTemplate
+    ? `Here was the prompt template used:
+### PROMPT TEMPLATE BEGIN ###
+<helicone-prompt-input key="promptTemplate" />
+### PROMPT TEMPLATE END ###`
+    : ""
+}
+
+${
+  includedVariables?.inputBody
+    ? `Here was the input body:
+### INPUT BODY BEGIN ###
+<helicone-prompt-input key="inputBody" />
+### INPUT BODY END ###`
+    : ""
+}
+`,
             },
           ],
         },

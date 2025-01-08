@@ -21,7 +21,9 @@ export class LLMAsAJudge {
         inputs: Record<string, string>;
         autoInputs?: Record<string, string>;
       };
-      output: string;
+      outputBody: string;
+      inputBody: string;
+      promptTemplate: string;
       evaluatorName: string;
       organizationId: string;
     }
@@ -60,7 +62,9 @@ export class LLMAsAJudge {
         inputs:
           JSON.stringify(this.params.inputRecord?.inputs) +
           JSON.stringify(this.params.inputRecord?.autoInputs),
-        outputs: this.params.output,
+        outputBody: this.params.outputBody,
+        inputBody: this.params.inputBody,
+        promptTemplate: this.params.promptTemplate,
       },
       autoInputs: [],
     });

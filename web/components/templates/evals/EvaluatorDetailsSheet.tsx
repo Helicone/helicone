@@ -27,16 +27,14 @@ export function getEvaluatorScoreName(
 interface EvaluatorDetailsSheetProps {
   selectedEvaluatorId: string | null;
   setSelectedEvaluatorId: (evaluatorId: string | null) => void;
-  evaluators: ReturnType<typeof useEvaluators>["evaluators"];
-  deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"];
 }
 
 const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
   selectedEvaluatorId,
   setSelectedEvaluatorId,
-  evaluators: evaluators,
-  deleteEvaluator,
 }) => {
+  const { evaluators: evaluators, deleteEvaluator } = useEvaluators();
+
   const evaluator = useMemo(() => {
     return evaluators.data?.data?.data?.find(
       (e) =>
