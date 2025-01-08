@@ -598,7 +598,7 @@ export function ExperimentTable({
                 )}
               >
                 <div
-                  className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max"
+                  className="bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max h-auto"
                   // style={{ width: "fit-content" }}
                 >
                   <Table className="border-collapse border-t border-slate-200 dark:border-slate-800 h-[1px]">
@@ -690,30 +690,29 @@ export function ExperimentTable({
                     </TableBody>
                   </Table>
                 </div>
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Add row
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full px-2 py-2">
+                    <AddRowPopover
+                      setPopoverOpen={setPopoverOpen}
+                      setShowAddManualRow={() => setRightPanel("add_manual")}
+                      setShowExperimentInputSelector={
+                        setShowExperimentInputSelector
+                      }
+                      setShowRandomInputSelector={setShowRandomInputSelector}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-
-              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add row
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full px-2 py-2">
-                  <AddRowPopover
-                    setPopoverOpen={setPopoverOpen}
-                    setShowAddManualRow={() => setRightPanel("add_manual")}
-                    setShowExperimentInputSelector={
-                      setShowExperimentInputSelector
-                    }
-                    setShowRandomInputSelector={setShowRandomInputSelector}
-                  />
-                </PopoverContent>
-              </Popover>
 
               <ExperimentRandomInputSelector
                 open={showRandomInputSelector}
