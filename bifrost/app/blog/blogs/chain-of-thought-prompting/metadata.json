@@ -1,7 +1,7 @@
 { 
-  "title": "Chain-of-Thought: Prompting Techniques, Tips, and Code Examples",
-  "title1": "Chain-of-Thought: Prompting Techniques, Tips, and Code Examples",
-  "title2": "Chain-of-Thought: Prompting Techniques, Tips, and Code Examples",
+  "title": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
+  "title1": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
+  "title2": "Chain-of-Thought Prompting: Techniques, Tips, and Code Examples",
   "description": "Learn about Chain-of-Thought (CoT) prompting, its techniques (zero-shot, few-shot, and auto-CoT), tips and real-world applications. See how it compares to other methods and discover how to implement CoT prompting to improve your AI application's performance.",
   "images": "/static/blog/chain-of-thought/chain-of-thought-cover.webp",
   "time": "12 minute read",

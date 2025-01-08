@@ -4,12 +4,12 @@ Chain-of-Thought (CoT) prompting is a powerful technique that helps LLMs break d
 
 ## What you'll learn
 
-- What is Chain-of-Thought prompting?
-- How Chain-of-Thought prompting works?
+- What is Chain-of-Thought Prompting?
+- How Chain-of-Thought Prompting works?
 - Key Techniques (Zero-Shot, Few-Shot, Auto-CoT, Multimodal, Self-Consistency)
-- Benefits of Chain-of-Thought prompting
-- Chain-of-Thought prompting vs. Other Methods
-- Next Steps & Resources
+- Benefits of Chain-of-Thought Prompting
+- Chain-of-Thought Prompting vs. Other Methods
+- Additional Resources
 
 ## What is Chain-of-Thought Prompting?
 
@@ -26,6 +26,15 @@ _Image source: How Chain-of-Thought works (Wei et al.)_
 Newer models like <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank">OpenAI’s o1</a> and Google’s PaLM naturally excel at CoT. For example, when asked to solve a classic brain teaser, o1 carefully maps out each move step-by-step until the puzzle is solved. Similarly, Google’s PaLM handles multi-step math problems by explicitly explaining its reasoning, resulting in more accurate and interpretable answers.
 
 Chain-of-thought prompting works well because it leverages the strengths of language models, such as generating fluent and coherent responses, while mimicking human problem-solving through planning and logical step-by-step reasoning.
+
+<CallToAction
+  title="Start monitoring your prompt with 1-line of code ⚡️"
+  description="Track your CoT prompt performance with Helicone's analytics dashboard."
+  primaryButtonText="Quick Start"
+  primaryButtonLink="https://docs.helicone.ai/getting-started/quick-start"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
 
 ## Key Techniques in Chain-of-Thought Prompting
 
@@ -173,7 +182,7 @@ The system would use this approach for similar problems within the same cluster,
 
 ## 4. Multimodal Chain-of-Thought
 
-**<a href="https://arxiv.org/abs/2302.00923" target="_blank">Multimodal chain-of-thought (CoT)</a>** method lets models process and integrate multiple types of information, such as images and text for advanced reasoning.
+**<a href="https://arxiv.org/abs/2302.00923" target="_blank">Multimodal Chain-of-Thought (CoT)</a>** method lets models process and integrate multiple types of information, such as images and text for advanced reasoning.
 
 ![Multimodal Chain-of-Thought](/static/blog/chain-of-thought/multimodal-cot.webp)
 
@@ -247,6 +256,15 @@ print("No answers found in the responses.")
 
 By sampling multiple completions and voting on the final answer, you reduce the chance of a single chain-of-thought error. This is especially valuable in critical applications like finance or healthcare.
 
+<CallToAction
+  title="Want to track multiple reasoning paths? ⚡️"
+  description="Helicone helps you monitor and compare Chain-of-Thought prompt variations."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
+
 ## Benefits of Chain-of-Thought Prompting
 
 ### Improved Accuracy
@@ -278,36 +296,51 @@ Both techniques use examples, but they differ in an important way. Few-shot prom
 
 ### CoT vs. Tree-of-Thought Prompting
 
-Chain of Thought (CoT) follows a simple, step-by-step approach where each idea connects directly to the one before it, creating a straight line of thinking. In contrast, Tree of Thoughts (ToT) uses a more complex structure, like a tree, where one idea branches out into many related ideas. This approach organizes thoughts in a more flexible and detailed way.
+Both Chain-of-Thought (CoT) and Tree-of-Thought (ToT) are prompting strategies that can be applied to large language models to improve their reasoning capabilities. CoT follows a linear approach where each step builds directly on previous reasoning. ToT uses a tree-like structure where multiple reasoning paths can be explored simultaneously.
 
-CoT models, like GPT-3, are great at generating clear and relevant text for short pieces of writing. ToT models, like Transformer models, are better at keeping track of many ideas over longer texts. CoT is simpler and less demanding on computers, while ToT's tree structure is more complex. ToT also uses something called a "ToT Controller," which learns from new data and helps the system improve over time.
+While both enhance problem-solving, they differ in complexity. CoT uses straightforward sequential reasoning, while ToT employs search algorithms like breadth-first search (BFS) and depth-first search (DFS) to systematically explore multiple solution paths. This makes ToT more computationally intensive but potentially more thorough for complex problems.
 
-CoT-SC uses a straightforward technique for thinking through problems, but doesn’t rely on complex search methods. On the other hand, ToT uses search algorithms, like breadth-first search (BFS) and depth-first search (DFS), to explore ideas in a more organized way, making it more effective for solving problems.
+Both techniques can be applied to various language models, with ToT being particularly useful for tasks requiring exploration of multiple possibilities or extended reasoning chains.
 
-## What is the Difference Between Prompt Chaining and Chain of Thoughts?
+## Difference Between Prompt Chaining and Chain of Thought
 
-Prompt chaining is a basic form of "Chain of Thought" (CoT) prompting. It asks AI to give answers based on a specific context or question. But CoT prompting is different. It pushes AI to build a full, logical argument from scratch, including reasons and conclusions. So, while prompt chaining improves individual responses, CoT focuses on creating a complete, consistent argument.
+Prompt chaining and Chain of Thought are distinct techniques for working with large language models. Prompt chaining breaks complex tasks into sequential subtasks, where the output of one prompt becomes input for the next. Chain of Thought focuses on making reasoning explicit within a single prompt by showing step-by-step logic.
 
-For example, if you ask an AI "What color is the sky?", it might simply say "The sky is blue." But if you ask it "Why is the sky blue?" using CoT, the AI will explain more. It might define "blue" as a primary color, then explain that the sky looks blue because the atmosphere absorbs other colors. This shows how CoT prompting helps the AI think through a problem step by step.
+**Example of prompt chaining for analyzing a book:**
+
+- First prompt: get plot summary
+- Second prompt: analyze themes using that summary
+- Third prompt: generate review using both outputs
+
+**Example of Chain of Thought for the same task:**
+
+"Let's analyze this book step by step:
+
+- The plot centers on...
+- This suggests the main theme is...
+- Therefore, my analysis is..."
 
 ## Conclusion
 
-We've discussed how Chain-of-Thought (CoT) prompting can improve reasoning and the output of Large Language Models. We've also provided some real-life examples of how this approach works.
+Chain-of-Thought prompting fundamentally changes how we interact with LLMs. By breaking down complex reasoning into visible steps, we can achieve more reliable, traceable outputs. To implement effectively:
 
-We also looked into other techniques like one-shot and few-shot prompting, which can further boost the model’s performance when combined with CoT. However, it’s important to understand both the benefits and limitations of these techniques.
+- Choose appropriate CoT techniques for your use case (i.e. zero-shot CoT for simple tasks, few-shot for complex problems)
+- Build systematic validation processes (i.e. validate with human or through self-consistency checks)
+- Optimize prompts through systematic testing and user feedback
+- Use analytics tools to track prompt performance and optimization. <a href="https://www.helicone.ai/" target="_blank">Helicone</a> is a great option to start.
 
-By applying the methods we’ve shared, you can create better, more reliable prompts. **Remember, the way you design your prompts can really affect the results!**
+<CallToAction
+  title="Ready to optimize your prompts? 💡"
+  description="Join 10,000 developers who use Helicone to monitor performance, trace reasoning paths and optimize their prompts."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
 
-### Next Steps
+### You might find these useful:
 
-- Experiment with zero-shot or few-shot CoT in your own projects. See if the output can be improved.
-- Try self consistency by gathering multiple outputs for each query, then pick the best solution.
-- Optimize your prompt. Adjust parameters like temperature, or try templates that suit your use case.
-- Create a feedback loop. Keep refining your prompts and reasoning paths based on your user feedback. Observability tools like Helicone is a great tool to aggregate user feedback and continuously evaluate your prompt in production.
-
-### Other Useful Resources
-
-- **<a href="https://docs.helicone.ai/guides/prompt-engineering/overview" target="_blank">Other Prompt Engineering Techniques - Helicone</a>**
+- **<a href="https://docs.helicone.ai/guides/prompt-engineering/overview" target="_blank">Other Prompt Engineering Techniques</a>**
 - **<a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank">Prompt Engineering Overview: All You Need to Know</a>**
 - **<a href="https://www.helicone.ai/blog/prompt-management" target="_blank">What is Prompt Management?</a>**
 
