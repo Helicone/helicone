@@ -230,7 +230,6 @@ export const HypothesisCellRenderer = forwardRef<
     }
 
     if (hypothesisRequestId && content) {
-      console.log({ playgroundPrompt });
       return (
         <Popover modal={true}>
           <PopoverTrigger asChild>
