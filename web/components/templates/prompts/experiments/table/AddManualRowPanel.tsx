@@ -89,7 +89,11 @@ const AddManualRowPanel = ({
       <div className="p-4 max-h-[calc(100vh-150px)] overflow-y-auto">
         <Accordion type="multiple" className="w-full" defaultValue={inputKeys}>
           {inputKeys.map((inputKey) => (
-            <AccordionItem key={inputKey} value={inputKey}>
+            <AccordionItem
+              key={inputKey}
+              value={inputKey}
+              className="border-b border-slate-200 dark:border-slate-800"
+            >
               <AccordionTrigger
                 iconPosition="start"
                 iconClassName="text-slate-500"
