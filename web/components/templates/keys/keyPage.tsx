@@ -14,6 +14,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useKeysPage } from "./useKeysPage";
 import AddKeyModal from "./addKeyModal";
+import { useIsGovernanceEnabled } from "../organization/hooks";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -28,6 +29,7 @@ const keyPermissions = new Map([
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
   const org = useOrg();
+
   const supabaseClient = useSupabaseClient<Database>();
   const [editOpen, setEditOpen] = useState(false);
   const [addKeyOpen, setAddKeyOpen] = useState(false);

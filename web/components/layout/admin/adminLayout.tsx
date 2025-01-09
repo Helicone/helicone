@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
@@ -7,6 +7,9 @@ import {
   ChartBarIcon,
   TicketIcon,
   CubeIcon,
+  BuildingLibraryIcon,
+  FlagIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { useRouter } from "next/router";
@@ -14,37 +17,33 @@ import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: HomeIcon, current: false },
-  { name: "On Prem", href: "/admin/on-prem", icon: TicketIcon, current: false },
+  { name: "Dashboard", href: "/admin", icon: HomeIcon },
+  { name: "On Prem", href: "/admin/on-prem", icon: TicketIcon },
   {
     name: "All Orgs",
     href: "/admin/stats",
-    icon: ChartBarIcon,
-    current: false,
+    icon: BuildingLibraryIcon,
+  },
+  {
+    name: "Governance Orgs",
+    href: "/admin/governance-orgs",
+    icon: UsersIcon,
   },
   {
     name: "Metrics",
     href: "/admin/metrics",
     icon: ChartBarIcon,
-    current: false,
   },
   {
     name: "Feature Flags",
     href: "/admin/feature-flags",
-    icon: ChartBarIcon,
-    current: false,
+    icon: FlagIcon,
   },
   {
     name: "Coles Cave",
     href: "/admin/coles-cave",
     icon: CubeIcon,
-    current: false,
   },
-];
-const teams = [
-  { id: 1, name: "Heroicons", href: "#", initial: "H", current: false },
-  { id: 2, name: "Tailwind Labs", href: "#", initial: "T", current: false },
-  { id: 3, name: "Workcation", href: "#", initial: "W", current: false },
 ];
 
 export default function AdminLayout(props: { children: React.ReactNode }) {
@@ -57,11 +56,12 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
     pathname.split("/")[1].charAt(0).toUpperCase() +
     pathname.split("/")[1].substring(1);
 
-  navigation.forEach((item) => {
-    if (pathname === item.href) {
-      item.current = true;
-    }
-  });
+  const isCurrentPage = useCallback(
+    (href: string) => {
+      return pathname === href;
+    },
+    [pathname]
+  );
 
   return (
     <MetaData title={`${currentPage} ${"- " + (org?.currentOrg?.name || "")}`}>
@@ -128,7 +128,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
                                 <a
                                   href={item.href}
                                   className={clsx(
-                                    item.current
+                                    isCurrentPage(item.href)
                                       ? "bg-gray-800 text-white"
                                       : "text-gray-400 hover:text-white hover:bg-gray-800",
                                     "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
@@ -169,7 +169,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
                         <a
                           href={item.href}
                           className={clsx(
-                            item.current
+                            isCurrentPage(item.href)
                               ? "bg-gray-800 text-white"
                               : "text-gray-400 hover:text-white hover:bg-gray-800",
                             "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"

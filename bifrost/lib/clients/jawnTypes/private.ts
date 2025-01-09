@@ -240,6 +240,16 @@ export interface paths {
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
+  "/v1/gov-organization/limits/member/{memberId}": {
+    get: operations["GetMemberLimits"];
+    post: operations["SetMemberLimits"];
+  };
+  "/v1/gov-organization/my-limits": {
+    get: operations["GetMyLimits"];
+  };
+  "/v1/gov-organization/is-governance-org": {
+    get: operations["IsGovernanceOrg"];
+  };
   "/v1/key/generateHash": {
     post: operations["GenerateHash"];
   };
@@ -263,6 +273,13 @@ export interface paths {
   };
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
+  };
+  "/v1/admin/governance-orgs/{orgId}": {
+    post: operations["GovernanceOrgs"];
+    delete: operations["DeleteGovernanceOrg"];
+  };
+  "/v1/admin/governance-orgs": {
+    get: operations["GetGovernanceOrgs"];
   };
   "/v1/admin/feature-flags": {
     post: operations["UpdateFeatureFlags"];
@@ -1137,6 +1154,7 @@ Json: JsonObject;
       id?: string;
       icon?: string;
       has_onboarded?: boolean;
+      governance_settings?: components["schemas"]["Json"] | null;
       domain?: string | null;
       created_at?: string | null;
       color?: string;
@@ -1303,6 +1321,69 @@ Json: JsonObject;
       heliconeMeta: components["schemas"]["HeliconeMeta"];
       authorization: string;
     };
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    "PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      /** @enum {number|null} */
+      error: null;
+      data: {
+        organization: string;
+        org_role: string;
+        member: string;
+        governance_limits: components["schemas"]["Json"];
+        created_at: string;
+      };
+      /** Format: double */
+      count: number | null;
+    };
+    /**
+     * @description Error format
+     *
+     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
+     */
+    PostgrestError: {
+      name: string;
+      message: string;
+      stack?: string;
+      details: string;
+      hint: string;
+      code: string;
+    };
+    PostgrestResponseFailure: {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      error: components["schemas"]["PostgrestError"];
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      count: null;
+    };
+    "PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": components["schemas"]["PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"] | components["schemas"]["PostgrestResponseFailure"];
+    "PostgrestResponseSuccess__governance_settings-Json__": {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      /** @enum {number|null} */
+      error: null;
+      data: {
+        governance_settings: components["schemas"]["Json"];
+      };
+      /** Format: double */
+      count: number | null;
+    };
+    "PostgrestSingleResponse__governance_settings-Json__": components["schemas"]["PostgrestResponseSuccess__governance_settings-Json__"] | components["schemas"]["PostgrestResponseFailure"];
     /** @enum {string} */
     KeyPermissions: "w" | "rw";
     GenerateHashQueryParams: {
@@ -1866,6 +1947,46 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
+    "PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      /** @enum {number|null} */
+      error: null;
+      data: {
+          tier: string;
+          subscription_status: string;
+          stripe_subscription_item_id: string;
+          stripe_subscription_id: string;
+          stripe_metadata: components["schemas"]["Json"];
+          stripe_customer_id: string;
+          soft_delete: boolean;
+          size: string;
+          reseller_id: string;
+          /** Format: double */
+          request_limit: number;
+          referral: string;
+          /** Format: double */
+          percent_to_log: number;
+          owner: string;
+          organization_type: string;
+          org_provider_key: string;
+          name: string;
+          logo_path: string;
+          limits: components["schemas"]["Json"];
+          is_personal: boolean;
+          id: string;
+          icon: string;
+          has_onboarded: boolean;
+          governance_settings: components["schemas"]["Json"];
+          domain: string;
+          created_at: string;
+          color: string;
+        }[];
+      /** Format: double */
+      count: number | null;
+    };
+    "PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": components["schemas"]["PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -3306,6 +3427,66 @@ export interface operations {
       };
     };
   };
+  GetMemberLimits: {
+    parameters: {
+      path: {
+        memberId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+        };
+      };
+    };
+  };
+  SetMemberLimits: {
+    parameters: {
+      path: {
+        memberId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          days: number;
+          /** Format: double */
+          limitUSD: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+        };
+      };
+    };
+  };
+  GetMyLimits: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+        };
+      };
+    };
+  };
+  IsGovernanceOrg: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__governance_settings-Json__"];
+        };
+      };
+    };
+  };
   GenerateHash: {
     requestBody: {
       content: {
@@ -3453,6 +3634,56 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GovernanceOrgs: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          days: number | null;
+          /** Format: double */
+          limitUSD: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": null;
+        };
+      };
+    };
+  };
+  DeleteGovernanceOrg: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": null;
+        };
+      };
+    };
+  };
+  GetGovernanceOrgs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"];
         };
       };
     };

@@ -24,6 +24,7 @@ import {
 } from "../../managers/organization/OrganizationManager";
 import { supabaseServer } from "../../lib/db/supabase";
 import { StripeManager } from "../../managers/stripe/StripeManager";
+import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
 
 @Route("v1/organization")
 @Tags("Organization")
