@@ -143,7 +143,7 @@ export const ExperimentRandomInputSelector = (
           </ul>
         </div>
 
-        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white pb-20">
+        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white dark:bg-black pb-20">
           <Button
             variant={"secondary"}
             size={"sm"}
