@@ -55,6 +55,12 @@ import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
 import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type TableDataType = {
   index: number;
@@ -118,27 +124,58 @@ export function ExperimentTable({
             <span className="group-hover:invisible transition-opacity duration-200">
               <ListIcon className="w-4 h-4" />
             </span>
-            <Button
-              variant="ghost"
-              className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              onClick={async () => {
-                await Promise.all(
-                  (promptVersionsData ?? []).map(async (pv) => {
-                    const rows = table.getRowModel().rows;
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  onClick={async () => {
                     await Promise.all(
-                      rows.map(async (row) => {
-                        const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                        if (cellRef) {
-                          await cellRef.runHypothesis();
-                        }
+                      (promptVersionsData ?? []).map(async (pv) => {
+                        const rows = table.getRowModel().rows;
+                        await Promise.all(
+                          rows.map(async (row) => {
+                            const cellRef =
+                              cellRefs.current[`${row.id}-${pv.id}`];
+                            if (cellRef) {
+                              await cellRef.runHypothesis();
+                            }
+                          })
+                        );
                       })
                     );
-                  })
-                );
-              }}
-            >
-              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
+                  }}
+                >
+                  Run all cells
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await Promise.all(
+                      (promptVersionsData ?? []).map(async (pv) => {
+                        const rows = table.getRowModel().rows;
+                        await Promise.all(
+                          rows.map(async (row) => {
+                            const cellRef =
+                              cellRefs.current[`${row.id}-${pv.id}`];
+                            if (cellRef) {
+                              await cellRef.runHypothesisIfRequired();
+                            }
+                          })
+                        );
+                      })
+                    );
+                  }}
+                >
+                  Run unexecuted cells
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ),
         columns: [
