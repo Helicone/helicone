@@ -126,7 +126,7 @@ export class PromptManager extends BaseManager {
       FROM prompts_versions 
       WHERE id = $8
     )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version)
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version, updated_at)
     SELECT
         ppv.prompt_v2,
         $2, 
@@ -157,8 +157,12 @@ export class PromptManager extends BaseManager {
           )
         END,
         $6,
-        $7,
-        ppv.id
+        $7::uuid,
+        ppv.id,
+        CASE 
+          WHEN $7::uuid IS NOT NULL THEN ppv.created_at
+          ELSE NOW()
+        END
     FROM parent_prompt_version ppv
     RETURNING 
         id,
