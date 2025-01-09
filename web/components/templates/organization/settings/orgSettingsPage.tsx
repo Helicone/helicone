@@ -1,11 +1,12 @@
 import { useUser } from "@supabase/auth-helpers-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../supabase/database.types";
 import { Row } from "../../../layout/common";
 import { clsx } from "../../../shared/clsx";
 import CreateOrgForm from "../createOrgForm";
 import { DeleteOrgModal } from "../deleteOrgModal";
+import { useIsGovernanceEnabled } from "../hooks";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -19,12 +20,92 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const [, setOpenDemo] = useLocalStorage("openDemo", false);
   const [, setRemovedDemo] = useLocalStorage("removedDemo", false);
 
+  const isGovernanceEnabled = useIsGovernanceEnabled();
+
   const isOwner = org.owner === user?.id;
+
+  const currentUsage = 17.5;
+
+  const isUnlimited = useMemo(() => {
+    return (
+      isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD === 0
+    );
+  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD]);
+
+  const totalUsage = useMemo(() => {
+    return (
+      (isGovernanceEnabled.data?.data?.data?.governance_settings
+        ?.limitUSD as number) ?? 0
+    );
+  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD]);
+
+  const days = useMemo(() => {
+    return isGovernanceEnabled.data?.data?.data?.governance_settings
+      ?.days as number;
+  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.days]);
 
   return (
     <>
       <div className="py-4 flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl">
-        <div className="text-sm pb-8 max-w-[450px] w-full flex flex-col space-y-1.5">
+        {isGovernanceEnabled.data?.data?.data && (
+          <div className="space-y-4 p-6 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800  pb-10">
+            <div className="flex flex-col space-y-2">
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Organization Governance
+              </h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                This organization is governed by your system administrator with
+                a maximum monthly spend limit of $
+                {totalUsage?.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                .
+              </p>
+            </div>
+
+            <div className="flex justify-between text-sm text-blue-800 dark:text-blue-200">
+              <span>
+                Current Usage: $
+                {currentUsage.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+              {isUnlimited ? (
+                <span>Unlimited</span>
+              ) : (
+                <span>
+                  $
+                  {totalUsage.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  limit
+                </span>
+              )}
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2.5 dark:bg-blue-800">
+              <div
+                className={clsx(
+                  "h-2.5 rounded-full",
+                  isUnlimited
+                    ? "bg-green-500"
+                    : currentUsage / totalUsage > 0.9
+                    ? "bg-red-500"
+                    : currentUsage / totalUsage > 0.7
+                    ? "bg-yellow-500"
+                    : "bg-green-500"
+                )}
+                style={{ width: `${(currentUsage / totalUsage) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              Usage resets every {days} days
+            </p>
+          </div>
+        )}
+        <div className="text-sm pb-8 max-w-[450px] w-full flex flex-col space-y-1.5 mt-10">
           <label
             htmlFor="org-id"
             className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
@@ -43,6 +124,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             disabled
           />
         </div>
+
         <div className="max-w-[450px] w-full">
           <CreateOrgForm
             initialValues={{
