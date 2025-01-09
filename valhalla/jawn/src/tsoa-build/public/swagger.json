@@ -11338,7 +11338,7 @@
 		},
 		"/v1/pi/total_requests": {
 			"post": {
-				"operationId": "GetTotalRequests",
+				"operationId": "PiGetTotalRequests",
 				"responses": {
 					"200": {
 						"description": "Ok",
