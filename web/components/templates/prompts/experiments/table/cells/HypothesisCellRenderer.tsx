@@ -159,8 +159,18 @@ export const HypothesisCellRenderer = forwardRef<
           requestsData.responseBody.response.choices[0].message.content
         );
         setRunning(false);
+      } else if (
+        // if the initial model is claude
+        requestsData?.responseBody?.response?.content &&
+        requestsData?.responseBody?.response?.content?.length > 0
+      ) {
+        setContent(requestsData.responseBody.response.content[0].text);
+        setRunning(false);
       }
-    }, [requestsData?.responseBody?.response?.choices]);
+    }, [
+      requestsData?.responseBody?.response?.choices,
+      requestsData?.responseBody?.response?.content,
+    ]);
 
     useEffect(() => {
       if (content || (promptTemplate?.helicone_template as any)?.messages) {
@@ -168,10 +178,12 @@ export const HypothesisCellRenderer = forwardRef<
           model: initialModel,
           messages: [
             ...((promptTemplate?.helicone_template as any)?.messages ?? []),
-            {
-              role: "assistant",
-              content: content,
-            },
+            content
+              ? {
+                  role: "assistant",
+                  content: content,
+                }
+              : null,
           ],
         });
       }
