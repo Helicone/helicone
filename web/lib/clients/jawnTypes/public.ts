@@ -275,7 +275,7 @@ export interface paths {
     post: operations["GetTotalCosts"];
   };
   "/v1/pi/total_requests": {
-    post: operations["GetTotalRequests"];
+    post: operations["PiGetTotalRequests"];
   };
   "/v1/pi/costs-over-time/query": {
     post: operations["GetCostsOverTime"];
@@ -3900,12 +3900,7 @@ export interface operations {
       };
     };
   };
-  GetTotalRequests: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
+  PiGetTotalRequests: {
     responses: {
       /** @description Ok */
       200: {
@@ -4673,6 +4668,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderUsageOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTotalRequests: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
         };
       };
     };
