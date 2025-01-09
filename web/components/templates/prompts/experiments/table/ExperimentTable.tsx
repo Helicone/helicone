@@ -135,7 +135,7 @@ export function ExperimentTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem
-                  onClick={async () => {
+                  onSelect={async () => {
                     await Promise.all(
                       (promptVersionsData ?? []).map(async (pv) => {
                         const rows = table.getRowModel().rows;
@@ -155,7 +155,7 @@ export function ExperimentTable({
                   Run all cells
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={async () => {
+                  onSelect={async () => {
                     await Promise.all(
                       (promptVersionsData ?? []).map(async (pv) => {
                         const rows = table.getRowModel().rows;

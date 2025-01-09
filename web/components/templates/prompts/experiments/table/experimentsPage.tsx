@@ -2,16 +2,23 @@ import AuthHeader from "../../../../shared/authHeader";
 import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
-import { PlusIcon, DocumentPlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../../../shared/notification/useNotification";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { Dialog, DialogTrigger } from "../../../../ui/dialog";
+import { Dialog } from "../../../../ui/dialog";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { getExampleExperimentPrompt } from "./helpers/basePrompt";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DropdownMenu } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -92,9 +99,51 @@ const ExperimentsPage = () => {
 
   const org = useOrg();
 
+  const { setNotification } = useNotification();
+
   return (
     <>
-      <AuthHeader title={"Experiments"} />
+      <AuthHeader
+        title={"Experiments"}
+        actions={
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                New experiment
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onSelect={async () => {
+                  setNotification("Creating experiment...", "info");
+                  const res = await jawn.POST("/v2/experiment/create/empty");
+                  if (res.error) {
+                    notification.setNotification(
+                      "Failed to create experiment",
+                      "error"
+                    );
+                  } else {
+                    router.push(`/experiments/${res.data?.data?.experimentId}`);
+                  }
+                }}
+              >
+                Start from scratch
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+                Start from prompt
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <StartFromPromptDialog
+          prompts={prompts as any}
+          onDialogClose={() => setDialogOpen(false)}
+        />
+      </Dialog>
 
       {org?.currentOrg?.tier === "free" ? (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -108,69 +157,6 @@ const ExperimentsPage = () => {
         </div>
       ) : (
         <>
-          <div className="mb-6 overflow-x-auto px-4">
-            <h3 className="text-md font-normal px-4 py-2 text-[#6B7280]">
-              Create a new experiment
-            </h3>
-            <div className="flex space-x-4 p-4">
-              <div>
-                <button
-                  className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
-                  onClick={async () => {
-                    const res = await jawn.POST("/v2/experiment/create/empty");
-                    if (res.error) {
-                      notification.setNotification(
-                        "Failed to create experiment",
-                        "error"
-                      );
-                    } else {
-                      router.push(
-                        `/experiments/${res.data?.data?.experimentId}`
-                      );
-                    }
-                  }}
-                >
-                  <PlusIcon className="w-16 h-16 text-slate-200" />
-                </button>
-                <span className="mt-2 text-sm text-[#6B7280] px-2">
-                  Start from scratch
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center space-y-1">
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700">
-                      <DocumentPlusIcon className="w-16 h-16 text-slate-200" />
-                    </button>
-                  </DialogTrigger>
-                  <StartFromPromptDialog
-                    prompts={prompts as any}
-                    onDialogClose={() => setDialogOpen(false)}
-                  />
-                </Dialog>
-                <span className="text-sm text-[#6B7280] px-2">
-                  Start from a prompt
-                </span>
-              </div>
-              {templateOptions.map((template) => (
-                <div key={template.id}>
-                  <button
-                    className="flex flex-col items-center justify-center w-40 h-32 bg-white dark:bg-slate-800 rounded-lg hover:bg-transparent transition-colors border-2 border-slate-100 dark:border-slate-700"
-                    onClick={() =>
-                      notification.setNotification(
-                        "Templates are coming soon!",
-                        "info"
-                      )
-                    }
-                  ></button>
-                  <span className="mt-2 text-sm text-[#6B7280] px-2">
-                    {template.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <ThemedTable
             defaultColumns={[
               {
