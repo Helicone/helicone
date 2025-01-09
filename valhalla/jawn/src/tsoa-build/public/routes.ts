@@ -5594,9 +5594,9 @@ export function RegisterRoutes(app: Router) {
         app.post('/v1/pi/total_requests',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PiController)),
-            ...(fetchMiddlewares<RequestHandler>(PiController.prototype.getTotalRequests)),
+            ...(fetchMiddlewares<RequestHandler>(PiController.prototype.piGetTotalRequests)),
 
-            async function PiController_getTotalRequests(request: ExRequest, response: ExResponse, next: any) {
+            async function PiController_piGetTotalRequests(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
@@ -5610,7 +5610,7 @@ export function RegisterRoutes(app: Router) {
                 const controller = new PiController();
 
               await templateService.apiHandler({
-                methodName: 'getTotalRequests',
+                methodName: 'piGetTotalRequests',
                 controller,
                 response,
                 next,

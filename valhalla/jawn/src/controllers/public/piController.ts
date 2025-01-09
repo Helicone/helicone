@@ -121,7 +121,7 @@ export class PiController extends Controller {
   }
 
   @Post("/total_requests")
-  public async getTotalRequests(
+  public async piGetTotalRequests(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<number, string>> {
     const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
