@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { ChevronDownIcon } from "lucide-react";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -38,12 +39,12 @@ const ExperimentsPage = () => {
         actions={
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                New experiment
+              <Button variant="outline">
+                Start new experiment
+                <ChevronDownIcon className="w-4 h-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="center" className="w-[200px]">
               <DropdownMenuItem
                 onSelect={async () => {
                   setNotification("Creating experiment...", "info");
