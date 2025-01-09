@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Separator } from "@/components/ui/separator";
-import { FingerprintIcon, KeyIcon, LinkIcon, LockIcon } from "lucide-react";
+import { FingerprintIcon, KeyIcon, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";

@@ -7,19 +7,18 @@ import {
   Patch,
   Path,
   Post,
-  Put,
   Request,
   Route,
   Security,
   Tags,
 } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { supabaseServer } from "../../lib/db/supabase";
-import { Setting, SettingName } from "../../utils/settings";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { supabaseServer } from "../../lib/db/supabase";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { Setting, SettingName } from "../../utils/settings";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {

@@ -14,7 +14,6 @@ import ThemedModal from "../../shared/themed/themedModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { useKeysPage } from "./useKeysPage";
 import AddKeyModal from "./addKeyModal";
-import { useIsGovernanceEnabled } from "../organization/hooks";
 
 interface KeyPageProps {
   hideTabs?: boolean;
