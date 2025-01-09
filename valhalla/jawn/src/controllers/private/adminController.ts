@@ -12,12 +12,13 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { supabaseServer } from "../../lib/db/supabase";
-import { Setting, SettingName } from "../../utils/settings";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { supabaseServer } from "../../lib/db/supabase";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { Setting, SettingName } from "../../utils/settings";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -42,6 +43,67 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Post("/governance-orgs/{orgId}")
+  public async governanceOrgs(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body()
+    body: {
+      limitUSD: number | null;
+      days: number | null;
+    }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const org = await supabaseServer.client
+      .from("organization")
+      .update({
+        governance_settings: {
+          limitUSD: body.limitUSD,
+          days: body.days,
+        },
+      })
+      .eq("id", orgId);
+
+    if (org.error) {
+      this.setStatus(404);
+      throw new Error("Organization not found");
+    }
+
+    return org.data;
+  }
+
+  @Delete("/governance-orgs/{orgId}")
+  public async deleteGovernanceOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const org = await supabaseServer.client
+      .from("organization")
+      .update({
+        governance_settings: null,
+      })
+      .eq("id", orgId);
+
+    if (org.error) {
+      this.setStatus(404);
+      throw new Error("Organization not found");
+    }
+
+    return org.data;
+  }
+
+  @Get("/governance-orgs")
+  @Tags("Governance Orgs")
+  @Security("api_key")
+  public async getGovernanceOrgs(@Request() request: JawnAuthenticatedRequest) {
+    await authCheckThrow(request.authParams.userId);
+
+    return await getGovernanceOrgs();
+  }
+
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,

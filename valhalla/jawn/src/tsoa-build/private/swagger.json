@@ -3179,6 +3179,14 @@
 					"has_onboarded": {
 						"type": "boolean"
 					},
+					"governance_settings": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Json"
+							}
+						],
+						"nullable": true
+					},
 					"domain": {
 						"type": "string",
 						"nullable": true
@@ -3680,6 +3688,233 @@
 					"authorization"
 				],
 				"type": "object"
+			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_unknown_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"properties": {
+							"organization": {
+								"type": "string"
+							},
+							"org_role": {
+								"type": "string"
+							},
+							"member": {
+								"type": "string"
+							},
+							"governance_limits": {
+								"$ref": "#/components/schemas/Json"
+							},
+							"created_at": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"organization",
+							"org_role",
+							"member",
+							"governance_limits",
+							"created_at"
+						],
+						"type": "object"
+					},
+					"count": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestError": {
+				"description": "Error format\n\n{@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"stack": {
+						"type": "string"
+					},
+					"details": {
+						"type": "string"
+					},
+					"hint": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"message",
+					"details",
+					"hint",
+					"code"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestResponseFailure": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"$ref": "#/components/schemas/PostgrestError"
+					},
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
+					},
+					{
+						"$ref": "#/components/schemas/PostgrestResponseFailure"
+					}
+				]
+			},
+			"PostgrestResponseSuccess__governance_settings-Json__": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"properties": {
+							"governance_settings": {
+								"$ref": "#/components/schemas/Json"
+							}
+						},
+						"required": [
+							"governance_settings"
+						],
+						"type": "object"
+					},
+					"count": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestSingleResponse__governance_settings-Json__": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__governance_settings-Json__"
+					},
+					{
+						"$ref": "#/components/schemas/PostgrestResponseFailure"
+					}
+				]
 			},
 			"KeyPermissions": {
 				"type": "string",
@@ -4961,6 +5196,164 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"items": {
+							"properties": {
+								"tier": {
+									"type": "string"
+								},
+								"subscription_status": {
+									"type": "string"
+								},
+								"stripe_subscription_item_id": {
+									"type": "string"
+								},
+								"stripe_subscription_id": {
+									"type": "string"
+								},
+								"stripe_metadata": {
+									"$ref": "#/components/schemas/Json"
+								},
+								"stripe_customer_id": {
+									"type": "string"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"size": {
+									"type": "string"
+								},
+								"reseller_id": {
+									"type": "string"
+								},
+								"request_limit": {
+									"type": "number",
+									"format": "double"
+								},
+								"referral": {
+									"type": "string"
+								},
+								"percent_to_log": {
+									"type": "number",
+									"format": "double"
+								},
+								"owner": {
+									"type": "string"
+								},
+								"organization_type": {
+									"type": "string"
+								},
+								"org_provider_key": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"logo_path": {
+									"type": "string"
+								},
+								"limits": {
+									"$ref": "#/components/schemas/Json"
+								},
+								"is_personal": {
+									"type": "boolean"
+								},
+								"id": {
+									"type": "string"
+								},
+								"icon": {
+									"type": "string"
+								},
+								"has_onboarded": {
+									"type": "boolean"
+								},
+								"governance_settings": {
+									"$ref": "#/components/schemas/Json"
+								},
+								"domain": {
+									"type": "string"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"color": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"tier",
+								"subscription_status",
+								"stripe_subscription_item_id",
+								"stripe_subscription_id",
+								"stripe_metadata",
+								"stripe_customer_id",
+								"soft_delete",
+								"size",
+								"reseller_id",
+								"request_limit",
+								"referral",
+								"percent_to_log",
+								"owner",
+								"organization_type",
+								"org_provider_key",
+								"name",
+								"logo_path",
+								"limits",
+								"is_personal",
+								"id",
+								"icon",
+								"has_onboarded",
+								"governance_settings",
+								"domain",
+								"created_at",
+								"color"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"count": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/PostgrestResponseFailure"
+					}
+				]
 			},
 			"ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
 				"properties": {
@@ -8645,6 +9038,157 @@
 				}
 			}
 		},
+		"/v1/gov-organization/limits/member/{memberId}": {
+			"post": {
+				"operationId": "SetMemberLimits",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gov Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"days": {
+										"type": "number",
+										"format": "double"
+									},
+									"limitUSD": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"days",
+									"limitUSD"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetMemberLimits",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gov Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/gov-organization/my-limits": {
+			"get": {
+				"operationId": "GetMyLimits",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gov Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/gov-organization/is-governance-org": {
+			"get": {
+				"operationId": "IsGovernanceOrg",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__governance_settings-Json__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gov Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/key/generateHash": {
 			"post": {
 				"operationId": "GenerateHash",
@@ -9051,6 +9595,135 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/governance-orgs/{orgId}": {
+			"post": {
+				"operationId": "GovernanceOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"days": {
+										"type": "number",
+										"format": "double",
+										"nullable": true
+									},
+									"limitUSD": {
+										"type": "number",
+										"format": "double",
+										"nullable": true
+									}
+								},
+								"required": [
+									"days",
+									"limitUSD"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteGovernanceOrg",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/governance-orgs": {
+			"get": {
+				"operationId": "GetGovernanceOrgs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Governance Orgs",
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/admin/feature-flags": {

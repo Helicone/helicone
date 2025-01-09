@@ -1600,6 +1600,7 @@ export type Database = {
           color: string
           created_at: string | null
           domain: string | null
+          governance_settings: Json | null
           has_onboarded: boolean
           icon: string
           id: string
@@ -1627,6 +1628,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1654,6 +1656,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1750,18 +1753,21 @@ export type Database = {
       organization_member: {
         Row: {
           created_at: string | null
+          governance_limits: Json | null
           member: string
           org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
+          governance_limits?: Json | null
           member: string
           org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
+          governance_limits?: Json | null
           member?: string
           org_role?: string
           organization?: string

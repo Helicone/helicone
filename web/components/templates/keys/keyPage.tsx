@@ -28,6 +28,7 @@ const keyPermissions = new Map([
 const KeyPage = (props: KeyPageProps) => {
   const user = useUser();
   const org = useOrg();
+
   const supabaseClient = useSupabaseClient<Database>();
   const [editOpen, setEditOpen] = useState(false);
   const [addKeyOpen, setAddKeyOpen] = useState(false);
