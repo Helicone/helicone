@@ -9,24 +9,6 @@ import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
 import { getHeliconeCookie } from "@/lib/cookies";
 
-const useIsGovernanceOrg = (orgId: string) => {
-  const jawn = getJawnClient(orgId);
-  const isGovernanceOrg = useQuery({
-    queryKey: ["IsGovernanceOrg", orgId],
-    queryFn: async (query) => {
-      const { data, error } = await jawn.GET(
-        "/v1/organization/is-governance-org"
-      );
-      if (error) {
-        console.error("Error fetching governance org:", error);
-        return false;
-      }
-      return data;
-    },
-  });
-  return isGovernanceOrg;
-};
-
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
   const { data, isLoading, refetch } = useQuery({
