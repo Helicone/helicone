@@ -1,4 +1,4 @@
-import { EvaluatorTestResult } from "@/components/shared/CreateNewEvaluator/types";
+import { EvaluatorTestResult } from "@/components/templates/evals/CreateNewEvaluator/types";
 import { TestData } from "./types";
 
 import { ClientType } from "@/lib/clients/jawn";

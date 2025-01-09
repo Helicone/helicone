@@ -1,6 +1,6 @@
 import { Col } from "@/components/layout/common";
-import { openAITemplateToOpenAIFunctionParams } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
-import { LLMEvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
+import { openAITemplateToOpenAIFunctionParams } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
+import { LLMEvaluatorConfigForm } from "@/components/templates/evals/CreateNewEvaluator/LLMEvaluatorConfigForm";
 import React, { useMemo, useState } from "react";
 import { useEvaluators } from "../EvaluatorHook";
 import { DeleteEvaluator } from "./DeleteEvalutor";

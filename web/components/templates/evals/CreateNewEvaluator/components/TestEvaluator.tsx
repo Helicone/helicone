@@ -15,8 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import clsx from "clsx";
-import MarkdownEditor from "../../markdownEditor";
+import MarkdownEditor from "../../../../shared/markdownEditor";
 import { EvaluatorTestResult } from "../types";
+import { PreviewLastMile } from "./PreviewLastMile";
 
 export function TestEvaluator() {
   const { testData, setTestData } = useTestDataStore();
@@ -229,6 +230,13 @@ export function TestEvaluator() {
             />
           </CollapsibleContent>
         </Collapsible>
+      )}
+
+      {testData?._type === "lastmile" && testData.config && (
+        <PreviewLastMile
+          testDataConfig={testData.config}
+          testInput={testData.testInput}
+        />
       )}
       <Col className="gap-2">
         <h2 className="text-lg font-medium">Output</h2>

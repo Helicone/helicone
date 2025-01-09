@@ -54,7 +54,7 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
-import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { generateOpenAITemplate } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
 
 type TableDataType = {
   index: number;
