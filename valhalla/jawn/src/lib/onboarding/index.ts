@@ -226,7 +226,7 @@ async function getDestinationWeather(
       "Helicone-Property-Environment": "development",
       "Helicone-Session-Name": "XPedia Travel Planner",
       "Helicone-Session-Id": sessionId,
-      "Helicone-Session-Path": `/planning/weather`,
+      "Helicone-Session-Path": `/planning/packing/weather`,
       "Helicone-User-Id": userId,
     }
   );
@@ -273,7 +273,7 @@ async function generatePackingList(
         "Helicone-Prompt-Id": "generate-packing-list",
         "Helicone-Session-Name": "XPedia Travel Planner",
         "Helicone-Session-Id": sessionId,
-        "Helicone-Session-Path": `/planning/packing-list`,
+        "Helicone-Session-Path": `/planning/packing/list`,
         "Helicone-User-Id": example.userId,
       },
     }
