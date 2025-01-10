@@ -43,6 +43,118 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Get("governance-orgs/keys")
+  public async getGovernanceOrgKeys(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    return await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys")
+      .single();
+  }
+
+  @Post("/governance-orgs/keys")
+  public async createGovernanceOrgKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      name: string;
+      value: string;
+    }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    let keys: { name: string; value: string }[] = [];
+    const keysData = await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys");
+
+    if (keysData.error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    if (keysData.data?.[0]) {
+      keys = (keysData.data[0].settings as any).keys.filter(
+        (key: { name: string }) => key.name !== body.name
+      );
+    }
+
+    keys.push({
+      name: body.name,
+      value: body.value,
+    });
+
+    let seen = new Set();
+    keys = keys.filter((key) => {
+      if (seen.has(key.name)) {
+        return false;
+      }
+      seen.add(key.name);
+      return true;
+    });
+
+    const { data, error } = await supabaseServer.client
+      .from("helicone_settings")
+      .update({
+        settings: {
+          keys,
+        },
+      })
+      .eq("name", "governance_keys");
+
+    if (error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    return data;
+  }
+
+  @Delete("/governance-orgs/keys")
+  public async deleteGovernanceOrgKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { name: string }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const keysData = await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys");
+
+    if (keysData.error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    const keys = keysData.data?.[0];
+
+    const newKeys = (keys?.settings as any).keys.filter(
+      (key: { name: string }) => key.name !== body.name
+    );
+
+    const { data, error } = await supabaseServer.client
+      .from("helicone_settings")
+      .upsert({
+        name: "governance_keys",
+        settings: {
+          keys: newKeys,
+        },
+      });
+
+    if (error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    return data;
+  }
+
   @Post("/governance-orgs/{orgId}")
   public async governanceOrgs(
     @Request() request: JawnAuthenticatedRequest,

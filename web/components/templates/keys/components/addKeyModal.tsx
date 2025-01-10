@@ -2,32 +2,27 @@ import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
-import { User } from "@supabase/auth-helpers-react";
-import { FormEvent, useEffect, useState } from "react";
-import { generateAPIKeyHelper } from "../../../utlis/generateAPIKeyHelper";
-import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
+import { FormEvent, useState } from "react";
+import useNotification from "../../../shared/notification/useNotification";
+import ThemedModal from "../../../shared/themed/themedModal";
+import { useKeys } from "../useKeys";
 
 interface AddKeyModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  user: User | null;
-  org: OrgContextValue | null;
-  onSuccess: () => void;
 }
 
 const AddKeyModal = (props: AddKeyModalProps) => {
-  const { open, setOpen, user, org, onSuccess } = props;
+  const { open, setOpen } = props;
 
   const [returnedKey, setReturnedKey] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const { setNotification } = useNotification();
 
+  const { addKey } = useKeys();
   const handleSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
+
     const keyName = event.currentTarget.elements.namedItem(
       "key-name"
     ) as HTMLInputElement;
@@ -43,32 +38,15 @@ const AddKeyModal = (props: AddKeyModalProps) => {
 
     const permission = keyPermissions.checked ? "rw" : "w";
 
-    const { res, apiKey } = generateAPIKeyHelper(
+    const { res, apiKey } = await addKey.mutateAsync({
       permission,
-      org?.currentOrg?.organization_type!,
-      user?.id!,
-      keyName.value,
-      window.location.hostname.includes("eu.")
-    );
-
-    const resp = res.then((res) => {
-      if (res.response.ok) {
-        setReturnedKey(apiKey);
-        setNotification("Successfully created API key", "success");
-        setIsLoading(false);
-        onSuccess();
-      } else {
-        setNotification("Failed to create API key", "error");
-        setIsLoading(false);
-      }
+      keyName: keyName.value,
+      isEu: window.location.hostname.includes("eu."),
     });
-  };
-
-  useEffect(() => {
-    if (!open) {
-      setReturnedKey(null);
+    if (res.response.ok) {
+      setReturnedKey(apiKey);
     }
-  }, [open]);
+  };
 
   return (
     <ThemedModal open={open} setOpen={setOpen}>
@@ -147,7 +125,7 @@ const AddKeyModal = (props: AddKeyModalProps) => {
               type="submit"
               className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              {isLoading && (
+              {addKey.isLoading && (
                 <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
               )}
               Create Key
@@ -187,7 +165,10 @@ const AddKeyModal = (props: AddKeyModalProps) => {
 
           <div className="flex justify-end gap-2 pt-4">
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                setReturnedKey(null);
+              }}
               type="button"
               className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
