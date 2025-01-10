@@ -113,6 +113,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
   );
 
   const { requestMessages, responseMessage, messages } = useMemo(() => {
+    console.log("idhar hai prompt", prompt);
     const requestMessages = getRequestMessages(undefined, prompt);
     const responseMessage = getResponseMessage(
       undefined,
@@ -120,6 +121,11 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       (prompt as PromptObject).model
     );
     const messages = getMessages(requestMessages, responseMessage, 200);
+    console.log({
+      requestMessages,
+      responseMessage,
+      messages,
+    });
     return { requestMessages, responseMessage, messages };
   }, [prompt, selectedInput]);
   const [promptVariables, setPromptVariables] = useState<
@@ -221,6 +227,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentChat, selectedModel]);
+
+  console.log("messages", messages);
 
   if (
     playgroundMode === "experiment-compact" ||
