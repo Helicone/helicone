@@ -24,7 +24,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
 
   const isOwner = org.owner === user?.id;
 
-  const currentUsage = 17.5;
+  const currentUsage = 0;
 
   const isUnlimited = useMemo(() => {
     return (

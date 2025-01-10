@@ -7,7 +7,7 @@ import { KeyPermissions } from "../../models/models";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
-  userId: string;
+  governance: boolean;
   keyName: string;
   permissions: KeyPermissions;
 }
@@ -28,7 +28,16 @@ export class GenerateHashController extends Controller {
       details?: string;
     };
   }> {
-    const { apiKey, userId, keyName } = requestBody;
+    const { apiKey, keyName, governance } = requestBody;
+    const userId = request.authParams.userId;
+    if (!userId) {
+      this.setStatus(401);
+      return {
+        error: {
+          message: "Unauthorized",
+        },
+      };
+    }
     try {
       const hashedKey = await hashAuth(apiKey);
 
@@ -40,6 +49,7 @@ export class GenerateHashController extends Controller {
           api_key_name: keyName,
           organization_id: request.authParams.organizationId,
           key_permissions: requestBody.permissions,
+          governance: governance,
         });
 
       if (insertRes.error) {

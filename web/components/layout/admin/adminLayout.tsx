@@ -25,7 +25,7 @@ const navigation = [
     icon: BuildingLibraryIcon,
   },
   {
-    name: "Governance Orgs",
+    name: "Governance",
     href: "/admin/governance-orgs",
     icon: UsersIcon,
   },
@@ -40,8 +40,8 @@ const navigation = [
     icon: FlagIcon,
   },
   {
-    name: "Coles Cave",
-    href: "/admin/coles-cave",
+    name: "Org Analytics",
+    href: "/admin/org-analytics",
     icon: CubeIcon,
   },
 ];

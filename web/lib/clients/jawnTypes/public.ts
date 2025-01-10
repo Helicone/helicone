@@ -431,6 +431,13 @@ export interface paths {
   "/v1/customer/query": {
     post: operations["GetCustomers"];
   };
+  "/v1/api-keys": {
+    get: operations["GetAPIKeys"];
+  };
+  "/v1/api-keys/{apiKeyId}": {
+    delete: operations["DeleteAPIKey"];
+    patch: operations["UpdateAPIKey"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -2306,6 +2313,38 @@ Json: JsonObject;
       id: string;
       name: string;
     };
+    "PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      /** @enum {number|null} */
+      error: null;
+      data: {
+          user_id: string;
+          temp_key: boolean;
+          soft_delete: boolean;
+          organization_id: string;
+          key_permissions: string;
+          /** Format: double */
+          id: number;
+          created_at: string;
+          api_key_name: string;
+          api_key_hash: string;
+        }[];
+      /** Format: double */
+      count: number | null;
+    };
+    PostgrestResponseFailure: {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      error: components["schemas"]["PostgrestError"];
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      count: null;
+    };
+    "PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": components["schemas"]["PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
   };
   responses: {
   };
@@ -4808,6 +4847,62 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Customer"][];
+        };
+      };
+    };
+  };
+  GetAPIKeys: {
+    parameters: {
+      query: {
+        governance: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"];
+        };
+      };
+    };
+  };
+  DeleteAPIKey: {
+    parameters: {
+      path: {
+        apiKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  UpdateAPIKey: {
+    parameters: {
+      path: {
+        apiKeyId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          api_key_name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            error: string;
+          };
         };
       };
     };
