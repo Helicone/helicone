@@ -379,6 +379,7 @@ async function getUsersTravelPlan(
       headers: {
         "Helicone-Request-Id": requestId,
         "Helicone-Property-Environment": "development",
+        "Helicone-Property-Member": "john.smith@example.com",
         "Helicone-Prompt-Id": "extract-travel-plan",
         "Helicone-Session-Name": "XPedia Travel Planner",
         "Helicone-Session-Id": sessionId,
@@ -508,6 +509,7 @@ async function getTravelTips(
       headers: {
         "Helicone-Request-Id": requestId,
         "Helicone-Property-Environment": "development",
+        "Helicone-Property-Member": "john.smith@example.com",
         "Helicone-Prompt-Id": "generate-travel-tips",
         "Helicone-Session-Name": "XPedia Travel Planner",
         "Helicone-Session-Id": sessionId,
