@@ -33,7 +33,6 @@ import {
 } from "../../templates/evals/testing/examples";
 import useNotification from "../notification/useNotification";
 import { TestInput } from "./types";
-import { Evaluator } from "@/components/templates/evals/details/types";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
