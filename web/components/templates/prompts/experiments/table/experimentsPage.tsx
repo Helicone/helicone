@@ -2,7 +2,6 @@ import AuthHeader from "../../../../shared/authHeader";
 import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { useRouter } from "next/router";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../../../shared/notification/useNotification";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
