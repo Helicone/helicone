@@ -1,13 +1,11 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 import { useState } from "react";
 
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
-import useNotification from "../../shared/notification/useNotification";
 import AddKeyModal from "./components/addKeyModal";
 import DeleteKeyModal from "./components/DeleteKeyModal";
 import EditKeyModal from "./components/EditKeyModal";

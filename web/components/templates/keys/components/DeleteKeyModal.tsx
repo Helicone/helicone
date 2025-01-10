@@ -1,4 +1,3 @@
-import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useKeys } from "../useKeys";

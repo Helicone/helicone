@@ -1,10 +1,5 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { User } from "@supabase/supabase-js";
 import { useState, useEffect } from "react";
-import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
-import useNotification from "../../../shared/notification/useNotification";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useKeys } from "../useKeys";
 
