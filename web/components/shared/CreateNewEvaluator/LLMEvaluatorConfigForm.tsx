@@ -53,7 +53,7 @@ export type LLMEvaluatorConfigFormPreset = {
   testInput?: TestInput;
 };
 
-const useLLMConfigStore = create<{
+export const useLLMConfigStore = create<{
   LLMEvaluatorConfigFormPreset: LLMEvaluatorConfigFormPreset;
   setLLMEvaluatorConfigFormPreset: Dispatch<
     SetStateAction<LLMEvaluatorConfigFormPreset>
