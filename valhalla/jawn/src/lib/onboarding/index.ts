@@ -4,6 +4,351 @@ import { hpf } from "@helicone/prompts";
 import { HeliconeManualLogger } from "@helicone/helpers";
 import { examples } from "./travelExamples";
 import { OPENAI_KEY } from "../clients/constant";
+import { hotels, flights } from "./onboardingVariables";
+
+async function findAndBookFlight(
+  heliconeLogger: HeliconeManualLogger,
+  openai: OpenAI,
+  travelPlan: any,
+  sessionId: string,
+  userId: string
+) {
+  const flightSearch = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "FlightAPI",
+      input: {
+        origin: "SFO",
+        destination: travelPlan.destination,
+        departDate: travelPlan.startDate,
+        returnDate: travelPlan.endDate,
+        passengers: 2,
+        cabinClass: "economy",
+      },
+    },
+    async (resultRecorder) => {
+      resultRecorder.appendResults({
+        status: "success",
+        flights,
+        filters: {
+          airlines: ["United", "Delta", "American"],
+          stops: [0, 1, 2],
+          priceRange: { min: 500, max: 1500 },
+        },
+      });
+      return { flights };
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/booking/flight/search`,
+      "Helicone-User-Id": userId,
+    }
+  );
+
+  // Use LLM to select the best flight (for show)
+  const prompt = hpf`As a travel expert, select the most suitable flight for this trip. Consider the duration, price, and amenities.
+
+  Travel Plan:
+  ${{
+    travelPlan: JSON.stringify(travelPlan),
+    availableFlights: JSON.stringify(flights),
+  }}
+
+  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:
+  {
+    "selectedFlightId": string,
+    "cabinClass": string,
+    "reasoningPoints": string[],
+    "alternativeId": string
+  }`;
+
+  const requestId = uuid();
+  const flightSelection = await openai.chat.completions.create(
+    {
+      messages: [{ role: "system", content: prompt }],
+      model: "gpt-3.5-turbo",
+    },
+    {
+      headers: {
+        "Helicone-Request-Id": requestId,
+        "Helicone-Property-Environment": "development",
+        "Helicone-Prompt-Id": "select-flight",
+        "Helicone-Session-Name": "XPedia Travel Planner",
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Path": `/booking/flight/selection`,
+        "Helicone-User-Id": userId,
+      },
+    }
+  );
+
+  // Ignore LLM's choice and use our predetermined selection
+  const selection = {
+    selectedFlightId: "FL_123456", // United Airlines
+    cabinClass: "Economy",
+    reasoningPoints:
+      JSON.parse(flightSelection.choices[0].message.content || "{}")
+        .reasoningPoints || [],
+  };
+
+  // Use our hardcoded selection for the booking
+  const booking = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "FlightBookingAPI",
+      input: {
+        flightId: selection.selectedFlightId,
+        cabinClass: selection.cabinClass,
+        passengers: 2,
+        departDate: travelPlan.startDate,
+        returnDate: travelPlan.endDate,
+      },
+    },
+    async (resultRecorder) => {
+      resultRecorder.appendResults({
+        status: "success",
+        booking: {
+          bookingId: "BK" + Date.now(),
+          confirmationNumber:
+            "XPED" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+          flight: {
+            id: "FL_123456",
+            outbound: {
+              flightNumber: "UA456",
+              airline: "United Airlines",
+              departure: { airport: "SFO", time: "10:30" },
+              arrival: { airport: "JFK", time: "19:00" },
+              duration: "8h 30m",
+              stops: 0,
+              aircraft: "Boeing 787-9",
+            },
+            return: {
+              flightNumber: "UA457",
+              airline: "United Airlines",
+              departure: { airport: "JFK", time: "11:30" },
+              arrival: { airport: "SFO", time: "14:45" },
+              duration: "6h 15m",
+              stops: 0,
+              aircraft: "Boeing 787-9",
+            },
+            price: {
+              total: 842,
+              currency: "USD",
+              breakdown: {
+                base: 720,
+                taxes: 122,
+                fees: 0,
+              },
+            },
+            seatsAvailable: 4,
+            cabinClass: "Economy",
+            features: ["Meal", "WiFi", "Power outlets", "Entertainment"],
+          },
+          stay: {
+            checkIn: travelPlan.startDate,
+            checkOut: travelPlan.endDate,
+            checkInTime: "15:00",
+            checkOutTime: "11:00",
+            nightsCount: 3,
+            guestCount: 2,
+          },
+          payment: {
+            total: 897,
+            currency: "USD",
+            breakdown: {
+              roomRate: 299,
+              taxesAndFees: 89.7,
+              total: 897,
+            },
+            paid: true,
+            method: "Credit Card (ending in 1234)",
+          },
+          amenities: [
+            "Free WiFi",
+            "Breakfast included",
+            "Access to spa and fitness center",
+            "Welcome drink",
+          ],
+          cancellation: {
+            freeCancellationUntil: "2024-03-20T23:59:59Z",
+            policy: "Free cancellation until 3 days before check-in",
+          },
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/booking/flight/confirm`,
+      "Helicone-User-Id": userId,
+    }
+  );
+
+  return booking;
+}
+
+async function findAndBookHotel(
+  heliconeLogger: HeliconeManualLogger,
+  openai: OpenAI,
+  travelPlan: any,
+  sessionId: string,
+  userId: string
+) {
+  const hotelSearch = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "HotelAPI",
+      input: {
+        destination: travelPlan.destination,
+        checkIn: travelPlan.startDate,
+        checkOut: travelPlan.endDate,
+        guests: 2,
+        rooms: 1,
+      },
+    },
+    async (resultRecorder) => {
+      resultRecorder.appendResults({
+        status: "success",
+        hotels,
+        filters: {
+          priceRange: { min: 150, max: 800 },
+          neighborhoods: ["City Center", "Historic District", "Waterfront"],
+          amenities: ["Pool", "Spa", "WiFi", "Parking", "Restaurant"],
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/booking/hotel/search`,
+      "Helicone-User-Id": userId,
+    }
+  );
+
+  // Use LLM to select the best hotel (for show)
+  const prompt = hpf`As a travel expert, select the most suitable hotel for this trip. Consider the location, amenities, and value for money.
+
+  Travel Plan:
+  ${{
+    travelPlan: JSON.stringify(travelPlan),
+    availableHotels: JSON.stringify(hotels),
+  }}
+
+  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:
+  {
+    "selectedHotelId": string,
+    "roomType": string,
+    "reasoningPoints": string[],
+    "alternativeId": string
+  }`;
+
+  const requestId = uuid();
+  const hotelSelection = await openai.chat.completions.create(
+    {
+      messages: [{ role: "system", content: prompt }],
+      model: "gpt-3.5-turbo",
+    },
+    {
+      headers: {
+        "Helicone-Request-Id": requestId,
+        "Helicone-Property-Environment": "development",
+        "Helicone-Prompt-Id": "select-hotel",
+        "Helicone-Session-Name": "XPedia Travel Planner",
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Path": `/booking/hotel/selection`,
+        "Helicone-User-Id": userId,
+      },
+    }
+  );
+
+  // Ignore LLM's choice and use our predetermined selection
+  const selection = {
+    selectedHotelId: "HTL_123456", // Grand Plaza Hotel
+    roomType: "Deluxe King",
+    reasoningPoints:
+      JSON.parse(hotelSelection.choices[0].message.content || "{}")
+        .reasoningPoints || [],
+  };
+
+  // Use our hardcoded selection for the booking
+  const booking = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "HotelBookingAPI",
+      input: {
+        hotelId: selection.selectedHotelId,
+        roomType: selection.roomType,
+        guests: 2,
+        checkIn: travelPlan.startDate,
+        checkOut: travelPlan.endDate,
+      },
+    },
+    async (resultRecorder) => {
+      resultRecorder.appendResults({
+        status: "success",
+        booking: {
+          bookingId: "BK" + Date.now(),
+          confirmationNumber:
+            "XPED" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+          hotel: {
+            name: "Grand Plaza Hotel",
+            address: "123 Main Street",
+            phone: "+1-555-0123",
+            email: "reservations@grandplaza.example.com",
+          },
+          room: {
+            type: "Deluxe King",
+            bedType: "1 King Bed",
+            floor: 15,
+            roomNumber: "1507",
+            specialRequests: "High floor, away from elevator",
+          },
+          stay: {
+            checkIn: travelPlan.startDate,
+            checkOut: travelPlan.endDate,
+            checkInTime: "15:00",
+            checkOutTime: "11:00",
+            nightsCount: 3,
+            guestCount: 2,
+          },
+          payment: {
+            total: 897,
+            currency: "USD",
+            breakdown: {
+              roomRate: 299,
+              taxesAndFees: 89.7,
+              total: 897,
+            },
+            paid: true,
+            method: "Credit Card (ending in 1234)",
+          },
+          amenities: [
+            "Free WiFi",
+            "Breakfast included",
+            "Access to spa and fitness center",
+            "Welcome drink",
+          ],
+          cancellation: {
+            freeCancellationUntil: "2024-03-20T23:59:59Z",
+            policy: "Free cancellation until 3 days before check-in",
+          },
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/booking/hotel/confirm`,
+      "Helicone-User-Id": userId,
+    }
+  );
+
+  return booking;
+}
 
 async function getUsersTravelPlan(
   openai: OpenAI,
@@ -309,7 +654,7 @@ async function processExample(
   );
 
   // Run these in parallel
-  const [tips, packingList] = await Promise.all([
+  const [tips, packingList, flightBooking, hotelBooking] = await Promise.all([
     getTravelTips(openai, heliconeLogger, example, sessionId, travelPlan),
     generatePackingList(
       openai,
@@ -319,6 +664,20 @@ async function processExample(
       travelPlan,
       weatherData
     ),
+    findAndBookFlight(
+      heliconeLogger,
+      openai,
+      travelPlan,
+      sessionId,
+      example.userId
+    ),
+    findAndBookHotel(
+      heliconeLogger,
+      openai,
+      travelPlan,
+      sessionId,
+      example.userId
+    ),
   ]);
 
   return {
@@ -326,6 +685,8 @@ async function processExample(
     tips,
     weatherData,
     packingList,
+    flightBooking,
+    hotelBooking,
   };
 }
 
@@ -345,7 +706,6 @@ export async function setupDemoOrganizationRequests({
   //     "Helicone-Auth": `Bearer ${heliconeApiKey}`,
   //   },
   // });
-  console.log(`Using Helicone Worker URL: ${heliconeWorkerUrl}`);
 
   const openai = new OpenAI({
     apiKey: OPENAI_KEY,
