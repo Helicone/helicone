@@ -10,7 +10,7 @@ type EvaluatorScore = {
 };
 export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
 
-const TIERS = ["pro-20240913", "enterprise"];
+const TIERS = ["pro-20240913", "enterprise", "demo"];
 
 export class LLMAsAJudge {
   constructor(
@@ -75,7 +75,6 @@ export class LLMAsAJudge {
       this.params.organizationId,
       "LLMAsAJudge"
     );
-    console.log("OPENROUTER_KEY", OPENROUTER_KEY);
 
     const res = await heliconeApiKey.data?.with(async (apiKey) => {
       return await fetch(requestPath, {
