@@ -33,6 +33,7 @@ import {
 } from "../../templates/evals/testing/examples";
 import useNotification from "../notification/useNotification";
 import { TestInput } from "./types";
+import { Evaluator } from "@/components/templates/evals/details/types";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -53,6 +54,40 @@ export type LLMEvaluatorConfigFormPreset = {
   testInput?: TestInput;
 };
 
+const getInitialState = (
+  evaluator?: Evaluator
+): LLMEvaluatorConfigFormPreset => {
+  if (!evaluator) {
+    return LLM_AS_A_JUDGE_OPTIONS[0].preset;
+  }
+
+  const template = evaluator.llm_template as any;
+  const property =
+    template.tools[0].function.parameters.properties[evaluator.name];
+  const propertyDescription = property?.description;
+  const rangeMin = property?.minimum;
+  const rangeMax = property?.maximum;
+
+  return {
+    name: evaluator.name,
+    description: propertyDescription,
+    expectedValueType: evaluator.scoring_type
+      .replace("LLM-", "")
+      .toLowerCase() as "boolean" | "choice" | "range",
+    includedVariables: {
+      inputs: true,
+      promptTemplate: false,
+      inputBody: false,
+      outputBody: true,
+    },
+    choiceScores: evaluator.scoring_type === "LLM-CHOICE" ? [] : undefined,
+    rangeMin: evaluator.scoring_type === "LLM-RANGE" ? rangeMin : undefined,
+    rangeMax: evaluator.scoring_type === "LLM-RANGE" ? rangeMax : undefined,
+    model: template.model,
+    testInput: undefined,
+  };
+};
+
 const useLLMConfigStore = create<{
   LLMEvaluatorConfigFormPreset: LLMEvaluatorConfigFormPreset;
   setLLMEvaluatorConfigFormPreset: Dispatch<
@@ -62,7 +97,7 @@ const useLLMConfigStore = create<{
   devtools(
     persist(
       (set) => ({
-        LLMEvaluatorConfigFormPreset: LLM_AS_A_JUDGE_OPTIONS[0].preset,
+        LLMEvaluatorConfigFormPreset: getInitialState(),
         setLLMEvaluatorConfigFormPreset: (by) => {
           if (typeof by === "function") {
             set((state) => ({
@@ -85,10 +120,11 @@ const useLLMConfigStore = create<{
 );
 
 export const LLMEvaluatorConfigForm: React.FC<{
+  evaluator: Evaluator;
   onSubmit: () => void;
   existingEvaluatorId?: string;
   openTestPanel?: () => void;
-}> = ({ existingEvaluatorId, onSubmit, openTestPanel }) => {
+}> = ({ evaluator, existingEvaluatorId, onSubmit, openTestPanel }) => {
   const notification = useNotification();
 
   const jawn = useJawnClient();
@@ -136,6 +172,12 @@ export const LLMEvaluatorConfigForm: React.FC<{
     configFormParams.testInput,
     setTestData,
   ]);
+
+  useEffect(() => {
+    if (evaluator) {
+      setConfigFormParams(getInitialState(evaluator));
+    }
+  }, [evaluator, setConfigFormParams]);
 
   return (
     <Col className="h-full flex flex-col">
