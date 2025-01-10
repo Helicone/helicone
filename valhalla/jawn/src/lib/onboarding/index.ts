@@ -183,6 +183,113 @@ async function getTravelTips(
   }
 }
 
+async function getDestinationWeather(
+  heliconeLogger: HeliconeManualLogger,
+  destination: string,
+  startDate: string,
+  endDate: string,
+  sessionId: string,
+  userId: string
+) {
+  const res = await heliconeLogger.logRequest(
+    {
+      _type: "tool",
+      toolName: "WeatherAPI",
+      input: {
+        destination,
+        startDate,
+        endDate,
+      },
+      apiVersion: "v1",
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    },
+    async (resultRecorder) => {
+      // Simulate weather API response
+      resultRecorder.appendResults({
+        status: "success",
+        forecast: {
+          averageTemp: 22,
+          conditions: "Mostly sunny",
+          precipitation: "20% chance of rain",
+          humidity: "Medium",
+          seasonalNotes: "Peak tourist season",
+        },
+        metadata: {
+          destination,
+          dateRange: `${startDate} to ${endDate}`,
+        },
+      });
+    },
+    {
+      "Helicone-Property-Environment": "development",
+      "Helicone-Session-Name": "XPedia Travel Planner",
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": `/planning/weather`,
+      "Helicone-User-Id": userId,
+    }
+  );
+
+  return res;
+}
+
+async function generatePackingList(
+  openai: OpenAI,
+  heliconeLogger: HeliconeManualLogger,
+  example: (typeof examples)[0],
+  sessionId: string,
+  travelPlan: any,
+  weatherData: any
+) {
+  const prompt = hpf`As a travel expert, generate a comprehensive packing list based on the destination, planned activities, and weather conditions.
+
+  ${{
+    travelPlan: JSON.stringify(travelPlan),
+    weather: JSON.stringify(weatherData),
+  }}
+
+  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:
+  {
+    "essentials": string[],
+    "clothing": string[],
+    "electronics": string[],
+    "toiletries": string[],
+    "activitySpecific": Record<string, string[]>,
+    "weatherConsiderations": string[],
+    "documentsAndMoney": string[]
+  }`;
+
+  const requestId = uuid();
+  const chatCompletion = await openai.chat.completions.create(
+    {
+      messages: [{ role: "system", content: prompt }],
+      model: "gpt-3.5-turbo",
+    },
+    {
+      headers: {
+        "Helicone-Request-Id": requestId,
+        "Helicone-Property-Environment": "development",
+        "Helicone-Prompt-Id": "generate-packing-list",
+        "Helicone-Session-Name": "XPedia Travel Planner",
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Path": `/planning/packing-list`,
+        "Helicone-User-Id": example.userId,
+      },
+    }
+  );
+
+  try {
+    const result = JSON.parse(
+      chatCompletion.choices[0].message.content || "{}"
+    );
+    return result;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
+}
+
 async function processExample(
   openai: OpenAI,
   heliconeLogger: HeliconeManualLogger,
@@ -191,15 +298,35 @@ async function processExample(
 ) {
   const travelPlan = await getUsersTravelPlan(openai, example, sessionId);
 
-  const tips = await getTravelTips(
-    openai,
+  // Get weather data first
+  const weatherData = await getDestinationWeather(
     heliconeLogger,
-    example,
+    travelPlan.destination || "unknown",
+    travelPlan.startDate || "unknown",
+    travelPlan.endDate || "unknown",
     sessionId,
-    travelPlan
+    example.userId
   );
 
-  return { travelPlan, tips };
+  // Run these in parallel
+  const [tips, packingList] = await Promise.all([
+    getTravelTips(openai, heliconeLogger, example, sessionId, travelPlan),
+    generatePackingList(
+      openai,
+      heliconeLogger,
+      example,
+      sessionId,
+      travelPlan,
+      weatherData
+    ),
+  ]);
+
+  return {
+    travelPlan,
+    tips,
+    weatherData,
+    packingList,
+  };
 }
 
 export async function setupDemoOrganizationRequests({
