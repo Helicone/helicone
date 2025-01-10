@@ -44,7 +44,6 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
 
       <Col className="space-y-2">
         <LLMEvaluatorConfigForm
-          evaluator={evaluator}
           onSubmit={() => {}}
           existingEvaluatorId={evaluator.id}
         />
