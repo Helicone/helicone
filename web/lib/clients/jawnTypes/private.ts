@@ -274,6 +274,11 @@ export interface paths {
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
   };
+  "/v1/admin/governance-orgs/keys": {
+    get: operations["GetGovernanceOrgKeys"];
+    post: operations["CreateGovernanceOrgKey"];
+    delete: operations["DeleteGovernanceOrgKey"];
+  };
   "/v1/admin/governance-orgs/{orgId}": {
     post: operations["GovernanceOrgs"];
     delete: operations["DeleteGovernanceOrg"];
@@ -1388,7 +1393,7 @@ Json: JsonObject;
     KeyPermissions: "w" | "rw";
     GenerateHashQueryParams: {
       apiKey: string;
-      userId: string;
+      governance: boolean;
       keyName: string;
       permissions: components["schemas"]["KeyPermissions"];
     };
@@ -1947,6 +1952,22 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
+    "PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__": {
+      /** Format: double */
+      status: number;
+      statusText: string;
+      /** @enum {number|null} */
+      error: null;
+      data: {
+        settings: components["schemas"]["Json"];
+        name: string;
+        id: string;
+        created_at: string;
+      };
+      /** Format: double */
+      count: number | null;
+    };
+    "PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__": components["schemas"]["PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__"] | components["schemas"]["PostgrestResponseFailure"];
     "PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       /** Format: double */
       status: number;
@@ -3634,6 +3655,51 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetGovernanceOrgKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__"];
+        };
+      };
+    };
+  };
+  CreateGovernanceOrgKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": null;
+        };
+      };
+    };
+  };
+  DeleteGovernanceOrgKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": null;
         };
       };
     };
