@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { clsx } from "../../../shared/clsx";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useKeys } from "../useKeys";
@@ -20,6 +20,12 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
     );
   }, [keys?.data?.data?.data, open, selectedKey]);
 
+  const selectKeyData = useMemo(() => {
+    return keys?.data?.data?.data?.find(
+      (key) => key.id.toString() === selectedKey
+    );
+  }, [keys?.data?.data?.data, selectedKey]);
+
   return (
     <ThemedModal open={open} setOpen={setOpen}>
       <div className="flex flex-col gap-4 w-[400px]">
@@ -38,7 +44,7 @@ const EditKeyModal = ({ open, setOpen, selectedKey }: EditKeyModalProps) => {
             className={clsx(
               "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
             )}
-            placeholder={selectedKey?.api_key_name}
+            placeholder={selectKeyData?.api_key_name}
             onChange={(e) => setEditName(e.target.value)}
           />
         </div>
