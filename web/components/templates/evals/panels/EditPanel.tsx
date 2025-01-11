@@ -1,13 +1,47 @@
 import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import LLMAsJudgeEvaluatorDetails from "../details/LLMAsJudgeEvaluatorDetails";
 import PythonEvaluatorDetails from "../details/PythonEvaluatorDetails";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
 import { useEvaluators } from "../EvaluatorHook";
 import { PanelType } from "./types";
+import { Evaluator } from "../details/types";
+import {
+  LLMEvaluatorConfigFormPreset,
+  useLLMConfigStore,
+} from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
 
+const getInitialState = (
+  evaluator: Evaluator
+): LLMEvaluatorConfigFormPreset => {
+  const template = evaluator.llm_template as any;
+  const property =
+    template.tools[0].function.parameters.properties[evaluator.name];
+  const propertyDescription = property?.description;
+  const rangeMin = property?.minimum;
+  const rangeMax = property?.maximum;
+
+  return {
+    name: evaluator.name,
+    description: propertyDescription,
+    expectedValueType: evaluator.scoring_type
+      .replace("LLM-", "")
+      .toLowerCase() as "boolean" | "choice" | "range",
+    includedVariables: {
+      inputs: true,
+      promptTemplate: false,
+      inputBody: false,
+      outputBody: true,
+    },
+    choiceScores: evaluator.scoring_type === "LLM-CHOICE" ? [] : undefined,
+    rangeMin: evaluator.scoring_type === "LLM-RANGE" ? rangeMin : undefined,
+    rangeMax: evaluator.scoring_type === "LLM-RANGE" ? rangeMax : undefined,
+    model: template.model,
+    testInput: undefined,
+  };
+};
 export const EditPanel = ({
   setPanels,
   panels,
@@ -26,6 +60,14 @@ export const EditPanel = ({
         e.name === selectedEvaluatorId
     );
   }, [evaluators, selectedEvaluatorId]);
+
+  const { setLLMEvaluatorConfigFormPreset } = useLLMConfigStore();
+
+  useEffect(() => {
+    if (evaluator) {
+      setLLMEvaluatorConfigFormPreset(getInitialState(evaluator));
+    }
+  }, [evaluator, setLLMEvaluatorConfigFormPreset]);
 
   return (
     <Col className="h-full">

@@ -75,9 +75,9 @@ const GenerateAPIKey = ({
       const { res: promiseRes, apiKey: generatedApiKey } = generateAPIKeyHelper(
         "rw",
         org?.currentOrg?.organization_type ?? "",
-        user?.id ?? "",
         "Main",
-        window.location.hostname.includes("eu.")
+        window.location.hostname.includes("eu."),
+        false
       );
 
       const res = await promiseRes;

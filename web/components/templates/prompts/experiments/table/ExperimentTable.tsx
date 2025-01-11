@@ -572,7 +572,7 @@ export function ExperimentTable({
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
-            <div className="flex flex-col overflow-x-auto w-full">
+            <div className="flex flex-col w-full">
               {showScores && (
                 <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-800">
                   {promptVersionsData && (
@@ -591,15 +591,17 @@ export function ExperimentTable({
               )}
               <div
                 className={clsx(
-                  "h-[calc(100vh-90px)] bg-white dark:bg-neutral-950 w-full",
-                  showScores && "h-[calc(100vh-90px-300px-80px)]"
+                  "bg-white dark:bg-neutral-950 w-full overflow-x-auto",
+                  showScores
+                    ? "h-[calc(100vh-90px-300px-50px)]"
+                    : "h-[calc(100vh-90px)]"
                 )}
               >
                 <div
-                  className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max"
+                  className="bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max h-auto"
                   // style={{ width: "fit-content" }}
                 >
-                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800">
+                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800 h-[1px]">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
@@ -688,30 +690,29 @@ export function ExperimentTable({
                     </TableBody>
                   </Table>
                 </div>
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Add row
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full px-2 py-2">
+                    <AddRowPopover
+                      setPopoverOpen={setPopoverOpen}
+                      setShowAddManualRow={() => setRightPanel("add_manual")}
+                      setShowExperimentInputSelector={
+                        setShowExperimentInputSelector
+                      }
+                      setShowRandomInputSelector={setShowRandomInputSelector}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-
-              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add row
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full px-2 py-2">
-                  <AddRowPopover
-                    setPopoverOpen={setPopoverOpen}
-                    setShowAddManualRow={() => setRightPanel("add_manual")}
-                    setShowExperimentInputSelector={
-                      setShowExperimentInputSelector
-                    }
-                    setShowRandomInputSelector={setShowRandomInputSelector}
-                  />
-                </PopoverContent>
-              </Popover>
 
               <ExperimentRandomInputSelector
                 open={showRandomInputSelector}

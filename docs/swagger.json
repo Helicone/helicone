@@ -7396,6 +7396,132 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"items": {
+							"properties": {
+								"user_id": {
+									"type": "string"
+								},
+								"temp_key": {
+									"type": "boolean"
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"organization_id": {
+									"type": "string"
+								},
+								"key_permissions": {
+									"type": "string"
+								},
+								"id": {
+									"type": "number",
+									"format": "double"
+								},
+								"created_at": {
+									"type": "string"
+								},
+								"api_key_name": {
+									"type": "string"
+								},
+								"api_key_hash": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"user_id",
+								"temp_key",
+								"soft_delete",
+								"organization_id",
+								"key_permissions",
+								"id",
+								"created_at",
+								"api_key_name",
+								"api_key_hash"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"count": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestResponseFailure": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"$ref": "#/components/schemas/PostgrestError"
+					},
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/PostgrestResponseFailure"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -11338,7 +11464,7 @@
 		},
 		"/v1/pi/total_requests": {
 			"post": {
-				"operationId": "GetTotalRequests",
+				"operationId": "PiGetTotalRequests",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -13696,6 +13822,143 @@
 						"application/json": {
 							"schema": {
 								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys": {
+			"get": {
+				"operationId": "GetAPIKeys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "governance",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/api-keys/{apiKeyId}": {
+			"delete": {
+				"operationId": "DeleteAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"error"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "apiKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"error": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"error"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "apiKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"api_key_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"api_key_name"
+								],
 								"type": "object"
 							}
 						}
