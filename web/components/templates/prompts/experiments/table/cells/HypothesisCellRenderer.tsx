@@ -203,8 +203,16 @@ export const HypothesisCellRenderer = forwardRef<
       setRunning(false);
     };
 
+    const handleRunHypothesisIfRequired = async (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      if (!content) {
+        await handleRunHypothesis(e);
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       runHypothesis: () => handleRunHypothesis(),
+      runHypothesisIfRequired: () => handleRunHypothesisIfRequired(),
     }));
 
     if (running) {
