@@ -22,7 +22,6 @@ const TotalCost = () => {
   const { apiKey } = useHeliconeLogin();
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
   const router = useRouter();
-
   const jawn = useJawnClient(apiKey.data ?? "");
 
   const costsOverTime = useQuery({
