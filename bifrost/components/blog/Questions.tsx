@@ -27,7 +27,7 @@ export function Questions({}: QuestionsProps) {
           >
             contact us
           </a>
-          , we'd love to hear from you!
+          , we&apos;d love to hear from you!
         </p>
       </section>
     </>
