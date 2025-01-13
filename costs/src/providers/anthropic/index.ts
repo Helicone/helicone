@@ -91,17 +91,7 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
-  {
-    model: {
-      operator: "equals",
-      value: "claude-3-5-sonnet-20241022",
-    },
-    cost: {
-      prompt_token: 0.000003,
-      completion_token: 0.000015,
-    },
-    showInPlayground: true,
-  },
+
   {
     model: {
       operator: "equals",
@@ -110,6 +100,19 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.00000025,
       completion_token: 0.00000125,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-3-5-sonnet-20241022",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+      cache_creation_prompt_tokens: 0.00000375,
+      cache_read_prompt_tokens: 0.0000003,
     },
     showInPlayground: true,
   },

@@ -35,20 +35,8 @@ export interface ModelRow {
   cost: {
     prompt_token: number;
     completion_token: number;
-  };
-  showInPlayground?: boolean;
-  targetUrl?: string;
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-}
-
-export interface ModelRow {
-  model: TextOperator;
-  cost: {
-    prompt_token: number;
-    completion_token: number;
+    cache_read_prompt_tokens?: number;
+    cache_creation_prompt_tokens?: number;
   };
   showInPlayground?: boolean;
   targetUrl?: string;
