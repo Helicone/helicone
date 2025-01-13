@@ -63,7 +63,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
           >
             <PlusIcon className="w-5 h-5 text-slate-700 dark:text-slate-100" />
             <span className="text-sm font-medium text-slate-700 dark:text-slate-100">
-              Add Column
+              Add Prompt
             </span>
           </Button>
         </DropdownMenuTrigger>
