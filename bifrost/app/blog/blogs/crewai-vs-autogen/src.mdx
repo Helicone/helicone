@@ -13,8 +13,6 @@ Both platforms are powerful and cater to different aspects of AI application dev
 | Code Execution | Leverages LangChain's ecosystem for language understanding.                    | Has better default code execution capabilities, using Docker for isolation.                     |
 | LLM Support    | Has dependencies on OpenAI, limiting for other LLMs.                           | More reliant on OpenAI's GPT models, which can be limiting.                                     |
 
----
-
 ## CrewAI — Structured collaboration
 
 `free` `open-source`
@@ -64,15 +62,46 @@ crew = Crew(
 )
 ```
 
-_Note: Always check [CrewAI's official documentation](https://docs.crewai.com/concepts/agents) for the most up-to-date information and best practices._
+_Note: Always check CrewAI's official <a href="https://docs.crewai.com/concepts/agents" target="_blank" rel="noopener">documentation</a> for the most up-to-date information and best practices._
+
+### Use Cases of CrewAI
+
+- Better for prototyping and quickly testing complex agent interactions.
+- Better for automating regular workflows with a defined structure.
+
+#### Example 1: Multi-stage data processing
+
+```python
+data_collector = Agent(role='Collector')
+validator = Agent(role='Validator')
+transformer = Agent(role='Transformer')
+crew = Crew(agents=[data_collector, validator, transformer])
+
+result = crew.kickoff()
+```
+
+#### Example 2: Tiered support system
+
+```python
+first_line = Agent(role='InitialResponse')
+specialist = Agent(role='TechnicalSupport')
+escalation = Agent(role='EscalationManager')
+support_crew = Crew(agents=[first_line, specialist, escalation])
+
+result = support_crew.kickoff()
+```
+
+_You might find these helpful: <a href="https://pypi.org/project/crewai/" target="_blank" rel="noopener">Python Package</a>_
 
 ---
 
-### [AutoGen](https://microsoft.github.io/autogen/0.2/) — Autonomous problem-solving
+## AutoGen — Autonomous problem-solving
 
 `free` `open-source`
 
-AutoGen is a framework developed by Microsoft, allowing developers to create AI agents that can interact with each other and with humans to solve complex tasks. These agents can be customized to perform specific roles or have particular expertise:
+Microsoft's <a href="https://microsoft.github.io/autogen/0.2/" target="_blank" rel="noopener">AutoGen</a> is a framework developed by Microsoft, allowing developers to create AI agents
+that can interact with each other and with humans to solve complex tasks. These agents
+can be customized to perform specific roles or have particular expertise:
 
 1. code execution for tasks involving programming or data analysis.
 2. conversational approach to problem-solving, where agents can discuss, plan, and execute tasks iteratively.
@@ -104,40 +133,9 @@ joe = ConversableAgent(
 )
 ```
 
-_Note: Always check [AutoGen's official documentation](https://microsoft.github.io/autogen/0.2/docs/tutorial/introduction/#agents) for the most up-to-date information and best practices._
+_Note: Always check <a href="https://microsoft.github.io/autogen/0.2/docs/tutorial/introduction/#agents" target="_blank" rel="noopener">AutoGen's official documentation</a> for the most up-to-date information and best practices._
 
----
-
-## Use Cases
-
-### CrewAI
-
-- Better for prototyping and quickly testing complex agent interactions.
-- Better for automating regular workflows with a defined structure.
-
-#### Example 1: Multi-stage data processing
-
-```python
-data_collector = Agent(role='Collector')
-validator = Agent(role='Validator')
-transformer = Agent(role='Transformer')
-crew = Crew(agents=[data_collector, validator, transformer])
-
-result = crew.kickoff()
-```
-
-#### Example 2: Tiered support system
-
-```python
-first_line = Agent(role='InitialResponse')
-specialist = Agent(role='TechnicalSupport')
-escalation = Agent(role='EscalationManager')
-support_crew = Crew(agents=[first_line, specialist, escalation])
-
-result = support_crew.kickoff()
-```
-
-### AutoGen
+### Use Cases of AutoGen
 
 - Preferred for tasks requiring precise control over information processing and API access.
 - Better for one-time, complex problem-solving where the solution approach is unclear.
@@ -170,7 +168,7 @@ For beginners, **<span style={{color: '#03A9F4'}}>CrewAI is generally considered
 2. documentation contains examples, which is particularly beneficial for beginners
 3. higher level of abstraction, helps beginners quickly prototype and explore multi-agent interactions without delving too deeply into complex setups.
 
-## Developer Opinions
+### Developer Opinions
 
 Many developers find that the choice between CrewAI and AutoGen depends on the specific project requirements:
 
@@ -179,15 +177,13 @@ Many developers find that the choice between CrewAI and AutoGen depends on the s
 - Some recommend using CrewAI if you know how to solve a problem and want to automate the process, and AutoGen if you want the agent to come up with a solution for you.
 - Both frameworks are seen as valuable tools, with the choice often coming down to the particular use case and development needs.
 
----
-
 ## Bottom Line
 
-It's worth noting that there are many <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">awesome AI agent frameworks</a> out there and they are rapidly evolving. We encourage you to explore multiple options to find the best fit for your use case, and stay updated with the latest advancements in the field.
+It's worth noting that there are many <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">awesome AI agent frameworks</a> out there and they are rapidly evolving. We encourage you to explore multiple options to find the best fit for your use case, and stay updated with the latest advancements in the field.
 
 Always be sure to check the official documentation for the most up-to-date information and best practices.
 
-### Other Comparisons:
+### Other Comparisons?
 
 - Comparing <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">CrewAI and Dify AI</a>
 - Comparing <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank" rel="noopener">LlamaIndex and LangChain</a>
