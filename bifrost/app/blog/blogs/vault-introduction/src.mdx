@@ -1,4 +1,3 @@
-
 ![Vault Feature](/static/blog/vault_banner.webp)
 
 In an evolving business landscape, managing multiple API keys can become a cumbersome process. Vault, Helicone's solution to this challenge, seamlessly integrates provider API keys like OpenAI and provides an efficient way to create and manage Helicone proxy keys.
@@ -41,7 +40,7 @@ curl --request POST
 
 With Vault, the process is streamlined:
 
-``` 
+```
 curl --request POST \\
   --url https://oai.helicone.ai/v1/chat/completions \\
   --header 'Authorization: Bearer {HELICONE_PROXY_KEY}' \\
@@ -61,14 +60,15 @@ curl --request POST \\
 
 Helicone takes security seriously. For provider keys, we use advanced AEAD encryption with transparent column-level encryption, ensuring these keys are safe even from database dumps. As for proxy keys, we employ a one-way hash, meaning once generated, they cannot be reverse-engineered.
 
-
 ## Future Roadmap
 
 As we continue to refine and expand Vault, here's a glimpse into the future additions we're excited about:
+
 - **Cost Rate Limits:** Set expenditure caps based on proxy key IDs to manage and control costs.
 - **Request Rate Limits:** Control the frequency of requests on a per proxy key ID basis, preventing any misuse or overuse.
-
 
 ## Moving Forward with Vault
 
 As businesses grow and adapt, so do their needs. Helicone is committed to innovating and providing solutions like Vault to meet these demands. We believe in simplifying processes while maximizing security and efficiency. With Vault, we're one step closer to that vision. We're excited to see how Vault empowers your business and are always here to support your journey.
+
+<Questions />
