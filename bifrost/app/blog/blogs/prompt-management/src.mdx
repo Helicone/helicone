@@ -1,62 +1,53 @@
-As prompts become more complex, developers are looking for a better way to track, compare versions, and test them efficiently before production. 
+As prompts become more complex, developers are looking for a better way to track, compare versions, and test them efficiently before production.
 
 ![Prompt Management in Helicone](/static/blog/prompt-management/cover.webp)
 
 But it's not just developers who are managing prompts--**non-technical people are also becoming key partners in prompt design.**
-- What if you could iterate faster and independently of the code? 
-- Collaborate with non-software engineers? 
-- Revert to previous versions easily? 
-- Retain ownership of your prompts? 
 
+- What if you could iterate faster and independently of the code?
+- Collaborate with non-software engineers?
+- Revert to previous versions easily?
+- Retain ownership of your prompts?
 
-In this blog, we will dive into the challenges of managing prompts and what to look for in prompt management tool. 
-
----
+In this blog, we will dive into the challenges of managing prompts and what to look for in prompt management tool.
 
 ## What is a Prompt?
 
 Large Language Models (LLMs) can be taught to perform new tasks using **<span style={{color: '#0ea5e9'}}>in-context learning</span>**, which involves feeding a prompt with instructions and/or examples. This method allows LLMs to perform tasks without needing additional training or parameter updates.
 
-**Prompt engineering is crucial for optimizing the model outputs.** Anyone working with AI products can be involved in crafting prompts using various techniques -- both developers and non-technical users. 
-
----
+**Prompt engineering is crucial for optimizing the model outputs.** Anyone working with AI products can be involved in crafting prompts using various techniques -- both developers and non-technical users.
 
 ## What is Prompt Management?
 
-At its core, prompt management for production-level LLMs involves setting up a streamlined system to manage and optimize prompts. This includes: 
+At its core, prompt management for production-level LLMs involves setting up a streamlined system to manage and optimize prompts. This includes:
 
 1. **Version control**: Keeping track of different prompt variations.
 2. **Decoupling prompts from the codebase**: Being able to test and iterate on prompts without delving into your application's core code.
 3. **Traceability**: Making sure prompts are easily traceable for testing and optimization.
 
 ![Version Control in Helicone](/static/blog/prompt-management/templating.webp)
-*View input/output, manage prompt versions and templates in Helicone.* 
+_View input/output, manage prompt versions and templates in Helicone._
 
-
----
-
-## What are the challenges with managing prompts? 
+## What are the challenges with managing prompts?
 
 ### 1. Overwhelming number of prompts
 
-For customer service chatbot, developers often create several versions of a prompt to handle refund requests. Each version uses different phrasing to test which one generates the most accurate and helpful response. 
+For customer service chatbot, developers often create several versions of a prompt to handle refund requests. Each version uses different phrasing to test which one generates the most accurate and helpful response.
 
 **<span style={{color: '#0ea5e9'}}>Problem</span>**
 
 But as the product/company scales, managing multiple versions can quickly become overwhelming **without proper version control.**
 
-
 ### 2. Iteration without code changes
 
-A team working on an AI personal assistant wants to improve its scheduling capabilities, but changing the code every time is tedious. 
+A team working on an AI personal assistant wants to improve its scheduling capabilities, but changing the code every time is tedious.
 
 **<span style={{color: '#0ea5e9'}}>Problem</span>**
 
-Teams need to test and refine prompts quickly **without changing production code.** 
+Teams need to test and refine prompts quickly **without changing production code.**
 
 ![Version Control in Helicone](/static/blog/prompt-management/experiment.webp)
-*Helicone lets you tweak prompts, models, or datasets without delving into the codebase. You can also directly compare the metrics with production prompt.*
-
+_Helicone lets you tweak prompts, models, or datasets without delving into the codebase. You can also directly compare the metrics with production prompt._
 
 ### 3. Collaboration with non-technical teams
 
@@ -64,11 +55,9 @@ A marketing team with content writers and SEO specialists might collaborate on p
 
 **<span style={{color: '#0ea5e9'}}>Problem</span>**
 
-An effective tool enable collaboration between the technical and creative roles, **allowing them to tweak prompts without delving into code**. The good news is, Helicone is user-friendly for both technical and non-technical teams! 
+An effective tool enable collaboration between the technical and creative roles, **allowing them to tweak prompts without delving into code**. The good news is, Helicone is user-friendly for both technical and non-technical teams!
 
----
-
-## What to look for in a prompt management tool? 
+## What to look for in a prompt management tool?
 
 If your team is building LLM apps, consider choosing a prompt management tool that:
 
@@ -76,13 +65,11 @@ If your team is building LLM apps, consider choosing a prompt management tool th
 - **Is secure**: allowing you to safely store and distribute your model API key.
 - **Is collaborative**: empowering both technical and non-technical teams in prompt design.
 
-Tools like [Helicone](https://github.com/Helicone/helicone), [Pezzo](https://github.com/pezzolabs/pezzo) and [Agenta](https://github.com/Agenta-AI/agenta) are popular choices for managing prompts. 
-
----
+Tools like [Helicone](https://github.com/Helicone/helicone), [Pezzo](https://github.com/pezzolabs/pezzo) and [Agenta](https://github.com/Agenta-AI/agenta) are popular choices for managing prompts.
 
 ## Bottom Line
 
-While many prompt management tools provide awesome features, they often come with limitations, such as **<span style={{color: '#0ea5e9'}}>losing access to your prompts when services go down.</span>** 
+While many prompt management tools provide awesome features, they often come with limitations, such as **<span style={{color: '#0ea5e9'}}>losing access to your prompts when services go down.</span>**
 
 That's why Helicone was designed to provide full prompt ownership and the easiest implementation with a 1-line integration. For more details, check out Helicone's docs on [Prompt Management](https://docs.helicone.ai/features/prompts).
 
@@ -93,3 +80,5 @@ That's why Helicone was designed to provide full prompt ownership and the easies
 - [How to Manage Prompts & Experiment | Helicone](https://docs.helicone.ai/use-cases/experiments)
 - [Prompt Engineering Course for Developers | OpenAI & Deeplearning.ai](https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/)
 - [LLM Prompting Guide | Hugging Face](https://huggingface.co/docs/transformers/main/en/tasks/prompting)
+
+<Questions />
