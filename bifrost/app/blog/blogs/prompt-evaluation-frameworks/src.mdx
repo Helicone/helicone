@@ -1,0 +1,261 @@
+Prompt evaluation frameworks are tools and methodologies designed to assess and optimize the effectiveness of prompts used with large language models (LLMs). They enable developers to systematically test, refine, and benchmark prompts to achieve desired outputs.
+
+## Why Prompt Evaluation Frameworks Matter
+
+As LLM applications grow more complex, prompt management and monitoring become crucial challenges for developers. Here are several pain points when working with LLMs, which make prompt evaluation frameworks a necessity:
+
+### 1. Ineffective Prompt Engineering
+
+Creating precise prompts is often trial and error. Developers often need to extensively test and refine prompts to optimize them for specific tasks, requiring repeated adjustments for consistent results.
+
+### 2. Inconsistent and Unreliable Outputs
+
+LLMs can generate incorrect or irrelevant responses, known as hallucinations. These issues reduce the reliability of outputs, requiring ongoing prompt adjustments.
+
+### 3. Output Formatting Issues
+
+LLMs sometimes fail to deliver responses in the desired format, such as structured data or specific code syntax, leading to wasted time on manual corrections.
+
+### 4. Managing Long-Form Content
+
+LLMs struggle to maintain coherence and context in long outputs, particularly near token limits. Developers frequently use techniques like chunking or context windowing. Prompt evaluation frameworks assist in testing and optimizing these methods, enabling better handling of extended content while preserving context and quality.
+
+### 5. Lack of Specialized Tools for Prompt Testing
+
+There is a growing need for dedicated tools to test, refine, and manage prompts. Such tools would streamline prompt evaluation, improving output quality and reducing iteration time.
+
+
+## Overview of the Top Prompt Evaluation Frameworks
+
+1. Helicone
+2. OpenAI Eval
+3. Promptfoo
+4. Comet Opik
+5. PromptLayer
+6. Traceloop
+7. Braintrust
+
+
+## Comparisons of Prompt Evaluation Frameworks
+
+
+| Feature | Helicone | Promptfoo | Comet Opik | PromptLayer | Traceloop | OpenAI Evals | Braintrust |
+|---------|----------|-----------|------------|-------------|------------|--------------| ---------- |
+| Open Source | ✔ | ✔ | ✔ | - | - | ✔ | - | 
+| Self-Hostable | ✔ | ✔ | ✔ | - | ✔ | ✔ | ✔ |
+| Prompt Management | ✔ | - | - | ✔ | - | - | ✔ |
+| Prompt Versioning | ✔ | - | - | ✔ | - | - | ✔ |
+| Prompt Experimentation | ✔ | - | ✔ | ✔ | ✔ | - | ✔ |
+| User Feedback Collection | ✔ | - | ✔ | - | - | - | ✔ |
+| Usage Monitoring | ✔ | - | ✔ | ✔ | ✔ | - | - |
+| Cost Analytics | ✔ | - | - | ✔ | - | - | - | 
+| LLM Evaluations | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Tracing | ✔ | - | ✔ | ✔ | ✔ | - | - |
+| Dashboard & Analytics | ✔ | - | ✔ | ✔ | ✔ | - | - |
+| CI/CD Integration | - | ✔ | ✔ | - | - | - | ✔ |
+ 
+---
+
+## 1. [Helicone](https://www.helicone.ai)
+
+![Helicon Promp Eval Dashboard](/static/blog/prompt-evaluation-frameworks/helicone.webp)
+
+{/*
+### **What is Helicone?**
+
+Helicone is an open-source LLM observability and monitoring platform purpose-built for developers to monitor, debug, and optimize their LLM applications. With the flexibility to be self-hosted or used as a gateway with a simple 1-line integration, it provides instant insights into latency, costs, time to first tokens (TTFT) and more.
+*/}
+
+**Pricing**: Freemium, open source
+
+### **Key Features**
+
+1. **Prompt Experiments**: Enables iterative refinement by creating prompt variations, testing them against production data, and validating results with custom evaluators. Supports side-by-side comparisons to optimize performance.  
+
+2. **Scores API**: Assigns quantitative scores to requests and experiments, allowing detailed evaluation and comparison of prompt effectiveness.  
+
+3. **Prompt Management**: Tracks, versions, and maintains datasets of inputs/outputs for each prompt iteration. Ensures seamless rollback and collaboration-friendly workflows.  
+
+4. **Sessions**: Groups multi-step LLM interactions for debugging and optimizing complex workflows.  
+
+5. **User Feedback**: Captures user responses (positive/negative) to measure and refine prompt success.  
+
+### **Differentiators**
+
+- **Automated Versioning**: Automatically tracks changes and versions prompts for robust change management.  
+- **Custom Evaluators**: Define and run evaluation logic specific to application needs.  
+- **Random Sampling**: Evaluates prompts using sampled production data, reducing dependency on curated datasets.  
+- **Open Source**: Fully customizable, community-driven platform for prompt observability and evaluation.  
+
+
+
+## 2. [OpenAI Eval](https://www.openai.com)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is OpenAI Eval?**
+
+OpenAI Evals is a framework for evaluating large language models (LLMs) and systems built upon them. It enables developers to create custom evaluations to test model performance across various scenarios. 
+
+In the context of prompt evaluation, OpenAI Evals support for evaluating complex behaviors, including prompt chains and tool-using agents, through the Completion Function Protocol.
+*/}
+
+**Pricing**: Free, open-source
+
+### **Key Features**
+
+1. **Evaluation Framework**: Provides tools for dataset-driven testing, prompt-response evaluations, and benchmarking model performance.
+2. **Open-Source Registry**: Includes a repository of pre-built benchmarks, allowing contributions and collaboration from the community.
+3. **Custom Evaluations**: Supports the creation of bespoke assessments tailored to specific application needs.
+4. **API Integration**: Seamlessly integrates with the OpenAI API for testing deployed models.
+5. **Model-Graded Evaluations**: Supports evaluations where models assess their own outputs or those of other models, enabling self-referential testing.
+
+### **Differentiators**
+
+- **Flexibility**: Handles diverse evaluation types, from basic Q&A to complex, multi-step workflows.
+- **Community Collaboration**: Open-source nature encourages shared development of benchmarks.
+- **Innovative Methods**: Leverages LLMs for self-assessment, pushing the boundaries of traditional evaluation methods.
+
+
+## 3. [Promptfoo](https://www.promptfoo.dev)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is Promptfoo?**
+
+Promptfoo is an open-source CLI and library for systematic evaluation, testing, and optimization of prompts in LLM applications.
+*/}
+
+**Pricing**: Freemium, open source
+
+### **Key Features**
+1. **Batch Testing:** Streamlines comparison of prompts against predefined scenarios.
+2. **Test-Driven Development:** Encourages structured prompt testing, reducing reliance on ad hoc experimentation.
+3. **Integration Flexibility:** Compatible with major LLM providers and open-source models.
+4. **Evaluation Metrics:** Offers customizable metrics for nuanced LLM output assessments.
+5. **Security Focus:** Includes automated red-teaming and penetration testing for vulnerability identification.
+
+### **Differentiators**
+
+- **Open-Source:** Fully customizable and extensible for specific workflows.
+- **Developer-Optimized:** Features like caching, concurrency, and live reloading improve speed and usability.
+- **Comprehensive Evaluation:** Supports robust frameworks for testing and optimizing LLM prompts at scale.
+
+## 4. [Comet Opik](https://www.comet.com/docs/opik)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is Comet Opik?**
+
+Opik is an open-source platform designed for evaluating, testing, and monitoring Large Language Model (LLM) applications. It integrates seamlessly with tools like OpenAI, LangChain, and LlamaIndex, providing end-to-end observability during development and production.
+*/}
+
+**Pricing**: Freemium, open source
+
+### **Key Features**
+1. **Tracing & Logging**: Records all LLM calls and traces, enables debugging and optimization by providing detailed step-by-step insights.
+
+2. **Evaluation Metrics**: Supports pre-configured and custom evaluation metrics. Handles advanced assessments like hallucination detection and factuality.
+
+3. **CI/CD Integration**: Integrates into CI/CD pipelines for performance baselines. Enables automated testing of LLM pipelines during deployment.
+
+4. **Production Monitoring**: Logs real-time production traces to identify runtime issues. Analyzes model behavior on new data and creates datasets for iterative improvement.
+
+### **Differentiators**
+
+- **Seamless Integration:** Built-in support for popular tools (OpenAI, LangChain, LlamaIndex).  
+- **Open-Source Flexibility:** Customizable to fit diverse workflows and scalable for enterprise needs.  
+- **Comprehensive Tooling:** Covers evaluation, debugging, monitoring, and testing in one unified platform.  
+
+
+## 5. [PromptLayer](https://www.promptlayer.com)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is PromptLayer?**
+
+PromptLayer is a platform that enhances prompt engineering by providing tools for management, evaluation, and observability of large language model (LLM) interactions.
+*/}
+
+**Pricing**: Freemium, not open source
+
+### **Key Features:**
+
+1. **Prompt Management:** Offers a visual editor for creating, editing, and deploying prompts, enabling collaboration among both technical and non-technical team members. 
+
+2. **Observability and Analytics:** Logs all API interactions, capturing inputs, outputs, costs, and latencies, providing insights for performance optimization. 
+
+3. **Evaluation Tools:** Facilitates historical backtesting, regression testing, and model comparisons to support data-driven prompt optimization. 
+
+4. **Integration with Codebases:** Acts as middleware for APIs like OpenAI, seamlessly integrating into development workflows to capture prompt activity in real-time. 
+
+### **Differentiators:**
+
+- **Collaborative Workflow:** Empowers non-technical stakeholders, such as product managers and content experts, to participate directly in prompt engineering without requiring engineering support. 
+
+- **CMS for Prompts:** Functions as a content management system tailored for prompt lifecycle management, offering structured version control and deployment capabilities. 
+
+- **Data-Driven Optimization:** Combines logging, observability, and evaluation tools to iteratively improve prompt performance based on comprehensive analytics. 
+
+- **Developer-Friendly Integration:** Provides middleware that simplifies API interactions, facilitating easy incorporation into existing projects and development workflows.
+ 
+
+## 6. [Traceloop](https://www.traceloop.com)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is Traceloop?**
+
+Traceloop is an observability platform tailored for Large Language Model (LLM) applications, offering real-time monitoring and debugging to maintain consistent output quality. 
+*/}
+
+**Pricing**: Freemium, not open source
+
+### **Key Features**
+
+1. **Real-Time Alerts:** Notifies developers of unexpected output quality changes, enabling prompt issue resolution. 
+
+2. **OpenLLMetry SDK:** An open-source extension of OpenTelemetry, facilitating seamless integration with existing observability tools and AI frameworks. 
+
+3. **Comprehensive Instrumentation:** Supports a wide range of LLM providers and vector databases, ensuring extensive monitoring capabilities. 
+
+### **Differentiators**
+
+- **Efficient Error Detection:** Employs innovative methods to identify issues like hallucinations without relying on additional LLMs, enhancing resource efficiency.
+
+- **Broad Compatibility:** Integrates with numerous models, frameworks, and vector databases, providing developers with flexibility and comprehensive visibility into their LLM applications. 
+
+## 7. [Braintrust](https://www.braintrust.dev)
+
+{/* TODO: Add cover */}
+
+{/*
+### **What is Braintrust?**
+
+Braintrust is an end-to-end platform for building AI applications. It makes software development with large language models (LLMs) robust and iterative. It allows you to create prompts, test them out in the playground, use them in your code, update them, and track their performance over time.
+*/}
+
+**Pricing**: Freemium, not open source
+
+### **Key Features:**
+
+1. **Iterative LLM Workflows:** Enables continuous refinement of AI prompts and models, enhancing product reliability by diagnosing regressions and optimizing performance. 
+
+2. **Real-Time Monitoring:** Offers tools to analyze LLM execution traces, providing insights into AI interactions to maintain optimal model performance. 
+
+3. **Custom Scoring Mechanism:** Allows developers to define scoring criteria in natural language or code, facilitating precise evaluation of LLM outputs against expected results. 
+
+4. **Integrated Dataset Management:** Enables efficient capture and organization of rated example datasets, allowing the creation of scalable and secure "golden" datasets for training AI models. 
+
+**Differentiators:**
+
+- **Hill Climbing:** Supports iterative improvement by comparing new experiments to previous ones, even without pre-existing benchmarks, aiding in model performance enhancement. 
+
+- **Trials:** Allows running each input multiple times to assess variance in responses, providing a more robust overall score through intelligent aggregation of results. 
+
+- **Model Comparison:** Facilitates evaluation across multiple AI models and parameters, assisting in informed model selection and optimization. 
