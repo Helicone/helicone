@@ -4,16 +4,16 @@ import { getJawnClient } from "../lib/clients/jawn";
 export function generateAPIKeyHelper(
   permission: "rw" | "w",
   organization_type: string,
-  userId: string,
   keyName: string,
-  isEu: boolean
+  isEu: boolean,
+  governance: boolean
 ) {
   const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
 
   const apiKey = `${apiKeyPrefix}${
     organization_type === "customer" ? "" : "-helicone"
-  }${isEu ? "-eu" : ""}${
-    organization_type === "customer" ? "-cp" : ""
+  }${isEu ? "-eu" : ""}${organization_type === "customer" ? "-cp" : ""}${
+    governance ? "-gov" : ""
   }-${generateApiKey({
     method: "base32",
     dashes: true,
@@ -24,9 +24,9 @@ export function generateAPIKeyHelper(
     res: jawn.POST("/v1/key/generateHash", {
       body: {
         apiKey,
-        userId: userId,
         keyName: keyName,
         permissions: permission,
+        governance: governance,
       },
     }),
     apiKey: apiKey,

@@ -1,14 +1,15 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 import { useState } from "react";
 
-import { Database } from "../../../supabase/database.types";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
-import useNotification from "../../shared/notification/useNotification";
-import { useKeysPage } from "./useKeysPage";
-import { useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
+import AddKeyModal from "./components/addKeyModal";
+import DeleteKeyModal from "./components/DeleteKeyModal";
+import EditKeyModal from "./components/EditKeyModal";
+import HeliconeKeyTable from "./components/HeliconeKeyTable";
 
 interface KeyPageProps {
   hideTabs?: boolean;
@@ -24,33 +25,21 @@ const AccessKeysPage = (props: KeyPageProps) => {
   const user = useUser();
   const org = useOrg();
 
-  const supabaseClient = useSupabaseClient<Database>();
   const [editOpen, setEditOpen] = useState(false);
   const [addKeyOpen, setAddKeyOpen] = useState(false);
   const [deleteHeliconeOpen, setDeleteHeliconeOpen] = useState(false);
-  const [selectedHeliconeKey, setSelectedHeliconeKey] =
-    useState<Database["public"]["Tables"]["helicone_api_keys"]["Row"]>();
-  const [editName, setEditName] = useState<string>("");
+  const [selectedHeliconeKey, setSelectedHeliconeKey] = useState<string>();
 
-  const onEditHandler = (
-    key: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
-  ) => {
-    setSelectedHeliconeKey(key);
+  const onEditHandler = (keyId: string) => {
+    setSelectedHeliconeKey(keyId);
     setEditOpen(true);
   };
 
-  const onDeleteHeliconeHandler = (
-    key: Database["public"]["Tables"]["helicone_api_keys"]["Row"]
-  ) => {
-    setSelectedHeliconeKey(key);
+  const onDeleteHeliconeHandler = (keyId: string) => {
+    setSelectedHeliconeKey(keyId);
     setDeleteHeliconeOpen(true);
   };
-
-  const { heliconeKeys, isLoading, refetchHeliconeKeys } = useKeysPage();
-
-  const currentUsage = 17.5;
-
-  const { setNotification } = useNotification();
+  const currentUsage = 0;
 
   const myLimits = useQuery({
     queryKey: ["my-limits", org?.currentOrg?.id],
@@ -135,6 +124,11 @@ const AccessKeysPage = (props: KeyPageProps) => {
               Usage resets every {days} days
             </p>
           </div>
+          <HeliconeKeyTable
+            onAddKey={() => setAddKeyOpen(true)}
+            onEdit={onEditHandler}
+            onDelete={onDeleteHeliconeHandler}
+          />
 
           <div>
             <button
@@ -146,6 +140,19 @@ const AccessKeysPage = (props: KeyPageProps) => {
           </div>
         </div>
       </div>
+
+      <AddKeyModal open={addKeyOpen} setOpen={setAddKeyOpen} />
+
+      <EditKeyModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        selectedKey={selectedHeliconeKey}
+      />
+      <DeleteKeyModal
+        open={deleteHeliconeOpen}
+        setOpen={setDeleteHeliconeOpen}
+        selectedKey={selectedHeliconeKey}
+      />
     </>
   );
 };

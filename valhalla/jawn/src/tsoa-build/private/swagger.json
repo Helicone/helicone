@@ -3928,8 +3928,8 @@
 					"apiKey": {
 						"type": "string"
 					},
-					"userId": {
-						"type": "string"
+					"governance": {
+						"type": "boolean"
 					},
 					"keyName": {
 						"type": "string"
@@ -3940,7 +3940,7 @@
 				},
 				"required": [
 					"apiKey",
-					"userId",
+					"governance",
 					"keyName",
 					"permissions"
 				],
@@ -5196,6 +5196,71 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusText": {
+						"type": "string"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"properties": {
+							"settings": {
+								"$ref": "#/components/schemas/Json"
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							},
+							"created_at": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"settings",
+							"name",
+							"id",
+							"created_at"
+						],
+						"type": "object"
+					},
+					"count": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"status",
+					"statusText",
+					"error",
+					"data",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__"
+					},
+					{
+						"$ref": "#/components/schemas/PostgrestResponseFailure"
+					}
+				]
 			},
 			"PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
@@ -9595,6 +9660,128 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/governance-orgs/keys": {
+			"get": {
+				"operationId": "GetGovernanceOrgKeys",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateGovernanceOrgKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"value": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"value",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteGovernanceOrgKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										null
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/governance-orgs/{orgId}": {

@@ -543,7 +543,7 @@ export class ExperimentV2Manager extends BaseManager {
 
       return result;
     } catch (e) {
-      return err("Failed to run hypothesis");
+      return err("Failed to run hypothesis" + JSON.stringify(e));
     }
   }
 
