@@ -1,23 +1,28 @@
-While the <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank">Chain of Thought (CoT)</a> prompting technique allows LLMs to thrive at step-wise reasoning problems, its inability to strategically look ahead and weigh different alternatives makes it fall short on tasks requiring decision-making. The Tree of Thought (ToT) prompting technique unlocks new neural pathways for LLMs, encouraging them to explore multiple thoughts and self-evaluate at each step, even as they look ahead or backtrack to determine the next best move.
+While the <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank">Chain of Thought (CoT)</a> prompting technique allows LLMs to thrive at step-wise reasoning problems, its inability to strategically look ahead and weigh different alternatives makes it fall short on tasks requiring decision-making.
+
+The Tree of Thought (ToT) prompting technique unlocks new neural pathways for LLMs, encouraging them to explore multiple thoughts and self-evaluate at each step, even as they look ahead or backtrack to determine the next best move.
 
 ![Tree-of-Thought Prompting - Helicone](/static/blog/tree-of-thought/tree-of-thought-cover.webp)
 
-According to <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el (2023)</a>, the Tree of Thought is a prompting framework that generalizes over the Chain of Thought technique breaking the token-level, left-to-right decision-making barrier. This technique combines advanced search algorithms with the innate self-evaluative properties of LLMs to implement deliberate decision-making.
+According to <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el (2023)</a>, the Tree of Thought (ToT) is a prompting framework that generalizes over the Chain-of-Thought (CoT) technique breaking the token-level, left-to-right decision-making barrier. This technique combines advanced search algorithms with the innate self-evaluative properties of LLMs to implement deliberate decision-making.
 
 In this article, we will explain Tree of Thought prompting, examine how it works, and compare its performance to other prompting techniques.
 
 ## What You'll Learn
 
-- What is Chain-of-Thought Prompting?
-- How Chain-of-Thought Prompting works?
-- Key Techniques (Zero-Shot, Few-Shot, Auto-CoT, Multimodal, Self-Consistency)
-- Benefits of Chain-of-Thought Prompting
-- Chain-of-Thought Prompting vs. Other Methods
-- Additional Resources
+- What is Tree of Thought Prompting?
+- How Tree of Thought Prompting works?
+- Tree of Thought Frameworks
+- How to Use Tree of Thought Prompts
+- How to Evaluate ToT Prompts Using Helicone for Better Accuracy
+- Tree of Thought Prompting vs. Other Methods
+- When to Use Tree of Thought
 
 ## What is Tree of Thought Prompting?
 
-Tree of Thought (ToT) prompting is a new framework for language model inference proposed by <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el (2023)</a> and <a href="https://arxiv.org/abs/2305.08291" target="_blank" rel="noopener">Long (2023)</a>, amongst other researchers in May 2023. The novel prompting technique uses intermediate reasoning steps to give LLMs complex, strategic reasoning power. This technique takes on a human-like approach to problem-solving (trial and error), exhaustively working through every possible outcome in a problem/solution space. The computation progresses in a tree-like manner, following the most likely step at each turn, and backtracking when necessary until it finds the correct solution.
+Tree of Thought (ToT) prompting is a new framework for language model inference proposed by <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el (2023)</a> and <a href="https://arxiv.org/abs/2305.08291" target="_blank" rel="noopener">Long (2023)</a>, amongst other researchers in May 2023. The novel prompting technique uses intermediate reasoning steps to give LLMs complex, strategic reasoning power.
+
+This technique takes on a human-like approach to problem-solving (trial and error), exhaustively working through every possible outcome in a problem/solution space. The computation progresses in a tree-like manner, following the most likely step at each turn, and backtracking when necessary until it finds the correct solution.
 
 ![Tree-of-Thought Prompting Explained](/static/blog/tree-of-thought/tot-explained.webp)
 
@@ -59,8 +64,6 @@ print(dfs_iterative(graph, 'A'))
 
 _Source: <a href="http://medium.com/@kapildevkhatik2" target="_blank" rel="noopener">medium.com/@kapildevkhatik2</a>_
 
-### Comparing with Chain-of-Thought (CoT) Prompting
-
 ![Tree-of-Thought Prompting - How it compares with other prompting techniques](/static/blog/tree-of-thought/how-tot-compare.webp)
 
 _Source: <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el. (2023)</a>_
@@ -71,8 +74,6 @@ At a high level, ToT helps LLMs achieve deliberate reasoning by:
 2. Leveraging a tree search strategy to explore the problem space.
 3. Self-evaluate thoughts via deliberate reasoning
 
-# Continue from here
-
 ## Tree of Thought Frameworks
 
 In an attempt to surmount the limitations of chain-of-thought reasoning techniques, several AI researchers have proposed the concept of Tree of Thought.
@@ -81,9 +82,11 @@ In Yao et el. (2023)'s proposal, the ToT framework leverages Depth-first search 
 
 Here's a schematic demonstration of how the framework combines the DFS search strategy with self-evaluation to solve The Game of 24 puzzles.
 
-Source: Yao et el. (2023)
+![Tree-of-Thought Framework](/static/blog/tree-of-thought/tot-framework.webp)
 
-Long (2023) augments LLMs with several modules including a ToT controller, which enables it to solve more specific problems. More precisely, this contraption combines reinforced learning with ToT, encouraging the controller to self-learn as it consumes data sets over time.
+_Source: <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener">Yao et el. (2023)</a>_
+
+**<a href="https://arxiv.org/abs/2305.08291" target="_blank" rel="noopener">Long (2023)</a>** augments LLMs with several modules including a ToT controller, which enables it to solve more specific problems. More precisely, this contraption combines reinforced learning with ToT, encouraging the controller to self-learn as it consumes data sets over time.
 
 In addition to the ToT controller, this suped-up LLM uses a memory module to track preceding token sequences. That way, it can easily retrace its steps and explore new directions. ToT-enabled LLMs can solve more complex puzzle games like Sudoku.
 
@@ -91,53 +94,107 @@ Based on the demonstrations shown in these papers, the tree of thought framework
 
 ## How to Use Tree of Thought Prompts
 
-As you would instruct ChatGPT to solve a problem using CoT, Hubert (2023) proposed a simpler way to implement ToT by distilling its core concepts into a single prompt.
+As you would instruct ChatGPT to solve a problem using CoT, Dave Hubert proposed <a href="https://github.com/dave1010/tree-of-thought-prompting" target="_blank" rel="noopener">a simpler way to implement ToT</a> by distilling its core concepts into a single prompt.
 
-### QUESTION:
+### Original Question
 
+Large Language Models sometimes struggle to answer more complex questions. For example:
+
+```
 Bob is in the living room.
 He walks to the kitchen, carrying a cup.
 He puts a ball in the cup and carries the cup to the bedroom.
 He turns the cup upside down and then walks to the garden.
 He puts the cup down in the garden and then walks to the garage.
 Where is the ball?
+```
 
-Even after applying CoT, ChatGPT gave a wrong answer when asked the above question.
-Introducing a ToT-style prompt corrected the error. Here's how Hubert (2023) put together the prompt.
+Even after applying CoT, GPT 3.5 gave a wrong answer when asked the above question. Now introducing a ToT-style prompt corrected the error.
 
+### Here's how Hubert put together the ToT prompt:
+
+```
 Imagine three different experts are answering this question.
 All experts will write down 1 step of their thinking,
 then share it with the group.
 Then all experts will go on to the next step, etc.
 If any expert realizes they're wrong at any point then they leave.
 The question is…
+```
 
 Instructing ChatGPT to provide diverse chains of thought that reach a consensus at each step did the trick.
 
-## How to Evaluate ToT Prompts Using Helicone AI for Better Accuracy
+## How to Evaluate ToT Prompts Using Helicone for Better Accuracy
 
-Since the precision of an LLM depends strongly on how well it's instructed, using well-refined ToT prompts improves its performance. Helicone's Evaluators help users simplify the prompt creation and optimization process. This tool provides a playground where you can safely experiment with prompts and measure their success before pushing your code to a live environment.
+Since the precision of an LLM output depends strongly on how well the prompt is constructed, using well-refined ToT prompts improves its performance.
 
-Fast-track prompt engineering with Helicone's Evaluators using these simple steps:
+**<a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Helicone's Experiments</a>** help users simplify the prompt creation and optimization process. This tool provides a playground where you can safely experiment with prompts and measure their success before pushing your code to a live environment.
 
-- Add your desired prompt to the module
-- Insert variables into your prompt
-- Enter a dataset with values for your input variables
-- Add an evaluator (You can run multiple evaluators simultaneously).
-- Finally, run the evaluator. The evaluator provides feedback that allows you to adjust your prompt till you get the desired results.
+![Tree-of-Thought Prompting - Running Experiments in Helicone](/static/blog/tree-of-thought/tot-experiments.webp)
+
+Speed up prompt iteration with Helicone's Experiments using these simple steps:
+
+### Step 1: Create a new experiment
+
+If you have an existing prompt in Helicone, you can use it as a starting point.
+
+Otherwise, you can **create a prompt from scratch**. Then paste your ToT prompt into the prompt field.
+
+![Tree-of-Thought Prompting - Running Experiments in Helicone](/static/blog/tree-of-thought/tot-start-from-scratch.webp)
+
+### Step 2: Add input rows
+
+The next step is to import golden datasets or real-world data to test your prompt on.
+
+There are a few ways to do this. But if you don't have any request data, you can **manually add input rows** for each variable you used in your prompt.
+
+![Tree-of-Thought Prompting - Add inputs to your experiment](/static/blog/tree-of-thought/tot-add-input.webp)
+
+### Step 3: Add an evaluator
+
+An evaluator is a metric used to assess and score thequality of the model outputs for your prompts.
+
+Helicone currently supports LLM-as-a-judge and Python evaluators. TypeScript support is coming soon!
+
+![Tree-of-Thought Prompting - Add an evaluator](/static/blog/tree-of-thought/tot-add-eval.webp)
+
+### Step 4: Run the evaluator and see scores
+
+Once the evaluator is created, you can run it to see the scores.
+
+Evaluators provide feedback that allows you to adjust your prompt until you get the desired score or output. Helicone allows you to view the average scores across all your inputs, as well as the individual scores for each input.
+
+![Tree-of-Thought Prompting - Run evaluator](/static/blog/tree-of-thought/tot-run-eval.webp)
+
+### Step 5: Iterate on your prompt
+
+If you are unsatisfied with the scores, create a new prompt variation, then run evaluators again.
+
+Create as many prompts as you need until you get the desired scores.
+
+You can always add more input rows or evaluators to your experiment for more comprehensive testing.
+
+![Tree-of-Thought Prompting - Run evaluator](/static/blog/tree-of-thought/tot-fork-prompt.webp)
+
+Above is an example of forking an existing prompt to create a new variation.
 
 ## Tree of Thought Prompting Vs. Other Prompting Techniques (Benchmarks)
 
-Compared to preceding prompting techniques, ToT shows massive improvement at planning/searching problems such as the game of 24, crossword puzzles, and creative writing.
+Compared to <a href="https://docs.helicone.ai/guides/prompt-engineering/overview" target="_blank" rel="noopener">preceding prompting techniques</a>, ToT shows massive improvement at planning/searching problems such as the game of 24, crossword puzzles, and creative writing, according to Yao et el. (2023).
 
-Source: Yao et el. (2023)
+![Tree-of-Thought Prompting - Benchmarks](/static/blog/tree-of-thought/tot-benchmarks.webp)
 
-CoT only passes 4.0% of the benchmark tests, failing 60% at the first three words. ToT, on the other hand, achieved 74% accuracy across all game tests as seen in the table below.
-Source: Yao et el. (2023)
+The CoT prompt only passes `4.0%` of the benchmark tests, failing `60%` at the first three words. The ToT prompt, on the other hand, achieved `74%` accuracy across all game tests as seen in the table below.
+
+![Tree-of-Thought vs. Chain-of-Thought Prompting](/static/blog/tree-of-thought/tot-vs-cot.webp)
+
+Despite ToT's unprecedented success rate at strategy games, researchers see further room for LLM enhancements with better search algorithms and heuristics.
 
 ## When to Use Tree of Thought
 
-ToT's ability to encourage LLMs to work through multiple reasoning paths simultaneously makes them applicable to a new range of problems. Besides the puzzle solvers implemented by researchers in the pioneering papers, ToT-based LLMs can be engineered to solve other complex tasks. You know you should apply the Tree of Thought when:
+ToT's ability to encourage LLMs to work through multiple reasoning paths simultaneously makes them applicable to a new range of problems. Besides the puzzle solvers implemented by researchers in the pioneering papers, ToT-based LLMs can be engineered to solve other complex tasks.
+
+You can apply the Tree of Thought technique when:
 
 - Chain of Thought doesn't work: CoT takes a linear approach to problem solving so it may give incorrect responses when faced with a complex problem
 - Lookahead and strategic decision making is required
@@ -152,30 +209,33 @@ Based on Yao et el. (2023) benchmark tests, the Tree of Thought framework/prompt
 
 <CallToAction
   title="Ready to optimize your prompts? 💡"
-  description="Join 10,000 developers who use Helicone to monitor performance, trace reasoning paths and optimize their prompts."
+  description="Join thousands of developers who use Helicone to monitor performance, trace reasoning paths and optimize their prompts."
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai"
   secondaryButtonText="Contact us"
   secondaryButtonLink="https://www.helicone.ai/contact"
 />
 
-### Other Articles You May Like to Read
+### You might also be interested in
 
 - <a
     href="https://www.helicone.ai/blog/chain-of-thought-prompting"
     target="_blank"
+    rel="noopener"
   >
-    Chain of Thought Prompting
+    Chain-of-Thought Prompting: Key Techniques and Benchmarks
   </a>
 - <a
-    href="https://www.helicone.ai/blog/how-to-test-your-llm-prompts"
+    href="https://www.helicone.ai/blog/test-your-llm-prompts"
     target="_blank"
+    rel="noopener"
   >
-    How to Test Your LLM Prompts
+    How to Test Your LLM Prompts with Helicone
   </a>
 - <a
-    href="https://www.helicone.ai/blog/out-with-golden-datasets-heres-why-random-sampling-is-better"
+    href="https://www.helicone.ai/blog/prompt-evaluation-for-llms"
     target="_blank"
+    rel="noopener"
   >
-    Out with Golden Datasets: Here's Why Random Sampling is Better
+    Prompt Evaluation Explained: Random Sampling vs. Golden Datasets
   </a>

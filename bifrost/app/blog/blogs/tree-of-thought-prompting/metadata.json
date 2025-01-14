@@ -1,7 +1,7 @@
 { 
-  "title": "Tree-of-Thought Prompting: Techniques and Use Cases",
-  "title1": "Tree-of-Thought Prompting: Techniques and Use Cases",
-  "title2": "Tree-of-Thought Prompting: Techniques and Use Cases",
+  "title": "Tree-of-Thought Prompting: Key Techniques and Use Cases",
+  "title1": "Tree-of-Thought Prompting: Key Techniques and Use Cases",
+  "title2": "Tree-of-Thought Prompting: Key Techniques and Use Cases",
   "description": "Learn about Chain-of-Thought (CoT) prompting, its techniques (zero-shot, few-shot, and auto-CoT), tips and real-world applications. See how it compares to other methods and discover how to implement CoT prompting to improve your AI application's performance.",
   "images": "/static/blog/tree-of-thought/tree-of-thought-cover.webp",
   "time": "12 minute read",
