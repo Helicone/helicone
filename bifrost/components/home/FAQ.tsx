@@ -28,6 +28,8 @@ const FAQ = () => {
               limiting, API key management.
             </AccordionContent>
           </AccordionItem>
+          <hr className="my-2 border-t border-slate-200" />
+
           <AccordionItem value="item-2" className="border-b-0">
             <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
               I don&apos;t want to use Helicone&apos;s Proxy, can I still use
@@ -45,6 +47,7 @@ const FAQ = () => {
               infrastructure.
             </AccordionContent>
           </AccordionItem>
+          <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-3" className="border-b-0">
             <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">
               How do you calculate the cost of LLM requests?{" "}
@@ -60,6 +63,7 @@ const FAQ = () => {
               Pricing Calculator.
             </AccordionContent>
           </AccordionItem>
+          <hr className="my-2 border-t border-slate-200" />
         </Accordion>
       </div>
     </div>
