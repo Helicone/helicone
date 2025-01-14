@@ -1,4 +1,4 @@
-Building AI agents but not sure which of **<span style={{color: '#03A9F4'}}>LlamaIndex</span>** and **<span style={{color: '#03A9F4'}}>LangChain</span>** is a better option? You're not alone. Both frameworks have earned their stripes in production environments and are strongly supported in the **<span style={{color: '#03A9F4'}}>open-source</span>** community. 
+Building AI agents but not sure which of **<span style={{color: '#03A9F4'}}>LlamaIndex</span>** and **<span style={{color: '#03A9F4'}}>LangChain</span>** is a better option? You're not alone. Both frameworks have earned their stripes in production environments and are strongly supported in the **<span style={{color: '#03A9F4'}}>open-source</span>** community.
 
 But we find that it’s not always about choosing one over the other.
 
@@ -6,11 +6,9 @@ But we find that it’s not always about choosing one over the other.
 
 LlamaIndex and LangChain each bring unique strengths to the table. LangChain excels in building **complex AI workflows** with its modular architecture, while LlamaIndex specializes in **efficient data retrieval and indexing** across 160+ data sources. Many developers are finding that combining both can create more powerful applications than using either alone.
 
-
-
 ## Overview
 
-In this guide, we will explore: 
+In this guide, we will explore:
 
 - How LlamaIndex works
 - How LangChain works
@@ -19,15 +17,14 @@ In this guide, we will explore:
 - Comparing multi-modal support
 - How to combine both frameworks for your RAG applications
 
-
 ## At a Glance
 
-|  | LlamaIndex | LangChain |
-| --- | :--- | :--- |
-| **Primary Focus** | ✔ Data indexing and retrieval optimization | ✔ Building complex AI workflows |
-| **Key Strength** | ✔ Retrieval-Augmented Generation (RAG) | ✔ Modular architecture for multi-step reasoning |
-| **Best For** | ✔ Applications requiring efficient data processing from multiple sources | ✔ Prototyping and building end-to-end AI applications |
-| **Notable Feature** | ✔ Supports 160+ formats (APIs, PDF, Documents, SQL, etc.) | ✔ Extensive integration options with various LLM models |
+|                     | LlamaIndex                                                               | LangChain                                               |
+| ------------------- | :----------------------------------------------------------------------- | :------------------------------------------------------ |
+| **Primary Focus**   | ✔ Data indexing and retrieval optimization                               | ✔ Building complex AI workflows                         |
+| **Key Strength**    | ✔ Retrieval-Augmented Generation (RAG)                                   | ✔ Modular architecture for multi-step reasoning         |
+| **Best For**        | ✔ Applications requiring efficient data processing from multiple sources | ✔ Prototyping and building end-to-end AI applications   |
+| **Notable Feature** | ✔ Supports 160+ formats (APIs, PDF, Documents, SQL, etc.)                | ✔ Extensive integration options with various LLM models |
 
 ---
 
@@ -52,17 +49,16 @@ response = query_engine.query("How to build an AI agent?")
 print(response)
 
 ```
-LlamaIndex simplifies this process by taking your query `"How to build an AI agent?"` and matching it with the most relevant information from your vectorized data (or `index`). This information is then used as context for the LLM to generate a response. For more information on how to get started, check out [LlamaIndex's documentation](https://docs.llamaindex.ai/en/stable/#getting-started). 
 
----
+LlamaIndex simplifies this process by taking your query `"How to build an AI agent?"` and matching it with the most relevant information from your vectorized data (or `index`). This information is then used as context for the LLM to generate a response. For more information on how to get started, check out <a href="https://docs.llamaindex.ai/en/stable/#getting-started" target="_blank" rel="noopener">LlamaIndex's documentation</a>.
 
 ## What is LangChain?
 
-LangChain is a framework designed to facilitate LLM application development. It provides a comprehensive set of tools and components that allow developers to easily **<span style={{color: '#03A9F4'}}>build, manage, and deploy LLM-powered applications</span>**. 
+LangChain is a framework designed to facilitate LLM application development. It provides a comprehensive set of tools and components that allow developers to easily **<span style={{color: '#03A9F4'}}>build, manage, and deploy LLM-powered applications</span>**.
 
 ### How LangChain Works
 
-**<span style={{color: '#03A9F4'}}>Chains</span>** are key components of LangChain, allowing you to connect different components together to create complex workflows. 
+**<span style={{color: '#03A9F4'}}>Chains</span>** are key components of LangChain, allowing you to connect different components together to create complex workflows.
 
 #### Prompt Template
 
@@ -88,66 +84,58 @@ chain.run(query)
 
 ```
 
----
-
 ## Comparing Learning Curves
 
-**LangChain has a lower initial learning curve and is more intuitive for beginners**. It offers more out-of-the-box components, extensive documentation and examples and a larger developer community with more resources. LlamaIndex is powerful but has a steeper learning curve compare to LangChain. 
+**LangChain has a lower initial learning curve and is more intuitive for beginners**. It offers more out-of-the-box components, extensive documentation and examples and a larger developer community with more resources. LlamaIndex is powerful but has a steeper learning curve compare to LangChain.
 
-As you progress beyond the basics, **LlamaIndex becomes more advantageous for specific tasks**, particularly advanced RAG (Retrieval-Augmented Generation) techniques.  LangChain's extensive customizability can lead to a steeper learning curve if you are building advanced agents.
-
----
+As you progress beyond the basics, **LlamaIndex becomes more advantageous for specific tasks**, particularly advanced RAG (Retrieval-Augmented Generation) techniques. LangChain's extensive customizability can lead to a steeper learning curve if you are building advanced agents.
 
 ## Comparing Performance
 
-Both frameworks require careful consideration of performance factors for production environments. LangChain's issues stem from its complex architecture and resource management, while LlamaIndex's potential bottlenecks relate to its specialization and scalability constraints. 
+Both frameworks require careful consideration of performance factors for production environments. LangChain's issues stem from its complex architecture and resource management, while LlamaIndex's potential bottlenecks relate to its specialization and scalability constraints.
 
-#### LlamaIndex
+### LlamaIndex
 
 - Efficient for specific RAG tasks, **<span style={{color: '#03A9F4'}}>limited flexibility for complex Natural Language Processing (NLP) tasks</span>**.
 - Performance tied to indexing efficiency.
 - Requires scaling considerations for large datasets or high query volumes.
 
-#### LangChain
+### LangChain
 
 - Complex architecture (multi-layered abstractions) requires careful management
 - Abstraction = limited control over agent design
 - Multiple API calls can impact latency (optimize API call frequency and implement caching)
 - **<span style={{color: '#03A9F4'}}>Resource usage like CPU usage and operational costs requires [monitoring](https://www.notion.so/Choosing-Between-LangChain-and-LlamaIndex-128c78c0f25e804785a8c97df6aee318?pvs=21).</span>**
 
----
+## Comparing Multi-Modal Capabilities
 
-## Comparing Multi-Modal Capabilities 
+### LlamaIndex
 
-#### LlamaIndex
+LlamaIndex offers built-in support for <a href="https://docs.llamaindex.ai/en/stable/use_cases/multimodal/" target="_blank" rel="noopener">multi-modal applications</a>. It enables full multi-modal Retrieval-Augmented Generation (RAG) pipelines by supporting indexing and retrieving both text and image chunks within the same system. It also provides high-level abstractions to simplify building multi-modal RAG apps, like ready-to-use classes `OpenAIMultiModal` to easily <a href="https://docs.llamaindex.ai/en/stable/examples/multi_modal/gpt4v_multi_modal_retrieval/" target="_blank" rel="noopener">integrate with models</a> like GPT-4V.
 
-LlamaIndex offers [built-in support for multi-modal applications](https://docs.llamaindex.ai/en/stable/use_cases/multimodal/). It enables full multi-modal Retrieval-Augmented Generation (RAG) pipelines by supporting indexing and retrieving both text and image chunks within the same system. It also provides high-level abstractions to simplify building multi-modal RAG apps, like ready-to-use classes `OpenAIMultiModal` to easily [integrate with models like GPT-4V](https://docs.llamaindex.ai/en/stable/examples/multi_modal/gpt4v_multi_modal_retrieval/).
-
-#### LangChain
+### LangChain
 
 LangChain is primarily designed as a general-purpose framework for building LLM applications. Its core strengths lie in its tools for working with language models and text-based applications. While it can be used for multi-modal tasks, it doesn't have the same level of built-in support as LlamaIndex.
 
 However, LangChain's flexible architecture allows for integration with external tools and models for multi-modal tasks. Developers may need to implement more custom logic for multi-modal applications.
 
----
-
 ## LangChain and LlamaIndex, which is better for your use case?
 
-#### Choose LlamaIndex when:
+### Choose LlamaIndex when:
 
 - Building RAG-focused applications
 - Dealing with diverse data sources
 - Requiring efficient data retrieval
 - Working with multi-modal data
 
-#### Choose LangChain when:
+### Choose LangChain when:
 
 - Creating complex AI workflows
 - Building end-to-end applications
 - Needing extensive LLM integration
 - Requiring agent-based systems
 
-#### Use both when:
+### Use both when:
 
 - Building data-intensive applications with complex workflows
 - Requiring both efficient retrieval and sophisticated processing
@@ -155,21 +143,20 @@ However, LangChain's flexible architecture allows for integration with external 
 
 ---
 
-### (Short) Elevator Pitch :)
+### (Short) Elevator Pitch
 
-*Building multi-step agents can be tricky, especially when an error in one part of the chain affects the entire outcome. Helicone’s observability dashboard and Sessions feature (that comes with the Pro plan) can help you identify precisely where the breakdown occurs, enabling faster troubleshooting.*
+_Building multi-step agents can be tricky, especially when an error in one part of the chain affects the entire outcome. Helicone’s observability dashboard and Sessions feature (that comes with the Pro plan) can help you identify precisely where the breakdown occurs, enabling faster troubleshooting._
 
 **→ <a href="https://www.helicone.ai/" target="_blank">Get Started for Free</a>**
-
 
 ---
 
 ## Using Both LlamaIndex and LangChain
 
-LangChain and LlamaIndex can be used together to make your RAG application more powerful. 
+LangChain and LlamaIndex can be used together to make your RAG application more powerful.
 
 ![Using both LlamaIndex and LangChain](/static/blog/llamaindex-vs-langchain/using-both.webp)
-*Image: <a href="https://datasciencedojo.com/blog/llamaindex-vs-langchain/" target="_blank">LlamaIndex vs LangChain: Understand the Key Differences</a>*
+_Image: <a href="https://datasciencedojo.com/blog/llamaindex-vs-langchain/" target="_blank">LlamaIndex vs LangChain: Understand the Key Differences</a>_
 
 ### Combined Approach
 
@@ -205,20 +192,14 @@ tool_config = IndexToolConfig(
 tool = LlamaIndexTool.from_tool_config(tool_config)
 ```
 
-
 ## Bottom Line
 
 LangChain is a good option if you need quick prototyping and flexibility or complex reasoning tasks. LlamaIndex is ideal if your focus is primarily on data retrieval. If you’re building enterprise applications, consider using both frameworks together, while implementing proper monitoring and optimization.
 
-
 ## You might find these useful:
 
-- **<a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank">6 Awesome Frameworks for Building AI Agents (Open-Source)</a>**
-- **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank">Debugging RAG Chatbots and AI Agents with Sessions</a>**
-- **<a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank">How Replaying LLM Sessions Enhances Performance</a>**
+- **<a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">6 Awesome Frameworks for Building AI Agents (Open-Source)</a>**
+- **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging AI Agents with Helicone's Sessions</a>**
+- **<a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank" rel="noopener">Optimizing AI agents by replaying LLM Sessions</a>**
 
----
-
-### Questions or feedback?
-
-Are the information out of date? Do you have additional platforms to add? Please raise an issue and we’d love to share your insights!
+<Questions />
