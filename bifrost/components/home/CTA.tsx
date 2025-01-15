@@ -7,6 +7,7 @@ import LogoBox from "./LogoBox";
 import { useState } from "react";
 import { ISLAND_WIDTH } from "@/lib/utils";
 import Image from "next/image";
+import { ChevronRight as ChevronRightIcon } from "lucide-react";
 
 const CTA = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -46,7 +47,7 @@ const CTA = () => {
           <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-2 border-brand rounded-xl py-2 px-7 text-brand transition-transform duration-1000",
+                "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
                 "rotate-[-3deg]"
               )}
             >
@@ -59,11 +60,17 @@ const CTA = () => {
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="text-base md:text-[40px] py-[10px] md:py-12 px-4 md:px-6 bg-brand hover:bg-brand/90 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
+            className="md:gap-3 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
             Try Helicone for free
+            {isHovered && (
+              <ChevronRightIcon
+                className="md:w-12 w-5 md:h-12 h-5"
+                strokeWidth={2.5}
+              />
+            )}
           </Button>
         </Link>
       </div>

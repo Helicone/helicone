@@ -46,7 +46,7 @@ const Integrations = (props: IntegrationsProps) => {
       ),
       href: "https://docs.helicone.ai/integrations/openai/javascript#openai-javascript-sdk-integration",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -95,31 +95,23 @@ client = OpenAI(
       ),
       href: "https://docs.helicone.ai/integrations/anthropic/javascript",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  defaultHeaders: {
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-});
-`,
+  apiKey: ANTHROPIC_API_KEY,
+  baseURL: "https://anthropic.helicone.ai/\$\{HELICONE_API_KEY\}/\",
+});`,
         },
         python: {
           language: "python",
           code: `import anthropic
 
 client = anthropic.Anthropic(
-  api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai"
-  defaultHeaders={
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-)
-`,
+  api_key=ANTHROPIC_API_KEY,
+  base_url="https://anthropic.helicone.ai/{HELICONE_API_KEY}/"
+)`,
         },
         langchain: {
           language: "python",
@@ -127,10 +119,7 @@ client = anthropic.Anthropic(
   modelName: "claude-2",
   anthropicApiKey: "ANTHROPIC_API_KEY",
   clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
-    defaultHeaders: {
-      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-    },
+    baseURL: "https://anthropic.helicone.ai/{HELICONE_API_KEY}/",
   },
 });
 `,
@@ -151,7 +140,7 @@ client = anthropic.Anthropic(
       ),
       href: "https://docs.helicone.ai/integrations/azure/javascript",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -270,7 +259,7 @@ self.model = AzureChatOpenAI(
         </div>
       ),
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
   method: "POST",
@@ -317,7 +306,7 @@ self.model = AzureChatOpenAI(
 
   const [currentProvider, setCurrentProvider] = useState("OpenAI");
 
-  const [currentIntegration, setCurrentIntregration] = useState("node.js");
+  const [currentIntegration, setCurrentIntregration] = useState("javascript");
 
   const selectedProvider = PROVIDERS.find(
     (provider) => provider.name === currentProvider
@@ -332,7 +321,7 @@ self.model = AzureChatOpenAI(
           <h2 className="text-3xl sm:text-5xl font-semibold text-black">
             Get integrated in <span className="text-brand">seconds</span>
           </h2>
-          <p className="text-lg sm:text-xl text-landing-description">
+          <p className="text-lg font-light sm:text-xl text-landing-description">
             Use any model and monitor applications at any scale.{" "}
           </p>
         </div>
@@ -358,7 +347,7 @@ self.model = AzureChatOpenAI(
                     if (provider.name === "Gemini") {
                       setCurrentIntregration("curl");
                     } else {
-                      setCurrentIntregration("node.js");
+                      setCurrentIntregration("javascript");
                     }
                   }
                 }}
@@ -372,9 +361,9 @@ self.model = AzureChatOpenAI(
           <Link
             href="https://docs.helicone.ai/getting-started/quick-start"
             target="_blank"
-            className="text-sm text-landing-secondary flex gap-1 items-center"
+            className="text-md font-light flex w-full justify-end items-center gap-1 text-landing-description"
           >
-            Other providers? See docs <ArrowUpRightIcon className="h-3 w-3" />
+            Other providers? See docs <ArrowUpRightIcon className="h-4 w-4" />
           </Link>
         </div>
       </div>
