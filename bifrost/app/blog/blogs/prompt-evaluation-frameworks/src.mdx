@@ -37,7 +37,7 @@ When evaluating prompts for Large Language Models (LLMs), developers commonly fo
 - **Coherence**: Evaluates the logical consistency and clarity of the response.
 - **Format Adherence**: Checks if the output aligns with the specified format, such as JSON or code syntax.
 - **Latency**: Measures the time taken for the model to generate a response.
-- **Cost Efficiency**: Evaluates the computational resources required for prompt execution.
+- **Cost Efficiency**: Evaluate the computational resources required for prompt execution.
 
 Online resources: [PromptLearnings](https://promptlearnings.com/establishing-prompt-engineering-metrics), [Portkey](https://portkey.ai/blog/evaluating-prompt-effectiveness-key-metrics-and-tools), [Vellum AI](https://www.vellum.ai/blog/how-to-evaluate-the-quality-of-large-language-models-for-production-use-cases).
 
@@ -97,12 +97,12 @@ Online resources: [PromptLearnings](https://promptlearnings.com/establishing-pro
 
 ### **Differentiators**
 
-- **Automated Versioning**: Automatically tracks changes and versions prompts for robust change management.  
+- **Automated Versioning**: Automatically tracks changes and version prompts for robust change management.  
 - **Custom Evaluators**: Define and run evaluation logic specific to application needs.  
 - **Random Sampling**: Evaluates prompts using sampled production data, reducing dependency on curated datasets.  
-- **Open Source**: Fully customizable, community-driven platform for prompt observability and evaluation.  
+- **Open Source**: A fully customizable, community-driven platform for prompt observability and evaluation.  
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 To evaluate prompts using Helicone and OpenAI, follow these steps:
 
@@ -113,7 +113,7 @@ To evaluate prompts using Helicone and OpenAI, follow these steps:
     ```
 2. **Log feedback using the Fetch API**
 
-    You need valid OpenAI and Helicone API keys to evaluate prompts in code. Here's an example of logging positive feedback:
+ You need valid OpenAI and Helicone API keys to evaluate prompts in code. Here's an example of logging positive feedback:
 
     ```javascript
     import OpenAI from "openai";
@@ -159,7 +159,7 @@ To evaluate prompts using Helicone and OpenAI, follow these steps:
     );
     ```
 
-For more information on how to evaluate prompts using Helicone, either by using code or UI, please read the [Helicone documentation](https://docs.helicone.ai).
+Please read the [Helicone documentation](https://docs.helicone.ai) for more information on how to evaluate prompts using Helicone, either using code or UI.
 
 ## 2. [OpenAI Eval](https://www.openai.com)
 
@@ -187,7 +187,7 @@ For more information on how to evaluate prompts using Helicone, either by using 
 - **Community Collaboration**: Open-source nature encourages shared development of benchmarks.
 - **Innovative Methods**: Leverages LLMs for self-assessment, pushing the boundaries of traditional evaluation methods.
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 
 1. **Install OpenAI Evals**
@@ -264,7 +264,7 @@ For detailed guidance, refer to the [OpenAI Evals documentation](https://github.
 - **Developer-Optimized:** Features like caching, concurrency, and live reloading improve speed and usability.
 - **Comprehensive Evaluation:** Supports robust frameworks for testing and optimizing LLM prompts at scale.
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 You can use Promptfoo in a Node.js application via it's programmatic API:
 
@@ -302,9 +302,9 @@ You can use Promptfoo in a Node.js application via it's programmatic API:
      try {
        const results = await promptfoo.evaluate(config);
        console.log(results);
-     } catch (error) {
+    } catch (error) {
        console.error('Error during evaluation:', error);
-     }
+    }
    })();
    ```
 
@@ -316,7 +316,7 @@ You can use Promptfoo in a Node.js application via it's programmatic API:
    node evaluate.js
    ```
 
-This script evaluates the prompt using the specified model and test case, then outputs the results. For more detailed information and advanced configurations, refer to the [Promptfoo documentation](https://www.promptfoo.dev/docs/installation/).
+This script evaluates the prompt using the specified model and test case, and then outputs the results. For more detailed information and advanced configurations, refer to the [Promptfoo documentation](https://www.promptfoo.dev/docs/installation/).
 
 
 ## 4. [Comet Opik](https://www.comet.com/docs/opik)
@@ -330,7 +330,7 @@ This script evaluates the prompt using the specified model and test case, then o
 **Pricing**: Freemium, open source
 
 ### **Key Features**
-1. **Tracing & Logging**: Records all LLM calls and traces, enables debugging and optimization by providing detailed step-by-step insights.
+1. **Tracing & Logging**: Records all LLM calls and traces, and enables debugging and optimization by providing detailed step-by-step insights.
 
 2. **Evaluation Metrics**: Supports pre-configured and custom evaluation metrics. Handles advanced assessments like hallucination detection and factuality.
 
@@ -344,13 +344,13 @@ This script evaluates the prompt using the specified model and test case, then o
 - **Open-Source Flexibility:** Customizable to fit diverse workflows and scalable for enterprise needs.  
 - **Comprehensive Tooling:** Covers evaluation, debugging, monitoring, and testing in one unified platform. 
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 1. **Install the Opik SDK**
 
-   Ensure the Opik SDK is installed in your environment:
+ Ensure the Opik SDK is installed in your environment:
 
    ```bash
    pip install opik
@@ -358,7 +358,7 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 2. **Configure the SDK**
 
-   Set up the SDK to connect to your Opik instance:
+ Set up the SDK to connect to your Opik instance:
 
    ```python
    import opik
@@ -368,7 +368,7 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 3. **Define Your LLM Function**
 
-   Create a function that interacts with your Large Language Model (LLM). Use the `@opik.track` decorator to log traces:
+ Create a function that interacts with your Large Language Model (LLM). Use the `@opik.track` decorator to log traces:
 
    ```python
    from opik import track
@@ -376,13 +376,13 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
    @track
    def generate_response(prompt: str) -> str:
        # Replace with your LLM call logic
-       response = "Your LLM-generated response here"
+    response = "Your LLM-generated response here"
        return response
    ```
 
 4. **Set Up Evaluation Metrics**
 
-   Opik provides various metrics for prompt evaluation. For instance, to assess hallucination:
+ Opik provides various metrics for prompt evaluation. For instance, to assess hallucination:
 
    ```python
    from opik.evaluation.metrics import Hallucination
@@ -392,7 +392,7 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 5. **Prepare Your Dataset**:
 
-   Load or create a dataset containing prompts and expected outputs:
+ Load or create a dataset containing prompts and expected outputs:
 
    ```python
    dataset = [
@@ -403,13 +403,13 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 6. **Define the Evaluation Task**
 
-   Create a function that processes each dataset item, generates the LLM response, and prepares the data for scoring:
+ Create a function that processes each dataset item, generates the LLM response, and prepares the data for scoring:
 
    ```python
    def evaluation_task(item):
-       input_prompt = item["input"]
-       expected_output = item["expected_output"]
-       generated_output = generate_response(input_prompt)
+    input_prompt = item["input"]
+    expected_output = item["expected_output"]
+    generated_output = generate_response(input_prompt)
        return {
            "input": input_prompt,
            "output": generated_output,
@@ -419,7 +419,7 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 7. **Run the Evaluation**
 
-   Utilize the `evaluate` function to process the dataset with the defined task and metrics:
+ Utilize the `evaluate` function to process the dataset with the defined task and metrics:
 
    ```python
    from opik.evaluation import evaluate
@@ -435,7 +435,7 @@ You need Python 3 to evaluate prompts using Comet's Opik, follow these steps:
 
 8. **Review the Results**
 
-   After execution, analyze the evaluation results to understand your LLM's performance:
+ After execution, analyze the evaluation results to understand your LLM's performance:
 
    ```python
    for result in results:
@@ -456,7 +456,7 @@ For more detailed information and advanced configurations, refer to the [Opik Do
 
 {/*### **What is PromptLayer?** */}
 
-{/*PromptLayer is a platform that enhances prompt engineering by providing tools for management, evaluation, and observability of large language model (LLM) interactions.*/}
+{/*PromptLayer is a platform that enhances prompt engineering by providing tools for the management, evaluation, and observability of large language model (LLM) interactions.*/}
 
 **Pricing**: Freemium, not open source
 
@@ -468,7 +468,7 @@ For more detailed information and advanced configurations, refer to the [Opik Do
 
 3. **Evaluation Tools:** Facilitates historical backtesting, regression testing, and model comparisons to support data-driven prompt optimization. 
 
-4. **Integration with Codebases:** Acts as middleware for APIs like OpenAI, seamlessly integrating into development workflows to capture prompt activity in real-time. 
+4. **Integration with Codebases:** Acts as middleware for APIs like OpenAI, seamlessly integrating into development workflows to capture prompt activity in real time. 
 
 ### **Differentiators:**
 
@@ -481,13 +481,13 @@ For more detailed information and advanced configurations, refer to the [Opik Do
 - **Developer-Friendly Integration:** Provides middleware that simplifies API interactions, facilitating easy incorporation into existing projects and development workflows.
 
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 To evaluate prompts programmatically using PromptLayer, you can integrate their API into your workflow. Here's how to set up an evaluation pipeline in Python:
 
 1. **Install Required Packages**
 
-   Ensure you have the latest versions of `promptlayer` and `openai` installed:
+ Ensure you have the latest versions of `promptlayer` and `openai` installed:
 
    ```bash
    pip install promptlayer openai
@@ -495,7 +495,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 2. **Set Up API Keys**
 
-   Configure your environment with your OpenAI and PromptLayer API keys:
+ Configure your environment with your OpenAI and PromptLayer API keys:
 
    ```python
    import os
@@ -505,7 +505,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 3. **Initialize PromptLayer Client**
 
-   Create a PromptLayer client instance:
+ Create a PromptLayer client instance:
 
    ```python
    import promptlayer
@@ -514,7 +514,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 4. **Create a Dataset from Request History**
 
-   Build a dataset using your request history to serve as evaluation data:
+ Build a dataset using your request history to serve as evaluation data:
 
    ```python
    dataset = promptlayer_client.create_dataset_from_filter_params(
@@ -530,7 +530,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 5. **Create an Evaluation Pipeline**
 
-   Set up an evaluation pipeline (report) using the dataset:
+ Set up an evaluation pipeline (report) using the dataset:
 
    ```python
    report = promptlayer_client.create_report(
@@ -541,7 +541,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 6. **Configure Evaluation Steps**
 
-   Add steps to your evaluation pipeline, such as running the latest version of your prompt template:
+ Add steps to your evaluation pipeline, such as running the latest version of your prompt template:
 
    ```python
    prompt_template_column = promptlayer_client.add_report_column(
@@ -553,7 +553,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
    )
    ```
 
-   You can also add custom API endpoint evaluations:
+ You can also add custom API endpoint evaluations:
 
    ```python
    api_endpoint_column = promptlayer_client.add_report_column(
@@ -566,7 +566,7 @@ To evaluate prompts programmatically using PromptLayer, you can integrate their 
 
 7. **Run the Evaluation**
 
-   Execute the evaluation pipeline to assess your prompt's performance:
+ Execute the evaluation pipeline to assess your prompt's performance:
 
    ```python
    evaluation_results = promptlayer_client.run_report(report_id=report["id"])
@@ -601,13 +601,13 @@ For more detailed information, refer to PromptLayer's documentation on [Programm
 
 - **Broad Compatibility:** Integrates with numerous models, frameworks, and vector databases, providing developers with flexibility and comprehensive visibility into their LLM applications. 
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 To evaluate prompts using Traceloop, you can utilize their SDK to manage and fetch prompts within your application. Here's how to implement it:
 
 1. **Install the Traceloop SDK**
 
-   Ensure the SDK is installed in your environment:
+ Ensure the SDK is installed in your environment:
 
    ```bash
    pip install traceloop-sdk
@@ -623,21 +623,21 @@ To evaluate prompts using Traceloop, you can utilize their SDK to manage and fet
    Traceloop.init(app_name="your_app_name", traceloop_sync_enabled=True)
    ```
 
-   Setting `traceloop_sync_enabled=True` enables prompt synchronization. 
+ Setting `traceloop_sync_enabled=True` enables prompt synchronization. 
 
 3. **Fetch and Use Prompts from Traceloop**
 
-   Retrieve managed prompts using the `get_prompt` function:
+ Retrieve managed prompts using the `get_prompt` function:
 
    ```python
    prompt_template = Traceloop.get_prompt("joke_generator")
    ```
 
-   This fetches the prompt associated with the key `"joke_generator"`. 
+ This fetches the prompt associated with the key `"joke_generator"`. 
 
 4. **Incorporate the Prompt into Your LLM Workflow**
 
-   Use the fetched prompt in your LLM application:
+ Use the fetched prompt in your LLM application:
 
    ```python
    def create_prompt(prompt_template, question):
@@ -647,7 +647,7 @@ To evaluate prompts using Traceloop, you can utilize their SDK to manage and fet
    response = llm.generate(prompt)
    ```
 
-   This approach allows you to manage and evaluate prompts effectively within your application.
+ This approach allows you to manage and evaluate prompts effectively within your application.
 
 For a comprehensive demonstration, refer to Traceloop's [demo repository](https://github.com/traceloop/demo). 
 
@@ -682,7 +682,7 @@ For more detailed information, consult Traceloop's [Prompt Management Documentat
 - **Model Comparison:** Facilitates evaluation across multiple AI models and parameters, assisting in informed model selection and optimization.
 
 
-### **Basic Setup for Evals**
+### **Basic Setup**
 
 
 1. **Install the Braintrust SDK**
@@ -693,7 +693,7 @@ For more detailed information, consult Traceloop's [Prompt Management Documentat
    ```
 2. **Define an evaluation script**
 
-    The evaluation script specifies your dataset, the task (such as an LLM call), and scoring functions to assess the outputs. Here's an example in TypeScript:
+ The evaluation script specifies your dataset, the task (such as an LLM call), and scoring functions to assess the outputs. Here's an example in TypeScript:
 
     ```typescript
     import { Eval } from "braintrust";
@@ -709,13 +709,13 @@ For more detailed information, consult Traceloop's [Prompt Management Documentat
         task: async (input) => {
         // Replace this with your LLM call
         return "Hi " + input;
-        },
+    },
         scores: [Levenshtein],
         }
     );
     ```
 
-    In this script:
+ In this script:
 
     - `data` provides the evaluation dataset, each with an `input` and an `expected` output.
 
@@ -731,7 +731,7 @@ This setup allows you to assess how well your model's outputs align with expecta
 To choose the best prompt evaluation framework for your needs, consider the following criteria:
 
 1. **Core Features**: Ensure it supports prompt testing, monitoring, versioning, and management. Example: Helicone offers monitoring and cost tracking.
-	
+    
 2. **Integration**: Look for compatibility with your existing tools (CI/CD pipelines, LLM APIs). Example: PromptLayer integrates with OpenAI APIs.
 
 3. **Scalability**: Assess its ability to handle large-scale prompt evaluations and datasets.
