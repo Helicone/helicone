@@ -18,8 +18,8 @@ const Quote2 = () => {
 
       <div
         className={cn(
-          "bg-slate-50 border border-slate-200 px-6 py-3 cursor-pointer max-w-[750px] transition-all duration-300 ease-in-out",
-          isQuestionOpen ? "rounded-2xl" : "rounded-[100px]"
+          "bg-slate-50 border border-slate-200 px-6 py-3 cursor-pointer max-w-[750px] transition-all duration-300 ease-in-out align-text-top",
+          isQuestionOpen ? "rounded-2xl" : "rounded-[24px]"
         )}
         onClick={() => setIsQuestionOpen(!isQuestionOpen)}
       >
@@ -29,7 +29,7 @@ const Quote2 = () => {
           )}
         >
           <p className="text-sm sm:text-lg">
-            What if I don’t want Helicone to be in my critical path.{" "}
+            What if I don&apos;t want Helicone to be in my critical path?
           </p>
           <div className="transition-transform duration-300">
             {isQuestionOpen ? (
@@ -48,7 +48,7 @@ const Quote2 = () => {
           )}
         >
           <div className="overflow-hidden">
-            <p className="text-sm sm:text-lg text-[#ACB3BA]">
+            <p className="text-sm sm:text-lg font-light text-gray-400">
               There are two ways to interface with Helicone - Proxy and Async.
               You can integrate with Helicone using the async integration to
               ensure zero propagation delay, or choose proxy for the simplest

@@ -1,10 +1,12 @@
 As developers at the forefront of AI innovation, we're constantly exploring ways to optimize our applications. With the rise of large language models (LLMs) like GPT-4 and LLaMA, a question that often surfaces is: **"Should we fine-tune our models?"**
 
-## **Rule of Thumb: DON'T FINE-TUNE**
+![When to fine-tune](/static/blog/when-to-finetune/finetune-cover.webp)
+
+## Rule of Thumb: DON'T FINE-TUNE
 
 Fine-tuning might seem like the go-to solution for enhancing model performance, but it's not always the silver bullet it's made out to be. In fact, fine-tuning is only beneficial in a narrow set of scenarios, and diving into it without careful consideration can lead to more problems than solutions.
 
-### **The Limitations of Fine-Tuning**
+### The Limitations of Fine-Tuning
 
 1. **Narrow Applicability**: Fine-tuning shines in well-defined, repeatable problems where the desired output is consistent and predictable. Outside of these cases, it can introduce unnecessary complexity.
 
@@ -16,13 +18,11 @@ Fine-tuning might seem like the go-to solution for enhancing model performance, 
 
 5. **Obsolescence Risk**: With base models rapidly improving, a fine-tuned model can quickly become outdated, especially when new, more capable versions are released.
 
----
-
-## **When Fine-Tuning Makes Sense**
+## When Fine-Tuning Makes Sense
 
 So, when _should_ you consider fine-tuning? Only in high-cost, high-accuracy use cases where the benefits clearly outweigh the drawbacks.
 
-### **Ideal Scenarios for Fine-Tuning**
+### Ideal Scenarios for Fine-Tuning
 
 - **Highly Specialized Tasks**: When dealing with extremely specific domains like legal contract analysis or medical diagnosis, where precision is paramount.
 
@@ -32,79 +32,74 @@ So, when _should_ you consider fine-tuning? Only in high-cost, high-accuracy use
 
 _Think of fine-tuning as customizing a race car for a specific track. It performs exceptionally well on that track but struggles elsewhere._
 
----
+## The Downsides of Fine-Tuning
 
-## **The Downsides of Fine-Tuning**
-
-### 1. **Reduced Generalization**
+### 1. Reduced Generalization
 
 Fine-tuning narrows the model's focus, which can impair its ability to generalize across different tasks or domains. This specialization can lead to failures when the model encounters data that deviates from its fine-tuned training set.
 
 _It's like training a musician exclusively on classical pieces—they may excel in that genre but falter when asked to play jazz._
 
-### 2. **Maintenance Overhead**
+### 2. Maintenance Overhead
 
 Every time your data changes or the underlying base model improves, you'll need to re-fine-tune. This ongoing process is resource-intensive and can slow down development cycles.
 
-### 3. **Financial Costs**
+### 3. Financial Costs
 
 Fine-tuning requires significant computational power and storage, leading to higher operational costs. Additionally, deploying fine-tuned models often involves more expensive infrastructure.
 
----
-
-## **The Rising Power of Base Models**
+## The Rising Power of Base Models
 
 One of the most compelling reasons to reconsider fine-tuning is the rapid advancement of base models. They're becoming faster, cheaper, and more powerful at an unprecedented rate.
 
-### **Benefits of Sticking with Base Models**
+### Benefits of Sticking with Base Models
 
 Sticking with base models offers several advantages. They maintain versatility, possessing a broad understanding that makes them adaptable to a wide range of tasks without additional training. They are cost-effective, reducing the need for expensive fine-tuning processes and infrastructure. Moreover, they provide future-proofing; as new models are released, you can immediately leverage their improved capabilities without the lag of retraining.
 
 _Using the latest smartphone right out of the box instead of customizing an older model with limited features._
 
----
-
-## **Alternatives to Fine-Tuning**
+## Alternatives to Fine-Tuning
 
 Before jumping into fine-tuning, consider other strategies that can enhance your application's performance without the associated downsides.
 
-### **Prompt Engineering**
+### Prompt Engineering
 
 Crafting better prompts can guide the model to produce more accurate and relevant outputs. This approach is cost-effective and doesn't require altering the model itself.
 
 - **Example**: Instead of fine-tuning for customer service responses, develop prompts that guide the model to respond empathetically and professionally.
+- We wrote a detailed guide on <a href="https://docs.helicone.ai/guides/prompt-engineering/overview" rel="noopener" target="_blank">prompt engineering techniques</a> that you can check out.
 
-### **Few-Shot Learning**
+### Few-Shot Learning
 
 Providing the model with a few examples within the prompt can help it understand the desired output format or style.
 
 - **Example**: Include sample inputs and desired outputs in your prompt to help the model generate code snippets in a specific programming language.
 
-### **Utilizing Specialized APIs**
+### Utilizing Specialized APIs
 
 Many providers offer specialized endpoints optimized for certain tasks. Leveraging these can save you the hassle of fine-tuning while still achieving high performance.
 
 - **Example**: Use OpenAI's GPT-4 Turbo with Vision API for image analysis and text generation tasks, or Anthropic's Claude 3 Opus for complex reasoning and analysis, instead of fine-tuning a general language model for these specific capabilities.
 
-### **Retrieval-Augmented Generation (RAG)**
+### Retrieval-Augmented Generation (RAG)
 
 RAG combines the power of large language models with external knowledge retrieval, allowing the model to access and utilize specific information without fine-tuning.
 
-- **Example**: Instead of fine-tuning a model on your company's documentation, implement a RAG system that retrieves relevant information from your knowledge base and incorporates it into the model's responses.
+- **Example**: Instead of fine-tuning a model on your company's documentation, <a href="https://www.helicone.ai/blog/pdf-chatbot-tutorial" rel="noopener" target="_blank">build a RAG system</a> that retrieves relevant information from your knowledge base and incorporates it into the model's responses.
 
-### **Chain-of-Thought Prompting**
+### Chain-of-Thought Prompting
 
-This technique involves breaking down complex tasks into smaller, logical steps within the prompt, guiding the model through a reasoning process.
+The <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" rel="noopener" target="_blank">chain-of-thought prompting</a> technique involves breaking down complex tasks into smaller, logical steps within the prompt, guiding the model through a reasoning process.
 
 - **Example**: For solving math problems, provide a step-by-step breakdown in the prompt to guide the model's thought process, rather than fine-tuning it on mathematical reasoning.
 
-### **Constrained Decoding**
+### Constrained Decoding
 
 Use techniques like guided or controlled text generation to restrict the model's outputs without fine-tuning. This approach can be particularly effective for generating secure code.
 
 - **Example**: Implement custom decoding strategies to ensure the model generates code that adheres to specific security patterns or avoids known vulnerabilities.
 
-[Recent research](https://arxiv.org/abs/2405.00218) has shown that constrained decoding can be more effective than techniques like prefix tuning for improving the security of code generation, without sacrificing functional correctness. Their work demonstrates that constrained decoding:
+Recent <a href="https://arxiv.org/abs/2405.00218" rel="noopener" target="_blank">research</a> has shown that constrained decoding can be more effective than techniques like prefix tuning for improving the security of code generation, without sacrificing functional correctness. Their work demonstrates that constrained decoding:
 
 - Does not require a specialized training dataset
 - Can significantly improve the security of code generated by large language models
@@ -112,13 +107,13 @@ Use techniques like guided or controlled text generation to restrict the model's
 
 This approach offers a promising direction for enhancing code security without the need for fine-tuning, making it a valuable alternative to consider in your AI development pipeline.
 
-### **Ensemble Methods**
+### Ensemble Methods
 
 Combine outputs from multiple models or API calls to improve accuracy and robustness without fine-tuning individual models.
 
 - **Example**: Use different models for various subtasks of a complex problem, then aggregate their outputs for a final result. For instance, use one model for sentiment analysis and another for entity recognition in a text analysis pipeline.
 
-### **Mixture of Agents**
+### Mixture of Agents
 
 Utilize multiple AI agents with different specializations or prompts to collaborate on complex tasks, simulating a team of experts.
 
@@ -126,13 +121,11 @@ Utilize multiple AI agents with different specializations or prompts to collabor
 
 This approach differs from traditional ensemble methods by focusing on task division and agent interaction rather than just combining outputs. It can be particularly effective for complex, multi-step problems that benefit from different perspectives or areas of expertise.
 
----
-
-## **Making the Right Choice**
+## Making the Right Choice
 
 Deciding whether to fine-tune should be a strategic decision based on a clear cost-benefit analysis.
 
-### **Questions to Consider**
+### Questions to Consider
 
 - **Is the task highly specialized and unmanageable with the base model?**
 
@@ -142,7 +135,7 @@ Deciding whether to fine-tune should be a strategic decision based on a clear co
 
 If the answer to these questions is a resounding yes, then fine-tuning might be the right path. Otherwise, exploring alternative methods is likely more beneficial.
 
-## **Stay Ahead of the Curve**
+## Stay Ahead of the Curve
 
 As base models continue to evolve, staying updated with the latest releases can offer substantial benefits without the overhead of fine-tuning.
 
@@ -156,9 +149,11 @@ By adopting a flexible and forward-thinking approach, you can ensure your AI app
 
 ---
 
-## **<span style={{color: '#0ea5e9'}}>Further Resources</span>**
+## Further Resources
 
-- **Helicone Fine-Tuning Guide**: [Fine-Tuning Models in Helicone](https://docs.helicone.ai/features/fine-tuning)
-- **Hugging Face**: [Fine-Tuning with Hugging Face](https://huggingface.co/docs/transformers/main/en/training)
-- **OpenPipe**: [Fine-Tuning Best Practices: Training Data](https://openpipe.ai/blog/fine-tuning-best-practices-series-introduction-and-chapter-1-training-data)
-- **OpenPipe**: [Fine-Tuning Best Practices: Models](https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models)
+- Helicone - <a href="https://docs.helicone.ai/features/fine-tuning" rel="noopener" target="_blank">Curate Datasets and Fine-tune Models</a>
+- Hugging Face - <a href="https://huggingface.co/docs/transformers/main/en/training" rel="noopener" target="_blank">Fine-Tuning with Hugging Face</a>
+- OpenPipe - <a href="https://openpipe.ai/blog/fine-tuning-best-practices-series-introduction-and-chapter-1-training-data" rel="noopener" target="_blank">Fine-Tuning Best Practices: Training Data</a>
+- OpenPipe - <a href="https://openpipe.ai/blog/fine-tuning-best-practices-chapter-2-models" rel="noopener" target="_blank">Fine-Tuning Best Practices: Models</a>
+
+<Questions />
