@@ -28,6 +28,19 @@ LLMs struggle to maintain coherence and context in long outputs, particularly ne
 
 There is a growing need for dedicated tools to test, refine, and manage prompts. Such tools would streamline prompt evaluation, improving output quality and reducing iteration time.
 
+## Key Metrics
+
+When evaluating prompts for Large Language Models (LLMs), developers commonly focus on these key metrics:
+
+- **Output Accuracy**: Measures the correctness of the model’s response relative to the desired answer.
+- **Relevance**: Assesses how pertinent the output is to the given prompt.
+- **Coherence**: Evaluates the logical consistency and clarity of the response.
+- **Format Adherence**: Checks if the output aligns with the specified format, such as JSON or code syntax.
+- **Latency**: Measures the time taken for the model to generate a response.
+- **Cost Efficiency**: Evaluates the computational resources required for prompt execution.
+
+Online resources: [PromptLearnings](https://promptlearnings.com/establishing-prompt-engineering-metrics), [Portkey](https://portkey.ai/blog/evaluating-prompt-effectiveness-key-metrics-and-tools), [Vellum AI](https://www.vellum.ai/blog/how-to-evaluate-the-quality-of-large-language-models-for-production-use-cases).
+
 
 ## Overview of the Top Prompt Evaluation Frameworks
 
@@ -72,15 +85,15 @@ There is a growing need for dedicated tools to test, refine, and manage prompts.
 
 ### **Key Features**
 
-1. **Prompt Experiments**: Enables iterative refinement by creating prompt variations, testing them against production data, and validating results with custom evaluators. Supports side-by-side comparisons to optimize performance.  
+1. **Prompt Experiments**: Enables iterative refinement by creating prompt variations, testing them against production data, and validating results with custom evaluators. Supports side-by-side comparisons to optimize performance. For more information about this, please read this [docs](https://docs.helicone.ai/features/experiments).
 
-2. **Scores API**: Assigns quantitative scores to requests and experiments, allowing detailed evaluation and comparison of prompt effectiveness.  
+2. **Scores API**: Assigns quantitative scores to requests and experiments, allowing detailed evaluation and comparison of prompt effectiveness. Read more about this [here](https://docs.helicone.ai/features/advanced-usage/scores).
 
-3. **Prompt Management**: Tracks, versions, and maintains datasets of inputs/outputs for each prompt iteration. Ensures seamless rollback and collaboration-friendly workflows.  
+3. **Prompt Management**: Tracks, versions, and maintains datasets of inputs/outputs for each prompt iteration. Ensures seamless rollback and collaboration-friendly workflows. More information can be found [here](https://docs.helicone.ai/features/prompts).  
 
-4. **Sessions**: Groups multi-step LLM interactions for debugging and optimizing complex workflows.  
+4. **Sessions**: Groups multi-step LLM interactions for debugging and optimizing complex workflows. This blog post explains more about session and other [essential Helicone features](https://www.helicone.ai/blog/essential-helicone-features).
 
-5. **User Feedback**: Captures user responses (positive/negative) to measure and refine prompt success.  
+5. **User Feedback**: Captures user responses (positive/negative) to measure and refine prompt success. Read more about this advanced usage [here](https://docs.helicone.ai/features/advanced-usage/feedback).
 
 ### **Differentiators**
 
@@ -250,7 +263,24 @@ There is a growing need for dedicated tools to test, refine, and manage prompts.
 
 - **Trials:** Allows running each input multiple times to assess variance in responses, providing a more robust overall score through intelligent aggregation of results. 
 
-- **Model Comparison:** Facilitates evaluation across multiple AI models and parameters, assisting in informed model selection and optimization. 
+- **Model Comparison:** Facilitates evaluation across multiple AI models and parameters, assisting in informed model selection and optimization.
+
+
+## Choosing the Right Prompt Evaluation Framework
+
+To choose the best prompt evaluation framework for your needs, consider the following criteria:
+
+1. **Core Features**: Ensure it supports prompt testing, monitoring, versioning, and management. Example: Helicone offers monitoring and cost tracking.
+	
+2. **Integration**: Look for compatibility with your existing tools (CI/CD pipelines, LLM APIs). Example: PromptLayer integrates with OpenAI APIs.
+
+3. **Scalability**: Assess its ability to handle large-scale prompt evaluations and datasets.
+
+4. **Metrics Support**: Verify it tracks key metrics like accuracy, relevance, latency, and cost.
+
+5. **Usability**: Check for an intuitive UI, detailed documentation, and automation capabilities.
+
+6. **Community & Support**: Opt for frameworks with active communities or strong customer support for troubleshooting.
 
 
 ## Further Reading
