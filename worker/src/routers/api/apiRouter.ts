@@ -10,6 +10,11 @@ import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
 import { createAPIClient } from "../../api/lib/apiClient";
 
+import {
+  hideProperty,
+  unhideProperty,
+} from "../../lib/managers/PropertiesManager";
+
 function getAPIRouterV1(
   router: OpenAPIRouterType<
     Route,
@@ -466,6 +471,31 @@ function getAPIRouterV1(
       });
     }
   );
+
+  router.post(
+      "/v2/properties/hide",
+      async (
+          _,
+          requestWrapper: RequestWrapper,
+          env: Env,
+          _ctx: ExecutionContext
+      ) => {
+        return await hideProperty(requestWrapper, env); // Ensure the updated hide logic is used.
+      }
+  );
+
+  router.post(
+      "/v2/properties/unhide",
+      async (
+          _,
+          requestWrapper: RequestWrapper,
+          env: Env,
+          _ctx: ExecutionContext
+      ) => {
+        return await unhideProperty(requestWrapper, env); // Ensure the updated unhide logic is used.
+      }
+  );
+
 }
 
 export const getAPIRouter = (

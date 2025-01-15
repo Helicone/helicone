@@ -22,6 +22,26 @@ const RequestRow = (props: RequestRowProps) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleDeleteProperty = async (property: string) => {
+    try {
+      const response = await fetch("/api/propertiesV2/hide", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ property_key: property }),
+      });
+      if (response.ok) {
+        console.log(`${property} deleted successfully`);
+      } else {
+        console.error(`Failed to delete ${property}`);
+      }
+    } catch (error) {
+      console.error("Error deleting property:", error);
+    }
+  };
+
+
   return (
     <li
       key={"request-row-view-" + index}
@@ -84,24 +104,35 @@ const RequestRow = (props: RequestRowProps) => {
             </span>
           </p>
           {row.customProperties &&
-            properties.length > 0 &&
-            Object.keys(row.customProperties).length > 0 && (
-              <>
-                {properties.map((property, i) => {
-                  if (
-                    row.customProperties &&
-                    row.customProperties.hasOwnProperty(property)
-                  ) {
-                    return (
-                      <p className="text-sm" key={i}>
-                        <span className="font-semibold">{property}:</span>{" "}
-                        {row.customProperties[property] as string}
-                      </p>
-                    );
-                  }
-                })}
-              </>
-            )}
+              properties.length > 0 &&
+              Object.keys(row.customProperties).length > 0 && (
+                  <>
+                    {properties.map((property, i) => {
+                      if (
+                          row.customProperties &&
+                          row.customProperties.hasOwnProperty(property)
+                      ) {
+                        return (
+                            <div className="flex justify-between items-center" key={i}>
+                              <p className="text-sm">
+                                <span className="font-semibold">{property}:</span>{" "}
+                                {row.customProperties[property] as string}
+                              </p>
+                              <button
+                                  className="text-red-500 hover:text-red-700 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent row selection on button click
+                                    handleDeleteProperty(property);
+                                  }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                        );
+                      }
+                    })}
+                  </>
+              )}
         </div>
       )}
     </li>
