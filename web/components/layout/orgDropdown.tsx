@@ -46,23 +46,22 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const { ownedOrgs, memberOrgs, customerOrgs } = useMemo(() => {
     const owned =
       orgContext?.allOrgs.filter(
-        (org) => org.owner === user?.id && org.organization_type !== "customer"
+        org => org.owner === user?.id && org.organization_type !== "customer"
       ) || [];
     const member =
       orgContext?.allOrgs.filter(
-        (org) => org.owner !== user?.id && org.organization_type !== "customer"
+        org => org.owner !== user?.id && org.organization_type !== "customer"
       ) || [];
     const customer =
-      orgContext?.allOrgs.filter(
-        (org) => org.organization_type === "customer"
-      ) || [];
+      orgContext?.allOrgs.filter(org => org.organization_type === "customer") ||
+      [];
     return { ownedOrgs: owned, memberOrgs: member, customerOrgs: customer };
   }, [orgContext?.allOrgs, user?.id]);
 
   const currentIcon = useMemo(
     () =>
       ORGANIZATION_ICONS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.icon
+        icon => icon.name === orgContext?.currentOrg?.icon
       ),
     [orgContext?.currentOrg?.icon]
   );
@@ -70,7 +69,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const currentColor = useMemo(
     () =>
       ORGANIZATION_COLORS.find(
-        (icon) => icon.name === orgContext?.currentOrg?.color
+        icon => icon.name === orgContext?.currentOrg?.color
       ),
     [orgContext?.currentOrg?.color]
   );
@@ -93,22 +92,20 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className={cn(
-              "flex items-center justify-start w-full ml-1 p-2 truncate"
-            )}
+            className="flex flex-row gap-2 justify-start px-2 py-1 w-full "
           >
             {currentIcon && (
               <currentIcon.icon
                 className={clsx(
                   `text-${currentColor?.name}-500`,
-                  "mr-2 flex-shrink-0 h-4 w-4"
+                  "flex-shrink-0 h-4 w-4"
                 )}
                 aria-hidden="true"
               />
             )}
-            <p className="text-xs font-medium w-fit text-left">
+            <h3 className="text-xs font-medium text-left truncate max-w-24">
               {orgContext?.currentOrg?.name}
-            </p>
+            </h3>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
@@ -197,7 +194,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           <CreateOrgForm
             onCancelHandler={setCreateOpen}
             onCloseHandler={() => setCreateOpen(false)}
-            onSuccess={(orgId) => {
+            onSuccess={orgId => {
               orgContext?.setCurrentOrg(orgId ?? "");
               router.push("/dashboard");
             }}

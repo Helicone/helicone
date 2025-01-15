@@ -22,7 +22,6 @@ import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnbo
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "@/components/templates/organization/createOrgForm";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useUser } from "@supabase/auth-helpers-react";
 
 export interface NavigationItem {
@@ -67,9 +66,7 @@ const DesktopSidebar = ({
   const toggleExpand = (name: string) => {
     const prev = expandedItems || [];
     setExpandedItems(
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name]
+      prev.includes(name) ? prev.filter(item => item !== name) : [...prev, name]
     );
   };
   const largeWith = useMemo(
@@ -79,22 +76,22 @@ const DesktopSidebar = ({
 
   const NAVIGATION_ITEMS = useMemo(() => {
     if (isCollapsed) {
-      return NAVIGATION.flatMap((item) => {
+      return NAVIGATION.flatMap(item => {
         if (item.subItems && expandedItems.includes(item.name)) {
           return [
             item,
-            ...item.subItems.filter((subItem) => subItem.icon !== null),
+            ...item.subItems.filter(subItem => subItem.icon !== null),
           ];
         }
         return [item];
-      }).filter((item) => item.icon !== null);
+      }).filter(item => item.icon !== null);
     }
 
-    return NAVIGATION.map((item) => {
+    return NAVIGATION.map(item => {
       if (item.subItems) {
         return {
           ...item,
-          subItems: item.subItems.map((subItem) => ({
+          subItems: item.subItems.map(subItem => ({
             ...subItem,
             href: subItem.href,
           })),
@@ -188,8 +185,6 @@ const DesktopSidebar = ({
     useState(false);
   const [showCreateOrg, setShowCreateOrg] = useState(false);
 
-  const jawn = useJawnClient();
-
   return (
     <>
       {/* Mobile hamburger menu */}
@@ -241,41 +236,41 @@ const DesktopSidebar = ({
         )}
       >
         <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
-          <div className="flex-grow overflow-y-auto pb-14">
-            {/* Collapsible button and OrgDropdown */}
-            <div className="flex items-center gap-2 h-14 border-b dark:border-slate-800">
-              {!isCollapsed && <OrgDropdown />}
-              <div
-                className={cn(
-                  "flex justify-center items-center",
-                  isCollapsed ? "w-full m-4" : "mr-2"
-                )}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCollapseToggle}
-                  className="w-full flex justify-center dark:hover:bg-slate-800 px-2"
-                >
-                  {isCollapsed ? (
-                    <ChevronRightIcon className="h-4 w-4" />
-                  ) : (
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+          {/* Collapse button and OrgDropdown */}
+          <div
+            className={`flex flex-row items-center border-b dark:border-slate-800 p-2.5 
+              ${isCollapsed ? "justify-center" : "justify-between"}`}
+          >
+            {/* - OrgDropdown */}
+            {!isCollapsed && <OrgDropdown />}
 
-            <div className="flex flex-col justify-between h-[calc(100%-16px)]">
+            {/* - Collapse button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCollapseToggle}
+              className="flex justify-center items-center dark:hover:bg-slate-800 shrink-0"
+            >
+              {isCollapsed ? (
+                <ChevronRightIcon className="h-4 w-4" />
+              ) : (
+                <ChevronLeftIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+
+          {/* Main content area */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 overflow-y-auto">
               {/* Navigation items */}
-              <div className="flex flex-col justify-between">
+              <div className="flex flex-col">
                 {((!isCollapsed &&
                   org?.currentOrg?.organization_type === "reseller") ||
                   org?.isResellerOfCurrentCustomerOrg) && (
                   <div className="flex w-full justify-center px-5 py-2">
                     <Button
                       variant="outline"
-                      className="w-full  dark:text-slate-400"
+                      className="w-full dark:text-slate-400"
                       size="sm_sleek"
                       onClick={() => {
                         router.push("/enterprise/portal");
@@ -296,12 +291,12 @@ const DesktopSidebar = ({
                 <div
                   ref={navItemsRef}
                   data-collapsed={isCollapsed}
-                  className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
+                  className="group flex flex-col py-2 data-[collapsed=true]:py-2"
                 >
-                  <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                  <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                     {isOnboardingVisible && <OnboardingNavItems />}
                     {!isOnboardingVisible &&
-                      NAVIGATION_ITEMS.map((link) => (
+                      NAVIGATION_ITEMS.map(link => (
                         <NavItem
                           key={link.name}
                           link={link}
@@ -318,35 +313,12 @@ const DesktopSidebar = ({
                   </nav>
                 </div>
               </div>
-              {/* <Button
-                variant="outline"
-                className="mx-2 text-[13px] font-medium"
-                onClick={() => {
-                  jawn.POST("/v1/organization/setup-demo");
-                }}
-              >
-                Stup date
-              </Button> */}
-              {org?.currentOrg?.tier === "demo" &&
-                org.allOrgs.filter(
-                  (org) => org.tier !== "demo" && org.owner === user?.id
-                ).length === 0 && (
-                  <Button
-                    variant="outline"
-                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
-                    onClick={() => {
-                      setShowEndOnboardingConfirmation(true);
-                    }}
-                  >
-                    Ready to integrate
-                  </Button>
-                )}
 
               {/* InfoBox */}
               {canShowInfoBox &&
                 !isCollapsed &&
                 org?.currentOrg?.tier !== "demo" && (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
                     <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
                       ⚡ Experiments is here: a new way to perfect your prompt.{" "}
                       <Link
@@ -360,17 +332,17 @@ const DesktopSidebar = ({
                   </div>
                 )}
             </div>
-          </div>
 
-          {/* Sticky help dropdown */}
-          {org?.currentOrg?.tier !== "demo" && (
-            <div className="absolute bottom-3 left-3 z-10">
-              <SidebarHelpDropdown
-                changelog={changelog}
-                handleChangelogClick={handleChangelogClick}
-              />
-            </div>
-          )}
+            {/* Sticky help dropdown */}
+            {org?.currentOrg?.tier !== "demo" && (
+              <div className="p-3">
+                <SidebarHelpDropdown
+                  changelog={changelog}
+                  handleChangelogClick={handleChangelogClick}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <ChangelogModal
@@ -396,7 +368,7 @@ const DesktopSidebar = ({
             onCloseHandler={() => {
               setShowCreateOrg(false);
             }}
-            onSuccess={(orgId) => {
+            onSuccess={orgId => {
               org?.setCurrentOrg(orgId ?? "");
               router.push("/dashboard");
             }}
