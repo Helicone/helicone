@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "tree-of-thought-prompting",
     },
   },
