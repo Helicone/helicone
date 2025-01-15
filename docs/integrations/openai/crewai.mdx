@@ -21,11 +21,12 @@ Once you’ve walked through these steps, you can customize or extend as needed.
 
   <Step title="Create an Account & Generate an API Key">
     1. Log into [Helicone](https://www.helicone.ai) (or create a new account).
-    2. Generate a [write-only API key](https://docs.helicone.ai/helicone-headers/helicone-auth).  
+    2. Generate a [write-only API key](https://docs.helicone.ai/helicone-headers/helicone-auth).
 
     <Note>
       Store your Helicone API key securely (e.g., in environment variables).
     </Note>
+
   </Step>
 
   <Step title="Set OPENAI_BASE_URL">
@@ -38,6 +39,7 @@ Once you’ve walked through these steps, you can customize or extend as needed.
     ```
 
     This points OpenAI API requests to Helicone’s proxy endpoint.
+
   </Step>
 
   <Step title="Integrate Helicone & Crew AI in Code (Additional)">
@@ -75,7 +77,7 @@ Once you’ve walked through these steps, you can customize or extend as needed.
         def researcher(self) -> Agent:
             var_prompt_1 = "topic"
             var_value_1  = "advanced AI breakthroughs"
-            
+
             return Agent(
                 role="Senior Data Researcher",
                 goal=f"Uncover cutting-edge developments in <helicone-prompt-input key=\"{var_prompt_1}\">{var_value_1}</helicone-prompt-input>",
@@ -120,8 +122,8 @@ Once you’ve walked through these steps, you can customize or extend as needed.
             )
     ```
 
-    **Additional Resources**  
-    - View all available headers in the [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-directory).  
+    **Additional Resources**
+    - View all available headers in the [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-directory).
     - For full examples, visit the [Crew AI Examples Repository](https://github.com/crewAIInc/crewAI-examples).
 
   </Step>
@@ -134,6 +136,7 @@ Once you’ve walked through these steps, you can customize or extend as needed.
     <Note>
       If your requests do not appear in Helicone, double-check your headers and API key. Also verify the endpoint is set to <code>https://oai.helicone.ai/v1</code>.
     </Note>
+
   </Step>
 
 </Steps>
