@@ -1,6 +1,7 @@
 import {
   CreateEvaluatorParams,
   EvaluatorResult,
+  TestInput,
   UpdateEvaluatorParams,
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
@@ -14,6 +15,7 @@ import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { pythonEvaluator } from "./pythonEvaluator";
+import { LastMileConfigForm } from "./types";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -49,6 +51,15 @@ export function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  testLastMileEvaluator({
+    config,
+    testInput,
+  }: {
+    config: LastMileConfigForm;
+    testInput: TestInput;
+  }) {
+    return ok(null);
+  }
   testPythonEvaluator({
     code,
     requestBodyString,

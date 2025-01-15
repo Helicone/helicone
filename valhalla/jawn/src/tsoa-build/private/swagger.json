@@ -466,6 +466,154 @@
 				],
 				"type": "object"
 			},
+			"DataEntry": {
+				"anyOf": [
+					{
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"system-prompt"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"inputKey": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"prompt-input"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"inputKey",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"input-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"output-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"BaseLastMileConfigForm": {
+				"properties": {
+					"output": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"input": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"output",
+					"input",
+					"name"
+				],
+				"type": "object"
+			},
+			"LastMileConfigForm": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/BaseLastMileConfigForm"
+					},
+					{
+						"anyOf": [
+							{
+								"properties": {
+									"_type": {
+										"type": "string",
+										"enum": [
+											"relevance",
+											"context_relevance"
+										]
+									}
+								},
+								"required": [
+									"_type"
+								],
+								"type": "object"
+							},
+							{
+								"properties": {
+									"groundTruth": {
+										"$ref": "#/components/schemas/DataEntry"
+									},
+									"_type": {
+										"type": "string",
+										"enum": [
+											"faithfulness"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"groundTruth",
+									"_type"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
+			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
 					"data": {
@@ -6004,6 +6152,54 @@
 									"evaluatorName",
 									"testInput",
 									"evaluatorConfig"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/lastmile/test": {
+			"post": {
+				"operationId": "TestLastMileEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"config": {
+										"$ref": "#/components/schemas/LastMileConfigForm"
+									}
+								},
+								"required": [
+									"testInput",
+									"config"
 								],
 								"type": "object"
 							}

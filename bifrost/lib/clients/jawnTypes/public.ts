@@ -146,6 +146,9 @@ export interface paths {
   "/v1/evaluator/llm/test": {
     post: operations["TestLLMEvaluator"];
   };
+  "/v1/evaluator/lastmile/test": {
+    post: operations["TestLastMileEvaluator"];
+  };
   "/v1/request/query": {
     post: operations["GetRequests"];
   };
@@ -1034,6 +1037,37 @@ Json: JsonObject;
       evaluator_llm_template?: string;
       evaluator_scoring_type: string;
     };
+    DataEntry: {
+      /** @enum {string} */
+      _type: "system-prompt";
+    } | {
+      inputKey: string;
+      /** @enum {string} */
+      _type: "prompt-input";
+    } | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "input-body";
+    }) | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "output-body";
+    });
+    BaseLastMileConfigForm: {
+      output: components["schemas"]["DataEntry"];
+      input: components["schemas"]["DataEntry"];
+      name: string;
+    };
+    LastMileConfigForm: components["schemas"]["BaseLastMileConfigForm"] & (({
+      /** @enum {string} */
+      _type: "relevance" | "context_relevance";
+    }) | {
+      groundTruth: components["schemas"]["DataEntry"];
+      /** @enum {string} */
+      _type: "faithfulness";
+    });
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS";
     Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
@@ -2313,7 +2347,7 @@ Json: JsonObject;
       id: string;
       name: string;
     };
-    "PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+    "PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
       /** Format: double */
       status: number;
       statusText: string;
@@ -2327,6 +2361,7 @@ Json: JsonObject;
           key_permissions: string;
           /** Format: double */
           id: number;
+          governance: boolean;
           created_at: string;
           api_key_name: string;
           api_key_hash: string;
@@ -2344,7 +2379,7 @@ Json: JsonObject;
       /** @enum {number|null} */
       count: null;
     };
-    "PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": components["schemas"]["PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
+    "PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": components["schemas"]["PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
   };
   responses: {
   };
@@ -3215,6 +3250,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["EvaluatorScoreResult"];
+        };
+      };
+    };
+  };
+  TestLastMileEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": {
+          testInput: components["schemas"]["TestInput"];
+          config: components["schemas"]["LastMileConfigForm"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -4861,7 +4914,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"];
+          "application/json": components["schemas"]["PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"];
         };
       };
     };

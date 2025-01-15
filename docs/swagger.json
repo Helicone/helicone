@@ -2369,6 +2369,154 @@
 				],
 				"type": "object"
 			},
+			"DataEntry": {
+				"anyOf": [
+					{
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"system-prompt"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"inputKey": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"prompt-input"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"inputKey",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"input-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"output-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"BaseLastMileConfigForm": {
+				"properties": {
+					"output": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"input": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"output",
+					"input",
+					"name"
+				],
+				"type": "object"
+			},
+			"LastMileConfigForm": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/BaseLastMileConfigForm"
+					},
+					{
+						"anyOf": [
+							{
+								"properties": {
+									"_type": {
+										"type": "string",
+										"enum": [
+											"relevance",
+											"context_relevance"
+										]
+									}
+								},
+								"required": [
+									"_type"
+								],
+								"type": "object"
+							},
+							{
+								"properties": {
+									"groundTruth": {
+										"$ref": "#/components/schemas/DataEntry"
+									},
+									"_type": {
+										"type": "string",
+										"enum": [
+											"faithfulness"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"groundTruth",
+									"_type"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
+			},
 			"ProviderName": {
 				"type": "string",
 				"enum": [
@@ -7397,7 +7545,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+			"PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
 				"properties": {
 					"status": {
 						"type": "number",
@@ -7435,6 +7583,9 @@
 									"type": "number",
 									"format": "double"
 								},
+								"governance": {
+									"type": "boolean"
+								},
 								"created_at": {
 									"type": "string"
 								},
@@ -7452,6 +7603,7 @@
 								"organization_id",
 								"key_permissions",
 								"id",
+								"governance",
 								"created_at",
 								"api_key_name",
 								"api_key_hash"
@@ -7513,10 +7665,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+			"PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/PostgrestResponseFailure"
@@ -9604,6 +9756,54 @@
 									"evaluatorName",
 									"testInput",
 									"evaluatorConfig"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/lastmile/test": {
+			"post": {
+				"operationId": "TestLastMileEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"config": {
+										"$ref": "#/components/schemas/LastMileConfigForm"
+									}
+								},
+								"required": [
+									"testInput",
+									"config"
 								],
 								"type": "object"
 							}
@@ -13838,7 +14038,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+									"$ref": "#/components/schemas/PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
 								}
 							}
 						}

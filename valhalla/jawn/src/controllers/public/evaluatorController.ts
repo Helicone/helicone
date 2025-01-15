@@ -26,6 +26,7 @@ import {
   EvaluatorScoreResult,
 } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../../lib/clients/constant";
+import { LastMileConfigForm } from "../../managers/evaluator/types";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
@@ -62,7 +63,7 @@ type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
 };
 
-type TestInput = {
+export type TestInput = {
   inputBody: string;
   outputBody: string;
 
@@ -338,5 +339,25 @@ export class EvaluatorController extends Controller {
       this.setStatus(500);
     }
     return result;
+  }
+
+  @Post("/lastmile/test")
+  public async testLastMileEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      config: LastMileConfigForm;
+      testInput: TestInput;
+    }
+  ): Promise<Result<null, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.testLastMileEvaluator(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error || "Failed to test last mile evaluator");
+    } else {
+      this.setStatus(200);
+      return ok(null);
+    }
   }
 }
