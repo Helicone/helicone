@@ -104,7 +104,15 @@ const PrototypeSidebar = ({
                   >
                     <div className="flex items-center">
                       <HomeIcon className="mr-2 h-4 w-4" />
-                      Dashboard
+                      <div className="relative">
+                        Dashboard
+                        {openedPage !== "dashboard" && (
+                          <>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div
@@ -122,8 +130,12 @@ const PrototypeSidebar = ({
                       <TableCellsIcon className="mr-2 h-4 w-4" />
                       <div className="relative">
                         Requests
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                        {openedPage !== "requests" && (
+                          <>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -148,8 +160,12 @@ const PrototypeSidebar = ({
                       <ListTreeIcon className="mr-2 h-4 w-4" />
                       <div className="relative">
                         Sessions
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
-                        <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                        {openedPage !== "sessions" && (
+                          <>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px]"></div>
+                            <div className="absolute w-1.5 h-1.5 bg-[#32ACEB] rounded-full top-[1px] right-[-9px] animate-ping"></div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

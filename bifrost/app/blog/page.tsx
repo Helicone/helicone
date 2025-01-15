@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openai-structured-outputs",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "chain-of-thought-prompting",
     },
   },

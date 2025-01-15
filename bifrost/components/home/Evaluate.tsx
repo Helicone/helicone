@@ -24,7 +24,7 @@ const Evaluate = () => {
               <span className="text-brand">Prevent regression</span> and improve
               quality over-time
             </h2>
-            <p className="text-lg max-w-[520px]">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Monitor performance in real-time and catch regressions
               pre-deployment with LLM-as-a-judge or custom evals
             </p>
@@ -58,7 +58,7 @@ const Evaluate = () => {
           <div
             className={cn(
               "bg-slate-50 border border-slate-200 px-6 py-3 cursor-pointer max-w-[550px] transition-all duration-300 ease-in-out",
-              isQuestionOpen ? "rounded-2xl" : "rounded-[100px]"
+              isQuestionOpen ? "rounded-2xl" : "rounded-[24px]"
             )}
             onClick={() => setIsQuestionOpen(!isQuestionOpen)}
           >
@@ -85,10 +85,10 @@ const Evaluate = () => {
               )}
             >
               <div className="overflow-hidden">
-                <p className="text-lg text-[#ACB3BA]">
+                <p className="text-sm sm:text-lg font-light text-gray-400">
                   Online evaluation tests systems in real-time using live data
-                  and actual user interactions. It’s useful to capture dynamic
-                  real-world scenarios. <br />
+                  and actual user interactions. It&apos;s useful to capture
+                  dynamic real-world scenarios. <br />
                   <br />
                   In contrast, offline evaluation occurs in controlled,
                   simulated environments using previous requests or synthetic
