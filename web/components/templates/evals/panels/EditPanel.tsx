@@ -11,7 +11,7 @@ import { Evaluator } from "../details/types";
 import {
   LLMEvaluatorConfigFormPreset,
   useLLMConfigStore,
-} from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
+} from "../CreateNewEvaluator/LLMEvaluatorConfigForm";
 
 const getInitialState = (
   evaluator: Evaluator

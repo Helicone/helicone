@@ -46,9 +46,9 @@ function SelectDataEntryType({
             if (value === "prompt-input") {
               onChange({ _type: "prompt-input", inputKey: "" });
             } else if (value === "input-body") {
-              onChange({ _type: "input-body", content: "jsonify" });
+              onChange({ _type: "input-body", content: "message" });
             } else if (value === "output-body") {
-              onChange({ _type: "output-body", content: "jsonify" });
+              onChange({ _type: "output-body", content: "message" });
             } else if (value === "system-prompt") {
               onChange({ _type: "system-prompt" });
             }
@@ -87,8 +87,8 @@ function SelectDataEntryType({
               <SelectValue placeholder="Select input body type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="jsonify">JSONify</SelectItem>
               <SelectItem value="message">Message</SelectItem>
+              <SelectItem value="jsonify">JSONify</SelectItem>
             </SelectContent>
           </Select>
         )}
@@ -168,9 +168,23 @@ export const LastMileDevConfigForm: React.FC<{
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
 
+  const { setTestData } = useTestDataStore();
+
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
     DEFAULT_FAITHFULNESS_TYPE
   );
+
+  useEffect(() => {
+    setTestData((prev) => {
+      if (!prev) return null;
+      return {
+        testInput: prev.testInput,
+        _type: "lastmile",
+        evaluator_name: "",
+        config: evaluatorType,
+      };
+    });
+  }, [setTestData, evaluatorType]);
 
   return (
     <Col className="h-full flex flex-col gap-2">
