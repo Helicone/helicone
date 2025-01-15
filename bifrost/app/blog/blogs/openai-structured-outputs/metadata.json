@@ -2,7 +2,7 @@
   "title": "Building a Simple Chatbot with OpenAI Structured Outputs",
   "title1": "Building a Simple Chatbot with OpenAI Structured Outputs",
   "title2": "Building a Simple Chatbot with OpenAI Structured Outputs",
-  "description": "Learn how to use OpenAI's new Structured Outputs feature to build a reliable flight search chatbot. This step-by-step guide covers function calling, response formatting, and monitoring with Helicone.",
+  "description": "Learn how to use OpenAI's new Structured Outputs feature to build a reliable flight search chatbot. This step-by-step tutorial covers function calling, response formatting, and monitoring with Helicone.",
   "images": "/static/blog/openai-structured-outputs/cover.webp",
   "time": "7 minute read",
   "author": "Lina Lam",

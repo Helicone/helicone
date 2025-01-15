@@ -4,13 +4,13 @@ As the name suggests, <a href="https://platform.openai.com/docs/guides/structure
 
 ![OpenAIStructured Outputs](/static/blog/openai-structured-outputs/cover.webp)
 
-The key difference between the new Structured Outputs and the likely soon-to-be-deprecated JSON mode lies in its enhanced reliability. OpenAI strongly recommends transitioning to Structured Outputs for any functionality previously handled by JSON mode.
-
 In this guide, we'll explore how to leverage Structured Outputs by building a simple chatbot capable of providing detailed flight information in response to a simple user query. We'll then use Helicone to monitor our chatbot's performance.
 
 ## Why Use Structured Outputs?
 
 Structured Outputs allow you to generate structured data from unstructured inputs to your chatbots. Unlike unstructured text, structured outputs are organized, making them easier to parse, manipulate, and integrate into various applications.
+
+The key difference between the new Structured Outputs and the likely soon-to-be-deprecated JSON mode lies in its enhanced reliability. OpenAI strongly recommends transitioning to Structured Outputs for any functionality previously handled by JSON mode.
 
 ### Key Benefits
 
@@ -43,7 +43,7 @@ But first, you should know that Structured Outputs can be used in two ways throu
 1. **Function Calling**: You can enable Structured Outputs for all models that support <a href="https://platform.openai.com/docs/assistants/tools" target="_blank" rel="noopener">tools</a>. With this setting, the model's output will match the tool's defined structure.
 2. **Response Format Option**: Developers can use the `json_schema` option in the `response_format` parameter to specify a JSON Schema. This is for when the model isn't calling a tool but needs to respond in a structured format. When `strict: true` is used with this option, the model's output will strictly follow the provided schema.
 
-## Building a Flight Details Chatbot with Structured Outputs
+## Building a Flight Details Chatbot with OpenAI Structured Outputs
 
 Now, we build!
 
@@ -272,7 +272,7 @@ And that's it! In just a few steps, you can review all refusal responses and opt
     target="_blank"
     rel="noopener"
   >
-    4 Essential Helicone Features to Optimize Your LLM Development
+    4 Essential Helicone Features to Optimize Your LLM App
   </a>
 - <a
     href="https://www.helicone.ai/blog/first-ai-app-with-helicone"
@@ -309,7 +309,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Here's the entire script:
+### Here's the entire script:
 
 ```python
 from pydantic import BaseModel
