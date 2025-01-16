@@ -76,13 +76,14 @@ const SessionNameSelection = ({
         {sessionNames
           .sort(
             (a, b) =>
-              new Date(a.last_used).getTime() - new Date(a.last_used).getTime()
+              new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
           )
           // Remove sessions older than 45 days
-          .filter(
-            (seshName) =>
-              new Date(seshName.last_used).getTime() >
-              new Date().getTime() - 45 * 24 * 60 * 60 * 1000
+          .filter((seshName) =>
+            sessionNameSearch
+              ? true
+              : new Date(seshName.last_used).getTime() >
+                new Date().getTime() - 45 * 24 * 60 * 60 * 1000
           )
           .map((seshName) => (
             <Card
