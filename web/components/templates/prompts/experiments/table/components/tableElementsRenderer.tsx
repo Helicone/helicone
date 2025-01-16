@@ -110,34 +110,6 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     }
   );
 
-  const { data: randomInputRecordsData } = useQuery(
-    ["randomInputRecords", originalPromptVersionId],
-    async () => {
-      console.log("fetching random input records");
-      const res = await jawnClient.POST(
-        "/v1/prompt/version/{promptVersionId}/inputs/query",
-        {
-          params: {
-            path: {
-              promptVersionId: originalPromptVersionId ?? "",
-            },
-          },
-          body: {
-            limit: 1,
-            random: true,
-          },
-        }
-      );
-      return res.data?.data ?? [];
-    },
-    {
-      enabled: showViewPrompt && originalPromptVersionId !== undefined, // Fetch only when the drawer is open
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    }
-  );
-
   const queryClient = useQueryClient();
 
   const promptVersionIdScore = useQuery<{
