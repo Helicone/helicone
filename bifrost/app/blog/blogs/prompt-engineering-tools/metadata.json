@@ -1,9 +1,9 @@
 {
-  "title": "Prompt Engineering: Tools, Best Practices, and Techniques",
-  "title1": "Prompt Engineering: Tools, Best Practices, and Techniques",
-  "title2": "Prompt Engineering: Tools, Best Practices, and Techniques",
+  "title": "Prompt Engineering Techniques, Tools and Best Practices",
+  "title1": "Prompt Engineering Techniques, Tools and Best Practices",
+  "title2": "Prompt Engineering Techniques, Tools and Best Practices",
   "description": "Writing effective prompts is a crucial skill for developers working with large language models (LLMs). Here are the essentials of prompt engineering and the best tools to optimize your prompts.",
-  "images": "/static/blog/prompt-engineering-tools/cover.webp",
+  "images": "/static/blog/prompt-engineering-tools/prompt-engineering-cover.webp",
   "time": "4 minute read",
   "author": "Lina Lam",
   "date": "September 12, 2024", 
