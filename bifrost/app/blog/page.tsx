@@ -216,7 +216,7 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+      folderName: "openai-structured-outputs",
     },
   },
   {
@@ -226,12 +226,17 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "openai-structured-outputs",
+      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
     },
   },
   {
     dynmaicEntry: {
       folderName: "chain-of-thought-prompting",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-api-providers",
     },
   },
   {
@@ -251,12 +256,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "claude-3.5-sonnet-vs-openai-o1",
+      folderName: "crewai-vs-dify-ai",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-dify-ai",
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
     },
   },
   {
@@ -286,12 +291,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-autogen",
+      folderName: "prompt-evaluation-for-llms",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-evaluation-for-llms",
+      folderName: "crewai-vs-autogen",
     },
   },
   {
@@ -302,11 +307,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-api-providers",
     },
   },
   {
