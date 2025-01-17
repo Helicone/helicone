@@ -1,26 +1,58 @@
-"use client";
-import { streamResponse } from "@/app/actions/stream-response";
-import performEditPrompt from "@/prompts-delete-this-folder/perform-edit";
-import { Variable } from "@/types/prompt-state";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+
+// Helper functions for API calls
+async function streamResponseAPI(
+  params: any,
+  options?: { headers?: { "x-cancel": string } }
+) {
+  const response = await fetch("/api/actions/stream", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-cancel": options?.headers?.["x-cancel"] || "0",
+    },
+    body: JSON.stringify(params),
+  });
+  return response.body as ReadableStream<Uint8Array>;
+}
+
+async function getAutoCompleteSuggestionAPI(
+  currentText: string,
+  contextText: string,
+  options?: { headers?: { "x-cancel": string } }
+) {
+  const response = await fetch("/api/actions/autocomplete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-cancel": options?.headers?.["x-cancel"] || "0",
+    },
+    body: JSON.stringify({ currentText, contextText }),
+  });
+  return response.body as ReadableStream<Uint8Array>;
+}
+
 import { $assistant, $system, $user } from "@/utils/llm";
+import { toCamelCase, toSnakeCase } from "@/utils/strings";
+import { getVariableStatus, isVariable } from "@/utils/variables";
 import { createSelectionRange } from "@/utils/selection";
 import { readStream } from "@/utils/stream";
-import { toCamelCase, toSnakeCase } from "@/utils/strings";
-import { PiChatDotsBold } from "react-icons/pi";
-import { suggestions } from "@/prompts-delete-this-folder/perform-edit";
 
+import { Variable } from "@/types/prompt-state";
+
+import performEditPrompt from "@/prompts/perform-edit";
+import { suggestions } from "@/prompts/perform-edit";
+
+import { PiChatDotsBold } from "react-icons/pi";
 import {
   handleSuggestionStream,
   MIN_LENGTH_FOR_SUGGESTIONS,
   SUGGESTION_DELAY,
   suggestionReducer,
 } from "@/utils/suggestions";
-import { getVariableStatus, isVariable } from "@/utils/variables";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { MdKeyboardTab } from "react-icons/md";
-// import { getAutoCompleteSuggestion } from '../../app/actions/auto-complete';
-import LoadingDots from "../universal/LoadingDots";
-import Toolbar from "./Toolbar";
+import LoadingDots from "@/components/shared/universal/LoadingDots";
+import Toolbar from "@/components/shared/prompts/Toolbar";
 
 type SelectionState = {
   text: string;
@@ -163,7 +195,7 @@ export default function PromptBox({
     const fetchAndHandleStream = async () => {
       try {
         console.log("Fetching suggestions for:", value);
-        const stream = await getAutoCompleteSuggestion(value, contextText, {
+        const stream = await getAutoCompleteSuggestionAPI(value, contextText, {
           headers: { "x-cancel": "0" },
         });
 
@@ -289,7 +321,7 @@ export default function PromptBox({
               !isValid
                 ? "text-slate-400 line-through"
                 : hasValue
-                ? "text-modulue"
+                ? "text-heliblue"
                 : "text-red-500"
             }`}
           >
@@ -479,7 +511,7 @@ export default function PromptBox({
         isLoading: true,
       });
 
-      const stream = await streamResponse(
+      const stream = await streamResponseAPI(
         {
           model: "anthropic/claude-3-5-haiku:beta",
           messages: [
@@ -605,7 +637,7 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className="group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-modulue hover:shadow-md rounded-xl bg-white border border-slate-100"
+      className="group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue hover:shadow-md rounded-xl bg-white border border-slate-100"
     >
       <textarea
         ref={textareaRef}
@@ -639,7 +671,7 @@ export default function PromptBox({
             {!suggestionState.isStreaming && (
               <span className="opacity-0 transition-opacity group-focus-within:opacity-100">
                 <span className="duration-250 relative inline-flex translate-x-0 items-center opacity-100 transition-all ease-out">
-                  <div className="glass ml-1 flex flex-row items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-xs text-modulue">
+                  <div className="glass ml-1 flex flex-row items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-xs text-heliblue">
                     <MdKeyboardTab />
                     <label>tab</label>
                   </div>

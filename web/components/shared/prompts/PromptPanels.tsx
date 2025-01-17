@@ -102,7 +102,7 @@ export default function PromptPanels({
           disabled={!canAddPair}
           className={`flex flex-row items-center gap-2 ${
             canAddPair
-              ? "text-modulue hover:underline"
+              ? "text-heliblue hover:underline"
               : "cursor-not-allowed text-slate-400"
           }`}
         >
