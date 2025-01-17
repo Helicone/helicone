@@ -1,11 +1,9 @@
-import AuthLayout from "../components/layout/auth/authLayout";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { User } from "@supabase/auth-helpers-react";
-import { SortDirection } from "../services/lib/sorts/requests/sorts";
-import { ReactElement } from "react";
-import SessionsPage from "../components/templates/sessions/sessionsPage";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { ParsedUrlQuery } from "querystring";
+import { ReactElement } from "react";
+import AuthLayout from "../components/layout/auth/authLayout";
+import SessionsPage from "../components/templates/sessions/sessionsPage";
+import { SortDirection } from "../services/lib/sorts/requests/sorts";
 
 interface SessionsProps {
   currentPage: number;

@@ -1,20 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
+import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
+import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { useUser } from "@supabase/auth-helpers-react";
-import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
-import { useOrg } from "../org/organizationContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -24,6 +22,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { children } = props;
   const router = useRouter();
   const { pathname } = router;
+
   const org = useOrg();
   const user = useUser();
 
@@ -35,7 +34,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   }, [pathname]);
 
   const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
-  const org = useOrg();
 
   const banner = useMemo(() => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
@@ -71,10 +69,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
     }
   }, [router, user]);
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
   if (!user) {
     return null;
   }
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   return (
     <MetaData title={currentPage}>
