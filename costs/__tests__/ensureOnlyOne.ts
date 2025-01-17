@@ -797,6 +797,12 @@ WHEN (request_response_rmt.provider = 'AWS') THEN (
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'DEEPSEEK') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'deepseek-chat') THEN 14 * request_response_rmt.prompt_tokens + 28 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens

@@ -15,6 +15,7 @@ import { costs as qstashCosts } from "./qstash";
 import { openAIProvider } from "./openai";
 import { anthropicProvider } from "./anthropic";
 import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as deepseekCosts } from "./deepseek";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -203,6 +204,7 @@ export const providers: {
   {
     pattern: deepseek,
     provider: "DEEPSEEK",
+    costs: deepseekCosts,
   },
 ];
 
