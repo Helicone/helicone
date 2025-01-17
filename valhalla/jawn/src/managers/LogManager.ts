@@ -15,10 +15,11 @@ import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestSto
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { WebhookStore } from "../lib/stores/WebhookStore";
-import { FeatureFlagStore } from "../lib/stores/FeatureFlagStore";
 import { supabaseServer } from "../lib/db/supabase";
 import { dataDogClient } from "../lib/clients/DataDogClient";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
+import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
+import { OnlineEvalHandler } from "../lib/handlers/OnlineEvalHandler";
 
 export class LogManager {
   public async processLogEntry(logMessage: Message): Promise<void> {
@@ -53,6 +54,7 @@ export class LogManager {
     const requestHandler = new RequestBodyHandler();
     const responseBodyHandler = new ResponseBodyHandler();
     const promptHandler = new PromptHandler();
+    const onlineEvalHandler = new OnlineEvalHandler();
     const loggingHandler = new LoggingHandler(
       new LogStore(),
       new VersionedRequestStore(""),
@@ -65,6 +67,7 @@ export class LogManager {
     const webhookHandler = new WebhookHandler(
       new WebhookStore(supabaseServer.client)
     );
+    const segmentHandler = new SegmentLogHandler();
 
     authHandler
       .setNext(rateLimitHandler)
@@ -72,10 +75,12 @@ export class LogManager {
       .setNext(requestHandler)
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
+      .setNext(onlineEvalHandler)
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
-      .setNext(webhookHandler);
+      .setNext(webhookHandler)
+      .setNext(segmentHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
@@ -138,6 +143,7 @@ export class LogManager {
 
     await this.logPosthogEvents(posthogHandler, batchContext);
     await this.logLytixEvents(lytixHandler, batchContext);
+    await this.logSegmentEvents(segmentHandler, batchContext);
     await this.logWebhooks(webhookHandler, batchContext);
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
@@ -273,6 +279,29 @@ export class LogManager {
       methodName: "handleResults",
       messageCount: batchContext.messageCount,
       message: "Lytix events",
+    });
+  }
+
+  private async logSegmentEvents(
+    handler: SegmentLogHandler,
+    batchContext: {
+      batchId: string;
+      partition: number;
+      lastOffset: string;
+      messageCount: number;
+    }
+  ): Promise<void> {
+    const start = performance.now();
+    await handler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: handler.constructor.name,
+      methodName: "handleResults",
+      messageCount: batchContext.messageCount,
+      message: "Segment events",
     });
   }
 

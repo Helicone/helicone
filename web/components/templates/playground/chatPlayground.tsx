@@ -8,20 +8,19 @@ import {
 import { useState } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import {
   ChatCompletionCreateParams,
   ChatCompletionTool,
 } from "openai/resources/chat";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
-import HcButton from "../../ui/hcButton";
 import { SingleChat } from "../requests/chatComponent/single/singleChat";
 import { Message } from "../requests/chatComponent/types";
 import ModelPill from "../requestsV2/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
-import { PlaygroundModel } from "./playgroundPage";
+import { PlaygroundModel } from "./types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -603,23 +602,20 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           id="step-inc"
           className="w-full flex justify-between sticky bottom-0 bg-gray-100 py-4 border-t border-gray-300 dark:border-gray-700 dark:bg-[#17191d]"
         >
-          <HcButton
-            variant={"secondary"}
+          <Button variant={"secondary"} onClick={() => customNavBar.onBack()}>
+            Back
+          </Button>
+          <Button
             size={"sm"}
-            title={"Back"}
-            onClick={() => customNavBar.onBack()}
-          />
-          <HcButton
-            variant={"primary"}
-            size={"sm"}
-            title={"Continue"}
             onClick={() => {
               if (onSubmit) {
                 onSubmit(currentChat);
               }
               customNavBar.onContinue();
             }}
-          />
+          >
+            Continue
+          </Button>
         </div>
       )}
     </>

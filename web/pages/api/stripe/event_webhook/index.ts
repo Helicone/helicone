@@ -3,6 +3,11 @@ import Stripe from "stripe";
 import { buffer } from "micro";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
+import {
+  getEvaluatorUsage,
+  getExperimentUsage,
+} from "@/lib/api/stripe/llmUsage";
+import { costOf } from "@/packages/cost";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -138,6 +143,159 @@ const PricingVersion20240913 = {
   },
   handleDelete: PricingVersionOld.handleDelete,
 };
+
+const InvoiceHandlers = {
+  async handleInvoiceCreated(event: Stripe.Event) {
+    const invoice = event.data.object as Stripe.Invoice;
+
+    try {
+      if (invoice.status === "draft") {
+        const subscriptionMetadata = invoice.subscription_details?.metadata;
+        const orgId = subscriptionMetadata?.orgId;
+        if (!orgId) {
+          console.log("No orgId found, skipping invoice item creation");
+          return;
+        }
+
+        const customerID =
+          typeof invoice.customer === "string"
+            ? invoice.customer
+            : invoice.customer?.id;
+
+        if (!customerID) {
+          console.log("No customerID found, skipping invoice item creation");
+          return;
+        }
+
+        const subscription = await stripe.subscriptions.retrieve(
+          invoice.subscription as string
+        );
+
+        const subscriptionStartDate = new Date(
+          subscription.current_period_start * 1000
+        );
+        const subscriptionEndDate = new Date(
+          subscription.current_period_end * 1000
+        );
+
+        const experimentUsage = await getExperimentUsage(
+          orgId,
+          subscriptionStartDate,
+          subscriptionEndDate
+        );
+
+        if (experimentUsage.error || !experimentUsage.data) {
+          console.error(
+            "Error getting experiment usage:",
+            experimentUsage.error
+          );
+          return;
+        }
+
+        const evaluatorUsage = await getEvaluatorUsage(
+          orgId,
+          subscriptionStartDate,
+          subscriptionEndDate
+        );
+
+        if (evaluatorUsage.error || !evaluatorUsage.data) {
+          console.error("Error getting evaluator usage:", evaluatorUsage.error);
+          return;
+        }
+
+        if (experimentUsage.data.length !== 0) {
+          for (const usage of experimentUsage.data) {
+            const totalCost = costOf({
+              model: usage.model,
+              provider: usage.provider.toUpperCase(),
+            });
+
+            if (!totalCost) {
+              console.error("No cost found for", usage.model, usage.provider);
+              continue;
+            }
+
+            await stripe.invoiceItems.create({
+              customer: customerID,
+              invoice: invoice.id,
+              currency: "usd",
+              amount: Math.ceil(
+                (totalCost.completion_token * usage.completion_tokens +
+                  totalCost.prompt_token * usage.prompt_tokens) *
+                  100
+              ),
+              description: `Experiment: ${usage.provider}/${
+                usage.model
+              }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
+                totalCost.completion_token * 1000
+              ).toPrecision(6)}/1K completion tokens, $${+(
+                totalCost.prompt_token * 1000
+              ).toPrecision(6)}/1K prompt tokens`,
+            });
+          }
+        }
+
+        if (evaluatorUsage.data.length !== 0) {
+          for (const usage of evaluatorUsage.data) {
+            const totalCost = costOf({
+              model: usage.model,
+              provider: usage.provider.toUpperCase(),
+            });
+
+            if (!totalCost) {
+              console.error("No cost found for", usage.model, usage.provider);
+              continue;
+            }
+
+            await stripe.invoiceItems.create({
+              customer: customerID,
+              invoice: invoice.id,
+              currency: "usd",
+              amount: Math.ceil(
+                (totalCost.completion_token * usage.completion_tokens +
+                  totalCost.prompt_token * usage.prompt_tokens) *
+                  100
+              ),
+              description: `Evaluator: ${usage.provider}/${
+                usage.model
+              }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
+                totalCost.completion_token * 1000
+              ).toPrecision(6)}/1K completion tokens, $${+(
+                totalCost.prompt_token * 1000
+              ).toPrecision(6)}/1K prompt tokens`,
+            });
+          }
+        }
+      } else {
+        console.log("Invoice is not draft, skipping finalization");
+        console.log(invoice);
+      }
+    } catch (error) {
+      console.error("Error handling invoice creation:", error);
+      throw error;
+    }
+  },
+
+  async handleInvoiceUpcoming(event: Stripe.Event) {
+    console.log("Invoice upcoming");
+
+    const invoice = event.data.object as Stripe.Invoice;
+
+    try {
+      if (invoice.subscription) {
+        // await stripe.subscriptions.update(invoice.subscription as string, {
+        //   metadata: {
+        //     lastInvoicePreview: new Date().toISOString(),
+        //   },
+        // });
+      }
+    } catch (error) {
+      console.error("Error handling upcoming invoice:", error);
+      throw error;
+    }
+  },
+};
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     const buf = await buffer(req);
@@ -163,6 +321,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         ? PricingVersion20240913
         : PricingVersionOld;
 
+    if (event.type === "test_helpers.test_clock.advancing") {
+      return res.status(200).end();
+    }
+
+    console.log(event.type);
+
+    const knownUnhandledEvents = [
+      "invoiceitem.created",
+      "invoice.updated",
+      "payment_intent.succeeded",
+      "charge.succeeded",
+      "payment_intent.created",
+      "customer.updated",
+      "test_helpers.test_clock.ready",
+      "invoice.payment_succeeded",
+      "invoice.paid",
+      "invoice.finalized",
+    ];
+
+    if (knownUnhandledEvents.includes(event.type)) {
+      console.log("Unhandled event type", event.type);
+      return res.status(200).end();
+    }
+
     if (event.type === "customer.subscription.created") {
       await pricingFunctions.handleCreate(event);
     } else if (event.type === "checkout.session.completed") {
@@ -171,11 +353,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await pricingFunctions.handleUpdate(event);
     } else if (event.type === "customer.subscription.deleted") {
       await pricingFunctions.handleDelete(event);
+    } else if (event.type === "invoice.created") {
+      await InvoiceHandlers.handleInvoiceCreated(event);
+    } else if (event.type === "invoice.upcoming") {
+      await InvoiceHandlers.handleInvoiceUpcoming(event);
     } else {
+      console.log("Unhandled event type", event.type);
       return res.status(400).end();
     }
 
     res.json({ received: true });
+    res.status(200).end();
   } else {
     res.setHeader("Allow", "POST");
     res.status(405).end("Method Not Allowed");

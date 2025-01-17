@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChangelogItem } from "./auth/Sidebar";
+import { ChangelogItem } from "./auth/types";
 
 const ChangelogModal = ({
   open,
@@ -20,7 +20,7 @@ const ChangelogModal = ({
       {changelog && (
         <DialogContent className="w-[95vw] sm:w-full max-w-xl max-h-[80vh] overflow-y-auto">
           <DialogHeader className="mt-2">
-            <DialogTitle className="flex justify-between items-end">
+            <DialogTitle className="flex justify-between items-end text-[20px]">
               {changelog.title}
               <small className="text-xs text-slate-500">
                 {new Date(changelog.pubDate).toLocaleDateString()}
@@ -35,7 +35,7 @@ const ChangelogModal = ({
               </div>
             )}
             <div
-              className="prose dark:prose-invert prose-sm"
+              className="prose dark:prose-invert prose-sm prose-h2:text-base prose-h3:text-base"
               dangerouslySetInnerHTML={{ __html: changelog["content:encoded"] }}
             />
           </div>

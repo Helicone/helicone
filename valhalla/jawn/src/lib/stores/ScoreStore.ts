@@ -5,7 +5,7 @@ import { BaseStore } from "./baseStore";
 
 export type Score = {
   score_attribute_key: string;
-  score_attribute_type: string;
+  score_attribute_type: "number" | "boolean";
   score_attribute_value: number;
 };
 
@@ -34,7 +34,11 @@ export class ScoreStore extends BaseStore {
     super(organizationId);
   }
 
-  public async putScoresIntoSupabase(requestId: string, scores: Score[]) {
+  public async putScoresIntoSupabase(
+    requestId: string,
+    scores: Score[],
+    evaluatorId?: string
+  ) {
     try {
       const scoreKeys = scores.map((score) => {
         if (score.score_attribute_type === "boolean") {
@@ -44,7 +48,7 @@ export class ScoreStore extends BaseStore {
       });
       const scoreTypes = scores.map((score) => score.score_attribute_type);
       const scoreValues = scores.map((score) => score.score_attribute_value);
-
+      const evaluatorIds = scores.map((_score) => evaluatorId);
       const { data: requestData, error: requestError } = await dbExecute(
         `SELECT id FROM request WHERE id = $1 AND helicone_org_id = $2`,
         [requestId, this.organizationId]
@@ -60,11 +64,12 @@ export class ScoreStore extends BaseStore {
 
       const upsertQuery = `
         WITH upserted_attributes AS (
-            INSERT INTO score_attribute (score_key, value_type, organization)
-            SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[])
+            INSERT INTO score_attribute (score_key, value_type, organization, evaluator_id)
+            SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[]), unnest($4::uuid[])
             ON CONFLICT (score_key, organization) DO UPDATE SET
                 score_key = EXCLUDED.score_key,
-                value_type = EXCLUDED.value_type
+                value_type = EXCLUDED.value_type,
+                evaluator_id = EXCLUDED.evaluator_id
             RETURNING id, score_key
         )
         SELECT id, score_key
@@ -73,7 +78,7 @@ export class ScoreStore extends BaseStore {
 
       const { data: upsertedAttributes, error: upsertError } = await dbExecute(
         upsertQuery,
-        [scoreKeys, scoreTypes, organizationIds]
+        [scoreKeys, scoreTypes, organizationIds, evaluatorIds]
       );
 
       if (!upsertedAttributes || upsertError) {
@@ -132,6 +137,7 @@ export class ScoreStore extends BaseStore {
         SELECT *
         FROM request_response_rmt
         WHERE (request_id, organization_id) IN (${queryPlaceholders})
+        AND request_created_at > now() - INTERVAL 30 DAY
         `,
         queryParams
       ),

@@ -6,7 +6,7 @@ import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 import { getJawnClient } from "../../lib/clients/jawn";
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 
 function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
   getPropertyFilters: (

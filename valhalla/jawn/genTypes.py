@@ -117,16 +117,18 @@ def main():
     # Define the input and output files
     tasks = [
         (f"{current_dir}/src/tsoa-build/public/swagger.json",
-         f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts"),
+         f"{current_dir}/../../web/lib/clients/jawnTypes/public.ts",
+         f"{current_dir}/../../bifrost/lib/clients/jawnTypes/public.ts"),
         (f"{current_dir}/src/tsoa-build/private/swagger.json",
-         f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts"),
-        (f"{current_dir}/src/tsoa-build/public/swagger.json",
-         f"{current_dir}/../../sdk/typescript/core/api/generatedTypes/public.ts")
+         f"{current_dir}/../../web/lib/clients/jawnTypes/private.ts",
+         f"{current_dir}/../../bifrost/lib/clients/jawnTypes/private.ts"),
     ]
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(run_openapi_typescript, input_file, output_file)
-                   for input_file, output_file in tasks]
+        futures = []
+        for input_file, web_output, bifrost_output in tasks:
+            futures.append(executor.submit(run_openapi_typescript, input_file, web_output))
+            futures.append(executor.submit(run_openapi_typescript, input_file, bifrost_output))
         concurrent.futures.wait(futures)
 
 

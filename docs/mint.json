@@ -60,8 +60,6 @@
       "group": "Getting Started",
       "pages": [
         "getting-started/quick-start",
-        "helicone-headers/header-directory",
-        "helicone-headers/helicone-auth",
         {
           "group": "Self Host",
           "pages": [
@@ -70,9 +68,7 @@
             "getting-started/self-host/docker",
             "getting-started/self-host/kubernetes",
             "getting-started/self-host/manual"
-          ],
-          "icon": "server",
-          "iconType": "solid"
+          ]
         }
       ]
     },
@@ -84,15 +80,11 @@
           "pages": [
             "getting-started/integration-method/gateway",
             "getting-started/integration-method/custom"
-          ],
-          "icon": "chart-network",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"],
-          "icon": "arrows-rotate",
-          "iconType": "solid"
+          "pages": ["getting-started/integration-method/openllmetry"]
         },
         {
           "group": "OpenAI",
@@ -101,12 +93,9 @@
             "integrations/openai/python",
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
-            "integrations/openai/crewai",
             "integrations/openai/curl",
             "integrations/openai/assistants"
-          ],
-          "icon": "dice-d20",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Azure OpenAI",
@@ -115,9 +104,7 @@
             "integrations/azure/python",
             "integrations/azure/langchain",
             "integrations/azure/curl"
-          ],
-          "icon": "microsoft",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Anthropic",
@@ -126,21 +113,18 @@
             "integrations/anthropic/python",
             "integrations/anthropic/langchain",
             "integrations/anthropic/curl"
-          ],
-          "icon": "burst",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Ollama",
-          "pages": ["integrations/ollama/javascript"],
-          "icon": "alicorn",
-          "iconType": "solid"
+          "pages": ["integrations/ollama/javascript"]
         },
         {
           "group": "AWS Bedrock",
-          "pages": ["integrations/bedrock/javascript"],
-          "icon": "aws",
-          "iconType": "solid"
+          "pages": [
+            "integrations/bedrock/javascript",
+            "integrations/bedrock/python"
+          ]
         },
         {
           "group": "Gemini",
@@ -151,9 +135,7 @@
                 "integrations/gemini/api/javascript",
                 "integrations/gemini/api/python",
                 "integrations/gemini/api/curl"
-              ],
-              "icon": "code",
-              "iconType": "solid"
+              ]
             },
             {
               "group": "Vertex AI (Enterprise)",
@@ -161,13 +143,9 @@
                 "integrations/gemini/vertex/javascript",
                 "integrations/gemini/vertex/python",
                 "integrations/gemini/vertex/curl"
-              ],
-              "icon": "code",
-              "iconType": "solid"
+              ]
             }
-          ],
-          "icon": "google",
-          "iconType": "solid"
+          ]
         },
         "getting-started/integration-method/vercelai",
         "getting-started/integration-method/anyscale",
@@ -179,9 +157,7 @@
             "integrations/groq/javascript",
             "integrations/groq/python",
             "integrations/groq/curl"
-          ],
-          "icon": "cloud",
-          "iconType": "solid"
+          ]
         },
         {
           "group": "Instructor",
@@ -192,26 +168,30 @@
         },
         "getting-started/integration-method/deepinfra",
         "getting-started/integration-method/openrouter",
+        "getting-started/integration-method/crewai",
         {
           "group": "LiteLLM",
           "pages": [
             "getting-started/integration-method/litellm-openllmetry",
             "getting-started/integration-method/litellm"
-          ],
-          "icon": "code",
-          "iconType": "solid"
+          ]
         },
         "getting-started/integration-method/fireworks",
         {
           "group": "Vector DB",
           "pages": [
+            "integrations/vectordb/python",
             "integrations/vectordb/javascript",
             "integrations/vectordb/curl"
           ]
         },
         {
           "group": "Tools",
-          "pages": ["integrations/tools/javascript", "integrations/tools/curl"]
+          "pages": [
+            "integrations/tools/python",
+            "integrations/tools/javascript",
+            "integrations/tools/curl"
+          ]
         }
       ]
     },
@@ -240,21 +220,18 @@
       "group": "Features",
       "pages": [
         {
-          "group": "Evaulation",
+          "group": "Evaluation",
           "pages": [
             "features/advanced-usage/feedback",
             "features/advanced-usage/scores"
-          ],
-          "icon": "chart-line",
-          "iconType": "solid"
+          ]
         },
         "features/sessions",
         "features/prompts",
+        "features/experiments",
         {
-          "group": "Webooks",
-          "pages": ["features/webhooks", "features/webhooks-testing"],
-          "icon": "webhook",
-          "iconType": "solid"
+          "group": "Webhooks",
+          "pages": ["features/webhooks", "features/webhooks-testing"]
         },
 
         "features/advanced-usage/custom-properties",
@@ -274,13 +251,13 @@
     {
       "group": "References",
       "pages": [
-        "references/api",
         "references/proxy-vs-async",
         "references/availability",
         "references/latency-affect",
         "references/data-autonomy",
         "references/open-source",
-        "references/how-we-calculate-cost"
+        "references/how-we-calculate-cost",
+        "helicone-headers/header-directory"
       ]
     },
     {
@@ -291,8 +268,10 @@
           "group": "Cookbooks",
           "pages": [
             "guides/cookbooks/fine-tune",
+            "guides/cookbooks/openai-structured-outputs",
             "guides/cookbooks/experiments",
             "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/getting-sessions",
             "guides/cookbooks/etl",
             "guides/cookbooks/replay-session",
             "guides/cookbooks/predefining-request-id",
@@ -306,12 +285,16 @@
         {
           "group": "Prompt Engineering",
           "pages": [
+            "guides/prompt-engineering/overview",
             "guides/prompt-engineering/be-specific-and-clear",
             "guides/prompt-engineering/use-structured-formats",
             "guides/prompt-engineering/leverage-role-playing",
             "guides/prompt-engineering/implement-few-shot-learning",
             "guides/prompt-engineering/use-constrained-outputs",
-            "guides/prompt-engineering/use-chain-of-thought-prompting"
+            "guides/prompt-engineering/use-chain-of-thought-prompting",
+            "guides/prompt-engineering/use-thread-of-thought-prompting",
+            "guides/prompt-engineering/use-least-to-most-prompting",
+            "guides/prompt-engineering/use-meta-prompting"
           ]
         }
       ]
@@ -358,19 +341,16 @@
       ]
     },
     {
-      "group": "User",
-      "pages": [
-        "rest/user/post-v1userquery",
-        "rest/user/post-v1user-metricsquery"
-      ]
-    },
-    {
       "group": "Request",
       "pages": [
         "rest/request/post-v1requestquery",
+        "rest/request/post-v1requestquery-clickhouse",
+        "rest/request/get-v1request",
+        "rest/request/post-v1requestquery-ids",
         "rest/request/post-v1request-feedback",
-        "rest/request/post-v1request-score",
-        "rest/request/put-v1request-property"
+        "rest/request/put-v1request-property",
+        "rest/request/post-v1request-assets",
+        "rest/request/post-v1request-score"
       ]
     },
     {
@@ -378,28 +358,160 @@
       "pages": [
         "rest/prompt/post-v1promptquery",
         "rest/prompt/post-v1prompt-query",
+        "rest/prompt/delete-v1prompt",
+        "rest/prompt/post-v1promptcreate",
+        "rest/prompt/post-v1promptversion-edit-label",
+        "rest/prompt/post-v1promptversion-edit-template",
         "rest/prompt/post-v1promptversion-subversion",
-        "rest/prompt/post-v1prompt-versionsquery"
+        "rest/prompt/post-v1promptversion-promote",
+        "rest/prompt/post-v1promptversion-inputsquery",
+        "rest/prompt/get-v1prompt-experiments",
+        "rest/prompt/post-v1prompt-versionsquery",
+        "rest/prompt/get-v1promptversion",
+        "rest/prompt/delete-v1promptversion",
+        "rest/prompt/post-v1prompt-compile",
+        "rest/prompt/post-v1prompt-template"
       ]
+    },
+    {
+      "group": "User",
+      "pages": [
+        "rest/user/post-v1usermetrics-overviewquery",
+        "rest/user/post-v1usermetricsquery",
+        "rest/user/post-v1userquery"
+      ]
+    },
+    {
+      "group": "Evals",
+      "pages": [
+        "rest/evals/post-v1evalsquery",
+        "rest/evals/get-v1evalsscores",
+        "rest/evals/post-v1evals",
+        "rest/evals/post-v1evalsscore-distributionsquery"
+      ]
+    },
+    {
+      "group": "Webhooks",
+      "pages": [
+        "rest/webhooks/get-v1webhooks",
+        "rest/webhooks/post-v1webhooks",
+        "rest/webhooks/delete-v1webhooks"
+      ]
+    },
+    {
+      "group": "Evaluator",
+      "pages": [
+        "rest/evaluator/post-v1evaluator",
+        "rest/evaluator/get-v1evaluator",
+        "rest/evaluator/put-v1evaluator",
+        "rest/evaluator/delete-v1evaluator",
+        "rest/evaluator/post-v1evaluatorquery",
+        "rest/evaluator/get-v1evaluator-experiments",
+        "rest/evaluator/get-v1evaluator-onlineevaluators",
+        "rest/evaluator/post-v1evaluator-onlineevaluators",
+        "rest/evaluator/delete-v1evaluator-onlineevaluators"
+      ]
+    },
+    {
+      "group": "Experiment",
+      "pages": [
+        "rest/experiment/post-v2experimentcreateempty",
+        "rest/experiment/post-v2experimentcreatefrom-request",
+        "rest/experiment/post-v2experimentnew",
+        "rest/experiment/get-v2experiment",
+        "rest/experiment/get-v2experiment-1",
+        "rest/experiment/post-v2experiment-prompt-version",
+        "rest/experiment/get-v2experiment-prompt-versions",
+        "rest/experiment/get-v2experiment-input-keys",
+        "rest/experiment/post-v2experiment-add-manual-row",
+        "rest/experiment/post-v2experiment-rowinsertbatch",
+        "rest/experiment/post-v2experiment-rowupdate",
+        "rest/experiment/post-v2experiment-run-hypothesis",
+        "rest/experiment/get-v2experiment-evaluators",
+        "rest/experiment/post-v2experiment-evaluators",
+        "rest/experiment/delete-v2experiment-evaluators",
+        "rest/experiment/post-v2experiment-evaluatorsrun",
+        "rest/experiment/get-v2experiment-should-run-evaluators",
+        "rest/experiment/get-v2experiment-scores",
+        "rest/experiment/get-v2experiment-",
+        "rest/experiment/post-v1experimentnew-empty",
+        "rest/experiment/post-v1experimenttablenew",
+        "rest/experiment/post-v1experimenttable-query",
+        "rest/experiment/post-v1experimenttable-metadataquery",
+        "rest/experiment/post-v1experimenttablesquery",
+        "rest/experiment/post-v1experimenttable-cell",
+        "rest/experiment/patch-v1experimenttable-cell",
+        "rest/experiment/post-v1experimenttable-column",
+        "rest/experiment/post-v1experimenttable-rownew",
+        "rest/experiment/delete-v1experimenttable-row",
+        "rest/experiment/post-v1experimenttable-rowinsertbatch",
+        "rest/experiment/post-v1experimentupdate-meta",
+        "rest/experiment/post-v1experiment",
+        "rest/experiment/post-v1experimenthypothesis",
+        "rest/experiment/post-v1experimenthypothesis-scoresquery",
+        "rest/experiment/get-v1experiment-evaluators",
+        "rest/experiment/post-v1experiment-evaluators",
+        "rest/experiment/post-v1experiment-evaluatorsrun",
+        "rest/experiment/delete-v1experiment-evaluators",
+        "rest/experiment/post-v1experimentquery"
+      ]
+    },
+    {
+      "group": "Trace",
+      "pages": [
+        "rest/trace/post-v1tracelog",
+        "rest/trace/post-v1tracelog-python"
+      ]
+    },
+    {
+      "group": "Log",
+      "pages": ["rest/log/post-v1logrequest"]
+    },
+    {
+      "group": "Property",
+      "pages": ["rest/property/post-v1propertyquery"]
     },
     {
       "group": "Dataset",
       "pages": [
         "rest/dataset/post-v1experimentdataset",
         "rest/dataset/post-v1experimentdatasetrandom",
-        "rest/dataset/post-v1experimentdataset-query",
-        "rest/dataset/post-v1experimentdataset-mutate"
+        "rest/dataset/post-v1experimentdatasetquery",
+        "rest/dataset/post-v1experimentdataset-rowinsert",
+        "rest/dataset/post-v1experimentdataset-version-rownew",
+        "rest/dataset/post-v1experimentdataset-inputsquery",
+        "rest/dataset/post-v1experimentdataset-mutate",
+        "rest/dataset/post-v1helicone-dataset",
+        "rest/dataset/post-v1helicone-dataset-mutate",
+        "rest/dataset/post-v1helicone-dataset-query",
+        "rest/dataset/post-v1helicone-dataset-count",
+        "rest/dataset/post-v1helicone-datasetquery",
+        "rest/dataset/post-v1helicone-dataset-request"
       ]
-    },
-    {
-      "group": "Experiment",
-      "pages": ["rest/experiment/post-v1experiment"]
     },
     {
       "group": "Customer",
       "pages": [
         "rest/customer/post-v1customer-usagequery",
         "rest/customer/post-v1customerquery"
+      ]
+    },
+    {
+      "group": "Dashboard",
+      "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
+    },
+    {
+      "group": "Settings",
+      "pages": ["rest/settings/get-v1settingsquery"]
+    },
+
+    {
+      "group": "Session",
+      "pages": [
+        "rest/session/post-v1sessionquery",
+        "rest/session/post-v1sessionnamequery",
+        "rest/session/post-v1sessionmetricsquery",
+        "rest/session/post-v1session-feedback"
       ]
     }
   ],
@@ -420,6 +532,10 @@
     "discord": "https://discord.com/invite/zsSTcH2qhG"
   },
   "redirects": [
+    {
+      "source": "/integrations/openai/crewai",
+      "destination": "/getting-started/integration-method/crewai"
+    },
     {
       "source": "/getting-started/proxy-vs-async",
       "destination": "/references/proxy-vs-async"

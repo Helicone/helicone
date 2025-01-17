@@ -1,10 +1,10 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import ThemedModal from "../../../shared/themed/themedModal";
-import { TextInput } from "@tremor/react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useOrg } from "../../../layout/organizationContext";
+import { useOrg } from "../../../layout/org/organizationContext";
 import Papa from "papaparse";
+import { Input } from "@/components/ui/input";
 
 interface ExportCustomerButtonProps {
   searchQuery: string | null;
@@ -39,7 +39,7 @@ const ExportCustomerButton = (props: ExportCustomerButtonProps) => {
           </h3>
           <div className="flex flex-col space-y-2">
             <label className="text-xs text-gray-500">Export Name</label>
-            <TextInput
+            <Input
               placeholder="customers.csv"
               onChange={(e) => {
                 setExportName(e.target.value);

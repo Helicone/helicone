@@ -1,5 +1,17 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useURLParams } from "@/services/hooks/localURLParams";
+import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import {
+  filterUITreeToFilterNode,
+  getRootFilterNode,
+} from "@/services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
@@ -9,19 +21,6 @@ import { Row } from "../../layout/common/row";
 import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
-import Link from "next/link";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Tabs, TabsTrigger, TabsList } from "@/components/ui/tabs";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-  UIFilterRowTree,
-} from "@/services/lib/filters/uiFilterRowTree";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -58,15 +57,22 @@ const SessionsPage = (props: SessionsPageProps) => {
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useState<string>("");
-  const [sessionNameSearch, setSessionNameSearch] = useState<string>("");
+  const [sessionIdSearch, setSessionIdSearch] = useURLParams<
+    string | undefined
+  >("session-search", undefined);
+  const [sessionNameSearch, setSessionNameSearch] = useState<
+    string | undefined
+  >(undefined);
+
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
   const names = useSessionNames(debouncedSessionNameSearch ?? "");
   const allNames = useSessionNames("");
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
-  const [selectedName, setSelectedName] = useState<string>("");
+  const [selectedName, setSelectedName] = useState<string | undefined>(
+    undefined
+  );
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -82,12 +88,12 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const { sessions, refetch, isLoading } = useSessions(
     timeFilter,
-    debouncedSessionIdSearch,
-    selectedName,
+    debouncedSessionIdSearch ?? "",
     filterUITreeToFilterNode(
       SESSIONS_TABLE_FILTERS,
       debouncedAdvancedFilters
-    ) as any
+    ) as any,
+    selectedName
   );
 
   const org = useOrg();
@@ -118,32 +124,20 @@ const SessionsPage = (props: SessionsPageProps) => {
         isWithinIsland={true}
         title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
         actions={
-          selectedName && (
-            <TabsList className="grid w-full grid-cols-2 mr-8">
-              {TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="flex items-center gap-2"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          )
+          <TabsList className="grid w-full grid-cols-2 mr-8">
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex items-center gap-2"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         }
       />
-      {org?.currentOrg?.tier === "free" && (
-        <InfoBox title="Sessions is a Pro feature">
-          <p>
-            Sessions is a Pro feature. In order to keep using it, you need to
-            upgrade your plan before September 27th, 2024.{" "}
-            <Link href="/settings/billing" className="text-blue-500 underline">
-              Upgrade to Pro
-            </Link>
-          </p>
-        </InfoBox>
-      )}
+
       <div>
         {allNames.isLoading ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -154,10 +148,8 @@ const SessionsPage = (props: SessionsPageProps) => {
           <Row className="border-t border-slate-200 dark:border-slate-800">
             <SessionNameSelection
               sessionNameSearch={sessionNameSearch}
-              setSessionNameSearch={setSessionNameSearch}
-              sessionIdSearch={sessionIdSearch}
-              setSessionIdSearch={setSessionIdSearch}
               selectedName={selectedName}
+              setSessionNameSearch={setSessionNameSearch}
               setSelectedName={setSelectedName}
               sessionNames={names.sessions}
             />
@@ -168,7 +160,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                   (session) => session.name === selectedName
                 ) ?? null
               }
-              sessionIdSearch={sessionIdSearch}
+              sessionIdSearch={sessionIdSearch ?? ""}
               setSessionIdSearch={setSessionIdSearch}
               sessions={sessions}
               isLoading={isLoading}

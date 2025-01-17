@@ -79,6 +79,10 @@ export interface AuthParams {
   organizationId: string;
   userId?: string;
   heliconeApiKeyId?: number;
+  tier: string;
+  accessDict: {
+    cache: boolean;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -202,7 +206,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
         asyncLogModel.timing.endTime.seconds * 1000 +
           asyncLogModel.timing.endTime.milliseconds
       ),
-      timeToFirstToken: async () => null,
+      timeToFirstToken: async () =>
+        Number(asyncLogModel.timing.timeToFirstToken) ?? null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });
@@ -751,6 +756,8 @@ export class DBLoggable {
         lytixKey: requestHeaders.lytixKey ?? undefined,
         lytixHost: requestHeaders.lytixHost ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
+        heliconeManualAccessKey:
+          requestHeaders.heliconeManualAccessKey ?? undefined,
       },
       log: {
         request: {
@@ -773,6 +780,10 @@ export class DBLoggable {
           requestCreatedAt: this.request.startTime ?? new Date(),
           isStream: this.request.isStream,
           heliconeTemplate: this.request.heliconeTemplate ?? undefined,
+          experimentColumnId:
+            requestHeaders.experimentHeaders.columnId ?? undefined,
+          experimentRowIndex:
+            requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
         response: {
           id: this.response.responseId,

@@ -5,8 +5,8 @@ import dateFormat from "dateformat";
 import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import useNotification from "../../../shared/notification/useNotification";
-import HcButton from "../../../ui/hcButton";
 import { handleLogCostCalculation } from "../../../../utlis/LogCostCalculation";
+import { Button } from "@/components/ui/button";
 
 interface TopOrgsProps {}
 
@@ -109,18 +109,17 @@ const TopOrgs = (props: TopOrgsProps) => {
             />
           </div>
           <div className="col-span-1">
-            <HcButton
-              variant={"primary"}
-              size={"xs"}
+            <Button
+              disabled={isLoading}
               onClick={async () => {
                 setSearchQuery({
                   emailContains: emailContains,
                   orgToSearch: orgName,
                 });
               }}
-              loading={isLoading}
-              title={"Search"}
-            />
+            >
+              Search
+            </Button>
           </div>
         </div>
       </div>

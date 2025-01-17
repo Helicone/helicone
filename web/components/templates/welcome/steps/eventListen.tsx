@@ -5,11 +5,11 @@ import * as Listening from "../../../../public/lottie/Listening.json";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
 import dynamic from "next/dynamic";
-import HcButton from "../../../ui/hcButton";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { LightBulbIcon } from "@heroicons/react/24/outline";
 import { DemoGame } from "../../../shared/themed/demo/demoGame";
 import ThemedBubbleModal from "../../../shared/themed/themedBubbleModal";
+import { Button } from "@/components/ui/button";
 
 interface EventListenProps {
   previousStep: () => void;
@@ -164,25 +164,20 @@ const EventListen = (props: EventListenProps) => {
         </div>
       </div>
       <div className="sticky bottom-0  p-4 flex items-center justify-between">
-        <HcButton
-          variant={"secondary"}
+        <Button variant={"secondary"} size={"sm"} onClick={previousStep}>
+          Back
+        </Button>
+        <Button
           size={"sm"}
-          title={"Back"}
-          onClick={previousStep}
-        />
-        <HcButton
-          variant={"primary"}
-          size={"sm"}
-          title={"Next"}
           onClick={() => {
             if (data && data.data) {
               nextStepHandler();
             }
           }}
-          loading={!data || !data.data}
-          loadingText={"Next"}
           disabled={!isSuccess}
-        />
+        >
+          Next
+        </Button>
       </div>
       <ThemedBubbleModal
         open={openDemo}

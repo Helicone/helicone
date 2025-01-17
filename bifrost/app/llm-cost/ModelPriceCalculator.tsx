@@ -40,208 +40,6 @@ type CostData = {
   totalCost: number;
 };
 
-// Custom MultiSelect component
-const MultiSelect = ({
-  label,
-  options,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  options: { value: string; label: string }[];
-  selected: string[];
-  onToggle: (value: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-2 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        {selected.length > 0 ? `${selected.length} selected` : label}
-        <ChevronDown className="w-4 h-4 ml-2" />
-      </button>
-      {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              className="flex items-center px-4 py-2 hover:bg-gray-100"
-            >
-              <Checkbox
-                id={`option-${option.value}`}
-                checked={selected.includes(option.value)}
-                onCheckedChange={() => onToggle(option.value)}
-              />
-              <label
-                htmlFor={`option-${option.value}`}
-                className="ml-2 text-sm text-gray-700"
-              >
-                {option.label}
-              </label>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProviderPill = ({
-  provider,
-  models,
-  selectedModels,
-  onRemoveProvider,
-  onAddModel,
-  onRemoveModel,
-}: {
-  provider: string;
-  models: string[];
-  selectedModels: string[];
-  onRemoveProvider: (provider: string) => void;
-  onAddModel: (model: string) => void;
-  onRemoveModel: (model: string) => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="mb-2">
-      <div className="relative inline-block">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
-        >
-          {formatProviderName(provider)}
-          <ChevronDown
-            className={`w-4 h-4 ml-2 ${isOpen ? "transform rotate-180" : ""}`}
-          />
-        </button>
-        <button
-          onClick={() => onRemoveProvider(provider)}
-          className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          <XCircle className="w-4 h-4" />
-        </button>
-        {isOpen && (
-          <div className="absolute z-10 mt-1 w-56 bg-white border border-gray-300 rounded-md shadow-lg">
-            <ScrollArea className="h-48">
-              <div className="p-2">
-                {models.map((model) => (
-                  <button
-                    key={model}
-                    onClick={() => onAddModel(model)}
-                    className="w-full text-left px-2 py-1 hover:bg-gray-100 rounded truncate"
-                  >
-                    {model}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
-      </div>
-      <div className="mt-2 ml-4">
-        {selectedModels
-          .filter((model) => models.includes(model))
-          .map((model) => (
-            <span
-              key={model}
-              className="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full mr-2 mb-2"
-            >
-              {model}
-              <button
-                onClick={() => onRemoveModel(model)}
-                className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
-              >
-                <XCircle className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
-      </div>
-    </div>
-  );
-};
-
-const ProviderItem = ({
-  provider,
-  models,
-  onAddModel,
-}: {
-  provider: string;
-  models: string[];
-  onAddModel: (model: string) => void;
-}) => {
-  const [showModels, setShowModels] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const itemRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setShowModels(true), 200);
-  };
-
-  const handleMouseLeave = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setShowModels(false), 300);
-  };
-
-  const handleClick = () => {
-    setShowModels(!showModels);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={itemRef}
-      className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div
-        onClick={handleClick}
-        className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
-      >
-        <span>{formatProviderName(provider)}</span>
-        <ChevronRight className="w-4 h-4" />
-      </div>
-      {showModels && (
-        <div
-          className="absolute left-full top-0 w-64 bg-white border border-gray-300 rounded-md shadow-lg ml-1"
-          onMouseEnter={() => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            setShowModels(true);
-          }}
-          onMouseLeave={handleMouseLeave}
-        >
-          <ScrollArea className="h-64">
-            <div className="p-2">
-              {models.map((model) => (
-                <button
-                  key={model}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddModel(model);
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded truncate text-sm"
-                >
-                  {model}
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const FilterSection = ({
   providers,
   selectedProviders,
@@ -306,7 +104,7 @@ const FilterSection = ({
             variant="ghost"
             size="sm"
             onClick={onClearAll}
-            className="text-xs text-gray-500 hover:text-gray-700"
+            className="text-xs text-slate-500 hover:text-slate-700"
           >
             Clear All
           </Button>
@@ -323,7 +121,7 @@ const FilterSection = ({
                 {formatProviderName(provider)}
                 <button
                   onClick={() => onRemoveProvider(provider)}
-                  className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
                 >
                   <XCircle className="w-4 h-4" />
                 </button>
@@ -339,7 +137,7 @@ const FilterSection = ({
                 {model}
                 <button
                   onClick={() => onRemoveModel(model)}
-                  className="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="ml-2 text-slate-500 hover:text-slate-700 focus:outline-none"
                 >
                   <XCircle className="w-4 h-4" />
                 </button>
@@ -437,13 +235,42 @@ export default function ModelPriceCalculator({
     const urlModel = urlParts[urlParts.indexOf("model") + 1];
 
     if (urlProvider && urlModel) {
-      const selectedModel = costData.find(
+      const decodedModel = decodeURIComponent(urlModel);
+      const decodedProvider = decodeURIComponent(urlProvider);
+
+      // First try to find exact match
+      let selectedModel = costData.find(
         (data) =>
-          data.model.toLowerCase() ===
-            decodeURIComponent(urlModel).toLowerCase() &&
-          data.provider.toLowerCase() ===
-            decodeURIComponent(urlProvider).toLowerCase()
+          data.model.toLowerCase() === decodedModel.toLowerCase() &&
+          data.provider.toLowerCase() === decodedProvider.toLowerCase()
       );
+
+      // If not found, check if it's a parent model
+      if (!selectedModel) {
+        const providerData = providers.find(
+          (p) => p.provider.toLowerCase() === decodedProvider.toLowerCase()
+        );
+        if (providerData?.modelDetails) {
+          for (const [_, details] of Object.entries(
+            providerData.modelDetails
+          )) {
+            if (
+              details.searchTerms[0].toLowerCase() ===
+              decodedModel.toLowerCase()
+            ) {
+              // Use the first matching model's costs
+              const firstMatchModel = details.matches[0];
+              selectedModel = costData.find(
+                (data) =>
+                  data.model === firstMatchModel &&
+                  data.provider.toLowerCase() === decodedProvider.toLowerCase()
+              );
+              break;
+            }
+          }
+        }
+      }
+
       if (selectedModel) {
         setSelectedModelData(selectedModel);
       }
@@ -539,13 +366,13 @@ Optimize your AI API costs:`;
   const getSortIcon = (key: keyof CostData) => {
     if (!sortConfig || sortConfig.key !== key) {
       return (
-        <ChevronDown className="inline-block ml-1 w-4 h-4 text-gray-400" />
+        <ChevronDown className="inline-block ml-1 w-4 h-4 text-slate-400" />
       );
     }
     return sortConfig.direction === "asc" ? (
-      <ChevronUp className="inline-block ml-1 w-4 h-4 text-gray-600" />
+      <ChevronUp className="inline-block ml-1 w-4 h-4 text-slate-600" />
     ) : (
-      <ChevronDown className="inline-block ml-1 w-4 h-4 text-gray-600" />
+      <ChevronDown className="inline-block ml-1 w-4 h-4 text-slate-600" />
     );
   };
 
@@ -579,7 +406,7 @@ Optimize your AI API costs:`;
             maxWidth: "100px",
           }}
         />
-        <h2 className="text-4xl font-semibold text-gray-800 mb-2">
+        <h1 className="text-4xl font-semibold text-slate-700 mb-2">
           {provider && model ? (
             <>
               {formatProviderName(provider)}{" "}
@@ -590,23 +417,15 @@ Optimize your AI API costs:`;
             "LLM API "
           )}
           Pricing Calculator
-        </h2>
-        <p className="text-gray-600 mb-4">
+        </h1>
+        <p className="text-slate-500 mb-4">
           {provider && model
             ? `Calculate the cost of using ${model} with Helicone's free pricing tool.`
             : "Calculate the cost of using AI models with Helicone's free pricing tool."}
         </p>
-
-        <button
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200"
-          onClick={handleTwitterShare}
-        >
-          <Twitter className="w-5 h-5" />
-          <span className="font-medium">Share</span>
-        </button>
       </div>
 
-      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-6 mb-6">
+      <div className="max-w-xl mx-auto h-9 flex justify-start items-start gap-4 mb-6">
         <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
           <Label
             htmlFor="inputTokens"
@@ -620,87 +439,131 @@ Optimize your AI API costs:`;
               type="number"
               value={inputTokens}
               onChange={(e) => setInputTokens(e.target.value)}
-              className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
         </div>
-        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-4">
+        <div className="grow shrink basis-0 h-9 flex justify-start items-center gap-2">
           <Label
             htmlFor="outputTokens"
             className="text-black text-sm font-medium leading-tight"
           >
-            Output tokens
+            Output Tokens
           </Label>
-          <div className="grow shrink basis-0 bg-[#f8feff] flex-col justify-start items-start gap-1.5 inline-flex">
+          <div className="grow shrink basis-0 flex-col justify-start items-start gap-1.5 inline-flex">
             <div className="self-stretch relative w-full">
               <Input
                 id="outputTokens"
                 type="number"
                 value={outputTokens}
                 onChange={(e) => setOutputTokens(e.target.value)}
-                className="pl-3 pr-3 py-2 bg-slate-50 rounded-md border border-slate-300 text-slate-900 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="pl-3 pr-3 py-2 bg-white rounded-md border border-slate-300 text-slate-700 text-sm font-normal leading-tight w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
           </div>
         </div>
+        <button
+          className="inline-flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors duration-100 h-full"
+          onClick={handleTwitterShare}
+        >
+          <Twitter className="w-4 h-4" />
+          <span className="font-medium text-sm hidden md:block">Share</span>
+        </button>
       </div>
 
       {selectedModelData && (
-        <Card className="max-w-xl mx-auto mb-8 p-[17px] h-[309px]">
-          <CardHeader className="p-0 mb-4">
-            <CardTitle className="text-base font-medium leading-none flex items-center gap-2">
-              <Calculator className="w-4 h-4 text-gray-500" />
+        <Card className="max-w-xl mx-auto mb-8 p-4">
+          <CardHeader className="p-0 mb-4 mt-1">
+            <CardTitle className="text-base font-medium leading-none flex items-center gap-2 text-slate-900">
+              <Calculator className="w-4 h-4 text-slate-500 font-medium" />
               Model Cost Calculation
             </CardTitle>
             <div className="flex items-center gap-2 mt-2">
-              <div className="w-3.5 h-3.5 relative opacity-10"></div>
+              <div className="w-4 h-4 relative opacity-10"></div>
               <div className="text-slate-400 text-sm font-normal leading-tight">
                 {selectedModelData.provider} {selectedModelData.model}
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-0 space-y-[9px]">
-            <div className="flex justify-between items-center py-1.5">
+          <CardContent className="p-0 space-y-3">
+            <div className="flex justify-between items-center pl-2">
               <span className="text-slate-700 text-sm font-medium leading-tight">
                 Total Input Cost
               </span>
-              <span className="text-sky-500 text-sm font-semibold leading-[16.80px]">
+              <span className="text-slate-500 text-sm font-semibold">
                 ${formatCost(selectedModelData.inputCost)}
               </span>
             </div>
-            <div className="flex justify-between items-center py-1.5">
-              <span className="text-slate-400 text-sm font-medium leading-tight">
-                Input Cost/1k tokens
+            <div className="flex justify-between items-center pl-2">
+              <span className="text-slate-400 text-sm font-normal leading-tight pb-2">
+                Input Cost/1k Tokens
               </span>
-              <span className="text-slate-400 text-sm font-medium leading-[16.80px]">
-                ${formatCost(selectedModelData.inputCostPer1k)}/1k tokens
+              <span className="text-slate-400 text-sm font-normal">
+                ${formatCost(selectedModelData.inputCostPer1k)}/1k Tokens
               </span>
             </div>
-            <div className="h-[0px] border-t border-slate-100"></div>
-            <div className="flex justify-between items-center py-1.5">
+            <div className="h-[0px] border-t border-slate-100 pt-2"></div>
+            <div className="flex justify-between items-center pl-2">
               <span className="text-slate-700 text-sm font-medium leading-tight">
                 Total Output Cost
               </span>
-              <span className="text-sky-500 text-sm font-semibold leading-[16.80px]">
+              <span className="text-slate-500 text-sm font-semibold leading-4">
                 ${formatCost(selectedModelData.outputCost)}
               </span>
             </div>
-            <div className="flex justify-between items-center py-1.5">
-              <span className="text-slate-400 text-sm font-medium leading-tight">
-                Output Cost/1k tokens
+            <div className="flex justify-between items-center pl-2">
+              <span className="text-slate-400 text-sm font-normal leading-tight pb-2">
+                Output Cost/1k Tokens
               </span>
-              <span className="text-slate-400 text-sm font-medium leading-[16.80px]">
-                ${formatCost(selectedModelData.outputCostPer1k)}/1k tokens
+              <span className="text-slate-400 text-sm font-normal leading-4">
+                ${formatCost(selectedModelData.outputCostPer1k)}/1k Tokens
               </span>
             </div>
-            <div className="h-[0px] border-t border-slate-100"></div>
-            <div className="flex justify-between items-center py-1.5">
+            <div className="h-[0px] border-t border-slate-100 pt-2"></div>
+            <div className="flex justify-between items-center pl-2">
               <span className="text-slate-700 text-base font-semibold leading-tight">
                 Estimate Total Cost
               </span>
               <span className="text-sky-500 text-base font-bold leading-tight">
                 ${formatCost(selectedModelData.totalCost)}
               </span>
+            </div>
+
+            <div className="pt-1"></div>
+
+            <div className="flex bg-sky-50 border-sky-100 border-2 text-slate-500 font-medium rounded-lg justify-left items-left px-4 py-3 flex-col gap-1">
+              <span>
+                Helicone users save{" "}
+                <span className="text-sky-500 font-bold">up to 70%</span> on
+                their LLM costs...
+              </span>
+              <span className="text-slate-400 font-normal text-sm mb-1">
+                by caching, improving prompts, fine-tuning, etc.
+              </span>
+              <div className="mt-2">
+                <a
+                  href="https://us.helicone.ai/signin"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Get started for free
+                  <svg
+                    className="w-5 h-5 text-white ml-auto transform rotate-270"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="m9 18 6-6-6-6"
+                    ></path>
+                  </svg>
+                </a>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -721,26 +584,26 @@ Optimize your AI API costs:`;
         <div className="w-full overflow-x-auto rounded-lg shadow-sm">
           <div className="min-w-[1000px]">
             <div className="max-h-[calc(200vh-600px)] overflow-y-auto">
-              <table className="w-full divide-y divide-gray-200 border-separate border-spacing-0">
+              <table className="w-full divide-y divide-slate-200 border-separate border-spacing-0">
                 <thead className="sticky top-0 bg-slate-100">
                   <tr>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-gray-200 first:rounded-tl-lg cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-slate-200 first:rounded-tl-lg cursor-pointer"
                       onClick={() => requestSort("provider")}
                     >
                       Provider {getSortIcon("provider")}
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-gray-200 cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/6 bg-slate-100 border border-slate-200 cursor-pointer"
                       onClick={() => requestSort("model")}
                     >
                       Model {getSortIcon("model")}
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
                       onClick={() => requestSort("inputCostPer1k")}
                     >
                       Input/1k <br />
@@ -748,7 +611,7 @@ Optimize your AI API costs:`;
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
                       onClick={() => requestSort("outputCostPer1k")}
                     >
                       Output/1k <br />
@@ -756,28 +619,28 @@ Optimize your AI API costs:`;
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
                       onClick={() => requestSort("inputCost")}
                     >
                       Input Cost {getSortIcon("inputCost")}
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 cursor-pointer"
                       onClick={() => requestSort("outputCost")}
                     >
                       Output Cost {getSortIcon("outputCost")}
                     </th>
                     <th
                       scope="col"
-                      className="p-[24px] text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-100 border border-gray-200 last:rounded-tr-lg cursor-pointer"
+                      className="p-[24px] text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-100 border border-slate-200 last:rounded-tr-lg cursor-pointer"
                       onClick={() => requestSort("totalCost")}
                     >
                       Total Cost {getSortIcon("totalCost")}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-slate-200">
                   {visibleCostData.map((data, index) => (
                     <tr
                       key={index}
@@ -788,70 +651,70 @@ Optimize your AI API costs:`;
                           : ""
                       }`}
                     >
-                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           {formatProviderName(data.provider)}
                         </Link>
                       </td>
-                      <td className="text-sm text-gray-900 font-medium border border-gray-200 p-0">
+                      <td className="text-sm text-slate-900 font-medium border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           <div className="break-words">{data.model}</div>
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           ${formatCost(data.inputCostPer1k)}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           ${formatCost(data.outputCostPer1k)}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           ${formatCost(data.inputCost)}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap text-sm text-gray-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >
                           ${formatCost(data.outputCost)}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-gray-200 p-0">
+                      <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-slate-200 p-0">
                         <Link
                           href={`/llm-cost/provider/${encodeURIComponent(
-                            data.provider
+                            data.provider.toLowerCase()
                           )}/model/${encodeURIComponent(data.model)}`}
                           className="block w-full h-full px-6 py-2"
                         >

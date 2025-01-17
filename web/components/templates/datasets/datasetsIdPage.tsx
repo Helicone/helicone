@@ -5,7 +5,6 @@ import {
   useGetHeliconeDatasets,
 } from "../../../services/hooks/dataset/heliconeDataset";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import HcBadge from "../../ui/hcBadge";
 import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import {
   getGenericRequestText,
@@ -24,7 +23,7 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requestsV2/tableFooter";
 import { clsx } from "../../shared/clsx";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import ExportButton from "../../shared/themed/table/exportButton";
 import NewDataset from "./NewDataset";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -33,6 +32,7 @@ import DatasetDrawerV2 from "./datasetDrawer";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useIntegration } from "@/services/hooks/useIntegrations";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
+import { Badge } from "@/components/ui/badge";
 
 interface DatasetIdPageProps {
   id: string;
@@ -40,7 +40,7 @@ interface DatasetIdPageProps {
   pageSize: number;
 }
 
-export type DatasetRow =
+type DatasetRow =
   | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
@@ -258,7 +258,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                 <h1 className="font-semibold text-4xl text-black dark:text-white">
                   {datasets?.[0]?.name}
                 </h1>
-                <HcBadge title={`${count || 0} rows`} size={"sm"} />
+                <Badge variant="secondary">{`${count || 0} rows`}</Badge>
               </div>
             </div>
           </div>

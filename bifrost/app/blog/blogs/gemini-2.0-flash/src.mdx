@@ -1,0 +1,213 @@
+Google has unveiled **Gemini 2.0 Flash** in December 2024, an experimental AI reasoning model that sets itself apart through transparent reasoning processes and enhanced problem-solving capabilities. As a direct competitor to <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1</a> reasoning model, this release signifies Google's push toward more transparent and capable AI models.
+
+![Google released Gemini 2.0 Flash](/static/blog/gemini-2.0-flash/gemini-2.0.webp)
+
+Let's take a look at the key capabilities of Gemini 2.0 Flash, how its performance compares to its predecessors, and how to build a high-performance AI application with Gemini 2.0 Flash.
+
+## What is Gemini 2.0 Flash?
+
+**Gemini 2.0 Flash** is Google's latest AI model designed to offer developers the tools to build more advanced **<span style={{color: '#03A9F4'}}>agentic applications</span>**. Gemini 2.0 brings **multimodal capabilities** and doubles the speed of its predecessor Gemini 1.5 Pro while being more performative on key benchmarks (more on that later).
+
+<BottomLine
+  title="What's an agentic application?"
+  description="An AI system that's capable of executing multi-step tasks on behalf of users. For example, interacting with multiple data sources or tools to achieve user-specified goals."
+/>
+
+| Feature            | Specification                                 |
+| ------------------ | --------------------------------------------- |
+| Input Token Limit  | `1 million` tokens                            |
+| Output Token Limit | `8K` tokens                                   |
+| Knowledge Cutoff   | August 2024                                   |
+| Input Format       | Text, Images, Audio, Video                    |
+| Output Format      | Text, Image, Speech                           |
+| Pricing            | Free through AI Studio, pay-as-you-go pricing |
+
+**What distinguishes Gemini 2.0 is its advanced reasoning process**. The <a href="https://ai.google.dev/gemini-api/docs/thinking-mode?_gl=1*af5obp*_up*MQ..*_ga*MTczOTkzMjk4NC4xNzM0NzU5MDQx*_ga_P1DBVKWT6V*MTczNDc1OTA0MS4xLjAuMTczNDc1OTA0MS4wLjAuNzg3ODIzODc1" rel="noopener" target="_blank">Thinking Mode</a> provides strong reasoning capabilities than the base model Gemini 2.0 Flash, which significantly reduces model hallucinations and improves the accuracy of the model's responses.
+
+## Key Features of Gemini 2.0
+
+### New Multimodal Capabilities
+
+Like previous models, Gemini 2.0 Flash supports multi-modal inputs (text, images, audio and video). The new model now introduced **<span style={{color: '#03A9F4'}}>multimodal outputs</span>** that allows the generation of responses with text, audio, and images through <a href="https://developers.googleblog.com/en/the-next-chapter-of-the-gemini-era-for-developers/" target="_blank" rel="noopener">a single API call</a>, making it a versatile model for a wider range of applications.
+
+### Advanced Reasoning = Better Performance
+
+Gemini 2.0 Flash Thinking Mode provides **<span style={{color: '#03A9F4'}}>advanced reasoning</span>** allows it to analyze complex tasks, think multiple steps ahead, and provide results that are <a href="https://x.com/deedydas/status/1869798307343806827" target="_blank" rel="noopener noreferrer nofollow">more accurate and context-aware</a> than top models like OpenAI o1. This makes Gemini 2.0 more ideal for use cases where deeper analysis is required, like AI-powered research assistants and complex query handling.
+
+### Integration with Native & External Tools
+
+Developers will appreciate the new <a href="https://ai.google.dev/api/multimodal-live" target="_blank" rel="noopener">Multimodal Live API</a>, which allows Gemini 2.0 to integrate in real-time with native tools like Google Search, Maps, and <a href="https://developers.googleblog.com/en/the-next-chapter-of-the-gemini-era-for-developers/" target="_blank" rel="noopener">code execution</a>, as well as custom third-party functions via function calling.
+
+This integration makes Gemini 2.0 a valuable tool for tasks that require dynamic, real-time data from multiple sources, such as real-time media analysis or live decision-making based on current data.
+
+### Improved Developer Experience
+
+Developers can integrate pretrained models like Gemini 2.0 into their projects easily using Google AI Studio and <a href="https://cloud.google.com/vertex-ai/" target="_blank" rel="noopener">Vertex AI</a>. Tools like **Gemini Code Assist** for programming tasks and **Google Colab** integrations with Gemini's capabilities are examples of how Google is making AI more accessible for developers.
+
+## Gemini 2.0 Benchmarks: Performance and Speed
+
+Google’s Gemini 2.0 Flash has been specifically designed for speed and performance. According to early <a href="https://artificialanalysis.ai/models/gemini-2-0-flash-experimental" target="_blank" rel="noopener">benchmarks</a>, Gemini 2.0 Flash performs twice as fast as its predecessor, Gemini 1.5 Pro, and matches top models like <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI o1</a> and <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3 70b</a>. Gemini 2.0 also significantly improved time to first token (TTFT) compared to Gemini 1.5 Flash.
+
+![Google Gemini 2.0 Flash - Speed Comparison](/static/blog/gemini-2.0-flash/gemini-2.0-speed.webp)
+
+Gemini 2.0 Flash outperforms previous models in terms of handling multiple types of input formats. For example, when tested with multimodal inputs (combining images, text, and audio), Gemini 2.0 showed impressive responsiveness and processing speed, trailing right behind o1-mini.
+
+![Google Gemini 2.0 Flash - Quality Comparison](/static/blog/gemini-2.0-flash/gemini-2.0-quality.webp)
+
+Moreover, Gemini 2.0 is expected to become widely available to users in early 2025. Google has already started limited testing of Gemini 2.0 in <a href="https://blog.google/products/gemini/google-gemini-ai-collection-2024/" target="_blank" rel="noopener">AI Overviews for Search</a> in December 2024. The broader rollout of Gemini 2.0 to Google Search and other Google products is planned for early 2025.
+
+## How Gemini 2.0 Stacks Up Against Previous Versions
+
+When <a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">comparing Gemini 2.0</a> with previous iterations, there are several notable improvements:
+
+- **Speed and Performance**: As mentioned, Gemini 2.0 Flash is notably faster than its predecessors, offering improved response times for developers and users.
+- **Multimodal Support**: The added multimodal input and output capabilities sets Gemini 2.0 apart from earlier versions that only handled text.
+- **Agentic Features**: While Gemini 1.0 and 1.5 models could respond to text-based prompts, Gemini 2.0 can handle complex, multi-step tasks autonomously.
+
+![Google Gemini 2.0 Flash - Benchmarks](/static/blog/gemini-2.0-flash/gemini-2.0-benchmark.webp)
+
+These upgrades make Gemini 2.0 not just a tool for developers but also a potential game-changer in industries like **healthcare, finance, and gaming**, where decision-making, multi-step reasoning, and real-time data interaction are vital.
+
+## How Gemini 2.0 Compares with o1 and Claude 3.5 Sonnet
+
+| Benchmark                    | Gemini 2.0 Flash Experimental                                                                                                                                                   | Claude 3.5 Sonnet                                                                                                                | OpenAI o1                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| MMLU (General knowledge)     | 3️⃣ **76.4%** <br/> (<a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">Google</a>) | **88.3%** <br/> (0-CoT, <a href="https://www.anthropic.com/news/claude-3-5-sonnet" target="_blank" rel="noopener">Anthropic</a>) | **91.8%** <br/> (<a href="https://openai.com/index/o1-and-new-tools-for-developers/" target="_blank" rel="noopener">OpenAI</a>) |
+| LiveBench (Coding average)   | 3️⃣ **50.0%** <br/> (<a href="https://livebench.ai/#/" target="_blank" rel="noopener">LiveBench</a>)                                                                             | **67.1%** <br/> (<a href="https://livebench.ai/#/" target="_blank" rel="noopener">LiveBench</a>)                                 | **69.7%** <br/> (<a href="https://livebench.ai/#/" target="_blank" rel="noopener">LiveBench</a>)                                |
+| Math                         | 2️⃣ **89.7%** <br/> (<a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">Google</a>) | **71.1%** <br/> (0-CoT, <a href="https://www.anthropic.com/news/claude-3-5-sonnet" target="_blank" rel="noopener">Anthropic</a>) | **96.4%** <br/> (<a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI</a>)    |
+| MMMU (multi-modal benchmark) | 2️⃣ **70.7%** <br/> (<a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">Google</a>) | **68.3%** <br/> (0-CoT, <a href="https://www.anthropic.com/news/claude-3-5-sonnet" target="_blank" rel="noopener">Anthropic</a>) | **77.3%** <br/> (<a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI</a>)    |
+| GPQA (Reasoning)             | 2️⃣ **62.1%** <br/> (<a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">Google</a>) | **59.4%** <br/> (0-CoT, <a href="https://www.anthropic.com/news/claude-3-5-sonnet" target="_blank" rel="noopener">Anthropic</a>) | **75.7%** <br/> (<a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI</a>)    |
+
+Compared to OpenAI and Anthropic's latest models (o1 and Claude 3.5 Sonnet), OpenAI's o1 leads across most benchmarks in highest MMLU score at `91.8%`, best math performance and best reasoning capabilities with `75.7%` on GPQA.
+
+Gemini 2.0 Flash Experimental trails in general knowledge with `76.4%` MMLU, a strong math performance at `89.7%` and competitive in multimodal tasks at `70.7%` MMMU.
+
+## Limitations
+
+### People and Image Editing Restrictions
+
+Generating images of people or editing uploaded images of individuals is prohibited. This is to ensure privacy and respect for all users, maintaining a standard of ethics in image creation.
+
+### Optimized Language Support
+
+For optimal performance in image generation, it’s best to use specific languages such as English (EN), Spanish (es-MX), Japanese (ja-JP), Chinese (zh-CN), and Hindi (hi-IN). These languages are supported with the highest accuracy and fluency for the best results.
+
+### Audio and Video Limitations
+
+Please note that audio or video inputs are not supported for image generation. The focus remains on creating visual content based on textual prompts only.
+
+### Image Generation Challenges
+
+Sometimes, image generation might not trigger as expected, and there are a few things you can try:
+
+- If the model outputs text instead of an image, try explicitly asking for an image in your prompt (e.g., “generate an image” or “please provide images as you go along”).
+- On some occasions, the model may stop generating an image halfway through. If this happens, kindly attempt the request again or modify your prompt slightly to get the desired output.
+
+## Where to Access Gemini 2.0
+
+As of now, an experimental version of Gemini 2.0 is available to developers and trusted testers. Google has already begun integrating it into several of its products and services, including Google Search, and through the Gemini API in <a href="https://aistudio.google.com/?utm_source=gfd&utm_medium=referral&utm_campaign=blog-dec&utm_content=gemini2-L0" target="_blank" rel="noopener nofollow noreferrer">Google AI Studio</a> and <a href="https://console.cloud.google.com/vertex-ai/studio/freeform?model=gemini-2.0-flash-exp" target="_blank" rel="noopener">Vertex AI</a>.
+
+For those interested in exploring Gemini 2.0’s capabilities, Google is offering free access through AI Studio, where developers can experiment with the <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live" target="_blank" rel="noopener">multimodal live API</a> and other advanced features.
+
+Developers can access the model in code by using `gemini-2.0-flash-thinking-exp` or `gemini-2.0-flash-thinking-exp-1219`.
+
+## Pricing: Is Gemini 2.0 free or paid?
+
+### Free access through AI Studio
+
+An experimental version of Gemini 2.0 Flash Thinking is available at no cost through Google AI Studio, with the limitations of a maximum context window of 32,767 tokens and usage restrictions or 2 requests per minute (RPM) and 50 requests per day (RPD).
+
+### Pay-as-you-go pricing
+
+For users requiring more extensive capabilities, Gemini 2.0 Flash offers flexible pay-as-you-go pricing based on token usage.
+
+| Operation               | Standard Prompts (Up to 128K tokens) | Extended Prompts (Beyond 128K tokens) |
+| ----------------------- | ------------------------------------ | ------------------------------------- |
+| Input Processing        | $0.075 per million tokens            | $0.15 per million tokens              |
+| Output Generation       | $0.30 per million tokens             | $0.60 per million tokens              |
+| Context Caching         | $0.01875 per million tokens          | $0.0375 per million tokens            |
+| Context Caching Storage | $1.00 per million tokens per hour    | $1.00 per million tokens per hour     |
+
+## Building Reliable LLM Applications with Gemini 2.0
+
+When building an LLM application, especially with new models or switching from one model to another, it’s important to monitor AI responses to ensure consistent performance for your end-users. We recommend to:
+
+### Step 1. Set up an LLM observability and monitoring tool
+
+Start by choosing an observability tool. **Helicone** has a generous <a href="https://helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> and it's easy to set up.
+
+Next, <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">follow the instruction to integrate</a> your Gemini-powered AI app. If you choose to use Helicone, this step takes about a minute.
+
+![Integrating Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/listen-for-events.webp)
+
+Once you've integrated your Gemini-powered AI app, you can start monitoring your model's response time, latency and costs in real time.
+
+### Step 2. Monitor user behaviors and evaluate model outputs
+
+Analyze your user behavior patterns regularly.
+
+You can gain insights through user feedback or by reviewing your request logs.
+
+In Helicone, all your logs are filterable in the `Request` tab.
+
+![Track request and response logs for Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/requests.webp)
+
+You can **filter by errors** or by **other custom properties like user segment**, **environment**, or **session ID** to get more granular insights, identify opportunities and performance bottlenecks.
+
+This will give you insights on if you should improve your prompt, cut down API costs, or improve speed - just to name a few.
+
+### Step 3. Iterate on your prompt
+
+As LLMs are sensitive to model and prompt changes, use Helicone's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments feature</a> to test and compare different versions of your prompts.
+
+This will help you see quickly which prompt version result in the best output, or if the new changes you made caused performance regressions.
+
+![Compare different versions of your prompt with Helicone](/static/blog/gemini-2.0-flash/experiments.webp)
+
+### Step 4. Push new changes to production
+
+Once you are happy with your changes, push your new changes to production.
+
+**Helicone will automatically track your prompt changes** and version it for you. You can continue to monitor your model's performance and improve your prompts.
+
+![Merge PR in GitHub](/static/blog/gemini-2.0-flash/merge.webp)
+
+### Step 5. Repeat from Step 2
+
+A continuous improvement cycle is key to building a reliable LLM application. **Keep monitoring your model's performance & improving your prompts to make sure your application is always performing at its best.**
+
+Use Helicone’s dashboard to monitor your model’s response time, latency and costs in real time.
+
+![Helicone dashboard](/static/blog/gemini-2.0-flash/dashboard.webp)
+
+## What's Next for Google Gemini?
+
+Looking ahead, Google’s vision for Gemini 2.0 is centered around making AI more "agentic"—being able to take actions on behalf of users. This concept has evolved from previous "assistant" models, where AI was used primarily for answering questions and providing insights. Now with Gemini 2.0, the goal is to create models that can handle more practical, action-oriented tasks, such as planning a trip, completing programming tasks, or interacting with other software tools.
+
+In line with this, Google is developing Project Astra, a research initiative exploring the potential of a universal AI assistant. Similar to J.A.R.V.I.S. from the Iron Man films, this assistant would be able to understand a vast array of contexts, handle complex tasks, and assist users in real-time.
+
+### Other model deep-dives
+
+- <a
+    href="https://www.helicone.ai/blog/google-gemini-exp-1206"
+    target="_blank"
+    rel="noopener"
+  >
+    Google's Gemini-Exp-1206 (Dec 2024)
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
+    target="_blank"
+    rel="noopener"
+  >
+    OpenAI's o1 & ChatGPT Pro (Dec 2024)
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct"
+    target="_blank"
+    rel="noopener"
+  >
+    Meta's Llama 3.3 70b Instruct (Dec 2024)
+  </a>
+
+<Questions />

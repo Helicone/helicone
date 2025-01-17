@@ -1,7 +1,7 @@
 // import { SparklesIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
-import { useOrg } from "../layout/organizationContext";
+import { useOrg } from "../layout/org/organizationContext";
 import ThemedModal from "./themed/themedModal";
 import getStripe from "../../utlis/getStripe";
 

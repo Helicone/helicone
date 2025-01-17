@@ -8,15 +8,15 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "../../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "../../../templates/dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
@@ -29,12 +29,17 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
-import { Checkbox } from "@mui/material";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { RequestViews } from "./RequestViews";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -93,8 +98,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     placeholder: string;
   };
 }
-
-export type RequestViews = "table" | "card" | "row";
 
 export default function ThemedTable<T extends { id?: string }>(
   props: ThemedTableV5Props<T>
@@ -191,8 +194,37 @@ export default function ThemedTable<T extends { id?: string }>(
     }
   }, [rightPanel]);
 
+  const sessionData = useMemo(() => {
+    if (rows.length === 0) {
+      return undefined;
+    }
+    // @ts-ignore
+    const sessionId = rows[0].original?.customProperties?.[
+      "Helicone-Session-Id"
+    ] as string | undefined;
+    return { sessionId };
+  }, [rows]);
+
+  const { currentStep, isOnboardingVisible, setOnClickElement } =
+    useOnboardingContext();
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (
+      id === "requests-table" &&
+      isOnboardingVisible &&
+      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
+    ) {
+      setOnClickElement(
+        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnboardingVisible, currentStep]);
+
   return (
-    <div className="h-full flex flex-col border-b divide-y divide-slate-300 dark:divide-slate-700">
+    <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
           search={search}
@@ -296,16 +328,20 @@ export default function ThemedTable<T extends { id?: string }>(
                           {showCheckboxes && (
                             <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
                               <Checkbox
-                                onChange={(e) =>
-                                  handleSelectAll(e.target.checked)
-                                }
+                                variant="blue"
+                                onCheckedChange={handleSelectAll}
                                 checked={selectedIds?.length === rows.length}
-                                indeterminate={
-                                  selectedIds &&
-                                  selectedIds?.length > 0 &&
-                                  selectedIds?.length < rows.length
-                                }
-                                className="text-slate-700 dark:text-slate-400"
+                                ref={(ref) => {
+                                  if (ref) {
+                                    (
+                                      ref as unknown as HTMLInputElement
+                                    ).indeterminate =
+                                      selectedIds !== undefined &&
+                                      selectedIds.length > 0 &&
+                                      selectedIds.length < rows.length;
+                                  }
+                                }}
+                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                               />
                               <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
                             </th>
@@ -337,7 +373,7 @@ export default function ThemedTable<T extends { id?: string }>(
                     <tbody className="text-[13px] ">
                       {rows.map((row, index) => (
                         <tr
-                          key={row.id}
+                          key={row.original?.id}
                           className={clsx(
                             " hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
@@ -346,12 +382,15 @@ export default function ThemedTable<T extends { id?: string }>(
                           )}
                           onClick={
                             onRowSelect &&
-                            (() => handleRowSelect(row.original, index))
+                            (() => {
+                              handleRowSelect(row.original, index);
+                            })
                           }
                         >
                           {showCheckboxes && (
                             <td className="w-8 px-2">
                               <Checkbox
+                                variant="blue"
                                 checked={selectedIds?.includes(
                                   row.original?.id ?? ""
                                 )}
@@ -410,12 +449,18 @@ export default function ThemedTable<T extends { id?: string }>(
         </ResizablePanel>
         {rightPanel && (
           <>
-            <ResizableHandle withHandle />
-            <ResizablePanel minSize={25} maxSize={75}>
-              <div className="h-full flex-shrink-0 flex flex-col">
-                {rightPanel}
-              </div>
-            </ResizablePanel>
+            {isOnboardingVisible && currentStep === 1 ? (
+              <div className="h-full w-1/2">{rightPanel}</div>
+            ) : (
+              <>
+                <ResizableHandle withHandle />
+                <ResizablePanel minSize={25} maxSize={75}>
+                  <div className="h-full flex-shrink-0 flex flex-col">
+                    {rightPanel}
+                  </div>
+                </ResizablePanel>
+              </>
+            )}
           </>
         )}
       </ResizablePanelGroup>

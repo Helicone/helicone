@@ -84,13 +84,13 @@ export async function recordCacheHit(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const { error } = await dbClient
-    .from("cache_hits")
-    .insert({ request_id: requestId, organization_id: organizationId });
+  // const { error } = await dbClient
+  //   .from("cache_hits")
+  //   .insert({ request_id: requestId, organization_id: organizationId });
 
-  if (error) {
-    console.error(error);
-  }
+  // if (error) {
+  //   console.error(error);
+  // }
 
   const { data: response, error: responseError } = await dbClient
     .from("response")
@@ -107,25 +107,26 @@ export async function recordCacheHit(
   const completionTokens = response?.completion_tokens ?? 0;
   const latency = response?.delay_ms ?? 0;
 
-  const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
-    "cache_hits",
-    [
-      {
-        request_id: requestId,
-        organization_id: organizationId,
-        prompt_tokens: promptTokens,
-        completion_tokens: completionTokens,
-        model: model ?? "",
-        latency: latency,
-        created_at: null,
-        provider,
-        country_code: countryCode,
-      },
-    ]
-  );
-
-  if (clickhouseError) {
-    console.error(clickhouseError);
+  if (organizationId !== "ba195205-9d19-42de-9317-b479c20ed6ae") {
+    const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
+      "cache_hits",
+      [
+        {
+          request_id: requestId,
+          organization_id: organizationId,
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          model: model ?? "",
+          latency: latency,
+          created_at: null,
+          provider,
+          country_code: countryCode,
+        },
+      ]
+    );
+    if (clickhouseError) {
+      console.error(clickhouseError);
+    }
   }
 }
 export async function getCachedResponse(

@@ -1,6 +1,6 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
-import { useOrg } from "../../../components/layout/organizationContext";
+import { useOrg } from "../../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 
 const fetchHeliconeDatasetRows = async (

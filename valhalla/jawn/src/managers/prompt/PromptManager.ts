@@ -1,7 +1,10 @@
 // src/users/usersService.ts
+import { autoFillInputs } from "@helicone/prompts";
 import {
   CreatePromptResponse,
   PromptCreateSubversionParams,
+  PromptEditSubversionLabelParams,
+  PromptEditSubversionTemplateParams,
   PromptQueryParams,
   PromptResult,
   PromptVersionResult,
@@ -10,16 +13,63 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { Result, err, ok } from "../../lib/shared/result";
+import { supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
-import { User } from "../../models/user";
+import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
-import { autoFillInputs } from "@helicone/prompts";
+import { RequestManager } from "../request/RequestManager";
+import { ExperimentV2Manager } from "../experiment/ExperimentV2Manager";
 
 export class PromptManager extends BaseManager {
+  async getOrCreatePromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const requestManager = new RequestManager(this.authParams);
+    const requestResult = await requestManager.uncachedGetRequestByIdWithBody(
+      requestId
+    );
+    if (requestResult.error || !requestResult.data) {
+      return err(requestResult.error);
+    }
+
+    const promptVersionResult = await this.getPromptVersionFromRequest(
+      requestId
+    );
+    if (promptVersionResult.data) {
+      return ok(promptVersionResult.data);
+    }
+    const prompt = await this.createPrompt({
+      metadata: {
+        promptFromRequest: true,
+      },
+      prompt: requestResult.data.request_body,
+      userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+    });
+
+    if (prompt.error || !prompt.data) {
+      return err(prompt.error);
+    }
+
+    return ok(prompt.data.prompt_version_id);
+  }
+
+  private async getPromptVersionFromRequest(
+    requestId: string
+  ): Promise<Result<string, string>> {
+    const res = await supabaseServer.client
+      .from("prompt_input_record")
+      .select("*")
+      .eq("source_request", requestId)
+      .single();
+
+    if (res.error || !res.data) {
+      return err("Failed to get prompt version from request");
+    }
+
+    return ok(res.data.prompt_version);
+  }
   async createNewPromptVersion(
     parentPromptVersionId: string,
     params: PromptCreateSubversionParams
@@ -35,13 +85,25 @@ export class PromptManager extends BaseManager {
       isProduction: false, // Set isProduction to false for new versions
     };
 
-    // Parse the newHeliconeTemplate to extract the model
     let model = "";
     try {
-      const templateObj = JSON.parse(params.newHeliconeTemplate);
-      model = templateObj.model || "";
+      const templateObj =
+        typeof params.newHeliconeTemplate === "string"
+          ? JSON.parse(params.newHeliconeTemplate)
+          : params.newHeliconeTemplate;
+
+      model =
+        templateObj.model ||
+        templateObj.messages?.[0]?.model ||
+        (Array.isArray(templateObj) ? templateObj[0]?.model : "") ||
+        "";
+
+      if (!model) {
+        console.warn("No model found in template:", templateObj);
+      }
     } catch (error) {
-      console.error("Error parsing newHeliconeTemplate:", error);
+      console.error("Error parsing or extracting model from template:", error);
+      console.error("Template:", params.newHeliconeTemplate);
     }
 
     const result = await dbExecute<{
@@ -53,28 +115,54 @@ export class PromptManager extends BaseManager {
       model: string;
       created_at: string;
       metadata: Record<string, any>;
+      experiment_id: string | null;
     }>(
       `
     WITH parent_prompt_version AS (
       SELECT * FROM prompts_versions WHERE id = $1
+    ),
+    bump_version AS (
+      SELECT major_version, minor_version 
+      FROM prompts_versions 
+      WHERE id = $8
     )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata)
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version, updated_at)
     SELECT
         ppv.prompt_v2,
         $2, 
         $3,
         $4,
-        CASE WHEN $5 THEN ppv.major_version + 1 ELSE ppv.major_version END,
         CASE 
-          WHEN $5 THEN 0
-          ELSE (SELECT minor_version + 1
-                FROM prompts_versions pv1
-                WHERE pv1.major_version = ppv.major_version
-                AND pv1.prompt_v2 = ppv.prompt_v2
-                ORDER BY pv1.major_version DESC, pv1.minor_version DESC
-                LIMIT 1)
+          WHEN $8 IS NOT NULL AND $8 != ppv.id THEN (SELECT major_version FROM bump_version)
+          WHEN $5 THEN ppv.major_version + 1 
+          ELSE ppv.major_version 
         END,
-        $6
+        CASE 
+          WHEN $8 IS NOT NULL AND $8 != ppv.id THEN (
+            SELECT minor_version + 1
+            FROM prompts_versions pv1
+            WHERE pv1.major_version = (SELECT major_version FROM bump_version)
+            AND pv1.prompt_v2 = ppv.prompt_v2
+            ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+            LIMIT 1
+          )
+          WHEN $5 THEN 0
+          ELSE (
+            SELECT minor_version + 1
+            FROM prompts_versions pv1
+            WHERE pv1.major_version = ppv.major_version
+            AND pv1.prompt_v2 = ppv.prompt_v2
+            ORDER BY pv1.major_version DESC, pv1.minor_version DESC
+            LIMIT 1
+          )
+        END,
+        $6,
+        $7::uuid,
+        ppv.id,
+        CASE 
+          WHEN $7::uuid IS NOT NULL THEN ppv.created_at
+          ELSE NOW()
+        END
     FROM parent_prompt_version ppv
     RETURNING 
         id,
@@ -82,17 +170,121 @@ export class PromptManager extends BaseManager {
         major_version,
         helicone_template,
         prompt_v2,
-        model;
-    
+        model,
+        experiment_id;
     `,
       [
         parentPromptVersionId,
         params.newHeliconeTemplate,
         model,
         this.authParams.organizationId,
-        isMajorVersion, // New parameter for determining major/minor version
+        isMajorVersion,
         metadata,
+        params.experimentId || null,
+        params.bumpForMajorPromptVersionId || null,
       ]
+    );
+
+    return resultMap(result, (data) => data[0]);
+  }
+
+  async editPromptVersionTemplate(
+    promptVersionId: string,
+    params: PromptEditSubversionTemplateParams
+  ): Promise<Result<null, string>> {
+    if (
+      params.heliconeTemplate &&
+      JSON.stringify(params.heliconeTemplate).length > 1_000_000_000
+    ) {
+      return err("Helicone template too large");
+    }
+
+    const result = await dbExecute<PromptVersionResult>(
+      `
+    UPDATE prompts_versions
+    SET helicone_template = $1,
+    updated_at = now()
+    WHERE id = $2 AND organization = $3
+    `,
+      [params.heliconeTemplate, promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (params.experimentId) {
+      const newPromptVersionInputKeys = Array.from(
+        (typeof params.heliconeTemplate === "string"
+          ? params.heliconeTemplate
+          : JSON.stringify(params.heliconeTemplate)
+        ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
+      ).map((match) => match[1]);
+
+      const existingExperimentInputKeys = await supabaseServer.client
+        .from("experiment_v3")
+        .select("input_keys")
+        .eq("id", params.experimentId)
+        .single();
+
+      const res = await Promise.all([
+        supabaseServer.client
+          .from("experiment_v3")
+          .update({
+            input_keys: [
+              ...new Set([
+                ...(existingExperimentInputKeys.data?.input_keys ?? []),
+                ...newPromptVersionInputKeys,
+              ]),
+            ],
+          })
+          .eq("organization", this.authParams.organizationId)
+          .eq("id", params.experimentId),
+        dbExecute(
+          `INSERT INTO prompt_input_keys (key, prompt_version)
+       SELECT unnest($1::text[]), $2
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
+          [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+        ),
+      ]);
+
+      if (res.some((r) => r.error)) {
+        return err("Failed to update experiment input keys");
+      }
+
+      return ok(null);
+    }
+
+    return ok(null);
+  }
+
+  async editPromptVersionLabel(
+    promptVersionId: string,
+    params: PromptEditSubversionLabelParams
+  ): Promise<Result<{ metadata: Record<string, any> }, string>> {
+    if (params.label.length > 100) {
+      return err("Label too long");
+    }
+
+    if (params.label.length === 0) {
+      return err("Label cannot be empty");
+    }
+
+    const result = await dbExecute<{
+      metadata: Record<string, any>;
+    }>(
+      `
+    UPDATE prompts_versions
+    SET metadata = jsonb_set(
+      COALESCE(metadata, '{}'::jsonb),
+      '{label}',
+      to_jsonb($1::text)
+    )
+    WHERE id = $2 AND organization = $3
+    RETURNING 
+      metadata
+    `,
+      [params.label, promptVersionId, this.authParams.organizationId]
     );
 
     return resultMap(result, (data) => data[0]);
@@ -198,6 +390,9 @@ export class PromptManager extends BaseManager {
       model: string;
       created_at: string;
       metadata: Record<string, any>;
+      experiment_id?: string | null;
+      parent_prompt_version?: string | null;
+      updated_at: string;
     }>(
       `
     SELECT 
@@ -208,7 +403,10 @@ export class PromptManager extends BaseManager {
       prompt_v2,
       model,
       prompts_versions.created_at,
-      prompts_versions.metadata
+      prompts_versions.metadata,
+      prompts_versions.experiment_id,
+      prompts_versions.parent_prompt_version,
+      prompts_versions.updated_at
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
@@ -420,6 +618,8 @@ export class PromptManager extends BaseManager {
     WHERE prompt_v2.organization = $1
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
+    AND (prompt_v2.metadata->>'promptFromRequest' != 'true' OR prompt_v2.metadata->>'promptFromRequest' IS NULL)
+    AND (prompt_v2.metadata->>'emptyPrompt' != 'true' OR prompt_v2.metadata->>'emptyPrompt' IS NULL)
     ORDER BY created_at DESC
     `,
       filterWithAuth.argsAcc
@@ -605,5 +805,57 @@ export class PromptManager extends BaseManager {
     }
 
     return ok(null);
+  }
+
+  public getHeliconeTemplateKeys(template: string | object): string[] {
+    try {
+      // Convert to string if it's an object
+      const templateString =
+        typeof template === "string"
+          ? template
+          : JSON.stringify(template, null, 2);
+
+      // Helper function to find keys in a string
+      const findKeys = (str: string): string[] => {
+        const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+        const matches = str.match(regex);
+        return matches
+          ? matches.map((match) =>
+              match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+            )
+          : [];
+      };
+
+      // For objects, we need to search through all nested properties
+      if (typeof template === "object") {
+        const keys: string[] = [];
+        const searchObject = (obj: any) => {
+          for (const value of Object.values(obj)) {
+            if (typeof value === "string") {
+              keys.push(...findKeys(value));
+            } else if (Array.isArray(value)) {
+              value.forEach((item) => {
+                if (typeof item === "string") {
+                  keys.push(...findKeys(item));
+                } else if (typeof item === "object") {
+                  searchObject(item);
+                }
+              });
+            } else if (typeof value === "object" && value !== null) {
+              searchObject(value);
+            }
+          }
+        };
+        searchObject(template);
+        return [...new Set(keys)]; // Remove duplicates
+      }
+
+      // For strings, just search directly
+      return findKeys(templateString);
+    } catch (error) {
+      // Log the error if needed
+      console.error("Error in getHeliconeTemplateKeys:", error);
+      return [];
+    }
   }
 }

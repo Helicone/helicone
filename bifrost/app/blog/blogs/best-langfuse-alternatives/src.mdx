@@ -10,12 +10,12 @@ As the use of Large Language Models (LLMs) becomes increasingly prevalent in var
 
 Here's a quick overview of how Helicone compares to Langfuse:
 
-| Aspect       | Helicone                                                | Langfuse                                        |
-| ------------ | ------------------------------------------------------- | ----------------------------------------------- |
-| Best For     | Developers, Small to Large Teams                        | Hobbyists, Small Teams                          |
-| Pricing      | Free tier available, flexible pricing                   | Free tier available, flexible pricing           |
-| Key Strength | Comprehensive features, High scalability, Cloud-focused | Self-hosting ease, Open-source                  |
-| Drawback     | More complex self-hosting setup                         | Basic cloud product quality, Scalability issues |
+| Aspect       | Helicone                                                        | Langfuse                                         |
+| ------------ | --------------------------------------------------------------- | ------------------------------------------------ |
+| Best For     | Teams wanting proxy-based monitoring or SDK integration         | Teams focusing on SDK-first integration          |
+| Pricing      | Free tier available, flexible pricing                           | Free tier available, flexible pricing            |
+| Key Strength | Comprehensive features, High scalability, Cloud-focused         | Self-hosting ease, Open-source                   |
+| Drawback     | More complex self-hosting setup due to distributed architecture | Single PostgreSQL database may limit scalability |
 
 ## Overview: Helicone vs. Langfuse
 
@@ -30,7 +30,7 @@ Here's a quick overview of how Helicone compares to Langfuse:
 | Prompt Experiments   | ✅       | ✅                    |
 | Evaluation           | ✅       | ✅                    |
 | Transparent Pricing  | ✅       | ✅                    |
-| Image Support        | ✅       | ❌                    |
+| Image Support        | ✅       | ✅                    |
 | Scalability          | ✅       | ❌                    |
 | Data Export          | ✅       | ✅                    |
 | Cost Analysis        | ✅       | 🟠 (Limited at scale) |
@@ -43,35 +43,34 @@ Here's a quick overview of how Helicone compares to Langfuse:
 
 Different tools excel in different scenarios. Here's a quick guide to help you choose the right tool for your specific needs:
 
-1. **Small Startup with Limited Budget**
+1. **Teams Needing Proxy-Based Implementation**
 
    - **Best Tool:** Helicone
-   - **Why:** Offers a comprehensive feature set with a free tier, flexible pricing, and easy integration, suitable for growing startups.
+   - **Why:** Offers robust proxy architecture with caching and edge deployment capabilities
 
-2. **Large Enterprise with Complex Workflows**
-
-   - **Best Tool:** Helicone
-   - **Why:** Provides high scalability and advanced features necessary for complex enterprise-level LLM applications.
-
-3. **Research Team Focused on Experimentation**
-
-   - **Best Tool:** Helicone
-   - **Why:** Offers robust prompt experimentation and evaluation features, crucial for research and development.
-
-4. **Solo Developer Working on Side Projects**
+2. **Teams Requiring Deep Tracing & Evaluation**
 
    - **Best Tool:** Consider both
-   - **Why:** Helicone offers easy integration and comprehensive features, while Langfuse provides simpler self-hosting for those preferring to manage their own infrastructure.
+   - **Why:** Both platforms offer comprehensive tracing and evaluation capabilities
 
-5. **AI-Focused Company with High Volume LLM Usage**
-
-   - **Best Tool:** Helicone
-   - **Why:** Built on Cloudflare Workers, ClickHouse, and Kafka, ensuring high scalability for intensive LLM usage. Helicone has handled over 2 billion LLM logs and 1.6 trillion tokens.
-
-6. **Low Usage Project with Self-Hosting Preference**
+3. **Simple Self-Hosting Setup**
 
    - **Best Tool:** Langfuse
-   - **Why:** Offers ease of self-hosting, making it suitable for smaller projects or developers who prefer managing their own infrastructure.
+   - **Why:** Single PostgreSQL database makes deployment straightforward
+
+4. **Highly Scalable Self-Hosting**
+
+   - **Best Tool:** Helicone
+   - **Why:** Helm chart with distributed architecture with Cloudflare Workers, ClickHouse, and Kafka enables better scaling
+
+5. **High Volume LLM Usage**
+
+   - **Best Tool:** Helicone
+   - **Why:** While Langfuse handles moderate scale, Helicone's distributed architecture is built to handle many millions to billions of requests
+
+6. **Enterprise with Complex Workflows**
+   - **Best Tool:** Consider both
+   - **Why:** Both platforms serve enterprise customers with comprehensive feature sets
 
 ---
 
@@ -103,8 +102,6 @@ Compared to Langfuse, which emphasizes ease of self-hosting, Helicone offers bot
 
 ## Langfuse
 
-**Designed for: Hobbyists and Small Teams with Low-Volume Projects**
-
 ![Langfuse Dashboard Image](/static/blog/langfuse-alternatives/langfuse-traces.webp)
 
 ### What is Langfuse?
@@ -120,11 +117,9 @@ Langfuse is an open-source LLM observability tool that offers tracing and monito
 
 ### How Does Langfuse Compare to Helicone?
 
-Langfuse distinguishes itself by emphasizing ease of self-hosting and simplicity in setup. Its exclusive reliance on PostgreSQL as the sole database backend simplifies deployment and is well-suited for low-volume projects or developers who prefer managing their own infrastructure. This makes Langfuse an attractive option for small teams or individual developers focusing on smaller-scale applications.
+Langfuse distinguishes itself by emphasizing ease of self-hosting and simplicity in setup. Its exclusive reliance on PostgreSQL as the sole database backend simplifies deployment and is well-suited for low-volume projects or developers who prefer managing their own infrastructure. This makes Langfuse an attractive option for teams or individual developers focusing on small to medium-scale applications.
 
 However, as data volume increases, PostgreSQL may face performance limitations. Additionally, without a data streaming platform like **Kafka**, there can be challenges with scaling and data persistence; if the system goes down, logs may be lost.
-
-In comparison, Helicone's infrastructure utilizes both **ClickHouse** and **Kafka**. ClickHouse efficiently handles large-scale data analytics, while Kafka ensures high-throughput data ingestion and data persistence, preventing log loss even during downtime. This combination allows Helicone to handle high traffic seamlessly and scale efficiently, ensuring analytics remain fast and responsive even with billions of logs. Helicone's cloud-focused approach provides higher scalability, advanced features, and greater reliability, making it better suited for applications with high usage or complex requirements.
 
 ---
 
@@ -155,3 +150,30 @@ In comparison, Helicone's infrastructure utilizes both **ClickHouse** and **Kafk
 ## Conclusion
 
 Choosing the right LLM observability tool depends on your specific needs and priorities. **Helicone** offers a scalable, feature-rich platform ideal for applications ranging from startups to large enterprises, especially where high performance and advanced analytics are required. **Langfuse** provides a simpler, self-hosted solution suitable for smaller teams or low volume projects that prioritize managing their own infrastructure.
+
+### Other Helicone vs Langfuse Comparisons
+
+- Langfuse has its own comparison against Helicone live on <a href="https://langfuse.com/faq/all/best-helicone-alternative" rel="noopener nofollow" target="_blank">their website</a>.
+
+### Helicone vs. Other LLM Observability Tools
+
+- <a href="/blog/langsmith" rel="noopener" target="_blank">
+    Comparing Langsmith vs Helicone
+  </a>
+- <a href="/blog/braintrust-alternatives" rel="noopener" target="_blank">
+    Comparing Braintrust vs Helicone
+  </a>
+- <a href="/blog/best-arize-alternatives" rel="noopener" target="_blank">
+    Comparing Arize AI vs Helicone
+  </a>
+
+<CallToAction
+  title="Ready to scale your LLM app?"
+  description="Track your LLM usage, optimize costs, improve your prompts, and scale your LLM app with Helicone."
+  primaryButtonText="Try Helicone for free"
+  primaryButtonLink="https://www.helicone.ai/signup"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+<Questions />

@@ -1,0 +1,16 @@
+---
+title: "Mistral Integration"
+sidebarTitle: "Mistral"
+description: "Connect Helicone with Mistral, a platform for running open-source language models. Monitor and optimize your AI applications using Mistral's powerful models through a simple base_url configuration."
+"twitter:title": "Mistral Integration - Helicone OSS LLM Observability"
+---
+
+You can seamlessly integrate Helicone with your OpenAI compatible models that are deployed on Mistral.
+
+The integration process closely mirrors the [proxy approach](/integrations/openai/javascript). The only distinction lies in the modification of the base_url to point to the dedicated Mistral endpoint `https://mistral.helicone.ai/v1`.
+
+```bash
+base_url="https://mistral.helicone.ai/v1"
+```
+
+Please ensure that the base_url is correctly set to ensure successful integration.

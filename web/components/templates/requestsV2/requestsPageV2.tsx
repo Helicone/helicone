@@ -13,9 +13,9 @@ import {
   getRootFilterNode,
   isFilterRowNode,
   isUIFilterRow,
-  UIFilterRowNode,
-  UIFilterRowTree,
 } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowNode } from "@/services/lib/filters/types";
 import {
   OrganizationFilter,
   OrganizationLayout,
@@ -29,13 +29,13 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import { Row } from "../../layout/common";
 import GenericButton from "../../layout/common/button";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { UIFilterRow } from "../../shared/themed/themedAdvancedFilters";
+import { UIFilterRow } from "@/services/lib/filters/types";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import {
   getModelFromPath,
@@ -634,6 +634,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
+  useEffect(() => {
+    if (searchParams.get("requestId")) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [searchParams]);
+
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
       setAdvancedFilters(filters);
@@ -687,9 +695,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   return (
     <>
       <div className="h-screen flex flex-col">
-        <StreamWarning
-          requestWithStreamUsage={requestWithoutStream !== undefined}
-        />
+        <div className="mx-10">
+          <StreamWarning
+            requestWithStreamUsage={requestWithoutStream !== undefined}
+          />
+        </div>
 
         {!isCached && userId === undefined && (
           <AuthHeader
@@ -744,7 +754,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden sentry-mask-me">
             <div
               className={clsx(
                 isShiftPressed && "no-select",

@@ -9,12 +9,17 @@ import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { err, ok, Result, resultMap } from "../lib/shared/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
+import {
+  getHistogramRowOnKeys,
+  HistogramRow,
+} from "./helpers/percentileDistributions";
 import { RequestManager } from "./request/RequestManager";
 
 export interface SessionResult {
   created_at: string;
   latest_request_created_at: string;
-  session: string;
+  session_id: string;
+  session_name: string;
   total_cost: number;
   total_requests: number;
   prompt_tokens: number;
@@ -29,12 +34,6 @@ export interface SessionNameResult {
   last_used: string;
   first_used: string;
   session_count: number;
-}
-
-export interface HistogramRow {
-  range_start: string;
-  range_end: string;
-  value: number;
 }
 
 export interface SessionMetrics {
@@ -72,135 +71,50 @@ export class SessionManager {
       argsAcc: [],
     });
 
-    const SIZES_TO_PERCENTILES = {
-      p50: "0.5",
-      p75: "0.75",
-      p95: "0.95",
-      p99: "0.99",
-      "p99.9": "0.999",
-    };
+    const histogramData = await getHistogramRowOnKeys({
+      keys: [
+        { key: "properties['Helicone-Session-Name']", alias: "session_name" },
+        { key: "properties['Helicone-Session-Id']", alias: "session_id" },
+      ],
+      pSize: requestBody.pSize ?? "p75",
+      useInterquartile: requestBody.useInterquartile ?? false,
+      builtFilter,
+      aggregateFunction: "count(*)",
+    });
 
-    const upperPercentile = SIZES_TO_PERCENTILES[pSize ?? "p75"];
-    const lowerPercentile = useInterquartile
-      ? (1 - parseFloat(upperPercentile)).toString()
-      : upperPercentile;
-
-    const buildPercentileClause = (metric: string) =>
-      useInterquartile
-        ? `quantile(${lowerPercentile})(${metric}) AS lower_bound,
-         quantile(${upperPercentile})(${metric}) AS upper_bound`
-        : `quantile(${upperPercentile})(${metric}) AS p_value`;
-
-    const buildWhereClause = (metric: string) =>
-      useInterquartile
-        ? `${metric} BETWEEN lower_bound AND upper_bound`
-        : `${metric} <= p_value`;
-
-    const sessionsCountQuery = `
-WITH session_counts AS (
-  SELECT
-    properties['Helicone-Session-Name'] AS session_name,
-    properties['Helicone-Session-Id'] AS session_id,
-    count(*) AS row_count
-  FROM request_response_rmt
-  WHERE ${builtFilter.filter}
-  GROUP BY session_name, session_id
-),
-percentiles AS (
-  SELECT
-    ${buildPercentileClause("row_count")}
-  FROM session_counts
-)
-SELECT
-  arrayJoin(histogram(10)(row_count)) AS hist
-FROM session_counts, percentiles
-WHERE ${buildWhereClause("row_count")}
-`;
-
-    const sessionCount = await clickhouseDb.dbQuery<{
-      hist: [number, number, number];
-    }>(sessionsCountQuery, builtFilter.argsAcc);
-
-    if (!sessionCount?.data) {
-      return err("No session count found");
+    if (histogramData.error) {
+      return histogramData;
     }
 
-    const histogramData: HistogramRow[] = sessionCount.data.map((row) => ({
-      range_start: row.hist[0].toString(),
-      range_end: row.hist[1].toString(),
-      value: row.hist[2],
-    }));
+    const sessionDurationData = await getHistogramRowOnKeys({
+      keys: [{ key: "properties['Helicone-Session-Id']", alias: "session_id" }],
+      pSize: requestBody.pSize ?? "p75",
+      useInterquartile: requestBody.useInterquartile ?? false,
+      builtFilter,
+      aggregateFunction:
+        "dateDiff('second', min(request_response_rmt.request_created_at), max(request_response_rmt.request_created_at))",
+    });
 
-    const sessionDurationQuery = `
-WITH session_durations AS (
-  SELECT
-    properties['Helicone-Session-Id'] AS session_id,
-    dateDiff('second', min(request_response_rmt.request_created_at), max(request_response_rmt.request_created_at)) AS duration
-  FROM request_response_rmt
-  WHERE ${builtFilter.filter}
-  GROUP BY session_id
-),
-percentiles AS (
-  SELECT
-    ${buildPercentileClause("duration")}
-  FROM session_durations
-)
-SELECT
-  arrayJoin(histogram(10)(duration)) AS hist
-FROM session_durations, percentiles
-WHERE ${buildWhereClause("duration")}
-`;
-
-    const sessionDuration = await clickhouseDb.dbQuery<{
-      hist: [number, number, number];
-    }>(sessionDurationQuery, builtFilter.argsAcc);
-
-    if (!sessionDuration?.data) {
-      return err("No session duration found");
+    if (sessionDurationData.error) {
+      return sessionDurationData;
     }
 
-    const sessionCostQuery = `
-    WITH session_costs AS (
-      SELECT
-        properties['Helicone-Session-Id'] AS session_id,
-        ${clickhousePriceCalc("request_response_rmt")} AS cost
-      FROM request_response_rmt
-      WHERE ${builtFilter.filter}
-      GROUP BY session_id
-    ),
-    percentiles AS (
-      SELECT
-        ${buildPercentileClause("cost")}
-      FROM session_costs
-    )
-    SELECT
-      arrayJoin(histogram(10)(cost)) AS hist
-    FROM session_costs, percentiles
-    WHERE ${buildWhereClause("cost")}
-    `;
+    const sessionCostData = await getHistogramRowOnKeys({
+      keys: [{ key: "properties['Helicone-Session-Id']", alias: "session_id" }],
+      pSize: requestBody.pSize ?? "p75",
+      useInterquartile: requestBody.useInterquartile ?? false,
+      builtFilter,
+      aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+    });
 
-    const sessionCost = await clickhouseDb.dbQuery<{
-      hist: [number, number, number];
-    }>(sessionCostQuery, builtFilter.argsAcc);
-
-    if (!sessionCost?.data) {
-      return err("No session cost found");
+    if (sessionCostData.error) {
+      return sessionCostData;
     }
-
-    const sessionCostData: HistogramRow[] = sessionCost.data.map((row) => ({
-      range_start: row.hist[0].toString(),
-      range_end: row.hist[1].toString(),
-      value: row.hist[2],
-    }));
 
     return ok({
-      session_count: histogramData,
-      session_duration: sessionDuration.data.map((row) => ({
-        range_start: row.hist[0].toString(),
-        range_end: row.hist[1].toString(),
-        value: row.hist[2],
-      })),
-      session_cost: sessionCostData,
+      session_count: histogramData.data!,
+      session_duration: sessionDurationData.data!,
+      session_cost: sessionCostData.data!,
     });
   }
 
@@ -256,6 +170,7 @@ WHERE ${buildWhereClause("duration")}
       ${builtFilter.filter}
     )
     GROUP BY properties['Helicone-Session-Name']
+    LIMIT 50
     `;
 
     const results = await clickhouseDb.dbQuery<SessionNameResult>(
@@ -275,11 +190,11 @@ WHERE ${buildWhereClause("duration")}
     requestBody: SessionQueryParams
   ): Promise<Result<SessionResult[], string>> {
     const {
-      sessionIdContains,
+      search,
       timeFilter,
-      sessionName,
       timezoneDifference,
       filter: filterTree,
+      nameEquals,
     } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
@@ -304,28 +219,44 @@ WHERE ${buildWhereClause("duration")}
       filterTree,
     ];
 
-    if (sessionName) {
+    if (nameEquals) {
       filters.push({
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: sessionName,
+              equals: nameEquals,
             },
           },
         },
       });
     }
 
-    if (sessionIdContains) {
-      filters.push({
-        request_response_rmt: {
-          properties: {
-            "Helicone-Session-Id": {
-              ilike: `%${sessionIdContains}%`,
+    if (search) {
+      filters.push(
+        filterListToTree(
+          [
+            {
+              request_response_rmt: {
+                properties: {
+                  "Helicone-Session-Id": {
+                    ilike: `%${search}%`,
+                  },
+                },
+              },
             },
-          },
-        },
-      });
+            {
+              request_response_rmt: {
+                properties: {
+                  "Helicone-Session-Name": {
+                    ilike: `%${search}%`,
+                  },
+                },
+              },
+            },
+          ],
+          "or"
+        )
+      );
     }
 
     const builtFilter = await buildFilterWithAuthClickHouse({
@@ -346,7 +277,8 @@ WHERE ${buildWhereClause("duration")}
     SELECT 
       min(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
-      properties['Helicone-Session-Id'] as session,
+      properties['Helicone-Session-Id'] as session_id,
+      properties['Helicone-Session-Name'] as session_name,
       ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
@@ -355,12 +287,11 @@ WHERE ${buildWhereClause("duration")}
     FROM request_response_rmt
     WHERE (
         has(properties, 'Helicone-Session-Id')
-        ${sessionName ? "" : "AND NOT has(properties, 'Helicone-Session-Name')"}
         AND (
           ${builtFilter.filter}
         )
     )
-    GROUP BY properties['Helicone-Session-Id']
+    GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
     HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50

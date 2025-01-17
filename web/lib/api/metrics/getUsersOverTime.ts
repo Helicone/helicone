@@ -1,4 +1,3 @@
-import { UsersOverTime } from "../../../pages/api/metrics/usersOverTime";
 import { Result, resultMap } from "../../result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -15,4 +14,8 @@ export async function getUsersOverTime(
       count: Number(d.users),
     }))
   );
+}
+export interface UsersOverTime {
+  count: number;
+  time: Date;
 }

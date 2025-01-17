@@ -1,25 +1,14 @@
 // src/users/usersController.ts
 import OpenAI from "openai";
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
+import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ChatCompletionTool,
   ChatCompletionToolChoiceOption,
 } from "openai/resources/chat/completions";
-
-let OPENAI_KEY: string | undefined = undefined;
-
-if (process.env.PROVIDER_KEYS) {
-  try {
-    const keys = JSON.parse(process.env.PROVIDER_KEYS);
-    OPENAI_KEY = keys.DEMO_OPENAI_API_KEY;
-  } catch (e) {
-    console.error(e);
-  }
-}
-OPENAI_KEY = OPENAI_KEY ?? process.env.OPENAI_API_KEY;
+import { OPENAI_KEY } from "../../lib/clients/constant";
 
 @Route("v1/demo")
 @Tags("Demo")
@@ -51,7 +40,7 @@ export class DemoController extends Controller {
       };
     }
 
-    const tempAPIKey = await generateHeliconeAPIKey(
+    const tempAPIKey = await generateTempHeliconeAPIKey(
       request.authParams.organizationId
     );
 

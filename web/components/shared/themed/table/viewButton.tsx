@@ -5,7 +5,7 @@ import {
   Squares2X2Icon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { RequestViews } from "./themedTable";
+import { RequestViews } from "./RequestViews";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

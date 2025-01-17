@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { UserMetric } from "../../lib/api/users/users";
+import { UserMetric } from "../../lib/api/users/UserMetric";
 import { Result } from "../../lib/result";
-import {
-  FilterNode,
-  filterListToTree,
-  filterUIToFilterLeafs,
-} from "../lib/filters/filterDefs";
+import { FilterNode } from "../lib/filters/filterDefs";
+import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+import { filterListToTree } from "../lib/filters/filterListToTree";
 import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
@@ -143,15 +141,33 @@ const useUsers = (
   currentPage: number,
   currentPageSize: number,
   sortLeaf: SortLeafUsers,
-  advancedFilter?: FilterNode
+  advancedFilter?: FilterNode,
+  timeFilter?: FilterNode
 ) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["users", currentPage, currentPageSize, advancedFilter, sortLeaf],
+    queryKey: [
+      "users",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+      timeFilter,
+    ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
       const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3];
+      const advancedFilter = query.queryKey[3] as FilterNode | undefined;
       const sortLeaf = query.queryKey[4];
+      const timeFilter = query.queryKey[5] as FilterNode | undefined;
+
+      let filter = advancedFilter ?? timeFilter;
+      if (timeFilter && advancedFilter) {
+        filter = {
+          left: advancedFilter,
+          operator: "and",
+          right: timeFilter,
+        };
+      }
       const [response, count] = await Promise.all([
         fetch("/api/request_users", {
           method: "POST",
@@ -159,7 +175,7 @@ const useUsers = (
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            filter: advancedFilter,
+            filter: filter,
             offset: (currentPage - 1) * currentPageSize,
             limit: currentPageSize,
             sort: sortLeaf,

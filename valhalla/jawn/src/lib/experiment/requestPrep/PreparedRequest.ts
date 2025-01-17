@@ -10,6 +10,12 @@ export interface PreparedRequestArgs {
   providerKey: string | null;
   template: any;
   secretKey: string;
-  datasetRow: Experiment["dataset"]["rows"][number];
+  inputs: Record<string, any>;
+  autoInputs: Record<string, any>[];
+  requestPath?: string;
   requestId: string;
+  columnId?: string;
+  rowIndex?: number;
+  experimentId?: string;
+  model?: string;
 }

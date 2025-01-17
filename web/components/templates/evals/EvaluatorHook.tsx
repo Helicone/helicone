@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
@@ -7,15 +7,13 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  UIFilterRowTree,
-  getRootFilterNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { useOrg } from "../../layout/organizationContext";
+import { getRootFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { useOrg } from "../../layout/org/organizationContext";
 import useSearchParams, {
   SearchParams,
 } from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "../dashboard/dashboardPage";
+import { TimeFilter } from "@/types/timeFilter";
 import { useUIFilterConvert } from "../dashboard/useDashboardPage";
 
 // Import Shadcn UI components for dropdown
@@ -34,7 +32,7 @@ const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
     };
   } else {
     range = {
-      start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
+      start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
       end: new Date(),
     };
   }
@@ -150,5 +148,18 @@ export const useEvaluators = () => {
     setAdvancedFilters,
     searchPropertyFilters,
     deleteEvaluator,
+  };
+};
+
+export const useInvalidateEvaluators = () => {
+  const queryClient = useQueryClient();
+  const org = useOrg();
+
+  return {
+    invalidate: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["evaluators", org?.currentOrg?.id],
+      });
+    },
   };
 };

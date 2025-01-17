@@ -13,7 +13,7 @@ import { removeLeadingWhitespace } from "../../shared/utils/utils";
 
 import RoleButton from "./new/roleButton";
 import useNotification from "../../shared/notification/useNotification";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
@@ -116,7 +116,6 @@ export const PrettyInput = ({
 
 export const RenderWithPrettyInputKeys = (props: {
   text: string;
-
   selectedProperties: Record<string, string> | undefined;
 }) => {
   const { text, selectedProperties } = props;

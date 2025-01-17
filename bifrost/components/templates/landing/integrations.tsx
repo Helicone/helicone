@@ -1,10 +1,14 @@
 "use client";
 
+import { ISLAND_WIDTH } from "@/lib/utils";
 import { DiffHighlight } from "@/components/shared/diffHighlight";
+import { cn } from "@/lib/utils";
 import { ArrowUpRightIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { toast, Toaster } from "react-hot-toast";
 
 interface IntegrationsProps {}
 
@@ -42,7 +46,7 @@ const Integrations = (props: IntegrationsProps) => {
       ),
       href: "https://docs.helicone.ai/integrations/openai/javascript#openai-javascript-sdk-integration",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -78,6 +82,51 @@ client = OpenAI(
       },
     },
     {
+      name: "Anthropic",
+      logo: (
+        <div className="p-3">
+          <Image
+            src={"/static/anthropic.webp"}
+            alt={"Anthropic"}
+            width={2048}
+            height={2048}
+          />
+        </div>
+      ),
+      href: "https://docs.helicone.ai/integrations/anthropic/javascript",
+      integrations: {
+        javascript: {
+          language: "tsx",
+          code: `import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({
+  apiKey: ANTHROPIC_API_KEY,
+  baseURL: "https://anthropic.helicone.ai/\$\{HELICONE_API_KEY\}/\",
+});`,
+        },
+        python: {
+          language: "python",
+          code: `import anthropic
+
+client = anthropic.Anthropic(
+  api_key=ANTHROPIC_API_KEY,
+  base_url="https://anthropic.helicone.ai/{HELICONE_API_KEY}/"
+)`,
+        },
+        langchain: {
+          language: "python",
+          code: `const llm = new ChatAnthropic({
+  modelName: "claude-2",
+  anthropicApiKey: "ANTHROPIC_API_KEY",
+  clientOptions: {
+    baseURL: "https://anthropic.helicone.ai/{HELICONE_API_KEY}/",
+  },
+});
+`,
+        },
+      },
+    },
+    {
       name: "Azure",
       logo: (
         <div className="p-3">
@@ -91,7 +140,7 @@ client = OpenAI(
       ),
       href: "https://docs.helicone.ai/integrations/azure/javascript",
       integrations: {
-        "node.js": {
+        javascript: {
           language: "tsx",
           code: `import OpenAI from "openai";
 
@@ -165,76 +214,7 @@ self.model = AzureChatOpenAI(
         },
       },
     },
-    {
-      name: "Anthropic",
-      logo: (
-        <div className="p-3">
-          <Image
-            src={"/static/anthropic.webp"}
-            alt={"Anthropic"}
-            width={2048}
-            height={2048}
-          />
-        </div>
-      ),
-      href: "https://docs.helicone.ai/integrations/anthropic/javascript",
-      integrations: {
-        "node.js": {
-          language: "tsx",
-          code: `import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  baseURL: "https://anthropic.helicone.ai/",
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  defaultHeaders: {
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-});
-
-await anthropic.messages.create({
-  model: "claude-3-opus-20240229",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, world" }],
-});
-`,
-        },
-        python: {
-          language: "python",
-          code: `import anthropic
-
-client = anthropic.Anthropic(
-  api_key=os.environ.get("ANTHROPIC_API_KEY"),
-  base_url="https://anthropic.helicone.ai"
-  defaultHeaders={
-    "Helicone-Auth": <HELICONE_API_KEY>,
-  },
-)
-
-client.messages.create(
-  model="claude-3-opus-20240229",
-  max_tokens=1024,
-  messages=[
-    {"role": "user", "content": "Hello, world"}
-  ]
-)
-`,
-        },
-        langchain: {
-          language: "python",
-          code: `const llm = new ChatAnthropic({
-  modelName: "claude-2",
-  anthropicApiKey: "ANTHROPIC_API_KEY",
-  clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/",
-    defaultHeaders: {
-      "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-    },
-  },
-});
-`,
-        },
-      },
-    },
     {
       name: "Gemini",
       logo: (
@@ -247,23 +227,58 @@ client.messages.create(
           />
         </div>
       ),
-      integrations: {},
+      integrations: {
+        curl: {
+          language: "shell",
+          code: `curl --request POST \\
+  --url "https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=$\{GOOGLE_GENERATIVE_API_KEY\}" \\
+  --header "Content-Type: application/json" \\
+  --header "Helicone-Auth: Bearer $\{HELICONE_API_KEY\}" \\
+  --header "Helicone-Target-URL: https://generativelanguage.googleapis.com" \\
+  --data '{
+    "contents": [{
+      "parts":[{
+        "text": "Write a story about a magic backpack."
+      }]
+    }]
+  }'`,
+        },
+      },
       href: "https://docs.helicone.ai/integrations/gemini/api/curl",
     },
     {
-      name: "Anyscale",
+      name: "OpenRouter",
       logo: (
         <div className="p-3">
           <Image
-            src={"/static/anyscale.webp"}
-            alt={"Anyscale"}
+            src={"/static/openrouter.webp"}
+            alt={"Open Router"}
             width={2048}
             height={2048}
           />
         </div>
       ),
-      integrations: {},
-      href: "https://docs.helicone.ai/getting-started/integration-method/anyscale",
+      integrations: {
+        javascript: {
+          language: "tsx",
+          code: `fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer $\{OPENROUTER_API_KEY\}\`,
+    "Helicone-Auth": \`Bearer $\{HELICONE_API_KEY\}\`,
+    "HTTP-Referer": \`$\{YOUR_SITE_URL\}\`, // Optional, for including your app on openrouter.ai rankings.
+    "X-Title": \`$\{YOUR_SITE_NAME\}\`, // Optional. Shows in rankings on openrouter.ai.
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
+    messages: [{ role: "user", content: "What is the meaning of life?" }],
+    stream: true,
+  }),
+});`,
+        },
+      },
+      href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
     },
     {
       name: "TogetherAI",
@@ -280,21 +295,7 @@ client.messages.create(
       integrations: {},
       href: "https://docs.helicone.ai/getting-started/integration-method/together",
     },
-    {
-      name: "OpenRouter",
-      logo: (
-        <div className="p-3">
-          <Image
-            src={"/static/openrouter.webp"}
-            alt={"Open Router"}
-            width={2048}
-            height={2048}
-          />
-        </div>
-      ),
-      integrations: {},
-      href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
-    },
+
     {
       name: "LiteLLM",
       logo: <div className="">🚅</div>,
@@ -305,7 +306,7 @@ client.messages.create(
 
   const [currentProvider, setCurrentProvider] = useState("OpenAI");
 
-  const [currentIntegration, setCurrentIntregration] = useState("node.js");
+  const [currentIntegration, setCurrentIntregration] = useState("javascript");
 
   const selectedProvider = PROVIDERS.find(
     (provider) => provider.name === currentProvider
@@ -314,53 +315,59 @@ client.messages.create(
   const currentCodeBlock = selectedProvider?.integrations[currentIntegration];
 
   return (
-    <div className="flex flex-col mx-auto max-w-5xl w-full">
-      <ul className="grid grid-cols-3 md:grid-cols-8 gap-8 md:gap-4 px-4 md:px-16 pb-4">
-        {PROVIDERS.map((provider, index) => (
-          <li
-            key={index}
-            className="hover:bg-sky-100 group m-auto p-1 rounded-lg transition-colors ease-in-out duration-200"
-          >
-            <button
-              onClick={() => {
-                if (
-                  Object.keys(provider.integrations).length == 0 ||
-                  window.matchMedia("(max-width: 768px)").matches
-                ) {
-                  window.open(provider.href, "_blank");
-                  return;
-                }
-                setCurrentProvider(provider.name);
-                if (!provider.integrations[currentIntegration]) {
-                  setCurrentIntregration("node.js");
-                }
-              }}
-              className="flex flex-col items-center space-y-2"
-            >
-              <div className="col-span-1 rounded-lg border border-gray-300 bg-white h-16 w-16 flex items-center justify-center">
-                {provider.logo}
-              </div>
-              <span
-                className={`text-sm flex items-center gap-2 ${
-                  currentProvider === provider.name
-                    ? "font-bold text-black"
-                    : "text-gray-500"
-                }`}
+    <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-8")}>
+      <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-center">
+        <div className="flex flex-col gap-3">
+          <h2 className="text-3xl sm:text-5xl font-semibold text-black">
+            Get integrated in <span className="text-brand">seconds</span>
+          </h2>
+          <p className="text-lg font-light sm:text-xl text-landing-description">
+            Use any model and monitor applications at any scale.{" "}
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-wrap">
+            {PROVIDERS.map((provider) => (
+              <div
+                key={provider.name}
+                className={cn(
+                  "w-20 h-20 rounded-md p-3 hover:bg-[#EBF7FB] transition-colors ease-in-out duration-200 cursor-pointer",
+                  selectedProvider?.name === provider.name ? "bg-[#EBF7FB]" : ""
+                )}
+                onClick={() => {
+                  if (
+                    Object.keys(provider.integrations).length == 0 ||
+                    window.matchMedia("(max-width: 768px)").matches
+                  ) {
+                    window.open(provider.href, "_blank");
+                    return;
+                  }
+                  setCurrentProvider(provider.name);
+                  if (!provider.integrations[currentIntegration]) {
+                    if (provider.name === "Gemini") {
+                      setCurrentIntregration("curl");
+                    } else {
+                      setCurrentIntregration("javascript");
+                    }
+                  }
+                }}
               >
-                {provider.name}
-                <ArrowUpRightIcon
-                  className={`h-4 w-4 hidden transition-all duration-200 ease-in-out ${
-                    Object.keys(provider.integrations).length > 0
-                      ? ""
-                      : "group-hover:flex"
-                  }`}
-                />
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mx-8 mt-4 hidden md:flex">
+                <div className="flex items-center justify-center bg-white border border-slate-200 rounded-md h-full ">
+                  {provider.logo}
+                </div>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="https://docs.helicone.ai/getting-started/quick-start"
+            target="_blank"
+            className="text-md font-light flex w-full justify-end items-center gap-1 text-landing-description"
+          >
+            Other providers? See docs <ArrowUpRightIcon className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+      <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700 mt-4">
         <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
           <ul className="flex items-center space-x-0">
             {Object.keys(selectedProvider?.integrations || {}).map(
@@ -380,28 +387,23 @@ client.messages.create(
             )}
           </ul>
           <button className="text-gray-300">
-            <ClipboardIcon className="h-6 w-6" />
+            <ClipboardIcon
+              onClick={() => {
+                navigator.clipboard.writeText(currentCodeBlock?.code || "");
+                toast.success("Copied to clipboard");
+              }}
+              className="h-6 w-6"
+            />
           </button>
         </div>
-        <div className="">
+        <div className="w-full">
           <DiffHighlight
             code={currentCodeBlock?.code || ""}
             language={currentCodeBlock?.language || "tsx"}
           />
         </div>
       </div>
-      <div className="flex items-center justify-center mt-4 mx-5">
-        <p className="text-gray-400 text-sm m-auto">
-          Don&apos;t see your model? Let us know by creating a Github{" "}
-          <a
-            href="https://github.com/helicone/helicone/issues"
-            target="_blank"
-            className="text-sky-500"
-          >
-            Issue.
-          </a>
-        </p>
-      </div>
+      <Toaster />
     </div>
   );
 };

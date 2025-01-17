@@ -1,20 +1,17 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
   ChevronDownIcon,
-  DocumentPlusIcon,
   DocumentTextIcon,
   EyeIcon,
   PencilIcon,
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { TextInput } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
@@ -38,22 +35,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../ui/dialog";
-import HcButton from "../../ui/hcButton";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
-import { MODEL_LIST } from "../playground/new/modelList";
 import { PricingCompare } from "../pricing/pricingCompare";
+import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
-import { UpgradeToProCTA } from "../pricing/upgradeToProCTA";
-import { IslandContainer } from "@/components/ui/islandContainer";
 
 // **Import PromptPlayground and PromptObject**
-import PromptPlayground, { PromptObject } from "./id/promptPlayground";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
+import { cn } from "@/lib/utils";
 import { ScrollArea } from "../../ui/scroll-area";
+import PromptPlayground, { PromptObject } from "./id/promptPlayground";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -66,46 +64,25 @@ const PromptsPage = (props: PromptsPageProps) => {
   const searchParams = useSearchParams();
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
   const [newPromptName, setNewPromptName] = useState<string>("");
-  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
 
   // **Update newPromptContent to basePrompt with type PromptObject**
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
     model: "gpt-4",
     messages: [
       {
+        id: "1",
         role: "system",
         content: [{ text: "You are a helpful assistant.", type: "text" }],
       },
     ],
   });
 
-  const [promptVariables, setPromptVariables] = useState<string[]>([]);
-  const [variableValues, setVariableValues] = useState<Record<string, string>>(
-    {}
-  );
   const newPromptInputRef = useRef<HTMLInputElement>(null);
   const notification = useNotification();
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
   const jawn = useJawnClient();
-
-  const extractVariables = (content: string) => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const variables = new Set<string>();
-    let match;
-    while ((match = regex.exec(content)) !== null) {
-      variables.add(match[1].trim());
-    }
-    return Array.from(variables);
-  };
-
-  const replaceVariablesWithTags = useCallback((content: string) => {
-    return content.replace(
-      /\{\{([^}]+)\}\}/g,
-      (match, p1) => `<helicone-prompt-input key="${p1.trim()}" />`
-    );
-  }, []);
 
   const createPrompt = async (userDefinedId: string) => {
     if (!userDefinedId) {
@@ -176,10 +153,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [showPricingCompare, setShowPricingCompare] = useState(false);
 
   return (
-    <IslandContainer>
+    <div>
       <div className="flex flex-col space-y-4 w-full">
         <AuthHeader
-          isWithinIsland={true}
+          isWithinIsland={false}
           title={
             <div className="flex items-center gap-2">
               Prompts
@@ -209,38 +186,35 @@ const PromptsPage = (props: PromptsPageProps) => {
               {(hasAccess || hasLimitedAccess) && (
                 <div
                   id="util"
-                  className="flex flex-row justify-between items-center"
+                  className={cn(
+                    "flex flex-row justify-between items-center",
+                    ISLAND_MARGIN
+                  )}
                 >
                   <div className="flex flex-row items-center space-x-2 w-full">
                     <div className="max-w-xs w-full">
-                      <TextInput
-                        icon={MagnifyingGlassIcon}
+                      <Input
                         value={searchName}
-                        onValueChange={(value) => setSearchName(value)}
+                        onChange={(e) => setSearchName(e.target.value)}
                         placeholder="Search prompts..."
+                        className="h-full"
                       />
                     </div>
 
                     <Dialog>
                       <DialogTrigger asChild className="w-min">
                         {hasAccess ? (
-                          <HcButton
-                            variant={"primary"}
-                            size={"sm"}
-                            title={"Create new prompt"}
-                            icon={DocumentPlusIcon}
-                          />
+                          <Button variant="default" size="sm">
+                            Create Prompt
+                          </Button>
                         ) : (
                           <ProFeatureWrapper
                             featureName="Prompts"
                             enabled={false}
                           >
-                            <HcButton
-                              variant={"primary"}
-                              size={"sm"}
-                              title={"Create new prompt"}
-                              icon={DocumentPlusIcon}
-                            />
+                            <Button variant="default" size="sm">
+                              Create Prompt
+                            </Button>
                           </ProFeatureWrapper>
                         )}
                       </DialogTrigger>
@@ -268,7 +242,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                                 >
                                   Name
                                 </Label>
-                                <TextInput
+                                <Input
                                   id="new-prompt-name"
                                   value={newPromptName}
                                   onChange={(e) =>
@@ -363,7 +337,12 @@ const PromptsPage = (props: PromptsPageProps) => {
 
               {filteredPrompts && (hasLimitedAccess || hasAccess) ? (
                 searchParams.get("view") === "card" ? (
-                  <ul className="w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4">
+                  <ul
+                    className={cn(
+                      "w-full h-full grid grid-cols-2 xl:grid-cols-4 gap-4",
+                      ISLAND_MARGIN
+                    )}
+                  >
                     {filteredPrompts.map((prompt, i) => (
                       <li key={i} className="col-span-1">
                         <PromptCard prompt={prompt} />
@@ -413,14 +392,14 @@ const PromptsPage = (props: PromptsPageProps) => {
                         key: undefined,
                         header: "Permission",
                         render: (prompt) => (
-                          <div className="text-gray-500">
+                          <div>
                             {prompt.metadata?.createdFromUi === true ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center justify-center text-center bg-[#F1F5F9] dark:bg-[#1E293B] rounded-md p-2 border border-[#CBD5E1] dark:border-[#475569] text-black dark:text-white max-w-28">
+                                  <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
                                     <PencilIcon className="h-4 w-4 mr-1" />
                                     <p>Editable</p>
-                                  </div>
+                                  </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
                                   <p>
@@ -436,10 +415,10 @@ const PromptsPage = (props: PromptsPageProps) => {
                             ) : (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="flex items-center justify-center bg-[#F1F5F9] rounded-md p-2 border border-[#CBD5E1] text-black max-w-28">
+                                  <Badge className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
                                     <EyeIcon className="h-4 w-4 mr-1" />
                                     <p>View only</p>
-                                  </div>
+                                  </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent align="center">
                                   <p>
@@ -704,9 +683,7 @@ const chatCompletion = await openai.chat.completions.create(
                         </Button>
                         {showPricingCompare || (
                           <Button asChild>
-                            <Link href="/settings/billing">
-                              Start 14-day free trial
-                            </Link>
+                            <Link href="/settings/billing">Upgrade to Pro</Link>
                           </Button>
                         )}
                       </div>
@@ -718,7 +695,7 @@ const chatCompletion = await openai.chat.completions.create(
           )}
         </div>
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 

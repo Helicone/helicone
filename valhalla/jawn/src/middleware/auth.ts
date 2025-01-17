@@ -67,6 +67,7 @@ export const authMiddleware = async (
       return;
     }
     const authParams = await supabaseServer.authenticate(authorization.data!);
+
     if (
       authParams.error ||
       !authParams.data?.organizationId ||

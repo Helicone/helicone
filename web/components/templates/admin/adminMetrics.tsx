@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart, Select, SelectItem } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 
 interface AdminStatsProps {}
 
@@ -14,6 +14,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
     "7 days",
     "1 month",
     "3 months",
+    "6 months",
     "12 months",
     "24 months",
   ] as const;

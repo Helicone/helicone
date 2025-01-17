@@ -2,7 +2,7 @@ import { Textarea } from "@tremor/react";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col, Row } from "../../../layout/common";
 import { clsx } from "../../clsx";
-import { ChatHistory } from "./demoGame";
+import { ChatHistory } from "./ChatHistory";
 import Typewriter from "./typewriter";
 import { useState, useEffect, useRef } from "react";
 import { hpf } from "@helicone/prompts";

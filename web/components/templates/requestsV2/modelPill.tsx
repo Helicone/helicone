@@ -1,5 +1,5 @@
 import { clsx } from "../../shared/clsx";
-import { getBuilderType } from "./builder/requestBuilder";
+import { getBuilderType } from "./builder/getBuilderType";
 
 interface ModelPillProps {
   model: string;

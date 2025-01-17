@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useOrg } from "../../../components/layout/organizationContext";
+import { useOrg } from "../../../components/layout/org/organizationContext";
 import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
 import { Result, resultMap } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";

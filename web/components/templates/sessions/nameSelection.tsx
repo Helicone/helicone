@@ -1,24 +1,24 @@
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hoverCard";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { TooltipContent } from "@radix-ui/react-tooltip";
+import { InfoIcon } from "lucide-react";
+import Link from "next/link";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
-import { clsx } from "../../shared/clsx";
 import { Row } from "../../layout/common/row";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { TooltipTrigger, Tooltip } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { InfoIcon } from "lucide-react";
-import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hoverCard";
-import { HoverCard } from "@/components/ui/hoverCard";
-import { TooltipContent } from "@radix-ui/react-tooltip";
+import { clsx } from "../../shared/clsx";
 
 interface SessionNameSelectionProps {
-  sessionIdSearch: string;
-  setSessionIdSearch: (value: string) => void;
-  sessionNameSearch: string;
-  setSessionNameSearch: (value: string) => void;
+  sessionNameSearch?: string;
+  setSessionNameSearch: (value?: string) => void;
   sessionNames: Array<{
     name: string;
     created_at: string;
@@ -26,21 +26,17 @@ interface SessionNameSelectionProps {
     last_used: string;
     session_count: number;
   }>;
-  selectedName: string;
-  setSelectedName: (name: string) => void;
+  selectedName?: string;
+  setSelectedName: (name?: string) => void;
 }
 
 const SessionNameSelection = ({
   sessionNameSearch,
   setSessionNameSearch,
-  sessionIdSearch,
-  setSessionIdSearch,
   sessionNames,
   selectedName,
   setSelectedName,
 }: SessionNameSelectionProps) => {
-  const [selectedCard, setSelectedCard] = useState<string | null>(null);
-
   return (
     <Col className="min-w-[20em] min-h-[calc(100vh-56px)] bg-slate-50 dark:bg-black border-r border-slate-200 dark:border-slate-800 place-items-stretch">
       <Row className="items-center border-b">
@@ -77,91 +73,108 @@ const SessionNameSelection = ({
       </Row>
 
       <Col className="max-h-[70vh] overflow-y-auto">
-        {sessionNames.map((seshName) => (
-          <Card
-            key={seshName.name}
-            className={clsx(
-              "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b",
-              selectedCard === seshName.name
-                ? "bg-sky-100 dark:bg-slate-900"
-                : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
-            )}
-            onClick={() => {
-              setSelectedName(seshName.name);
-              setSelectedCard(seshName.name);
-            }}
-          >
-            <Row className="flex w-full justify-between items-center gap-2 mb-2">
-              <Row className="gap-2 items-center">
-                {seshName.name === "" ? (
-                  <div className="text-slate-400 dark:text-slate-600 font-semibold text-sm">
-                    Unnamed
-                  </div>
-                ) : (
-                  <div className="font-semibold text-sm text-slate-900 dark:text-slate-300">
-                    {seshName.name}
-                  </div>
-                )}
-                <HoverCard>
-                  <HoverCardTrigger>
-                    <InfoIcon
-                      width={16}
-                      height={16}
-                      className="text-slate-700 cursor-pointer"
-                    />
-                  </HoverCardTrigger>
-                  <HoverCardContent
-                    align="start"
-                    className="w-[220px] p-0 z-[1000] bg-white dark:bg-black border border-slate-200 dark:border-slate-800"
-                  >
-                    <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
-                      <div className="flex flex-col gap-1">
-                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Total sessions
-                        </h3>
-                        <p className="text-sm text-slate-500 truncate">
-                          {seshName.session_count}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Created on
-                        </h3>
-                        <p className="text-sm text-slate-500 truncate">
-                          {new Date(seshName.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
+        {sessionNames
+          .sort(
+            (a, b) =>
+              new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+          )
+          // Remove sessions older than 45 days
+          .filter((seshName) =>
+            sessionNameSearch
+              ? true
+              : new Date(seshName.last_used).getTime() >
+                new Date().getTime() - 45 * 24 * 60 * 60 * 1000
+          )
+          .map((seshName) => (
+            <Card
+              key={seshName.name}
+              className={clsx(
+                "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b",
+                selectedName === seshName.name
+                  ? "bg-sky-100 dark:bg-slate-900"
+                  : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+              )}
+              onClick={() => {
+                if (seshName.name === selectedName) {
+                  setSelectedName(undefined);
+                  setSessionNameSearch(undefined);
+                } else {
+                  setSelectedName(seshName.name);
+                  setSessionNameSearch(undefined);
+                }
+              }}
+            >
+              <Row className="flex w-full justify-between items-center gap-2 mb-2">
+                <Row className="gap-2 items-center">
+                  {seshName.name === "" ? (
+                    <div className="text-slate-400 dark:text-slate-600 font-semibold text-sm">
+                      Unnamed
                     </div>
-                  </HoverCardContent>
-                </HoverCard>
+                  ) : (
+                    <div className="font-semibold text-sm text-slate-900 dark:text-slate-300">
+                      {seshName.name}
+                    </div>
+                  )}
+                  <HoverCard>
+                    <HoverCardTrigger>
+                      <InfoIcon
+                        width={16}
+                        height={16}
+                        className="text-slate-700 cursor-pointer"
+                      />
+                    </HoverCardTrigger>
+                    <HoverCardContent
+                      align="start"
+                      className="w-[220px] p-0 z-[1000] bg-white dark:bg-black border border-slate-200 dark:border-slate-800"
+                    >
+                      <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Total sessions
+                          </h3>
+                          <p className="text-sm text-slate-500 truncate">
+                            {seshName.session_count}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Created on
+                          </h3>
+                          <p className="text-sm text-slate-500 truncate">
+                            {new Date(seshName.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </Row>
+
+                <div
+                  className={clsx(
+                    "border border-slate-300 dark:border-slate-700 rounded-full h-4 w-4 flex items-center justify-center",
+                    selectedName === seshName.name
+                      ? "bg-sky-500 dark:bg-sky-500/80"
+                      : "bg-white dark:bg-slate-700/50"
+                  )}
+                ></div>
               </Row>
 
-              <div
-                className={clsx(
-                  "border border-slate-300 dark:border-slate-700 rounded-full h-4 w-4 flex items-center justify-center",
-                  selectedCard === seshName.name
-                    ? "bg-sky-500 dark:bg-sky-500/80"
-                    : "bg-white dark:bg-slate-700/50"
-                )}
-              ></div>
-            </Row>
-
-            <Row className="flex w-full justify-between items-center text-slate-500 dark:text-slate-500">
-              <p className="text-xs">
-                Last used{" "}
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {getTimeAgo(new Date(seshName.last_used))}
-                </span>
-              </p>
-              <p className="text-xs">
-                Total cost $
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {seshName.total_cost.toFixed(2)}
-                </span>
-              </p>
-            </Row>
-          </Card>
-        ))}
+              <Row className="flex w-full justify-between items-center text-slate-500 dark:text-slate-500">
+                <p className="text-xs">
+                  Last used{" "}
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {getTimeAgo(new Date(seshName.last_used))}
+                  </span>
+                </p>
+                <p className="text-xs">
+                  Total cost $
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {seshName.total_cost.toFixed(2)}
+                  </span>
+                </p>
+              </Row>
+            </Card>
+          ))}
       </Col>
     </Col>
   );

@@ -1,5 +1,4 @@
 import { TextInput } from "@tremor/react";
-import HcButton from "../../../ui/hcButton";
 import { useState, useEffect } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import {
@@ -7,10 +6,13 @@ import {
   useUpdateSetting,
 } from "../../../../services/hooks/admin";
 import { components } from "../../../../lib/clients/jawnTypes/private";
+import { Button } from "@/components/ui/button";
 
 const settingNames: Array<components["schemas"]["SettingName"]> = [
   "kafka:dlq",
   "kafka:log",
+  "kafka:score",
+  "kafka:dlq:score",
   "kafka:dlq:eu",
   "kafka:log:eu",
 ];
@@ -80,9 +82,8 @@ const KafkaSettings = () => {
             />
           </div>
           <div className="col-span-1">
-            <HcButton
-              variant={"primary"}
-              size={"xs"}
+            <Button
+              variant={"default"}
               onClick={() => {
                 if (miniBatchSize != 0 && !miniBatchSize) {
                   setNotification("Mini Batch Size is required", "error");
@@ -95,9 +96,10 @@ const KafkaSettings = () => {
                   } as components["schemas"]["Setting"],
                 });
               }}
-              loading={isUpdatingSetting || isLoadingSetting}
-              title={"Update Setting"}
-            />
+              disabled={isUpdatingSetting || isLoadingSetting}
+            >
+              Update Setting
+            </Button>
           </div>
         </div>
       </div>

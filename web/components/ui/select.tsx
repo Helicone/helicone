@@ -92,7 +92,7 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "h-[var(--radix-select-trigger-height)] overflow-y-auto w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
@@ -117,8 +117,10 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
+    showIndicator?: boolean;
+  }
+>(({ className, children, showIndicator = true, ...props }, ref) => (
   <SelectItemRawNotText ref={ref} className={className} {...props}>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectItemRawNotText>
@@ -127,8 +129,10 @@ SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectItemRawNotText = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
+    showIndicator?: boolean;
+  }
+>(({ className, children, showIndicator = true, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
@@ -137,11 +141,13 @@ const SelectItemRawNotText = React.forwardRef<
     )}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-      <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
+    {showIndicator && (
+      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+        <SelectPrimitive.ItemIndicator>
+          <Check className="h-4 w-4" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
+    )}
 
     {children}
   </SelectPrimitive.Item>

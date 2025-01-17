@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-interface BlogStructureMetaData {
+export interface BlogStructureMetaData {
   title: string;
   title1?: string;
   title2?: string;
@@ -12,6 +12,7 @@ interface BlogStructureMetaData {
   date?: string;
   author?: string;
   authors?: string[];
+  badge?: string;
 }
 
 export async function getMetadata(

@@ -11,36 +11,7 @@ import {
   BookOpenIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
-
-export interface CourseParams {
-  topic: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  audience: string;
-}
-
-export interface CourseOverview {
-  title: string;
-  description: string;
-}
-
-export interface CourseSection {
-  title: string;
-  content: string;
-}
-
-export interface CourseQuiz {
-  questions: Array<{
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  }>;
-}
-
-export interface Course {
-  overview: CourseOverview;
-  sections: CourseSection[];
-  quizzes: CourseQuiz[];
-}
+import { Course, CourseParams, CourseQuiz, CourseSection } from "./types";
 
 type CourseParts =
   | "overview"

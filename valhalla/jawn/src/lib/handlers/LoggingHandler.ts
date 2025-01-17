@@ -5,7 +5,11 @@ import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext, PromptRecord } from "./HandlerContext";
+import {
+  ExperimentCellValue,
+  HandlerContext,
+  PromptRecord,
+} from "./HandlerContext";
 
 type S3Record = {
   requestId: string;
@@ -31,6 +35,13 @@ export type BatchPayload = {
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
   searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
+  experimentCellValues: ExperimentCellValue[];
+  scores: {
+    organizationId: string;
+    requestId: string;
+    scores: Record<string, number | boolean | undefined>;
+    evaluatorIds: Record<string, string>;
+  }[];
 };
 
 export class LoggingHandler extends AbstractLogHandler {
@@ -56,6 +67,8 @@ export class LoggingHandler extends AbstractLogHandler {
       s3Records: [],
       requestResponseVersionedCH: [],
       searchRecords: [],
+      experimentCellValues: [],
+      scores: [],
     };
   }
 
@@ -73,6 +86,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.processedLog.request.heliconeTemplate
           ? this.mapPrompt(context)
           : null;
+      const experimentCellValueMapped = this.mapExperimentCellValues(context);
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
@@ -80,6 +94,17 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
       this.batchPayload.searchRecords.push(...searchRecordsMapped);
+      if (
+        context.processedLog.request.scores &&
+        Object.keys(context.processedLog.request.scores).length > 0
+      ) {
+        this.batchPayload.scores.push({
+          organizationId: context.orgParams?.id ?? "",
+          requestId: requestMapped.id ?? "",
+          scores: context.processedLog.request.scores ?? {},
+          evaluatorIds: context.processedLog.request.scores_evaluatorIds ?? {},
+        });
+      }
 
       if (s3RecordMapped) {
         this.batchPayload.s3Records.push(s3RecordMapped);
@@ -87,6 +112,10 @@ export class LoggingHandler extends AbstractLogHandler {
 
       if (promptMapped) {
         this.batchPayload.prompts.push(promptMapped);
+      }
+
+      if (experimentCellValueMapped) {
+        this.batchPayload.experimentCellValues.push(experimentCellValueMapped);
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
@@ -363,6 +392,22 @@ export class LoggingHandler extends AbstractLogHandler {
     return assetInserts;
   }
 
+  mapExperimentCellValues(context: HandlerContext): ExperimentCellValue | null {
+    const request = context.message.log.request;
+    const experimentColumnId = request.experimentColumnId;
+    const experimentRowIndex = request.experimentRowIndex;
+
+    if (!experimentColumnId || !experimentRowIndex) {
+      return null;
+    }
+
+    return {
+      columnId: experimentColumnId,
+      rowIndex: parseInt(experimentRowIndex),
+      value: request.id,
+    };
+  }
+
   mapPrompt(context: HandlerContext): PromptRecord | null {
     if (
       !context.message.log.request.promptId ||
@@ -396,10 +441,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
-      model:
-        context.processedLog.model && context.processedLog.model !== ""
-          ? context.processedLog.model
-          : this.getModelFromPath(request.path),
+      model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
@@ -421,7 +463,11 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: context.processedLog.assets
         ? Array.from(context.processedLog.assets.keys())
         : [],
-      scores: {},
+      scores: Object.fromEntries(
+        Object.entries(context.processedLog.request.scores ?? {}).map(
+          ([key, value]) => [key, +(value ?? 0)]
+        )
+      ),
       request_body:
         this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
       response_body:
@@ -430,23 +476,6 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return requestResponseLog;
-  }
-
-  private getModelFromPath(path: string): string {
-    const regex1 = /\/engines\/([^/]+)/;
-    const regex2 = /models\/([^/:]+)/;
-
-    let match = path.match(regex1);
-
-    if (!match) {
-      match = path.match(regex2);
-    }
-
-    if (match && match[1]) {
-      return match[1];
-    }
-
-    return "";
   }
 
   mapResponse(

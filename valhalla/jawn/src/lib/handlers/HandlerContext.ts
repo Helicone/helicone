@@ -41,6 +41,8 @@ export type Log = {
     requestCreatedAt: Date;
     isStream: boolean;
     heliconeTemplate?: TemplateWithInputs;
+    experimentColumnId?: string;
+    experimentRowIndex?: string;
   };
   response: {
     id: string;
@@ -74,6 +76,8 @@ export type ProcessedLog = {
     heliconeTemplate?: TemplateWithInputs;
     assets?: Map<string, string>;
     properties?: Record<string, string>;
+    scores?: Record<string, number | boolean | undefined>;
+    scores_evaluatorIds?: Record<string, string>;
   };
   response: {
     model?: string;
@@ -91,6 +95,7 @@ export type HeliconeMeta = {
   posthogHost?: string;
   lytixKey?: string;
   lytixHost?: string;
+  heliconeManualAccessKey?: string;
 };
 
 export type Message = {
@@ -104,7 +109,7 @@ export type HeliconeScoresMessage = {
   organizationId: string;
   scores: {
     score_attribute_key: string;
-    score_attribute_type: string;
+    score_attribute_type: "number" | "boolean";
     score_attribute_value: number;
   }[];
   createdAt: Date;
@@ -118,4 +123,10 @@ export type PromptRecord = {
   model?: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
+};
+
+export type ExperimentCellValue = {
+  columnId: string;
+  rowIndex: number;
+  value: string;
 };

@@ -1,6 +1,6 @@
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
-import OrgContext, { useOrg } from "../organizationContext";
+import OrgContext, { useOrg } from "../org/organizationContext";
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -17,10 +17,15 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
         {banner && (
           <div className="p-2">
             <div className="w-full bg-sky-500 rounded-lg p-2 text-white flex items-center justify-center gap-2">
-              <span className="text-sky-100 text-xs font-normal">
-                {getUSDate(new Date(banner.updated_at))}
-              </span>
-              <p className="text-sky-100 font-normal">|</p>
+              {banner.updated_at && (
+                <>
+                  <span className="text-sky-100 text-xs font-normal">
+                    {getUSDate(new Date(banner.updated_at))}
+                  </span>
+                  <p className="text-sky-100 font-normal">|</p>
+                </>
+              )}
+
               <p className="text-sm font-semibold"> {banner.title}</p>
               <svg
                 viewBox="0 0 2 2"

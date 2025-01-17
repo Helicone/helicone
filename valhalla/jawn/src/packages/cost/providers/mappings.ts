@@ -1,4 +1,3 @@
-import { costs as openaiCosts } from "./openai";
 import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
@@ -6,14 +5,17 @@ import { costs as togetherAICompletionCosts } from "./togetherai/completion";
 import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion";
 import { costs as azureCosts } from "./azure";
 import { costs as googleCosts } from "./google";
-import { costs as anthropicCosts } from "./anthropic";
 import { costs as cohereCosts } from "./cohere";
 import { costs as mistralCosts } from "./mistral";
 import { costs as openRouterCosts } from "./openrouter";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
-import { ModelRow } from "../interfaces/Cost";
+import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { costs as qstashCosts } from "./qstash";
+import { openAIProvider } from "./openai";
+import { anthropicProvider } from "./anthropic";
+import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as deepseekCosts } from "./deepseek";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -46,6 +48,10 @@ const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 const qstash = /^https:\/\/qstash\.upstash\.io/;
 //https://www.firecrawl.dev/
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
+// https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
+const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://api.deepseek.com
+const deepseek = /^https:\/\/api\.deepseek\.com/;
 
 export const providersNames = [
   "OPENAI",
@@ -70,6 +76,8 @@ export const providersNames = [
   "DEEPINFRA",
   "QSTASH",
   "FIRECRAWL",
+  "AWS",
+  "DEEPSEEK",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -80,21 +88,24 @@ export const providers: {
   pattern: RegExp;
   provider: ProviderName;
   costs?: ModelRow[];
+  modelDetails?: ModelDetailsMap;
 }[] = [
   {
     pattern: openAiPattern,
     provider: "OPENAI",
-    costs: [...openaiCosts, ...fineTunedOpenAICosts],
+    costs: [...openAIProvider.costs, ...fineTunedOpenAICosts],
+    modelDetails: openAIProvider.modelDetails,
   },
   {
     pattern: anthropicPattern,
     provider: "ANTHROPIC",
-    costs: anthropicCosts,
+    costs: anthropicProvider.costs,
+    modelDetails: anthropicProvider.modelDetails,
   },
   {
     pattern: azurePattern,
     provider: "AZURE",
-    costs: [...azureCosts, ...openaiCosts],
+    costs: [...azureCosts, ...openAIProvider.costs],
   },
   {
     pattern: localProxyPattern,
@@ -185,6 +196,16 @@ export const providers: {
     pattern: firecrawl,
     provider: "FIRECRAWL",
   },
+  {
+    pattern: awsBedrock,
+    provider: "AWS",
+    costs: awsBedrockCosts,
+  },
+  {
+    pattern: deepseek,
+    provider: "DEEPSEEK",
+    costs: deepseekCosts,
+  },
 ];
 
 export const playgroundModels: {
@@ -216,3 +237,10 @@ export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 export const approvedDomains = providers.map((provider) => provider.pattern);
 
 export const modelNames = allCosts.map((cost) => cost.model.value);
+
+export const parentModelNames = providers.reduce((acc, provider) => {
+  if (provider.modelDetails) {
+    acc[provider.provider] = Object.keys(provider.modelDetails);
+  }
+  return acc;
+}, {} as Record<ProviderName, string[]>);

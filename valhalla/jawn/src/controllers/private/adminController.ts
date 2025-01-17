@@ -12,12 +12,13 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { supabaseServer } from "../../lib/db/supabase";
-import { Setting, SettingName } from "../../utils/settings";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { supabaseServer } from "../../lib/db/supabase";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { Setting, SettingName } from "../../utils/settings";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -42,6 +43,179 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Get("governance-orgs/keys")
+  public async getGovernanceOrgKeys(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    return await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys")
+      .single();
+  }
+
+  @Post("/governance-orgs/keys")
+  public async createGovernanceOrgKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      name: string;
+      value: string;
+    }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    let keys: { name: string; value: string }[] = [];
+    const keysData = await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys");
+
+    if (keysData.error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    if (keysData.data?.[0]) {
+      keys = (keysData.data[0].settings as any).keys.filter(
+        (key: { name: string }) => key.name !== body.name
+      );
+    }
+
+    keys.push({
+      name: body.name,
+      value: body.value,
+    });
+
+    let seen = new Set();
+    keys = keys.filter((key) => {
+      if (seen.has(key.name)) {
+        return false;
+      }
+      seen.add(key.name);
+      return true;
+    });
+
+    const { data, error } = await supabaseServer.client
+      .from("helicone_settings")
+      .update({
+        settings: {
+          keys,
+        },
+      })
+      .eq("name", "governance_keys");
+
+    if (error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    return data;
+  }
+
+  @Delete("/governance-orgs/keys")
+  public async deleteGovernanceOrgKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { name: string }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const keysData = await supabaseServer.client
+      .from("helicone_settings")
+      .select("*")
+      .eq("name", "governance_keys");
+
+    if (keysData.error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    const keys = keysData.data?.[0];
+
+    const newKeys = (keys?.settings as any).keys.filter(
+      (key: { name: string }) => key.name !== body.name
+    );
+
+    const { data, error } = await supabaseServer.client
+      .from("helicone_settings")
+      .upsert({
+        name: "governance_keys",
+        settings: {
+          keys: newKeys,
+        },
+      });
+
+    if (error) {
+      this.setStatus(404);
+      throw new Error("Keys not found");
+    }
+
+    return data;
+  }
+
+  @Post("/governance-orgs/{orgId}")
+  public async governanceOrgs(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body()
+    body: {
+      limitUSD: number | null;
+      days: number | null;
+    }
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const org = await supabaseServer.client
+      .from("organization")
+      .update({
+        governance_settings: {
+          limitUSD: body.limitUSD,
+          days: body.days,
+        },
+      })
+      .eq("id", orgId);
+
+    if (org.error) {
+      this.setStatus(404);
+      throw new Error("Organization not found");
+    }
+
+    return org.data;
+  }
+
+  @Delete("/governance-orgs/{orgId}")
+  public async deleteGovernanceOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    const org = await supabaseServer.client
+      .from("organization")
+      .update({
+        governance_settings: null,
+      })
+      .eq("id", orgId);
+
+    if (org.error) {
+      this.setStatus(404);
+      throw new Error("Organization not found");
+    }
+
+    return org.data;
+  }
+
+  @Get("/governance-orgs")
+  @Tags("Governance Orgs")
+  @Security("api_key")
+  public async getGovernanceOrgs(@Request() request: JawnAuthenticatedRequest) {
+    await authCheckThrow(request.authParams.userId);
+
+    return await getGovernanceOrgs();
+  }
+
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
@@ -829,6 +1003,7 @@ export class AdminController extends Controller {
         | "7 days"
         | "1 month"
         | "3 months"
+        | "6 months"
         | "12 months"
         | "24 months";
       groupBy: "hour" | "day" | "week" | "month";

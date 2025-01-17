@@ -53,11 +53,15 @@ npm install -g yarn
 supabase start
 ```
 
-### Start Clickhouse
+### Start Clickhouse + Minio
 
 ```bash
+python3 -m venv env
+source env/bin/activate
+pip install tabulate requests minio
 # This will start clickhouse locally
-python3 clickhouse/ch_hcone.py --start
+python3 clickhouse/ch_hcone.py --restart
+python3 minio_hcone.py --restart
 ```
 
 ### Start Workers
@@ -69,24 +73,29 @@ yarn
 ```
 
 ```bash
-# Start All Workers
-chmod +x run_all_workers.sh
-./run_all_workers
+# Start OpenAI Proxy Worker
+npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 --test-scheduled
 ```
 
 ### Start Jawn (Serves Web)
 
+I a new terminal tab, run the following:
+
 ```bash
 cd valhalla/jawn
+cp .env.example .env
 yarn && yarn dev
 ```
 
 ### Start Web
 
+I a new terminal tab, run the following:
+
 ```bash
+cp .env.example web/.env
 cd web
 yarn
-yarn dev
+yarn dev:local -p 3000
 ```
 
 ## Step 3 - Setup your instance
@@ -94,15 +103,17 @@ yarn dev
 You are done!
 
 ```bash
+export OPENAI_API_KEY="sk-"
+export HELICONE_API_KEY="sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 curl --request POST \
-  --url http://127.0.0.1:8787/v1/chat/completions \
-  --header 'Authorization: Bearer <OPENAI_KEY>' \
-  --header 'Helicone-Auth: Bearer sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa' \
+  --url http://localhost:8787/v1/chat/completions \
+  --header "Authorization: Bearer $OPENAI_API_KEY" \
+  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
   --header 'Content-Type: application/json' \
-  --header 'OpenAI-Organization: ' \
+  --header 'Accept-Encoding: identity' \
   --header 'helicone-property-hello: world' \
   --data '{
-    "model": "gpt-3.5-turbo-0613",
+    "model": "gpt-4o-mini",
     "messages": [
         {
             "role": "system",

@@ -1,45 +1,84 @@
 import { useMemo, useState } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
-import HcButton from "../../../ui/hcButton";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
 
 interface ExperimentInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-
-  requestIds?: {
-    id: string;
-    inputs: {
-      [key: string]: string;
-    };
-    source_request: string;
-    prompt_version: string;
-    created_at: string;
-  }[];
+  promptVersionId: string | undefined;
   onSuccess?: (success: boolean) => void;
-  meta?: {
-    promptVersionId?: string;
-    datasetId?: string;
-  };
+  handleAddRows: (
+    rows: {
+      inputRecordId: string;
+      inputs: Record<string, string>;
+      autoInputs: any[];
+    }[]
+  ) => void;
 }
 
 export const ExperimentRandomInputSelector = (
   props: ExperimentInputSelectorProps
 ) => {
-  const { open, setOpen, requestIds, onSuccess } = props;
+  const { open, setOpen, promptVersionId, onSuccess } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
-  const [numberInput, setNumberInput] = useState(10); // New state for number input
+  const [numberInput, setNumberInput] = useState(10); // Default to 10 inputs
 
-  // TODO We should use a hook to fetch the requests from the API
-  const shuffledRequests = useMemo(
-    () =>
-      requestIds?.sort(() => Math.random() - 0.5).slice(0, numberInput) ?? [],
-    [requestIds, numberInput]
+  // Fetch random input records using useQuery
+  const {
+    data: randomInputRecordsData,
+    isLoading,
+    isError,
+  } = useQuery(
+    ["randomInputRecords", promptVersionId],
+    async () => {
+      const res = await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId: promptVersionId ?? "",
+            },
+          },
+          body: {
+            limit: 100,
+            random: true,
+          },
+        }
+      );
+      return res.data?.data ?? [];
+    },
+    {
+      enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
+    }
   );
+
+  // Process and select the desired number of random inputs
+  const selectedRandomInputs = useMemo(() => {
+    if (!randomInputRecordsData) return [];
+
+    // Shuffle the records
+    const shuffled = [...randomInputRecordsData].sort(
+      () => Math.random() - 0.5
+    );
+
+    // Select the number of inputs specified by numberInput
+    return shuffled.slice(0, numberInput).map((row) => ({
+      id: row.id,
+      inputs: row.inputs,
+      source_request: row.source_request,
+      prompt_version: row.prompt_version,
+      created_at: row.created_at,
+      response: row.response_body,
+      autoInputs: row.auto_prompt_inputs,
+    }));
+  }, [randomInputRecordsData, numberInput]);
 
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
@@ -47,7 +86,7 @@ export const ExperimentRandomInputSelector = (
         <div className="flex flex-col w-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-xl">
-              Randomized Inputs ({requestIds?.length})
+              Randomized Inputs ({selectedRandomInputs.length})
             </h2>
           </div>
           <p className="text-gray-500 text-sm pb-4">
@@ -55,74 +94,74 @@ export const ExperimentRandomInputSelector = (
           </p>
 
           <div className="flex items-center mb-4">
-            <button
-              onClick={() => setNumberInput((prev) => Math.max(prev - 1, 0))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setNumberInput((prev) => Math.max(prev - 1, 1))}
               className="border p-2 mr-2"
             >
               -
-            </button>
-            <input
+            </Button>
+            <Input
               type="number"
               value={numberInput}
               onChange={(e) => {
                 const value = e.target.value.replace(/^0+/, ""); // Remove leading zeros
-                setNumberInput(Number(value));
+                setNumberInput(Number(value) || 1);
               }}
-              className="border p-2 mr-2 w-10"
+              className="border p-2 mr-2 w-10 h-full"
             />
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setNumberInput((prev) => prev + 1)}
               className="border p-2 mr-2"
             >
               +
-            </button>
-            <span>Random Inputs</span>
+            </Button>
+            <span className="text-sm text-slate-700 dark:text-slate-300">
+              Random Inputs
+            </span>
           </div>
 
           <ul className="flex flex-col items-center space-y-4 w-full pt-4 overflow-y-auto">
-            {shuffledRequests.map((request) => (
-              <li key={request.id} className="w-full flex items-start">
-                <PromptPropertyCard
-                  autoInputs={request.inputs}
-                  isSelected={true}
-                  requestId={request.source_request}
-                  createdAt={request.created_at}
-                  properties={request.inputs}
-                />
-              </li>
-            ))}
+            {isLoading && <div>Loading inputs...</div>}
+            {isError && <div>Error loading inputs.</div>}
+            {!isLoading &&
+              !isError &&
+              selectedRandomInputs.map((request) => (
+                <li key={request.id} className="w-full flex items-start">
+                  <PromptPropertyCard
+                    autoInputs={request.autoInputs}
+                    isSelected={true}
+                    requestId={request.source_request}
+                    createdAt={request.created_at}
+                    properties={request.inputs}
+                  />
+                </li>
+              ))}
           </ul>
         </div>
 
-        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white pb-20">
-          <HcButton
+        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white dark:bg-black pb-20">
+          <Button
             variant={"secondary"}
             size={"sm"}
-            title={"Cancel"}
             onClick={() => setOpen(false)}
-          />
+          >
+            Cancel
+          </Button>
 
-          <HcButton
-            variant={"primary"}
+          <Button
+            variant={"default"}
             size={"sm"}
-            title={"Confirm"}
             onClick={async () => {
-              await Promise.all(
-                shuffledRequests.map((request) => {
-                  return jawn.POST(
-                    "/v1/experiment/dataset/{datasetId}/row/insert",
-                    {
-                      body: {
-                        inputRecordId: request.id,
-                      },
-                      params: {
-                        path: {
-                          datasetId: props.meta?.datasetId ?? "",
-                        },
-                      },
-                    }
-                  );
-                })
+              await props.handleAddRows(
+                selectedRandomInputs.map((request) => ({
+                  inputRecordId: request.id,
+                  inputs: request.inputs,
+                  autoInputs: request.autoInputs,
+                }))
               );
 
               if (onSuccess) {
@@ -132,7 +171,9 @@ export const ExperimentRandomInputSelector = (
                 setOpen(false);
               }
             }}
-          />
+          >
+            Confirm
+          </Button>
         </div>
       </div>
     </ThemedDrawer>

@@ -7,6 +7,7 @@ import { Database } from "../db/database.types";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { sanitizeObject } from "../../utils/sanitize";
+import { mapScores } from "../../managers/score/ScoreManager";
 
 const pgp = pgPromise();
 const db = pgp({
@@ -166,6 +167,18 @@ export class LogStore {
           }
         }
 
+        if (payload.scores && payload.scores.length > 0) {
+          for (const score of payload.scores) {
+            await this.processScore({
+              score: score.scores,
+              requestId: score.requestId,
+              organizationId: score.organizationId,
+              evaluatorIds: score.evaluatorIds,
+              t,
+            });
+          }
+        }
+
         try {
           const searchRecords = this.filterDuplicateSearchRecords(
             payload.searchRecords
@@ -203,6 +216,7 @@ export class LogStore {
     newPromptRecord: PromptRecord,
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
+    const INVALID_TEMPLATE_ERROR = "Invalid template";
     const { promptId, orgId, requestId, heliconeTemplate, model } =
       newPromptRecord;
 
@@ -212,7 +226,7 @@ export class LogStore {
 
     if (typeof heliconeTemplate.template === "string") {
       heliconeTemplate.template = {
-        error: "Invalid template",
+        error: INVALID_TEMPLATE_ERROR,
         template: heliconeTemplate.template,
       };
     }
@@ -313,7 +327,13 @@ export class LogStore {
         console.error("Error updating and inserting prompt version", error);
         throw error;
       }
-    } else if (shouldBump.shouldUpdateNotBump) {
+    } else if (
+      shouldBump.shouldUpdateNotBump &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
+      )
+    ) {
       try {
         const updateQuery = `
         UPDATE prompts_versions
@@ -370,6 +390,61 @@ export class LogStore {
     }
 
     return ok("Prompt processed successfully");
+  }
+
+  async processScore({
+    score,
+    requestId,
+    t,
+    organizationId,
+    evaluatorIds,
+  }: {
+    score: Record<string, number | boolean | undefined>;
+    requestId: string;
+    t: pgPromise.ITask<{}>;
+    organizationId: string;
+    evaluatorIds: Record<string, string>;
+  }) {
+    const mappedScores = mapScores(score);
+
+    // Convert arrays for the upsert
+    const scoreKeys = mappedScores.map((s) => s.score_attribute_key);
+    const scoreTypes = mappedScores.map((s) => s.score_attribute_type);
+    const scoreValues = mappedScores.map((s) => s.score_attribute_value);
+    const organizationIds = Array(scoreKeys.length).fill(organizationId);
+    const scoreEvaluatorIds = mappedScores.map((s) => {
+      return evaluatorIds[s.score_attribute_key] || null;
+    });
+    // First upsert the score attributes and get their IDs
+    const upsertedAttributes = await t.many(
+      `
+      WITH upserted_attributes AS (
+        INSERT INTO score_attribute (score_key, value_type, organization, evaluator_id)
+        SELECT unnest($1::text[]), unnest($2::text[]), unnest($3::uuid[]), unnest($4::uuid[])
+        ON CONFLICT (score_key, organization) DO UPDATE SET
+          score_key = EXCLUDED.score_key,
+          value_type = EXCLUDED.value_type,
+          evaluator_id = EXCLUDED.evaluator_id
+        RETURNING id, score_key
+      )
+      SELECT id, score_key
+      FROM upserted_attributes
+    `,
+      [scoreKeys, scoreTypes, organizationIds, scoreEvaluatorIds]
+    );
+
+    // Then insert the score values
+    const attributeIds = upsertedAttributes.map((attr) => attr.id);
+    await t.none(
+      `
+      INSERT INTO score_value (score_attribute, request_id, int_value)
+      SELECT unnest($1::uuid[]), $2, unnest($3::bigint[])
+      ON CONFLICT (score_attribute, request_id) DO NOTHING
+    `,
+      [attributeIds, requestId, scoreValues]
+    );
+
+    return ok("Scores processed successfully");
   }
 
   filterDuplicateRequests(

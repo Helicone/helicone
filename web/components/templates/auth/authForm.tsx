@@ -3,10 +3,22 @@ import { BsGoogle, BsGithub } from "react-icons/bs";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { CustomerPortalContent } from "../../../pages/signin";
 import { useRouter } from "next/router";
-import HcButton from "../../ui/hcButton";
-import { Select, SelectItem, TextInput } from "@tremor/react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+
+type CustomerPortalContent = {
+  domain: string;
+  logo: string;
+};
 
 interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
@@ -24,6 +36,8 @@ const AuthForm = (props: AuthFormProps) => {
     authFormType,
     customerPortalContent,
   } = props;
+
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const router = useRouter();
   useEffect(() => {
@@ -86,7 +100,7 @@ const AuthForm = (props: AuthFormProps) => {
   };
 
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative">
+    <div className="w-full bg-[#f8feff] h-full antialiased relative light">
       <div className="h-screen flex flex-1 flex-col sm:flex-row justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24 relative">
         <div className="flex flex-col w-full space-y-4 h-full justify-center items-center max-w-lg">
           <div className="w-full flex justify-between items-center">
@@ -144,23 +158,19 @@ const AuthForm = (props: AuthFormProps) => {
                       </span>
                     </label>
 
-                    <Select defaultValue={checkPath()}>
-                      <SelectItem
-                        value="us"
-                        onClick={() => {
-                          handleRouting("us");
-                        }}
-                      >
-                        🇺🇸 United States
-                      </SelectItem>
-                      <SelectItem
-                        value="eu"
-                        onClick={() => {
-                          handleRouting("eu");
-                        }}
-                      >
-                        🇪🇺 European Union
-                      </SelectItem>
+                    <Select
+                      defaultValue={checkPath()}
+                      onValueChange={(value) =>
+                        handleRouting(value as "us" | "eu")
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="us">🇺🇸 United States</SelectItem>
+                        <SelectItem value="eu">🇪🇺 European Union</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
 
@@ -173,15 +183,15 @@ const AuthForm = (props: AuthFormProps) => {
                         Email
                       </label>
                       <div className="mt-1">
-                        <TextInput
+                        <Input
                           id="email"
                           name="email"
                           type="email"
                           autoComplete="email"
                           required
-                          placeholder={"jane@acme.com"}
+                          placeholder="jane@acme.com"
                           value={email}
-                          onValueChange={setEmail}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
                     </div>
@@ -196,7 +206,7 @@ const AuthForm = (props: AuthFormProps) => {
                           Password
                         </label>
                         <div className="mt-1">
-                          <TextInput
+                          <Input
                             id="password"
                             name="password"
                             type="password"
@@ -204,8 +214,34 @@ const AuthForm = (props: AuthFormProps) => {
                             placeholder="***********"
                             required
                             value={password}
-                            onValueChange={setPassword}
+                            onChange={(e) => setPassword(e.target.value)}
                           />
+                        </div>
+                      </div>
+                    )}
+
+                    {authFormType === "signup" && (
+                      <div className="flex items-center justify-start gap-1">
+                        <Checkbox
+                          checked={acceptedTerms}
+                          onCheckedChange={(checked) =>
+                            setAcceptedTerms(checked as boolean)
+                          }
+                        />
+                        <div className="text-xs leading-6 flex items-center gap-1">
+                          <Link
+                            href={"/terms"}
+                            className="font-medium text-blue-500 hover:text-blue-400 focus:outline-none focus:underline transition ease-in-out duration-150"
+                          >
+                            Accept terms
+                          </Link>
+                          and{" "}
+                          <Link
+                            href={"/privacy"}
+                            className="font-medium text-blue-500 hover:text-blue-400 focus:outline-none focus:underline transition ease-in-out duration-150"
+                          >
+                            privacy policy
+                          </Link>
                         </div>
                       </div>
                     )}
@@ -224,22 +260,23 @@ const AuthForm = (props: AuthFormProps) => {
                   </div>
 
                   <div className="pt-2 w-full flex">
-                    <HcButton
-                      variant={"primary"}
+                    <Button
                       size={"sm"}
-                      loading={isLoading}
-                      title={
-                        authFormType === "signin"
-                          ? "Sign in with email"
-                          : authFormType === "signup"
-                          ? "Sign up with email"
-                          : authFormType === "reset"
-                          ? "Reset password"
-                          : "Update password"
+                      disabled={
+                        isLoading ||
+                        (authFormType === "signup" && !acceptedTerms)
                       }
                       type="submit"
                       className="w-full flex"
-                    />
+                    >
+                      {authFormType === "signin"
+                        ? "Sign in with email"
+                        : authFormType === "signup"
+                        ? "Sign up with email"
+                        : authFormType === "reset"
+                        ? "Reset password"
+                        : "Update password"}
+                    </Button>
                   </div>
                 </form>
               </div>

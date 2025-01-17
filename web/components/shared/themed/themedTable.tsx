@@ -6,13 +6,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { clsx } from "../clsx";
 import { useState } from "react";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import useNotification from "../notification/useNotification";
 import {
   useGetOrgMembers,
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 
 export interface ThemedTableProps {
@@ -95,7 +95,7 @@ export const SecretInput = (props: {
           </button>
           <div className="flex w-full min-w-[15rem]">
             {show ? (
-              <Tooltip title="Click to Copy" placement="top" arrow>
+              <Tooltip title="Click to Copy" placement="top">
                 <button
                   id="secret-key"
                   onClick={(e) => {

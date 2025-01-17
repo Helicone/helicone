@@ -1,5 +1,5 @@
 import { Col } from "@/components/layout/common";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -117,9 +117,6 @@ export const FreePlanCard = () => {
             >
               Upgrade to Pro
             </Button>
-            <span className="text-slate-500 text-[12px]">
-              14 days free trial
-            </span>
           </Col>
           <div>
             <button

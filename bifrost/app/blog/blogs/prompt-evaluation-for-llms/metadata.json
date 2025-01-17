@@ -1,0 +1,10 @@
+{
+  "title": "Prompt Evaluation Explained: Random Sampling vs. Golden Datasets",
+  "title1": "Prompt Evaluation Explained: Random Sampling vs. Golden Datasets",
+  "title2": "Prompt Evaluation Explained: Random Sampling vs. Golden Datasets",
+  "description": "Crafting high-quality prompts and evaluating them requires both high-quality input variables and clearly defined tasks. In a recent webinar, Nishant Shukla, the senior director of AI at QA Wolf, and Justin Torre, the CEO of Helicone, shared their insights on how they tackled this challenge.",
+  "images": "/static/blog/prompt-evaluation-for-llms/cover.webp",
+  "time": "6 minute read",
+  "author": "Lina Lam",
+  "date": "November 12, 2024"
+}

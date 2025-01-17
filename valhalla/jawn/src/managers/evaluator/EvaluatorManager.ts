@@ -4,19 +4,44 @@ import {
   UpdateEvaluatorParams,
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
-import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import {
-  Experiment,
-  ExperimentDatasetRow,
-} from "../../lib/stores/experimentStore";
+  ExperimentOutputForScores,
+  ExperimentV2Manager,
+} from "../../managers/experiment/ExperimentV2Manager";
 import { BaseManager } from "../BaseManager";
-import { ExperimentManager } from "../experiment/ExperimentManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { pythonEvaluator } from "./pythonEvaluator";
 
-function getEvaluatorScoreName(evaluatorName: string) {
+export function placeAssetIdValues(
+  inputValues: Record<string, string>,
+  heliconeTemplate: any
+): any {
+  function traverseAndTransform(obj: any): any {
+    if (typeof obj === "string") {
+      // Adjusted regex for <helicone-asset-id> pattern
+      const regex = /<helicone-asset-id key="([^"]+)"\s*\/>/g;
+      return obj.replace(regex, (match, key) => {
+        // Use the key extracted from <helicone-asset-id> to fetch the replacement value
+        return inputValues[key] ?? match; // Replace with value from inputValues or keep the match if not found
+      });
+    } else if (Array.isArray(obj)) {
+      return obj.map(traverseAndTransform);
+    } else if (typeof obj === "object" && obj !== null) {
+      const result: { [key: string]: any } = {};
+      for (const key of Object.keys(obj)) {
+        result[key] = traverseAndTransform(obj[key]);
+      }
+      return result;
+    }
+    return obj; // Return the object if it doesn't match any of the above conditions
+  }
+  return traverseAndTransform(heliconeTemplate);
+}
+
+export function getEvaluatorScoreName(evaluatorName: string) {
   return evaluatorName
     .toLowerCase()
     .replace(" ", "_")
@@ -24,16 +49,35 @@ function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  testPythonEvaluator({
+    code,
+    requestBodyString,
+    responseString,
+  }: {
+    code: string;
+    requestBodyString: string;
+    responseString: string;
+  }) {
+    return pythonEvaluator({
+      code,
+      requestBodyString,
+      responseString,
+      orgId: this.authParams.organizationId,
+      uniqueId: "0",
+    });
+  }
   async getExperiments(evaluatorId: string) {
     const result = await dbExecute<{
       experiment_id: string;
       experiment_created_at: string;
+      experiment_name: string;
     }>(
       `SELECT
       experiment.id as experiment_id,
-      experiment.created_at as experiment_created_at
-      FROM evaluator_experiments
-      left join experiment_v2 as experiment on evaluator_experiments.experiment = experiment.id
+      experiment.created_at as experiment_created_at,
+      experiment.name as experiment_name
+      FROM evaluator_experiments_v3
+      left join experiment_v3 as experiment on evaluator_experiments_v3.experiment = experiment.id
       WHERE evaluator = $1
       AND experiment.organization = $2
       `,
@@ -41,45 +85,181 @@ export class EvaluatorManager extends BaseManager {
     );
     return result;
   }
-  private async runLLMEvaluator({
-    scoringType,
+
+  async runLLMEvaluatorScore({
+    evaluator,
+    inputRecord,
+    request_id,
+    requestBody,
+    responseBody,
+  }: {
+    evaluator: EvaluatorResult;
+    inputRecord: {
+      inputs: Record<string, string>;
+      autoInputs?: Record<string, string>;
+    };
+    request_id: string;
+    requestBody: string;
+    responseBody: string;
+  }): Promise<Result<{ score: number | boolean }, string>> {
+    if (evaluator.llm_template) {
+      const llmAsAJudge = new LLMAsAJudge({
+        scoringType: evaluator.scoring_type as
+          | "LLM-CHOICE"
+          | "LLM-BOOLEAN"
+          | "LLM-RANGE",
+        llmTemplate: evaluator.llm_template,
+        inputRecord,
+        outputBody: responseBody,
+        inputBody: requestBody,
+        promptTemplate: evaluator.llm_template.promptTemplate,
+        evaluatorName: evaluator.name,
+        organizationId: this.authParams.organizationId,
+      });
+      const result = await llmAsAJudge.evaluate();
+      if (result.error) {
+        return err(result.error);
+      }
+      return ok({ score: result.data!.score });
+    } else if (evaluator.code_template) {
+      const codeResult = await pythonEvaluator({
+        code: evaluator.code_template,
+        requestBodyString: requestBody,
+        responseString: responseBody,
+        uniqueId: request_id,
+        orgId: this.authParams.organizationId,
+      });
+      if (codeResult.error) {
+        return err(codeResult.error);
+      }
+      if (codeResult.data?.output == undefined) {
+        return err("Score is undefined");
+      }
+      if (codeResult.data?.output.toLowerCase() === "true") {
+        return ok({ score: true });
+      } else if (codeResult.data?.output.toLowerCase() === "false") {
+        return ok({ score: false });
+      } else {
+        return ok({ score: +codeResult.data?.output });
+      }
+    } else {
+      return err("Evaluator type not supported");
+    }
+  }
+
+  private async getContent(requestId: string): Promise<
+    Result<
+      {
+        requestBody: string;
+        responseBody: string;
+      },
+      string
+    >
+  > {
+    const reqManager = new RequestManager(this.authParams);
+    const request = await reqManager.uncachedGetRequestByIdWithBody(requestId);
+
+    if (request.error) {
+      return err(request.error);
+    }
+
+    if (!request.data?.signed_body_url) {
+      return err("Request response not found");
+    }
+
+    if (
+      request.data.asset_urls &&
+      Object.keys(request.data.asset_urls).length > 0
+    ) {
+      request.data.request_body = placeAssetIdValues(
+        request.data.asset_urls,
+        request.data.request_body
+      );
+    }
+    return ok({
+      requestBody: request.data.request_body,
+      responseBody: request.data.response_body,
+    });
+  }
+
+  private async runEvaluatorAndPostScore({
     evaluator,
     inputRecord,
     run,
+    requestBody,
+    responseBody,
   }: {
-    scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
     evaluator: EvaluatorResult;
-    inputRecord: ExperimentDatasetRow["inputRecord"];
-    run: Experiment["hypotheses"][number]["runs"][number];
+    inputRecord: {
+      inputs: Record<string, string>;
+      autoInputs?: Record<string, string>;
+    };
+    run: ExperimentOutputForScores;
+    requestBody: string;
+    responseBody: string;
   }): Promise<Result<null, string>> {
-    const llmAsAJudge = new LLMAsAJudge({
-      openAIApiKey: process.env.OPENAI_API_KEY!,
-      scoringType,
-      llmTemplate: evaluator.llm_template,
+    try {
+      const scoreResult = await this.runLLMEvaluatorScore({
+        evaluator,
+        inputRecord,
+        request_id: run.request_id,
+        requestBody,
+        responseBody,
+      });
+      if (scoreResult.error) {
+        return err(scoreResult.error);
+      }
+
+      const scoreName = getEvaluatorScoreName(evaluator.name);
+
+      const scoreManager = new ScoreManager(this.authParams);
+      if (
+        scoreResult.data?.score == undefined ||
+        scoreResult.data?.score == null
+      ) {
+        return err("Score is undefined");
+      }
+      const requestFeedback = await scoreManager.addScores(
+        run.request_id,
+        {
+          [scoreName]: scoreResult.data?.score,
+        },
+        0,
+        evaluator.id
+      );
+
+      return ok(null);
+    } catch (e) {
+      console.error("error evaluating", e);
+      return err("Error evaluating" + JSON.stringify(e));
+    }
+  }
+
+  async runEvaluator(
+    evaluator: EvaluatorResult,
+    inputRecord: {
+      inputs: Record<string, string>;
+      autoInputs?: Record<string, string>;
+    },
+    run: ExperimentOutputForScores
+  ) {
+    const content = await this.getContent(run.request_id);
+    if (content.error) {
+      return err(content.error);
+    }
+    return this.runEvaluatorAndPostScore({
+      evaluator,
       inputRecord,
-      output: JSON.stringify(run.response?.body),
-      evaluatorName: evaluator.name,
+      run,
+      requestBody: content.data?.requestBody ?? "",
+      responseBody: content.data?.responseBody ?? "",
     });
-    const result = await llmAsAJudge.evaluate();
-
-    const scoreName = getEvaluatorScoreName(evaluator.name);
-
-    const reqManager = new ScoreManager(this.authParams);
-    const requestFeedback = await reqManager.addScores(
-      run.resultRequestId,
-      {
-        [scoreName]: result.score,
-      },
-      0
-    );
-
-    return ok(null);
   }
 
   async runExperimentEvaluators(
     experimentId: string
   ): Promise<Result<null, string>> {
-    const experimentManager = new ExperimentManager(this.authParams);
+    const experimentManager = new ExperimentV2Manager(this.authParams);
     const experiment = await experimentManager.hasAccessToExperiment(
       experimentId
     );
@@ -89,54 +269,86 @@ export class EvaluatorManager extends BaseManager {
 
     const evaluators = await this.getEvaluatorsForExperiment(experimentId);
 
-    const experimentData = await experimentManager.getExperimentById(
-      experimentId,
-      {
-        responseBodies: true,
-        inputs: true,
-        score: true,
-      }
+    const experimentData = await experimentManager.getExperimentOutputForScores(
+      experimentId
     );
 
-    const x = await Promise.all(
-      experimentData.data?.hypotheses.map(async (hypothesis) => {
-        return await Promise.all(
-          hypothesis.runs.map(async (run) => {
-            for (const evaluator of evaluators.data ?? []) {
-              const scoreName = getEvaluatorScoreName(evaluator.name);
-              if (!(run.scores && scoreName in run.scores)) {
-                if (evaluator.scoring_type.startsWith("LLM")) {
-                  const datasetRow = experimentData.data?.dataset?.rows.find(
-                    (row) => row.rowId === run.datasetRowId
-                  );
+    if (experimentData.error) {
+      return err(experimentData.error);
+    }
 
-                  if (datasetRow) {
-                    const evaluatorResult = await this.runLLMEvaluator({
-                      scoringType: evaluator.scoring_type as
-                        | "LLM-CHOICE"
-                        | "LLM-BOOLEAN"
-                        | "LLM-RANGE",
-                      evaluator: evaluator,
-                      inputRecord: datasetRow.inputRecord,
-                      run: run,
-                    });
-                  }
-                }
-              }
-            }
-          })
-        );
+    const x = await Promise.all(
+      experimentData.data?.map(async (request) => {
+        const content = await this.getContent(request.request_id);
+        if (content.error) {
+          return err(content.error);
+        }
+        const evaluationPromises: Promise<Result<null, string>>[] = [];
+        for (const evaluator of evaluators.data ?? []) {
+          const scoreName = getEvaluatorScoreName(evaluator.name);
+          if (!(request.scores && scoreName in request.scores)) {
+            evaluationPromises.push(
+              this.runEvaluatorAndPostScore({
+                evaluator,
+                inputRecord: request.input_record,
+                run: request,
+                requestBody: content.data?.requestBody ?? "",
+                responseBody: content.data?.responseBody ?? "",
+              })
+            );
+          }
+        }
+        return Promise.all(evaluationPromises);
       }) ?? []
     );
 
     return ok(null);
   }
 
+  async shouldRunEvaluators(
+    experimentId: string
+  ): Promise<Result<boolean, string>> {
+    const experimentManager = new ExperimentV2Manager(this.authParams);
+    const experiment = await experimentManager.hasAccessToExperiment(
+      experimentId
+    );
+    if (!experiment) {
+      return err("Unauthorized");
+    }
+
+    const evaluators = await this.getEvaluatorsForExperiment(experimentId);
+
+    const experimentData = await experimentManager.getExperimentOutputForScores(
+      experimentId
+    );
+
+    if (experimentData.error) {
+      return err(experimentData.error);
+    }
+
+    if (experimentData.data?.length === 0) {
+      return ok(false);
+    }
+
+    let shouldRun = false;
+    for (const request of experimentData.data ?? []) {
+      for (const evaluator of evaluators.data ?? []) {
+        const scoreName =
+          getEvaluatorScoreName(evaluator.name) +
+          (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
+        if (!(request.scores && scoreName in request.scores)) {
+          shouldRun = true;
+        }
+      }
+    }
+    return ok(shouldRun);
+  }
+
   async deleteExperimentEvaluator(
     experimentId: string,
     evaluatorId: string
   ): Promise<Result<null, string>> {
-    const experimentManager = new ExperimentManager(this.authParams);
+    const experimentManager = new ExperimentV2Manager(this.authParams);
     const experiment = await experimentManager.hasAccessToExperiment(
       experimentId
     );
@@ -144,7 +356,7 @@ export class EvaluatorManager extends BaseManager {
       return err("Unauthorized");
     }
     const result = await dbExecute(
-      `DELETE FROM evaluator_experiments WHERE experiment = $1 AND evaluator = $2`,
+      `DELETE FROM evaluator_experiments_v3 WHERE experiment = $1 AND evaluator = $2`,
       [experimentId, evaluatorId]
     );
     if (result.error) {
@@ -155,7 +367,7 @@ export class EvaluatorManager extends BaseManager {
   async getEvaluatorsForExperiment(
     experimentId: string
   ): Promise<Result<EvaluatorResult[], string>> {
-    const experimentManager = new ExperimentManager(this.authParams);
+    const experimentManager = new ExperimentV2Manager(this.authParams);
     const experiment = await experimentManager.hasAccessToExperiment(
       experimentId
     );
@@ -172,10 +384,11 @@ export class EvaluatorManager extends BaseManager {
         evaluator.llm_template,
         evaluator.organization_id,
         evaluator.updated_at,
-        evaluator.name
-      FROM evaluator_experiments 
-      left join evaluator on evaluator_experiments.evaluator = evaluator.id
-      WHERE evaluator_experiments.experiment = $1
+        evaluator.name,
+        evaluator.code_template
+      FROM evaluator_experiments_v3
+      left join evaluator on evaluator_experiments_v3.evaluator = evaluator.id
+      WHERE evaluator_experiments_v3.experiment = $1
       `,
       [experimentId]
     );
@@ -187,7 +400,7 @@ export class EvaluatorManager extends BaseManager {
     experimentId: string,
     evaluatorId: string
   ): Promise<Result<null, string>> {
-    const experimentManager = new ExperimentManager(this.authParams);
+    const experimentManager = new ExperimentV2Manager(this.authParams);
     const experiment = await experimentManager.hasAccessToExperiment(
       experimentId
     );
@@ -196,7 +409,7 @@ export class EvaluatorManager extends BaseManager {
     }
     const result = await dbExecute<null>(
       `
-      INSERT INTO evaluator_experiments (experiment, evaluator)
+      INSERT INTO evaluator_experiments_v3 (experiment, evaluator)
       VALUES ($1, $2)
       `,
       [experimentId, evaluatorId]
@@ -211,10 +424,27 @@ export class EvaluatorManager extends BaseManager {
   async createEvaluator(
     params: CreateEvaluatorParams
   ): Promise<Result<EvaluatorResult, string>> {
+    const scoreName = getEvaluatorScoreName(params.name);
+    const scoreAttributes = await dbExecute<{
+      id: string;
+      score_key: string;
+    }>(
+      `
+      SELECT id, score_key
+      FROM score_attributes
+      WHERE score_key = $1 AND organization_id = $2
+      `,
+      [scoreName, this.authParams.organizationId]
+    );
+
+    if (scoreAttributes.data?.length && scoreAttributes.data.length > 0) {
+      return err("Score attribute by this name already exists");
+    }
+
     const result = await dbExecute<EvaluatorResult>(
       `
-      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name
       `,
       [
@@ -222,6 +452,7 @@ export class EvaluatorManager extends BaseManager {
         params.llm_template,
         this.authParams.organizationId,
         params.name,
+        params.code_template,
       ]
     );
 
@@ -246,7 +477,7 @@ export class EvaluatorManager extends BaseManager {
   async queryEvaluators(): Promise<Result<EvaluatorResult[], string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template
       FROM evaluator
       WHERE organization_id = $1
       ORDER BY created_at DESC
@@ -275,6 +506,11 @@ export class EvaluatorManager extends BaseManager {
       updateValues.push(params.llm_template);
     }
 
+    if (params.code_template !== undefined) {
+      updateFields.push(`code_template = $${paramIndex++}`);
+      updateValues.push(params.code_template);
+    }
+
     if (updateFields.length === 0) {
       return err("No fields to update");
     }
@@ -295,7 +531,7 @@ export class EvaluatorManager extends BaseManager {
   async deleteEvaluator(evaluatorId: string): Promise<Result<null, string>> {
     const deleteExperimentEvaluator = await dbExecute(
       `
-      DELETE FROM evaluator_experiments
+      DELETE FROM evaluator_experiments_v3
       WHERE evaluator = $1
       `,
       [evaluatorId]
@@ -308,7 +544,7 @@ export class EvaluatorManager extends BaseManager {
 
     const result = await dbExecute(
       `
-      DELETE FROM evaluator
+      DELETE FROM evaluator_v3
       WHERE id = $1 AND organization_id = $2
       `,
       [evaluatorId, this.authParams.organizationId]

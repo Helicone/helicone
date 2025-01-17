@@ -1,11 +1,5 @@
-import {
-  AreaChart,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from "@tremor/react";
+import { AreaChart } from "@tremor/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { formatNumber } from "../initialColumns";
@@ -137,12 +131,12 @@ const UserIdPage = (props: UserIdPageProps) => {
               </div>
             </div>
             <div className="flex flex-col w-full h-full col-span-12 md:col-span-7">
-              <TabGroup defaultIndex={defaultIndex}>
-                <TabList className="font-semibold" variant="line">
+              <Tabs defaultValue={defaultIndex.toString()} className="w-full">
+                <TabsList>
                   {tabs.map((tab) => (
-                    <Tab
+                    <TabsTrigger
                       key={tab.id}
-                      icon={tab.icon}
+                      value={tab.id.toString()}
                       onClick={() => {
                         const { id, page, t } = router.query;
                         router.replace(
@@ -154,70 +148,70 @@ const UserIdPage = (props: UserIdPageProps) => {
                           { shallow: true }
                         );
                       }}
+                      className="flex items-center gap-2"
                     >
+                      <tab.icon className="h-4 w-4" />
                       {tab.title}
-                    </Tab>
+                    </TabsTrigger>
                   ))}
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <div className="py-4 flex flex-col space-y-4">
-                      <StyledAreaChart
-                        title={"Requests last 30 days"}
-                        value={undefined}
-                        isDataOverTimeLoading={isLoading}
-                        height={"200px"}
-                      >
-                        <AreaChart
-                          data={requestOverTime}
-                          categories={["requests"]}
-                          index={"date"}
-                          className="h-56"
-                          colors={["blue"]}
-                          showLegend={false}
-                          curveType="monotone"
-                        />
-                      </StyledAreaChart>
-                      <StyledAreaChart
-                        title={"Costs in the last 30 days"}
-                        value={undefined}
-                        isDataOverTimeLoading={isLoading}
-                        height={"200px"}
-                      >
-                        <AreaChart
-                          data={costOverTime}
-                          categories={["cost"]}
-                          index={"date"}
-                          className="h-56"
-                          colors={["green"]}
-                          showLegend={false}
-                          valueFormatter={(value) => {
-                            return `$${formatNumber(value, 6)}`;
-                          }}
-                          curveType="monotone"
-                        />
-                      </StyledAreaChart>
-                    </div>
-                  </TabPanel>
-                  <TabPanel>
-                    <div className="py-2">
-                      <RequestsPageV2
-                        currentPage={1}
-                        pageSize={25}
-                        sort={{
-                          sortKey: null,
-                          sortDirection: null,
-                          isCustomProperty: false,
-                        }}
-                        userId={userId}
-                        currentFilter={null}
-                        organizationLayout={null}
-                        organizationLayoutAvailable={false}
+                </TabsList>
+                <TabsContent value="0">
+                  <div className="py-4 flex flex-col space-y-4">
+                    <StyledAreaChart
+                      title={"Requests last 30 days"}
+                      value={undefined}
+                      isDataOverTimeLoading={isLoading}
+                      height={"200px"}
+                    >
+                      <AreaChart
+                        data={requestOverTime}
+                        categories={["requests"]}
+                        index={"date"}
+                        className="h-56"
+                        colors={["blue"]}
+                        showLegend={false}
+                        curveType="monotone"
                       />
-                    </div>
-                  </TabPanel>
-                </TabPanels>
-              </TabGroup>
+                    </StyledAreaChart>
+                    <StyledAreaChart
+                      title={"Costs in the last 30 days"}
+                      value={undefined}
+                      isDataOverTimeLoading={isLoading}
+                      height={"200px"}
+                    >
+                      <AreaChart
+                        data={costOverTime}
+                        categories={["cost"]}
+                        index={"date"}
+                        className="h-56"
+                        colors={["green"]}
+                        showLegend={false}
+                        valueFormatter={(value) => {
+                          return `$${formatNumber(value, 6)}`;
+                        }}
+                        curveType="monotone"
+                      />
+                    </StyledAreaChart>
+                  </div>
+                </TabsContent>
+                <TabsContent value="1">
+                  <div className="py-2">
+                    <RequestsPageV2
+                      currentPage={1}
+                      pageSize={25}
+                      sort={{
+                        sortKey: null,
+                        sortDirection: null,
+                        isCustomProperty: false,
+                      }}
+                      userId={userId}
+                      currentFilter={null}
+                      organizationLayout={null}
+                      organizationLayoutAvailable={false}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         )}

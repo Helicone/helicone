@@ -11,14 +11,18 @@ import { formatSeconds } from "@/lib/sql/timeHelpers";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { BarChart, Card, Title } from "@tremor/react";
 import { useState } from "react";
-import { useSessionMetrics } from "../../../services/hooks/sessions";
+import {
+  useSessionMetrics,
+  useSessionNames,
+} from "../../../services/hooks/sessions";
 import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
-import { SessionResult } from "./sessionDetails";
+
 import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import { Responsive, WidthProvider } from "react-grid-layout";
+type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -167,8 +171,8 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
           <Chart
             title="Cost distribution"
             data={metrics.session_cost.map((sessionCost) => {
-              const start = Math.round(Number(sessionCost.range_start ?? 0));
-              const end = Math.round(Number(sessionCost.range_end ?? 0));
+              const start = Number(sessionCost.range_start ?? 0);
+              const end = Number(sessionCost.range_end ?? 0);
               return {
                 range:
                   start === end

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
@@ -45,12 +45,19 @@ const TreeView: React.FC<TreeViewProps> = ({
   const [expandSpan, setExpandSpan] = useState(false);
   const [collapseAll, setCollapseAll] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
+
+  const onBoardingRequestTrace = useMemo(
+    () =>
+      session.traces.find((t) => t.path === "/planning/extract-travel-plan"),
+    [session.traces]
+  );
+
   return (
     <>
       <Col className="h-full">
-        <Col className="gap-1 items-start sticky top-0 z-[100]">
+        <Col className="gap-1 items-start sticky top-0 z-[1]">
           {showSpan && (
-            <div className="bg-white w-full relative dark:bg-slate-900 border-slate-200 border-t">
+            <div className="bg-white w-full relative dark:bg-slate-950 border-slate-200 dark:border-slate-700 border-t">
               <TraceSpan
                 session={session}
                 selectedRequestIdDispatch={[
@@ -120,11 +127,13 @@ const TreeView: React.FC<TreeViewProps> = ({
                   ]}
                   collapseAll={collapseAll}
                   setShowDrawer={setShowDrawer}
+                  onBoardingRequestTrace={onBoardingRequestTrace}
+                  sessionId={session.session_id}
                 />
               </Col>
             </ScrollArea>
           </div>
-          <ScrollArea className="h-full w-fit bg-white">
+          <ScrollArea className="h-full w-fit bg-white dark:bg-black">
             <div className="flex flex-col gap-5 w-full">
               <div className="flex-grow [&_.border]:border-none">
                 {requestIdToShow &&

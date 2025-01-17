@@ -6,18 +6,11 @@ import { OrgLimits } from "../../../organization/createOrgForm";
 import { getUSDateFromString } from "../../../../shared/utils/utils";
 import { clsx } from "../../../../shared/clsx";
 import OrgMembersPage from "../../../organization/members/orgMembersPage";
-import {
-  AreaChart,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from "@tremor/react";
+import { AreaChart } from "@tremor/react";
 import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
-import { useOrg } from "../../../../layout/organizationContext";
+import { useOrg } from "../../../../layout/org/organizationContext";
 import { useRouter } from "next/router";
 import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "../editCustomerOrgModal";
@@ -29,6 +22,7 @@ import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "@/components/templates/organization/orgConstants";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -228,46 +222,44 @@ const PortalIdPage = (props: PortalIdPageProps) => {
               </div>
             </div>
             <div className="flex flex-col w-full h-full">
-              <TabGroup>
-                <TabList className="font-semibold" variant="line">
-                  <Tab>Usage</Tab>
-                  <Tab>Members</Tab>
-                  <Tab>Keys</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <div className="pt-4">
-                      <StyledAreaChart
-                        title={"Requests Over Time"}
-                        value={undefined}
-                        isDataOverTimeLoading={false}
-                        height="400px"
-                      >
-                        <AreaChart
-                          data={chartData}
-                          categories={["requests"]}
-                          index={"date"}
-                          colors={["emerald"]}
-                          className="h-full w-full pt-8"
-                          showLegend={false}
-                          curveType="monotone"
-                        />
-                      </StyledAreaChart>
-                    </div>
-                  </TabPanel>
-                  <TabPanel>
-                    {org && <OrgMembersPage org={org} wFull={true} />}
-                  </TabPanel>
-                  <TabPanel>
-                    <div className="pt-4">
-                      <ProviderKeyList
-                        orgProviderKey={org?.org_provider_key || ""}
-                        orgId={org?.id}
+              <Tabs defaultValue="usage" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="usage">Usage</TabsTrigger>
+                  <TabsTrigger value="members">Members</TabsTrigger>
+                  <TabsTrigger value="keys">Keys</TabsTrigger>
+                </TabsList>
+                <TabsContent value="usage">
+                  <div className="pt-4">
+                    <StyledAreaChart
+                      title={"Requests Over Time"}
+                      value={undefined}
+                      isDataOverTimeLoading={false}
+                      height="400px"
+                    >
+                      <AreaChart
+                        data={chartData}
+                        categories={["requests"]}
+                        index={"date"}
+                        colors={["emerald"]}
+                        className="h-full w-full pt-8"
+                        showLegend={false}
+                        curveType="monotone"
                       />
-                    </div>
-                  </TabPanel>
-                </TabPanels>
-              </TabGroup>
+                    </StyledAreaChart>
+                  </div>
+                </TabsContent>
+                <TabsContent value="members">
+                  {org && <OrgMembersPage org={org} wFull={true} />}
+                </TabsContent>
+                <TabsContent value="keys">
+                  <div className="pt-4">
+                    <ProviderKeyList
+                      orgProviderKey={org?.org_provider_key || ""}
+                      orgId={org?.id}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </>
         )}

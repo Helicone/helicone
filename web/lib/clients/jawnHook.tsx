@@ -1,4 +1,4 @@
-import { useOrg } from "../../components/layout/organizationContext";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "./jawn";
 
 export const useJawnClient = () => {

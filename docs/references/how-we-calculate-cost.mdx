@@ -27,7 +27,7 @@ We capture this data, and we estimate the cost based on the model returned in th
 
 ### OpenAI Streaming
 
-Unlike non-streaming requests, OpenAI streaming requests do not return the `usage` tag. Therefore, we rely on 3rd party tokenizers like [TikToken](https://github.com/openai/tiktoken) to count our tokens. The calculation becomes complex when handling Chat messages, as hidden tokens are abstracted away from the user. To accurately estimate the amount of prompt and completion tokens, we have reverse-engineered the hidden tokens.
+To calculate cost using OpenAI streaming please look at enabling the [stream usage flag docs](/faq/enable-stream-usage#incorrect-cost-calculation-while-streaming)
 
 ### Anthropic Requests
 

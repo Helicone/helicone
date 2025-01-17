@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 import {
   useGetOrgMembers,
@@ -18,9 +18,9 @@ import {
   CurrencyDollarIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Tooltip } from "@mui/material";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
-import { alertTimeWindows } from "./alertsPage";
+import { alertTimeWindows } from "./constant";
 import { Database } from "../../../supabase/database.types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";

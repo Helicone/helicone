@@ -1,82 +1,81 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   usePrompt,
   usePromptRequestsOverTime,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 
+import { Input as PromptInput } from "@/components/templates/prompts/id/MessageInput";
 import {
-  BeakerIcon,
   ArrowTrendingUpIcon,
-  TrashIcon,
+  BeakerIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
+  TrashIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+
+import { TimeFilter } from "@/types/timeFilter";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useExperiments } from "../../../../services/hooks/prompts/experiments";
-import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import HcButton from "../../../ui/hcButton";
-import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
-import { MODEL_LIST } from "../../playground/new/modelList";
-import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
+import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import {
   TimeInterval,
   getTimeInterval,
   getTimeIntervalAgo,
 } from "../../../../lib/timeCalculations/time";
-import { useSearchParams } from "next/navigation";
-import { TimeFilter } from "../../dashboard/dashboardPage";
+import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
+import { useExperiments } from "../../../../services/hooks/prompts/experiments";
+import { useInputs } from "../../../../services/hooks/prompts/inputs";
+import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
 import {
   FilterBranch,
   FilterLeaf,
 } from "../../../../services/lib/filters/filterDefs";
-import PromptPlayground from "./promptPlayground";
-import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
-import { Message } from "../../requests/chatComponent/types";
+import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { MODEL_LIST } from "../../playground/new/modelList";
+import { PromptMessage } from "../../requests/chatComponent/types";
+import PromptPlayground from "./promptPlayground";
 
-import { Badge } from "../../../ui/badge";
-import { ScrollArea } from "../../../ui/scroll-area";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { MultiSelect, MultiSelectItem, AreaChart } from "@tremor/react";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import { SimpleTable } from "../../../shared/table/simpleTable";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import { getUSDateFromString } from "../../../shared/utils/utils";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import ModelPill from "../../requestsV2/modelPill";
-import StatusBadge from "../../requestsV2/statusBadge";
-import TableFooter from "../../requestsV2/tableFooter";
-import { Button } from "../../../ui/button";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useFeatureFlags } from "@/services/hooks/featureFlags";
-import { useOrg } from "@/components/layout/organizationContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
-import { InfoIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
-import { clsx } from "clsx";
-import PromptInputItem from "./promptInputItem";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
+import { clsx } from "clsx";
+import { InfoIcon } from "lucide-react";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
+import LoadingAnimation from "../../../shared/loadingAnimation";
+import { SimpleTable } from "../../../shared/table/simpleTable";
+import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
+import { getUSDateFromString } from "../../../shared/utils/utils";
+import { Badge } from "../../../ui/badge";
+import { Button } from "../../../ui/button";
+import { ScrollArea } from "../../../ui/scroll-area";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import ModelPill from "../../requestsV2/modelPill";
+import StatusBadge from "../../requestsV2/statusBadge";
+import TableFooter from "../../requestsV2/tableFooter";
+import PromptInputItem from "./promptInputItem";
 
 interface PromptIdPageProps {
   id: string;
@@ -106,84 +105,13 @@ export function getTimeAgo(date: Date): string {
   return `${Math.floor(secondsPast / 31536000)} years ago`;
 }
 
-export const RenderImageWithPrettyInputKeys = (props: {
-  text: string;
-  selectedProperties: Record<string, string> | undefined;
-}) => {
-  const { text, selectedProperties } = props;
-
-  // Function to replace matched patterns with JSX components
-  const replaceInputKeysWithComponents = (inputText: string) => {
-    if (typeof inputText !== "string") {
-      // don't throw, stringify the input and return it
-      return JSON.stringify(inputText);
-    }
-
-    // Regular expression to match the pattern
-    const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
-    const parts = [];
-    let lastIndex = 0;
-    // Use the regular expression to find and replace all occurrences
-    inputText.replace(regex, (match: any, keyName: string, offset: number) => {
-      // Push preceding text if any
-      if (offset > lastIndex) {
-        parts.push(inputText.substring(lastIndex, offset));
-      }
-
-      const getRenderText = () => {
-        if (selectedProperties) {
-          return selectedProperties[keyName] || "{{undefined}}";
-        } else {
-          return keyName;
-        }
-      };
-      const renderText = getRenderText();
-
-      // eslint-disable-next-line @next/next/no-img-element
-      parts.push(<img src={renderText} alt={keyName} className="max-h-24" />);
-
-      // Update lastIndex to the end of the current match
-      lastIndex = offset + match.length;
-
-      // This return is not used but is necessary for the replace function
-      return match;
-    });
-
-    // Add any remaining text after the last match
-    if (lastIndex < inputText.length) {
-      parts.push(inputText.substring(lastIndex));
-    }
-    return parts;
-  };
-
-  return (
-    <div className="text-md leading-8 text-black dark:text-white">
-      {replaceInputKeysWithComponents(text)}
-    </div>
-  );
-};
-
-type NotNullOrUndefined<T> = T extends null | undefined ? never : T;
-
-// Update the Input type definition
-type Input = {
-  id: string;
-  inputs: { [key: string]: string };
-  source_request: string;
-  prompt_version: string;
-  created_at: string;
-  response_body?: string; // Make response_body optional
-  auto_prompt_inputs: Record<string, any>[] | unknown[];
-};
-
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
   const { prompt, isLoading, refetch: refetchPrompt } = usePrompt(id);
   const jawn = useJawnClient();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [inputView, setInputView] = useState<"list" | "grid">("list");
-  const [selectedInput, setSelectedInput] = useState<Input | undefined>();
+  const [selectedInput, setSelectedInput] = useState<PromptInput | undefined>();
   const [searchRequestId, setSearchRequestId] = useState<string>("");
   const searchParams = useSearchParams();
   const notification = useNotification();
@@ -228,7 +156,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     getInterval() as TimeInterval
   );
 
-  const createSubversion = async (history: Message[], model: string) => {
+  const createSubversion = async (history: PromptMessage[], model: string) => {
     if (prompt?.metadata?.createdFromUi === false) {
       notification.setNotification(
         "Prompt was not created from the UI, please change the prompt in your codebase to use the new version",
@@ -238,15 +166,20 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
     const promptData = {
       model: model,
-      messages: history.map((msg) => ({
-        role: msg.role,
-        content: [
-          {
-            text: msg.content,
-            type: "text",
-          },
-        ],
-      })),
+      messages: history.map((msg) => {
+        if (typeof msg === "string") {
+          return msg;
+        }
+        return {
+          role: msg.role,
+          content: [
+            {
+              text: msg.content,
+              type: "text",
+            },
+          ],
+        };
+      }),
     };
 
     const result = await jawn.POST(
@@ -407,7 +340,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     }
   };
 
-  const handleInputSelect = (input: Input | undefined) => {
+  const handleInputSelect = (input: PromptInput | undefined) => {
     setSelectedInput((prevInput) => {
       if (prevInput?.id === input?.id) {
         return undefined; // Deselect if the same input is clicked again
@@ -474,131 +407,27 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     promptVersionId: string,
     promptData: string
   ) => {
-    if (!(experimentFlags?.hasFlag || user?.email?.includes("helicone.ai"))) {
-      notification.setNotification(
-        "Experiment feature is not enabled - sign up for the waitlist to use it",
-        "error"
-      );
-      return;
-    }
-    const dataset = await jawn.POST("/v1/helicone-dataset", {
-      body: {
-        datasetName: "Dataset for Experiment",
-        requestIds: [],
-      },
-    });
-    if (!dataset.data?.data?.datasetId) {
-      notification.setNotification("Failed to create dataset", "error");
-      return;
-    }
     const promptVersion = prompts?.find((p) => p.id === promptVersionId);
-    const experiment = await jawn.POST("/v1/experiment/new-empty", {
+
+    if (!promptVersion) {
+      notification.setNotification("Prompt version not found", "error");
+      return;
+    }
+
+    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
       body: {
-        metadata: {
-          prompt_id: id,
-          prompt_version: promptVersionId || "",
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        datasetId: dataset.data?.data?.datasetId,
+        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+        originalPromptVersion: promptVersionId,
       },
     });
-    if (!experiment.data?.data?.experimentId) {
+
+    if (experimentTableResult.error || !experimentTableResult.data) {
       notification.setNotification("Failed to create experiment", "error");
       return;
     }
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/subversion",
-      {
-        params: {
-          path: {
-            promptVersionId: promptVersionId,
-          },
-        },
-        body: {
-          newHeliconeTemplate: JSON.stringify(promptData),
-          isMajorVersion: false,
-          metadata: {
-            experimentAssigned: true,
-          },
-        },
-      }
-    );
-
-    if (result.error || !result.data) {
-      notification.setNotification("Failed to create subversion", "error");
-      return;
-    }
-
-    // const randomInputData = await jawn.POST(
-    //   "/v1/prompt/version/{promptVersionId}/inputs/query",
-    //   {
-    //     params: {
-    //       path: {
-    //         promptVersionId: promptVersionId,
-    //       },
-    //     },
-    //     body: {
-    //       limit: 10,
-    //       random: true,
-    //     },
-    //   }
-    // );
-
-    // if (
-    //   randomInputData.error ||
-    //   !randomInputData.data ||
-    //   !randomInputData.data.data
-    // ) {
-    //   notification.setNotification("Failed to get random inputs", "error");
-    //   return;
-    // }
-
-    // await Promise.all(
-    //   randomInputData?.data?.data?.map((request) => {
-    //     return jawn.POST(
-    //       "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row",
-    //       {
-    //         body: {
-    //           inputs: request.inputs,
-    //           sourceRequest: request.source_request,
-    //         },
-    //         params: {
-    //           path: {
-    //             promptVersionId: promptVersionId,
-    //             datasetId: dataset.data?.data?.datasetId ?? "",
-    //           },
-    //         },
-    //       }
-    //     );
-    //   })
-    // );
-
-    // const hypothesis = await jawn.POST("/v1/experiment/hypothesis", {
-    //   body: {
-    //     experimentId: experiment.data?.data?.experimentId,
-    //     model: model,
-    //     promptVersion: promptVersionId,
-    //     providerKeyId: "NOKEY",
-    //     status: "RUNNING",
-    //   },
-    // });
-
-    // const runResult = await jawn.POST("/v1/experiment/run", {
-    //   body: {
-    //     experimentId: experiment.data?.data?.experimentId,
-    //     hypothesisId: hypothesis.data?.data?.hypothesisId || "",
-    //     datasetRowIds: [],
-    //   },
-    // });
-    // if (runResult.error || !runResult.data) {
-    //   notification.setNotification("Failed to run experiment", "error");
-    //   return;
-    // }
 
     router.push(
-      `/prompts/${id}/subversion/${promptVersionId}/experiment/${experiment.data?.data?.experimentId}`
+      `/experiments/${experimentTableResult.data.data?.experimentId}`
     );
   };
 
@@ -630,13 +459,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     refetchPromptVersions();
     refetchPrompt();
   };
-  const user = useUser();
-  const org = useOrg();
 
-  const experimentFlags = useFeatureFlags(
-    "experiment",
-    org?.currentOrg?.id ?? ""
-  );
+  const org = useOrg();
 
   const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
   const [isInputsExpanded, setIsInputsExpanded] = useState(true);
@@ -980,7 +804,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                 )}
                                               </DropdownMenuContent>
                                             </DropdownMenu>
-                                          ) : (
+                                          ) : promptVersion.minor_version ===
+                                            0 ? (
                                             <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
                                                 <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
@@ -1001,6 +826,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                                                 </DropdownMenuItem>
                                               </DropdownMenuContent>
                                             </DropdownMenu>
+                                          ) : (
+                                            <></>
                                           )}
                                         </div>
                                       </div>
@@ -1199,15 +1026,16 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                       </MultiSelect>
                     </div>
                     <div className="pl-2">
-                      <HcButton
-                        variant={"light"}
+                      <Button
+                        variant={"ghost"}
                         size={"sm"}
-                        title={"Clear All"}
                         onClick={() => {
                           setSelectedDatasets([]);
                           setSelectedModels([]);
                         }}
-                      />
+                      >
+                        Clear All
+                      </Button>
                     </div>
                   </div>
                 </div>

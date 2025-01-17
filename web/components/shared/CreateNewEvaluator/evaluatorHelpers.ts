@@ -10,6 +10,12 @@ interface OpenAIFunctionParams {
   choiceScores?: ChoiceScore[];
   rangeMin?: number;
   rangeMax?: number;
+  includedVariables?: {
+    inputs: boolean;
+    promptTemplate: boolean;
+    inputBody: boolean;
+    outputBody: boolean;
+  };
 }
 
 function generateOpenAIFunction({
@@ -57,6 +63,69 @@ function generateOpenAIFunction({
   return JSON.stringify(baseFunction, null, 2);
 }
 
+function OpenAIFunctionToFunctionParams(
+  expectedValueType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE",
+  template:
+    | {
+        name: string;
+        description: string;
+        parameters: {
+          type: string;
+          properties: {
+            [key: string]: {
+              description: string;
+              type: string;
+              oneOf?: { const: number; title: string }[];
+              minimum?: number;
+              maximum?: number;
+            };
+          };
+          required: string[];
+        };
+      }
+    | undefined
+): OpenAIFunctionParams {
+  if (!template || !template?.parameters?.properties) {
+    return {
+      name: "",
+      description: "",
+      expectedValueType: "boolean",
+    };
+  }
+
+  // Get the first property key since OpenAI functions only have one property
+  const propertyKey = Object.keys(template.parameters.properties)[0];
+  const property = template.parameters.properties[propertyKey];
+
+  const params: OpenAIFunctionParams = {
+    name: propertyKey,
+    description: property.description,
+    expectedValueType: expectedValueType.split("-")[1].toLowerCase() as
+      | "boolean"
+      | "choice"
+      | "range",
+  };
+
+  // Add additional parameters based on the expectedValueType
+  switch (expectedValueType) {
+    case "LLM-CHOICE":
+      params.choiceScores = property.oneOf?.map((choice) => ({
+        score: choice.const,
+        description: choice.title,
+      }));
+      break;
+    case "LLM-RANGE":
+      params.rangeMin = property.minimum;
+      params.rangeMax = property.maximum;
+      break;
+    case "LLM-BOOLEAN":
+      params.expectedValueType = "boolean";
+      break;
+  }
+
+  return params;
+}
+
 export function generateOpenAITemplate({
   name,
   description,
@@ -65,8 +134,15 @@ export function generateOpenAITemplate({
   rangeMin,
   rangeMax,
   model,
+  includedVariables,
 }: OpenAIFunctionParams & {
   model: string;
+  includedVariables?: {
+    inputs: boolean;
+    promptTemplate: boolean;
+    inputBody: boolean;
+    outputBody: boolean;
+  };
 }): string {
   return JSON.stringify(
     {
@@ -78,15 +154,44 @@ export function generateOpenAITemplate({
               type: "text",
               text: `Please call the scorer function and use the following context to evaluate the output.
 
-Here were the inputs into the LLM:
+
+
+${
+  includedVariables?.inputs
+    ? `Here were the inputs into the LLM:
 ### INPUT BEGIN ###
 <helicone-prompt-input key="inputs" />
-### INPUT END ###
+### INPUT END ###`
+    : ""
+}
 
-Here was the output of the LLM:
+${
+  includedVariables?.outputBody
+    ? `Here was the output of the LLM:
 ### OUTPUT BEGIN ###
-<helicone-prompt-input key="outputs" />
-### OUTPUT END ###`,
+<helicone-prompt-input key="outputBody" />
+### OUTPUT END ###`
+    : ""
+}
+
+${
+  includedVariables?.promptTemplate
+    ? `Here was the prompt template used:
+### PROMPT TEMPLATE BEGIN ###
+<helicone-prompt-input key="promptTemplate" />
+### PROMPT TEMPLATE END ###`
+    : ""
+}
+
+${
+  includedVariables?.inputBody
+    ? `Here was the input body:
+### INPUT BODY BEGIN ###
+<helicone-prompt-input key="inputBody" />
+### INPUT BODY END ###`
+    : ""
+}
+`,
             },
           ],
         },
@@ -113,4 +218,18 @@ Here was the output of the LLM:
     null,
     2
   );
+}
+
+export function openAITemplateToOpenAIFunctionParams(
+  template: any,
+  scoringType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
+): OpenAIFunctionParams & { model: string } {
+  const parsedTemplate = template;
+  return {
+    ...OpenAIFunctionToFunctionParams(
+      scoringType,
+      parsedTemplate.tools[0].function
+    ),
+    model: parsedTemplate.model,
+  };
 }

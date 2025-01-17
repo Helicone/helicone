@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
@@ -10,12 +9,21 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useRef, useState } from "react";
-import { useOrg } from "../organizationContext";
+import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import NavItem from "./NavItem";
-import { ChangelogItem } from "./Sidebar";
+import { ChangelogItem } from "./types";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
+import { useTheme } from "next-themes";
+import OnboardingNavItems from "./OnboardingNavItems";
+import useOnboardingContext from "../onboardingContext";
+import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
+import { Dialog } from "@/components/ui/dialog";
+import { DialogContent } from "@/components/ui/dialog";
+import CreateOrgForm from "@/components/templates/organization/createOrgForm";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export interface NavigationItem {
   name: string;
@@ -30,10 +38,16 @@ interface SidebarProps {
   NAVIGATION: NavigationItem[];
   changelog: ChangelogItem[];
   setOpen: (open: boolean) => void;
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
+const DesktopSidebar = ({
+  changelog,
+  NAVIGATION,
+  sidebarRef,
+}: SidebarProps) => {
   const org = useOrg();
+  const user = useUser();
   const tier = org?.currentOrg?.tier;
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
@@ -90,7 +104,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
 
@@ -109,12 +122,22 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
   };
 
+  const { theme, setTheme } = useTheme();
+
   useEffect(() => {
     calculateAvailableSpace();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "b" && event.metaKey) {
+      if (
+        event.key === "b" &&
+        event.metaKey &&
+        org?.currentOrg?.tier !== "demo"
+      ) {
+        event.preventDefault();
         setIsCollapsed(!isCollapsed);
+      } else if (event.metaKey && event.shiftKey && event.key === "l") {
+        event.preventDefault();
+        setTheme(theme === "dark" ? "light" : "dark");
       }
     };
 
@@ -127,7 +150,8 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
       window.removeEventListener("resize", calculateAvailableSpace);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCollapsed, expandedItems, setIsCollapsed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -151,7 +175,6 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
   };
 
   const handleModalOpen = (open: boolean) => {
-    console.log({ open });
     if (!open) {
       setChangelogToView(null);
     } else {
@@ -159,6 +182,13 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
     }
     setModalOpen(open);
   };
+
+  const { isOnboardingVisible } = useOnboardingContext();
+  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
+    useState(false);
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
+
+  const jawn = useJawnClient();
 
   return (
     <>
@@ -236,102 +266,111 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
               </div>
             </div>
 
-            {/* Navigation items */}
-            <div className="flex flex-col">
-              {((!isCollapsed &&
-                org?.currentOrg?.organization_type === "reseller") ||
-                org?.isResellerOfCurrentCustomerOrg) && (
-                <div className="flex w-full justify-center px-5 py-2">
+            <div className="flex flex-col justify-between h-[calc(100%-16px)]">
+              {/* Navigation items */}
+              <div className="flex flex-col justify-between">
+                {((!isCollapsed &&
+                  org?.currentOrg?.organization_type === "reseller") ||
+                  org?.isResellerOfCurrentCustomerOrg) && (
+                  <div className="flex w-full justify-center px-5 py-2">
+                    <Button
+                      variant="outline"
+                      className="w-full  dark:text-slate-400"
+                      size="sm_sleek"
+                      onClick={() => {
+                        router.push("/enterprise/portal");
+                        if (
+                          org.currentOrg?.organization_type === "customer" &&
+                          org.currentOrg?.reseller_id
+                        ) {
+                          org.setCurrentOrg(org.currentOrg.reseller_id);
+                        }
+                      }}
+                    >
+                      {org.currentOrg?.organization_type === "customer"
+                        ? "Back to Portal"
+                        : "Customer Portal"}
+                    </Button>
+                  </div>
+                )}
+                <div
+                  ref={navItemsRef}
+                  data-collapsed={isCollapsed}
+                  className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
+                >
+                  <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                    {isOnboardingVisible && <OnboardingNavItems />}
+                    {!isOnboardingVisible &&
+                      NAVIGATION_ITEMS.map((link) => (
+                        <NavItem
+                          key={link.name}
+                          link={link}
+                          isCollapsed={isCollapsed}
+                          expandedItems={expandedItems}
+                          toggleExpand={toggleExpand}
+                          onClick={() => {
+                            setIsCollapsed(false);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          deep={0}
+                        />
+                      ))}
+                  </nav>
+                </div>
+              </div>
+              {/* <Button
+                variant="outline"
+                className="mx-2 text-[13px] font-medium"
+                onClick={() => {
+                  jawn.POST("/v1/organization/setup-demo");
+                }}
+              >
+                Stup date
+              </Button> */}
+              {org?.currentOrg?.tier === "demo" &&
+                org.allOrgs.filter(
+                  (org) => org.tier !== "demo" && org.owner === user?.id
+                ).length === 0 && (
                   <Button
                     variant="outline"
-                    className="w-full  dark:text-slate-400"
-                    size="sm_sleek"
+                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
                     onClick={() => {
-                      router.push("/enterprise/portal");
-                      if (
-                        org.currentOrg?.organization_type === "customer" &&
-                        org.currentOrg?.reseller_id
-                      ) {
-                        org.setCurrentOrg(org.currentOrg.reseller_id);
-                      }
+                      setShowEndOnboardingConfirmation(true);
                     }}
                   >
-                    {org.currentOrg?.organization_type === "customer"
-                      ? "Back to Portal"
-                      : "Customer Portal"}
+                    Ready to integrate
                   </Button>
-                </div>
-              )}
-              <div
-                ref={navItemsRef}
-                data-collapsed={isCollapsed}
-                className="group flex flex-col py-2 data-[collapsed=true]:py-2 "
-              >
-                <nav className="grid flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                  {NAVIGATION_ITEMS.map((link) => (
-                    <NavItem
-                      key={link.name}
-                      link={link}
-                      isCollapsed={isCollapsed}
-                      expandedItems={expandedItems}
-                      toggleExpand={toggleExpand}
-                      onClick={() => {
-                        setIsCollapsed(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      deep={0}
-                    />
-                  ))}
-                </nav>
-              </div>
-            </div>
+                )}
 
-            {/* InfoBox */}
-            {tier !== "growth" &&
-              tier !== "pro" &&
-              canShowInfoBox &&
-              !isCollapsed && (
-                <div className="bg-sky-500/10 rounded-lg border-l-4 border-l-sky-500 border-y border-r border-y-sky-200 border-r-sky-200 text-sky-500 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start p-2 mt-2 mx-2 mb-8">
-                  <h1 className="text-xs text-start font-medium tracking-tight leading-tight">
-                    🎉 Introducing a new way to perfect your prompts.{" "}
-                    <Link
-                      href="https://helicone.ai/experiments"
-                      target="_blank"
-                      className="underline decoration-sky-400 decoration-1 underline-offset-2 font-semibold"
-                    >
-                      Get early access here.
-                    </Link>{" "}
-                  </h1>
-                </div>
-              )}
-
-            {canShowInfoBox && !isCollapsed && shouldShowInfoBox && (
-              <div className="p-2">
-                <InfoBox icon={() => <></>} className="flex flex-col">
-                  <div>
-                    <span className="text-[#1c4ed8] text-xs font-semibold leading-tight">
-                      Early Adopter Exclusive: $120 Credit for the year. <br />
-                    </span>
-                    <span className="text-[#1c4ed8] text-xs font-light leading-tight">
-                      Switch to Pro and get $10/mo credit for 1 year, as a thank
-                      you for your early support!
-                    </span>
+              {/* InfoBox */}
+              {canShowInfoBox &&
+                !isCollapsed &&
+                org?.currentOrg?.tier !== "demo" && (
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2  mt-2 mx-2 mb-8 font-medium">
+                    <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                      ⚡ Experiments is here: a new way to perfect your prompt.{" "}
+                      <Link
+                        href="https://docs.helicone.ai/features/experiments"
+                        target="_blank"
+                        className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                      >
+                        Check out the docs.
+                      </Link>{" "}
+                    </h1>
                   </div>
-                  <Button className="bg-blue-700 mt-[10px] text-xs" size="xs">
-                    <Link href="/settings/billing">Upgrade to Pro</Link>
-                  </Button>
-                </InfoBox>
-              </div>
-            )}
+                )}
+            </div>
           </div>
 
           {/* Sticky help dropdown */}
-          <div className="absolute bottom-3 left-3 z-10">
-            <SidebarHelpDropdown
-              changelog={changelog}
-              handleChangelogClick={handleChangelogClick}
-            />
-          </div>
+          {org?.currentOrg?.tier !== "demo" && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <SidebarHelpDropdown
+                changelog={changelog}
+                handleChangelogClick={handleChangelogClick}
+              />
+            </div>
+          )}
         </div>
       </div>
       <ChangelogModal
@@ -339,6 +378,31 @@ const DesktopSidebar = ({ changelog, NAVIGATION }: SidebarProps) => {
         setOpen={handleModalOpen}
         changelog={changelogToView}
       />
+      <EndOnboardingConfirmation
+        open={showEndOnboardingConfirmation}
+        setOpen={setShowEndOnboardingConfirmation}
+        onEnd={() => {
+          setShowEndOnboardingConfirmation(false);
+          setShowCreateOrg(true);
+        }}
+      />
+      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
+        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
+          <CreateOrgForm
+            firstOrg={true}
+            onCancelHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onCloseHandler={() => {
+              setShowCreateOrg(false);
+            }}
+            onSuccess={(orgId) => {
+              org?.setCurrentOrg(orgId ?? "");
+              router.push("/dashboard");
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

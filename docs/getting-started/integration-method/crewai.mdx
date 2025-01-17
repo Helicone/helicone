@@ -1,0 +1,252 @@
+---
+title: "Crew AI Integration"
+sidebarTitle: "Crew AI"
+description: "Integrate Helicone with Crew AI, a multi-agent framework supporting multiple LLM providers. Monitor AI-driven tasks and agent interactions across providers."
+twitter:title: "Crew AI Integration - Helicone OSS LLM Observability"
+---
+
+## Introduction
+
+[Crew AI](https://github.com/joaomdmoura/crewAI) is a multi-agent framework that supports multiple LLM providers through LiteLLM integration. By using Helicone as a proxy, you can track and optimize your AI model usage across different providers through a unified dashboard.
+
+## Quick Start
+
+<Steps>
+
+  <Step title="Create an Account & Generate an API Key">
+    1. Log into [Helicone](https://www.helicone.ai) (or create a new account)
+    2. Generate a [write-only API key](https://docs.helicone.ai/helicone-headers/helicone-auth)
+
+    <Note>
+      Store your Helicone API key securely (e.g., in environment variables)
+    </Note>
+
+  </Step>
+
+  <Step title="Set OPENAI_BASE_URL">
+    Configure your environment to route API calls through Helicone:
+
+    ```python
+    import os
+
+    os.environ["OPENAI_BASE_URL"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+    ```
+
+    This points OpenAI API requests to Helicone's proxy endpoint.
+
+    <Note>
+      See [Advanced Provider Configuration](#advanced-provider-configuration) for other LLM providers.
+    </Note>
+
+  </Step>
+
+<Step title="Verify in Helicone">
+  Run your CrewAI application and check the Helicone dashboard to confirm
+  requests are being logged.
+</Step>
+
+</Steps>
+
+## Advanced Provider Configuration
+
+CrewAI supports multiple LLM providers. Here's how to configure different providers with Helicone:
+
+### OpenAI (Alternative Method)
+
+```python
+from crewai import LLM
+
+llm = LLM(
+    model="gpt-4",
+    base_url="https://oai.helicone.ai/v1",
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+    }
+)
+```
+
+### Anthropic
+
+```python
+llm = LLM(
+    model="anthropic/claude-3-sonnet-20240229-v1:0",
+    base_url="https://anthropic.helicone.ai",
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+    }
+)
+```
+
+### Gemini
+
+```python
+llm = LLM(
+    model="gemini/gemini-1.5-pro-latest",
+    base_url="https://gateway.helicone.ai",
+    api_key=os.environ.get("GEMINI_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+        "Helicone-Target-URL": "https://generativelanguage.googleapis.com",
+    }
+)
+```
+
+### Groq
+
+```python
+llm = LLM(
+    model="groq/llama-3.2-90b-text-preview",
+    base_url="https://groq.helicone.ai/openai/v1",
+    api_key=os.environ.get("GROQ_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+    }
+)
+```
+
+### Other Providers
+
+CrewAI supports many LLM providers through LiteLLM integration. If your preferred provider isn't listed above but is supported by CrewAI, you can likely use it with Helicone. Simply:
+
+1. Check the dev integrations on the sidebar for your specific provider
+2. Configure your CrewAI LLM using the same base URL and headers structure shown in the provider's Helicone documentation
+
+For example, if a provider's Helicone documentation shows:
+
+```python
+# Provider's Helicone documentation
+base_url = "https://provider.helicone.ai"
+headers = {
+    "Helicone-Auth": "Bearer your-key",
+    "Other-Required-Headers": "values"
+}
+```
+
+You would configure your CrewAI LLM like this:
+
+```python
+llm = LLM(
+    model="provider/model-name",
+    base_url="https://provider.helicone.ai",
+    api_key=os.environ.get("PROVIDER_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+        "Other-Required-Headers": "values"
+    }
+)
+```
+
+## Helicone Features
+
+### Request Tracking
+
+Add custom properties to track and filter requests:
+
+```python
+llm = LLM(
+    model="your-model",
+    base_url="your-helicone-endpoint",
+    api_key="your-api-key",
+    extra_headers={
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Property-Custom": "value",      # Custom properties
+        "Helicone-User-Id": "user-abc",          # Track user-specific requests
+        "Helicone-Session-Id": "session-123",     # Group requests by session
+        "Helicone-Session-Name": "session-name",  # Group requests by session name
+        "Helicone-Session-Path": "/session/path", # Group requests by session path
+    }
+)
+```
+
+Learn more about:
+
+- [Custom Properties](/features/advanced-usage/custom-properties)
+- [User Metrics](/features/advanced-usage/user-metrics)
+- [Sessions](/features/sessions)
+
+### Caching
+
+Enable response caching to reduce costs and latency:
+
+```python
+llm = LLM(
+    model="your-model",
+    base_url="your-helicone-endpoint",
+    api_key="your-api-key",
+    extra_headers={
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Cache-Enabled": "true",
+    }
+)
+```
+
+Learn more about [Caching](/features/advanced-usage/caching)
+
+### Prompt Management
+
+Track and version your prompts:
+
+```python
+llm = LLM(
+    model="your-model",
+    base_url="your-helicone-endpoint",
+    api_key="your-api-key",
+    extra_headers={
+        "Helicone-Auth": f"Bearer {helicone_api_key}",
+        "Helicone-Prompt-Name": "research-task",
+        "Helicone-Prompt-Id": "uuid-of-prompt",
+    }
+)
+```
+
+Learn more about [Prompts](/features/prompts)
+
+## Multi-Agent Example
+
+Create agents using different LLM providers:
+
+```python
+from crewai import Agent, Crew, Task
+
+# Research agent using OpenAI
+researcher = Agent(
+    role="Research Specialist",
+    goal="Analyze technical documentation",
+    backstory="Expert in technical research",
+    llm=openai_llm,
+    verbose=True
+)
+
+# Writing agent using Anthropic
+writer = Agent(
+    role="Technical Writer",
+    goal="Create documentation",
+    backstory="Expert technical writer",
+    llm=anthropic_llm,
+    verbose=True
+)
+
+# Data processing agent using Gemini
+analyst = Agent(
+    role="Data Analyst",
+    goal="Process research findings",
+    backstory="Specialist in data interpretation",
+    llm=gemini_llm,
+    verbose=True
+)
+
+# Create crew with multiple agents
+crew = Crew(
+    agents=[researcher, writer, analyst],
+    tasks=[...],  # Your tasks here
+    verbose=True
+)
+```
+
+## Additional Resources
+
+- [CrewAI LLMs Documentation](https://docs.crewai.com/concepts/llms)
+- [Helicone Documentation](https://docs.helicone.ai)
+- [CrewAI GitHub Repository](https://github.com/joaomdmoura/crewAI)

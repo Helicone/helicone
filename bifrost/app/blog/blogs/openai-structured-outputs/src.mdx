@@ -1,0 +1,537 @@
+In August 2024, OpenAI introduced "Structured Outputs", a remarkable new capability in the Chat Completions API and Assistants API, and successor to the earlier "JSON mode."
+
+As the name suggests, <a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured Outputs</a> enables developers to obtain consistent, predictable JSON outputs from OpenAI chatbots, according to a predefined schema. Essentially, it's just a reliable way to get ChatGPT to output JSON.
+
+![OpenAIStructured Outputs](/static/blog/openai-structured-outputs/cover.webp)
+
+In this guide, we'll explore how to leverage Structured Outputs by building a simple chatbot capable of providing detailed flight information in response to a simple user query. We'll then use Helicone to monitor our chatbot's performance.
+
+## Why Use Structured Outputs?
+
+Structured Outputs allow you to generate structured data from unstructured inputs to your chatbots. Unlike unstructured text, structured outputs are organized, making them easier to parse, manipulate, and integrate into various applications.
+
+The key difference between the new Structured Outputs and the likely soon-to-be-deprecated JSON mode lies in its enhanced reliability. OpenAI strongly recommends transitioning to Structured Outputs for any functionality previously handled by JSON mode.
+
+### Key Benefits
+
+- **Consistency**: Structured outputs ensure consistent data formats, reducing the need for additional parsing or error handling.
+- **Efficiency**: They streamline the integration process, making it easier to incorporate AI-generated data into existing systems.
+- **Interoperability**: Structured data can be seamlessly used across different platforms and applications, enhancing interoperability.
+- **Safety**: Structured outputs adhere to existing safety policies. The model can refuse unsafe requests, and developers can programmatically detect these refusals—we'll use this functionality later.
+- **Native SDK Support**: OpenAI's Python and Node SDKs natively support Structured Outputs. Developers can supply schemas using Pydantic or Zod objects, with the SDKs handling JSON schema conversion, automatic deserialization, and parsing of any refusals.
+
+## When to Use Structured Outputs
+
+1. When connecting a language model to tools, functions, or data in your system.
+2. When you want to structure a model's output to the user.
+3. When building multi-agent systems or complex workflows with many intermediate steps or internal routing.
+
+## Example Use Cases
+
+1. Having models call or fetch data from your APIs and functions.
+2. **<a href="https://openai.com/index/introducing-structured-outputs-in-the-api/" target="_blank" rel="noopener">Dynamically generating</a>** user interfaces based on user intent.
+3. Extracting structured data from unstructured data.
+
+## How to Use Structured Outputs
+
+Here's a complete guide on using Structured Outputs to build reliable apps with LLMs.
+
+As stated earlier, we'll be building a simple chatbot that can query an API to respond with detailed flight information.
+
+But first, you should know that Structured Outputs can be used in two ways through the API:
+
+1. **Function Calling**: You can enable Structured Outputs for all models that support <a href="https://platform.openai.com/docs/assistants/tools" target="_blank" rel="noopener">tools</a>. With this setting, the model's output will match the tool's defined structure.
+2. **Response Format Option**: Developers can use the `json_schema` option in the `response_format` parameter to specify a JSON Schema. This is for when the model isn't calling a tool but needs to respond in a structured format. When `strict: true` is used with this option, the model's output will strictly follow the provided schema.
+
+## Building a Flight Details Chatbot with OpenAI Structured Outputs
+
+Now, we build!
+
+Here's a high-level overview of how our chatbot will work: It will extract parameters from a user query, call our API with Function Calling, and then structure the API response in a predefined format with Response Format.
+
+Let's get into it!
+
+### What You'll Need
+
+Before we get started, make sure you have the following in place:
+
+1. **Python**: Make sure you have Python installed. You can grab it from <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">here</a>.
+2. **OpenAI API Key**: You'll need <a href="https://platform.openai.com/docs/quickstart/create-and-export-an-api-key" target="_blank" rel="noopener">this</a> to get a response from OpenAI's API.
+3. **Helicone API Key**: You'll need this to monitor your chatbot's performance. Get one for free <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">here</a>.
+
+### Setting Up Your Environment
+
+First, install the necessary packages by running:
+
+```bash
+pip install pydantic openai python-dotenv
+```
+
+Next, create a `.env` file in your project's root directory and add your API keys:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+HELICONE_API_KEY=your_helicone_api_key_here
+```
+
+Now we're ready to dive into the code!
+
+## Understanding the Code
+
+Let's break down the code and see how it all fits together.
+
+### Pydantic Models
+
+We start with a few Pydantic models to define the data we're working with. While Pydantic is not necessary (you can just define your schema in JSON), it is recommended by OpenAI.
+
+```python
+class FlightSearchParams(BaseModel):
+    departure: str
+    arrival: str
+    date: Optional[str] = None
+
+class FlightDetails(BaseModel):
+    flight_number: str
+    departure: str
+    arrival: str
+    departure_time: str
+    arrival_time: str
+    price: float
+    available_seats: int
+
+class ChatbotResponse(BaseModel):
+    flights: List[FlightDetails]
+    natural_response: str
+```
+
+- **FlightSearchParams**: Holds the user's search criteria (departure, arrival, and date).
+- **FlightDetails**: Stores details about each flight.
+- **ChatbotResponse**: Formats the chatbot's response, including both structured flight details and a natural language explanation.
+
+### The FlightChatbot Class
+
+This is the main class describing the Chatbot's functionality. Let's take a look at it.
+
+#### Initialization
+
+Here, we initialize the chatbot with your OpenAI API key and a small sample database of flights.
+
+```python
+def __init__(self, api_key: str):
+    self.client = OpenAI(api_key=api_key)
+    self.flights_db = [
+        {
+            "flight_number": "BA123",
+            "departure": "New York",
+            "arrival": "London",
+            "departure_time": "2025-01-15T08:30:00",
+            "arrival_time": "2025-01-15T20:45:00",
+            "price": 650.00,
+            "available_seats": 45
+        },
+        {
+            "flight_number": "AA456",
+            "departure": "London",
+            "arrival": "New York",
+            "departure_time": "2025-01-16T10:15:00",
+            "arrival_time": "2025-01-16T13:30:00",
+            "price": 720.00,
+            "available_seats": 12
+        }
+    ]
+```
+
+### Searching for Flights
+
+Next, we define the `_search_flights` method.
+
+```python
+def _search_flights(self, departure: str, arrival: str, date: Optional[str] = None) -> List[dict]:
+    matches = []
+    for flight in self.flights_db:
+        if (flight["departure"].lower() == departure.lower() and
+            flight["arrival"].lower() == arrival.lower()):
+            if date:
+                flight_date = flight["departure_time"].split("T")[0]
+                if flight_date == date:
+                    matches.append(flight)
+            else:
+                matches.append(flight)
+    return matches
+```
+
+This method searches the database for flights that match the given criteria. It checks for matching departure and arrival cities, and optionally filters by date.
+
+### Processing User Queries
+
+Now we process user input to extract search parameters and find matching flights:
+
+```python
+def process_query(self, user_query: str) -> str:
+    try:
+        parameter_extraction = self.client.chat.completions.create(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": "You are a flight search assistant. Extract search parameters from user queries."},
+                {"role": "user", "content": user_query}
+            ],
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "search_flights",
+                    "description": "Search for flights based on departure and arrival cities, and optionally a date",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "departure": {"type": "string", "description": "Departure city"},
+                            "arrival": {"type": "string", "description": "Arrival city"},
+                            "date": {"type": "string", "description": "Flight date in YYYY-MM-DD format", "format": "date"}
+                        },
+                        "required": ["departure", "arrival"]
+                    }
+                }
+            }],
+            tool_choice={"type": "function", "function": {"name": "search_flights"}}
+        )
+
+        function_args = json.loads(parameter_extraction.choices[0].message.tool_calls[0].function.arguments)
+
+        found_flights = self._search_flights(
+            departure=function_args["departure"],
+            arrival=function_args["arrival"],
+            date=function_args.get("date")
+        )
+
+        response = self.client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": "You are a flight search assistant..."},
+                {"role": "user", "content": f"Original query: {user_query}\nFound flights: {json.dumps(found_flights, indent=2)}"}
+            ],
+            response_format=ChatbotResponse
+        )
+
+        return response.choices[0].message
+
+    except Exception as e:
+        error_response = ChatbotResponse(
+            flights=[],
+            natural_response=f"I apologize, but I encountered an error processing your request: {str(e)}"
+        )
+        return error_response.model_dump_json(indent=2)
+```
+
+This method:
+
+- Extracts parameters from the user's query using OpenAI's function calling.
+- Searches for matching flights.
+- Generates a response from the results of the search in the `ChatbotResponse` format—a structured response consisting of flight data and a natural language response.
+
+### Monitoring Query Refusals with Helicone
+
+As mentioned earlier, structured outputs come with a built-in safety feature that allows your chatbot to refuse unsafe requests. You can easily detect these refusals programmatically.
+
+Since a refusal doesn't match the `response_format` schema you provided, the API introduces a `refusal` field to indicate when the model has declined to respond. This helps you handle refusals gracefully and prevents errors when trying to fit the response into your specified format.
+
+But what if you want to review all the queries your chatbot refused—perhaps to identify any false positives? This is where <a href="https://helicone.ai/" target="_blank" rel="noopener">Helicone</a> comes into play.
+
+With Helicone's request logger, you can view details of all requests made to your chatbot and easily filter for those containing a refusal field. This gives you instant insight into which requests were declined, providing a solid starting point for improving your code or prompts.
+
+### How it works
+
+1. **<a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Create an account</a>** and get an API key from Helicone.
+
+2. **Edit the OpenAI initialization snippet** to integrate with Helicone so you can log all requests:
+
+```python
+self.client = OpenAI(
+  api_key=api_key,
+  base_url="https://oai.helicone.ai/v1",
+  default_headers= {
+      "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
+  })
+```
+
+2. **Navigate to your Helicone dashboard** to view and filter requests. Simply filter for those with a refusal field to quickly see all instances where your chatbot refused to respond.
+
+![Filtering for refusals on Helicone's Request page](/static/blog/openai-structured-outputs/helicone-dashboard.webp)
+
+And that's it! In just a few steps, you can review all refusal responses and optimize your chatbot as needed.
+
+### What else can you do with Helicone?
+
+- <a
+    href="https://docs.helicone.ai/getting-started/quick-start#whats-next"
+    target="_blank"
+    rel="noopener"
+  >
+    Just integrated? Here's what's next.
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/essential-helicone-features"
+    target="_blank"
+    rel="noopener"
+  >
+    4 Essential Helicone Features to Optimize Your LLM App
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/first-ai-app-with-helicone"
+    target="_blank"
+    rel="noopener"
+  >
+    I built my first AI app with Helicone
+  </a>
+
+## Putting It All Together
+
+So, let's bring it all together with a simple `main` function that serves as our entry point:
+
+```python
+def main():
+    # Initialize chatbot with your API key
+    chatbot = FlightChatbot(os.getenv('OPENAI_API_KEY'))
+
+    # Example queries
+    example_queries = [
+        "When is the next flight from New York to London?",
+        "Find me flights from London to New York on January 16, 2025",
+        "Are there any flights from Paris to Tokyo tomorrow?"
+    ]
+
+    for query in example_queries:
+        print(f"User Query: {query}")
+        response = chatbot.process_query(query)
+        print("\nResponse:")
+        print(response.refusal or response.parsed)
+        print("-" * 50 + "\n")
+
+if __name__ == "__main__":
+    main()
+```
+
+### Here's the entire script:
+
+```python
+from pydantic import BaseModel
+from typing import Optional, List
+import json
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Pydantic models for structured data
+class FlightSearchParams(BaseModel):
+    departure: str
+    arrival: str
+    date: Optional[str] = None
+
+class FlightDetails(BaseModel):
+    flight_number: str
+    departure: str
+    arrival: str
+    departure_time: str
+    arrival_time: str
+    price: float
+    available_seats: int
+
+class ChatbotResponse(BaseModel):
+    flights: List[FlightDetails]
+    natural_response: str
+
+class FlightChatbot:
+    def __init__(self, api_key: str):
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url="https://oai.helicone.ai/v1",
+            default_headers= {
+                "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
+            })
+        self.flights_db = [
+            {
+                "flight_number": "BA123",
+                "departure": "New York",
+                "arrival": "London",
+                "departure_time": "2025-01-15T08:30:00",
+                "arrival_time": "2025-01-15T20:45:00",
+                "price": 650.00,
+                "available_seats": 45
+            },
+            {
+                "flight_number": "AA456",
+                "departure": "London",
+                "arrival": "New York",
+                "departure_time": "2025-01-16T10:15:00",
+                "arrival_time": "2025-01-16T13:30:00",
+                "price": 720.00,
+                "available_seats": 12
+            }
+        ]
+
+    def _search_flights(self, departure: str, arrival: str, date: Optional[str] = None) -> List[dict]:
+        """Search for flights using the provided parameters."""
+        matches = []
+        for flight in self.flights_db:
+            if (flight["departure"].lower() == departure.lower() and
+                flight["arrival"].lower() == arrival.lower()):
+                if date:
+                    flight_date = flight["departure_time"].split("T")[0]
+                    if flight_date == date:
+                        matches.append(flight)
+                else:
+                    matches.append(flight)
+        return matches
+
+    def process_query(self, user_query: str) -> str:
+        """Process a user query and return flight information."""
+        try:
+            # First, use function calling to extract parameters
+            parameter_extraction = self.client.chat.completions.create(
+                model="gpt-4o-2024-08-06",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a flight search assistant. Extract search parameters from user queries."
+                    },
+                    {
+                        "role": "user",
+                        "content": user_query
+                    }
+                ],
+                tools=[{
+                    "type": "function",
+                    "function": {
+                        "name": "search_flights",
+                        "description": "Search for flights based on departure and arrival cities, and optionally a date",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "departure": {
+                                    "type": "string",
+                                    "description": "Departure city"
+                                },
+                                "arrival": {
+                                    "type": "string",
+                                    "description": "Arrival city"
+                                },
+                                "date": {
+                                    "type": "string",
+                                    "description": "Flight date in YYYY-MM-DD format",
+                                    "format": "date"
+                                }
+                            },
+                            "required": ["departure", "arrival"]
+                        }
+                    }
+                }],
+                tool_choice={"type": "function", "function": {"name": "search_flights"}}
+            )
+
+            # Extract parameters from function call
+            function_args = json.loads(parameter_extraction.choices[0].message.tool_calls[0].function.arguments)
+
+            # Search for flights
+            found_flights = self._search_flights(
+                departure=function_args["departure"],
+                arrival=function_args["arrival"],
+                date=function_args.get("date")
+            )
+
+            # Use parse helper to generate structured response with natural language
+            response = self.client.beta.chat.completions.parse(
+                model="gpt-4o-2024-08-06",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a flight search assistant. Generate a response containing:
+                        1. A list of structured flight details
+                        2. A natural language response explaining the search results
+
+                        For the natural language response:
+                        - Be concise and helpful
+                        - Include key details like flight numbers, times, and prices
+                        - If no flights are found, explain why and suggest alternatives"""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Original query: {user_query}\nFound flights: {json.dumps(found_flights, indent=2)}"
+                    }
+                ],
+                response_format=ChatbotResponse
+            )
+            return response.choices[0].message
+
+        except Exception as e:
+            error_response = ChatbotResponse(
+                flights=[],
+                natural_response=f"I apologize, but I encountered an error processing your request: {str(e)}"
+            )
+            return error_response.model_dump_json(indent=2)
+
+def main():
+    # Initialize chatbot with your API key
+    chatbot = FlightChatbot(os.getenv('OPENAI_API_KEY'))
+
+    # Example queries
+    example_queries = [
+        "When is the next flight from New York to London?",
+        "Find me flights from London to New York on January 16, 2025",
+        "Are there any flights from Paris to Tokyo tomorrow?"
+    ]
+
+    for query in example_queries:
+        print(f"User Query: {query}")
+        response = chatbot.process_query(query)
+        print("\nResponse:")
+        print(response.refusal or response.parsed)
+        print("-" * 50 + "\n")
+
+if __name__ == "__main__":
+    main()
+```
+
+## Running the Chatbot
+
+1. Make sure your `.env` file is set up with your API keys.
+2. Run the script:
+
+```bash
+python your_script_name.py
+```
+
+That's it! You now have a fully functioning flight search chatbot that can take user input, call a function with the right parameters, and return a structured output—pretty neat, huh?
+
+## Conclusion
+
+OpenAI's Structured Outputs offer developers a powerful tool for generating reliable, structured data from natural language inputs, allowing you to enhance the consistency, efficiency, and safety of your AI applications.
+
+This guide demonstrated the practical application of Structured Outputs by building a flight information chatbot. We also highlighted the use of Helicone's advanced monitoring capabilities, which offer valuable insights into your chatbot's performance and help identify areas for improvement.
+
+Whether you're developing complex workflows or simply trying to extract or output structured data, Structured Outputs pave the way for more predictable and robust AI-powered solutions.
+
+### You might also like:
+
+- <a
+    href="https://www.helicone.ai/blog/pdf-chatbot-tutorial"
+    target="_blank"
+    rel="noopener"
+  >
+    Building a RAG-Powered PDF Chatbot with LLMs and Vector Search
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/test-your-llm-prompts"
+    target="_blank"
+    rel="noopener"
+  >
+    How to Test Your LLM Prompts (With Examples)
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions"
+    target="_blank"
+    rel="noopener"
+  >
+    Debugging RAG Chatbots and AI Agents with Sessions
+  </a>
+
+<Questions />

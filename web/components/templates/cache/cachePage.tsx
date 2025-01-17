@@ -6,25 +6,26 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
-import { BarChart, Divider } from "@tremor/react";
+import { BarChart } from "@tremor/react";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import RequestsPageV2 from "../requestsV2/requestsPageV2";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ModelPill from "../requestsV2/modelPill";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import { TimeFilter } from "../../../lib/api/handlerWrappers";
+import { TimeFilter } from "../../../services/lib/filters/filterDefs";
 import { useCachePageClickHouse } from "./useCachePage";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
 import { formatNumber } from "../users/initialColumns";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { Separator } from "@/components/ui/separator";
 
 interface CachePageProps {
   currentPage: number;
@@ -187,7 +188,7 @@ const CachePage = (props: CachePageProps) => {
 
             {isPro && (
               <div>
-                <Divider>Or</Divider>
+                <Separator>or</Separator>
 
                 <div className="mt-4">
                   <h3 className="text-xl text-black dark:text-white font-semibold">

@@ -1,4 +1,3 @@
-import { LatencyOverTime } from "../../../pages/api/metrics/latencyOverTime";
 import { Result, resultMap } from "../../result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
@@ -15,4 +14,8 @@ export async function getLatencyOverTime(
       duration: Number(d.latency),
     }))
   );
+}
+export interface LatencyOverTime {
+  duration: number;
+  time: Date;
 }

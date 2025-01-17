@@ -288,6 +288,7 @@ export type Database = {
       }
       evaluator: {
         Row: {
+          code_template: Json | null
           created_at: string
           id: string
           llm_template: Json | null
@@ -297,6 +298,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          code_template?: Json | null
           created_at?: string
           id?: string
           llm_template?: Json | null
@@ -306,6 +308,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          code_template?: Json | null
           created_at?: string
           id?: string
           llm_template?: Json | null
@@ -360,6 +363,115 @@ export type Database = {
           },
         ]
       }
+      evaluator_experiments_v3: {
+        Row: {
+          created_at: string
+          evaluator: string
+          experiment: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          evaluator: string
+          experiment: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          evaluator?: string
+          experiment?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_evaluator_experiments_v3_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_evaluator_experiments_v3_experiment_fkey"
+            columns: ["experiment"]
+            isOneToOne: false
+            referencedRelation: "experiment_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_cell: {
+        Row: {
+          column_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          row_index: number
+          status: string | null
+          value: string | null
+        }
+        Insert: {
+          column_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          row_index: number
+          status?: string | null
+          value?: string | null
+        }
+        Update: {
+          column_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          row_index?: number
+          status?: string | null
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_cell_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_column"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_column: {
+        Row: {
+          column_name: string
+          column_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          table_id: string
+        }
+        Insert: {
+          column_name: string
+          column_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          table_id: string
+        }
+        Update: {
+          column_name?: string
+          column_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_column_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_table"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_dataset_v2_row: {
         Row: {
           created_at: string
@@ -392,6 +504,107 @@ export type Database = {
             columns: ["input_record"]
             isOneToOne: false
             referencedRelation: "prompt_input_record"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_output: {
+        Row: {
+          created_at: string
+          experiment_id: string | null
+          id: number
+          input_record_id: string | null
+          is_original: boolean
+          prompt_version_id: string | null
+          request_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          experiment_id?: string | null
+          id?: number
+          input_record_id?: string | null
+          is_original?: boolean
+          prompt_version_id?: string | null
+          request_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string | null
+          id?: number
+          input_record_id?: string | null
+          is_original?: boolean
+          prompt_version_id?: string | null
+          request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_experiment_output_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_output_input_record_id_fkey"
+            columns: ["input_record_id"]
+            isOneToOne: false
+            referencedRelation: "prompt_input_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_output_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_output_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_table: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          metadata: Json | null
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_table_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_table_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]
@@ -529,6 +742,58 @@ export type Database = {
             columns: ["result_request_id"]
             isOneToOne: false
             referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_v3: {
+        Row: {
+          copied_original_prompt_version: string | null
+          created_at: string
+          id: string
+          input_keys: string[] | null
+          name: string
+          organization: string
+          original_prompt_version: string
+        }
+        Insert: {
+          copied_original_prompt_version?: string | null
+          created_at?: string
+          id?: string
+          input_keys?: string[] | null
+          name: string
+          organization: string
+          original_prompt_version: string
+        }
+        Update: {
+          copied_original_prompt_version?: string | null
+          created_at?: string
+          id?: string
+          input_keys?: string[] | null
+          name?: string
+          organization?: string
+          original_prompt_version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_experiment_v3_copied_original_prompt_version_fkey"
+            columns: ["copied_original_prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v3_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v3_original_prompt_version_fkey"
+            columns: ["original_prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -755,6 +1020,7 @@ export type Database = {
           key_permissions: string | null
           organization_id: string
           soft_delete: boolean
+          temp_key: boolean
           user_id: string
         }
         Insert: {
@@ -765,6 +1031,7 @@ export type Database = {
           key_permissions?: string | null
           organization_id: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id: string
         }
         Update: {
@@ -775,6 +1042,7 @@ export type Database = {
           key_permissions?: string | null
           organization_id?: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id?: string
         }
         Relationships: [
@@ -1259,6 +1527,45 @@ export type Database = {
           },
         ]
       }
+      online_evaluators: {
+        Row: {
+          config: Json | null
+          created_at: string
+          evaluator: string
+          id: number
+          organization: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          evaluator: string
+          id?: number
+          organization: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          evaluator?: string
+          id?: number
+          organization?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_online_evaluators_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_online_evaluators_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_rate_limit_tracker: {
         Row: {
           created_at: string | null
@@ -1293,6 +1600,7 @@ export type Database = {
           color: string
           created_at: string | null
           domain: string | null
+          governance_settings: Json | null
           has_onboarded: boolean
           icon: string
           id: string
@@ -1320,6 +1628,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1347,6 +1656,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1443,18 +1753,21 @@ export type Database = {
       organization_member: {
         Row: {
           created_at: string | null
+          governance_limits: Json | null
           member: string
           org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
+          governance_limits?: Json | null
           member: string
           org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
+          governance_limits?: Json | null
           member?: string
           org_role?: string
           organization?: string
@@ -1533,6 +1846,35 @@ export type Database = {
           },
         ]
       }
+      pi_session: {
+        Row: {
+          created_at: string
+          id: number
+          organization_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          organization_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          organization_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_pi_session_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_input_keys: {
         Row: {
           created_at: string | null
@@ -1566,6 +1908,7 @@ export type Database = {
         Row: {
           auto_prompt_inputs: Json
           created_at: string | null
+          experiment_id: string | null
           id: string
           inputs: Json
           prompt_version: string
@@ -1574,6 +1917,7 @@ export type Database = {
         Insert: {
           auto_prompt_inputs?: Json
           created_at?: string | null
+          experiment_id?: string | null
           id?: string
           inputs: Json
           prompt_version: string
@@ -1582,6 +1926,7 @@ export type Database = {
         Update: {
           auto_prompt_inputs?: Json
           created_at?: string | null
+          experiment_id?: string | null
           id?: string
           inputs?: Json
           prompt_version?: string
@@ -1600,6 +1945,13 @@ export type Database = {
             columns: ["source_request"]
             isOneToOne: false
             referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_prompt_input_record_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_v3"
             referencedColumns: ["id"]
           },
         ]
@@ -1648,6 +2000,7 @@ export type Database = {
       prompts_versions: {
         Row: {
           created_at: string | null
+          experiment_id: string | null
           helicone_template: Json | null
           id: string
           major_version: number
@@ -1655,11 +2008,14 @@ export type Database = {
           minor_version: number
           model: string | null
           organization: string
+          parent_prompt_version: string | null
           prompt_v2: string
           soft_delete: boolean | null
+          updated_at: string
         }
         Insert: {
           created_at?: string | null
+          experiment_id?: string | null
           helicone_template?: Json | null
           id?: string
           major_version: number
@@ -1667,11 +2023,14 @@ export type Database = {
           minor_version: number
           model?: string | null
           organization: string
+          parent_prompt_version?: string | null
           prompt_v2: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Update: {
           created_at?: string | null
+          experiment_id?: string | null
           helicone_template?: Json | null
           id?: string
           major_version?: number
@@ -1679,8 +2038,10 @@ export type Database = {
           minor_version?: number
           model?: string | null
           organization?: string
+          parent_prompt_version?: string | null
           prompt_v2?: string
           soft_delete?: boolean | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1695,6 +2056,20 @@ export type Database = {
             columns: ["prompt_v2"]
             isOneToOne: false
             referencedRelation: "prompt_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_prompts_versions_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_prompts_versions_parent_prompt_version_fkey"
+            columns: ["parent_prompt_version"]
+            isOneToOne: false
+            referencedRelation: "prompts_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -2158,6 +2533,7 @@ export type Database = {
       score_attribute: {
         Row: {
           created_at: string | null
+          evaluator_id: string | null
           id: string
           organization: string
           score_key: string
@@ -2165,6 +2541,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization: string
           score_key: string
@@ -2172,6 +2549,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -2183,6 +2561,13 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_score_attribute_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
             referencedColumns: ["id"]
           },
         ]
@@ -2543,6 +2928,14 @@ export type Database = {
             }
             Returns: Record<string, unknown>[]
           }
+      ensure_one_demo_org: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
+      }
       ensure_personal: {
         Args: Record<PropertyKey, never>
         Returns: undefined

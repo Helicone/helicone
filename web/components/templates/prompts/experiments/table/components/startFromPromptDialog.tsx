@@ -14,13 +14,13 @@ import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
 import LoadingAnimation from "../../../../../shared/loadingAnimation";
 
-// Move NewExperimentDialog outside of StartFromPromptDialog
 export const NewExperimentDialog = () => {
   const notification = useNotification();
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
     model: "gpt-4",
     messages: [
       {
+        id: "1",
         role: "system",
         content: [{ text: "You are a helpful assistant.", type: "text" }],
       },
@@ -252,77 +252,41 @@ export const StartFromPromptDialog = ({
       );
       return;
     }
-    const dataset = await jawn.POST("/v1/helicone-dataset", {
-      body: {
-        datasetName: "Dataset for Experiment",
-        requestIds: [],
-      },
-    });
-    if (!dataset.data?.data?.datasetId) {
-      notification.setNotification("Failed to create dataset", "error");
-      return;
-    }
     const promptVersion = promptVersions?.find(
       (p) => p.id === selectedVersionId
     );
     const prompt = prompts?.find((p) => p.id === selectedPromptId);
-    const experiment = await jawn.POST("/v1/experiment/new-empty", {
+
+    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
       body: {
-        metadata: {
-          prompt_id: selectedPromptId,
-          prompt_version: selectedVersionId || "",
-          experiment_name:
-            `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}` ||
-            "",
-        },
-        datasetId: dataset.data?.data?.datasetId,
+        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
+        originalPromptVersion: selectedVersionId,
       },
     });
-    if (!experiment.data?.data?.experimentId) {
-      notification.setNotification("Failed to create experiment", "error");
-      return;
-    }
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/subversion",
-      {
-        params: {
-          path: {
-            promptVersionId: selectedVersionId,
-          },
-        },
-        body: {
-          newHeliconeTemplate: JSON.stringify(promptVersion?.helicone_template),
-          isMajorVersion: false,
-          metadata: {
-            experimentAssigned: true,
-          },
-        },
-      }
-    );
 
-    if (result.error || !result.data) {
-      notification.setNotification("Failed to create subversion", "error");
+    if (experimentTableResult.error || !experimentTableResult.data) {
+      notification.setNotification("Failed to create experiment", "error");
       return;
     }
 
     router.push(
-      `/prompts/${selectedPromptId}/subversion/${selectedVersionId}/experiment/${experiment.data?.data?.experimentId}`
+      `/experiments/${experimentTableResult.data?.data?.experimentId}`
     );
   };
 
   return (
-    <DialogContent className="w-[500px] p-4 bg-white shadow-lg rounded-md">
+    <DialogContent className="w-[500px] p-4 shadow-lg rounded-md">
       <div>
         <div className="flex flex-row items-center space-x-2 text-center">
           <BeakerIcon className="w-4 h-4 " />
           <h3 className="font-medium mb-2 text-lg">Start with a prompt</h3>
         </div>
 
-        <p className="text-sm text-gray-500 mb-2">
+        <p className="text-sm text-slate-500 mb-2">
           Choose an existing prompt and select the version you want to
           experiment on.
         </p>
-        <div className="border border-slate-200 rounded-md">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-md">
           <ScrollArea className="flex flex-col overflow-y-auto max-h-[30vh]  py-2  px-1 pt-0">
             {prompts &&
               prompts?.map((prompt) => (
@@ -331,7 +295,7 @@ export const StartFromPromptDialog = ({
                   variant="ghost"
                   className={`w-full justify-start mt-2 ${
                     selectedPromptId === prompt.id
-                      ? "bg-slate-200"
+                      ? "bg-slate-200 dark:bg-slate-800"
                       : "hover:bg-accent"
                   }`}
                   onClick={() => handlePromptSelect(prompt.id)}
@@ -341,11 +305,11 @@ export const StartFromPromptDialog = ({
                 </Button>
               ))}
           </ScrollArea>
-          <div className="flex flex-row border-t border-[#E2E8F0] items-center space-x-2 py-4 px-4 cursor-pointer">
-            <PlusIcon className="h-6 w-6 text-[#334155]" />
+          <div className="flex flex-row border-t border-slate-200 dark:border-slate-700 items-center space-x-2 py-4 px-4 cursor-pointer">
+            <PlusIcon className="h-6 w-6 text-slate-700 dark:text-slate-300" />
             <Dialog>
               <DialogTrigger asChild>
-                <span className="text-md font-normal text-[#334155]">
+                <span className="text-md font-normal text-slate-700 dark:text-slate-300">
                   Create a new prompt
                 </span>
               </DialogTrigger>
@@ -372,20 +336,22 @@ export const StartFromPromptDialog = ({
             </SelectTrigger>
             <SelectContent className="text-xl">
               {!isLoadingVersions &&
-                promptVersions?.map((version: any) => (
-                  <SelectItem
-                    key={version.id}
-                    value={version.id}
-                    className={`cursor-pointer ${
-                      selectedVersionId === version.id
-                        ? "bg-accent"
-                        : "hover:bg-accent"
-                    }`}
-                  >
-                    {version.name ||
-                      `V ${version.major_version}.${version.minor_version}`}
-                  </SelectItem>
-                ))}
+                promptVersions
+                  ?.filter((version) => version.minor_version === 0)
+                  ?.map((version: any) => (
+                    <SelectItem
+                      key={version.id}
+                      value={version.id}
+                      className={`cursor-pointer ${
+                        selectedVersionId === version.id
+                          ? "bg-accent"
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      {version.name ||
+                        `V ${version.major_version}.${version.minor_version}`}
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
         </div>

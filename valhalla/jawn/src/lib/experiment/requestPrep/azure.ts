@@ -5,7 +5,8 @@ import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
 const settingsManager = new SettingsManager();
 export async function prepareRequestAzure(
   apiKey?: string,
-  requestId?: string
+  requestId?: string,
+  experimentId?: string
 ): Promise<{
   url: URL;
   headers: { [key: string]: string };
@@ -23,6 +24,7 @@ export async function prepareRequestAzure(
     "api-key": azureAPIKey,
     Accept: "application/json",
     "Accept-Encoding": "",
+    "Helicone-Manual-Access-Key": process.env.HELICONE_MANUAL_ACCESS_KEY ?? "",
   };
 
   if (apiKey) {
@@ -37,6 +39,12 @@ export async function prepareRequestAzure(
       "Helicone-Request-Id": requestId,
     };
   }
+  if (experimentId) {
+    headers = {
+      ...headers,
+      "Helicone-Experiment-Id": experimentId,
+    };
+  }
 
   const fetchUrl = `${heliconeWorkerUrl}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${apiVersion}`;
 
@@ -49,18 +57,21 @@ export async function prepareRequestAzure(
 export async function prepareRequestAzureFull({
   template,
   secretKey: apiKey,
-  datasetRow,
+  inputs,
+  autoInputs,
   requestId,
+  experimentId,
 }: PreparedRequestArgs): Promise<PreparedRequest> {
   const newRequestBody = autoFillInputs({
     template: template ?? {},
-    inputs: datasetRow.inputRecord?.inputs ?? {},
-    autoInputs: datasetRow.inputRecord?.autoInputs ?? [],
+    inputs: inputs ?? {},
+    autoInputs: autoInputs ?? [],
   });
 
   const { url: fetchUrl, headers } = await prepareRequestAzure(
     apiKey,
-    requestId
+    requestId,
+    experimentId
   );
   return {
     url: fetchUrl,

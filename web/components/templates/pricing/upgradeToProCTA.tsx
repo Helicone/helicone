@@ -1,4 +1,4 @@
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -110,7 +110,7 @@ export const UpgradeToProCTA = ({
           ? "Loading..."
           : isPro
           ? "Upgrade"
-          : "Start 14-day free trial"}
+          : "Upgrade to Pro"}
       </Button>
     </div>
   );

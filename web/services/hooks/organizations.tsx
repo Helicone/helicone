@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { OrgContextValue } from "../../components/layout/organizationContext";
+import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
+import { getHeliconeCookie } from "@/lib/cookies";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -212,22 +213,103 @@ const useOrgsContextManager = () => {
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
       if (x.data && x.data.length > 0) {
-        const firstOrg = x.data[0];
-        setOrg(firstOrg);
-        setOrgCookie(firstOrg.id);
-        setRenderKey((key) => key + 1);
+        const currentOrg = x.data.find(
+          (organization) => organization.id === org?.id
+        );
+        if (currentOrg) {
+          setOrg(currentOrg);
+          setOrgCookie(currentOrg.id);
+          setRenderKey((key) => key + 1);
+        }
       }
     });
   }, [refetch]);
 
+  const [ensuringOneOrg, setEnsuringOneOrg] = useState(false);
+
   useEffect(() => {
-    if ((!orgs || orgs.length === 0) && user?.id) {
-      fetch(`/api/user/${user.id}/ensure-one-org`).then((res) => {
+    if ((!orgs || orgs.length === 0) && user?.id && !ensuringOneOrg) {
+      setEnsuringOneOrg(true);
+      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const isEu = window.location.hostname.includes("eu.");
+      fetch(`/api/user/${user.id}/ensure-one-org`, {
+        method: "POST",
+        body: JSON.stringify({
+          isEu,
+        }),
+      }).then((res) => {
+        setEnsuringOneOrg(false);
         if (res.status === 201) {
         } else if (res.status !== 200) {
           console.error("Failed to create org", res.json());
         } else {
-          refreshCurrentOrg();
+          res.json().then((x) => {
+            fetch(
+              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/evaluator`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "helicone-authorization": JSON.stringify({
+                    _type: "jwt",
+                    token: jwtToken,
+                    orgId: x.orgId,
+                  }),
+                },
+                body: JSON.stringify({
+                  llm_template:
+                    '{\n  "messages": [\n    {\n      "role": "user",\n      "content": [\n        {\n          "type": "text",\n          "text": "Please call the scorer function and use the following context to evaluate the output.\\n\\n\\n\\nHere were the inputs into the LLM:\\n### INPUT BEGIN ###\\n<helicone-prompt-input key=\\"inputs\\" />\\n### INPUT END ###\\n\\nHere was the output of the LLM:\\n### OUTPUT BEGIN ###\\n<helicone-prompt-input key=\\"outputBody\\" />\\n### OUTPUT END ###\\n\\n\\n\\n\\n"\n        }\n      ]\n    }\n  ],\n  "max_tokens": 1024,\n  "temperature": 1,\n  "model": "gpt-3.5-turbo",\n  "tools": [\n    {\n      "type": "function",\n      "function": {\n        "name": "scorer",\n        "description": "Given the inputs as shown in the system message and the output. Please call the scorer function.",\n        "parameters": {\n          "type": "object",\n          "properties": {\n            "PackerQuality": {\n              "description": "You are an expert travel consultant who specializes in evaluating packing list recommendations. Given the travel context and the AI\'s generated packing list, score how well the packing list serves the traveler\'s needs on a scale of 1-100.\\n\\nScoring Rubric:\\n- Weather Appropriateness (25 points)\\n  • Items match destination climate\\n  • Seasonal considerations included\\n  • Layering options if needed\\n  • Weather protection items\\n\\n- Activity Coverage (25 points)\\n  • All planned activities accounted for\\n  • Appropriate gear/clothing for each activity\\n  • Safety equipment where necessary\\n  • Specialized items included\\n\\n- Essential Basics (25 points)\\n  • Core travel items covered\\n  • Toiletries completeness\\n  • Documents and money items\\n  • Electronics and chargers\\n\\n- Practicality (25 points)\\n  • Appropriate for trip duration\\n  • Not overpacked/redundant\\n  • Consideration for luggage limitations\\n  • Items are travel-friendly\\n\\nConsider both inclusion of necessary items and exclusion of unnecessary ones in your scoring. Deduct points for irrelevant items or missed essentials.",\n              "type": "number",\n              "minimum": 1,\n              "maximum": 100\n            }\n          },\n          "required": [\n            "PackerQuality"\n          ]\n        }\n      }\n    }\n  ]\n}',
+                  scoring_type: "LLM-RANGE",
+                  name: "PackerQuality",
+                }),
+              }
+            ).then(async (response) => {
+              const evaluator = await response.json();
+              if (evaluator.data?.id) {
+                await fetch(
+                  `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/evaluator/${evaluator.data.id}/onlineEvaluators`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "helicone-authorization": JSON.stringify({
+                        _type: "jwt",
+                        token: jwtToken,
+                        orgId: x.orgId,
+                      }),
+                    },
+                    body: JSON.stringify({
+                      config: {
+                        sampleRate: 100,
+                        propertyFilters: [
+                          {
+                            key: "Helicone-Prompt-Id",
+                            value: "generate-packing-list",
+                          },
+                        ],
+                      },
+                    }),
+                  }
+                );
+              }
+            });
+
+            fetch(
+              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "helicone-authorization": JSON.stringify({
+                    _type: "jwt",
+                    token: jwtToken,
+                    orgId: x.orgId,
+                  }),
+                },
+              }
+            );
+            refreshCurrentOrg();
+          });
         }
       });
     }
@@ -305,8 +387,8 @@ const useOrgsContextManager = () => {
     isResellerOfCurrentCustomerOrg,
     refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
-      refetch().then(() => {
-        const org = orgs?.find((org) => org.id === orgId);
+      refetch().then((data) => {
+        const org = data?.data?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);

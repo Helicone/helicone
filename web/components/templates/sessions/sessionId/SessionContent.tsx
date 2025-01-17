@@ -13,6 +13,7 @@ import { Row } from "@/components/layout/common";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface SessionContentProps {
   session: Session;
@@ -86,6 +87,14 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
 
+  if (requests.requests.isLoading) {
+    return (
+      <div className="h-screen w-full flex justify-center items-center">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
   return (
     <Col className="h-screen">
       <Tabs
@@ -95,7 +104,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         }
         className="flex flex-col h-full"
       >
-        <div className="sticky top-0 bg-white z-10">
+        <div className="sticky top-0 bg-white dark:bg-slate-950 z-10">
           <Row className="items-center justify-between">
             <BreadCrumb
               className="mx-8 pt-10"
@@ -199,7 +208,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           }
           open={selectedRequestId !== "" && openDrawer}
           setOpen={(open) => handleRequestIdChange("")}
-          properties={[]}
         />
       </Tabs>
     </Col>

@@ -1,0 +1,131 @@
+OpenAI has recently made two significant announcements: the **<span style={{color: '#03A9F4'}}>full release of their o1 reasoning model</span>** and the introduction of **<span style={{color: '#03A9F4'}}>ChatGPT Pro</span>**, a new premium subscription tier. We did some research, here’s a TL;DR on what you missed.
+
+![OpenAI released the full o1 reasoning model on December 5, 2024](/static/blog/openai-o1-and-chatgpt-pro/o1-cover.webp)
+
+## What changed from o1-preview?
+
+- OpenAI o1 now supports **<span style={{color: '#03A9F4'}}>image uploads</span>**, which wasn’t possible with o1-preview.
+- O1 is **<span style={{color: '#03A9F4'}}>more concise</span>** in its thinking, and major errors are reduced. O1 outperforms o1-preview by 34% on difficult real-world questions based on OpenAI’s tests.
+- O1 is **<span style={{color: '#03A9F4'}}>replacing o1-preview</span>** in ChatGPT, which was initially released in September 2024. _Plus_ and _Team_ users will get access today (upon release), while enterprise and education users will have access in a week.
+- OpenAI is working on adding support for tools like web browsing in o1.
+
+## How does o1 compare with GPT-4o?
+
+![Comparing evaluation benchmarks between gpt-4o and openai o1](/static/blog/openai-o1-and-chatgpt-pro/o1-improvement.webp)
+
+- O1 is more concise, powerful, and provides better reasoning in general.
+- In Math, <a href="https://openai.com/index/learning-to-reason-with-llms/" target="_blank">o1 achieved an impressive 83% accuracy</a> on the 2024 AIME exams, designed to challenge the brightest students in the US, while GPT-4o only solved on average 12% of problems.
+- O1 model series significantly outperforms the GPT-4o models on safety benchmarks, such as jailbreak, adherence to content guidelines, with detailed evaluation results in <a href="https://openai.com/index/openai-o1-system-card/" target="_blank">OpenAI o1 System Card</a>.
+- O1 model is better able to follow instructions, where it can prioritize privileged instructions over user or developer messages.
+
+## Is OpenAI o1 available in the API?
+
+O1 support will be available in the API, bringing a range of powerful new features. Developers can look forward to the addition of support for _function calling, enhanced messaging capabilities, image analysis, web browsing, and file upload_ in the coming months. Additionally, OpenAI is preparing to introduce Structured Outputs and vision capabilities in the near future.
+
+<CallToAction
+  title="Save up to 70% on your OpenAI API cost ⚡️"
+  description="Helicone users can cache their responses, optimize prompts, and more."
+  primaryButtonText="Get started for free"
+  primaryButtonLink="/signin"
+  secondaryButtonText="Calculate API costs"
+  secondaryButtonLink="/llm-cost"
+/>
+
+## New Plan: What is ChatGPT _Pro_?
+
+![OpenAI adds a new premium subscription called ChatGPT Pro](/static/blog/openai-o1-and-chatgpt-pro/chatgpt-pro.webp)
+
+ChatGPT Pro is OpenAI's new premium subscription tier for ChatGPT, launched on December 5, 2024. Here’s a short breakdown:
+
+- It costs **<span style={{color: '#03A9F4'}}>$200 per month</span>** — 10x the cost of ChatGPT _Plus_.
+- You get **unlimited usage.** No more daily time limits.
+- You get **unlimited access** to all of OpenAI's models. This includes _o1 pro mode_ — a more powerful version of OpenAI o1, o1, o1-mini, GPT-4o, and Advanced Voice — the human-like conversational feature.
+
+### What is O1 Pro Mode?
+
+OpenAI’s `o1 pro` model is exclusive for ChatGPT _Pro_ users. It’s a version of o1 that uses more compute to think harder and provide more refined and insightful responses to complex problems in areas like data science, programming, and legal analysis.
+
+O1 pro performs better on challenging ML benchmarks on all fronts. See below and OpenAI for <a href="https://openai.com/index/introducing-chatgpt-pro/" target="_blank">detailed benchmarks</a>.
+
+![Comparing o1 pro mode with o1-preview and o1](/static/blog/openai-o1-and-chatgpt-pro/o1-pro-mode-comparison.webp)
+
+### Accessing O1 Pro
+
+Pro users can select `o1 pro mode` in the model picker in ChatGPT. To accommodate the longer response times associated with o1 pro mode, users will see a progress bar indicating wait times and receive notifications when tasks are completed.
+
+### Who is it for?
+
+ChatGPT Pro is aimed at researchers, engineers, and professionals who require advanced AI capabilities daily. Compared to other ChatGPT plans, it is significantly more expensive than ChatGPT Plus ($20/month).
+
+> We think the audience for ChatGPT Pro will be the power users of ChatGPT — those who are already pushing the models to the limits of their capabilities on tasks like math, programming, and writing,
+
+_- Jason Wei, a member of OpenAI’s technical staff, said during a livestreamed press conference._
+
+### How much is ChatGPT Pro?
+
+ChatGPT Pro is $200/month.
+
+### ChatGPT _Pro_ vs. ChatGPT _Plus_ - what should you pick?
+
+The difference lies in model access and relevant features. Here’s a simple breakdown.
+
+|                     | **ChatGPT Free** | **ChatGPT Plus** | **ChatGPT Pro** |
+| ------------------- | ---------------- | ---------------- | --------------- |
+| Price               | $0/month         | $20/month        | $200/month      |
+| GPT-4o mini         | ✅               | ✅               | ✅              |
+| GPT-4o              | Limited          | Up to 5x free    | ✅              |
+| o1                  | ❌               | Limited          | ✅              |
+| o1-mini             | ❌               | Limited          | ✅              |
+| **o1 pro mode**     | ❌               | ❌               | ✅              |
+| Standard voice mode | ✅               | ✅               | ✅              |
+| Advanced voice      | Limited          | ✅               | ✅              |
+| Web browsing        | Limited          | ✅               | ✅              |
+| Data analysis       | Limited          | ✅               | ✅              |
+| Vision              | Limited          | ✅               | ✅              |
+| File uploads        | Limited          | ✅               | ✅              |
+| Use custom GPTs     | Limited          | ✅               | ✅              |
+| Create custom GPTs  | ❌               | ✅               | ✅              |
+| Image generation    | Limited          | ✅               | ✅              |
+| Context Window      | 8K               | 32K              | 128K            |
+
+For detailed plans, visit <a href="https://openai.com/chatgpt/pricing/" target="_blank">ChatGPT Pricing</a>.
+
+### Do you need a ChatGPT Pro subscription for o1?
+
+No, all paid ChatGPT users (_Plus_ and _Pro_) can access o1 through the ChatGPT model selector. ChatGPT _Pro_ subscribers will get a better version of o1 (called o1 pro mode) that uses more compute, but it would take longer to generate responses.
+
+## What’s next?
+
+OpenAI has ambitious plans for its o1 reasoning model and the newly introduced ChatGPT Pro subscription plan. OpenAI intends to **continuously improve the o1 model over time**, including adding function calling capability, adding web browsing, file uploads and other performance improvements.
+
+For the _Pro_ plan, OpenAI is planning to introduce more powerful, compute-intensive productivity features. For developers, **o1 support will be available in the API** with support for function calling, developer messages, structured outputs, vision and more in the near future.
+
+Additionally, OpenAI has initiated a grant program through which 10 grants of ChatGPT _Pro_ will be awarded to medical researchers at leading institutions.
+
+## What to expect in 2025
+
+According to recent statements, GPT-5 is expected to be **released in early 2025**, here's an overview of <a href="https://www.helicone.ai/blog/openai-gpt-5" target="_blank">gpt-5</a> and what to expect.
+
+Based on recent developments, there are also reports about OpenAI's plans to increase the price of ChatGPT Plus over the next few years. Here’s a quick breakdown:
+
+- OpenAI currently charges $20 per month for ChatGPT _Plus_.
+- Over the next five years, OpenAI intends to "aggressively raise" the cost of ChatGPT Plus, it is expected to reach $44 per month by 2029, according to a report by <a href="https://www.nytimes.com/2024/09/27/technology/openai-chatgpt-investors-funding.html" target="_blank">New York Times</a>.
+
+### You might be interested in:
+
+- <a
+    href="http://www.helicone.ai/blog/openai-o3"
+    target="_blank"
+    rel="noopener"
+  >
+    OpenAI o3: What is it and how is it different from o1?
+  </a>
+- <a
+    href="http://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1"
+    target="_blank"
+    rel="noopener"
+  >
+    OpenAI o1 vs Claude 3.5 Sonnet: A Comprehensive Comparison
+  </a>
+
+<Questions />

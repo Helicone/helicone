@@ -2,11 +2,10 @@ import React from "react";
 
 import { Result } from "../../../lib/result";
 import { SingleFilterDef } from "../../../services/lib/filters/frontendFilterDefs";
-import { AdvancedFilterRow, UIFilterRow } from "./themedAdvancedFilters";
-import {
-  UIFilterRowNode,
-  UIFilterRowTree,
-} from "../../../services/lib/filters/uiFilterRowTree";
+
+import { UIFilterRow } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowNode } from "@/services/lib/filters/types";
 import SaveFilterButton from "../../templates/dashboard/saveFilterButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PlusSquareIcon } from "lucide-react";
+import { AdvancedFilterRow } from "./themedAdvancedFilterRow";
 
 interface FilterTreeEditorProps {
   uiFilterRowTree: UIFilterRowTree;
@@ -239,9 +239,7 @@ const FilterTreeEditor: React.FC<FilterTreeEditorProps> = ({
       );
 
       return path.length === 1 ? (
-        <div className="flex flex-col  dark:bg-[#17191d] py-1  rounded-sm">
-          {filterRow}
-        </div>
+        <div className="flex flex-col py-1 rounded-sm">{filterRow}</div>
       ) : (
         filterRow
       );

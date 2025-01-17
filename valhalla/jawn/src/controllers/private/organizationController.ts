@@ -1,18 +1,18 @@
 import {
-  Route,
-  Tags,
-  Security,
-  Controller,
   Body,
-  Post,
-  Request,
-  Path,
+  Controller,
   Delete,
   Get,
+  Path,
+  Post,
   Query,
+  Request,
+  Route,
+  Security,
+  Tags,
 } from "tsoa";
+import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   NewOrganizationParams,
   OrganizationFilter,
@@ -22,8 +22,8 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
-import { supabaseServer } from "../../lib/db/supabase";
 import { StripeManager } from "../../managers/stripe/StripeManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -58,7 +58,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: NewOrganizationParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
+  ): Promise<Result<string, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.createOrganization(requestBody);
@@ -67,7 +67,7 @@ export class OrganizationController extends Controller {
       return err(result.error ?? "Error creating organization");
     } else {
       this.setStatus(201); // set return status 201
-      return ok(null);
+      return ok(result.data.id ?? "");
     }
   }
 
@@ -328,13 +328,20 @@ export class OrganizationController extends Controller {
       return err(memberCount.error ?? "Error getting member count");
     }
 
-    // const userCount = await stripeManager.updateProUserCount(
-    //   memberCount.data - 1
-    // );
+    const org = await organizationManager.getOrg();
+    if (org.error || !org.data) {
+      return err(org.error?.message ?? "Error getting organization");
+    }
 
-    // if (userCount.error) {
-    //   return err(userCount.error ?? "Error updating pro user count");
-    // }
+    if (memberCount.data > 0 && org.data.tier != "free") {
+      const userCount = await stripeManager.updateProUserCount(
+        memberCount.data - 1
+      );
+
+      if (userCount.error) {
+        return err(userCount.error ?? "Error updating pro user count");
+      }
+    }
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,
@@ -343,6 +350,25 @@ export class OrganizationController extends Controller {
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error removing member from organization");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/setup-demo")
+  public async setupDemo(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.setupDemo(
+      request.authParams.organizationId ?? ""
+    );
+    if (result.error) {
+      this.setStatus(500);
+      console.error(result.error);
+      return err(result.error ?? "Error setting up demo");
     } else {
       this.setStatus(201);
       return ok(null);

@@ -4,8 +4,7 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { useMemo } from "react";
-import { useOrg } from "@/components/layout/organizationContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface DatasetsPageProps {
@@ -27,16 +26,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   const router = useRouter();
 
   const org = useOrg();
-
-  const hasAccess = useMemo(() => {
-    return (
-      org?.currentOrg?.tier === "growth" ||
-      org?.currentOrg?.tier === "enterprise" ||
-      (org?.currentOrg?.tier === "pro-20240913" &&
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
-    );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
 
   return (
     <>

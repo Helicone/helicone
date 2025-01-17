@@ -1,34 +1,24 @@
 import { useState } from "react";
 
-import { useOrg } from "../../layout/organizationContext";
+import { useOrg } from "../../layout/org/organizationContext";
 import useAlertsPage from "./useAlertsPage";
-import CreateAlertModal from "./createAlertModal";
+import { CreateAlertModal, EditAlertModal } from "./createAlertModal";
 import { BellIcon, NewspaperIcon } from "@heroicons/react/24/outline";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../supabase/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { Tooltip } from "@mui/material";
-import EditAlertModal from "./editAlertModal";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Col } from "@/components/layout/common";
+import { alertTimeWindows } from "./constant";
 
 interface AlertsPageProps {
   user: User;
 }
-
-export const alertTimeWindows: { [key: string]: number } = {
-  "5 minutes": 5 * 60 * 1000,
-  "10 minutes": 10 * 60 * 1000,
-  "15 minutes": 15 * 60 * 1000,
-  "30 minutes": 30 * 60 * 1000,
-  "1 hour": 60 * 60 * 1000,
-  "1 day": 24 * 60 * 60 * 1000,
-  "1 week": 7 * 24 * 60 * 60 * 1000,
-  "1 month": 30 * 24 * 60 * 60 * 1000,
-};
 
 const AlertsPage = (props: AlertsPageProps) => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);

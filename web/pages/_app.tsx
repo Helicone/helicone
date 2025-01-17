@@ -15,11 +15,14 @@ import { NextPage } from "next";
 import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { OrgContextProvider } from "../components/layout/organizationContext";
+import { OrgContextProvider } from "../components/layout/org/organizationContext";
 import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 declare global {
   interface Window {
@@ -73,7 +76,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                 <OrgContextProvider>
                   <ThemeProvider attribute="class" defaultTheme="light">
                     <TooltipProvider>
-                      {getLayout(<Component {...pageProps} />)}
+                      <div className={inter.className}>
+                        {getLayout(<Component {...pageProps} />)}
+                      </div>
                     </TooltipProvider>
                   </ThemeProvider>
                   <Notification />
@@ -97,6 +102,14 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           id="pylon-snippet"
           dangerouslySetInnerHTML={{
             __html: `(function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/f766dfd3-28f8-40a8-872f-351274cbd306");var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();`,
+          }}
+        />
+      )}
+      {trackingEnabled && (
+        <Script
+          id="rb2b-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `!function(){var reb2b=window.reb2b=window.reb2b||[];if(reb2b.invoked)return;reb2b.invoked=true;reb2b.methods=["identify","collect"];reb2b.factory=function(method){return function(){var args=Array.prototype.slice.call(arguments);args.unshift(method);reb2b.push(args);return reb2b;}};for(var i=0;i<reb2b.methods.length;i++){var key=reb2b.methods[i];reb2b[key]=reb2b.factory(key);}reb2b.load=function(key){var script=document.createElement("script");script.type="text/javascript";script.async=true;script.src="https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"+key+"/LNKLDHM4VMOJ.js.gz";var first=document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script,first);};reb2b.SNIPPET_VERSION="1.0.1";reb2b.load("LNKLDHM4VMOJ");}();`,
           }}
         />
       )}

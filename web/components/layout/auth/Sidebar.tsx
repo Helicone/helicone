@@ -1,46 +1,37 @@
 /* eslint-disable @next/next/no-img-element */
 
-import {
-  ArchiveBoxIcon,
-  BeakerIcon,
-  BellIcon,
-  CircleStackIcon,
-  HomeIcon,
-  LockClosedIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  TableCellsIcon,
-  TagIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import DesktopSidebar, { NavigationItem } from "./DesktopSidebar";
+import DesktopSidebar from "./DesktopSidebar";
+import { ChangelogItem, NavigationItem } from "./types";
 
-import { PiGraphLight } from "react-icons/pi";
-import { useOrg } from "../organizationContext";
-import { NotepadText, TestTube2, Webhook } from "lucide-react";
-import { Enclosure } from "rss-parser";
+import {
+  ArchiveIcon,
+  BellIcon,
+  ChartLineIcon,
+  DatabaseIcon,
+  FlaskConicalIcon,
+  Home,
+  ListTreeIcon,
+  LockIcon,
+  NotepadText,
+  SheetIcon,
+  ShieldCheckIcon,
+  TagIcon,
+  TestTube2,
+  UsersIcon,
+  Webhook,
+} from "lucide-react";
+import { useOrg } from "../org/organizationContext";
 
-export interface ChangelogItem {
-  title: string;
-  description: string;
-  link: string;
-  content: string;
-  "content:encoded": string;
-  "content:encodedSnippet": string;
-  contentSnippet: string;
-  isoDate: string;
-  pubDate: string;
-  image?: Enclosure;
-}
 interface SidebarProps {
   setOpen: (open: boolean) => void;
   changelog: ChangelogItem[];
+  sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
+const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
@@ -50,13 +41,13 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
       {
         name: "Dashboard",
         href: "/dashboard",
-        icon: HomeIcon,
+        icon: Home,
         current: pathname.includes("/dashboard"),
       },
       {
         name: "Requests",
         href: "/requests",
-        icon: TableCellsIcon,
+        icon: SheetIcon,
         current: pathname.includes("/requests"),
       },
 
@@ -69,7 +60,7 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
           {
             name: "Sessions",
             href: "/sessions",
-            icon: PiGraphLight,
+            icon: ListTreeIcon,
             current: pathname.includes("/sessions"),
           },
           {
@@ -108,23 +99,19 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
           {
             name: "Experiments",
             href: "/experiments",
-            icon: BeakerIcon,
+            icon: FlaskConicalIcon,
             current: pathname.includes("/experiments"),
           },
-          ...(!user?.email?.includes("@helicone.ai")
-            ? []
-            : [
-                {
-                  name: "Evaluators",
-                  href: "/evaluators",
-                  icon: SparklesIcon,
-                  current: pathname.includes("/evaluators"),
-                },
-              ]),
+          {
+            name: "Evaluators",
+            href: "/evaluators",
+            icon: ChartLineIcon,
+            current: pathname.includes("/evaluators"),
+          },
           {
             name: "Datasets",
             href: "/datasets",
-            icon: CircleStackIcon,
+            icon: DatabaseIcon,
             current: pathname.includes("/datasets"),
           },
         ],
@@ -139,7 +126,7 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
           {
             name: "Cache",
             href: "/cache",
-            icon: ArchiveBoxIcon,
+            icon: ArchiveIcon,
             current: pathname.includes("/cache"),
           },
           {
@@ -173,7 +160,7 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
                 {
                   name: "Vault",
                   href: "/vault",
-                  icon: LockClosedIcon,
+                  icon: LockIcon,
                   current: pathname.includes("/vault"),
                 },
               ],
@@ -227,16 +214,12 @@ const Sidebar = ({ changelog, setOpen }: SidebarProps) => {
   );
 
   return (
-    <>
-      {/* Remove this line */}
-      {/* <MobileNavigation NAVIGATION={NAVIGATION} setOpen={setOpen} /> */}
-
-      <DesktopSidebar
-        changelog={changelog}
-        NAVIGATION={NAVIGATION}
-        setOpen={setOpen}
-      />
-    </>
+    <DesktopSidebar
+      sidebarRef={sidebarRef}
+      changelog={changelog}
+      NAVIGATION={NAVIGATION}
+      setOpen={setOpen}
+    />
   );
 };
 

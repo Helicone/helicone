@@ -3,8 +3,6 @@ title: "Vercel AI SDK Integration"
 sidebarTitle: "Vercel AI"
 description: "Use Vercel AI SDK to integrate with Helicone to log your OpenAI usage."
 "twitter:title": "Vercel AI SDK Integration - Helicone OSS LLM Observability"
-icon: "triangle"
-iconType: "solid"
 ---
 
 ## Proxy Integration
@@ -22,7 +20,7 @@ HELICONE_API_KEY=<your API key>
   <Step title="Modify the base URL and add a Helicone-Auth header">
 <CodeGroup>
 
-```javascript example.js
+```javascript OpenAI
 import { createOpenAI } from "@ai-sdk/openai";
 
 const openai = createOpenAI({
@@ -33,10 +31,26 @@ const openai = createOpenAI({
 });
 
 // Use openai to make API calls
-// For example:
-const response = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
-  messages: [{ role: "user", content: "Hello, world" }],
+const response = streamText({
+  model: openai("gpt-4o"),
+  prompt: "Hello world",
+});
+```
+
+```javascript Anthropic
+import { createAnthropic } from "@ai-sdk/anthropic";
+
+const anthropic = createAnthropic({
+  baseURL: "https://anthropic.helicone.ai/v1",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+
+// Use openai to make API calls
+const response = streamText({
+  model: anthropic("claude-3-5-sonnet-20241022"),
+  prompt: "Hello world",
 });
 ```
 

@@ -7,6 +7,7 @@ import * as hamster from "../../public/lottie/Aniki Hamster.json";
 import * as plane from "../../public/lottie/Paper Airplane.json";
 import * as PartyParrot from "../../public/lottie/PartyParrot.json";
 import * as Pacman from "../../public/lottie/Pacman.json";
+import * as Cube from "../../public/lottie/cube.json";
 
 type Animation =
   | typeof chicky
@@ -28,7 +29,7 @@ const LoadingAnimation = ({
   height = 300,
   width = 300,
 }: LoadingAnimationProps) => {
-  const animation = defaultAnimation || hamster;
+  const animation = defaultAnimation || Cube;
 
   return (
     <div className="flex flex-col items-center justify-center align-middle w-full space-y-4">

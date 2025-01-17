@@ -11,7 +11,7 @@ import { FaDiscord } from "react-icons/fa6";
 import { CalendarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { ChangelogItem } from "./auth/Sidebar";
+import { ChangelogItem } from "./auth/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import clsx from "clsx";
 
@@ -27,9 +27,7 @@ const SidebarHelpDropdown = ({
   >("latestChangelogSeen", null);
 
   const hasNewChangelog =
-    latestChangelogSeen &&
-    changelog.length > 0 &&
-    latestChangelogSeen !== changelog[0].title;
+    changelog.length > 0 && latestChangelogSeen !== changelog[0].title;
 
   return (
     <DropdownMenu

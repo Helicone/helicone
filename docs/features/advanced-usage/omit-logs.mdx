@@ -7,11 +7,6 @@ description: "Configure Helicone to selectively exclude sensitive request and re
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-<Info>
-  **Who can use this feature**: Anyone on any
-  [plan](https://www.helicone.ai/pricing).{" "}
-</Info>
-
 ## Introduction
 
 The "Omit Logs" feature is designed for users who may not want to have Helicone store or log their request body or response body. This can be particularly useful for those concerned with privacy, data sensitivity, or simply wanting to keep their data footprint minimal.
@@ -34,7 +29,17 @@ The "Omit Logs" feature is designed for users who may not want to have Helicone 
   storage.{" "}
 </Check>
 
-## Getting Started
+There are two ways to omit logs:
+
+1. **Headers**: Use this if you're not using Helicone's [Python Asynchronous Logging](/getting-started/integration-method/openllmetry).
+2. **Helicone Python Async Logging**: Use this if you're using Helicone's [Python Asynchronous Logging](/getting-started/integration-method/openllmetry) and don't want to send the request or response to our backend.
+
+## Headers
+
+<Note>
+  **Note:** This method does not store the request or response but it still
+  sends it to our backend.
+</Note>
 
 To omit logging requests, set `Helicone-Omit-Request` to `true`.
 
@@ -85,6 +90,38 @@ const openai = new OpenAIApi(configuration);
 ```
 
 </CodeGroup>
+
+## Python Async Logging
+
+If you are using Helicone's [Asynchronous Logging](/getting-started/integration-method/openllmetry), you have the option to not even send the request or response to our backend.
+
+```python
+from helicone_async import HeliconeAsyncLogger
+from openai import OpenAI
+
+logger = HeliconeAsyncLogger(
+  api_key=HELICONE_API_KEY,
+)
+
+logger.init()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+logger.disable_content_tracing() # This will omit the request and response from being sent to our backend till the time you call logger.enable_content_tracing()
+
+# Make the OpenAI call
+response = client.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[{"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Who won the world series in 2020?"},
+            {"role": "assistant",
+             "content": "The Los Angeles Dodgers won the World Series in 2020."},
+            {"role": "user", "content": "Where was it played?"}]
+)
+
+print(response.choices[0])
+logger.enable_content_tracing() # All future requests will be sent with the request and response
+```
 
 ### Request View
 

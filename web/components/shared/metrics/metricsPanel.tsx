@@ -1,4 +1,4 @@
-import { Card } from "@tremor/react";
+import { Card } from "@/components/ui/card";
 
 export interface MetricsPanelProps {
   metric: {
@@ -21,10 +21,10 @@ export function MetricsPanel(props: MetricsPanelProps) {
   const { metric } = props;
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg h-full flex flex-col ring-0">
-      <dd className="text-slate-900 dark:text-slate-50 flex flex-col flex-grow">
+    <Card className="h-full flex flex-col">
+      <dd className="text-slate-900 dark:text-slate-50 flex flex-col flex-grow p-4">
         <div className="flex w-full items-center justify-between">
-          <div className="text-slate-500 text-xs">{metric.label}</div>
+          <div className="text-slate-500 text-[13px]">{metric.label}</div>
           {metric.icon && <metric.icon className="w-6 h-6 text-slate-500" />}
         </div>
         {metric.isLoading ? (

@@ -2,6 +2,31 @@ import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helicone Blog | AI Development Insights & Best Practices",
+  description:
+    "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+  icons: "/static/logo.webp",
+  openGraph: {
+    type: "website",
+    siteName: "Helicone.ai",
+    url: "https://www.helicone.ai/blog",
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    images: "/static/new-open-graph.png",
+    locale: "en_US",
+  },
+  twitter: {
+    title: "Helicone Blog | AI Development Insights & Best Practices",
+    description:
+      "Stay updated with the latest insights on AI development, LLM observability, and industry best practices from the team building the future of AI infrastructure.",
+    card: "summary_large_image",
+    images: "/static/new-open-graph.png",
+  },
+};
 
 type BlogPostProps = {
   blog: BlogStructure;
@@ -15,6 +40,7 @@ const HEADSHOTS = {
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
+  "Kavin Desi": "/static/blog/kavin-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -39,7 +65,7 @@ function metaDataToBlogStructure(
           ],
     title: metadata.title,
     description: metadata.description,
-    badgeText: "insight",
+    badgeText: metadata.badge || "insight",
     date: metadata?.date ?? "",
     href: `/blog/${folderName}`,
     imageUrl: metadata?.images ?? "",
@@ -75,7 +101,7 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
               "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset"
             )}
           >
-            / {blog.badgeText.toLowerCase()}
+            {blog.badgeText.toLowerCase()}
           </span>
           <span className="text-gray-400 text-sm">-</span>
           <span className="text-gray-400 text-sm">{blog.time}</span>
@@ -121,7 +147,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
         <div className="flex items-center gap-2">
           <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
-            / {blog.badgeText.toLowerCase()}
+            {blog.badgeText.toLowerCase()}
           </span>
           <span className="text-gray-400 text-sm">-</span>
           <span className="text-gray-400 text-sm">{blog.time}</span>
@@ -188,6 +214,96 @@ export type BlogStructure =
     };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "tree-of-thought-prompting",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-structured-outputs",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "chain-of-thought-prompting",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "rag-chunking-strategies",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-o3",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gemini-2.0-flash",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "crewai-vs-dify-ai",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "google-gemini-exp-1206",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "meta-llama-3-3-70-b-instruct",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-o1-and-chatgpt-pro",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-gpt-5",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "test-your-llm-prompts",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "crewai-vs-autogen",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-for-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "pdf-chatbot-tutorial",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llamaindex-vs-langchain",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "llm-api-providers",
@@ -284,39 +400,14 @@ const blogContent: BlogStructure[] = [
     },
   },
   {
-    title: "What is Prompt Management?",
-    description:
-      "Iterating your prompts is the #1 way to optimize user interactions with large language models (LLMs). Should you choose Helicone, Pezzo, or Agenta? We will explore the benefits of choosing a prompt management tool and what to look for.",
-    badgeText: "insight",
-    date: "Aug 1, 2024",
-    href: "/blog/prompt-management",
-    imageUrl: "/static/blog/prompt-management/cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "5 minute read",
+    dynmaicEntry: {
+      folderName: "prompt-management",
+    },
   },
   {
-    title:
-      "Meta Releases SAM 2 and What It Means for Developers Building Multi-Modal AI",
-    description:
-      "Meta's release of SAM 2 (Segment Anything Model for videos and images) represents a significant leap in AI capabilities, revolutionizing how developers and tools like Helicone approach multi-modal observability in AI systems.",
-    badgeText: "insight",
-    date: "July 30, 2024",
-    href: "/blog/sam-2",
-    imageUrl: "/static/blog/sam-2-cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "sam-2",
+    },
   },
   {
     dynmaicEntry: {
@@ -397,7 +488,7 @@ const blogContent: BlogStructure[] = [
       "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
     description:
       "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
-    badgeText: "feature",
+    badgeText: "how-to",
     date: "June 14, 2024",
     href: "/blog/custom-properties",
     imageUrl: "/static/blog/custom-properties/cover.webp",
@@ -431,7 +522,7 @@ const blogContent: BlogStructure[] = [
     title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
     description:
       "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    badgeText: "team's pick",
+    badgeText: "insight",
     date: "May 30, 2024",
     href: "/blog/cole-github-copilot",
     imageUrl: "/static/blog/cole-copilot.webp",
@@ -453,7 +544,7 @@ const blogContent: BlogStructure[] = [
     title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
     description:
       "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
-    badgeText: "team's pick",
+    badgeText: "insight",
     date: "May 23, 2024",
     href: "/blog/stefan-posthog",
     imageUrl: "/static/blog/stefan-posthog/posthog-cover.webp",
@@ -475,7 +566,7 @@ const blogContent: BlogStructure[] = [
     title: "A step by step guide to switch to gpt-4o safely with Helicone",
     description:
       "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
-    badgeText: "Product",
+    badgeText: "guide",
     date: "May 14, 2024",
     href: "/blog/switch-models-safely",
     imageUrl: "/static/blog/experiments/gpt-4o.webp",
@@ -528,7 +619,7 @@ const blogContent: BlogStructure[] = [
       "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
     description:
       "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
-    badgeText: "AI Safety",
+    badgeText: "insight",
     date: "Sep 19, 2023",
     href: "/blog/ai-safety",
     imageUrl: "/static/blog/AI.webp",
@@ -546,7 +637,7 @@ const blogContent: BlogStructure[] = [
       "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
     description:
       "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
-    badgeText: "Product",
+    badgeText: "feature",
     date: "Sep 13, 2023",
     href: "/blog/vault-introduction",
     imageUrl: "/static/blog/vault_asset.webp",
@@ -563,7 +654,7 @@ const blogContent: BlogStructure[] = [
     title: "Life after Y Combinator: Three Key Lessons for Startups",
     description:
       "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-    badgeText: "Personal",
+    badgeText: "insight",
     date: "Sep 11, 2023",
     href: "/blog/life-after-yc",
     imageUrl: "/static/blog/yc.webp",
@@ -580,7 +671,7 @@ const blogContent: BlogStructure[] = [
     title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
     description:
       "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
-    badgeText: "Education",
+    badgeText: "company",
     date: "Sep 1, 2023",
     href: "/blog/open-source-monitoring-for-openai",
     imageUrl: "/static/blog/openai.webp",
@@ -597,7 +688,7 @@ const blogContent: BlogStructure[] = [
     title: "Helicone partners with AutoGPT",
     description:
       "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
-    badgeText: "Partnership",
+    badgeText: "company",
     date: "Jul 30, 2023",
     href: "/blog/autoGPT",
     imageUrl: "/static/blog/autogpt.webp",
@@ -680,7 +771,7 @@ const blogContent: BlogStructure[] = [
 
 const Blog = async () => {
   return (
-    <div className="w-full bg-[#f8feff] h-full antialiased relative text-black">
+    <div className="w-full bg-white h-full antialiased relative text-black">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
           src={"/static/pricing/bouncing-cube.webp"}
