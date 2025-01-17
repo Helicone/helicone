@@ -1,0 +1,58 @@
+---
+title: "DeepSeek AI Integration"
+sidebarTitle: "DeepSeek AI"
+description: "Connect Helicone with DeepSeek AI, a platform that provides powerful language models including MoE and Code models for various AI applications."
+"twitter:title": "DeepSeek AI Integration - Helicone OSS LLM Observability"
+---
+
+You can follow their documentation here: [https://api-docs.deepseek.com/](https://api-docs.deepseek.com/)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a DeepSeek AI account">
+    Log into platform.deepseek.ai or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and DEEPSEEK_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+DEEPSEEK_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following DeepSeek AI URL with the Helicone Gateway URL:
+
+`https://api.deepseek.ai/v1/chat/completions` -> `https://deepseek.helicone.ai/v1/chat/completions`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
+```
+
+</Step>
+</Steps>
+
+Now you can access all the models on FireworksAI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <DEEPSEEK_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "deepseek-chat",
+    "messages": [{"role": "user", "content": "Say this is a test"}]
+}' \
+  --url https://deepseek.helicone.ai/chat/completions
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+And for more information on how to use DeepSeek AI, see [DeepSeek AI Docs](https://platform.deepseek.ai/docs).
