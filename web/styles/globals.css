@@ -16,3 +16,7 @@
     --chart-10: 0.588 0.158 241.966; /* oklch(0.588 0.158 241.966) */
   }
 }
+
+.interactive {
+  @apply transition-transform hover:shadow-md active:scale-95;
+}

@@ -47,9 +47,10 @@ module.exports = {
         },
       },
       colors: {
+        heliblue: "#0DA5E8",
         aui: {
           primary: {
-            DEFAULT: "#0284c7",
+            DEFAULT: "#18a4e9",
           },
         },
         // light mode
