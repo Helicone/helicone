@@ -683,9 +683,7 @@ const chatCompletion = await openai.chat.completions.create(
                         </Button>
                         {showPricingCompare || (
                           <Button asChild>
-                            <Link href="/settings/billing">
-                              Start 14-day free trial
-                            </Link>
+                            <Link href="/settings/billing">Upgrade to Pro</Link>
                           </Button>
                         )}
                       </div>
