@@ -4,8 +4,8 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getStripeCustomer } from "../../../utlis/stripeHelpers";
-import { stripeServer } from "../../../utlis/stripeServer";
+import { getStripeCustomer } from "../../../utils/stripeHelpers";
+import { stripeServer } from "../../../utils/stripeServer";
 import { supabaseServer } from "../../../lib/supabaseServer";
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 

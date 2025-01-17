@@ -3,7 +3,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { useOrg } from "../layout/org/organizationContext";
 import ThemedModal from "./themed/themedModal";
-import getStripe from "../../utlis/getStripe";
+import getStripe from "../../utils/getStripe";
 
 import { clsx } from "./clsx";
 import { useGetRequestCountClickhouse } from "../../services/hooks/requests";
@@ -40,11 +40,11 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.icon
+    icon => icon.name === orgContext?.currentOrg?.icon
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    (icon) => icon.name === orgContext?.currentOrg?.color
+    icon => icon.name === orgContext?.currentOrg?.color
   );
 
   const getProgress = (count: number) => {

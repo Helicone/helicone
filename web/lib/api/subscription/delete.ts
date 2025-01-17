@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { Result } from "../../result";
-import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
-import { stripeServer } from "../../../utlis/stripeServer";
+import { getStripeCustomerFromNext } from "../../../utils/stripeHelpers";
+import { stripeServer } from "../../../utils/stripeServer";
 
 export async function deleteSubscription(
   req: NextApiRequest,
@@ -22,7 +22,7 @@ export async function deleteSubscription(
   }
   if (customer.subscriptions && customer.subscriptions.data.length > 0) {
     const subscription = customer.subscriptions.data.find(
-      (sub) => sub.id === subscriptionId
+      sub => sub.id === subscriptionId
     );
     if (!subscription) {
       return { data: null, error: "No matching subscription id" };

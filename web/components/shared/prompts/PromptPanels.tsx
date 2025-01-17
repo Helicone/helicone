@@ -9,7 +9,7 @@ import {
   canAddMessagePair,
   canAddPrefillMessage,
   isRemovableMessage,
-} from "@/utlis/messages";
+} from "@/utils/messages";
 import PromptBox from "@/components/shared/prompts/PromptBox";
 
 interface PromptPanelsProps {
