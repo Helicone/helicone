@@ -11,6 +11,7 @@ import DemoModal from "./DemoModal";
 import MainContent from "./MainContent";
 import Sidebar from "./Sidebar";
 import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
+import { useOrg } from "../org/organizationContext";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -29,11 +30,33 @@ const AuthLayout = (props: AuthLayoutProps) => {
   }, [pathname]);
 
   const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
+  const org = useOrg();
 
-  const banner = useMemo(
-    () => alertBanners?.data?.find((x) => x.active),
-    [alertBanners]
-  );
+  const banner = useMemo(() => {
+    const activeBanner = alertBanners?.data?.find((x) => x.active);
+    if (activeBanner) {
+      return {
+        message: activeBanner.message,
+        title: activeBanner.title,
+        active: activeBanner.active,
+        created_at: activeBanner.created_at,
+        id: activeBanner.id,
+        updated_at: activeBanner.updated_at,
+      };
+    }
+    if (org?.currentOrg?.tier === "demo") {
+      return {
+        message: (
+          <>
+            Click <span className="font-semibold">Ready to Integrate</span> on
+            the bottom left to get started.
+          </>
+        ),
+        title: "Demo Organization",
+        active: true,
+      };
+    }
+  }, [alertBanners?.data, org?.currentOrg?.tier]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 
