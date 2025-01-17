@@ -299,10 +299,6 @@ async function modifyEnvBasedOnPath(
         GATEWAY_TARGET: "https://qstash.upstash.io",
       };
     } else if (hostParts[0].includes("deepseek")) {
-      const pathname = new URL(request.url).pathname;
-      if (!pathname.startsWith("/llm")) {
-        throw new Error("QStash only accepts routes that start with /llm");
-      }
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
