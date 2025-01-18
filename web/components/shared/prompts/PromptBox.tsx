@@ -1,42 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-
-// Helper functions for API calls
-async function streamResponseAPI(
-  params: any,
-  options?: { headers?: { "x-cancel": string } }
-) {
-  const response = await fetch("/api/actions/stream", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-cancel": options?.headers?.["x-cancel"] || "0",
-    },
-    body: JSON.stringify(params),
-  });
-  return response.body as ReadableStream<Uint8Array>;
-}
-
-async function getAutoCompleteSuggestionAPI(
-  currentText: string,
-  contextText: string,
-  options?: { headers?: { "x-cancel": string } }
-) {
-  const response = await fetch("/api/actions/autocomplete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-cancel": options?.headers?.["x-cancel"] || "0",
-    },
-    body: JSON.stringify({ currentText, contextText }),
-  });
-  return response.body as ReadableStream<Uint8Array>;
-}
-
 import { $assistant, $system, $user } from "@/utils/llm";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 import { createSelectionRange } from "@/utils/selection";
-import { readStream } from "@/utils/stream";
+import { readStream } from "@/lib/api/llm/read-stream";
+import { generate } from "@/lib/api/llm/generate";
+import { generateStream } from "@/lib/api/llm/generate-stream";
 
 import { Variable } from "@/types/prompt-state";
 
@@ -81,6 +50,32 @@ interface PromptBoxProps {
   onVariableCreate?: (variable: Variable) => void;
   contextText?: string;
   variables?: Variable[];
+}
+
+async function getAutoCompleteSuggestion(
+  value: string,
+  contextText: string,
+  options?: { headers?: { "x-cancel": string } }
+) {
+  return generate({
+    model: "anthropic/claude-3-5-haiku:beta",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an AI assistant helping autocomplete text. Provide natural, contextually relevant continuations.",
+      },
+      {
+        role: "user",
+        content: `Context: ${contextText}\nText to complete: ${value}`,
+      },
+    ],
+    temperature: 0.7,
+    stream: {
+      onChunk: () => {},
+      onCompletion: () => {},
+    },
+  });
 }
 
 export default function PromptBox({
@@ -195,30 +190,34 @@ export default function PromptBox({
     const fetchAndHandleStream = async () => {
       try {
         console.log("Fetching suggestions for:", value);
-        const stream = await getAutoCompleteSuggestionAPI(value, contextText, {
-          headers: { "x-cancel": "0" },
+        await generate({
+          model: "anthropic/claude-3-5-haiku:beta",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an AI assistant helping autocomplete text. Provide natural, contextually relevant continuations.",
+            },
+            {
+              role: "user",
+              content: `Context: ${contextText}\nText to complete: ${value}`,
+            },
+          ],
+          temperature: 0.7,
+          stream: {
+            onChunk: chunk => {
+              console.log("Received suggestion:", chunk);
+              dispatch({ type: "SET_SUGGESTION", payload: chunk });
+            },
+            onCompletion: () => {
+              console.log("Stopped streaming");
+              if (abortControllerRef.current === controller) {
+                dispatch({ type: "STOP_STREAMING" });
+                abortControllerRef.current = null;
+              }
+            },
+          },
         });
-
-        await handleSuggestionStream(
-          stream,
-          controller,
-          suggestion => {
-            console.log("Received suggestion:", suggestion);
-            dispatch({ type: "SET_SUGGESTION", payload: suggestion });
-          },
-          () => {
-            console.log("Started streaming");
-            dispatch({ type: "START_STREAMING" });
-          },
-          () => {
-            console.log("Stopped streaming");
-            if (abortControllerRef.current === controller) {
-              dispatch({ type: "STOP_STREAMING" });
-              abortControllerRef.current = null;
-            }
-          },
-          value
-        );
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
           console.error("Error fetching suggestion:", error);
@@ -511,7 +510,7 @@ export default function PromptBox({
         isLoading: true,
       });
 
-      const stream = await streamResponseAPI(
+      const stream = await generateStream(
         {
           model: "anthropic/claude-3-5-haiku:beta",
           messages: [
