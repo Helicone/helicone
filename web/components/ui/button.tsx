@@ -11,7 +11,7 @@ const buttonVariants = cva(
         default:
           "bg-slate-900 text-slate-50 hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90",
         action:
-          "bg-heliblue text-white hover:bg-heliblue/90 border border-slate-100 font-semibold interactive",
+          "bg-heliblue text-white hover:bg-heliblue/90 border border-slate-100 font-semibold interactive rounded-xl",
         destructive:
           "bg-red-400 text-white hover:bg-red-500 dark:bg-red-700 dark:text-slate-100 dark:hover:bg-red-800",
         outline:

@@ -7,22 +7,33 @@ export async function generateStream(
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
   const encoder = new TextEncoder();
+  const abortController = new AbortController();
+
+  let hasError = false;
 
   generate({
     ...params,
+    signal: abortController.signal,
     stream: {
       onChunk: async (chunk: string) => {
         if (options?.headers?.["x-cancel"] === "1") {
-          await writer.close();
+          hasError = true;
+          abortController.abort();
+          await writer.abort(new Error("Request cancelled"));
           return;
         }
-        await writer.write(encoder.encode(chunk));
+        if (!hasError) {
+          await writer.write(encoder.encode(chunk));
+        }
       },
       onCompletion: async () => {
-        await writer.close();
+        if (!hasError) {
+          await writer.close();
+        }
       },
     },
   }).catch(async error => {
+    hasError = true;
     console.error("Streaming error:", error);
     await writer.abort(error);
   });

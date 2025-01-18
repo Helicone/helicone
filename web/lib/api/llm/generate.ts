@@ -11,6 +11,7 @@ export interface GenerateParams {
   presencePenalty?: number;
   stop?: string[];
   schema?: object extends object ? z.ZodType<object> : never;
+  signal?: AbortSignal;
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
@@ -20,7 +21,7 @@ export interface GenerateParams {
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
 ): Promise<T extends object ? T : string> {
-  const response = await fetch("/api/llm/generate", {
+  const response = await fetch("/api/llm", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

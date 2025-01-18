@@ -10,7 +10,6 @@ import useNotification from "../../../shared/notification/useNotification";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoadingAnimation from "../../../shared/loadingAnimation";
-import { Button } from "../../../ui/button";
 import ResizablePanels from "../../../shared/universal/ResizablePanels";
 import PromptPanels from "@/components/shared/prompts/PromptPanels";
 import { PromptState, Variable } from "@/types/prompt-state";
@@ -22,6 +21,14 @@ import {
 } from "@/utils/messages";
 import { canAddPrefill } from "@/utils/messages";
 import PromptMetricsTab from "./PromptMetricsTab";
+import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
+import { PiSpinnerGapBold, PiStopBold, PiPlayBold } from "react-icons/pi";
+import { PiCommandBold } from "react-icons/pi";
+import ActionButton from "@/components/shared/universal/ActionButton";
+import { MdKeyboardReturn } from "react-icons/md";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
+import { replaceVariables } from "@/utils/variables";
 
 interface PromptIdPageProps {
   id: string;
@@ -31,8 +38,11 @@ interface PromptIdPageProps {
 
 const PromptIdPage = (props: PromptIdPageProps) => {
   const { id, currentPage, pageSize } = props;
+  const router = useRouter();
+  const jawnClient = useJawnClient();
+  const { setNotification } = useNotification();
 
-  // All hooks at the top
+  // Hooks
   const {
     prompt,
     isLoading: isPromptLoading,
@@ -43,11 +53,22 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     isLoading: isVersionsLoading,
     refetch: refetchPromptVersions,
   } = usePromptVersions(id);
-  const jawn = useJawnClient();
-  const searchParams = useSearchParams();
-  const notification = useNotification();
-  const router = useRouter();
   const [state, setState] = useState<PromptState | null>(null);
+
+  // STREAMING
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortController = useRef<AbortController | null>(null);
+
+  // VALIDATION
+  const canRun = useMemo(
+    () =>
+      state?.messages.some(
+        m =>
+          m.role === "user" &&
+          (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+      ) ?? false,
+    [state?.messages]
+  );
 
   // All callbacks defined with useCallback
   const updateState = useCallback((updates: Partial<PromptState>) => {
@@ -128,6 +149,127 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     });
   }, []);
 
+  const handleVariableChange = useCallback(
+    (index: number, value: string) => {
+      updateState({
+        variables: state?.variables?.map((v, i) =>
+          i === index ? { ...v, value } : v
+        ),
+      });
+    },
+    [state?.variables, updateState]
+  );
+
+  const handleSaveAndRun = useCallback(async () => {
+    if (!state || !canRun) return;
+
+    // -> ABORT: If already streaming
+    if (isStreaming) {
+      abortController.current?.abort();
+      setIsStreaming(false);
+      return;
+    }
+
+    // -> LOADING STATE
+    setIsStreaming(true);
+    setState(prev => (prev ? { ...prev, response: "" } : null));
+
+    // -> SAVE: If it has been modified
+    if (state.isDirty) {
+      try {
+        const result = await jawnClient?.POST(
+          "/v1/prompt/version/{promptVersionId}/edit-template",
+          {
+            params: {
+              path: {
+                promptVersionId: state.version.toString(),
+              },
+            },
+            body: {
+              heliconeTemplate: {
+                messages: state.messages,
+                parameters: state.parameters,
+                variables: state.variables,
+              },
+            },
+          }
+        );
+
+        if (result?.error) {
+          setNotification("Error saving prompt", "error");
+          return;
+        }
+
+        // Update state with the new version
+        setState(prev =>
+          prev
+            ? {
+                ...prev,
+                isDirty: false,
+              }
+            : null
+        );
+
+        // Refetch versions
+        await refetchPromptVersions();
+      } catch (error) {
+        console.error("Failed to save state:", error);
+        setNotification("Failed to save prompt state", "error");
+        return;
+      }
+    }
+
+    // -> RUN
+    try {
+      // Create new controller for this stream
+      abortController.current = new AbortController();
+
+      const processedMessages = state.messages.map(msg => ({
+        role: msg.role as "system" | "user" | "assistant",
+        content: replaceVariables(msg.content as string, state.variables || []),
+      }));
+
+      try {
+        const stream = await generateStream({
+          model: state.parameters.model,
+          messages: processedMessages,
+          temperature: state.parameters.temperature,
+          signal: abortController.current.signal,
+        });
+
+        await readStream(
+          stream,
+          (chunk: string) => {
+            setState(prev =>
+              prev ? { ...prev, response: (prev.response || "") + chunk } : null
+            );
+          },
+          abortController.current.signal
+        );
+      } catch (error) {
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Error:", error);
+          setNotification(error.message, "error");
+        }
+      } finally {
+        setIsStreaming(false);
+        abortController.current = null;
+      }
+    } catch (error) {
+      console.error("Failed to save state:", error);
+      setNotification("Failed to save prompt state", "error");
+      setIsStreaming(false);
+      return;
+    }
+  }, [
+    state,
+    isStreaming,
+    canRun,
+    jawnClient,
+    setNotification,
+    refetchPromptVersions,
+  ]);
+
   // useEffect hooks
   useEffect(() => {
     if (!promptVersions || isVersionsLoading) return;
@@ -140,16 +282,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
 
     if (!latestVersion) return;
 
-    console.log("Latest Version:", latestVersion);
-    console.log("Helicone Template:", latestVersion.helicone_template);
-
     // Parse helicone_template if it's a string, otherwise use as is
     const templateData =
       typeof latestVersion.helicone_template === "string"
         ? JSON.parse(latestVersion.helicone_template)
         : latestVersion.helicone_template;
-
-    console.log("Template Data:", templateData);
 
     // Initialize state with the latest version
     setState({
@@ -220,9 +357,28 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             <TabsTrigger value="metrics">Metrics</TabsTrigger>
           </TabsList>
 
-          <Button variant="action" size="default">
-            Run & Save
-          </Button>
+          <ActionButton
+            label={isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
+            icon={isStreaming ? PiStopBold : PiPlayBold}
+            className={
+              isStreaming
+                ? "bg-red-500 hover:bg-red-500/90 text-white"
+                : "bg-heliblue hover:bg-heliblue/90 text-white"
+            }
+            onClick={handleSaveAndRun}
+            disabled={!canRun}
+          >
+            {isStreaming && <PiSpinnerGapBold className="animate-spin" />}
+
+            <div
+              className={`flex items-center gap-1 text-sm ${
+                canRun ? "text-white opacity-60" : "text-slate-400"
+              }`}
+            >
+              <PiCommandBold className="h-4 w-4" />
+              <MdKeyboardReturn className="h-4 w-4" />
+            </div>
+          </ActionButton>
         </div>
 
         {/* Prompt Editor */}
@@ -240,7 +396,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
                 variables={state.variables || []}
               />
             }
-            rightPanel={<div className="h-full">Right</div>}
+            rightPanel={
+              <div className="flex h-full flex-col gap-4">
+                <ResponsePanel response={state.response || ""} />
+              </div>
+            }
           />
         </TabsContent>
 

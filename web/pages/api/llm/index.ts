@@ -56,7 +56,8 @@ export default async function handler(
           // Check if request was cancelled
           if (req.headers["x-cancel"] === "1") {
             abortController.abort();
-            return res.end();
+            res.end();
+            return;
           }
 
           const content = chunk?.choices?.[0]?.delta?.content;
@@ -67,14 +68,16 @@ export default async function handler(
             res.flush?.();
           }
         }
-        return res.end();
+        res.end();
+        return;
       } catch (error) {
         // Handle stream interruption gracefully
         if (
           error instanceof Error &&
           (error.name === "ResponseAborted" || error.name === "AbortError")
         ) {
-          return res.end();
+          res.end();
+          return;
         }
         throw error;
       }

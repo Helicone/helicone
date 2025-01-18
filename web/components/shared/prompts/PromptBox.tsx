@@ -52,32 +52,6 @@ interface PromptBoxProps {
   variables?: Variable[];
 }
 
-async function getAutoCompleteSuggestion(
-  value: string,
-  contextText: string,
-  options?: { headers?: { "x-cancel": string } }
-) {
-  return generate({
-    model: "anthropic/claude-3-5-haiku:beta",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an AI assistant helping autocomplete text. Provide natural, contextually relevant continuations.",
-      },
-      {
-        role: "user",
-        content: `Context: ${contextText}\nText to complete: ${value}`,
-      },
-    ],
-    temperature: 0.7,
-    stream: {
-      onChunk: () => {},
-      onCompletion: () => {},
-    },
-  });
-}
-
 export default function PromptBox({
   value,
   onChange,
