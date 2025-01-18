@@ -1,10 +1,10 @@
 {
-  "title": "Comparing Popular Prompt Evaluation Frameworks: Helicone, OpenAI Eval, and More",
-  "title1": "Comparing Popular Prompt Evaluation Frameworks: Helicone, OpenAI Eval, and More",
-  "title2": "Comparing Popular Prompt Evaluation Frameworks: Helicone, OpenAI Eval, and More",
-  "description": "In this blog, we will compare the leading prompt evaluation frameworks, including Helicone, OpenAI Eval, PromptFoo, and more. Learn about which evaluation framework best suits your needs.",
+  "title": "Popular Prompt Evaluation Frameworks in 2025: Helicone, OpenAI Eval, and More",
+  "title1": "Popular Prompt Evaluation Frameworks in 2025: Helicone, OpenAI Eval, and More",
+  "title2": "Popular Prompt Evaluation Frameworks in 2025: Helicone, OpenAI Eval, and More",
+  "description": "In this blog, we will compare leading prompt evaluation frameworks, including Helicone, OpenAI Eval, PromptFoo, and more. Learn about which evaluation framework best suits your needs and the basics setups.",
   "images": "/static/blog/prompt-evaluation-frameworks/eval-cover.webp",
-  "time": "7 minute read",
+  "time": "12 minute read",
   "author": "Lina Lam",
   "date": "January 17, 2025", 
   "badge": "compare"

@@ -1,32 +1,41 @@
-Picture this: You've spent weeks crafting the perfect LLM application, only to find your carefully engineered prompts producing inconsistent results in production.
-
-One day they work flawlessly, the next they generate nonsensical responses. Sound familiar? This is the reality for many developers working with LLMs, where prompt reliability can make or break an application's success.
+As an AI engineer, you've likely spent weeks perfecting your LLM application, realizing that your carefully engineered prompts start producing inconsistent results in production. What worked perfectly in testing now generates unexpected outputs, and you're left wondering what changed. Sounds familiar?
 
 ![Prompt evaluation frameworks blog cover](/static/blog/prompt-evaluation-frameworks/eval-cover.webp)
 
-Prompt evaluation frameworks are designed to address the challenges of working with LLMs. They enable developers to systematically test, refine, and benchmark prompts to achieve desired outputs. In this blog, we will compare the leading prompt evaluation frameworks, so you can choose the one that best suits your needs.
+This is the reality for many developers working with LLMs. While LLMs can perform impressive feats of natural language processing, their output quality heavily depends on how effectively we communicate with them through prompts.
 
-Ready to get started? Let's dive in!
+Today, the most impactful thing you can do to improve your LLM application is to create high quality evaluations to measure your prompts. Without evals, it can be very difficult and time intensive to understand how different model or prompt changes affect your output.
 
-| Framework   | Pricing Model         |
-| ----------- | --------------------- |
-| Helicone    | Freemium, Open-source |
-| OpenAI Eval | Freemium              |
-| Promptfoo   | Freemium, Open-source |
-| Comet Opik  | Freemium, Open-source |
-| PromptLayer | Freemium              |
-| Traceloop   | Freemium, Open-source |
-| Braintrust  | Freemium              |
+In this blog, we will compare the leading prompt evaluation frameworks available today, helping you choose the right tool for your specific needs. We will cover:
 
-## Why should you evaluate your prompts?
+- **Why evaluate your prompts?**
+- **Key metrics for evaluating prompt effectiveness**
+- **Top Prompt Evaluation Frameworks in 2025**
+- **Choosing the right prompt evaluation framework**
 
-- **Ineffective prompt engineering.** Crafting effective prompts often requires trial and error. You need to use <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering techniques</a> to guide the model towards the desired response. This is quite a manual process and is not a guarantee of consistent results.
+| Framework      | Pricing Model         |
+| -------------- | --------------------- |
+| 1. Helicone    | Freemium, Open-source |
+| 2. OpenAI Eval | Freemium, Open-source |
+| 3. Promptfoo   | Freemium, Open-source |
+| 4. Comet Opik  | Freemium, Open-source |
+| 5. PromptLayer | Freemium              |
+| 6. Traceloop   | Freemium, Open-source |
+| 7. Braintrust  | Freemium              |
 
-- **LLMs can be unpredictable.** LLMs can generate incorrect or irrelevant responses (a.k.a. hallucinate) despite the best efforts of prompt engineering. When you switch a model, adjust parameters, or make a small change to the prompt, the output can change dramatically.
+Let's dive in!
 
-- **Output formatting issues.** Sometimes, LLMs fail to return outputs in the desired format, such as JSON or specific code syntax. This can be a huge issues when <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">building agentic workflows</a> where the input of the following function depend on previously returned outputs.
+## Why evaluate your prompts?
 
-- **Managing long-form content.** LLMs struggle to maintain coherence and context in long outputs, particularly near token limits. Developers frequently use techniques like <a href="https://www.helicone.ai/blog/chunking-strategies" target="_blank" rel="noopener">chunking</a> to handle this. Prompt evaluation frameworks help in testing and optimizing your prompts while preserving context and quality.
+Prompt evaluation frameworks help developers systematically test, refine, and benchmark prompts to achieve desired outputs. Key challenges include:
+
+- **Ineffective prompt engineering.** Crafting effective prompts often requires trial and error. You need to use <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering techniques</a> to guide the model towards the desired response. This is quite a manual process and is not a guarantee of consistent results, unless you test it regularly.
+
+- **Unpredictable LLM outputs.** LLMs can hallucinate and generate incorrect responses, even with good prompts. Changes to models, parameters, or prompts can significantly impact outputs, requiring active monitoring.
+
+- **Issue with output formatting.** Sometimes, LLMs fail to return outputs in the desired format (e.g. JSON, code), breaking <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">agentic workflows</a> that depend on structured responses.
+
+- **Managing long-form content.** LLMs often lose coherence in long outputs near token limits. Developers use <a href="https://www.helicone.ai/blog/chunking-strategies" target="_blank" rel="noopener">chunking techniques</a> and prompt evaluation frameworks to preserve quality and context.
 
 - **Lack of specialized tools for prompt testing.** There is a growing need for dedicated tools to test, refine, and manage prompts. Such tools would streamline prompt evaluation, improving output quality and reducing iteration time.
 
@@ -62,120 +71,116 @@ When evaluating prompts for Large Language Models, developers usually focus on t
 
 ---
 
-## 1. <a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone</a>: Open-Source Prompt Evaluation
+## 1. <a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone</a>: Comprehensive Prompt Evaluation Platform
 
-**Pricing**: Freemium, open source
+**Pricing**: Freemium, open-source
 
 ![Helicone, Open-Source Prompt Evaluation Frameworks](/static/blog/prompt-evaluation-frameworks/eval-helicone.webp)
 
-{/* ### **What is Helicone?** */}
+[![Helicone](https://img.shields.io/github/stars/helicone/helicone.svg?stylAe=social)](https://github.com/helicone/helicone)
 
-{/* Helicone is an open-source LLM observability and monitoring platform purpose-built for developers to monitor, debug, and optimize their LLM applications. With the flexibility to be self-hosted or used as a gateway with a simple 1-line integration, it provides instant insights into latency, costs, time to first tokens (TTFT) and more. */}
+### What is Helicone?
+
+Helicone is an open-source comprehensive platform for monitoring LLM usage, prompt versioning, experimentation, and evaluation. Its flexibility and user-friendly interface make it a popular choice for developers looking for a comprehensive solution to improve their LLM applications.
 
 ### Key Features of Helicone
 
 - **<a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Prompt Experiments</a>**: Test your prompt changes against production data to find what works best. Developers also use Experiments to prevent prompt regressions before deploying to production.
-
-- **<a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">Evaluators & Scores</a>**: Evaluate your prompt outputs with quantitative scores (i.e. quality, relevance, and more).
-
+- **<a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">Evaluators & Scores</a>**: Evaluate your prompt outputs using LLM-as-a-judge or custom Python/TypeScript evaluators to quantify output quality.
 - **<a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">Automatic Prompt Tracking</a>**: Helicone automatically tracks and versions your prompt changes in code so you can easily roll back to previous versions.
+- **<a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a>**: Visualize and debug workflows with multiple prompts, so you can easily drill down and understand exactly where the error occurred.
+- **<a href="https://docs.helicone.ai/features/advanced-usage/feedback" target="_blank" rel="noopener">User Feedback</a>**: Capture user feedback (positive/negative) to measure and refine your prompt.
 
-- **<a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Agent Debugging</a>**: Sessions help you debug your agentic workflow. Sessions help you drill down into each trace and understand exactly where the error occurred.
+### Differentiators
 
-- **<a href="https://docs.helicone.ai/features/advanced-usage/feedback" target="_blank" rel="noopener">User Feedback</a>**: Captures user responses (positive/negative) to measure and refine prompt success.
+- **Effortless Integration:** A simple one-line code change to integrate with any provider in seconds.
+- **Real-time Insights:** Monitor API usage, costs, and performance in real-time, helping you catch issues before users do.
+- **Developer-Friendly:** Provides optimization features such as cutom evaluators, LLM-as-a-judge, caching, and ramdom sampling of production data.
 
 <CallToAction
-  title="What Director of AI at QA Wolf thinks:"
-  description="The ability to test prompt variations on production traffic without touching a line of code is magical. It feels like we're cheating; it's just that good! "
+  title="Don't take our word for it!"
+  description="What Director of AI at QA Wolf thinks: the ability to test prompt variations on production traffic without touching a line of code is magical. It feels like we're cheating; it's just that good!"
   primaryButtonText="Try Helicone for Free"
   primaryButtonLink="https://www.helicone.ai/signup"
 />
 
 ### Basic Setup
 
-To evaluate prompts using Helicone and OpenAI, follow these steps:
+Helicone is versatile and works with any LLM provider. Here's how to set up Helicone with OpenAI to evaluate prompts:
 
-1. **Install OpenAI SDK**
-
-   ```bash
-   npm install openai
-   ```
-
-2. **Log feedback using the Fetch API**
-
-   You need valid OpenAI and Helicone API keys to evaluate prompts in code. Here's an example of logging positive feedback:
+1. **Change your baseURL to use Helicone**
 
    ```javascript
    import OpenAI from "openai";
 
-   // Initialize the OpenAI client with Helicone integration
    const openai = new OpenAI({
-     apiKey: process.env.OPENAI_API_KEY,
-     baseURL: "https://oai.helicone.ai/v1",
-     defaultHeaders: {
-       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-     },
+     apiKey: OPENAI_API_KEY,
+     // change the baseURL to use Helicone
+     baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`,
    });
-
-   // Generate a chat completion
-   const {
-     data: completions,
-     response,
-   }: { data: ChatCompletion, response: Response } = await openai.chat
-     .completions({
-       model: "gpt-3.5-turbo",
-       messages: [{ role: "user", content: "Say hi!" }],
-     })
-     .withResponse();
-
-   // Retrieve the heliconeId header
-   const heliconeId = response.headers.get("helicone-id");
-
-   // Log feedback
-   const options = {
-     method: "POST",
-     headers: {
-       "Helicone-Auth": "YOUR_HELICONE_AUTH_HEADER",
-       "Content-Type": "application/json",
-     },
-     body: JSON.stringify({
-       rating: true, // true for positive, false for negative
-     }),
-   };
-
-   const response = await fetch(
-     `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
-     options
-   );
    ```
 
-Note that if you use any other provider, you can use Helicone too. Please refer to Helicone's documentation for most up-to-date instructions on <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">creating a prompt</a>, <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">running experiments</a>, and <a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">evaluating the output</a>.
+2. **Import Helicone prompts**
+
+   In your TypeScript/JavaScript code, import the necessary functions:
+
+   ```javascript
+   import { hpf, hpstatic } from "@helicone/prompts";
+   ```
+
+3. **Optional: Create a template and input variables**
+
+   Use `hpf` for dynamic prompts and hpstatic for static prompts.
+
+   ```javascript
+   const staticPrompt = hpstatic`You are a helpful assistant.`;
+
+   // Enclose input variables in double curly braces.
+   const character = "two brothers";
+   const location = "space";
+   const dynamicPrompt = hpf`Write a story about ${{ character }} set in ${{
+     location,
+   }}`;
+   ```
+
+4. **Send request to Helicone**
+
+   Include Helicone headers in your API call with your usual parameters. Keep in mind that you need both valid OpenAI and Helicone API keys.
+
+5. **Experiment and evaluate prompts**
+
+   Once you've set up prompts in Helicone, you can:
+
+   - **<a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">Improve your prompt template</a>**
+   - **<a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Run experiments</a>**
+   - **<a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">Evaluate the output</a>**
+
+If you use any other provider, you can use Helicone too. Please refer to Helicone's documentation for most up-to-date instructions.
 
 ---
 
-## 2. [OpenAI Eval](https://www.openai.com)
+## 2. <a href="https://www.openai.com" target="_blank" rel="noopener nofollow">OpenAI Eval</a>: Standardized Evaluation Framework
 
-**Pricing**: Freemium, not open-source
+**Pricing**: Freemium, open-source
 
 ![OpenAI Eval](/static/blog/prompt-evaluation-frameworks/eval-openai.webp)
 
-{/* ### **What is OpenAI Eval?** */}
+[![OpenAI Eval](https://img.shields.io/github/stars/openai/evals.svg?stylAe=social)](https://github.com/openai/evals)
 
-{/* OpenAI Evals is a framework for evaluating large language models (LLMs) and systems built upon them. It enables developers to create custom evaluations to test model performance across various scenarios. */}
+### What is OpenAI Eval?
 
-{/* In the context of prompt evaluation, OpenAI Evals support for evaluating complex behaviors, including prompt chains and tool-using agents, through the Completion Function Protocol. */}
+OpenAI Eval is an open-source framework for evaluating and testing LLM applications, built by OpenAI. It provides tools for dataset-driven testing, prompt-response evaluations, and benchmarking model performance.
 
-### Key Features
+### Key Features of OpenAI Eval
 
 - **Evaluation Framework**: Provides tools for dataset-driven testing, prompt-response evaluations, and benchmarking model performance.
-- **Open-Source Registry**: Includes a repository of pre-built benchmarks, allowing contributions and collaboration from the community.
 - **Custom Evaluations**: Supports the creation of bespoke assessments tailored to specific application needs.
 - **API Integration**: Seamlessly integrates with the OpenAI API for testing deployed models.
 - **Model-Graded Evaluations**: Supports evaluations where models assess their own outputs or those of other models, enabling self-referential testing.
 
 <BottomLine
   title="Bottom Line"
-  description="OpenAI Eval stands out through its flexibility in handling diverse evaluation types, ranging from basic Q&A to complex, multi-step workflows. Its open-source nature fosters community collaboration, encouraging shared development of benchmarks across users. Additionally, it employs innovative methods by leveraging LLMs for self-assessment, which pushes the boundaries of traditional evaluation approaches."
+  description="OpenAI Evals is more focused on rigorous testing and benchmarking, while the other tools offer broader capabilities in prompt management, version control, and performance analytics, which may be more comprehensive for teams looking for prompt iteration and optimization."
 />
 
 ### Basic Setup
@@ -219,7 +224,7 @@ Note that if you use any other provider, you can use Helicone too. Please refer 
    samples_jsonl: path/to/your/dataset.jsonl
    ```
 
-5. **Run the Evaluation**: Execute the evaluation using the `oaieval` command-line tool:
+5. **Run the eval**: Execute the evaluation using the `oaieval` command-line tool:
 
    ```bash
    oaieval gpt-3.5-turbo translation_eval
@@ -227,19 +232,21 @@ Note that if you use any other provider, you can use Helicone too. Please refer 
 
 6. **Analyze the Results**: After execution, results are stored in the `outputs` directory. Review these to assess prompt performance and make necessary adjustments.
 
-For detailed guidance, refer to OpenAI's official <a href="https://github.com/openai/evals?tab=readme-ov-file#openai-evals" rel="noopener" target="_blank">Evals documentation</a> and the <a href="https://cookbook.openai.com/examples/evaluation/getting_started_with_openai_evals" rel="noopener" target="_blank">OpenAI cookbook</a> to get started.
+Please refer to the <a href="https://github.com/openai/evals?tab=readme-ov-file#openai-evals" rel="noopener" target="_blank">official evals docs</a> and <a href="https://cookbook.openai.com/examples/evaluation/getting_started_with_openai_evals" rel="noopener" target="_blank">cookbook</a> for most up-to-date instructions.
 
 ---
 
-## 3. <a href="https://www.promptfoo.dev" target="_blank" rel="noopener nofollow">Promptfoo</a>
+## 3. <a href="https://www.promptfoo.dev" target="_blank" rel="noopener nofollow">Promptfoo</a>: CLI for Systematic Evaluation
 
-**Pricing**: Freemium, open source
+**Pricing**: Freemium, open-source
 
 ![Promptfoo website cover](/static/blog/prompt-evaluation-frameworks/eval-promptfoo.webp)
 
-{/* ### **What is Promptfoo?** */}
+[![Promptfoo](https://img.shields.io/github/stars/promptfoo/promptfoo.svg?stylAe=social)](https://github.com/promptfoo/promptfoo)
 
-{/* Promptfoo is an open-source CLI and library for systematic evaluation, testing, and optimization of prompts in LLM applications. */}
+### What is Promptfoo?
+
+Promptfoo is an open-source CLI and library for systematic evaluation, testing, and optimization of prompts in LLM applications.
 
 ### Key Features
 
@@ -251,9 +258,9 @@ For detailed guidance, refer to OpenAI's official <a href="https://github.com/op
 
 ### Differentiators
 
-- **Open-Source:** Fully customizable and extensible for specific workflows.
-- **Developer-Optimized:** Features like caching, concurrency, and live reloading improve speed and usability.
-- **Comprehensive Evaluation:** Supports robust frameworks for testing and optimizing LLM prompts at scale.
+- Open-source and customizable for specific workflows.
+- Features for developers like caching, concurrency, and live reloading improve speed and usability.
+- Supports robust frameworks for testing and optimizing LLM prompts at scale.
 
 ### Basic Setup
 
@@ -309,15 +316,17 @@ For detailed instructions and advanced config, refer to <a href="https://www.pro
 
 ---
 
-## 4. <a href="https://www.comet.com/docs/opik" target="_blank" rel="noopener nofollow">Comet Opik</a>
+## 4. <a href="https://www.comet.com/docs/opik" target="_blank" rel="noopener nofollow">Comet Opik</a>: Observability and Eval Platform
 
 **Pricing**: Freemium, open-source
 
 ![Comet Opik](/static/blog/prompt-evaluation-frameworks/eval-comet.webp)
 
-{/* ### **What is Comet Opik?** */}
+[![Comet Opik](https://img.shields.io/github/stars/comet-ml/opik.svg?stylAe=social)](https://github.com/comet-ml/opik)
 
-{/* Opik is an open-source platform designed for evaluating, testing, and monitoring Large Language Model (LLM) applications. It integrates seamlessly with tools like OpenAI, LangChain, and LlamaIndex, providing end-to-end observability during development and production. */}
+### What is Comet Opik?
+
+Opik is an open-source platform designed for evaluating, testing, and monitoring LLM applications. It integrates seamlessly with tools like OpenAI, LangChain, and LlamaIndex, providing end-to-end observability during development and production.
 
 ### Key Features
 
@@ -328,9 +337,9 @@ For detailed instructions and advanced config, refer to <a href="https://www.pro
 
 ### Differentiators
 
-- **Seamless Integration:** Built-in support for popular tools (OpenAI, LangChain, LlamaIndex).
-- **Open-Source Flexibility:** Customizable to fit diverse workflows and scalable for enterprise needs.
-- **Comprehensive Tooling:** Covers evaluation, debugging, monitoring, and testing in one unified platform.
+- Built-in support for popular tools (OpenAI, LangChain, LlamaIndex).
+- Open-source and customizable to fit diverse workflows and scalable for enterprise needs.
+- Covers evaluation, debugging, monitoring, and testing in one unified platform.
 
 ### Basic Setup
 
@@ -435,15 +444,15 @@ For detailed instructions and advanced config, refer to <a href="https://www.com
 
 ---
 
-## 5. <a href="https://www.promptlayer.com" target="_blank" rel="noopener nofollow">PromptLayer</a>
+## 5. <a href="https://www.promptlayer.com" target="_blank" rel="noopener nofollow">PromptLayer</a>: Observability and Eval Platform
 
 **Pricing**: Freemium, not open-source
 
 ![PromptLayer](/static/blog/prompt-evaluation-frameworks/eval-prompt-layer.webp)
 
-{/* ### **What is PromptLayer?** */}
+### What is PromptLayer?
 
-{/* PromptLayer is a platform that enhances prompt engineering by providing tools for the management, evaluation, and observability of large language model (LLM) interactions. */}
+PromptLayer is a platform that enhances prompt engineering by providing tools for the management, evaluation, and observability of LLM interactions.
 
 ### Key Features
 
@@ -454,10 +463,9 @@ For detailed instructions and advanced config, refer to <a href="https://www.com
 
 ### Differentiators
 
-- **Collaborative Workflow:** Empowers non-technical stakeholders, such as product managers and content experts, to participate directly in prompt engineering without requiring engineering support.
-- **CMS for Prompts:** Functions as a content management system tailored for prompt lifecycle management, offering structured version control and deployment capabilities.
-- **Data-Driven Optimization:** Combines logging, observability, and evaluation tools to iteratively improve prompt performance based on comprehensive analytics.
-- **Developer-Friendly Integration:** Provides middleware that simplifies API interactions, facilitating easy incorporation into existing projects and development workflows.
+- **Collaborative Workflow:** Empowers non-technical stakeholders (i.e. product managers, content experts) to participate in prompt engineering.
+- **CMS for Prompts:** Functions as a content management system, offering structured version control and deployment capabilities.
+- **Data-Driven Optimization:** Combines logging, observability, and evaluation tools to improve prompt performance based on analytics.
 
 ### Basic Setup
 
@@ -556,15 +564,17 @@ For detailed instructions, refer to PromptLayer's <a href="https://docs.promptla
 
 ---
 
-## 6. <a href="https://www.traceloop.com" target="_blank" rel="noopener nofollow">Traceloop</a>
+## 6. <a href="https://www.traceloop.com" target="_blank" rel="noopener nofollow">Traceloop</a>: Real-Time Observability Platform
 
 **Pricing**: Freemium, open-source
 
 ![Traceloop](/static/blog/prompt-evaluation-frameworks/eval-traceloop.webp)
 
-{/* ### **What is Traceloop?** */}
+[![Traceloop](https://img.shields.io/github/stars/traceloop/openllmetry.svg?stylAe=social)](https://github.com/traceloop/openllmetry)
 
-{/* Traceloop is an observability platform tailored for Large Language Model (LLM) applications, offering real-time monitoring and debugging to maintain consistent output quality. */}
+### What is Traceloop?
+
+Traceloop is an observability platform tailored for LLM applications, offering real-time monitoring and debugging to maintain consistent output quality.
 
 ### Key Features
 
@@ -627,15 +637,15 @@ Refer to Traceloop's <a href="https://github.com/traceloop/demo" target="_blank"
 
 ---
 
-## 7. <a href="https://www.braintrust.dev" target="_blank" rel="noopener nofollow">Braintrust</a>
+## 7. <a href="https://www.braintrust.dev" target="_blank" rel="noopener nofollow">Braintrust</a>: End-to-End LLM Platform
 
 **Pricing**: Freemium, not open-source
 
 ![Braintrust](/static/blog/prompt-evaluation-frameworks/eval-braintrust.webp)
 
-{/* ### **What is Braintrust?** */}
+### What is Braintrust?
 
-{/* Braintrust is an end-to-end platform for building AI applications. It makes software development with large language models (LLMs) robust and iterative. It allows you to create prompts, test them out in the playground, use them in your code, update them, and track their performance over time. */}
+Braintrust is an end-to-end platform for building AI applications. It makes software development with LLMs robust and iterative. It allows you to create prompts, test them out in the playground, use them in your code, update them, and track their performance over time.
 
 ### Key Features
 
@@ -693,21 +703,25 @@ This setup allows you to assess how well your model's outputs align with expecta
 
 ## Choosing the Right Prompt Evaluation Framework
 
-To choose the best prompt evaluation framework for your needs, consider the following criteria:
+The best prompt evaluation framework vary depending on your needs. Here are a few things you should consider:
 
-1. **Core Features**: Ensure it supports prompt testing, monitoring, versioning, and management. Example: Helicone offers monitoring and cost tracking.
+1. **Core features**: Determine whether you need a tool solely for prompt evaluation or a comprehensive platform for LLM app optimization. All-in-one observability and evaluation solutions include Helicone, Comet, and Braintrust.
 
-2. **Integration**: Look for compatibility with your existing tools (CI/CD pipelines, LLM APIs). Example: PromptLayer integrates with OpenAI APIs.
+2. **Integration**: Make sure the framework of choice is compatible with your existing tools, including CI/CD pipelines and LLM APIs. While OpenAI Evals is limited to OpenAI APIs, platforms like Helicone and PromptLayer offer broader integration with providers such as Claude, Gemini, and Llama.
 
-3. **Scalability**: Assess its ability to handle large-scale prompt evaluations and datasets.
+3. **Scalability**: For production-scale evaluations, choose a tool that can handle large datasets and high-volume prompt evaluations efficiently.
 
-4. **Metrics Support**: Verify it tracks key metrics like accuracy, relevance, latency, and cost.
+4. **Metrics Support**: Verify that the framework allows you to run the evaluation of choice. Some platforms only support LLM-as-a-judge, while others allow you to define custom evaluators.
 
-5. **Usability**: Check for an intuitive UI, detailed documentation, and automation capabilities.
+5. **Usability**: If you are looking for a solution for your team with mixed technical experience, consider choosing a platform with intuitive UI and detailed documentation.
 
-6. **Community & Support**: Opt for frameworks with active communities or strong customer support for troubleshooting.
+## Bottom Line
 
-## Further Reading
+As LLMs become increasingly central to modern applications, prompt evaluation frameworks have evolved from simple testing tools into comprehensive platforms for managing, monitoring, and optimizing AI interactions.
+
+Whether you choose an open-source solution like Helicone or a commercial platform like PromptLayer, these frameworks are essential for building reliable, production-grade LLM applications that consistently deliver value to end users.
+
+### Further Reading
 
 - <a
     href="https://www.helicone.ai/blog/prompt-evaluation-for-llms"
