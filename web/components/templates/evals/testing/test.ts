@@ -1,10 +1,10 @@
 import { EvaluatorTestResult } from "@/components/templates/evals/CreateNewEvaluator/types";
-import { TestData } from "./types";
+import { TestConfig } from "./types";
 
 import { ClientType } from "@/lib/clients/jawn";
 
 export async function testEvaluator(
-  testData: TestData,
+  testData: TestConfig,
   jawn: ClientType
 ): Promise<EvaluatorTestResult> {
   if (testData._type === "llm") {

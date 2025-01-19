@@ -25,12 +25,11 @@ function SelectDataEntryType({
   defaultValue: DataEntry;
   onChange: (value: DataEntry) => void;
 }) {
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
   useEffect(() => {
     setTestData((prev) => {
       if (!prev) return null;
       return {
-        testInput: prev.testInput,
         _type: "lastmile",
         evaluator_name: "",
       };
@@ -168,7 +167,7 @@ export const LastMileDevConfigForm: React.FC<{
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
 
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
 
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
     DEFAULT_FAITHFULNESS_TYPE

@@ -18,21 +18,87 @@ import clsx from "clsx";
 import MarkdownEditor from "../../../../shared/markdownEditor";
 import { EvaluatorTestResult } from "../types";
 import { PreviewLastMile } from "./PreviewLastMile";
+import { useQuery } from "@tanstack/react-query";
+import { HeliconeRequest } from "@/lib/api/request/request";
+import { Label } from "@/components/ui/label";
 
 export function TestEvaluator() {
-  const { testData, setTestData } = useTestDataStore();
+  const { testConfig, setTestConfig, testInput, setTestInput } =
+    useTestDataStore();
 
   const [promptTemplate, setPromptTemplate] = useState<string | undefined>(
-    testData?.testInput.promptTemplate ?? ""
+    testInput?.promptTemplate ?? ""
   );
   const [result, setResult] = useState<EvaluatorTestResult>(null);
   const [activeTab, setActiveTab] = useState("inputs");
 
   const jawn = useJawnClient();
 
+  const [requestId, setRequestId] = useState<string | undefined>(undefined);
+
+  useQuery({
+    queryKey: ["testInputs", requestId],
+    queryFn: async () => {
+      if (!requestId) {
+        const requests = await jawn.POST("/v1/request/query-clickhouse", {
+          body: {
+            filter: "all",
+            limit: 1,
+            sort: {
+              created_at: "desc",
+            },
+          },
+        });
+        if (requests.data?.data && requests.data?.data.length > 0) {
+          setRequestId(requests.data?.data[0].request_id);
+        }
+        return;
+      }
+
+      const request = await jawn.GET("/v1/request/{requestId}", {
+        params: {
+          path: {
+            requestId: requestId,
+          },
+          query: {
+            includeBody: true,
+          },
+        },
+      });
+
+      setTestInput({
+        inputBody: JSON.stringify(
+          request.data?.data?.request_body ?? {},
+          undefined,
+          4
+        ),
+        inputs: {
+          inputs: {},
+          autoInputs: {},
+        },
+        outputBody: JSON.stringify(
+          request.data?.data?.response_body ?? {},
+          undefined,
+          4
+        ),
+        promptTemplate: "",
+      });
+    },
+  });
   const [previewOpen, setPreviewOpen] = useState(false);
   return (
     <div>
+      <Row className="gap-5 items-center justify-end">
+        <Label className="whitespace-nowrap">Request Id: </Label>
+        <Input
+          placeholder="Request Id"
+          className="w-fit"
+          value={requestId}
+          onChange={(e) => {
+            setRequestId(e.target.value);
+          }}
+        ></Input>
+      </Row>
       <Row className="justify-between gap-10">
         <Col className="h-full flex flex-col gap-2 w-full">
           <Tabs
@@ -50,27 +116,25 @@ export function TestEvaluator() {
             </TabsList>
 
             <TabsContent value="inputs" className="space-y-4 mt-4">
-              {Object.entries(testData?.testInput.inputs.inputs ?? []).map(
+              {Object.entries(testInput?.inputs?.inputs ?? []).map(
                 ([key, value], i) => (
                   <div key={`input-${i}`} className="flex items-center gap-2">
                     <Input
                       value={key}
                       onChange={(e) => {
                         const newKey = e.target.value;
-                        setTestData((prev) => {
+                        setTestInput((prev) => {
                           if (!prev) return prev;
 
-                          const newInputs = { ...prev.testInput.inputs.inputs };
+                          const newInputs = { ...prev.inputs.inputs };
                           delete newInputs[key];
                           newInputs[newKey] = value;
                           return {
                             ...prev,
-                            testInput: {
-                              ...prev.testInput,
-                              inputs: {
-                                inputs: newInputs,
-                                autoInputs: prev.testInput.inputs.autoInputs,
-                              },
+                            inputs: {
+                              ...prev.inputs,
+                              inputs: newInputs,
+                              autoInputs: prev.inputs.autoInputs,
                             },
                           };
                         });
@@ -81,20 +145,18 @@ export function TestEvaluator() {
                     <Input
                       value={value}
                       onChange={(e) => {
-                        setTestData((prev) => {
+                        setTestInput((prev) => {
                           if (!prev) return prev;
                           const newInputs = {
-                            ...prev.testInput.inputs.inputs,
+                            ...prev.inputs.inputs,
                             [key]: e.target.value,
                           };
                           return {
                             ...prev,
-                            testInput: {
-                              ...prev.testInput,
-                              inputs: {
-                                inputs: newInputs,
-                                autoInputs: prev.testInput.inputs.autoInputs,
-                              },
+                            inputs: {
+                              ...prev.inputs,
+                              inputs: newInputs,
+                              autoInputs: prev.inputs.autoInputs,
                             },
                           };
                         });
@@ -104,20 +166,17 @@ export function TestEvaluator() {
                     <Button
                       variant="ghost"
                       onClick={() => {
-                        setTestData((prev) => {
+                        setTestInput((prev) => {
                           if (!prev) return prev;
                           const newInputs = {
-                            ...prev.testInput.inputs.inputs,
+                            ...prev.inputs.inputs,
                           };
                           delete newInputs[key];
                           return {
                             ...prev,
-                            testInput: {
-                              ...prev.testInput,
-                              inputs: {
-                                inputs: newInputs,
-                                autoInputs: prev.testInput.inputs.autoInputs,
-                              },
+                            inputs: {
+                              inputs: newInputs,
+                              autoInputs: prev.inputs.autoInputs,
                             },
                           };
                         });
@@ -132,16 +191,13 @@ export function TestEvaluator() {
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    setTestData((prev) => {
+                    setTestInput((prev) => {
                       if (!prev) return prev;
                       return {
                         ...prev,
-                        testInput: {
-                          ...prev.testInput,
-                          inputs: {
-                            inputs: { ...prev.testInput.inputs.inputs, "": "" },
-                            autoInputs: prev.testInput.inputs.autoInputs,
-                          },
+                        inputs: {
+                          inputs: { ...prev.inputs.inputs, "": "" },
+                          autoInputs: prev.inputs.autoInputs,
                         },
                       };
                     });
@@ -167,13 +223,13 @@ export function TestEvaluator() {
             <TabsContent value="inputBody" className="space-y-4 mt-4">
               <MarkdownEditor
                 className="border rounded-lg text-sm"
-                text={testData?.testInput.inputBody ?? ""}
+                text={testInput?.inputBody ?? ""}
                 setText={(text) => {
-                  setTestData((prev) => {
+                  setTestInput((prev) => {
                     if (!prev) return prev;
                     return {
                       ...prev,
-                      testInput: { ...prev.testInput, inputBody: text },
+                      inputBody: text,
                     };
                   });
                 }}
@@ -185,13 +241,13 @@ export function TestEvaluator() {
             <TabsContent value="outputBody" className="space-y-4 mt-4">
               <MarkdownEditor
                 className="border rounded-lg text-sm"
-                text={testData?.testInput?.outputBody ?? ""}
+                text={testInput?.outputBody ?? ""}
                 setText={(text) => {
-                  setTestData((prev) => {
+                  setTestInput((prev) => {
                     if (!prev) return prev;
                     return {
                       ...prev,
-                      testInput: { ...prev.testInput, outputBody: text },
+                      outputBody: text,
                     };
                   });
                 }}
@@ -203,7 +259,7 @@ export function TestEvaluator() {
         </Col>
       </Row>
 
-      {testData?._type === "llm" && (
+      {testConfig?._type === "llm" && (
         <Collapsible open={previewOpen} onOpenChange={setPreviewOpen}>
           <CollapsibleTrigger>
             <Row className="items-center gap-2">
@@ -219,8 +275,8 @@ export function TestEvaluator() {
             <MarkdownEditor
               className="border rounded-lg text-sm"
               text={
-                testData?._type === "llm"
-                  ? testData?.evaluator_llm_template
+                testConfig?._type === "llm"
+                  ? testConfig?.evaluator_llm_template
                   : ""
               }
               setText={() => {}}
@@ -232,10 +288,10 @@ export function TestEvaluator() {
         </Collapsible>
       )}
 
-      {testData?._type === "lastmile" && testData.config && (
+      {testConfig?._type === "lastmile" && testInput && (
         <PreviewLastMile
-          testDataConfig={testData.config}
-          testInput={testData.testInput}
+          testDataConfig={testConfig.config}
+          testInput={testInput}
         />
       )}
       <Col className="gap-2">
@@ -264,9 +320,9 @@ export function TestEvaluator() {
       <Row className="justify-end gap-10 py-4">
         <Button
           onClick={async () => {
-            if (!testData) return;
+            if (!testConfig) return;
             setResult({ _type: "running" });
-            const rez = await testEvaluator(testData, jawn);
+            const rez = await testEvaluator(testConfig, jawn);
             setResult(rez);
           }}
         >

@@ -13,24 +13,22 @@ export type TestFunction = (
   testInputs: TestInput
 ) => Promise<EvaluatorTestResult>;
 
-export type TestData =
+export type TestConfig =
   | {
       _type: "llm";
       evaluator_llm_template: string;
       evaluator_scoring_type: string;
       evaluator_name: string;
-      testInput: TestInput;
     }
   | {
       _type: "python";
       evaluator_name: string;
       code: string;
-      testInput: TestInput;
     }
   | {
       _type: "lastmile";
       evaluator_name: string;
-      testInput: TestInput;
+
       config: LastMileConfigForm;
     };
 

@@ -90,7 +90,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
 
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
 
   const {
     LLMEvaluatorConfigFormPreset: configFormParams,
@@ -124,13 +124,11 @@ export const LLMEvaluatorConfigForm: React.FC<{
       evaluator_llm_template: openAIFunction,
       evaluator_scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
       evaluator_name: configFormParams.name,
-      testInput: configFormParams.testInput ?? exTestInput,
     });
   }, [
     openAIFunction,
     configFormParams.expectedValueType,
     configFormParams.name,
-    configFormParams.testInput,
     setTestData,
   ]);
 

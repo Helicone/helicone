@@ -2668,6 +2668,9 @@ export interface operations {
   };
   GetRequestById: {
     parameters: {
+      query?: {
+        includeBody?: boolean;
+      };
       path: {
         requestId: string;
       };

@@ -7,6 +7,7 @@ import {
   Path,
   Post,
   Put,
+  Query,
   Request,
   Route,
   Security,
@@ -165,16 +166,25 @@ export class RequestController extends Controller {
   @Get("/{requestId}")
   public async getRequestById(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() requestId: string,
+    @Query() includeBody: boolean = false
   ): Promise<Result<HeliconeRequest, string>> {
     const reqManager = new RequestManager(request.authParams);
-    const requestID = await reqManager.getRequestById(requestId);
-    if (requestID.error) {
+    let returnRequest: Result<HeliconeRequest, string>;
+    if (includeBody) {
+      returnRequest = await reqManager.uncachedGetRequestByIdWithBody(
+        requestId
+      );
+    } else {
+      returnRequest = await reqManager.getRequestById(requestId);
+    }
+
+    if (returnRequest.error) {
       this.setStatus(500);
     } else {
       this.setStatus(200);
     }
-    return requestID;
+    return returnRequest;
   }
 
   @Post("/query-ids")

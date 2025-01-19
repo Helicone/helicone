@@ -42,7 +42,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
   const { invalidate } = useInvalidateEvaluators();
 
   const [text, setText] = useState<string>(configFormParams.code);
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
 
   const jawn = useJawnClient();
   const [name, setName] = useState<string>(defaultName);
