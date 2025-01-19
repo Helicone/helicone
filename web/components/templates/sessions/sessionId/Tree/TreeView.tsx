@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
-import getNormalizedRequest from "../../../requestsV2/builder/requestBuilder";
+import getNormalizedRequest from "../../../requests/builder/requestBuilder";
 import { TraceSpan } from "../Span";
 import { Tree } from "./Tree";
 import { useGetRequests } from "../../../../../services/hooks/requests";
@@ -20,7 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import RequestDrawerV2 from "@/components/templates/requestsV2/requestDrawerV2";
+import RequestDrawerV2 from "@/components/templates/requests/requestDrawerV2";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 

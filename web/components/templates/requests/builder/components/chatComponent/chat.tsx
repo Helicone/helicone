@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { clsx } from "../../../shared/clsx";
+import { clsx } from "../../../../../shared/clsx";
 
 import { MessageRenderer } from "./MessageRenderer";
 import {
@@ -8,11 +8,11 @@ import {
   getResponseMessage,
 } from "./messageUtils";
 
-import ThemedModal from "../../../shared/themed/themedModal";
+import ThemedModal from "../../../../../shared/themed/themedModal";
 import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
 import { JsonView } from "./jsonView";
-import { LlmSchema } from "../../../../lib/api/models/requestResponseModel";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import { LlmSchema } from "../../../../../../lib/api/models/requestResponseModel";
+import { useLocalStorage } from "../../../../../../services/hooks/localStorage";
 import { HeliconeRequest } from "@/lib/api/request/request";
 
 interface ChatProps {

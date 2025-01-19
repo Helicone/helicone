@@ -4,8 +4,8 @@ import { clsx } from "../../shared/clsx";
 import RoleButton from "./new/roleButton";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import ModelPill from "../requestsV2/modelPill";
-import { Message } from "../requests/chatComponent/types";
+import ModelPill from "../requests/modelPill";
+import { Message } from "../requests/builder/components/chatComponent/types";
 
 interface ModelResponseGroupProps {
   modelMessage: Message[];

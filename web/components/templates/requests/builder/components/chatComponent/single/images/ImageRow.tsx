@@ -1,5 +1,5 @@
 import React from "react";
-import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
+import { RenderWithPrettyInputKeys } from "../../../../../../playground/chatRow";
 import { Message } from "../../types";
 import { ImageItem } from "./ImageItem";
 

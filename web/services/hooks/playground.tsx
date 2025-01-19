@@ -1,7 +1,7 @@
 import { ChatCompletionTool } from "openai/resources";
-import { Message } from "../../components/templates/requests/chatComponent/types";
-import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
-import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+import { Message } from "../../components/templates/requests/builder/components/chatComponent/types";
+import { NormalizedRequest } from "../../components/templates/requests/builder/abstractRequestBuilder";
+import useRequestsPageV2 from "../../components/templates/requests/useRequestsPageV2";
 import { getTimeIntervalAgo } from "@/lib/timeCalculations/time";
 import { useMemo } from "react";
 

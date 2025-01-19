@@ -2,7 +2,7 @@ import React from "react";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";
-import { Completion } from "../../requests/completion";
+import { Completion } from "./components/completion";
 
 class OpenAIAssistantBuilder extends AbstractRequestBuilder {
   protected buildSpecific(): SpecificFields {

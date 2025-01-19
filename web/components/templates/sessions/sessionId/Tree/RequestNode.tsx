@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
-import StatusBadge from "../../../requestsV2/statusBadge";
+import StatusBadge from "../../../requests/statusBadge";
 import { clsx } from "../../../../shared/clsx";
 import {
   Tooltip,

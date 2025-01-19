@@ -1,7 +1,7 @@
 import React from "react";
 import ChatRow from "./chatRow";
 import ModelResponseGroup from "./ModelResponseGroup";
-import { Message } from "../requests/chatComponent/types";
+import { Message } from "../requests/builder/components/chatComponent/types";
 import { Col } from "../../layout/common";
 
 interface ChatRowsProps {

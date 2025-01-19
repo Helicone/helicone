@@ -1,5 +1,5 @@
 import React from "react";
-import RoleButton from "../../../playground/new/roleButton";
+import RoleButton from "../../../../../playground/new/roleButton";
 
 interface MessageHeaderProps {
   role: string;

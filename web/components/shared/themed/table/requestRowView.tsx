@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
+import { NormalizedRequest } from "../../../templates/requests/builder/abstractRequestBuilder";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 

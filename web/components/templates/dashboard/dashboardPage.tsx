@@ -47,7 +47,7 @@ import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import UnauthorizedView from "../requestsV2/UnauthorizedView";
+import UnauthorizedView from "../requests/UnauthorizedView";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import CountryPanel from "./panels/countryPanel";
 import { ScoresPanel } from "./panels/scores/scoresPanel";

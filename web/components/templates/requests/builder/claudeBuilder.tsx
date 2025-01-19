@@ -1,5 +1,5 @@
 import { enforceString } from "../../../../lib/helpers/typeEnforcers";
-import { Completion } from "../../requests/completion";
+import { Completion } from "./components/completion";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";

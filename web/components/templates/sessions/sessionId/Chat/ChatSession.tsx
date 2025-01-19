@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useGetRequests } from "../../../../../services/hooks/requests";
-import getNormalizedRequest from "../../../requestsV2/builder/requestBuilder";
+import getNormalizedRequest from "../../../requests/builder/requestBuilder";
 import { Row } from "../../../../layout/common/row";
 import { Col } from "../../../../layout/common/col";
-import RequestDrawerV2 from "../../../requestsV2/requestDrawerV2";
+import RequestDrawerV2 from "../../../requests/requestDrawerV2";
 import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
-import StatusBadge from "../../../requestsV2/statusBadge";
-import { CustomPropertiesCard } from "../../../requestsV2/customProperties";
+import StatusBadge from "../../../requests/statusBadge";
+import { CustomPropertiesCard } from "../../../requests/customProperties";
 import { FaChevronRight } from "react-icons/fa";
 
 interface ChatSessionProps {
