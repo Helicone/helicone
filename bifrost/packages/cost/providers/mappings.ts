@@ -15,6 +15,7 @@ import { costs as qstashCosts } from "./qstash";
 import { openAIProvider } from "./openai";
 import { anthropicProvider } from "./anthropic";
 import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as deepseekCosts } from "./deepseek";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -49,6 +50,8 @@ const qstash = /^https:\/\/qstash\.upstash\.io/;
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
 const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://api.deepseek.com
+const deepseek = /^https:\/\/api\.deepseek\.com/;
 
 export const providersNames = [
   "OPENAI",
@@ -74,6 +77,7 @@ export const providersNames = [
   "QSTASH",
   "FIRECRAWL",
   "AWS",
+  "DEEPSEEK",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -196,6 +200,11 @@ export const providers: {
     pattern: awsBedrock,
     provider: "AWS",
     costs: awsBedrockCosts,
+  },
+  {
+    pattern: deepseek,
+    provider: "DEEPSEEK",
+    costs: deepseekCosts,
   },
 ];
 

@@ -273,7 +273,6 @@ WHERE (${builtFilter.filter})`,
         tier: "pro-20240913",
       },
       subscription_data: {
-        trial_period_days: isNewCustomer ? 14 : undefined,
         metadata: {
           orgId: this.authParams.organizationId,
           tier: "pro-20240913",

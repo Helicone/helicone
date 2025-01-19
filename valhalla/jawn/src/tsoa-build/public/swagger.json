@@ -2542,7 +2542,8 @@
 					"DEEPINFRA",
 					"QSTASH",
 					"FIRECRAWL",
-					"AWS"
+					"AWS",
+					"DEEPSEEK"
 				]
 			},
 			"Provider": {

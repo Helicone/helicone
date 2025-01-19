@@ -53,16 +53,16 @@ export function getResponseMessage(
   model: string
 ): Message | null {
   if (/^claude/.test(model)) {
-    // Handle Anthropic (Claude) response
-    if (Array.isArray(responseBody?.content)) {
-      return {
-        id: responseBody.id || crypto.randomUUID(),
-        role: "assistant",
-        content: responseBody.content,
-        model: responseBody.model,
-      };
-    } else {
-      // Fallback for unexpected structure
+    if (responseBody?.content) {
+      // Handle Anthropic (Claude) response
+      if (Array.isArray(responseBody?.content)) {
+        return {
+          id: responseBody.id || crypto.randomUUID(),
+          role: "assistant",
+          content: responseBody.content,
+          model: responseBody.model,
+        };
+      }
       return {
         id: responseBody.id || crypto.randomUUID(),
         role: "assistant",

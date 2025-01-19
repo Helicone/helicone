@@ -1,8 +1,6 @@
-See companion blog [here](/blog/building-an-llm-stack) before reading this.
+As seasoned developers, we've witnessed the ebb and flow of numerous tech stacks. From the meteoric rise of MERN to the gradual decline of AngularJS, and the innovative emergence of Jamstack, tech stacks have been the backbone of web development evolution.
 
 ![LLM stack guide](/static/blog/llm-stack-guide/cover.webp)
-
-As seasoned developers, we've witnessed the ebb and flow of numerous tech stacks. From the meteoric rise of MERN to the gradual decline of AngularJS, and the innovative emergence of Jamstack, tech stacks have been the backbone of web development evolution.
 
 Enter the LLM Stack - a cutting-edge tech stack designed to revolutionize how developers build and scale LLM (Large Language Model) applications.
 
@@ -15,19 +13,15 @@ LLM applications are deceptively simple to kickstart, but scaling them unveils a
 3. **Observability Hurdles**: Monitoring LLM performance requires specialized solutions.
 4. **Security Concerns**: LLMs introduce new vectors for data breaches and prompt injections.
 
-To illustrate this evolution, we've created a [companion blog](/blog/building-an-llm-stack) that walks through a real-world LLM application's journey from MVP to scalable product.
+To illustrate this evolution, we've created a <a href="/blog/building-an-llm-stack" target="_blank" rel="noopener">companion blog</a> that walks through a real-world LLM application's journey from MVP to scalable product.
 
-#### You might be interested in:
+## Anatomy of the LLM Stack
 
-- Read [Prompt Engineering Tools, Best Practices and Techniques](https://www.helicone.ai/blog/prompt-engineering-tools)
+Let's dissect the architecture of a robust LLM stack, based on our <a href="/blog/building-an-llm-stack" target="_blank" rel="noopener">detailed example</a>:
 
-# Anatomy of the LLM Stack
-
-Let's dissect the architecture of a robust LLM stack, based on our [detailed example](/blog/building-an-llm-stack):
+Please note that this article is not going to tell you what stack to choose, but rather outlines the components for building an LLM stack.
 
 ![LLM Stack Architecture](/static/blog/llm-stack-guide/llm-architecture.webp)
-
-**Note:** that this article is not going to tell you what stack to choose, but rather outlines the components for building an LLM stack.
 
 ## Key Components
 
@@ -37,17 +31,30 @@ This layer focuses on monitoring, tracking, and analyzing the performance and be
 
 ![Observability Layer](/static/blog/llm-stack-guide/observability-layer.webp)
 
-| Service         | Cutting-Edge Solutions                                                                                         |
-| --------------- | -------------------------------------------------------------------------------------------------------------- |
-| Observability   | [Helicone](/products/helicone-observability), LangSmith, LangFuse, Traceloop, PromptLayer, HoneyHive, AgentOps |
-| Clients         | LangChain, LiteLLM, LlamaIndex                                                                                 |
-| Agents          | CrewAI, AutoGPT, DifyAI, Autogen                                                                               |
-| Prompting Layer | [Helicone Prompting](https://docs.helicone.ai/features/prompts), PromptLayer, PromptFoo                        |
-| Integrations    | Zapier, LlamaIndex                                                                                             |
+| Service         | Cutting-Edge Solutions                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Observability   | <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>, LangSmith, LangFuse, Traceloop, PromptLayer, HoneyHive, AgentOps |
+| Clients         | LangChain, LiteLLM, LlamaIndex                                                                                                                   |
+| Agents          | CrewAI, AutoGPT, DifyAI, Autogen                                                                                                                 |
+| Prompting Layer | <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">Helicone Prompting</a>, PromptLayer, PromptFoo                |
+| Integrations    | Zapier, LlamaIndex                                                                                                                               |
 
 #### You might be interested:
 
-- Read: [6 Awesome Platforms & Frameworks for Building AI Agents (Open-Source)](https://www.helicone.ai/blog/ai-agent-builders)
+- <a
+    href="https://www.helicone.ai/blog/best-langsmith-alternatives"
+    target="_blank"
+    rel="noopener"
+  >
+    Comparing the Best Observability Tools for LLM Applications
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/ai-agent-builders"
+    target="_blank"
+    rel="noopener"
+  >
+    6 Awesome Platforms & Frameworks for Building AI Agents
+  </a>
 
 ### 2. Inference Layer
 
@@ -55,11 +62,13 @@ The Inference Layer is responsible for processing requests to the LLM, managing 
 
 ![Inference Layer](/static/blog/llm-stack-guide/inference-layer.webp)
 
-| Service           | Innovative Products                                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Gateway           | [Helicone Gateway](https://docs.helicone.ai/getting-started/integration-method/gateway), Cloudflare AI, PortKey, KeywordsAI |
-| LLM Load Balancer | Martian, LiteLLM                                                                                                            |
-| Model Providers   | OpenAI (GPT), Meta (Llama), Google (Gemini), Mistral, Anthropic (Claude), TogetherAI, Anyscale, Groq, Amazon (Bedrock)      |
+| Service           | Innovative Products                                                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway           | <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">Helicone Gateway</a>, Cloudflare AI, PortKey, KeywordsAI |
+| LLM Load Balancer | Martian, LiteLLM                                                                                                                                                      |
+| Model Providers   | OpenAI (GPT), Meta (Llama), Google (Gemini), Mistral, Anthropic (Claude), TogetherAI, Anyscale, Groq, Amazon (Bedrock)                                                |
+
+**You might be interested:** <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">Top 10 AI Inference Platforms in 2025</a>
 
 ### 3. Testing & Experimentation Layer
 
@@ -67,22 +76,45 @@ This layer enables developers to test, evaluate, and experiment with different p
 
 ![Testing & Experimentation Layer](/static/blog/llm-stack-guide/testing-layer.webp)
 
-| Service         | Next-Gen Tools                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Datastores      | [Helicone API](https://docs.helicone.ai/rest/request/post-v1requestquery), LangFuse, LangSmith                                  |
-| Experimentation | [Helicone Experiments](https://docs.helicone.ai/use-cases/experiments#how-to-run-llm-prompt-experiments), Promptfoo, Braintrust |
-| Evaluators      | PromptFoo, Lastmile, BaseRun                                                                                                    |
-| Fine Tuning     | OpenPipe, Autonomi                                                                                                              |
-|  |
+| Service         | Next-Gen Tools                                                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Datastores      | <a href="https://docs.helicone.ai/rest/request/post-v1requestquery" target="_blank" rel="noopener">Helicone API</a>, LangFuse, LangSmith |
+| Experimentation | <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Helicone Experiments</a>, Promptfoo, Braintrust   |
+| Evaluators      | PromptFoo, Lastmile, BaseRun                                                                                                             |
+| Fine Tuning     | OpenPipe, Autonomi                                                                                                                       |
+|                 |
 
----
+## Helicone: Developer's LLM Toolkit
 
-# Helicone: Your Gateway to LLM Excellence
-
-Helicone isn't just another tool in the LLM stack - it's a game-changer. Our primary focus areas, Gateway and Observability, are crucial for building robust, scalable LLM applications.
+Helicone provides two core components that developers need when building production LLM apps: a Gateway for managing traffic and an Observability layer for monitoring and debugging. Think of it like having both a load balancer and logging/monitoring system purpose-built for LLMs to help you build more robust and scalable applications.
 
 ![Helicone in the LLM Stack](/static/pasted_images/llm-stack-helicone-in-picture.png)
 
 By integrating Helicone into your LLM workflow, you're not just adopting a tool; you're embracing a philosophy of efficiency, scalability, and deep insights into your LLM applications.
 
 Ready to supercharge your LLM development? Dive deeper into Helicone's capabilities and see how it can transform your LLM stack today!
+
+### Further Resources
+
+- <a
+    href="https://www.helicone.ai/blog/building-an-llm-stack"
+    target="_blank"
+    rel="noopener"
+  >
+    LLM Architecture From Simple Chatbot to Complex System
+  </a>
+- <a
+    href="http://localhost:3002/blog/essential-helicone-features"
+    rel="noopener"
+  >
+    4 Essential Helicone Features to Optimize Your LLM App
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/first-ai-app-with-helicone"
+    target="_blank"
+    rel="noopener"
+  >
+    Building Your First AI App with Helicone
+  </a>
+
+<Questions />
