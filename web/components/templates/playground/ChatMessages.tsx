@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { Message } from "../requests/chatComponent/types";
+import { Message } from "../requests/builder/components/chatComponent/types";
 import ChatRows from "./ChatRows";
 import RoleButton from "./new/roleButton";
 

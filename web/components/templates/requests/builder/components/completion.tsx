@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { removeLeadingWhitespace } from "../../shared/utils/utils";
+import { removeLeadingWhitespace } from "../../../../shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 

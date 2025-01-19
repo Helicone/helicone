@@ -1,4 +1,4 @@
-import ModelPill from "../../requestsV2/modelPill";
+import ModelPill from "../../requests/modelPill";
 import { clsx } from "../../../shared/clsx";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 

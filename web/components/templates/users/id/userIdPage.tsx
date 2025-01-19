@@ -4,7 +4,7 @@ import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { formatNumber } from "../initialColumns";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
-import RequestsPageV2 from "../../requestsV2/requestsPageV2";
+import RequestsPageV2 from "../../requests/requestsPageV2";
 import { ElementType } from "react";
 import {
   PresentationChartLineIcon,

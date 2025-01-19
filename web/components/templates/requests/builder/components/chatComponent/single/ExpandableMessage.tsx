@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { clsx } from "../../../../shared/clsx";
-import { RenderWithPrettyInputKeys } from "../../../playground/chatRow";
+import { clsx } from "../../../../../../shared/clsx";
+import { RenderWithPrettyInputKeys } from "../../../../../playground/chatRow";
 import { isJSON } from "./utils";
-import { Col } from "../../../../layout/common";
-import MarkdownEditor from "../../../../shared/markdownEditor";
+import { Col } from "../../../../../../layout/common";
+import MarkdownEditor from "../../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
 
 interface ExpandableMessageProps {
