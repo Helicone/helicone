@@ -35,7 +35,7 @@ import {
 import useNotification from "../../../shared/notification/useNotification";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import { MODEL_LIST } from "../../playground/new/modelList";
-import { PromptMessage } from "../../requests/chatComponent/types";
+import { PromptMessage } from "../../requests/builder/components/chatComponent/types";
 import PromptPlayground from "./promptPlayground";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -72,9 +72,9 @@ import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";
 import { ScrollArea } from "../../../ui/scroll-area";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
-import ModelPill from "../../requestsV2/modelPill";
-import StatusBadge from "../../requestsV2/statusBadge";
-import TableFooter from "../../requestsV2/tableFooter";
+import ModelPill from "../../requests/modelPill";
+import StatusBadge from "../../requests/statusBadge";
+import TableFooter from "../../requests/tableFooter";
 import PromptInputItem from "./promptInputItem";
 
 interface PromptIdPageProps {

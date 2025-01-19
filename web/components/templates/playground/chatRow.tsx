@@ -18,7 +18,7 @@ import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
-import { Message } from "../requests/chatComponent/types";
+import { Message } from "../requests/builder/components/chatComponent/types";
 
 interface ChatRowProps {
   index: number;

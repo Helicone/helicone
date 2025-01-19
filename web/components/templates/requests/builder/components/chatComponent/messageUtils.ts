@@ -1,4 +1,4 @@
-import { LlmSchema } from "../../../../lib/api/models/requestResponseModel";
+import { LlmSchema } from "../../../../../../lib/api/models/requestResponseModel";
 import { Message } from "./types";
 
 // Helper functions

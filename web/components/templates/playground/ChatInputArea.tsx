@@ -6,7 +6,7 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import { Message } from "../requests/chatComponent/types";
+import { Message } from "../requests/builder/components/chatComponent/types";
 
 interface ChatInputAreaProps {
   currentChat: Message[];

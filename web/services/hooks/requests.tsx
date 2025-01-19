@@ -4,7 +4,7 @@ import { useOrg } from "../../components/layout/org/organizationContext";
 import {
   getModelFromPath,
   mapGeminiPro,
-} from "../../components/templates/requestsV2/builder/mappers/geminiMapper";
+} from "../../components/templates/requests/builder/mappers/geminiMapper";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";

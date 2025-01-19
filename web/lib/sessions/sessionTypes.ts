@@ -1,4 +1,4 @@
-import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
+import { NormalizedRequest } from "../../components/templates/requests/builder/abstractRequestBuilder";
 
 export interface Trace {
   start_unix_timestamp_ms: number;

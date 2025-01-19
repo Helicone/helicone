@@ -4,7 +4,7 @@ import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
-import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
+import RequestDrawerV2 from "../requests/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
   CodeBracketSquareIcon,

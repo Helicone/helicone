@@ -16,7 +16,7 @@ import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import TableFooter from "../requestsV2/tableFooter";
+import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
 

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { clsx } from "../../../../shared/clsx";
+import { clsx } from "../../../../../../shared/clsx";
 import { Message } from "../types";
 import { MessageContent } from "./MessageContent";
 import { MessageHeader } from "./MessageHeader";
