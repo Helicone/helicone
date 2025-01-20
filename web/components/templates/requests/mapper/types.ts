@@ -63,6 +63,34 @@ export type MapperType =
   | "openai-moderation"
   | "openai-embedding";
 
+type HeliconeMetadata = {
+  requestId: string;
+  path: string;
+  countryCode: string | null;
+  createdAt: string;
+  totalTokens: number | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+  latency: number | null;
+  user: string | null;
+  status: {
+    code: number;
+    statusType: "success" | "error" | "pending" | "unknown" | "cached";
+  };
+  customProperties: {
+    [key: string]: Json;
+  } | null;
+  cost: number | null;
+  feedback: {
+    createdAt: string | null;
+    id: string | null;
+    rating: boolean | null;
+  };
+  provider: Provider;
+  timeToFirstToken?: number | null;
+  scores?: Record<string, { value: number; valueType: string } | number> | null;
+};
+
 export type MappedLLMRequest = {
   _type: MapperType;
   id: string;
@@ -73,34 +101,5 @@ export type MappedLLMRequest = {
     request: any;
     response: any;
   };
-  heliconeMetadata: {
-    requestId: string;
-    path: string;
-    countryCode: string | null;
-    createdAt: string;
-    totalTokens: number | null;
-    promptTokens: number | null;
-    completionTokens: number | null;
-    latency: number | null;
-    user: string | null;
-    status: {
-      code: number;
-      statusType: "success" | "error" | "pending" | "unknown" | "cached";
-    };
-    customProperties: {
-      [key: string]: Json;
-    } | null;
-    cost: number | null;
-    feedback: {
-      createdAt: string | null;
-      id: string | null;
-      rating: boolean | null;
-    };
-    provider: Provider;
-    timeToFirstToken?: number | null;
-    scores?: Record<
-      string,
-      { value: number; valueType: string } | number
-    > | null;
-  };
+  heliconeMetadata: HeliconeMetadata;
 };
