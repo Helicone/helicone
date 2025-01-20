@@ -23,8 +23,8 @@ import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Button } from "../../../ui/button";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
-import ModelPill from "../../requestsV2/modelPill";
-import StatusBadge from "../../requestsV2/statusBadge";
+import ModelPill from "../../requests/modelPill";
+import StatusBadge from "../../requests/statusBadge";
 import { MODEL_LIST } from "../../playground/new/modelList";
 
 interface PromptMetricsTabProps {
