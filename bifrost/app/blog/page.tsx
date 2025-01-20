@@ -219,6 +219,12 @@ const blogContent: BlogStructure[] = [
       folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
     },
   },
+  
+  {
+    dynmaicEntry: {
+      folderName: "llm-caching",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "tree-of-thought-prompting",
