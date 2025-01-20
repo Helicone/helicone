@@ -16,26 +16,42 @@ export async function generateStream(
     signal: abortController.signal,
     stream: {
       onChunk: async (chunk: string) => {
-        if (options?.headers?.["x-cancel"] === "1") {
+        try {
+          if (options?.headers?.["x-cancel"] === "1") {
+            hasError = true;
+            abortController.abort();
+            await writer.abort(new Error("Request cancelled"));
+            return;
+          }
+          if (!hasError) {
+            await writer.write(encoder.encode(chunk));
+          }
+        } catch (error) {
           hasError = true;
-          abortController.abort();
-          await writer.abort(new Error("Request cancelled"));
-          return;
-        }
-        if (!hasError) {
-          await writer.write(encoder.encode(chunk));
+          console.error("Error writing chunk:", error);
+          await writer.abort(
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       },
       onCompletion: async () => {
-        if (!hasError) {
-          await writer.close();
+        try {
+          if (!hasError && !writer.closed) {
+            await writer.close();
+          }
+        } catch (error) {
+          console.error("Error closing writer:", error);
         }
       },
     },
   }).catch(async error => {
     hasError = true;
     console.error("Streaming error:", error);
-    await writer.abort(error);
+    try {
+      await writer.abort(error);
+    } catch (abortError) {
+      console.error("Error aborting writer:", abortError);
+    }
   });
 
   return stream.readable;
