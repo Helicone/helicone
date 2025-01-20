@@ -1,21 +1,21 @@
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import useNotification from "../../shared/notification/useNotification";
-import ThemedDiv from "../../shared/themed/themedDiv";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
-import { clsx } from "../../shared/clsx";
-import RequestRow from "./requestRow";
-import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import Link from "next/link";
-import { FlaskConicalIcon, TestTube2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { FlaskConicalIcon, TestTube2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedDiv from "../../shared/themed/themedDiv";
+import { MappedLLMRequest } from "./mapper/types";
+import RequestRow from "./requestRow";
 
 interface RequestDivProps {
   open: boolean;
@@ -24,7 +24,7 @@ interface RequestDivProps {
   hasNext?: boolean;
   onPrevHandler?: () => void;
   onNextHandler?: () => void;
-  request?: NormalizedRequest;
+  request?: MappedLLMRequest;
   properties: string[];
 }
 
@@ -132,10 +132,8 @@ const RequestDiv = (props: RequestDivProps) => {
                 <button
                   onClick={() => {
                     setNotification("Copied to clipboard", "success");
-                    const copy = { ...request };
-                    delete copy.render;
                     navigator.clipboard.writeText(
-                      JSON.stringify(copy || {}, null, 4)
+                      JSON.stringify(request?.schema || {}, null, 4)
                     );
                   }}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"

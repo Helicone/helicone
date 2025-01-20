@@ -1,10 +1,9 @@
+import { Message } from "@/components/templates/requests/mapper/types";
 import React, { useMemo } from "react";
-import { clsx } from "../../../../../../shared/clsx";
-import { Message } from "../types";
+import { clsx } from "../../../../../shared/clsx";
+import { PROMPT_MODES } from "../chatTopBar";
 import { MessageContent } from "./MessageContent";
 import { MessageHeader } from "./MessageHeader";
-import { getContentType } from "./utils";
-import { PROMPT_MODES } from "../chatTopBar";
 
 interface SingleChatProps {
   message: Message;
@@ -33,7 +32,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   const isSystem = messageContent.role === "system";
 
   const message = useMemo(() => {
-    const contentType = getContentType(messageContent);
+    const contentType = messageContent._type;
     if (contentType === "autoInput" && autoInputs) {
       const indexMatch = (messageContent as any as string).match(
         /<helicone-auto-prompt-input idx=(\d+) \/>/

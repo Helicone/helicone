@@ -14,11 +14,11 @@ import {
   getMessages,
   getRequestMessages,
   getResponseMessage,
-} from "../../requests/builder/components/chatComponent/messageUtils";
+} from "../../requests/mapper/utils/messageUtils";
 import {
   Message,
   PromptMessage,
-} from "../../requests/builder/components/chatComponent/types";
+} from "../../requests/components/chatComponent/types";
 import { Input } from "./MessageInput";
 import MessageRendererComponent from "./MessageRendererComponent";
 import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";

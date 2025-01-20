@@ -1,6 +1,5 @@
+import { Message } from "@/components/templates/requests/mapper/types";
 import React from "react";
-import { Message } from "../types";
-import { isJSON } from "./utils";
 
 export const OpenAIImage: React.FC<{
   item: any;
@@ -22,16 +21,22 @@ export const UnsupportedImage: React.FC = () => (
 
 export const FunctionMessage: React.FC<{
   message: Message;
-  formattedMessageContent: string;
-}> = ({ message, formattedMessageContent }) => (
-  <div className="flex flex-col space-y-2">
-    <code className="text-xs whitespace-pre-wrap font-semibold">
-      {message.name}
-    </code>
-    <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
-      {isJSON(formattedMessageContent)
-        ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-        : formattedMessageContent}
-    </pre>
-  </div>
+}> = ({ message }) => (
+  <>
+    {message.tool_calls?.map((toolCall, index) => (
+      <div
+        className="flex flex-col space-y-2"
+        key={`${index}-${toolCall.name}`}
+      >
+        <code className="text-xs whitespace-pre-wrap font-semibold">
+          {toolCall.name}
+        </code>
+        <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
+          {typeof toolCall.arguments === "object"
+            ? JSON.stringify(toolCall.arguments, null, 2)
+            : toolCall.arguments}
+        </pre>
+      </div>
+    ))}
+  </>
 );

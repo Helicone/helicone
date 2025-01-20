@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { MessageRenderer } from "../../requests/builder/components/chatComponent/MessageRenderer";
-import { JsonView } from "../../requests/builder/components/chatComponent/jsonView";
-import { PromptMessage } from "../../requests/builder/components/chatComponent/types";
+import { MessageRenderer } from "../../requests/components/chatComponent/MessageRenderer";
+import { JsonView } from "../../requests/components/chatComponent/jsonView";
+import { PromptMessage } from "../../requests/components/chatComponent/types";
 import { Input } from "./MessageInput";
 import PromptChatRow from "./promptChatRow";
 

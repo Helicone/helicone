@@ -17,6 +17,7 @@ import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import getNormalizedRequest from "./builder/requestBuilder";
+import { heliconeRequestToMappedContent } from "./mapper/getMappedContent";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -91,7 +92,7 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    normalizedRequests: getNormalizedRequests(requests.requests),
+    requests: requests.requests.map(heliconeRequestToMappedContent),
     count: count.data?.data,
     isDataLoading,
     isBodyLoading: requests.isLoading,

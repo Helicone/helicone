@@ -1,12 +1,12 @@
 import React, { useMemo, useRef } from "react";
 import { PROMPT_MODES } from "../chatTopBar";
-import { Message } from "../types";
+
 import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
-import { FunctionMessage } from "./renderingUtils";
-import { ImageRow } from "./images/ImageRow";
 import { FunctionCall } from "./FunctionCall";
-import { getContentType, getFormattedMessageContent } from "./utils";
+import { ImageRow } from "./images/ImageRow";
+import { FunctionMessage } from "./renderingUtils";
+import { Message } from "@/components/templates/requests/mapper/types";
 
 interface MessageContentProps {
   message: Message;
@@ -29,21 +29,10 @@ export const MessageContent: React.FC<MessageContentProps> = ({
   mode,
 }) => {
   const textContainerRef = useRef<HTMLDivElement>(null);
-  const formattedMessageContent = useMemo(
-    () => getFormattedMessageContent(message),
-    [message]
-  );
 
-  const contentType = getContentType(message);
-
-  switch (contentType) {
+  switch (message._type) {
     case "function":
-      return (
-        <FunctionMessage
-          message={message}
-          formattedMessageContent={formattedMessageContent}
-        />
-      );
+      return <FunctionMessage message={message} />;
     case "functionCall":
       return <FunctionCall message={message} />;
     case "image":
@@ -59,11 +48,11 @@ export const MessageContent: React.FC<MessageContentProps> = ({
     case "message":
       return (
         <ExpandableMessage
-          formattedMessageContent={formattedMessageContent}
           textContainerRef={textContainerRef}
           expandedProps={expandedProps}
           selectedProperties={selectedProperties}
           mode={mode}
+          formattedMessageContent={message.content ?? ""}
         />
       );
   }

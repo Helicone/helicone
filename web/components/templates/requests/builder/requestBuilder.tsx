@@ -26,7 +26,7 @@ const builders: {
   ChatBuilder: ChatBuilder,
   GeminiBuilder: ChatBuilder,
   CompletionBuilder: CompletionBuilder,
-  ChatGPTBuilder: ChatGPTBuilder,
+
   GPT3Builder: GPT3Builder,
   ModerationBuilder: ModerationBuilder,
   EmbeddingBuilder: EmbeddingBuilder,

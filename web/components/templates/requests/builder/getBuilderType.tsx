@@ -1,4 +1,4 @@
-import { LlmType } from "../../../../lib/api/models/requestResponseModel";
+import { LlmType } from "../mapper/types";
 import { Provider } from "../../../../lib/api/request/request";
 import { BuilderType } from "./BuilderType";
 

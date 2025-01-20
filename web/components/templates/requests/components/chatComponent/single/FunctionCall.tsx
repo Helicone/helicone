@@ -1,17 +1,9 @@
+import { Message } from "@/components/templates/requests/mapper/types";
 import React from "react";
-import { Message } from "../types";
 import { renderFunctionCall } from "./renderFunctionCall";
 
 export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
-  if (message?.function_call) {
-    return renderFunctionCall(
-      message.function_call.name,
-      message.function_call.arguments
-    );
-  } else if (
-    Array.isArray(message.tool_calls) &&
-    message.tool_calls.length > 0
-  ) {
+  if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
     return (
       <div className="flex flex-col space-y-2">
         {message.content !== null && message.content !== "" && (
@@ -19,14 +11,15 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
             {typeof message.content === "string" ? message.content : ""}
           </div>
         )}
-        {message.tool_calls.map((tool, index) =>
-          tool.function && typeof tool.function === "object"
-            ? renderFunctionCall(
-                tool.function.name,
-                tool.function.arguments,
-                index
-              )
-            : null
+        {message.tool_calls?.map((tool, index) =>
+          tool.name && typeof tool.name === "string" ? (
+            <pre
+              key={index}
+              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+            >
+              {`${tool.name}(${JSON.stringify(tool.arguments, null, 2)})`}
+            </pre>
+          ) : null
         )}
       </div>
     );

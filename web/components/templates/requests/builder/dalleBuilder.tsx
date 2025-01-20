@@ -1,4 +1,4 @@
-import { Completion } from "./components/completion";
+import { Completion } from "../components/completion";
 import AbstractRequestBuilder, {
   SpecificFields,
 } from "./abstractRequestBuilder";

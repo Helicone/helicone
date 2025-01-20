@@ -1,16 +1,14 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
-import {
-  getModelFromPath,
-  mapGeminiPro,
-} from "../../components/templates/requests/builder/mappers/geminiMapper";
+
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { mapGeminiPro } from "@/components/templates/requests/mapper/mappers/gemini/chat";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -38,7 +36,7 @@ function processFilter(filter: any): any {
 
 const requestBodyCache = new Map<string, HeliconeRequest>();
 
-const useGetRequestsWithBodies = (
+export const useGetRequestsWithBodies = (
   currentPage: number,
   currentPageSize: number,
   advancedFilter: FilterNode,
@@ -119,31 +117,11 @@ const useGetRequestsWithBodies = (
       const content = urlQueries[index].data;
       if (!content) return request;
 
-      const model =
-        request.model_override ||
-        request.response_model ||
-        request.request_model ||
-        content.response?.model ||
-        content.request?.model ||
-        content.response?.body?.model ||
-        getModelFromPath(request.target_url) ||
-        "";
-
       let updatedRequest = {
         ...request,
         request_body: content.request,
         response_body: content.response,
       };
-
-      if (
-        request.provider === "GOOGLE" &&
-        model.toLowerCase().includes("gemini")
-      ) {
-        updatedRequest.llmSchema = mapGeminiPro(
-          updatedRequest as HeliconeRequest,
-          model
-        );
-      }
 
       return updatedRequest;
     });

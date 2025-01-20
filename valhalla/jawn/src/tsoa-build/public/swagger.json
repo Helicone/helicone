@@ -2782,6 +2782,9 @@
 					},
 					"target_url": {
 						"type": "string"
+					},
+					"model": {
+						"type": "string"
 					}
 				},
 				"required": [

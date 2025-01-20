@@ -701,6 +701,7 @@ Json: JsonObject;
       properties: components["schemas"]["Record_string.string_"];
       assets: string[];
       target_url: string;
+      model?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

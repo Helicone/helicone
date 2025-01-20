@@ -1,28 +1,14 @@
 import React, { useMemo, useState } from "react";
-import { clsx } from "../../../../../shared/clsx";
-
-import { MessageRenderer } from "./MessageRenderer";
-import {
-  getMessages,
-  getRequestMessages,
-  getResponseMessage,
-} from "./messageUtils";
-
-import ThemedModal from "../../../../../shared/themed/themedModal";
+import { useLocalStorage } from "../../../../../services/hooks/localStorage";
+import { clsx } from "../../../../shared/clsx";
+import ThemedModal from "../../../../shared/themed/themedModal";
+import { MappedLLMRequest } from "../../mapper/types";
 import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
 import { JsonView } from "./jsonView";
-import { LlmSchema } from "../../../../../../lib/api/models/requestResponseModel";
-import { useLocalStorage } from "../../../../../../services/hooks/localStorage";
-import { HeliconeRequest } from "@/lib/api/request/request";
+import { MessageRenderer } from "./MessageRenderer";
 
 interface ChatProps {
-  llmSchema?: LlmSchema;
-  requestBody: any;
-  responseBody: any;
-  request: HeliconeRequest;
-  requestId: string;
-  status: number;
-  model: string;
+  mappedRequest: MappedLLMRequest;
   selectedProperties?: Record<string, string>;
   editable?: boolean;
   isHeliconeTemplate?: boolean;
@@ -33,12 +19,7 @@ interface ChatProps {
 }
 
 export const Chat: React.FC<ChatProps> = ({
-  request,
-  requestBody,
-  responseBody,
-  requestId,
-  llmSchema,
-  model,
+  mappedRequest,
   selectedProperties,
   editable,
   isHeliconeTemplate,
@@ -46,7 +27,6 @@ export const Chat: React.FC<ChatProps> = ({
   hideTopBar,
   messageSlice,
   className = "bg-slate-50",
-  status,
 }) => {
   const [open, setOpen] = useState(false);
   const [showAllMessages, setShowAllMessages] = useState(false);
@@ -55,16 +35,16 @@ export const Chat: React.FC<ChatProps> = ({
     "Pretty"
   );
 
-  const { requestMessages, messages } = useMemo(() => {
-    const requestMessages = getRequestMessages(llmSchema, requestBody);
-    const responseMessage = getResponseMessage(llmSchema, responseBody, model);
-    const messages = getMessages(requestMessages, responseMessage, status);
-    return { requestMessages, responseMessage, messages };
-  }, [llmSchema, requestBody, responseBody, model, status]);
-
   const [expandedChildren, setExpandedChildren] = useState<
     Record<string, boolean>
-  >(Object.fromEntries(messages.map((_, i) => [i, editable ?? false])));
+  >(
+    Object.fromEntries(
+      mappedRequest.preview.concatenatedMessages.map((_, i) => [
+        i,
+        editable ?? false,
+      ])
+    )
+  );
 
   const allExpanded = Object.values(expandedChildren).every(Boolean);
 
@@ -79,18 +59,22 @@ export const Chat: React.FC<ChatProps> = ({
   const chatTopBarProps = {
     allExpanded,
     toggleAllExpanded,
-    requestMessages,
-    requestId,
-    model,
+    requestMessages: mappedRequest.preview.concatenatedMessages,
+    requestId: mappedRequest.heliconeMetadata.requestId,
+    model: mappedRequest.model,
     setOpen,
     mode,
     setMode,
   };
 
-  const messagesToRender =
-    messageSlice === "lastTwo" && messages.length > 2
-      ? messages.slice(-2)
-      : messages;
+  const messagesToRender = useMemo(
+    () =>
+      messageSlice === "lastTwo" &&
+      mappedRequest.preview.concatenatedMessages.length > 2
+        ? mappedRequest.preview.concatenatedMessages.slice(-2)
+        : mappedRequest.preview.concatenatedMessages,
+    [mappedRequest.preview.concatenatedMessages, messageSlice]
+  );
 
   return (
     <>
@@ -103,8 +87,11 @@ export const Chat: React.FC<ChatProps> = ({
         <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
           {mode === "JSON" ? (
-            <JsonView requestBody={requestBody} responseBody={responseBody} />
-          ) : messages.length > 0 ? (
+            <JsonView
+              requestBody={mappedRequest.schema.request}
+              responseBody={mappedRequest.schema.response}
+            />
+          ) : messagesToRender.length > 0 ? (
             <MessageRenderer
               messages={messagesToRender}
               showAllMessages={showAllMessages}
@@ -127,8 +114,11 @@ export const Chat: React.FC<ChatProps> = ({
         <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
           <ChatTopBar {...chatTopBarProps} isModal={true} />
           {mode === "JSON" ? (
-            <JsonView requestBody={requestBody} responseBody={responseBody} />
-          ) : messages.length > 0 ? (
+            <JsonView
+              requestBody={mappedRequest.schema.request}
+              responseBody={mappedRequest.schema.response}
+            />
+          ) : messagesToRender.length > 0 ? (
             <MessageRenderer
               messages={messagesToRender}
               showAllMessages={showAllMessages}

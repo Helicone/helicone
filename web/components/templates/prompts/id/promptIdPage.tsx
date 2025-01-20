@@ -35,7 +35,7 @@ import {
 import useNotification from "../../../shared/notification/useNotification";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import { MODEL_LIST } from "../../playground/new/modelList";
-import { PromptMessage } from "../../requests/builder/components/chatComponent/types";
+import { PromptMessage } from "../../requests/components/chatComponent/types";
 import PromptPlayground from "./promptPlayground";
 
 import { useOrg } from "@/components/layout/org/organizationContext";

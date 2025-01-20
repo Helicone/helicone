@@ -15,8 +15,8 @@ import {
 } from "openai/resources/chat";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
-import { SingleChat } from "../requests/builder/components/chatComponent/single/singleChat";
-import { Message } from "../requests/builder/components/chatComponent/types";
+import { SingleChat } from "../requests/components/chatComponent/single/singleChat";
+import { Message } from "../requests/components/chatComponent/types";
 import ModelPill from "../requests/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";

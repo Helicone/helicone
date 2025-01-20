@@ -16,7 +16,7 @@ import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";
 import MarkdownEditor from "../../../shared/markdownEditor";
-import { Message } from "../../requests/builder/components/chatComponent/types";
+import { Message } from "../../requests/components/chatComponent/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";

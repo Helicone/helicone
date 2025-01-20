@@ -1,17 +1,19 @@
+import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { useState } from "react";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { formatNumber } from "../users/initialColumns";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
 import CostPill from "./costPill";
 import { CustomProperties } from "./customProperties";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
-import { getUSDateFromString } from "@/components/shared/utils/utils";
+
+import { RenderMappedRequest } from "./mapper/RenderHeliconeRequest";
+import { MappedLLMRequest } from "./mapper/types";
 
 interface RequestCardProps {
-  request: NormalizedRequest;
+  request: MappedLLMRequest;
   properties: string[];
 }
 
@@ -22,7 +24,7 @@ const RequestCard = (props: RequestCardProps) => {
     createdAt: string | null;
     id: string | null;
     rating: boolean | null;
-  }>(request.feedback);
+  }>(request.heliconeMetadata.feedback);
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
 
   const { setNotification } = useNotification();
@@ -54,18 +56,21 @@ const RequestCard = (props: RequestCardProps) => {
         <div className=" flex flex-row justify-between items-center w-full border-b border-gray-100 dark:border-gray-900 py-2">
           <div className="flex flex-row items-center gap-2">
             <p className="font-semibold text-xl">
-              {getUSDateFromString(request.createdAt)}
+              {getUSDateFromString(request.heliconeMetadata.createdAt)}
             </p>
             <StatusBadge
-              statusType={request.status.statusType}
-              errorCode={request.status.code}
+              statusType={request.heliconeMetadata.status.statusType}
+              errorCode={request.heliconeMetadata.status.code}
             />
           </div>
           <FeedbackButtons
             requestId={request.id}
             defaultValue={
-              request.scores && request.scores["helicone-score-feedback"]
-                ? Number(request.scores["helicone-score-feedback"]) === 1
+              request.heliconeMetadata.scores &&
+              request.heliconeMetadata.scores["helicone-score-feedback"]
+                ? Number(
+                    request.heliconeMetadata.scores["helicone-score-feedback"]
+                  ) === 1
                   ? true
                   : false
                 : null
@@ -77,13 +82,14 @@ const RequestCard = (props: RequestCardProps) => {
           <ModelPill model={request.model} />
 
           <p className="text-sm font-semibold">
-            {Number(request.latency) / 1000}s
+            {Number(request.heliconeMetadata.latency) / 1000}s
           </p>
-          {!request.cost && request.status.code === 200 ? (
+          {!request.heliconeMetadata.cost &&
+          request.heliconeMetadata.status.code === 200 ? (
             <CostPill />
-          ) : request.cost ? (
+          ) : request.heliconeMetadata.cost ? (
             <p className="text-sm font-semibold">
-              ${formatNumber(request.cost)}
+              ${formatNumber(request.heliconeMetadata.cost)}
             </p>
           ) : (
             <p className="text-sm font-semibold"></p>
@@ -91,26 +97,32 @@ const RequestCard = (props: RequestCardProps) => {
         </div>
         <div className="flex flex-col space-y-4">
           <p className="text-sm">
-            <span className="font-semibold">User:</span> {request.user}
+            <span className="font-semibold">User:</span>{" "}
+            {request.heliconeMetadata.user}
           </p>
           <p className="text-sm">
             <span className="font-semibold">Total Tokens:</span>{" "}
-            {request.totalTokens}{" "}
+            {request.heliconeMetadata.totalTokens}{" "}
             <span className="text-gray-600 text-xs">
-              (Completion: {request.completionTokens} / Prompt:{" "}
-              {request.promptTokens})
+              (Completion: {request.heliconeMetadata.completionTokens} / Prompt:{" "}
+              {request.heliconeMetadata.promptTokens})
             </span>
           </p>
 
-          {request.customProperties && properties.length > 0 && (
-            <CustomProperties
-              customProperties={request.customProperties as any}
-              properties={properties}
-            />
-          )}
+          {request.heliconeMetadata.customProperties &&
+            properties.length > 0 && (
+              <CustomProperties
+                customProperties={
+                  request.heliconeMetadata.customProperties as any
+                }
+                properties={properties}
+              />
+            )}
         </div>
       </div>
-      <div className="w-full max-w-3xl">{request.render()}</div>
+      <div className="w-full max-w-3xl">
+        <RenderMappedRequest mapperContent={request} />
+      </div>
     </div>
   );
 };

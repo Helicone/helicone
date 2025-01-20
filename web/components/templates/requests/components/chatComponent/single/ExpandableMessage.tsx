@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { clsx } from "../../../../../../shared/clsx";
-import { RenderWithPrettyInputKeys } from "../../../../../playground/chatRow";
-import { isJSON } from "./utils";
-import { Col } from "../../../../../../layout/common";
-import MarkdownEditor from "../../../../../../shared/markdownEditor";
+import { clsx } from "../../../../../shared/clsx";
+import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
+
+import { Col } from "../../../../../layout/common";
+import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
+import { isJSON } from "@/components/templates/requests/mapper/mappers/openai/chat";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;
@@ -23,7 +24,6 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   formattedMessageContent,
   textContainerRef,
   expandedProps: { expanded, setExpanded },
-
   selectedProperties,
   mode,
 }) => {
