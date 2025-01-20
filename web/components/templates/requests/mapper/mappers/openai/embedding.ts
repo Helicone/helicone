@@ -6,11 +6,7 @@ const getRequestText = (requestBody: any) => {
 };
 
 const getResponseText = (responseBody: any, statusCode: number = 200) => {
-  return statusCode === 0 || statusCode === null
-    ? ""
-    : statusCode === 200
-    ? JSON.stringify(responseBody.results || "", null, 4)
-    : responseBody?.error?.message || "";
+  return JSON.stringify(responseBody?.data?.[0].embedding, null, 4);
 };
 
 export const mapOpenAIModeration: MapperFn<any, any> = ({
