@@ -74,12 +74,9 @@ export async function dbExecute<T>(
   });
 
   try {
-    const result2 = await HELICONE_DB.any(query, parameters);
-    if (result2.length > 0) {
-      console.log(result2);
-    }
+    const result = await HELICONE_DB.any(query, parameters);
 
-    return { data: result2, error: null };
+    return { data: result, error: null };
   } catch (err) {
     console.error("Error executing query: ", query, parameters);
     console.error(err);
