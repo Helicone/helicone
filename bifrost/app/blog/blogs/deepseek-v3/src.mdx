@@ -1,17 +1,6 @@
-On December 26, 2024, DeepSeek officially released a new open-source large language model DeepSeek-V3, a Mixture-of-Experts (MoE) model with 671 billion parameters.
+On December 26, 2024, DeepSeek officially released a new open-source large language model DeepSeek-V3, a Mixture-of-Experts (MoE) model with 671 billion parameters. In this blog, we will dive into the features of DeepSeek-V3 and compare it to its predecessor, DeepSeek-V2.
 
 ![DeepSeek-V3 released](/static/blog/deepseek-v3/cover.webp)
-
-V3 sets a new benchmark with exceptional performance and surprising affordability. This advanced model positions itself as a formidable competitor to closed-source giants like OpenAI’s GPT-4 and Anthropic’s Claude 3.5 with an unbeatable advantage in cost.
-
-In this blog, we will cover:
-
-1. What is DeepSeek-V3?
-2. Key Features of DeepSeek-V3
-3. V2 vs V3: What’s New?
-4. DeepSeek V3 Benchmarks
-5. How to Access DeepSeek V3
-6. Should you use DeepSeek-V3?
 
 <BottomLine
   title="Developer’s Take"
@@ -20,67 +9,37 @@ In this blog, we will cover:
 
 ## What is DeepSeek-V3?
 
-DeepSeek-V3 is the most advanced open-source Large Language Model (LLM) from DeepSeek that started out as a response to the increasing demand for powerful yet accessible AI tools in natural language processing.
+DeepSeek-V3 is the most advanced open-source MoE Large Language Model from DeepSeek as of December 2024. A key feature of MoE models is selective activation, which allows DeepSeek-V3 to process information quickly while maintaining the benefits of a very large model.
 
-| Feature                | Description                                                                                                                                                                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Provider               | DeepSeek AI – fully open-source. Also available through major inference platforms                                                                                                                                                  |
-| Model Size             | Total Parameters: 671 billion<br/>Activated Parameters: 37 billion per token<br/>Total Disk Size: 685 billion parameters (including weights for the Multi-Token Prediction module).                                                |
-| Context Window         | 128,000 tokens                                                                                                                                                                                                                     |
-| Speed                  | Approximately 60 tokens per second                                                                                                                                                                                                 |
-| Latency (TTFT)         | ~0.76seconds / token ????                                                                                                                                                                                                          |
-| Price                  | $0.27/million input tokens                                                                                                                                                                                                         |
-| Compute Infrastructure | Trained on a high-performance cluster of 2048 NVIDIA H800 GPUs, with NVLink and InfiniBand ensuring fast, low-latency inter-node communication.                                                                                    |
-| Training Phases        | Includes pre-training on 14.8 trillion tokens, followed by a two-phase context length extension, and post-training involving Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL).                                         |
-| Recommended For        | Perfect for advanced reasoning, coding, and mathematical problem-solving. Ideal for developers, enterprises, and research organizations seeking large-scale AI solutions for complex tasks like language processing and analytics. |
-
-Its initial versions focused on creating models that would perform complex tasks while still being cost-effective and open-sourced, allowing developers and researchers broader and unrestricted access.
-
-Developers are comparing DeepSeek V3 with the latest Gemini models like exp-1206 and 2.0 flash in terms of costs, and it’s being compared to OpenAI o1 and Claude-3.5 Sonnet in terms of performance.
-
-DeepSeek’s first version ‘DeepSeek-V1’ laid the groundwork for the Mixture-of-Experts (MoE) architecture, allowing for multiple specialized models (Or “experts”) to collaborate on tasks.
+The first version `DeepSeek-V1` laid the groundwork for the **<span style={{color: '#0ea5e9'}}>Mixture-of-Experts (MoE)</span>** architecture, allowing for multiple specialized models (Or “experts”) to collaborate on tasks. Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
 
 <BottomLine
   title="What is Mixture of Experts?"
-  description="Mixture of Experts (MoE) refers to a model architecture that involves using a subset of specialized 'experts' (specialized neural networks) for different parts of the input data, which helps in efficiently distributing the computational workload. In DeepSeek V3, the MoE architecture is further optimized with DeepSeekMoE to improve computational efficiency during training and inference."
+  description="Mixture of Experts (MoE) splits tasks between specialized neural networks called 'experts', with each expert handling specific types of inputs. DeepSeek V3 uses an optimized version called DeepSeekMoE to improve efficiency."
 />
-
-Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
-
-A key feature of MoE models is selective activation. Due to this, DeepSeek-V3 is able to process information quickly while maintaining the benefits of a very large model.
 
 ## Key Features of DeepSeek-V3
 
-One of the standout features of DeepSeek-V3 is its integration of Memory-Latency-Aware (MLA) optimization. This enhancement compresses data for more efficient inference, reducing memory usage by optimizing the structure of cached data. As a result, DeepSeek-V3 delivers faster and more efficient performance compared to previous models, according to DeepSeek’s technical report.
+V3 sets a new benchmark for open-source modelswith exceptional performance and surprising affordability. This advanced model positions itself as a <a href="https://arxiv.org/pdf/2412.19437" target="_blank" rel="noopener">formidable competitor</a> to closed-source giants like OpenAI’s GPT-4 and Anthropic’s Claude 3.5 with **an unbeatable advantage in cost**.
 
-With a response rate of approximately 60 tokens per second, DeepSeek-V3 represents a threefold improvement over DeepSeek-V2, making it ideal for applications requiring fast analysis, real-time language processing, and high-throughput data handling. This enhanced speed is particularly beneficial for developers, enterprises, and researchers who prioritize efficient AI solutions.
+| Feature         | Description                                                                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider        | DeepSeek AI. Also available through <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">major inference platforms</a>. |
+| Model Size      | Total Parameters: 671 billion<br/>Activated Parameters: 37 billion per token                                                                               |
+| Context Window  | 128,000 tokens                                                                                                                                             |
+| Speed           | ~60 tokens / second (3x faster than V2)                                                                                                                    |
+| Latency (TTFT)  | ~0.76 seconds / token                                                                                                                                      |
+| Input Cost      | $0.27 / million tokens ($0.07/million tokens with cache hits)                                                                                              |
+| Output Cost     | $1.10 / million tokens                                                                                                                                     |
+| Recommended For | Coding, mathematical reasoning, educational tools, language translation. Use cases that require fast inference or a cost-effective solution.               |
+
+## V2 vs V3: What is the Difference?
+
+At approximately 60 tokens per second, DeepSeek-V3 has a 3x faster response rate compared to DeepSeek-V2, ideal for applications that needs fast analysis, real-time language processing, or high-throughput data handling.
 
 ![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-speed-comparison.webp)
 
 _Image Source: Comparison of AI model output speeds (Source - Artificial Analysis)_
-
-Building upon the Transformer framework introduced in DeepSeek-V2, DeepSeek-V3 also incorporates Multi-Token Prediction (MTP), a mechanism that predicts multiple tokens in parallel while maintaining causal consistency. This approach enhances training by providing richer signals, enabling the model to anticipate future tokens with greater accuracy and efficiency.
-
-To power these capabilities, DeepSeek-V3 relies on a robust infrastructure of 2,048 NVIDIA H800 GPUs interconnected via NVLink and InfiniBand, ensuring ultra-low latency and high bandwidth. This setup enables seamless scalability, allowing the model to efficiently handle complex computational tasks.
-
-The training of DeepSeek-V3 employs the DualPipe algorithm, which cleverly overlaps computation and data transfer phases, drastically reducing delays during training. Additionally, custom communication kernels are used to optimize cross-node data exchange, further improving bandwidth utilization.
-
-In terms of memory efficiency, DeepSeek-V3 uses FP8 mixed-precision training, balancing memory requirements and computational precision. By employing fine-grained scaling techniques, the model mitigates data outlier errors, ensuring numerical stability even during sensitive operations. This results in a model that maintains robust performance across a wide range of tasks.
-
-For organizations considering production deployment, DeepSeek-V3 offers a cost-effective solution, with transparent pricing based on usage patterns available through their official API documentation.
-
-![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-price-comparison.webp)
-
-_Image Source: Comparison of AI model price (Source - Artificial Analysis)_
-
-For developers and organizations looking to locally deploy DeepSeek-V3, the minimum hardware setup required for local deployment includes:
-
-| Stage            | Nodes Required | GPUs Required | Interconnects                            | Additional Notes                                                       |
-| ---------------- | -------------- | ------------- | ---------------------------------------- | ---------------------------------------------------------------------- |
-| Prefilling Stage | 4 nodes        | 32 GPUs       | NVLink for inter-GPU and InfiniBand (IB) | Ensures efficient inter-GPU and cross-node communication.              |
-| Decoding Stage   | 40 nodes       | 320 GPUs      | NVLink and InfiniBand (IB)               | Redundant experts balance computational loads and optimize efficiency. |
-
-## V2 vs V3: What is the Difference?
 
 |                                | DeepSeek-V3                                                                                                  | DeepSeek-V2                                                                                      |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
@@ -92,7 +51,15 @@ For developers and organizations looking to locally deploy DeepSeek-V3, the mini
 | Generation Throughput          | Processes 60 tokens/second (3x faster than DeepSeek-V2)                                                      | Maximum generation throughput 5.76x that of DeepSeek 67B, with 93.3% KV cache usage reduction.   |
 | Pre Training Dataset           | Trained on 14.8 trillion tokens, enhancing versatility and domain performance.                               | Trained on 8.1 trillion tokens, utilizing SFT and RL for alignment with human preferences.       |
 
-Reference: DeepSeek-V3 Technical Report, DeepSeek-V2 Technical Report
+Reference: <a href="https://arxiv.org/pdf/2412.19437" target="_blank" rel="noopener">DeepSeek-V3 Technical Report</a>, <a href="https://arxiv.org/pdf/2405.04434" target="_blank" rel="noopener">DeepSeek-V2 Technical Report</a>
+
+### Price and Performance
+
+Developers are now comparing DeepSeek V3 with the latest models like <a href="https://www.helicone.ai/blog/google-gemini-exp-1206" target="_blank" rel="noopener">Gemini exp-1206</a> and <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3</a> in terms of costs, and it’s being compared to OpenAI o1 and Anthropic’s Claude-3.5 Sonnet in terms of performance.
+
+![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-price-and-performance.webp)
+
+_Source: <a href="https://artificialanalysis.ai/models/deepseek-v3/providers" target="_blank" rel="noopener">DeepSeek-V3 price and performance</a> - Artificial Analysis_
 
 ## DeepSeek V3 Benchmarks
 
@@ -136,12 +103,12 @@ _Image Source: Benchmark performance of DeepSeek-V3 and its counterparts_
 
 There are many different methods for accessing DeepSeek-V3 as illustrated in the table below.
 
-| Method                                           | Description                                                                                                                                                                                            |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OpenRouter <br/><br/>(Some developers recommend) | Developers can access DeepSeek V3 on OpenRouter by purchasing credits. To monitor the AI application, developers use Helicone with OpenRouter for usage and cost tracking. Set up takes a few seconds. |
-| Chat                                             | Access DeepSeek V3 directly via chat on the official website.                                                                                                                                          |
-| API Access                                       | OpenAI-compatible API available through the DeepSeek Platform. Invoke DeepSeek-V3 by specifying model='deepseek-chat'. You can also use other endpoint providers.                                      |
-| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                        |
+| Method                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenRouter <br/><br/>(Some developers recommend) | Developers can <a href="https://openrouter.ai/deepseek/deepseek-chat" target="_blank" rel="noopener">access DeepSeek V3 on OpenRouter</a> by purchasing credits. <br/> <br/> To monitor the AI application, developers use <a href="https://docs.helicone.ai/getting-started/integration-method/openrouter" target="_blank" rel="noopener">Helicone with OpenRouter</a> for usage and cost tracking. Set up takes a few seconds. |
+| Chat                                             | Access DeepSeek V3 directly via chat on the <a href="http://chat.deepseek.com/" target="_blank" rel="noopener">official website</a>.                                                                                                                                                                                                                                                                                             |
+| API Access                                       | OpenAI-compatible API available through the <a href="http://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek Platform</a>. Invoke DeepSeek-V3 by specifying model=`deepseek-chat`. <br/><br/> You can also use <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other endpoint providers</a>.                                                                              |
+| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                                                                                                                                                                                                                                                  |
 
 ---
 
