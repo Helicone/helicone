@@ -1,19 +1,17 @@
 On December 26, 2024, DeepSeek officially released a new open-source large language model DeepSeek-V3, a Mixture-of-Experts (MoE) model with 671 billion parameters.
 
-V3 sets a new benchmark with exceptional performance and surprising affordability. This advanced model positions itself as a formidable competitor to closed-source giants like OpenAI’s GPT-4 and Anthropic’s Claude 3.5 with an unbeatable advantage in cost.
-
 ![DeepSeek-V3 released](/static/blog/deepseek-v3/cover.webp)
+
+V3 sets a new benchmark with exceptional performance and surprising affordability. This advanced model positions itself as a formidable competitor to closed-source giants like OpenAI’s GPT-4 and Anthropic’s Claude 3.5 with an unbeatable advantage in cost.
 
 In this blog, we will cover:
 
 1. What is DeepSeek-V3?
 2. Key Features of DeepSeek-V3
 3. V2 vs V3: What’s New?
-4. How to Access DeepSeek V3
-5. DeepSeek V3 Benchmarks
+4. DeepSeek V3 Benchmarks
+5. How to Access DeepSeek V3
 6. Should you use DeepSeek-V3?
-
-Let’s get started! 🚀
 
 <BottomLine
   title="Developer’s Take"
@@ -23,21 +21,6 @@ Let’s get started! 🚀
 ## What is DeepSeek-V3?
 
 DeepSeek-V3 is the most advanced open-source Large Language Model (LLM) from DeepSeek that started out as a response to the increasing demand for powerful yet accessible AI tools in natural language processing.
-
-Its initial versions focused on creating models that would perform complex tasks while still being cost-effective and open-sourced, allowing developers and researchers broader and unrestricted access.
-
-Developers are comparing DeepSeek V3 with the latest Gemini models like exp-1206 and 2.0 flash in terms of costs, and it’s being compared to OpenAI o1 and Claude-3.5 Sonnet in terms of performance.
-
-DeepSeek’s first version ‘DeepSeek-V1’ laid the groundwork for the Mixture-of-Experts (MoE) architecture, allowing for multiple specialized models (Or “experts”) to collaborate on tasks.
-
-Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
-
-A key feature of MoE models is selective activation. Due to this, DeepSeek-V3 is able to process information quickly while maintaining the benefits of a very large model.
-
-<BottomLine
-  title="What is Mixture of Experts (MoE)?"
-  description="Mixture of Experts (MoE) refers to a model architecture that involves using a subset of specialized 'experts' (specialized neural networks) for different parts of the input data, which helps in efficiently distributing the computational workload. In DeepSeek V3, the MoE architecture is further optimized with DeepSeekMoE to improve computational efficiency during training and inference."
-/>
 
 | Feature                | Description                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -50,6 +33,21 @@ A key feature of MoE models is selective activation. Due to this, DeepSeek-V3 is
 | Compute Infrastructure | Trained on a high-performance cluster of 2048 NVIDIA H800 GPUs, with NVLink and InfiniBand ensuring fast, low-latency inter-node communication.                                                                                    |
 | Training Phases        | Includes pre-training on 14.8 trillion tokens, followed by a two-phase context length extension, and post-training involving Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL).                                         |
 | Recommended For        | Perfect for advanced reasoning, coding, and mathematical problem-solving. Ideal for developers, enterprises, and research organizations seeking large-scale AI solutions for complex tasks like language processing and analytics. |
+
+Its initial versions focused on creating models that would perform complex tasks while still being cost-effective and open-sourced, allowing developers and researchers broader and unrestricted access.
+
+Developers are comparing DeepSeek V3 with the latest Gemini models like exp-1206 and 2.0 flash in terms of costs, and it’s being compared to OpenAI o1 and Claude-3.5 Sonnet in terms of performance.
+
+DeepSeek’s first version ‘DeepSeek-V1’ laid the groundwork for the Mixture-of-Experts (MoE) architecture, allowing for multiple specialized models (Or “experts”) to collaborate on tasks.
+
+<BottomLine
+  title="What is Mixture of Experts?"
+  description="Mixture of Experts (MoE) refers to a model architecture that involves using a subset of specialized 'experts' (specialized neural networks) for different parts of the input data, which helps in efficiently distributing the computational workload. In DeepSeek V3, the MoE architecture is further optimized with DeepSeekMoE to improve computational efficiency during training and inference."
+/>
+
+Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
+
+A key feature of MoE models is selective activation. Due to this, DeepSeek-V3 is able to process information quickly while maintaining the benefits of a very large model.
 
 ## Key Features of DeepSeek-V3
 
@@ -84,7 +82,7 @@ For developers and organizations looking to locally deploy DeepSeek-V3, the mini
 
 ## V2 vs V3: What is the Difference?
 
-| Aspect                         | DeepSeek-V3                                                                                                  | DeepSeek-V2                                                                                      |
+|                                | DeepSeek-V3                                                                                                  | DeepSeek-V2                                                                                      |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | Total Parameters               | 671 billion                                                                                                  | 236 billion                                                                                      |
 | Activated Parameters per Token | 37 billion                                                                                                   | 21 billion                                                                                       |
@@ -95,17 +93,6 @@ For developers and organizations looking to locally deploy DeepSeek-V3, the mini
 | Pre Training Dataset           | Trained on 14.8 trillion tokens, enhancing versatility and domain performance.                               | Trained on 8.1 trillion tokens, utilizing SFT and RL for alignment with human preferences.       |
 
 Reference: DeepSeek-V3 Technical Report, DeepSeek-V2 Technical Report
-
-## How to Access DeepSeek V3
-
-There are many different methods for accessing DeepSeek-V3 as illustrated in the table below.
-
-| Method                                           | Description                                                                                                                                                                                            |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OpenRouter <br/><br/>(Some developers recommend) | Developers can access DeepSeek V3 on OpenRouter by purchasing credits. To monitor the AI application, developers use Helicone with OpenRouter for usage and cost tracking. Set up takes a few seconds. |
-| Chat                                             | Access DeepSeek V3 directly via chat on the official website.                                                                                                                                          |
-| API Access                                       | OpenAI-compatible API available through the DeepSeek Platform. Invoke DeepSeek-V3 by specifying model='deepseek-chat'. You can also use other endpoint providers.                                      |
-| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                        |
 
 ## DeepSeek V3 Benchmarks
 
@@ -144,6 +131,17 @@ _Image Source: Benchmark performance of DeepSeek-V3 and its counterparts_
 | C-SimpleQA (Correct)       | 64.8        | 48.5             | 54.1               | 48.4               | 50.4                 | 51.3                   | 59.3        |
 
 (Source: DeepSeek-V3 Technical Report, 2024)
+
+## How to Access DeepSeek V3
+
+There are many different methods for accessing DeepSeek-V3 as illustrated in the table below.
+
+| Method                                           | Description                                                                                                                                                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OpenRouter <br/><br/>(Some developers recommend) | Developers can access DeepSeek V3 on OpenRouter by purchasing credits. To monitor the AI application, developers use Helicone with OpenRouter for usage and cost tracking. Set up takes a few seconds. |
+| Chat                                             | Access DeepSeek V3 directly via chat on the official website.                                                                                                                                          |
+| API Access                                       | OpenAI-compatible API available through the DeepSeek Platform. Invoke DeepSeek-V3 by specifying model='deepseek-chat'. You can also use other endpoint providers.                                      |
+| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                        |
 
 ---
 
