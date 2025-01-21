@@ -6,7 +6,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
@@ -27,7 +27,7 @@ async function handler(
   } = options.req.body as MetricsBackendBody;
 
   if (organizationId) {
-    await supabaseServer
+    await getSupabaseServer()
       .from("organization_member")
       .select("*")
       .eq("organization_id", organizationId)

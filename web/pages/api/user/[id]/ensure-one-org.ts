@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 
@@ -15,7 +15,7 @@ export default async function handler(
   const isEu = req.body.isEu;
 
   // First, try to find existing demo org
-  const { data: existingDemoOrg } = await supabaseServer
+  const { data: existingDemoOrg } = await getSupabaseServer()
     .from("organization")
     .select("*")
     .eq("soft_delete", false)
@@ -30,7 +30,7 @@ export default async function handler(
   // If no demo org exists, create one with upsert
 
   // Add member record
-  const result = await supabaseServer
+  const result = await getSupabaseServer()
     .rpc("ensure_one_demo_org", {
       user_id: userId,
     })
@@ -42,7 +42,7 @@ export default async function handler(
   }
 
   // Add member record
-  const { error: memberError } = await supabaseServer
+  const { error: memberError } = await getSupabaseServer()
     .from("organization_member")
     .upsert(
       {

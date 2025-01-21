@@ -1,8 +1,8 @@
-import { supabaseServer } from "../../lib/supabaseServer";
+import { getSupabaseServer } from "../../lib/supabaseServer";
 import { useQuery } from "@tanstack/react-query";
 
 export const useAlert = (orgId: string) => {
-  const supabase = supabaseServer;
+  const supabase = getSupabaseServer();
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ["alert", orgId],
     queryFn: async () => {
@@ -24,7 +24,7 @@ export const useAlert = (orgId: string) => {
 };
 
 export const useAlertHistory = (orgId: string) => {
-  const supabase = supabaseServer;
+  const supabase = getSupabaseServer();
   const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: ["alert_history", orgId],
     queryFn: async () => {
