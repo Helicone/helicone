@@ -6,6 +6,8 @@ import time
 import re
 import getpass
 import tabulate
+from yarl import URL
+
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = os.path.join(file_dir, 'migrations')
@@ -135,6 +137,14 @@ def main():
     parser = argparse.ArgumentParser(
         description='Helicone CLI tool to manage migrations and start services'
     )
+
+    envhost = os.getenv('CLICKHOUSE_HOST')
+    envport = os.getenv('CLICKHOUSE_PORT')
+    if envhost:
+        url = URL(envhost)
+        envhost = str(url.host)
+        envport = str(url.port) if url.port else envport
+
     parser.add_argument('--version', action='version',
                         version='%(prog)s 0.1.0')
     parser.add_argument('--migrate', action='store_true',
@@ -145,9 +155,9 @@ def main():
                         help='Restart services')
     parser.add_argument('--upgrade', action='store_true',
                         help='Apply all migrations')
-    parser.add_argument('--host', default=os.getenv('CLICKHOUSE_HOST') or "localhost",
+    parser.add_argument('--host', default=envhost or "localhost",
                         help='ClickHouse server host')
-    parser.add_argument('--port', default=os.getenv('CLICKHOUSE_PORT') or "18123",
+    parser.add_argument('--port', default=envport or "18123",
                         help='ClickHouse server port')
     parser.add_argument('--user', default=os.getenv('CLICKHOUSE_USER') or "default",
                         help='ClickHouse server user')
@@ -157,7 +167,8 @@ def main():
     args = parser.parse_args()
 
     password = os.getenv('CLICKHOUSE_PASSWORD')
-    if args.user:
+
+    if args.user and not password:
         password = getpass.getpass(
             prompt='Enter password for ClickHouse server user: ')
 
