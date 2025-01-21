@@ -36,7 +36,7 @@ export class OnlineEvalStore extends BaseStore {
       return ok(false);
     }
 
-    return ok(data![0].count > 0);
+    return ok((data?.[0]?.count ?? 0) > 0);
   }
 
   public async getOnlineEvalsByOrgId(
