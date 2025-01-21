@@ -28,9 +28,10 @@ export class OnlineEvalStore extends BaseStore {
   public async hasOnlineEvals(orgId: string): Promise<Result<boolean, string>> {
     const { data, error } = await dbExecute<{
       count: number;
-    }>(`SELECT COUNT(*) FROM online_evaluators WHERE organization = $1`, [
-      orgId,
-    ]);
+    }>(
+      `SELECT COUNT(*) as count FROM online_evaluators WHERE organization = $1`,
+      [orgId]
+    );
 
     if (error) {
       return ok(false);
