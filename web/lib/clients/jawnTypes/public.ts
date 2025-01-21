@@ -88,6 +88,9 @@ export interface paths {
   "/v1/prompt/create": {
     post: operations["CreatePrompt"];
   };
+  "/v1/prompt/{promptId}/user-defined-id": {
+    patch: operations["UpdatePromptUserDefinedId"];
+  };
   "/v1/prompt/version/{promptVersionId}/edit-label": {
     post: operations["EditPromptVersionLabel"];
   };
@@ -2821,6 +2824,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePromptUserDefinedId: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
