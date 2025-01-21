@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { $assistant, $system, $user } from "@/utils/llm";
+
+import { Variable } from "@/types/prompt-state";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 import { createSelectionRange } from "@/utils/selection";
-import { readStream } from "@/lib/api/llm/read-stream";
-import { generate } from "@/lib/api/llm/generate";
+
 import { generateStream } from "@/lib/api/llm/generate-stream";
-
-import { Variable } from "@/types/prompt-state";
-
+import { $assistant, $system, $user } from "@/utils/llm";
+import { readStream } from "@/lib/api/llm/read-stream";
+import autoCompletePrompt from "@/prompts/auto-complete";
 import performEditPrompt from "@/prompts/perform-edit";
 import { suggestions } from "@/prompts/perform-edit";
-
-import { PiChatDotsBold } from "react-icons/pi";
 import {
-  handleSuggestionStream,
   MIN_LENGTH_FOR_SUGGESTIONS,
   SUGGESTION_DELAY,
   suggestionReducer,
+  cleanSuggestionIfNeeded,
 } from "@/utils/suggestions";
-import { MdKeyboardTab } from "react-icons/md";
+
 import LoadingDots from "@/components/shared/universal/LoadingDots";
 import Toolbar from "@/components/shared/prompts/Toolbar";
+import { PiChatDotsBold } from "react-icons/pi";
+import { MdKeyboardTab } from "react-icons/md";
 
 type SelectionState = {
   text: string;
@@ -163,35 +163,42 @@ export default function PromptBox({
 
     const fetchAndHandleStream = async () => {
       try {
+        const prompt = autoCompletePrompt(value, contextText);
         console.log("Fetching suggestions for:", value);
-        await generate({
-          model: "anthropic/claude-3-5-haiku:beta",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an AI assistant helping autocomplete text. Provide natural, contextually relevant continuations.",
-            },
-            {
-              role: "user",
-              content: `Context: ${contextText}\nText to complete: ${value}`,
-            },
-          ],
-          temperature: 0.7,
-          stream: {
-            onChunk: chunk => {
-              console.log("Received suggestion:", chunk);
-              dispatch({ type: "SET_SUGGESTION", payload: chunk });
-            },
-            onCompletion: () => {
-              console.log("Stopped streaming");
-              if (abortControllerRef.current === controller) {
-                dispatch({ type: "STOP_STREAMING" });
-                abortControllerRef.current = null;
-              }
-            },
+
+        const stream = await generateStream(
+          {
+            provider: "anthropic",
+            model: "claude-3-5-haiku:beta",
+            messages: [
+              $system(prompt.system),
+              $user(prompt.user),
+              $assistant(prompt.prefill),
+            ],
+            temperature: 0.7,
           },
-        });
+          { headers: { "x-cancel": "0" } }
+        );
+
+        let accumulatedText = "";
+        await readStream(
+          stream,
+          (chunk: string) => {
+            accumulatedText += chunk;
+            console.log("Received suggestion:", accumulatedText);
+            dispatch({
+              type: "SET_SUGGESTION",
+              payload: cleanSuggestionIfNeeded(value, accumulatedText),
+            });
+          },
+          controller.signal
+        );
+
+        console.log("Stopped streaming");
+        if (abortControllerRef.current === controller) {
+          dispatch({ type: "STOP_STREAMING" });
+          abortControllerRef.current = null;
+        }
       } catch (error) {
         if (error instanceof Error && error.name !== "AbortError") {
           console.error("Error fetching suggestion:", error);
@@ -199,7 +206,6 @@ export default function PromptBox({
         dispatch({ type: "STOP_STREAMING" });
       }
     };
-
     fetchAndHandleStream();
 
     return () => {
@@ -242,7 +248,11 @@ export default function PromptBox({
       const textarea = textareaRef.current;
       if (textarea) {
         textarea.focus();
-        document.execCommand("insertText", false, suggestionState.suggestion);
+        document.execCommand(
+          "insertText",
+          false,
+          cleanSuggestionIfNeeded(value, suggestionState.suggestion)
+        );
         onChange(textarea.value);
       }
       dispatch({ type: "ACCEPT_SUGGESTION" });
@@ -486,7 +496,8 @@ export default function PromptBox({
 
       const stream = await generateStream(
         {
-          model: "anthropic/claude-3-5-haiku:beta",
+          provider: "anthropic",
+          model: "claude-3-5-haiku:beta",
           messages: [
             $system(prompt.system),
             $user(prompt.user),

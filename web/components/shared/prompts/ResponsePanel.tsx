@@ -28,10 +28,10 @@ export default function ResponsePanel({ response }: ResponsePanelProps) {
         </div>
       </div>
       <div className=" flex-1 overflow-auto rounded-xl bg-white border border-slate-100 select-text">
-        <div className="p-4 font-mono text-sm">
+        <div className="p-4 text-slate-700">
           {showMarkdown ? (
             response ? (
-              <ReactMarkdown className="prose prose-sm prose-stone max-w-none">
+              <ReactMarkdown className="prose prose-sm">
                 {response}
               </ReactMarkdown>
             ) : (
@@ -40,7 +40,7 @@ export default function ResponsePanel({ response }: ResponsePanelProps) {
               </span>
             )
           ) : (
-            <div className="whitespace-pre-wrap text-xs">
+            <div className="whitespace-pre-wrap text-sm">
               {response || (
                 <span className="text-slate-500">
                   Response will appear here...

@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  usePrompt,
-  usePromptVersions,
-} from "../../../../services/hooks/prompts/prompts";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
-import { useJawnClient } from "../../../../lib/clients/jawnHook";
-import useNotification from "../../../shared/notification/useNotification";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
+import { usePrompt, usePromptVersions } from "@/services/hooks/prompts/prompts";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import useNotification from "@/components/shared/notification/useNotification";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import ResizablePanels from "../../../shared/universal/ResizablePanels";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import PromptPanels from "@/components/shared/prompts/PromptPanels";
 import { PromptState, Variable } from "@/types/prompt-state";
-import { extractVariables } from "@/utils/variables";
+import {
+  extractVariables,
+  replaceVariables,
+  convertToHeliconeTags,
+  replaceTagsWithVariables,
+  isValidVariableName,
+} from "@/utils/variables";
 import {
   canAddMessagePair,
   canAddPrefillMessage,
@@ -22,13 +22,24 @@ import {
 import { canAddPrefill } from "@/utils/messages";
 import PromptMetricsTab from "./PromptMetricsTab";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
-import { PiSpinnerGapBold, PiStopBold, PiPlayBold } from "react-icons/pi";
+import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import { PiCommandBold } from "react-icons/pi";
-import ActionButton from "@/components/shared/universal/ActionButton";
-import { MdKeyboardReturn } from "react-icons/md";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
-import { replaceVariables } from "@/utils/variables";
+import { toKebabCase } from "@/utils/strings";
+import Link from "next/link";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
+import ActionButton from "@/components/shared/universal/ActionButton";
+import VersionSelector from "@/components/shared/universal/VersionSelector";
+import { MdKeyboardReturn } from "react-icons/md";
+import {
+  PiSpinnerGapBold,
+  PiStopBold,
+  PiPlayBold,
+  PiCaretLeftBold,
+} from "react-icons/pi";
+import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
+import { formatPrompt } from "@helicone/prompts";
 
 interface PromptIdPageProps {
   id: string;
@@ -36,23 +47,29 @@ interface PromptIdPageProps {
   pageSize: number;
 }
 
-const PromptIdPage = (props: PromptIdPageProps) => {
+export default function PromptIdPage(props: PromptIdPageProps) {
+  // PARAMS
   const { id, currentPage, pageSize } = props;
-  const router = useRouter();
-  const jawnClient = useJawnClient();
-  const { setNotification } = useNotification();
 
-  // Hooks
+  // HOOKS
+  // - Jawn Client
+  const jawnClient = useJawnClient();
+  // - Prompt Table
   const {
     prompt,
     isLoading: isPromptLoading,
     refetch: refetchPrompt,
   } = usePrompt(id);
+  // - Prompt Versions Table
   const {
     prompts: promptVersions,
     isLoading: isVersionsLoading,
     refetch: refetchPromptVersions,
   } = usePromptVersions(id);
+  // - Notifications
+  const { setNotification } = useNotification();
+
+  // STATE
   const [state, setState] = useState<PromptState | null>(null);
 
   // STREAMING
@@ -60,6 +77,7 @@ const PromptIdPage = (props: PromptIdPageProps) => {
   const abortController = useRef<AbortController | null>(null);
 
   // VALIDATION
+  // - Can Run
   const canRun = useMemo(
     () =>
       state?.messages.some(
@@ -70,25 +88,109 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     [state?.messages]
   );
 
-  // All callbacks defined with useCallback
-  const updateState = useCallback((updates: Partial<PromptState>) => {
-    setState(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        ...updates,
-        isDirty: true,
-      };
-    });
-  }, []);
+  // CALLBACKS
+  // - Load Version Data into State
+  const loadVersionData = useCallback(
+    (ver: any) => {
+      if (!ver) return;
+      // 1. Parse the helicone template. You might want to handle the case if it's already JSON-parsed.
+      const templateData =
+        typeof ver.helicone_template === "string"
+          ? JSON.parse(ver.helicone_template)
+          : ver.helicone_template;
 
-  const handleMessageChange = useCallback((index: number, content: string) => {
-    setState(prev => {
-      if (!prev) return null;
+      // 2. Derive "masterVersion" if needed
+      const metadata = ver.metadata as { isProduction?: boolean };
+      const masterVersion =
+        metadata?.isProduction === true
+          ? ver.major_version
+          : promptVersions?.find(
+              v => (v.metadata as { isProduction?: boolean })?.isProduction
+            )?.major_version ?? ver.major_version;
 
-      const newMessages = prev.messages.map((msg, i) =>
+      // 3. First collect all variables and their default values from the template inputs
+      const inputs = templateData.inputs || {};
+      const variables = Object.entries(inputs).map(([name, value]) => ({
+        name,
+        value: value as string,
+        isValid: isValidVariableName(name),
+      }));
+
+      // 4. Convert messages with Helicone tags to variable syntax
+      const processedMessages = templateData.messages.map((msg: any) => {
+        if (typeof msg.content === "string") {
+          // Convert Helicone tags to variable syntax
+          const content = replaceTagsWithVariables(msg.content);
+          return {
+            ...msg,
+            content,
+          };
+        } else if (typeof msg.content === "object") {
+          // Handle object content (if any)
+          return msg;
+        }
+        return msg;
+      });
+
+      // 5. Extract any additional variables from messages that might not be in inputs
+      processedMessages.forEach((msg: any) => {
+        if (typeof msg.content === "string") {
+          const messageVars = extractVariables(msg.content, true);
+          messageVars.forEach(({ name, isValid }) => {
+            // Only add if not already present
+            if (!variables.find(v => v.name === name)) {
+              variables.push({
+                name,
+                value: inputs[name] || "",
+                isValid: isValid ?? true,
+              });
+            }
+          });
+        }
+      });
+
+      // 6. Update state with the processed data
+      setState({
+        promptId: id,
+        masterVersion: masterVersion,
+        version: ver.major_version,
+        versionId: ver.id,
+        messages: processedMessages,
+        parameters: {
+          provider: templateData.provider || "openai",
+          model: templateData.model || "gpt-4o-mini",
+          temperature: templateData.temperature || 0.7,
+        },
+        variables: variables,
+        evals: templateData.evals || [],
+        structure: templateData.structure,
+        isDirty: false,
+      });
+    },
+    [id, promptVersions]
+  );
+  // - Update State
+  const updateState = useCallback(
+    (updates: Partial<PromptState>, markDirty: boolean = true) => {
+      setState(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          ...updates,
+          isDirty: markDirty ? true : prev.isDirty,
+        };
+      });
+    },
+    []
+  );
+  // - Message Change
+  const handleMessageChange = useCallback(
+    (index: number, content: string) => {
+      const newMessages = state?.messages.map((msg, i) =>
         i === index ? { ...msg, content } : msg
       );
+
+      if (!newMessages) return;
 
       // Extract all variables from all messages
       const allVariables = newMessages.reduce<Variable[]>((acc, msg) => {
@@ -97,7 +199,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           ...acc,
           ...messageVars.map(v => ({
             name: v.name,
-            value: prev.variables?.find(pv => pv.name === v.name)?.value || "",
+            value:
+              state?.variables?.find(pv => pv.name === v.name)?.value || "",
             isValid: v.isValid,
           })),
         ];
@@ -108,15 +211,14 @@ const PromptIdPage = (props: PromptIdPageProps) => {
         (v, idx, self) => idx === self.findIndex(t => t.name === v.name)
       );
 
-      return {
-        ...prev,
+      updateState({
         messages: newMessages,
         variables: uniqueVars,
-        isDirty: true,
-      };
-    });
-  }, []);
-
+      });
+    },
+    [state, updateState]
+  );
+  // - Remove Message
   const handleRemoveMessage = useCallback(
     (index: number) => {
       updateState({
@@ -125,12 +227,10 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     },
     [state, updateState]
   );
-
-  const handleVariableCreate = useCallback((newVariable: Variable) => {
-    setState(prev => {
-      if (!prev) return null;
-
-      const existingVars = prev.variables || [];
+  // - Create Variable
+  const handleVariableCreate = useCallback(
+    (newVariable: Variable) => {
+      const existingVars = state?.variables || [];
       const existingIndex = existingVars.findIndex(
         v => v.name === newVariable.name
       );
@@ -141,14 +241,13 @@ const PromptIdPage = (props: PromptIdPageProps) => {
           ? existingVars.map((v, i) => (i === existingIndex ? newVariable : v))
           : [...existingVars, newVariable];
 
-      return {
-        ...prev,
+      updateState({
         variables: newVars,
-        isDirty: true,
-      };
-    });
-  }, []);
-
+      });
+    },
+    [state, updateState]
+  );
+  // - Change Variable
   const handleVariableChange = useCallback(
     (index: number, value: string) => {
       updateState({
@@ -159,58 +258,117 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     },
     [state?.variables, updateState]
   );
+  // - Promote Version
+  const handleVersionPromote = useCallback(
+    async (version: any) => {
+      if (!version) return;
 
+      const currentProductionVersion = promptVersions?.find(
+        v => (v.metadata as { isProduction?: boolean })?.isProduction
+      );
+
+      try {
+        const result = await jawnClient.POST(
+          "/v1/prompt/version/{promptVersionId}/promote",
+          {
+            params: {
+              path: {
+                promptVersionId: version.id,
+              },
+            },
+            body: {
+              previousProductionVersionId:
+                currentProductionVersion?.id ?? version.id,
+            },
+          }
+        );
+
+        if (result.error) {
+          setNotification("Failed to promote version", "error");
+          return;
+        }
+
+        await refetchPromptVersions();
+        // Update state to reflect the new master version
+        setState(prev =>
+          prev
+            ? {
+                ...prev,
+                masterVersion: version.major_version,
+              }
+            : null
+        );
+        setNotification(
+          `Promoted version ${version.major_version} to production.`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Error promoting version:", error);
+        setNotification("Failed to promote version", "error");
+      }
+    },
+    [jawnClient, promptVersions, refetchPromptVersions, setNotification]
+  );
+  // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
     if (!state || !canRun) return;
 
-    // -> ABORT: If already streaming
+    // 1. ABORT: If already streaming
     if (isStreaming) {
       abortController.current?.abort();
       setIsStreaming(false);
       return;
     }
 
-    // -> LOADING STATE
+    // 2. STREAMING STATE + CLEAR RESPONSE
     setIsStreaming(true);
-    setState(prev => (prev ? { ...prev, response: "" } : null));
+    updateState({ response: "" }, false);
 
-    // -> SAVE: If it has been modified
+    const variables = state.variables || [];
+    const variableMap = Object.fromEntries(
+      variables.map(v => [v.name, v.value || ""])
+    );
+
+    // 3. SAVE: If dirty
     if (state.isDirty) {
+      const latestVersionId = promptVersions?.[0]?.id;
+      if (!latestVersionId) return;
+
+      // 3.1. Build Helicone Template for Saving
+      const heliconeTemplate = {
+        ...state.parameters,
+        messages: state.messages.map(msg => ({
+          ...msg,
+          content:
+            typeof msg.content === "string"
+              ? formatPrompt(convertToHeliconeTags(msg.content), variableMap)
+              : msg.content || "",
+        })),
+        inputs: variableMap,
+      };
+
       try {
-        const result = await jawnClient?.POST(
-          "/v1/prompt/version/{promptVersionId}/edit-template",
+        let result = await jawnClient.POST(
+          "/v1/prompt/version/{promptVersionId}/subversion",
           {
-            params: {
-              path: {
-                promptVersionId: state.version.toString(),
-              },
-            },
+            params: { path: { promptVersionId: latestVersionId } },
             body: {
-              heliconeTemplate: {
-                messages: state.messages,
-                parameters: state.parameters,
-                variables: state.variables,
+              newHeliconeTemplate: heliconeTemplate,
+              metadata: {
+                isProduction: false,
+                createdFromUi: true,
               },
+              isMajorVersion: true,
             },
           }
         );
 
-        if (result?.error) {
+        if (result?.error || !result?.data) {
           setNotification("Error saving prompt", "error");
           return;
         }
 
-        // Update state with the new version
-        setState(prev =>
-          prev
-            ? {
-                ...prev,
-                isDirty: false,
-              }
-            : null
-        );
-
-        // Refetch versions
+        loadVersionData(result.data.data);
         await refetchPromptVersions();
       } catch (error) {
         console.error("Failed to save state:", error);
@@ -219,30 +377,38 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       }
     }
 
-    // -> RUN
-    try {
-      // Create new controller for this stream
-      abortController.current = new AbortController();
+    // 5. RUN: Replace variables with their values for local execution
+    const runTemplate = {
+      ...state.parameters,
+      messages: state.messages.map(msg => ({
+        ...msg,
+        content:
+          typeof msg.content === "string"
+            ? replaceVariables(msg.content, variables)
+            : msg.content || "",
+      })),
+    };
 
-      const processedMessages = state.messages.map(msg => ({
-        role: msg.role as "system" | "user" | "assistant",
-        content: replaceVariables(msg.content as string, state.variables || []),
-      }));
+    // 6. EXECUTE
+    try {
+      abortController.current = new AbortController();
 
       try {
         const stream = await generateStream({
-          model: state.parameters.model,
-          messages: processedMessages,
-          temperature: state.parameters.temperature,
+          ...runTemplate,
           signal: abortController.current.signal,
-        });
+        } as any);
 
         await readStream(
           stream,
           (chunk: string) => {
-            setState(prev =>
-              prev ? { ...prev, response: (prev.response || "") + chunk } : null
-            );
+            setState(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                response: (prev.response || "") + chunk,
+              };
+            });
           },
           abortController.current.signal
         );
@@ -259,7 +425,6 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       console.error("Failed to save state:", error);
       setNotification("Failed to save prompt state", "error");
       setIsStreaming(false);
-      return;
     }
   }, [
     state,
@@ -268,44 +433,67 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     jawnClient,
     setNotification,
     refetchPromptVersions,
+    loadVersionData,
+    updateState,
   ]);
+  // - Handle ID Edit
+  const handleIdEdit = useCallback(
+    async (newId: string) => {
+      const kebabId = toKebabCase(newId);
+      if (kebabId !== id) {
+        const result = await jawnClient.PATCH(
+          "/v1/prompt/{promptId}/user-defined-id",
+          {
+            params: {
+              path: {
+                promptId: prompt?.id || "",
+              },
+            },
+            body: {
+              userDefinedId: kebabId,
+            },
+          }
+        );
 
-  // useEffect hooks
+        if (result.error) {
+          setNotification("Failed to update prompt ID.", "error");
+          return;
+        }
+
+        setNotification(`Updated prompt ID to ${kebabId}.`, "success");
+        await refetchPrompt();
+      }
+    },
+    [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
+  );
+
+  // EFFECTS
+  // - Load Initial State
   useEffect(() => {
-    if (!promptVersions || isVersionsLoading) return;
+    if (
+      !state &&
+      promptVersions &&
+      promptVersions.length > 0 &&
+      !isVersionsLoading
+    ) {
+      loadVersionData(promptVersions[0]);
+    }
+  }, [isVersionsLoading]);
+  // - Handle Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        handleSaveAndRun();
+      }
+    };
 
-    // Sort versions by version number to get the latest
-    const sortedVersions = [...promptVersions].sort(
-      (a, b) => b.minor_version - a.minor_version
-    );
-    const latestVersion = sortedVersions[0];
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSaveAndRun]);
 
-    if (!latestVersion) return;
-
-    // Parse helicone_template if it's a string, otherwise use as is
-    const templateData =
-      typeof latestVersion.helicone_template === "string"
-        ? JSON.parse(latestVersion.helicone_template)
-        : latestVersion.helicone_template;
-
-    // Initialize state with the latest version
-    setState({
-      promptId: id,
-      masterVersion: latestVersion.major_version,
-      version: latestVersion.minor_version,
-      messages: templateData.messages || [],
-      parameters: {
-        model: latestVersion.model,
-        temperature: templateData.temperature || 0.7,
-      },
-      variables: templateData.variables || [],
-      evals: templateData.evals || [],
-      structure: templateData.structure,
-      isDirty: false,
-    });
-  }, [promptVersions, isVersionsLoading, id]);
-
-  // Regular functions
+  // HELPERS
+  // - Add Message Pair
   const handleAddMessagePair = () => {
     if (!canAddMessagePair(state?.messages || [])) return;
     updateState({
@@ -316,11 +504,11 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       ],
     });
   };
-
+  // - Add Prefill
   const handleAddPrefill = () => {
     if (
       !state ||
-      !canAddPrefill(state.parameters.model) ||
+      !canAddPrefill(state.parameters.provider) ||
       !canAddPrefillMessage(state.messages)
     )
       return;
@@ -329,7 +517,8 @@ const PromptIdPage = (props: PromptIdPageProps) => {
     });
   };
 
-  // Show loading state while we fetch the prompt and versions
+  // RENDER
+  // - Loading Page
   if (isPromptLoading || isVersionsLoading || !state) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -337,26 +526,38 @@ const PromptIdPage = (props: PromptIdPageProps) => {
       </div>
     );
   }
-
+  // - Page
   return (
-    <main className="min-h-screen px-8">
-      <Tabs defaultValue="editor">
-        {/* Header */}
-        <div className="flex flex-row items-center justify-between py-4">
-          <HcBreadcrumb
-            pages={[
-              { href: "/prompts", name: "Prompts" },
-              {
-                href: `/prompts/${id}`,
-                name: prompt?.user_defined_id || "Loading...",
-              },
-            ]}
+    <Tabs className="relative flex flex-col" defaultValue="editor">
+      {/* Header */}
+      <GlassHeader>
+        {/* Left Side: Navigation */}
+        <div className="flex flex-row items-center gap-2">
+          <Link
+            className="text-base text-slate-500 hover:text-heliblue"
+            href="/prompts"
+          >
+            <PiCaretLeftBold />
+          </Link>
+          <VersionSelector
+            id={prompt?.user_defined_id || ""}
+            currentVersion={state.version}
+            masterVersion={state.masterVersion}
+            versions={promptVersions || []}
+            isLoading={isVersionsLoading}
+            isDirty={state.isDirty}
+            onVersionSelect={loadVersionData}
+            onVersionPromote={handleVersionPromote}
+            onIdEdit={handleIdEdit}
           />
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="editor">Editor</TabsTrigger>
             <TabsTrigger value="metrics">Metrics</TabsTrigger>
           </TabsList>
+        </div>
 
+        {/* Right Side: Actions */}
+        <div className="flex flex-row items-center gap-2">
           <ActionButton
             label={isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
             icon={isStreaming ? PiStopBold : PiPlayBold}
@@ -380,40 +581,56 @@ const PromptIdPage = (props: PromptIdPageProps) => {
             </div>
           </ActionButton>
         </div>
+      </GlassHeader>
 
-        {/* Prompt Editor */}
-        <TabsContent value="editor">
-          <ResizablePanels
-            leftPanel={
-              <PromptPanels
-                messages={state.messages}
-                onMessageChange={handleMessageChange}
-                onAddMessagePair={handleAddMessagePair}
-                onAddPrefill={handleAddPrefill}
-                canAddPrefill={canAddPrefill(state.parameters.model)}
-                onRemoveMessage={handleRemoveMessage}
-                onVariableCreate={handleVariableCreate}
+      {/* Prompt Editor Tab */}
+      <TabsContent className="p-4" value="editor">
+        <ResizablePanels
+          leftPanel={
+            <PromptPanels
+              messages={state.messages}
+              onMessageChange={handleMessageChange}
+              onAddMessagePair={handleAddMessagePair}
+              onAddPrefill={handleAddPrefill}
+              canAddPrefill={canAddPrefill(state.parameters.provider)}
+              onRemoveMessage={handleRemoveMessage}
+              onVariableCreate={handleVariableCreate}
+              variables={state.variables || []}
+            />
+          }
+          rightPanel={
+            <div className="flex h-full flex-col gap-4">
+              <ResponsePanel response={state.response || ""} />
+
+              <VariablesPanel
                 variables={state.variables || []}
+                onVariableChange={handleVariableChange}
               />
-            }
-            rightPanel={
-              <div className="flex h-full flex-col gap-4">
-                <ResponsePanel response={state.response || ""} />
-              </div>
-            }
-          />
-        </TabsContent>
 
-        {/* Metrics */}
-        <TabsContent value="metrics">
-          <PromptMetricsTab
-            id={id}
-            promptUserDefinedId={prompt?.user_defined_id || ""}
-          />
-        </TabsContent>
-      </Tabs>
-    </main>
+              <ParametersPanel
+                parameters={state.parameters}
+                onParameterChange={updates => {
+                  const newParameters = {
+                    ...state.parameters,
+                    ...updates,
+                  };
+                  updateState({
+                    parameters: newParameters,
+                  });
+                }}
+              />
+            </div>
+          }
+        />
+      </TabsContent>
+
+      {/* Metrics Tab */}
+      <TabsContent value="metrics">
+        <PromptMetricsTab
+          id={id}
+          promptUserDefinedId={prompt?.user_defined_id || ""}
+        />
+      </TabsContent>
+    </Tabs>
   );
-};
-
-export default PromptIdPage;
+}

@@ -60,14 +60,14 @@ export default function ResizablePanels({
 
   return (
     <div
-      className="resizable-container flex h-full w-full select-none gap-4"
+      className="resizable-container flex h-full w-full select-none gap-2"
       onMouseUp={handleMouseUp}
       onMouseLeave={() =>
         setState(prev => ({ ...prev, isResizing: false, isHovering: false }))
       }
       onMouseMove={handleResize}
     >
-      <div className="flex h-full flex-1 flex-col gap-4">{leftPanel}</div>
+      <div className="flex h-full flex-1 flex-col">{leftPanel}</div>
 
       <div
         className={resizeHandleClasses}

@@ -70,3 +70,35 @@ export function replaceVariables(
 export function isVariable(text: string): boolean {
   return text.startsWith("{{") && text.endsWith("}}") && text.length >= 4;
 }
+
+/**
+ * Converts {{variable}} syntax to helicone-prompt-input tags
+ * @param content The string content containing {{variable}} syntax
+ * @returns The string with variables converted to helicone tags
+ */
+export function convertToHeliconeTags(content: string): string {
+  // This regex matches {{variable}} with optional whitespace inside the braces
+  // It ensures we don't match nested braces and trims whitespace from variable names
+  return content.replace(/{{\s*([^{}]+?)\s*}}/g, (_, varName) => {
+    return `<helicone-prompt-input key="${varName.trim()}" />`;
+  });
+}
+
+/**
+ * Converts helicone-prompt-input tags to {{variable}} syntax
+ * @param content The string content containing helicone-prompt-input tags
+ * @param inputs Optional map of input keys to their default values
+ * @returns The string with helicone tags converted to variable syntax
+ */
+export function replaceTagsWithVariables(
+  content: string,
+  inputs?: Record<string, string>
+): string {
+  // Handle both self-closing and full tags
+  const regex =
+    /<helicone-prompt-input key="([^"]+)"[^>]*>([^<]*)<\/helicone-prompt-input>|<helicone-prompt-input key="([^"]+)"[^>]*\/>/g;
+  return content.replace(regex, (match, key1, content1, key2) => {
+    const varName = (key1 || key2).trim();
+    return `{{${varName}}}`;
+  });
+}

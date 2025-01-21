@@ -1,13 +1,10 @@
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+
 export type MessageRole = "developer" | "system" | "user" | "assistant";
 
 export interface Message {
-  role: MessageRole;
-  content:
-    | string
-    | {
-        type: "image_url";
-        image_url: { url: string };
-      };
+  role: string;
+  content: string | object;
 }
 
 export type Messages = Message[];
@@ -20,13 +17,28 @@ export interface PromptListItem {
   description?: string;
 }
 
+export interface PromptVersion {
+  id: string;
+  minor_version: number;
+  major_version: number;
+  prompt_v2: string;
+  model: string;
+  helicone_template: string;
+  created_at: string;
+  metadata: Record<string, any>;
+  parent_prompt_version?: string | null;
+  experiment_id?: string | null;
+  updated_at?: string;
+}
+
 export interface PromptState {
   promptId: string;
   masterVersion: number;
 
+  versionId: string; // The actual version ID (UUID) used for API calls
   version: number;
 
-  messages: Messages;
+  messages: ChatCompletionMessageParam[];
   parameters: Parameters;
   variables?: Variable[];
   evals?: EvalReference[];
@@ -37,8 +49,10 @@ export interface PromptState {
 }
 
 export interface Parameters {
+  provider: string;
   model: string;
   temperature: number;
+  // TODO: Add more parameters
 }
 export interface Variable {
   name: string;

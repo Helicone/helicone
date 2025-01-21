@@ -1,4 +1,5 @@
-import { Messages, Variable } from "@/types/prompt-state";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { Variable } from "@/types/prompt-state";
 import {
   PiDiceOneBold,
   PiDiceTwoBold,
@@ -13,7 +14,7 @@ import {
 import PromptBox from "@/components/shared/prompts/PromptBox";
 
 interface PromptPanelsProps {
-  messages: Messages;
+  messages: ChatCompletionMessageParam[];
   onMessageChange: (index: number, content: string) => void;
   onAddMessagePair: () => void;
   onAddPrefill: () => void;
@@ -86,11 +87,11 @@ export default function PromptPanels({
             value={
               typeof message.content === "string"
                 ? message.content
-                : message.content.image_url.url
+                : JSON.stringify(message.content)
             }
             onChange={content => onMessageChange(index, content)}
             onVariableCreate={onVariableCreate}
-            contextText={""}
+            contextText={""} // TODO: Add context for better auto-complete
             variables={variables}
           />
         </div>

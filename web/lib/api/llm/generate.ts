@@ -1,9 +1,10 @@
-import OpenAI from "openai";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { z } from "zod";
 
 export interface GenerateParams {
+  provider: string;
   model: string;
-  messages: OpenAI.ChatCompletionMessageParam[];
+  messages: ChatCompletionMessageParam[];
   temperature?: number;
   maxTokens?: number;
   topP?: number;
@@ -21,6 +22,8 @@ export interface GenerateParams {
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
 ): Promise<T extends object ? T : string> {
+  params.model = `${params.provider}/${params.model}`; // OpenRouter requires the model to be in the format of provider/model
+
   const response = await fetch("/api/llm", {
     method: "POST",
     headers: {

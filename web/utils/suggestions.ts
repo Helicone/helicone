@@ -83,45 +83,10 @@ export const suggestionReducer = (
 export const SUGGESTION_DELAY = 600;
 export const MIN_LENGTH_FOR_SUGGESTIONS = 8;
 
-function cleanSuggestionIfNeeded(text: string, suggestion: string): string {
+export function cleanSuggestionIfNeeded(
+  text: string,
+  suggestion: string
+): string {
   // Only clean spaces (not newlines) if the text ends with a space
   return text.endsWith(" ") ? suggestion.replace(/^ +/, "") : suggestion;
-}
-
-export async function handleSuggestionStream(
-  stream: ReadableStream<Uint8Array>,
-  abortController: AbortController,
-  onSuggestion: (suggestion: string) => void,
-  onStreamStart: () => void,
-  onStreamEnd: () => void,
-  currentText: string
-): Promise<void> {
-  let accumulated = "";
-  try {
-    const reader = stream.getReader();
-    onStreamStart();
-
-    while (true) {
-      const { done, value: chunk } = await reader.read();
-
-      if (abortController.signal.aborted) {
-        await reader.cancel();
-        break;
-      }
-
-      if (done) break;
-
-      const text = new TextDecoder().decode(chunk);
-      if (text) {
-        accumulated += text;
-        onSuggestion(cleanSuggestionIfNeeded(currentText, accumulated));
-      }
-    }
-  } catch (error) {
-    if (error instanceof Error && error.name !== "AbortError") {
-      console.error("Suggestion error:", error);
-    }
-  } finally {
-    onStreamEnd();
-  }
 }

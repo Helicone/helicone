@@ -9,49 +9,36 @@ export async function generateStream(
   const encoder = new TextEncoder();
   const abortController = new AbortController();
 
-  let hasError = false;
-
   generate({
     ...params,
     signal: abortController.signal,
     stream: {
       onChunk: async (chunk: string) => {
+        if (options?.headers?.["x-cancel"] === "1") {
+          abortController.abort();
+          await writer.abort(new Error("Request cancelled"));
+          return;
+        }
         try {
-          if (options?.headers?.["x-cancel"] === "1") {
-            hasError = true;
-            abortController.abort();
-            await writer.abort(new Error("Request cancelled"));
-            return;
-          }
-          if (!hasError) {
-            await writer.write(encoder.encode(chunk));
-          }
+          await writer.write(encoder.encode(chunk));
         } catch (error) {
-          hasError = true;
-          console.error("Error writing chunk:", error);
-          await writer.abort(
-            error instanceof Error ? error : new Error(String(error))
-          );
+          await writer.abort(error);
+          throw error;
         }
       },
       onCompletion: async () => {
         try {
-          if (!hasError && !writer.closed) {
-            await writer.close();
-          }
+          await writer.ready;
+          await writer.close();
         } catch (error) {
-          console.error("Error closing writer:", error);
+          // If we can't close, the stream is probably already closed or errored
+          console.debug("Could not close stream:", error);
         }
       },
     },
   }).catch(async error => {
-    hasError = true;
     console.error("Streaming error:", error);
-    try {
-      await writer.abort(error);
-    } catch (abortError) {
-      console.error("Error aborting writer:", abortError);
-    }
+    await writer.abort(error);
   });
 
   return stream.readable;

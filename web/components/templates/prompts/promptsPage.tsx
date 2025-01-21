@@ -61,15 +61,18 @@ const PromptsPage = (props: PromptsPageProps) => {
   const createPrompt = async (userDefinedId: string) => {
     // Prepare base prompt data
     const basePrompt = {
-      model: "gpt-4",
+      // provider: "openai",
+      // TODO: Fix prompt/create to allow for provider injection into helicone template,
+      // right now any v1 will break with @helicone/generate
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "aa",
+          content: "You are a helpful assistant.",
         },
         {
           role: "user",
-          content: "bb",
+          content: "What is ",
         },
       ],
     };
@@ -97,14 +100,14 @@ const PromptsPage = (props: PromptsPageProps) => {
     setIsCreatingPrompt(true);
     try {
       // Generate a unique name like "new prompt", "new prompt (1)", etc.
-      const basePromptName = "new prompt";
+      const basePromptName = "new-prompt";
       const existingPrompts = prompts || [];
 
       let promptName = basePromptName;
       let counter = 1;
 
       while (existingPrompts.some(p => p.user_defined_id === promptName)) {
-        promptName = `${basePromptName} (${counter})`;
+        promptName = `${basePromptName}-${counter}`;
         counter++;
       }
 
