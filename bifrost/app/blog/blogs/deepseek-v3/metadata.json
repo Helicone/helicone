@@ -1,0 +1,11 @@
+{
+  "title": "DeepSeek-V3: The New Open-Source MoE Model",
+  "title1": "DeepSeek-V3: The New Open-Source MoE Model",
+  "title2": "DeepSeek-V3: The New Open-Source MoE Model",
+  "description": "OpenAI just launched the o3 and o3-mini reasoning models. These models are built on the foundation of OpenAI's o1 models, introducing several notable improvements in performance, reasoning capabilities, and testing results.",
+  "images": "/static/blog/deepseek-v3/cover.webp",
+  "time": "7 minute read",
+  "author": "Lina Lam",
+  "date": "January 22, 2025", 
+  "badge": "news"
+}
