@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { Permission } from "../../../../services/lib/user";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 
 async function handler({
   req,
@@ -22,7 +22,7 @@ async function handler({
     return;
   }
 
-  const { error } = await supabaseServer
+  const { error } = await getSupabaseServer()
     .from("provider_keys")
     .update({ soft_delete: true })
     .eq("org_id", userData.orgId)

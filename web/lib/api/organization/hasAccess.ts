@@ -1,4 +1,4 @@
-import { supabaseServer } from "../../supabaseServer";
+import { getSupabaseServer } from "../../supabaseServer";
 import { dbExecute } from "../db/dbExecute";
 
 async function _checkAccessToOrg(
@@ -23,7 +23,7 @@ export async function checkAccessToMutateOrg(
   orgId: string,
   userId: string
 ): Promise<boolean> {
-  const orgToCheck = await supabaseServer
+  const orgToCheck = await getSupabaseServer()
     .from("organization")
     .select("*")
     .eq("id", orgId)
