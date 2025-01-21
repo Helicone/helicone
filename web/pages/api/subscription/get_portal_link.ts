@@ -6,7 +6,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getStripeCustomer } from "../../../utlis/stripeHelpers";
 import { stripeServer } from "../../../utlis/stripeServer";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 
 async function getOwner(orgId: String, userId: string) {
@@ -46,7 +46,7 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     return;
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await getSupabaseServer()
     .from("organization")
     .select("stripe_customer_id, subscription_status")
     .eq("id", orgId)
