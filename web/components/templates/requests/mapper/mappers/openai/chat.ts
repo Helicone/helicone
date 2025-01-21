@@ -245,18 +245,18 @@ const getLLMSchemaResponse = (response: OpenAIResponseBody) => {
   } else {
     return {
       messages: (response as ChatCompletion)?.choices?.map((choice) => ({
-        content: getFormattedMessageContent(choice.message.content),
-        role: choice.message.role,
-        tool_calls: choice.message.function_call
+        content: getFormattedMessageContent(choice?.message?.content ?? ""),
+        role: choice?.message?.role ?? "",
+        tool_calls: choice?.message?.function_call
           ? [
               {
                 name: choice.message.function_call.name,
                 arguments: JSON.parse(choice.message.function_call.arguments),
               },
             ]
-          : choice.message.tool_calls?.map((tool) => ({
-              name: tool.function.name,
-              arguments: JSON.parse(tool.function.arguments),
+          : choice?.message?.tool_calls?.map((tool) => ({
+              name: tool?.function?.name ?? "",
+              arguments: JSON.parse(tool?.function?.arguments ?? ""),
             })) ?? [],
         _type: getContentType(choice.message as any),
       })),

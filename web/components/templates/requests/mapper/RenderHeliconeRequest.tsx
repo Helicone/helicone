@@ -39,7 +39,13 @@ export const RenderMappedRequest = ({
     }
   } else {
   }
-  return <p>Unknown mapper type</p>;
+  return (
+    <>
+      <pre>
+        <code>{JSON.stringify(mapperContent, null, 2)}</code>
+      </pre>
+    </>
+  );
 };
 
 export const RenderHeliconeRequest = ({

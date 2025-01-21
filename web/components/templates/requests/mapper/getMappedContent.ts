@@ -10,11 +10,12 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
   "anthropic-chat": mapOpenAIRequest,
   "gemini-chat": mapOpenAIRequest,
-  "flux-chat": mapOpenAIRequest,
+  "black-forest-labs-image": mapOpenAIRequest,
   "openai-assistant": mapOpenAIRequest,
   "openai-image": mapOpenAIRequest,
   "openai-moderation": mapOpenAIRequest,
   "openai-embedding": mapOpenAIRequest,
+  unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
 const getStatusType = (

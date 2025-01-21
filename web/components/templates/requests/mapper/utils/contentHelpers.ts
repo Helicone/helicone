@@ -1,4 +1,3 @@
-import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { Message } from "../types";
 
 export const isJSON = (str: string): boolean => {
@@ -11,10 +10,10 @@ export const isJSON = (str: string): boolean => {
 };
 
 export const hasFunctionCall = (message: any): boolean =>
-  !!message.function_call ||
-  (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) ||
-  (Array.isArray(message.content) &&
-    message.content.some(
+  !!message?.function_call ||
+  (Array.isArray(message?.tool_calls) && message?.tool_calls?.length > 0) ||
+  (Array.isArray(message?.content) &&
+    message?.content?.some(
       (item: any) =>
         typeof item === "object" &&
         item !== null &&
@@ -23,13 +22,13 @@ export const hasFunctionCall = (message: any): boolean =>
     ));
 
 export const hasImage = (message: Message): boolean =>
-  Array.isArray(message.content) &&
-  message.content.some(
-    (item) => item.type === "image_url" || item.type === "image"
+  Array.isArray(message?.content) &&
+  message?.content?.some(
+    (item) => item?.type === "image_url" || item?.type === "image"
   );
 
 export function getContentType(message: any): Message["_type"] {
-  if (message.role === "function") return "function";
+  if (message?.role === "function") return "function";
   if (hasFunctionCall(message)) return "functionCall";
   if (hasImage(message)) return "image";
   if (

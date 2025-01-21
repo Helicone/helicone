@@ -6,7 +6,7 @@ import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
-import { isJSON } from "@/components/templates/requests/mapper/mappers/openai/chat";
+import { isJSON } from "../../../mapper/utils/contentHelpers";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;

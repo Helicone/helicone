@@ -16,7 +16,7 @@ import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilter
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
-import getNormalizedRequest from "./builder/requestBuilder";
+
 import { heliconeRequestToMappedContent } from "./mapper/getMappedContent";
 
 const useRequestsPageV2 = (
@@ -105,9 +105,5 @@ const useRequestsPageV2 = (
     filter,
   };
 };
-
-export function getNormalizedRequests(requests: HeliconeRequest[]) {
-  return requests.map(getNormalizedRequest);
-}
 
 export default useRequestsPageV2;

@@ -25,7 +25,7 @@ export const getMapperTypeFromHeliconeRequest = (
   });
 };
 
-const getMapperType = ({
+export const getMapperType = ({
   model,
   provider,
   path,
@@ -38,7 +38,9 @@ const getMapperType = ({
 }): MapperType => {
   if (
     /^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model) ||
-    /^(ft:)?gpt-(4|3\.5|35)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(model) ||
+    /^(ft:)?gpt-(4|3\.5|35)(?!-turbo-instruct)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(
+      model
+    ) ||
     /^o1-(preview|mini)(-\d{4}-\d{2}-\d{2})?$/.test(model) ||
     /^meta-llama\/.*/i.test(model) ||
     provider === "OPENROUTER" ||
@@ -81,5 +83,5 @@ const getMapperType = ({
     return "anthropic-chat";
   }
 
-  return "openai-chat";
+  return "unknown";
 };

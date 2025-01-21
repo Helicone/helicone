@@ -1,4 +1,3 @@
-import useOnboardingContext from "@/components/layout/onboardingContext";
 import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -255,7 +254,6 @@ const RequestRow = (props: {
   };
 
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
 
   return (
     <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">

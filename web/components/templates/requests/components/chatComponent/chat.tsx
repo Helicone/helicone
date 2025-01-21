@@ -88,8 +88,8 @@ export const Chat: React.FC<ChatProps> = ({
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
           {mode === "JSON" ? (
             <JsonView
-              requestBody={mappedRequest.schema.request}
-              responseBody={mappedRequest.schema.response}
+              requestBody={mappedRequest.raw.request}
+              responseBody={mappedRequest.raw.response}
             />
           ) : messagesToRender.length > 0 ? (
             <MessageRenderer

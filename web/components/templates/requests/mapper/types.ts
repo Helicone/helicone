@@ -61,7 +61,8 @@ export type MapperType =
   | "openai-assistant"
   | "openai-image"
   | "openai-moderation"
-  | "openai-embedding";
+  | "openai-embedding"
+  | "unknown";
 
 type HeliconeMetadata = {
   requestId: string;
