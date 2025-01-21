@@ -100,7 +100,7 @@ export const MigrateGrowthToPro = () => {
           </CardTitle>
           <CardDescription>
             We are discontinuing the Growth plan soon. Please{" "}
-            <b>upgrade to Pro</b> to keep 100k requests every month and access
+            <b>upgrade to Pro</b> to keep 10k requests every month and access
             all features or downgrade to Free plan.
           </CardDescription>
         </CardHeader>
