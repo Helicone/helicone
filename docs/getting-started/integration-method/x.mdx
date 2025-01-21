@@ -1,0 +1,58 @@
+---
+title: "X AI Integration"
+sidebarTitle: "X AI"
+description: "Connect Helicone with X AI, a platform that provides powerful language models including MoE and Code models for various AI applications."
+"twitter:title": "X AI Integration - Helicone OSS LLM Observability"
+---
+
+You can follow their documentation here: [https://api-docs.x.ai/](https://api-docs.x.ai/)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create an X AI account">
+    Log into https://console.x.ai/ or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and X_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+X_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following X AI URL with the Helicone Gateway URL:
+
+`https://api.x.ai/v1/chat/completions` -> `https://x.helicone.ai/v1/chat/completions`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
+```
+
+</Step>
+</Steps>
+
+Now you can access all the models on X AI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <X_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "grok-beta",
+    "messages": [{"role": "user", "content": "Say this is a test"}]
+}' \
+  --url https://x.helicone.ai/chat/completions
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+And for more information on how to use X AI, see [X AI Docs](https://docs.x.ai/docs/overview).
