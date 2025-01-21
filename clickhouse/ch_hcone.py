@@ -32,13 +32,17 @@ def get_host(host: str):
 def run_curl_command(query, host, port, user=None, password=None, migration_file=None):
 
     if not query:
-        curl_cmd = f"cat \"{migration_file}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = f"cat \"{migration_file}\" | curl '{
+            get_host(host)}:{port}/' --data-binary @-"
         if user and password:
-            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{
+                password}' '{get_host(host)}:{port}/' --data-binary @-"
     else:
-        curl_cmd = f"echo \"{query}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = f"echo \"{query}\" | curl '{
+            get_host(host)}:{port}/' --data-binary @-"
         if user and password:
-            curl_cmd = f"echo \"{query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+            curl_cmd = f"echo \"{
+                query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
 
     result = subprocess.run(curl_cmd, shell=True,
                             capture_output=True, text=True)
@@ -141,17 +145,18 @@ def main():
                         help='Restart services')
     parser.add_argument('--upgrade', action='store_true',
                         help='Apply all migrations')
-    parser.add_argument('--host', default="localhost",
+    parser.add_argument('--host', default=os.getenv('CLICKHOUSE_HOST') or "localhost",
                         help='ClickHouse server host')
-    parser.add_argument('--port', default='18123',
+    parser.add_argument('--port', default=os.getenv('CLICKHOUSE_PORT') or "18123",
                         help='ClickHouse server port')
-    parser.add_argument('--user', help='ClickHouse server user')
+    parser.add_argument('--user', default=os.getenv('CLICKHOUSE_USER') or "default",
+                        help='ClickHouse server user')
     parser.add_argument('--list-migrations', action='store_true',
                         help='List applied migrations')
 
     args = parser.parse_args()
 
-    password = None
+    password = os.getenv('CLICKHOUSE_PASSWORD')
     if args.user:
         password = getpass.getpass(
             prompt='Enter password for ClickHouse server user: ')
