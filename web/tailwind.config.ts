@@ -1,5 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
+
+export default {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
@@ -134,7 +136,6 @@ module.exports = {
         "tremor-full": "9999px",
       },
       fontSize: {
-        "tremor-label": ["0.75rem"],
         "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
@@ -175,7 +176,17 @@ module.exports = {
       components: ["default-theme"],
     }),
     require("tailwindcss-animate"),
-    require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
+    plugin(function ({ addVariant }) {
+      // Add numbered group variants
+      addVariant("group-one-hover", ":merge(.group-one):hover &");
+      addVariant("group-one-active", ":merge(.group-one):active &");
+      addVariant("group-two-hover", ":merge(.group-two):hover &");
+      addVariant("group-two-active", ":merge(.group-two):active &");
+      addVariant("group-three-hover", ":merge(.group-three):hover &");
+      addVariant("group-three-active", ":merge(.group-three):active &");
+      addVariant("group-four-hover", ":merge(.group-four):hover &");
+      addVariant("group-four-active", ":merge(.group-four):active &");
+    }),
   ],
-};
+} satisfies Config;

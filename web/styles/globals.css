@@ -15,28 +15,10 @@
     --chart-9: 0.75 0.183 55.934; /* oklch(0.75 0.183 55.934) */
     --chart-10: 0.588 0.158 241.966; /* oklch(0.588 0.158 241.966) */
   }
+}
 
-  /* Remove input highlights and autofill styles */
-  input,
-  textarea,
-  select {
-    @apply focus:outline-none focus:ring-0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* Remove autofill background */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  textarea:-webkit-autofill,
-  textarea:-webkit-autofill:hover,
-  textarea:-webkit-autofill:focus,
-  select:-webkit-autofill,
-  select:-webkit-autofill:hover,
-  select:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
-    transition: background-color 5000s ease-in-out 0s;
-  }
+input {
+  @apply appearance-none outline-none;
 }
 
 .glass {
