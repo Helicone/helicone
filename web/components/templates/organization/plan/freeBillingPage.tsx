@@ -197,8 +197,8 @@ const ComparisonItem = ({
 
 const proFeatures = [
   {
-    title: "100k requests",
-    description: "Higher limit compared to 10k.",
+    title: "Unlimited scaling",
+    description: "Scale your requests without limits.",
   },
   {
     title: "3 month log retention",
