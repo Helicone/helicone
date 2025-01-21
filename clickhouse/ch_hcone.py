@@ -30,19 +30,19 @@ def get_host(host: str):
 
 
 def run_curl_command(query, host, port, user=None, password=None, migration_file=None):
+    base_url = f"{get_host(host)}:{port}/"
+    auth = f"--user '{user}:{password}'" if user and password else ""
 
     if not query:
-        curl_cmd = f"cat \"{migration_file}\" | curl '{
-            get_host(host)}:{port}/' --data-binary @-"
-        if user and password:
-            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{
-                password}' '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = (
+            f"cat \"{migration_file}\" | "
+            f"curl {auth} '{base_url}' --data-binary @-"
+        ).strip()
     else:
-        curl_cmd = f"echo \"{query}\" | curl '{
-            get_host(host)}:{port}/' --data-binary @-"
-        if user and password:
-            curl_cmd = f"echo \"{
-                query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = (
+            f"echo \"{query}\" | "
+            f"curl {auth} '{base_url}' --data-binary @-"
+        ).strip()
 
     result = subprocess.run(curl_cmd, shell=True,
                             capture_output=True, text=True)
