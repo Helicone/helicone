@@ -156,7 +156,7 @@ export class PromptManager extends BaseManager {
             LIMIT 1
           )
         END,
-        $6,
+        $6::jsonb,
         $7::uuid,
         ppv.id,
         CASE 
@@ -171,6 +171,7 @@ export class PromptManager extends BaseManager {
         helicone_template,
         prompt_v2,
         model,
+        metadata,
         experiment_id;
     `,
       [
