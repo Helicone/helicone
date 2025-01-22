@@ -19,6 +19,8 @@ const proProductPrices = {
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
 
+const COST_OF_PROMPTS = 200;
+
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
@@ -57,7 +59,7 @@ export class StripeManager extends BaseManager {
       }
     }
 
-    return ok(200);
+    return ok(COST_OF_PROMPTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
