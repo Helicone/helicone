@@ -29,7 +29,7 @@ export default function SegmentedToggle({
     } else {
       const currentValue = Array.isArray(value) ? value : [];
       const newValue = currentValue.includes(index)
-        ? currentValue.filter(v => v !== index)
+        ? currentValue.filter((v) => v !== index)
         : [...currentValue, index];
       onChange(newValue);
     }
@@ -56,7 +56,7 @@ export default function SegmentedToggle({
               ${isFirst ? "rounded-l-full" : ""}
               ${isLast ? "rounded-r-full" : ""}
               text-xs font-medium px-2.5`}
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               handleClick(index);
             }}

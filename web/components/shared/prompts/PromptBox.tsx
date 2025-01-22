@@ -330,7 +330,7 @@ export default function PromptBox({
 
     // Get all client rects for the range to handle multi-line selections
     const rects = Array.from(range.getClientRects());
-    const highlights = rects.map(rect => ({
+    const highlights = rects.map((rect) => ({
       left: rect.left - preRect.left,
       top: rect.top - preRect.top - textarea.scrollTop - 2,
       width: rect.width,
@@ -370,7 +370,7 @@ export default function PromptBox({
     });
 
     const intersectionObserver = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting && selection) {
           requestAnimationFrame(updateToolboxPosition);
         }
@@ -511,7 +511,7 @@ export default function PromptBox({
 
       await readStream(stream, (chunk: string) => {
         generatedText += chunk;
-        setPendingEdit(prev =>
+        setPendingEdit((prev) =>
           prev ? { ...prev, generatedText: generatedText.trim() } : null
         );
       });
@@ -519,7 +519,7 @@ export default function PromptBox({
       console.error("Error generating edit:", error);
       setPendingEdit(null);
     } finally {
-      setPendingEdit(prev => (prev ? { ...prev, isLoading: false } : null));
+      setPendingEdit((prev) => (prev ? { ...prev, isLoading: false } : null));
     }
   };
   const handleAcceptEdit = () => {

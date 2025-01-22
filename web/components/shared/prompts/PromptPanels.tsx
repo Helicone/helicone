@@ -89,7 +89,7 @@ export default function PromptPanels({
                 ? message.content
                 : JSON.stringify(message.content)
             }
-            onChange={content => onMessageChange(index, content)}
+            onChange={(content) => onMessageChange(index, content)}
             onVariableCreate={onVariableCreate}
             contextText={""} // TODO: Add context for better auto-complete
             variables={variables}

@@ -22,7 +22,7 @@ export default function ResponsePanel({ response }: ResponsePanelProps) {
           <SegmentedToggle
             mode="single"
             value={showMarkdown ? 0 : 1}
-            onChange={value => setShowMarkdown(value === 0)}
+            onChange={(value) => setShowMarkdown(value === 0)}
             segments={[{ label: "Markdown" }, { label: "Text" }]}
           />
         </div>

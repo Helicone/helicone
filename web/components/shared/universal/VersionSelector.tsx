@@ -113,7 +113,7 @@ export default function VersionSelector({
           <input
             type="text"
             value={editValue}
-            onChange={e => setEditValue(e.target.value)}
+            onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={() => handleEditComplete(false)}
             autoFocus
@@ -170,7 +170,7 @@ export default function VersionSelector({
                 disabled={currentVersion === masterVersion}
                 onClick={() => {
                   const version = versions.find(
-                    v => v.major_version === currentVersion
+                    (v) => v.major_version === currentVersion
                   );
                   if (version) {
                     onVersionPromote(version);

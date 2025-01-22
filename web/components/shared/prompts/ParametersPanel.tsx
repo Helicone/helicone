@@ -37,7 +37,7 @@ export default function ParametersPanel({
         model: MODELS[defaultProvider][0],
       });
     }
-  }, [parameters.provider]);
+  }, [parameters.provider, onParameterChange]);
 
   const handleProviderChange = (provider: string) => {
     const validProvider = provider as keyof typeof MODELS;
@@ -69,7 +69,7 @@ export default function ParametersPanel({
             />
             <SelectDropdown
               value={parameters.model}
-              onChange={model => onParameterChange({ model })}
+              onChange={(model) => onParameterChange({ model })}
               options={MODELS[parameters.provider as keyof typeof MODELS]}
               variant="lg"
             />
@@ -94,7 +94,7 @@ export default function ParametersPanel({
               max="2"
               step="0.01"
               value={parameters.temperature}
-              onChange={e =>
+              onChange={(e) =>
                 onParameterChange({ temperature: parseFloat(e.target.value) })
               }
               className="flex-1 accent-heliblue w-48 h-2.5 rounded-full bg-slate-200 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-heliblue [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:cursor-grab"
@@ -121,7 +121,7 @@ const SelectDropdown = memo(function SelectDropdown({
 }: SelectDropdownProps) {
   const optionElements = useMemo(
     () =>
-      options.map(option => (
+      options.map((option) => (
         <option key={option} value={option} className="truncate">
           {option}
         </option>
@@ -133,7 +133,7 @@ const SelectDropdown = memo(function SelectDropdown({
     <div className={`relative ${variant === "sm" ? "w-28" : "w-44"}`}>
       <select
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         className="interactive w-full appearance-none rounded-lg pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-heliblue bg-white border border-slate-100 cursor-pointer hover:bg-slate-50 truncate"
       >
         {optionElements}

@@ -81,7 +81,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const canRun = useMemo(
     () =>
       state?.messages.some(
-        m =>
+        (m) =>
           m.role === "user" &&
           (typeof m.content === "string" ? m.content.trim().length > 0 : true)
       ) ?? false,
@@ -105,7 +105,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         metadata?.isProduction === true
           ? ver.major_version
           : promptVersions?.find(
-              v => (v.metadata as { isProduction?: boolean })?.isProduction
+              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
             )?.major_version ?? ver.major_version;
 
       // 3. First collect all variables and their default values from the template inputs
@@ -138,7 +138,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           const messageVars = extractVariables(msg.content, true);
           messageVars.forEach(({ name, isValid }) => {
             // Only add if not already present
-            if (!variables.find(v => v.name === name)) {
+            if (!variables.find((v) => v.name === name)) {
               variables.push({
                 name,
                 value: inputs[name] || "",
@@ -172,7 +172,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Update State
   const updateState = useCallback(
     (updates: Partial<PromptState>, markDirty: boolean = true) => {
-      setState(prev => {
+      setState((prev) => {
         if (!prev) return null;
         return {
           ...prev,
@@ -197,10 +197,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         const messageVars = extractVariables(msg.content as string, true);
         return [
           ...acc,
-          ...messageVars.map(v => ({
+          ...messageVars.map((v) => ({
             name: v.name,
             value:
-              state?.variables?.find(pv => pv.name === v.name)?.value || "",
+              state?.variables?.find((pv) => pv.name === v.name)?.value || "",
             isValid: v.isValid,
           })),
         ];
@@ -208,7 +208,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // Deduplicate variables (keep first occurrence)
       const uniqueVars = allVariables.filter(
-        (v, idx, self) => idx === self.findIndex(t => t.name === v.name)
+        (v, idx, self) => idx === self.findIndex((t) => t.name === v.name)
       );
 
       updateState({
@@ -232,7 +232,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     (newVariable: Variable) => {
       const existingVars = state?.variables || [];
       const existingIndex = existingVars.findIndex(
-        v => v.name === newVariable.name
+        (v) => v.name === newVariable.name
       );
 
       // If variable exists, update its value, otherwise add it
@@ -264,7 +264,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       if (!version) return;
 
       const currentProductionVersion = promptVersions?.find(
-        v => (v.metadata as { isProduction?: boolean })?.isProduction
+        (v) => (v.metadata as { isProduction?: boolean })?.isProduction
       );
 
       try {
@@ -290,7 +290,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         await refetchPromptVersions();
         // Update state to reflect the new master version
-        setState(prev =>
+        setState((prev) =>
           prev
             ? {
                 ...prev,
@@ -326,7 +326,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
     const variables = state.variables || [];
     const variableMap = Object.fromEntries(
-      variables.map(v => [v.name, v.value || ""])
+      variables.map((v) => [v.name, v.value || ""])
     );
 
     // 3. SAVE: If dirty
@@ -337,7 +337,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       // 3.1. Build Helicone Template for Saving
       const heliconeTemplate = {
         ...state.parameters,
-        messages: state.messages.map(msg => ({
+        messages: state.messages.map((msg) => ({
           ...msg,
           content:
             typeof msg.content === "string"
@@ -380,7 +380,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     // 5. RUN: Replace variables with their values for local execution
     const runTemplate = {
       ...state.parameters,
-      messages: state.messages.map(msg => ({
+      messages: state.messages.map((msg) => ({
         ...msg,
         content:
           typeof msg.content === "string"
@@ -402,7 +402,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         await readStream(
           stream,
           (chunk: string) => {
-            setState(prev => {
+            setState((prev) => {
               if (!prev) return null;
               return {
                 ...prev,
@@ -609,7 +609,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
               <ParametersPanel
                 parameters={state.parameters}
-                onParameterChange={updates => {
+                onParameterChange={(updates) => {
                   const newParameters = {
                     ...state.parameters,
                     ...updates,

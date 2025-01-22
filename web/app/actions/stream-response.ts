@@ -23,7 +23,7 @@ export async function streamResponse(
         await writer.close();
       },
     },
-  }).catch(async error => {
+  }).catch(async (error) => {
     console.error("Streaming error:", error);
     await writer.abort(error);
   });

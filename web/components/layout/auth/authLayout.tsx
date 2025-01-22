@@ -33,7 +33,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const org = useOrg();
 
   const banner = useMemo(() => {
-    const activeBanner = alertBanners?.data?.find(x => x.active);
+    const activeBanner = alertBanners?.data?.find((x) => x.active);
     if (activeBanner) {
       return {
         message: activeBanner.message,
@@ -73,7 +73,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 sidebarRef={sidebarRef}
                 changelog={
                   changelog
-                    ? changelog.slice(0, 2).map(item => ({
+                    ? changelog.slice(0, 2).map((item) => ({
                         title: item.title || "",
                         image: item.enclosure,
                         description: item.description || "",

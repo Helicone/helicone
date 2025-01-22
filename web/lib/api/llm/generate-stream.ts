@@ -36,7 +36,7 @@ export async function generateStream(
         }
       },
     },
-  }).catch(async error => {
+  }).catch(async (error) => {
     console.error("Streaming error:", error);
     await writer.abort(error);
   });

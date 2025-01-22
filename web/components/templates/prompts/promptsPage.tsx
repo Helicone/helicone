@@ -53,7 +53,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [isCreatingPrompt, setIsCreatingPrompt] = useState<boolean>(false);
 
   const notification = useNotification();
-  const filteredPrompts = prompts?.filter(prompt =>
+  const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
   const jawn = useJawnClient();
@@ -72,7 +72,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         },
         {
           role: "user",
-          content: "What is ",
+          content: "What is 2+2?",
         },
       ],
     };
@@ -106,7 +106,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       let promptName = basePromptName;
       let counter = 1;
 
-      while (existingPrompts.some(p => p.user_defined_id === promptName)) {
+      while (existingPrompts.some((p) => p.user_defined_id === promptName)) {
         promptName = `${basePromptName}-${counter}`;
         counter++;
       }
@@ -196,7 +196,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                   <div className="max-w-xs w-full">
                     <Input
                       value={searchName}
-                      onChange={e => setSearchName(e.target.value)}
+                      onChange={(e) => setSearchName(e.target.value)}
                       placeholder="Search prompts..."
                       className="h-full"
                     />
@@ -245,7 +245,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {
                       key: "user_defined_id",
                       header: "Name",
-                      render: prompt => (
+                      render: (prompt) => (
                         <div className="text-black dark:text-white font-semibold underline flex items-center">
                           <DocumentTextIcon className="h-4 w-4 mr-1" />
                           {prompt.user_defined_id}
@@ -255,7 +255,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {
                       key: "created_at",
                       header: "Created At",
-                      render: prompt => (
+                      render: (prompt) => (
                         <div className="text-gray-500">
                           {new Date(prompt.created_at).toLocaleString()}
                         </div>
@@ -264,7 +264,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {
                       key: "major_version",
                       header: "Major Versions",
-                      render: prompt => (
+                      render: (prompt) => (
                         <div className="text-gray-500">
                           {prompt.major_version}
                         </div>
@@ -273,14 +273,14 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {
                       key: undefined,
                       header: "Last 30 days",
-                      render: prompt => (
+                      render: (prompt) => (
                         <PromptUsageChart promptId={prompt.user_defined_id} />
                       ),
                     },
                     {
                       key: undefined,
                       header: "Permission",
-                      render: prompt => (
+                      render: (prompt) => (
                         <div>
                           {prompt.metadata?.createdFromUi === true ? (
                             <Tooltip>
@@ -325,7 +325,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     {
                       key: undefined,
                       header: "",
-                      render: prompt => (
+                      render: (prompt) => (
                         <PromptDelete
                           promptId={prompt.id}
                           promptName={prompt.user_defined_id}
@@ -336,7 +336,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                       ),
                     },
                   ]}
-                  onSelect={prompt => {
+                  onSelect={(prompt) => {
                     router.push(`/prompts/${prompt.id}`);
                   }}
                 />

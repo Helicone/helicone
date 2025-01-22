@@ -1,6 +1,5 @@
 import { Variable } from "@/types/prompt-state";
-import { getVariableStatus, isValidVariableName } from "@/utils/variables";
-import { PiWarningCircleBold } from "react-icons/pi";
+import { isValidVariableName } from "@/utils/variables";
 
 interface VariablesPanelProps {
   variables: Variable[];
@@ -11,7 +10,7 @@ export default function VariablesPanel({
   variables,
   onVariableChange,
 }: VariablesPanelProps) {
-  const validVariables = variables.filter(v => isValidVariableName(v.name));
+  const validVariables = variables.filter((v) => isValidVariableName(v.name));
 
   return (
     <div className="flex flex-col gap-2">
@@ -46,7 +45,7 @@ export default function VariablesPanel({
                 </div>
                 <input
                   value={variable.value}
-                  onChange={e => onVariableChange(index, e.target.value)}
+                  onChange={(e) => onVariableChange(index, e.target.value)}
                   placeholder={`Enter default value for {{${variable.name}}}...`}
                   className="w-[32rem] border border-slate-100 focus:ring-1 focus:ring-heliblue hover:shadow-md rounded-md px-2 py-1"
                 />

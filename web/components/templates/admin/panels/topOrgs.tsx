@@ -51,7 +51,7 @@ const TopOrgs = (props: TopOrgsProps) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["top_orgs", timeRange, tier, searchQuery],
-    queryFn: async query => {
+    queryFn: async (query) => {
       const timeRange = query.queryKey[1] as { startDate: Date; endDate: Date };
       const tier = query.queryKey[2] as
         | "all"
@@ -127,7 +127,7 @@ const TopOrgs = (props: TopOrgsProps) => {
         <input
           type="datetime-local"
           value={timeRange?.startDate.toISOString().slice(0, 16)}
-          onChange={e => {
+          onChange={(e) => {
             setTimeRange({
               ...timeRange!,
               startDate: new Date(e.target.value),
@@ -137,7 +137,7 @@ const TopOrgs = (props: TopOrgsProps) => {
         <input
           type="datetime-local"
           value={timeRange?.endDate.toISOString().slice(0, 16)}
-          onChange={e =>
+          onChange={(e) =>
             setTimeRange({
               ...timeRange!,
               endDate: new Date(e.target.value),
@@ -201,7 +201,7 @@ const TopOrgs = (props: TopOrgsProps) => {
         </button>
       </div>
       <div>
-        {tiers.map(t => (
+        {tiers.map((t) => (
           <button
             key={t}
             onClick={() => {
@@ -259,7 +259,7 @@ const TopOrgs = (props: TopOrgsProps) => {
             {/* Row 2 */}
             <div className="col-span-9">
               <BarChart
-                data={org.overTime.map(ot => ({
+                data={org.overTime.map((ot) => ({
                   dt: ot.dt,
                   count: +ot.count,
                 }))}

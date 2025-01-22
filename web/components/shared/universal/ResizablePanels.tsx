@@ -29,7 +29,7 @@ export default function ResizablePanels({
         80
       );
 
-      setState(prev => ({ ...prev, rightPanelWidth: newWidth }));
+      setState((prev) => ({ ...prev, rightPanelWidth: newWidth }));
     },
     [state]
   );
@@ -38,7 +38,7 @@ export default function ResizablePanels({
     const container = e.currentTarget.closest(".resizable-container");
     if (!container) return;
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isResizing: true,
       initialX: e.clientX,
@@ -48,7 +48,7 @@ export default function ResizablePanels({
   }, []);
 
   const handleMouseUp = useCallback(() => {
-    setState(prev => ({ ...prev, isResizing: false }));
+    setState((prev) => ({ ...prev, isResizing: false }));
   }, []);
 
   const resizeHandleClasses = `px-2 ${
@@ -63,7 +63,7 @@ export default function ResizablePanels({
       className="resizable-container flex h-full w-full select-none gap-2"
       onMouseUp={handleMouseUp}
       onMouseLeave={() =>
-        setState(prev => ({ ...prev, isResizing: false, isHovering: false }))
+        setState((prev) => ({ ...prev, isResizing: false, isHovering: false }))
       }
       onMouseMove={handleResize}
     >
@@ -72,8 +72,10 @@ export default function ResizablePanels({
       <div
         className={resizeHandleClasses}
         onMouseDown={handleMouseDown}
-        onMouseEnter={() => setState(prev => ({ ...prev, isHovering: true }))}
-        onMouseLeave={() => setState(prev => ({ ...prev, isHovering: false }))}
+        onMouseEnter={() => setState((prev) => ({ ...prev, isHovering: true }))}
+        onMouseLeave={() =>
+          setState((prev) => ({ ...prev, isHovering: false }))
+        }
       >
         <div className={dividerClasses} />
       </div>

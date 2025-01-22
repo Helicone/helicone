@@ -95,7 +95,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         // Check if cmd/ctrl is pressed
         if (event.metaKey || event.ctrlKey) {
           const tool = tools.find(
-            t => t.hotkey?.toLowerCase() === event.key.toLowerCase()
+            (t) => t.hotkey?.toLowerCase() === event.key.toLowerCase()
           );
           if (tool) {
             event.preventDefault();
@@ -208,7 +208,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                     placeholder={
                       tools[activeInput.index].placeholder ?? "Type here..."
                     }
-                    onChange={e => {
+                    onChange={(e) => {
                       if (activeInput.showConfirmation) {
                         handleDeny();
                       } else {
@@ -220,7 +220,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                     }}
                     autoFocus
                     readOnly={pendingEdit?.isLoading}
-                    onKeyDown={e => {
+                    onKeyDown={(e) => {
                       // Escape key: Cancels or denies
                       if (e.key === "Escape") {
                         e.preventDefault();
@@ -250,7 +250,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                     // Suggestions (max 2)
                     <div className="absolute bottom-0 left-0 w-full flex flex-row justify-around pb-3.5">
                       {editSuggestions
-                        ?.map(suggestion => ({
+                        ?.map((suggestion) => ({
                           ...suggestion,
                           weight:
                             suggestion.condition?.(
@@ -264,7 +264,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                           <button
                             key={index}
                             className="text-xs text-slate-400 hover:underline"
-                            onClick={e => {
+                            onClick={(e) => {
                               e.preventDefault();
                               const tool = tools[activeInput.index];
                               tool.onSubmit(suggestion.goal);
@@ -292,14 +292,14 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                   type="text"
                   value={activeInput.value}
                   required
-                  onChange={e => {
+                  onChange={(e) => {
                     if (activeInput.showConfirmation) {
                       handleDeny();
                     } else {
                       setActiveInput({ ...activeInput, value: e.target.value });
                     }
                   }}
-                  onKeyDown={e => {
+                  onKeyDown={(e) => {
                     if (e.key === "Escape") {
                       e.preventDefault();
                       activeInput.showConfirmation
@@ -466,5 +466,6 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
     );
   }
 );
+Toolbar.displayName = "Toolbar";
 
 export default Toolbar;

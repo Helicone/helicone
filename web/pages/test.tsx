@@ -10,7 +10,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 
 const Test: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = props => {
+> = (props) => {
   const orgContext = useOrg();
   const user = useUser();
   async function handleGrowthCheckout() {

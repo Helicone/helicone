@@ -115,7 +115,7 @@ const PromptMetricsTab = ({
   const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
 
-  const filteredExperiments = experiments.filter(experiment => {
+  const filteredExperiments = experiments.filter((experiment) => {
     if (
       selectedDatasets.length &&
       !selectedDatasets.includes(experiment.datasetId)
@@ -184,7 +184,7 @@ const PromptMetricsTab = ({
             <AreaChart
               className="h-[14rem]"
               data={
-                data?.data?.map(r => ({
+                data?.data?.map((r) => ({
                   date: getTimeMap(timeIncrement)(r.time),
                   count: r.count,
                 })) ?? []
@@ -211,11 +211,11 @@ const PromptMetricsTab = ({
               <MultiSelect
                 placeholder="Dataset"
                 value={selectedDatasets}
-                onValueChange={value => {
+                onValueChange={(value) => {
                   setSelectedDatasets(value);
                 }}
               >
-                {datasets.map(dataset => (
+                {datasets.map((dataset) => (
                   <MultiSelectItem value={dataset.id} key={dataset.id}>
                     {dataset.name}
                   </MultiSelectItem>
@@ -226,11 +226,11 @@ const PromptMetricsTab = ({
               <MultiSelect
                 placeholder="Model"
                 value={selectedModels}
-                onValueChange={value => {
+                onValueChange={(value) => {
                   setSelectedModels(value);
                 }}
               >
-                {MODEL_LIST.map(model => (
+                {MODEL_LIST.map((model) => (
                   <MultiSelectItem value={model.value} key={model.value}>
                     {model.label}
                   </MultiSelectItem>
@@ -262,7 +262,7 @@ const PromptMetricsTab = ({
               {
                 key: "id",
                 header: "ID",
-                render: item => (
+                render: (item) => (
                   <span className="underline text-black dark:text-white">
                     {item.id}
                   </span>
@@ -271,34 +271,34 @@ const PromptMetricsTab = ({
               {
                 key: "status",
                 header: "Status",
-                render: item => (
+                render: (item) => (
                   <StatusBadge statusType={item.status || "unknown"} />
                 ),
               },
               {
                 key: "createdAt",
                 header: "Created At",
-                render: item => (
+                render: (item) => (
                   <span>{getUSDateFromString(item.createdAt)}</span>
                 ),
               },
               {
                 key: "datasetName",
                 header: "Dataset",
-                render: item => item.datasetName,
+                render: (item) => item.datasetName,
               },
               {
                 key: "model",
                 header: "Model",
-                render: item => <ModelPill model={item.model || "unknown"} />,
+                render: (item) => <ModelPill model={item.model || "unknown"} />,
               },
               {
                 key: "runCount",
                 header: "Run Count",
-                render: item => item.runCount || 0,
+                render: (item) => item.runCount || 0,
               },
             ]}
-            onSelect={item => {
+            onSelect={(item) => {
               router.push(`/prompts/${id}/experiments/${item.id}`);
             }}
           />

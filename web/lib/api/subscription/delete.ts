@@ -22,7 +22,7 @@ export async function deleteSubscription(
   }
   if (customer.subscriptions && customer.subscriptions.data.length > 0) {
     const subscription = customer.subscriptions.data.find(
-      sub => sub.id === subscriptionId
+      (sub) => sub.id === subscriptionId
     );
     if (!subscription) {
       return { data: null, error: "No matching subscription id" };

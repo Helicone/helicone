@@ -40,11 +40,11 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(
-    icon => icon.name === orgContext?.currentOrg?.icon
+    (icon) => icon.name === orgContext?.currentOrg?.icon
   );
 
   const currentColor = ORGANIZATION_COLORS.find(
-    icon => icon.name === orgContext?.currentOrg?.color
+    (icon) => icon.name === orgContext?.currentOrg?.color
   );
 
   const getProgress = (count: number) => {

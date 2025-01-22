@@ -21,7 +21,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
   return (
     <div>
       <button
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           setOpen(true);
@@ -32,7 +32,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
       </button>
       <ThemedModal
         open={open}
-        setOpen={open => {
+        setOpen={(open) => {
           setOpen(open);
         }}
       >
@@ -53,7 +53,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
               Cancel
             </button>
             <button
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 // handleDeleteAlert(alertId);
@@ -66,7 +66,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
                       },
                     },
                   })
-                  .then(res => {
+                  .then((res) => {
                     if (res.error) {
                       setNotification("Error deleting prompt", "error");
                     } else {
@@ -75,7 +75,7 @@ const PromptDelete = (props: PromptDeleteProps) => {
                       setOpen(false);
                     }
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     setNotification("Error deleting prompt", "error");
                   })
                   .finally(() => {
