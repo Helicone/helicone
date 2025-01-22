@@ -171,52 +171,76 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   );
   // - Update State
   const updateState = useCallback(
-    (updates: Partial<PromptState>, markDirty: boolean = true) => {
+    (
+      updates:
+        | Partial<PromptState>
+        | ((prev: PromptState | null) => Partial<PromptState>),
+      markDirty: boolean = true
+    ) => {
       setState((prev) => {
         if (!prev) return null;
+        const newUpdates =
+          typeof updates === "function" ? updates(prev) : updates;
         return {
           ...prev,
-          ...updates,
+          ...newUpdates,
           isDirty: markDirty ? true : prev.isDirty,
         };
       });
+      console.log("!!!state being updated");
     },
     []
   );
   // - Message Change
   const handleMessageChange = useCallback(
     (index: number, content: string) => {
-      const newMessages = state?.messages.map((msg, i) =>
-        i === index ? { ...msg, content } : msg
-      );
+      updateState((prev) => {
+        if (!prev) return {};
 
-      if (!newMessages) return;
+        const newMessages = prev.messages.map((msg, i) =>
+          i === index ? { ...msg, content } : msg
+        );
 
-      // Extract all variables from all messages
-      const allVariables = newMessages.reduce<Variable[]>((acc, msg) => {
-        const messageVars = extractVariables(msg.content as string, true);
-        return [
-          ...acc,
-          ...messageVars.map((v) => ({
-            name: v.name,
-            value:
-              state?.variables?.find((pv) => pv.name === v.name)?.value || "",
-            isValid: v.isValid,
-          })),
-        ];
-      }, []);
+        // Extract variables from all messages
+        const messageVariables = newMessages.reduce<Variable[]>((acc, msg) => {
+          if (typeof msg.content !== "string") return acc;
+          const messageVars = extractVariables(msg.content, true);
+          return [
+            ...acc,
+            ...messageVars.map((v) => ({
+              name: v.name,
+              value:
+                prev.variables?.find((pv) => pv.name === v.name)?.value || "",
+              isValid: v.isValid,
+            })),
+          ];
+        }, []);
 
-      // Deduplicate variables (keep first occurrence)
-      const uniqueVars = allVariables.filter(
-        (v, idx, self) => idx === self.findIndex((t) => t.name === v.name)
-      );
+        // Keep only unique variables while preserving their existing values
+        const mergedVariables = messageVariables.reduce<Variable[]>(
+          (acc, variable) => {
+            if (!acc.some((v) => v.name === variable.name)) {
+              // Preserve the existing value if it exists
+              const existingVar = prev.variables?.find(
+                (v) => v.name === variable.name
+              );
+              acc.push({
+                ...variable,
+                value: existingVar?.value || variable.value || "",
+              });
+            }
+            return acc;
+          },
+          []
+        );
 
-      updateState({
-        messages: newMessages,
-        variables: uniqueVars,
+        return {
+          messages: newMessages,
+          variables: mergedVariables,
+        };
       });
     },
-    [state, updateState]
+    [updateState]
   );
   // - Remove Message
   const handleRemoveMessage = useCallback(
@@ -230,33 +254,43 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Create Variable
   const handleVariableCreate = useCallback(
     (newVariable: Variable) => {
-      const existingVars = state?.variables || [];
-      const existingIndex = existingVars.findIndex(
-        (v) => v.name === newVariable.name
-      );
+      updateState((prev) => {
+        if (!prev) return {};
+        const currentVars = [...(prev.variables || [])];
+        const existingIndex = currentVars.findIndex(
+          (v) => v.name === newVariable.name
+        );
 
-      // If variable exists, update its value, otherwise add it
-      const newVars =
-        existingIndex >= 0
-          ? existingVars.map((v, i) => (i === existingIndex ? newVariable : v))
-          : [...existingVars, newVariable];
+        if (existingIndex >= 0) {
+          currentVars[existingIndex] = {
+            ...currentVars[existingIndex],
+            ...newVariable,
+          };
+        } else {
+          currentVars.push(newVariable);
+        }
 
-      updateState({
-        variables: newVars,
+        console.log("!!!currentVars", currentVars);
+        return { variables: currentVars };
       });
+      console.log("!!!state.variables", state?.variables);
     },
-    [state, updateState]
+    [updateState, state?.variables]
   );
   // - Change Variable
   const handleVariableChange = useCallback(
     (index: number, value: string) => {
-      updateState({
-        variables: state?.variables?.map((v, i) =>
-          i === index ? { ...v, value } : v
-        ),
+      console.log("Changing variable at index:", index, "to value:", value);
+      updateState((prev) => {
+        if (!prev?.variables) return {};
+        console.log("Previous variables:", prev.variables);
+        const updatedVariables = [...prev.variables];
+        updatedVariables[index] = { ...updatedVariables[index], value };
+        console.log("Updated variables:", updatedVariables);
+        return { variables: updatedVariables };
       });
     },
-    [state?.variables, updateState]
+    [updateState]
   );
   // - Promote Version
   const handleVersionPromote = useCallback(

@@ -10,7 +10,10 @@ export default function VariablesPanel({
   variables,
   onVariableChange,
 }: VariablesPanelProps) {
-  const validVariables = variables.filter((v) => isValidVariableName(v.name));
+  // - Filter Valid Variables
+  const validVariablesWithIndices = variables
+    .map((v, i) => ({ variable: v, originalIndex: i }))
+    .filter(({ variable }) => isValidVariableName(variable.name));
 
   return (
     <div className="flex flex-col gap-2">
@@ -19,7 +22,7 @@ export default function VariablesPanel({
       </div>
 
       {/* No Variables */}
-      {validVariables.length === 0 ? (
+      {validVariablesWithIndices.length === 0 ? (
         <p className="text-sm text-slate-400 text-center text-balance">
           Make your prompt dynamic with variables. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
@@ -28,9 +31,9 @@ export default function VariablesPanel({
       ) : (
         <div className="flex flex-col divide-y divide-slate-100">
           {/* Variables */}
-          {validVariables.map((variable, index) => (
+          {validVariablesWithIndices.map(({ variable, originalIndex }) => (
             <div
-              key={`${variable.name}-${index}`}
+              key={`${variable.name}-${originalIndex}`}
               className="flex flex-col py-2 first:pt-0"
             >
               <div className="flex flex-d items-center justify-between gap-2 text-sm">
@@ -45,7 +48,9 @@ export default function VariablesPanel({
                 </div>
                 <input
                   value={variable.value}
-                  onChange={(e) => onVariableChange(index, e.target.value)}
+                  onChange={(e) =>
+                    onVariableChange(originalIndex, e.target.value)
+                  }
                   placeholder={`Enter default value for {{${variable.name}}}...`}
                   className="w-[32rem] border border-slate-100 focus:ring-1 focus:ring-heliblue hover:shadow-md rounded-md px-2 py-1"
                 />
