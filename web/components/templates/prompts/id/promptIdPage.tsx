@@ -530,25 +530,29 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // HELPERS
   // - Add Message Pair
   const handleAddMessagePair = () => {
-    if (!canAddMessagePair(state?.messages || [])) return;
-    updateState({
-      messages: [
-        ...(state?.messages || []),
-        { role: "assistant", content: "" },
-        { role: "user", content: "" },
-      ],
+    updateState((prev) => {
+      if (!prev || !canAddMessagePair(prev.messages)) return {};
+      return {
+        messages: [
+          ...prev.messages,
+          { role: "assistant", content: "" },
+          { role: "user", content: "" },
+        ],
+      };
     });
   };
   // - Add Prefill
   const handleAddPrefill = () => {
-    if (
-      !state ||
-      !canAddPrefill(state.parameters.provider) ||
-      !canAddPrefillMessage(state.messages)
-    )
-      return;
-    updateState({
-      messages: [...state.messages, { role: "assistant", content: "" }],
+    updateState((prev) => {
+      if (
+        !prev ||
+        !canAddPrefill(prev.parameters.provider) ||
+        !canAddPrefillMessage(prev.messages)
+      )
+        return {};
+      return {
+        messages: [...prev.messages, { role: "assistant", content: "" }],
+      };
     });
   };
 
@@ -645,12 +649,14 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               <ParametersPanel
                 parameters={state.parameters}
                 onParameterChange={(updates) => {
-                  const newParameters = {
-                    ...state.parameters,
-                    ...updates,
-                  };
-                  updateState({
-                    parameters: newParameters,
+                  updateState((prev) => {
+                    if (!prev) return {};
+                    return {
+                      parameters: {
+                        ...prev.parameters,
+                        ...updates,
+                      },
+                    };
                   });
                 }}
               />
