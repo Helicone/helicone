@@ -1,0 +1,138 @@
+# Optimizing LLM Performance Through Caching: Techniques, Tools, and Tips
+
+LLM inference is computationally intensive and requires careful optimization in production environments. Among various methods for lowering cost, reducing compute, and improving latency, caching stands out as an old reliable.
+
+Caching is particularly effective because it can optimize processes at multiple levels within LLM-powered systems.
+
+In this post, we will discuss:
+
+- Patterns of redundancy in LLMs and LLM-powered systems
+- KV-Caches as a model-level solution
+- Prompt caching (context caching)
+- Solutions offered by LLM providers and ways to utilize them
+- Caching LLM responses (exact vs semantic caches)
+- Monitoring and best practices
+
+## Redundant Patterns in LLM Systems
+
+Within LLMs, there are certain processes that, by nature, involve a lot of duplicative computation. We will add to these the more classic, service-level redundancies and discuss them in connection since redundancies cascade through architectural layers.
+
+With a rough hierarchical structure in mind, let's discuss what causes redundancy on each level:
+
+- **Autoregressive Token Generation (recompute on token):** LLMs calculate each new token as a function of all the tokens that came before.
+- **Stateless Architecture (recompute on prompt):** LLMs do not hold session memory; instead, they accumulate conversation history within inputs.
+- **Particular App Behavior (recompute on functionality):** LLM-driven applications, like any other, have specific operations they perform and set methods of performing them, which need communicating to the model.
+
+We can remedy the issue at each level through caching, and a combination of such efforts at all levels would help minimize our applications' inference costs.
+
+We will start our discussion on the token level, with an introduction to KV-Cache. We will observe its effects on the prompt level, as it significantly lowers the computational load of long prompts. We will discuss the advantages that come with this newfound freedom on the application level, as well as mechanisms to lower the number and cost of API calls.
+
+## KV Caching
+
+When generating a new token, LLMs have to consider all the tokens that came before to determine how well the new piece will fit into the semantic, syntactic, and pragmatic context. The calculated context becomes obsolete, however, right after a new addition, requiring the LLM to recalculate all the ways each token affects the others.
+
+In transformers, for each token, two main pieces of information are kept:
+
+1. The individual meaning (as embedding vectors in multidimensional space)
+2. Ways in which the token "may" relate to other tokens (as sets of weight matrices to adjust vectors on the "contextual space")
+
+There are three sets of weight matrices:
+
+- **Key (K):** encodes what makes a token influenced by others
+- **Value (V):** represents how a token influences others
+- **Query (Q):** determines how much attention a token pays to others
+
+(Note that these are rough, high-level descriptions.)
+
+The idea behind KV caching is to store each token's "potentiality" (the Key and Value matrices) for reuse when calculating actualized effects at iterations.
+
+There are optimization methods and different types of KV-caching mechanisms (such as KCache or FastGen), but here, we will assume the LLM service handles these internals, as major providers currently offer them under various names such as prompt or context caching.
+
+## Prompt Caching (Context Caching)
+
+### Use Cases
+
+There are certain scenarios where we embed a lot of the same information in repeated prompts. These could be:
+
+- **To keep session history:** In multi-turn conversations (e.g., for a chatbot), the conversation history has to be kept as a prefix to the prompt input.
+- **To dictate nuanced behavior:** We may need to pass lengthy system instructions or tool definitions in each prompt—for example, to ensure consistent and appropriate behavior for a chatbot or when instructing methods of sentiment analysis for a movie review platform.
+- **To provide referral text:** We may need to include a large corpus of data (e.g., product manuals for customer support bots, or codebase summaries for programming assistants).
+
+Caching provides significant improvements in these scenarios. Instead of repetitively processing instruction tokens, system prompts, or user manuals, the LLM can consult the cache for the K-V values of these tokens, reducing compute, latency, and cost.
+
+This can also be a great way to improve RAG systems. It functions as a lightweight alternative to fine-tuning since it lets us include many few-shot examples in the prompt.
+
+## LLM Service Options
+
+Major LLM providers (OpenAI, Google Gemini, and Anthropic Claude) offer built-in caching support for their models through their APIs, with significantly reduced costs for cache reads.
+
+While this is the case, there are certain constraints, such as:
+
+### Minimum Token Requirements:
+
+- Gemini: 32,768 tokens
+- Claude 3.5 Sonnet and Claude 3 Opus: 1,024 tokens
+- Claude 3.5 Haiku and Claude 3 Haiku: 2,048 tokens
+
+### Time-to-Live (TTL) Considerations:
+
+- Claude enforces a 5-minute TTL
+- Gemini offers configurable TTL settings
+
+It is important to read the latest documentation for these constraints and consider your application’s needs. For example, at their current status:
+
+#### Gemini’s Approach Suits:
+
+- Long-form content caching (e.g., entire knowledge bases or documentation)
+- Scenarios where content updates are infrequent
+- Applications that benefit from persistent caching (e.g., customer support systems with stable product documentation)
+- Cases where the overhead of caching large chunks is justified by frequent access
+
+#### Claude’s Approach Works Better For:
+
+- Short-lived, intensive processing periods
+- Rapid iteration scenarios (e.g., development and testing)
+- Bursty workloads where the same context is used multiple times in quick succession
+- Applications that can refresh cache entries programmatically every few minutes
+
+Note that this involves a trade of compute for storage. The provider may charge less for cache reads yet more for cache writes. In addition, storage durations can increase costs.
+
+## Best Practices for Context Caching
+
+To best utilize context caching, the system should:
+
+- **Adapt prompts to “trigger” caching:** Usually, this means starting prompts with similar content with identical strings of text. Providers typically check the prompt prefix up to a certain breakpoint. For example, if you’re doing RAG, place the retrieved context at the end of the prompt and keep instructions at the top.
+- **Track cache performance:** LLM services report when cached tokens are used. Keep track of cache hits and associated costs to ensure the benefit is measurable.
+- **Provide its own caching capabilities:** This, we will discuss next.
+
+## Caching LLM Responses
+
+While prompt caching significantly reduces the cost per API call, creating a cache reserve of common queries and their inferred responses at the application layer can further minimize these calls, eliminate costs, reduce latency, and support scalability.
+
+There are many "caching frameworks" that store prompts and responses as key-value pairs. LangChain has an extensive list [here](https://python.langchain.com/docs/integrations/llm_caching/).
+
+Most of these frameworks support two distinct cache types:
+
+- **Standard Cache:** Matches on the exact string (or the hash value) of the prompt.
+- **Semantic Cache:** Matches based on the “semantic similarity” of prompts.
+
+### Why Implement an Additional Cache Layer?
+
+- **Resilience to Minor Prompt Variations:** Even a single-character difference can cause a cache miss with standard prompt caching. Semantic caches help mitigate small discrepancies.
+- **Further Savings on Output Tokens:** While providers charge less for cached input tokens, output tokens often cost the same. By caching entire responses, additional model calls are eliminated, reducing overall costs.
+- **More Sophisticated Cache-Invalidation Mechanisms:** Updates can synchronize with data to keep responses up to date—going beyond a simple TTL. Context-aware triggers can invalidate or refresh specific entries whenever relevant information changes.
+- **Ad Hoc Patches for Common Queries:** For frequently asked questions, serving a polished, pre-composed response may be preferable to generating one.
+- **Improved Intent Recognition with Semantic Caching:** By analyzing embeddings, user intent can be understood more precisely.
+
+## Best Practices and Monitoring
+
+Optimizing LLM systems through caching requires understanding the application's specific needs and usage patterns. Caching strategies need to evolve alongside the application, with continuous monitoring of key performance indicators such as cache hit rates, latency improvements, and cached token percentages across system layers.
+
+### Key Steps for Optimization:
+
+- Adjusting cache sizes based on usage patterns
+- Fine-tuning TTL settings for optimal cache freshness
+- Restructuring prompts to maximize cache utilization
+- Balancing cache storage costs against compute savings
+
+Tools like **Helicone.ai** provide comprehensive insights into cache performance and other LLM metrics, supporting data-driven optimization. This ensures caching mechanisms enhance rather than hinder overall performance, maintaining efficiency across token-, prompt-, and application-level caches.
