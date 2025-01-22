@@ -13,7 +13,7 @@ export const usePromptVersions = (promptId: string) => {
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
-    queryFn: async query => {
+    queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
 
@@ -33,12 +33,14 @@ export const usePromptVersions = (promptId: string) => {
   });
 
   const sortedVersions = data?.data?.data
-    ? [...data.data.data].sort((a, b) => {
-        if (b.major_version !== a.major_version) {
-          return b.major_version - a.major_version;
-        }
-        return b.minor_version - a.minor_version;
-      })
+    ? [...data.data.data]
+        .sort((a, b) => {
+          if (b.major_version !== a.major_version) {
+            return b.major_version - a.major_version;
+          }
+          return b.minor_version - a.minor_version;
+        })
+        .filter((v) => v.minor_version === 0)
     : undefined;
 
   return {
@@ -54,7 +56,7 @@ export const usePrompts = (promptId?: string) => {
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
-    queryFn: async query => {
+    queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
@@ -93,7 +95,7 @@ export const usePrompt = (id: string) => {
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["prompt", org?.currentOrg?.id, id],
-    queryFn: async query => {
+    queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const id = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
@@ -134,9 +136,9 @@ export const usePromptRequestsOverTime = (
     params,
     endpoint: "/api/metrics/requestOverTime",
     key: queryKey,
-    postProcess: data => {
-      return resultMap(data, d =>
-        d.map(d => ({ count: +d.count, time: new Date(d.time) }))
+    postProcess: (data) => {
+      return resultMap(data, (d) =>
+        d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
       );
     },
   });

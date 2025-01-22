@@ -39,6 +39,9 @@ import {
   PiCaretLeftBold,
 } from "react-icons/pi";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
+import { FlaskConicalIcon } from "lucide-react";
+import { useRouter } from "next/router";
+import { useExperiment } from "./hooks";
 
 interface PromptIdPageProps {
   id: string;
@@ -515,6 +518,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
   );
 
+  const router = useRouter();
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
@@ -572,6 +576,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       };
     });
   };
+
+  const { newFromPromptVersion } = useExperiment();
 
   // RENDER
   // - Loading Page
@@ -645,6 +651,19 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             icon={PiRocketLaunchBold}
             onClick={() => {}}
             disabled={prompt?.metadata?.createdFromUi === false}
+          />
+          <ActionButton
+            label="Experiment"
+            className="bg-white"
+            icon={<FlaskConicalIcon className="h-4 w-4" />}
+            disabled={newFromPromptVersion.isLoading}
+            onClick={async () => {
+              const result = await newFromPromptVersion.mutateAsync({
+                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                originalPromptVersion: state.versionId,
+              });
+              router.push(`/experiments/${result.data?.data?.experimentId}`);
+            }}
           />
         </div>
       </GlassHeader>
