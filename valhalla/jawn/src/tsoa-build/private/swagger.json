@@ -7930,6 +7930,33 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/subscription/cost-for-prompts": {
+			"get": {
+				"operationId": "GetCostForPrompts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/subscription/free/usage": {
 			"get": {
 				"operationId": "GetFreeUsage",
