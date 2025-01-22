@@ -174,7 +174,11 @@ const ExperimentsPage = () => {
               </CardContent>
               <CardFooter className="flex flex-col items-center">
                 <div className="w-full">
-                  <UpgradeToProCTA defaultPrompts={true} showAddons={true} />
+                  <UpgradeToProCTA
+                    defaultPrompts={true}
+                    showAddons={true}
+                    showContactCTA={true}
+                  />
                 </div>
                 <div className="space-x-2 mt-5">
                   <Button variant="outline" asChild>
