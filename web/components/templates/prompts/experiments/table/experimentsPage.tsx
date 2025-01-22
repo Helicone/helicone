@@ -147,35 +147,28 @@ const ExperimentsPage = () => {
               <CardHeader>
                 <CardTitle>Unlock Experiment Features</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Take your LLM development to the next level with Helicone's
-                  powerful experimentation tools. Compare models, test prompts,
-                  and optimize outputs with data-driven insights.
+                  Take your LLM development to the next level with
+                  Helicone&apos;s powerful experimentation tools. Compare
+                  models, test prompts, and optimize outputs with data-driven
+                  insights.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <InfoBox>
                   <p className="text-sm font-medium">
-                    Run A/B tests on prompts, evaluate model performance, and
-                    make data-driven decisions to improve your AI outputs. Test
+                    Run A/B tests on prompts, evaluate performance, and make
+                    data-driven decisions to improve your AI outputs. Test
                     safely with production data without impacting users.
                   </p>
                 </InfoBox>
                 <div className="bg-muted p-4 rounded-lg space-y-3">
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      Compare Models
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Test Prompts
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Evaluate Results
-                    </Button>
-                  </div>
                   <div className="text-sm text-muted-foreground">
-                    • Run experiments with real production data • Compare
-                    multiple prompt versions • Score and evaluate outputs • Safe
-                    testing without user impact
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Run experiments with real production data</li>
+                      <li>Compare multiple prompt versions</li>
+                      <li>Score and evaluate outputs</li>
+                      <li>Safe testing without user impact</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>
