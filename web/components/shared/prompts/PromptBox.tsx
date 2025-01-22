@@ -221,6 +221,7 @@ export default function PromptBox({
     suggestionState.lastTypingTime,
     contextText,
     cancelCurrentSuggestion,
+    abortCurrentRequest,
   ]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     console.log("KeyDown Event:", {
@@ -419,7 +420,7 @@ export default function PromptBox({
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const handleSelection = () => {
+  const handleSelection = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
@@ -447,7 +448,7 @@ export default function PromptBox({
 
     // Update position immediately after selection
     requestAnimationFrame(updateToolboxPosition);
-  };
+  }, [value, updateToolboxPosition]);
   const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     // Don't hide if focus is moving to toolbox
     if (toolboxRef.current?.contains(e.relatedTarget as Node)) {

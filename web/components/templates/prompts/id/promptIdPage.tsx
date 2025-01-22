@@ -435,6 +435,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     refetchPromptVersions,
     loadVersionData,
     updateState,
+    promptVersions,
   ]);
   // - Handle ID Edit
   const handleIdEdit = useCallback(
@@ -478,7 +479,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     ) {
       loadVersionData(promptVersions[0]);
     }
-  }, [isVersionsLoading]);
+  }, [isVersionsLoading, loadVersionData, promptVersions, state]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
