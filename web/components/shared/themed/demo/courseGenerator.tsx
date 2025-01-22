@@ -244,7 +244,7 @@ export const CourseGenerator: React.FC = () => {
     try {
       const response = await jawn.POST("/v1/demo/completion", {
         body: {
-          messages,
+          messages: messages as any,
           promptId: `Course-Generator-${part}`,
           userEmail: user?.email ?? "no-email",
           sessionId,
