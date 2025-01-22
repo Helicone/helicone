@@ -66,7 +66,9 @@ const DesktopSidebar = ({
   const toggleExpand = (name: string) => {
     const prev = expandedItems || [];
     setExpandedItems(
-      prev.includes(name) ? prev.filter(item => item !== name) : [...prev, name]
+      prev.includes(name)
+        ? prev.filter((item) => item !== name)
+        : [...prev, name]
     );
   };
   const largeWith = useMemo(
@@ -76,22 +78,22 @@ const DesktopSidebar = ({
 
   const NAVIGATION_ITEMS = useMemo(() => {
     if (isCollapsed) {
-      return NAVIGATION.flatMap(item => {
+      return NAVIGATION.flatMap((item) => {
         if (item.subItems && expandedItems.includes(item.name)) {
           return [
             item,
-            ...item.subItems.filter(subItem => subItem.icon !== null),
+            ...item.subItems.filter((subItem) => subItem.icon !== null),
           ];
         }
         return [item];
-      }).filter(item => item.icon !== null);
+      }).filter((item) => item.icon !== null);
     }
 
-    return NAVIGATION.map(item => {
+    return NAVIGATION.map((item) => {
       if (item.subItems) {
         return {
           ...item,
-          subItems: item.subItems.map(subItem => ({
+          subItems: item.subItems.map((subItem) => ({
             ...subItem,
             href: subItem.href,
           })),
@@ -296,7 +298,7 @@ const DesktopSidebar = ({
                   <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                     {isOnboardingVisible && <OnboardingNavItems />}
                     {!isOnboardingVisible &&
-                      NAVIGATION_ITEMS.map(link => (
+                      NAVIGATION_ITEMS.map((link) => (
                         <NavItem
                           key={link.name}
                           link={link}
@@ -368,7 +370,7 @@ const DesktopSidebar = ({
             onCloseHandler={() => {
               setShowCreateOrg(false);
             }}
-            onSuccess={orgId => {
+            onSuccess={(orgId) => {
               org?.setCurrentOrg(orgId ?? "");
               router.push("/dashboard");
             }}
