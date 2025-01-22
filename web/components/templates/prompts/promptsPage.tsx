@@ -38,6 +38,14 @@ import PromptUsageChart from "./promptUsageChart";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import ActionButton from "@/components/shared/universal/ActionButton";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -157,23 +165,68 @@ const PromptsPage = (props: PromptsPageProps) => {
         }
         actions={
           hasAccess ? (
-            <Button
-              variant="action"
-              size="default"
-              onClick={handleCreatePrompt}
-              disabled={isCreatingPrompt}
-            >
-              {isCreatingPrompt ? (
-                <PiSpinnerGapBold className="animate-spin mr-1.5" />
-              ) : (
-                <PiPlusBold className="mr-1.5" />
-              )}
-              {isCreatingPrompt ? " Creating..." : " New Prompt"}
-            </Button>
+            <>
+              <ActionButton
+                className="bg-heliblue hover:bg-heliblue/90 text-white"
+                label={isCreatingPrompt ? "Creating..." : "New Prompt"}
+                icon={
+                  isCreatingPrompt ? (
+                    <PiSpinnerGapBold className="animate-spin" />
+                  ) : (
+                    <PiPlusBold />
+                  )
+                }
+                onClick={handleCreatePrompt}
+                disabled={isCreatingPrompt}
+              />
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="text-slate-700" variant="link" size="sm">
+                    Import from Code
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-full max-w-3xl bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Import from Code</DialogTitle>
+                  </DialogHeader>
+
+                  {/* TODO: Allow for Python tab as well */}
+                  <DiffHighlight
+                    code={`
+// 1. Add this line
+import { hprompt } from "@helicone/helicone";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "user",
+        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
+        content: hprompt\`Write a story about \${{ scene }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);`}
+                    language="typescript"
+                    newLines={[]}
+                    oldLines={[]}
+                    minHeight={false}
+                  />
+                </DialogContent>
+              </Dialog>
+            </>
           ) : (
             <ProFeatureWrapper featureName="Prompts" enabled={false}>
-              <Button variant="default" size="sm">
-                <PiPlusBold /> Create Prompt
+              <Button variant="action" size="default">
+                <PiPlusBold /> New Prompt
               </Button>
             </ProFeatureWrapper>
           )
