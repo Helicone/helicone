@@ -388,6 +388,15 @@ WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'X') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'grok-beta') THEN 5000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'grok-vision-beta') THEN 5000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'grok-2-1212') THEN 2000 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'grok-2-vision-1212') THEN 2000 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
 WHEN (request_response_rmt.provider = 'TOGETHER') THEN (
   CASE
   WHEN (request_response_rmt.model ILIKE 'allenai/OLMo-7B-Instruct') THEN 200 * request_response_rmt.prompt_tokens + 200 * request_response_rmt.completion_tokens
