@@ -1,23 +1,28 @@
-import AuthHeader from "../../../../shared/authHeader";
-import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
-import ThemedTable from "../../../../shared/themed/table/themedTable";
-import { useRouter } from "next/router";
-import useNotification from "../../../../shared/notification/useNotification";
-import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
-import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { Dialog } from "../../../../ui/dialog";
-import { useState } from "react";
-import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
+import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
+import { useJawnClient } from "../../../../../lib/clients/jawnHook";
+import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
+import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
+import AuthHeader from "../../../../shared/authHeader";
+import useNotification from "../../../../shared/notification/useNotification";
+import ThemedTable from "../../../../shared/themed/table/themedTable";
+import { Dialog } from "../../../../ui/dialog";
+import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -28,6 +33,17 @@ const ExperimentsPage = () => {
   const { experiments, isLoading } = useExperimentTables();
 
   const org = useOrg();
+
+  const hasAccess = useMemo(() => {
+    return (
+      org?.currentOrg?.tier === "growth" ||
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro" ||
+      (org?.currentOrg?.tier === "pro-20240913" &&
+        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+          ?.addons?.prompts)
+    );
+  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
 
   const { setNotification } = useNotification();
 
@@ -85,7 +101,7 @@ const ExperimentsPage = () => {
             tier={org?.currentOrg?.tier ?? "free"}
           />
         </div>
-      ) : (
+      ) : hasAccess ? (
         <>
           <ThemedTable
             defaultColumns={[
@@ -116,6 +132,82 @@ const ExperimentsPage = () => {
             }}
             fullWidth={true}
           />
+        </>
+      ) : (
+        <>
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+            <Card className="max-w-4xl">
+              <CardHeader>
+                <CardTitle>Need Prompts?</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  The Prompts feature is not included in the Pro plan by
+                  default. However, you can add it to your plan as an optional
+                  extra.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <InfoBox>
+                  <p className="text-sm font-medium">
+                    Version prompts, create prompt templates, and run
+                    experiments to improve prompt outputs.
+                  </p>
+                </InfoBox>
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex space-x-2 mb-2">
+                    <Button variant="outline" size="sm">
+                      Code
+                    </Button>
+                  </div>
+
+                  <DiffHighlight
+                    code={`
+// 1. Add this line
+import { hpf, hpstatic } from "@helicone/prompts";
+
+const chatCompletion = await openai.chat.completions.create(
+  {
+    messages: [
+      {
+        role: "system",
+        // 2. Use hpstatic for static prompts
+        content: hpstatic\`You are a creative storyteller.\`,
+      },
+      {
+        role: "user",
+        // 3: Add hpf to any string, and nest any variable in additional brackets \`{}\`
+        content: hpf\`Write a story about \${{ scene }}\`,
+      },
+    ],
+    model: "gpt-3.5-turbo",
+  },
+  {
+    // 3. Add Prompt Id Header
+    headers: {
+      "Helicone-Prompt-Id": "prompt_story",
+    },
+  }
+);
+  `}
+                    language="typescript"
+                    newLines={[]}
+                    oldLines={[]}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col items-center">
+                <div className="w-full">
+                  <UpgradeToProCTA defaultPrompts={true} showAddons={true} />
+                </div>
+                <div className="space-x-2 mt-5">
+                  <Button variant="outline" asChild>
+                    <Link href="https://docs.helicone.ai/features/prompts">
+                      View documentation
+                    </Link>
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
         </>
       )}
     </>

@@ -161,6 +161,9 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/stripe/subscription/cost-for-prompts": {
+    get: operations["GetCostForPrompts"];
+  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
@@ -3016,6 +3019,16 @@ export interface operations {
           "application/json": {
             useAzureForExperiment: boolean;
           };
+        };
+      };
+    };
+  };
+  GetCostForPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
         };
       };
     };

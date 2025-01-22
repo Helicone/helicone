@@ -31,6 +31,35 @@ export class StripeManager extends BaseManager {
     });
   }
 
+  public async getCostForPrompts(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    if (!subscriptionResult.data) {
+      return err("No existing subscription found");
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["prompts"]
+      )
+    ) {
+      const priceTheyArePayingForPrompts = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["prompts"]
+      );
+      if (
+        priceTheyArePayingForPrompts &&
+        priceTheyArePayingForPrompts.price.unit_amount &&
+        priceTheyArePayingForPrompts?.quantity &&
+        priceTheyArePayingForPrompts.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
+      }
+    }
+
+    return ok(200);
+  }
+
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
     const organization = await supabaseServer.client
       .from("organization")

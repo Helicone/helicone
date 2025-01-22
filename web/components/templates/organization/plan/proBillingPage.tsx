@@ -27,6 +27,7 @@ import { CalendarIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { useCallback } from "react";
+import { useCostForPrompts } from "../../pricing/hooks";
 
 export const ProPlanCard = () => {
   const org = useOrg();
@@ -174,6 +175,7 @@ export const ProPlanCard = () => {
     },
     [isTrialActive]
   );
+  const costForPrompts = useCostForPrompts();
 
   return (
     <div className="flex gap-6 lg:flex-row flex-col">
@@ -245,7 +247,9 @@ export const ProPlanCard = () => {
             </div>
             <div className="flex flex-col">
               <div className="flex items-center justify-between">
-                <Label htmlFor="prompts-toggle">Prompts ($30/mo)</Label>
+                <Label htmlFor="prompts-toggle">
+                  Prompts (${costForPrompts.data?.data ?? "loading..."}/mo)
+                </Label>
                 <Switch
                   id="prompts-toggle"
                   checked={hasPrompts}
@@ -352,7 +356,11 @@ export const ProPlanCard = () => {
               {!hasPrompts ? "Enable Prompts" : "Disable Prompts"}
             </DialogTitle>
             <DialogDescription>
-              {getDialogDescription(!hasPrompts, "Prompts", "$30")}
+              {getDialogDescription(
+                !hasPrompts,
+                "Prompts",
+                `$${costForPrompts.data?.data ?? "loading..."}`
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

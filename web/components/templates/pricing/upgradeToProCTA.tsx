@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useCostForPrompts } from "./hooks";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
@@ -47,6 +48,8 @@ export const UpgradeToProCTA = ({
     return org?.currentOrg?.tier === "pro-20240913";
   }, [org?.currentOrg?.tier]);
 
+  const costForPrompts = useCostForPrompts();
+
   return (
     <div>
       {showAddons && (
@@ -64,10 +67,10 @@ export const UpgradeToProCTA = ({
                   htmlFor="unlimited-prompts"
                   className="whitespace-nowrap"
                 >
-                  Unlimited Prompts
+                  Unlimited Prompts + Experiments + Evals
                 </Label>
                 <p className="text-sm text-muted-foreground whitespace-nowrap text-slate-500">
-                  + $30/mo
+                  + ${costForPrompts.data?.data ?? "loading..."}/mo
                 </p>
               </div>
             </div>
