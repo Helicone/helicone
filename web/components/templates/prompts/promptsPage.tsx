@@ -52,7 +52,6 @@ import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../../ui/scroll-area";
 import PromptPlayground, { PromptObject } from "./id/promptPlayground";
-import { ContactCTA } from "../pricing/contactCTA";
 
 interface PromptsPageProps {
   defaultIndex: number;
