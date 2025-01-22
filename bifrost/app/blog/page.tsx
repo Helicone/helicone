@@ -216,11 +216,6 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "prevent-prompt-injection",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "deepseek-v3",
     },
   },

@@ -1,31 +1,13 @@
-On December 26, 2024, DeepSeek officially released a new open-source large language model DeepSeek-V3, a Mixture-of-Experts (MoE) model with 671 billion parameters. In this blog, we will dive into the features of DeepSeek-V3 and compare it to its predecessor, DeepSeek-V2.
+On December 26, 2024, DeepSeek officially released a new open-source large language model DeepSeek-V3, a Mixture-of-Experts (MoE) model with 671 billion parameters. Despite being open-source, DeepSeek-V3 shows performance comparable to top models like GPT-4 and Claude 3.5 Sonnet.
+
+In this blog, we will dive into the features of DeepSeek-V3, its benchmarks, and compare it to its predecessor, DeepSeek-V2.
 
 ![DeepSeek-V3 released](/static/blog/deepseek-v3/cover.webp)
 
-<BottomLine
-  title="Developer’s Take"
-  description="“The model's intelligence along with how cheap it is basically lets you build AI into whatever you want without worrying about the cost."
-/>
-
-## What is DeepSeek-V3?
-
-DeepSeek-V3 is the most advanced open-source MoE Large Language Model from DeepSeek as of December 2024. A key feature of MoE models is selective activation, which allows DeepSeek-V3 to process information quickly while maintaining the benefits of a very large model.
-
-The first version `DeepSeek-V1` laid the groundwork for the **<span style={{color: '#0ea5e9'}}>Mixture-of-Experts (MoE)</span>** architecture, allowing for multiple specialized models (Or “experts”) to collaborate on tasks. Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
-
-<BottomLine
-  title="What is Mixture of Experts?"
-  description="Mixture of Experts (MoE) splits tasks between specialized neural networks called 'experts', with each expert handling specific types of inputs. DeepSeek V3 uses an optimized version called DeepSeekMoE to improve efficiency."
-/>
-
-## Key Features of DeepSeek-V3
-
-V3 sets a new benchmark for open-source modelswith exceptional performance and surprising affordability. This advanced model positions itself as a <a href="https://arxiv.org/pdf/2412.19437" target="_blank" rel="noopener">formidable competitor</a> to closed-source giants like OpenAI’s GPT-4 and Anthropic’s Claude 3.5 with **an unbeatable advantage in cost**.
-
-| Feature         | Description                                                                                                                                                |
+| Specs           | Description                                                                                                                                                |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Provider        | DeepSeek AI. Also available through <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">major inference platforms</a>. |
-| Model Size      | Total Parameters: 671 billion<br/>Activated Parameters: 37 billion per token                                                                               |
+| Model Size      | 671 billion total parameters<br/>37 billion activated parameters per token                                                                                 |
 | Context Window  | 128,000 tokens                                                                                                                                             |
 | Speed           | ~60 tokens / second (3x faster than V2)                                                                                                                    |
 | Latency (TTFT)  | ~0.76 seconds / token                                                                                                                                      |
@@ -33,106 +15,135 @@ V3 sets a new benchmark for open-source modelswith exceptional performance and s
 | Output Cost     | $1.10 / million tokens                                                                                                                                     |
 | Recommended For | Coding, mathematical reasoning, educational tools, language translation. Use cases that require fast inference or a cost-effective solution.               |
 
-## V2 vs V3: What is the Difference?
+## What is DeepSeek-V3?
 
-At approximately 60 tokens per second, DeepSeek-V3 has a 3x faster response rate compared to DeepSeek-V2, ideal for applications that needs fast analysis, real-time language processing, or high-throughput data handling.
+DeepSeek-V3 is the most advanced open-source Mixture-of-Experts (MoE) Large Language Model from DeepSeek as of December 2024. A key feature of MoE models is selective activation, which allows DeepSeek-V3 to process information quickly while maintaining the benefits of a very large model.
 
-![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-speed-comparison.webp)
+The first version `DeepSeek-V1` laid the groundwork for the **<span style={{color: '#0ea5e9'}}>Mixture-of-Experts (MoE)</span>** architecture, allowing for multiple specialized models (or "experts") to collaborate on tasks. Building on the successes of V1, DeepSeek-V2 introduced enhancements in the model architecture and training efficiency.
 
-_Image Source: Comparison of AI model output speeds (Source - Artificial Analysis)_
+## "Best Value in the Market"
 
-|                                | DeepSeek-V3                                                                                                  | DeepSeek-V2                                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| Total Parameters               | 671 billion                                                                                                  | 236 billion                                                                                      |
-| Activated Parameters per Token | 37 billion                                                                                                   | 21 billion                                                                                       |
-| Context Length Support         | Extends context length support in two stages, increasing from 32,000 tokens to 128,000 tokens.               | 128,000 tokens                                                                                   |
-| Architectural Features         | Retains MLA and DeepSeekMoE, and introduces a router for selective network activation, enhancing efficiency. | Utilizes Multi-head Latent Attention (MLA) and DeepSeekMoE for efficient inference and training. |
-| Benchmark Performance          | Excels in coding tasks and mathematics assessments, competitive with GPT-4 in code generation benchmarks.    | Scored 80 on the HumanEval benchmark, showcasing robust coding capabilities.                     |
-| Generation Throughput          | Processes 60 tokens/second (3x faster than DeepSeek-V2)                                                      | Maximum generation throughput 5.76x that of DeepSeek 67B, with 93.3% KV cache usage reduction.   |
-| Pre Training Dataset           | Trained on 14.8 trillion tokens, enhancing versatility and domain performance.                               | Trained on 8.1 trillion tokens, utilizing SFT and RL for alignment with human preferences.       |
+V3 sets a new benchmark for open-source models with exceptional performance and surprising affordability. This advanced model positions itself as the <a href="https://x.com/deepseek_ai/status/1872242663489188088" target="_blank" rel="noopener">best value in the market</a> with comparable performance to closed-source giants like OpenAI's GPT-4 and Anthropic's Claude 3.5 Sonnet.
+
+![DeepSeek-V3 Compared with Top Models](/static/blog/deepseek-v3/v3-compare-models.webp)
+
+DeepSeek V3 is one of the most cost-effective models in the market, with a price of `$0.27` per million input tokens and `$1.10` per million output tokens, compared to $3.00/million input tokens and $15.00/million output tokens for Claude 3.5 Sonnet.
+
+In terms of cost, developers now compare DeepSeek V3 with the latest models like Llama 3.3. Here's a <a href="https://artificialanalysis.ai/models/deepseek-v3/providers" target="_blank" rel="noopener">breakdown of the average cost</a> of each model:
+
+![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-price-comparison.webp)
+
+<BottomLine
+  title="Developer’s Take on DeepSeek-V3"
+  description="“The model's intelligence along with how cheap it is basically lets you build AI into whatever you want without worrying about the cost.“"
+/>
+
+## How does V3 compare with V2?
+
+At approximately 60 tokens per second, DeepSeek-V3 has a 3x faster response rate compared to DeepSeek-V2, ideal for applications that need fast analysis, real-time language processing, or high-throughput data handling.
+
+|                                | DeepSeek-V3                                                                                               | DeepSeek-V2                                                                                      |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Total Parameters               | 671 billion                                                                                               | 236 billion                                                                                      |
+| Activated Parameters per Token | 37 billion                                                                                                | 21 billion                                                                                       |
+| Context Length                 | Extends context length support in two stages, increasing from 32,000 tokens to 128,000 tokens.            | 128,000 tokens                                                                                   |
+| Architectural Features         | Retains MLA and DeepSeekMoE, and introduces a router for selective network activation.                    | Utilizes Multi-head Latent Attention (MLA) and DeepSeekMoE for efficient inference and training. |
+| Benchmark Performance          | Excels in coding tasks and mathematics assessments, competitive with GPT-4 in code generation benchmarks. | Scored 80 on the HumanEval benchmark, showcasing robust coding capabilities.                     |
+| Generation Throughput          | Processes 60 tokens/second (3x faster than DeepSeek-V2)                                                   | Maximum generation throughput 5.76x that of DeepSeek 67B, with 93.3% KV cache usage reduction.   |
+| Pre Training Dataset           | Trained on 14.8 trillion tokens, enhancing versatility and domain performance.                            | Trained on 8.1 trillion tokens, utilizing SFT and RL for alignment with human preferences.       |
 
 Reference: <a href="https://arxiv.org/pdf/2412.19437" target="_blank" rel="noopener">DeepSeek-V3 Technical Report</a>, <a href="https://arxiv.org/pdf/2405.04434" target="_blank" rel="noopener">DeepSeek-V2 Technical Report</a>
 
-### Price and Performance
-
-Developers are now comparing DeepSeek V3 with the latest models like <a href="https://www.helicone.ai/blog/google-gemini-exp-1206" target="_blank" rel="noopener">Gemini exp-1206</a> and <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3</a> in terms of costs, and it’s being compared to OpenAI o1 and Anthropic’s Claude-3.5 Sonnet in terms of performance.
-
-![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-price-and-performance.webp)
-
-_Source: <a href="https://artificialanalysis.ai/models/deepseek-v3/providers" target="_blank" rel="noopener">DeepSeek-V3 price and performance</a> - Artificial Analysis_
-
 ## DeepSeek V3 Benchmarks
 
-DeepSeek-V3 showed remarkable performance across major benchmarks:
+DeepSeek V3 consistently outperforms its predecessors and most competitors, particularly excelling in mathematical reasoning (MATH-500), coding tasks (Codeforces, LiveCodeBench), and Chinese evaluations (C-Eval, C-SimpleQA), demonstrating its scalability and advanced capabilities.
+
+![DeepSeek-V3 Benchmarks](/static/blog/deepseek-v3/v3-compare-with-other-models.webp)
+
+When comparing DeepSeek V3, it's on equal footing with Claude-3.5-Sonnet and OpenAI o1, but it does lack the context window significantly. If your task is short, it's wonderful.
 
 ![DeepSeek-V3 released](/static/blog/deepseek-v3/v3-performance-comparison.webp)
 
-_Image Source: Benchmark performance of DeepSeek-V3 and its counterparts_
+_Image Source: <a href="https://arxiv.org/pdf/2412.19437" target="_blank" rel="noopener">Benchmark performance of DeepSeek-V3 and its counterparts</a>_
 
-| Benchmark                  | DeepSeek V3 | DeepSeek V2-0506 | DeepSeek V2.5-0905 | Qwen 2.5 72B-Inst. | LLaMA-3.1 405B-Inst. | Claude-3.5 Sonnet-1022 | GPT-4o 0513 |
-| -------------------------- | ----------- | ---------------- | ------------------ | ------------------ | -------------------- | ---------------------- | ----------- |
-| Architecture               | MoE         | MoE              | MoE                | Dense              | Dense                | -                      | -           |
-| Activated Params           | 37B         | 21B              | 21B                | 72B                | 405B                 | -                      | -           |
-| Total Params               | 671B        | 236B             | 236B               | 72B                | 405B                 | -                      | -           |
-| MMLU (EM)                  | 88.5        | 78.2             | 80.6               | 85.3               | 88.6                 | 88.3                   | 87.2        |
-| MMLU-Redux (EM)            | 89.1        | 77.9             | 80.3               | 85.6               | 86.2                 | 88.9                   | 88.0        |
-| MMLU-Pro (EM)              | 75.9        | 58.5             | 66.2               | 71.6               | 73.3                 | 78.0                   | 72.6        |
-| English DROP (3-shot F1)   | 91.0        | 83.0             | 87.8               | 76.7               | 88.7                 | 88.3                   | 83.7        |
-| IF-Eval (Prompt Strict)    | 86.1        | 57.7             | 80.6               | 84.1               | 86.0                 | 86.5                   | 84.3        |
-| GPQA-Diamond (Pass@1)      | 59.1        | 35.3             | 41.3               | 49.0               | 51.1                 | 65.0                   | 49.9        |
-| SimpleQA (Correct)         | 24.9        | 9.0              | 10.2               | 9.1                | 17.1                 | 28.4                   | 38.2        |
-| FRAMES (Acc.)              | 73.3        | 66.9             | 65.4               | 69.8               | 70.0                 | 72.5                   | 80.5        |
-| LongBenchv2 (Acc.)         | 48.7        | 31.6             | 35.4               | 39.4               | 36.1                 | 41.0                   | 48.1        |
-| HumanEval-Mul (Pass@1)     | 82.6        | 69.3             | 77.4               | 77.3               | 77.2                 | 81.7                   | 80.5        |
-| LiveCodeBench (Pass@1-COT) | 40.5        | 18.8             | 29.2               | 31.1               | 28.4                 | 36.3                   | 33.4        |
-| CodeLiveCodeBench (Pass@1) | 37.6        | 20.3             | 28.4               | 28.7               | 30.1                 | 32.8                   | 34.2        |
-| Codeforces (Percentile)    | 51.6        | 17.5             | 35.6               | 24.8               | 25.3                 | 20.3                   | 23.6        |
-| SWE Verified (Resolved)    | 42.0        | -                | 22.6               | 23.8               | 24.5                 | 50.8                   | 38.8        |
-| Aider-Edit (Acc.)          | 79.7        | 60.3             | 71.6               | 65.4               | 63.9                 | 84.2                   | 72.9        |
-| Aider-Polyglot (Acc.)      | 49.6        | -                | 18.2               | 7.6                | 5.8                  | 45.3                   | 16.0        |
-| AIME2024 (Pass@1)          | 39.2        | 4.6              | 16.7               | 23.3               | 23.3                 | 16.0                   | 9.3         |
-| Math MATH-500 (EM)         | 90.2        | 56.3             | 74.7               | 80.0               | 73.8                 | 78.3                   | 74.6        |
-| CNMO2024 (Pass@1)          | 43.2        | 2.8              | 10.8               | 15.9               | 6.8                  | 13.1                   | 10.8        |
-| CLUEWSC (EM)               | 90.9        | 89.9             | 90.4               | 91.4               | 84.7                 | 85.4                   | 87.9        |
-| Chinese C-Eval (EM)        | 86.5        | 78.6             | 79.5               | 86.1               | 61.5                 | 76.7                   | 76.0        |
-| C-SimpleQA (Correct)       | 64.8        | 48.5             | 54.1               | 48.4               | 50.4                 | 51.3                   | 59.3        |
+### Education and Reasoning
 
-(Source: DeepSeek-V3 Technical Report, 2024)
+DeepSeek-V3 achieved notable results in MMLU (Massive Multitask Language Understanding) with a top score of `88.5`, surpassing all open-source models. It also performed exceptionally well in MMLU-Pro, securing a score of `75.9`, affirming its ability to handle complex, multitasking challenges. Its performance on GPQA (General Purpose Question Answering) reflected strong reasoning and factual knowledge, with a score of `59.1`.
+
+### Mathematics
+
+DeepSeek V3 demonstrated exceptional mathematical reasoning by scoring `90.2` in the MATH-500 test. This performance surpassed other models, including closed-source competitors, reinforcing its capability to handle computationally demanding tasks.
+
+### Code Generation
+
+DeepSeek-V3 showcased its prowess in competitive programming, scoring in the `51.6` percentile on Codeforces and achieving a resolution rate of `42.0` on SWE-Bench Verified. It also emerged as the top-performing open-source model on LiveCodeBench, cementing its position as a leader in software development and programming challenges.
 
 ## How to Access DeepSeek V3
 
-There are many different methods for accessing DeepSeek-V3 as illustrated in the table below.
+| Method                                           | Description                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenRouter <br/><br/>(Some developers recommend) | Access DeepSeek V3 on <a href="https://openrouter.ai/deepseek/deepseek-chat" target="_blank" rel="noopener">OpenRouter</a> by purchasing credits. <br/> <br/> To monitor your AI app, developers use OpenRouter with <a href="https://docs.helicone.ai/getting-started/integration-method/openrouter" target="_blank" rel="noopener">Helicone</a> to track usage and cost. |
+| Chat                                             | Access DeepSeek V3 directly via chat on the <a href="http://chat.deepseek.com/" target="_blank" rel="noopener">official website</a>.                                                                                                                                                                                                                                       |
+| API Access                                       | OpenAI-compatible API available through the <a href="http://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek Platform</a>. Invoke DeepSeek-V3 by specifying model=`deepseek-chat`. <br/><br/> You can also use <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other endpoint providers</a>.                        |
+| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                                                                                                                                                                                            |
 
-| Method                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OpenRouter <br/><br/>(Some developers recommend) | Developers can <a href="https://openrouter.ai/deepseek/deepseek-chat" target="_blank" rel="noopener">access DeepSeek V3 on OpenRouter</a> by purchasing credits. <br/> <br/> To monitor the AI application, developers use <a href="https://docs.helicone.ai/getting-started/integration-method/openrouter" target="_blank" rel="noopener">Helicone with OpenRouter</a> for usage and cost tracking. Set up takes a few seconds. |
-| Chat                                             | Access DeepSeek V3 directly via chat on the <a href="http://chat.deepseek.com/" target="_blank" rel="noopener">official website</a>.                                                                                                                                                                                                                                                                                             |
-| API Access                                       | OpenAI-compatible API available through the <a href="http://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek Platform</a>. Invoke DeepSeek-V3 by specifying model=`deepseek-chat`. <br/><br/> You can also use <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other endpoint providers</a>.                                                                              |
-| Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                                                                                                                                                                                                                                                  |
+## Monitoring Applications Powered by DeepSeek V3
 
----
+Connect DeepSeek with Helicone to get powerful observability for your LLM application. Integration is easy, follow these steps:
+
+### 1. Create a Helicone API Key
+
+Create a <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> account, then <a href="https://us.helicone.ai/developer" target="_blank" rel="noopener">generate an API key</a>.
+
+### 2. Create a DeepSeek API Key
+
+Create a <a href="platform.deepseek.ai" target="_blank" rel="noopener">DeepSeek</a> account, then generate an API key.
+
+### 3. Set both API keys as environment variables
+
+```bash
+HELICONE_API_KEY=<your API key>
+DEEPSEEK_API_KEY=<your API key>
+```
+
+### 4. Modify the base URL and add Auth headers
+
+Replace your base URL with the Helicone Gateway URL:
+
+```bash
+# Old base URL
+https://api.deepseek.ai/v1/chat/completions
+
+# New base URL
+https://deepseek.helicone.ai/v1/chat/completions
+```
+
+Add the following headers:
+
+```bash
+Authorization: Bearer <your API key>
+```
+
+For details, please refer to the <a href="https://docs.helicone.ai/getting-started/integration-method/deepseek" target="_blank" rel="noopener">DeepSeek integration documentation</a>.
 
 ## Should you use DeepSeek-V3?
 
-### Advantages of DeepSeek-V3
+### Advantages
 
-- DeepSeek V3 excels in performance benchmarks, particularly in coding challenges on platforms like Codeforces. and surpasses leading models such as Meta’s Llama 3.1 405B and OpenAI’s GPT-4o, making it a competitive and budget-friendly alternative.
+- DeepSeek V3 outperforms leading models like Llama 3.1 and GPT-4 in coding benchmarks, offering a cost-effective alternative.
 - As an open-source model, DeepSeek-V3 is versatile and very customizable. Developers can integrate it into diverse applications. Use cases include code completion and mathematical reasoning.
 
-### Limitations of DeepSeek V3
+### Limitations
 
 - DeepSeek-V3 has a strong performance if the smaller 64k context window is not a concern for you (according to DeepSeek’s official api). You can also deploy it yourself or another endpoint like these providers, which may be able to provide a 128k context window.
 - The model occasionally generates responses that deviate from user expectations or established interpretations, which indicates room for improvement in reasoning.
 - Some developers noticed that DeepSeek V3 occasionally generates "doom loops", where similar responses are produced consecutively/repeatedly. However, this may be improved with effective prompt engineering.
 
----
-
 ## Bottom Line
 
-The introduction of DeepSeek V3 represents a significant leap in open-source AI models. It’s able to compete head-to-head with leading closed-source models like GPT-4 and Claude 3.5 in key benchmarks. However, like all models, it comes with pros and cons.
+DeepSeek V3 is a game-changer in the open-source LLM landscape, delivering performance that rivals proprietary heavyweights like GPT-4 and Claude 3.5 across critical benchmarks. As with any model choice, there are tradeoffs to consider for your specific implementation.
 
-Depending on your use case, DeepSeek can be a solid open-source option. With powerful reasoning and affordability, this new model paves the way for newer models to come.
-You might also be interested in:
+For teams prioritizing both cost-efficiency and local deployment, DeepSeek stands out in the current open-source ecosystem. Its robust reasoning capabilities and competitive inference costs make it particularly compelling for production environments. The model's architecture also sets an interesting precedent for future open-source developments in the space.
 
 ### You might also be interested in:
 
@@ -141,7 +152,7 @@ You might also be interested in:
     target="_blank"
     rel="noopener"
   >
-    Top 10 Inference Platforms in 2025
+    Top 10 Inference Platforms in 2025 to Access V3
   </a>
 - <a
     href="https://www.helicone.ai/blog/llm-stack-guide"
@@ -155,7 +166,7 @@ You might also be interested in:
     target="_blank"
     rel="noopener"
   >
-    Powerful Techniques to Slash Your LLM Cost
+    5 Powerful Techniques to Slash Your LLM Cost
   </a>
 
 <Questions />
