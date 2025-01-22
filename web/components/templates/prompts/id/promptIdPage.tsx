@@ -158,7 +158,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: processedMessages,
         parameters: {
-          provider: ver.metadata.provider || "openai",
+          provider: ver.metadata?.provider || "openai",
           model: templateData.model || "gpt-4o-mini",
           temperature: templateData.temperature || 0.7,
         },
