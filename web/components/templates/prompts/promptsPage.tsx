@@ -69,9 +69,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const createPrompt = async (userDefinedId: string) => {
     // Prepare base prompt data
     const basePrompt = {
-      // provider: "openai",
-      // TODO: Fix prompt/create to allow for provider injection into helicone template,
-      // right now any v1 will break with @helicone/generate
       model: "gpt-4o-mini",
       messages: [
         {

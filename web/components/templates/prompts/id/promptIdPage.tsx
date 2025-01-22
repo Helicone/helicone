@@ -94,28 +94,37 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const loadVersionData = useCallback(
     (ver: any) => {
       if (!ver) return;
-      // 1. Parse the helicone template. You might want to handle the case if it's already JSON-parsed.
+      // 1. Parse the helicone template and metadata columns from the version
       const templateData =
         typeof ver.helicone_template === "string"
           ? JSON.parse(ver.helicone_template)
           : ver.helicone_template;
 
+      const metadata =
+        typeof ver.metadata === "string"
+          ? JSON.parse(ver.metadata)
+          : (ver.metadata as {
+              provider?: string;
+              isProduction?: boolean;
+              inputs?: Record<string, string>;
+            });
+
       // 2. Derive "masterVersion" if needed
-      const metadata = ver.metadata as { isProduction?: boolean };
       const masterVersion =
-        metadata?.isProduction === true
+        metadata.isProduction === true
           ? ver.major_version
           : promptVersions?.find(
               (v) => (v.metadata as { isProduction?: boolean })?.isProduction
             )?.major_version ?? ver.major_version;
 
       // 3. First collect all variables and their default values from the template inputs
-      const inputs = ver?.metadata?.inputs || {};
-      const variables = Object.entries(inputs).map(([name, value]) => ({
-        name,
-        value: value as string,
-        isValid: isValidVariableName(name),
-      }));
+      const variables = Object.entries(metadata.inputs || {}).map(
+        ([name, value]) => ({
+          name,
+          value: value as string,
+          isValid: isValidVariableName(name),
+        })
+      );
 
       // 4. Convert messages with Helicone tags to variable syntax
       const processedMessages = templateData.messages.map((msg: any) => {
@@ -132,6 +141,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         }
         return msg;
       });
+      console.log("Processed messages:", processedMessages);
 
       // 5. Extract any additional variables from messages that might not be in inputs
       processedMessages.forEach((msg: any) => {
@@ -142,7 +152,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             if (!variables.find((v) => v.name === name)) {
               variables.push({
                 name,
-                value: inputs[name] || "",
+                value: metadata.inputs?.[name] ?? "",
                 isValid: isValid ?? true,
               });
             }
@@ -151,22 +161,23 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       });
 
       // 6. Update state with the processed data
-      setState({
+      const newState = {
         promptId: id,
         masterVersion: masterVersion,
         version: ver.major_version,
         versionId: ver.id,
         messages: processedMessages,
         parameters: {
-          provider: ver.metadata?.provider || "openai",
-          model: templateData.model || "gpt-4o-mini",
-          temperature: templateData.temperature || 0.7,
+          provider: metadata.provider ?? "openai",
+          model: templateData.model ?? "gpt-4o-mini",
+          temperature: templateData.temperature ?? 0.7,
         },
         variables: variables,
         evals: templateData.evals || [],
         structure: templateData.structure,
         isDirty: false,
-      });
+      };
+      setState(newState);
     },
     [id, promptVersions]
   );
@@ -188,7 +199,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           isDirty: markDirty ? true : prev.isDirty,
         };
       });
-      console.log("!!!state being updated");
     },
     []
   );
@@ -271,12 +281,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           currentVars.push(newVariable);
         }
 
-        console.log("!!!currentVars", currentVars);
         return { variables: currentVars };
       });
-      console.log("!!!state.variables", state?.variables);
     },
-    [updateState, state?.variables]
+    [updateState]
   );
   // - Change Variable
   const handleVariableChange = useCallback(
@@ -382,6 +390,13 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         })),
       };
 
+      const metadata = {
+        isProduction: false,
+        createdFromUi: true,
+        provider: state.parameters.provider,
+        inputs: variableMap,
+      };
+
       try {
         let result = await jawnClient.POST(
           "/v1/prompt/version/{promptVersionId}/subversion",
@@ -389,12 +404,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             params: { path: { promptVersionId: latestVersionId } },
             body: {
               newHeliconeTemplate: heliconeTemplate,
-              metadata: {
-                isProduction: false,
-                createdFromUi: true,
-                inputs: variableMap,
-                provider: state.parameters.provider,
-              },
+              metadata,
               isMajorVersion: true,
             },
           }
@@ -408,8 +418,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         loadVersionData(result.data.data);
         await refetchPromptVersions();
       } catch (error) {
-        console.error("Failed to save state:", error);
-        setNotification("Failed to save and run prompt state", "error");
+        console.error("Save error:", error);
+        setNotification("Failed to save and run prompt", "error");
         return;
       }
     }
