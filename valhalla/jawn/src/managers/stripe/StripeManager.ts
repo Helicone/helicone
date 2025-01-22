@@ -19,6 +19,8 @@ const proProductPrices = {
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
 };
 
+const COST_OF_PROMPTS = 200;
+
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
@@ -29,6 +31,35 @@ export class StripeManager extends BaseManager {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2024-06-20",
     });
+  }
+
+  public async getCostForPrompts(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    if (!subscriptionResult.data) {
+      return err("No existing subscription found");
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["prompts"]
+      )
+    ) {
+      const priceTheyArePayingForPrompts = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["prompts"]
+      );
+      if (
+        priceTheyArePayingForPrompts &&
+        priceTheyArePayingForPrompts.price.unit_amount &&
+        priceTheyArePayingForPrompts?.quantity &&
+        priceTheyArePayingForPrompts.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_PROMPTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {

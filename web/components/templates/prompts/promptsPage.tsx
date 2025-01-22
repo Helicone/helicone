@@ -140,6 +140,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       org?.currentOrg?.tier === "growth" ||
       org?.currentOrg?.tier === "enterprise" ||
       org?.currentOrg?.tier === "pro" ||
+      org?.currentOrg?.tier === "demo" ||
       (org?.currentOrg?.tier === "pro-20240913" &&
         (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
           ?.addons?.prompts)
