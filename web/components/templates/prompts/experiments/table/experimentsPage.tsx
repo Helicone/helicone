@@ -3,7 +3,13 @@ import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeC
 import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -139,60 +145,38 @@ const ExperimentsPage = () => {
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <Card className="max-w-4xl">
               <CardHeader>
-                <CardTitle>Need Prompts?</CardTitle>
+                <CardTitle>Unlock Experiment Features</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  The Prompts feature is not included in the Pro plan by
-                  default. However, you can add it to your plan as an optional
-                  extra.
+                  Take your LLM development to the next level with Helicone's
+                  powerful experimentation tools. Compare models, test prompts,
+                  and optimize outputs with data-driven insights.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <InfoBox>
                   <p className="text-sm font-medium">
-                    Version prompts, create prompt templates, and run
-                    experiments to improve prompt outputs.
+                    Run A/B tests on prompts, evaluate model performance, and
+                    make data-driven decisions to improve your AI outputs. Test
+                    safely with production data without impacting users.
                   </p>
                 </InfoBox>
-                <div className="bg-muted p-4 rounded-lg">
-                  <div className="flex space-x-2 mb-2">
+                <div className="bg-muted p-4 rounded-lg space-y-3">
+                  <div className="flex space-x-2">
                     <Button variant="outline" size="sm">
-                      Code
+                      Compare Models
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Test Prompts
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Evaluate Results
                     </Button>
                   </div>
-
-                  <DiffHighlight
-                    code={`
-// 1. Add this line
-import { hpf, hpstatic } from "@helicone/prompts";
-
-const chatCompletion = await openai.chat.completions.create(
-  {
-    messages: [
-      {
-        role: "system",
-        // 2. Use hpstatic for static prompts
-        content: hpstatic\`You are a creative storyteller.\`,
-      },
-      {
-        role: "user",
-        // 3: Add hpf to any string, and nest any variable in additional brackets \`{}\`
-        content: hpf\`Write a story about \${{ scene }}\`,
-      },
-    ],
-    model: "gpt-3.5-turbo",
-  },
-  {
-    // 3. Add Prompt Id Header
-    headers: {
-      "Helicone-Prompt-Id": "prompt_story",
-    },
-  }
-);
-  `}
-                    language="typescript"
-                    newLines={[]}
-                    oldLines={[]}
-                  />
+                  <div className="text-sm text-muted-foreground">
+                    • Run experiments with real production data • Compare
+                    multiple prompt versions • Score and evaluate outputs • Safe
+                    testing without user impact
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col items-center">
@@ -201,7 +185,7 @@ const chatCompletion = await openai.chat.completions.create(
                 </div>
                 <div className="space-x-2 mt-5">
                   <Button variant="outline" asChild>
-                    <Link href="https://docs.helicone.ai/features/prompts">
+                    <Link href="https://docs.helicone.ai/features/prompts#prompts-and-experiments">
                       View documentation
                     </Link>
                   </Button>
