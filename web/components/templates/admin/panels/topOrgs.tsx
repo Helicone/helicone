@@ -5,7 +5,7 @@ import dateFormat from "dateformat";
 import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
 import useNotification from "../../../shared/notification/useNotification";
-import { handleLogCostCalculation } from "../../../../utlis/LogCostCalculation";
+import { handleLogCostCalculation } from "../../../../utils/LogCostCalculation";
 import { Button } from "@/components/ui/button";
 
 interface TopOrgsProps {}

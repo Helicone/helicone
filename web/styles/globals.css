@@ -16,3 +16,23 @@
     --chart-10: 0.588 0.158 241.966; /* oklch(0.588 0.158 241.966) */
   }
 }
+
+input {
+  @apply appearance-none outline-none;
+}
+
+.glass {
+  @apply bg-white/[.3333] backdrop-blur-md;
+}
+
+.interactive {
+  @apply transition-transform hover:shadow-md active:scale-95;
+}
+
+::-webkit-scrollbar {
+  @apply w-4 bg-slate-200;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply cursor-grab rounded-full border-2 border-solid border-slate-200 bg-white hover:shadow-md;
+}

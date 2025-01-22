@@ -5,7 +5,7 @@ import {
 import { Result } from "../../../lib/result";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
-import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
+import { handleLogCostCalculation } from "../../../utils/LogCostCalculation";
 
 async function handler({
   res,

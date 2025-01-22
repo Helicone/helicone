@@ -1,81 +1,55 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  usePrompt,
-  usePromptRequestsOverTime,
-  usePromptVersions,
-} from "../../../../services/hooks/prompts/prompts";
-
-import { Input as PromptInput } from "@/components/templates/prompts/id/MessageInput";
-import {
-  ArrowTrendingUpIcon,
-  BeakerIcon,
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  TrashIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-
-import { TimeFilter } from "@/types/timeFilter";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
-import { useJawnClient } from "../../../../lib/clients/jawnHook";
-import {
-  TimeInterval,
-  getTimeInterval,
-  getTimeIntervalAgo,
-} from "../../../../lib/timeCalculations/time";
-import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
-import { useExperiments } from "../../../../services/hooks/prompts/experiments";
-import { useInputs } from "../../../../services/hooks/prompts/inputs";
-import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
-import {
-  FilterBranch,
-  FilterLeaf,
-} from "../../../../services/lib/filters/filterDefs";
-import useNotification from "../../../shared/notification/useNotification";
-import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import { MODEL_LIST } from "../../playground/new/modelList";
-import { PromptMessage } from "../../requests/builder/components/chatComponent/types";
-import PromptPlayground from "./promptPlayground";
-
-import { useOrg } from "@/components/layout/org/organizationContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hoverCard";
-import { Input } from "@/components/ui/input";
-import { IslandContainer } from "@/components/ui/islandContainer";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePrompt, usePromptVersions } from "@/services/hooks/prompts/prompts";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import useNotification from "@/components/shared/notification/useNotification";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import ResizablePanels from "@/components/shared/universal/ResizablePanels";
+import PromptPanels from "@/components/shared/prompts/PromptPanels";
+import { PromptState, Variable } from "@/types/prompt-state";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
-import { clsx } from "clsx";
-import { InfoIcon } from "lucide-react";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import { SimpleTable } from "../../../shared/table/simpleTable";
-import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
-import { getUSDateFromString } from "../../../shared/utils/utils";
-import { Badge } from "../../../ui/badge";
-import { Button } from "../../../ui/button";
-import { ScrollArea } from "../../../ui/scroll-area";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import ModelPill from "../../requests/modelPill";
-import StatusBadge from "../../requests/statusBadge";
-import TableFooter from "../../requests/tableFooter";
-import PromptInputItem from "./promptInputItem";
+  extractVariables,
+  replaceVariables,
+  convertToHeliconeTags,
+  replaceTagsWithVariables,
+  isValidVariableName,
+} from "@/utils/variables";
+import {
+  canAddMessagePair,
+  canAddPrefillMessage,
+  removeMessagePair,
+} from "@/utils/messages";
+import { canAddPrefill } from "@/utils/messages";
+import PromptMetricsTab from "./PromptMetricsTab";
+import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
+import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
+import { PiCommandBold, PiRocketLaunchBold } from "react-icons/pi";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
+import { toKebabCase } from "@/utils/strings";
+import Link from "next/link";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
+import ActionButton from "@/components/shared/universal/ActionButton";
+import VersionSelector from "@/components/shared/universal/VersionSelector";
+import { MdKeyboardReturn } from "react-icons/md";
+import {
+  PiSpinnerGapBold,
+  PiStopBold,
+  PiPlayBold,
+  PiCaretLeftBold,
+} from "react-icons/pi";
+import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
+import { FlaskConicalIcon } from "lucide-react";
+import { useRouter } from "next/router";
+import { useExperiment } from "./hooks";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { DiffHighlight } from "../../welcome/diffHighlight";
 
 interface PromptIdPageProps {
   id: string;
@@ -83,1037 +57,748 @@ interface PromptIdPageProps {
   pageSize: number;
 }
 
-export function getTimeAgo(date: Date): string {
-  const now = new Date();
-  const secondsPast = (now.getTime() - date.getTime()) / 1000;
-
-  if (secondsPast < 60) {
-    return "just now";
-  }
-  if (secondsPast < 3600) {
-    return `${Math.floor(secondsPast / 60)} minutes ago`;
-  }
-  if (secondsPast <= 86400) {
-    return `${Math.floor(secondsPast / 3600)} hours ago`;
-  }
-  if (secondsPast <= 2592000) {
-    return `${Math.floor(secondsPast / 86400)} days ago`;
-  }
-  if (secondsPast <= 31536000) {
-    return `${Math.floor(secondsPast / 2592000)} months ago`;
-  }
-  return `${Math.floor(secondsPast / 31536000)} years ago`;
-}
-
-const PromptIdPage = (props: PromptIdPageProps) => {
+export default function PromptIdPage(props: PromptIdPageProps) {
+  // PARAMS
   const { id, currentPage, pageSize } = props;
-  const { prompt, isLoading, refetch: refetchPrompt } = usePrompt(id);
-  const jawn = useJawnClient();
-  const [page, setPage] = useState<number>(currentPage);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [selectedInput, setSelectedInput] = useState<PromptInput | undefined>();
-  const [searchRequestId, setSearchRequestId] = useState<string>("");
-  const searchParams = useSearchParams();
-  const notification = useNotification();
-  const { prompts, refetch: refetchPromptVersions } = usePromptVersions(id);
 
-  const router = useRouter();
+  // HOOKS
+  // - Jawn Client
+  const jawnClient = useJawnClient();
+  // - Prompt Table
+  const {
+    prompt,
+    isLoading: isPromptLoading,
+    refetch: refetchPrompt,
+  } = usePrompt(id);
+  // - Prompt Versions Table
+  const {
+    prompts: promptVersions,
+    isLoading: isVersionsLoading,
+    refetch: refetchPromptVersions,
+  } = usePromptVersions(id);
+  // - Notifications
+  const { setNotification } = useNotification();
 
-  const getTimeFilter = () => {
-    const currentTimeFilter = searchParams?.get("t");
-    let range: TimeFilter;
+  // STATE
+  const [state, setState] = useState<PromptState | null>(null);
 
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      const start = currentTimeFilter.split("_")[1]
-        ? new Date(currentTimeFilter.split("_")[1])
-        : getTimeIntervalAgo("24h");
-      const end = new Date(currentTimeFilter.split("_")[2] || new Date());
-      range = {
-        start,
-        end,
-      };
-    } else {
-      range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "24h"),
-        end: new Date(),
-      };
-    }
-    return range;
-  };
+  // STREAMING
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortController = useRef<AbortController | null>(null);
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
-
-  const getInterval = () => {
-    const currentTimeFilter = searchParams?.get("t");
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      return "custom";
-    } else {
-      return currentTimeFilter || "24h";
-    }
-  };
-
-  const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
+  // VALIDATION
+  // - Can Run
+  const canRun = useMemo(
+    () =>
+      (state?.messages.some(
+        (m) =>
+          m.role === "user" &&
+          (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+      ) ??
+        false) &&
+      prompt?.metadata?.createdFromUi !== false,
+    [state?.messages, prompt?.metadata?.createdFromUi]
   );
 
-  const createSubversion = async (history: PromptMessage[], model: string) => {
-    if (prompt?.metadata?.createdFromUi === false) {
-      notification.setNotification(
-        "Prompt was not created from the UI, please change the prompt in your codebase to use the new version",
-        "error"
+  // CALLBACKS
+  // - Load Version Data into State
+  const loadVersionData = useCallback(
+    (ver: any) => {
+      if (!ver) return;
+      // 1. Parse the helicone template and metadata columns from the version
+      const templateData =
+        typeof ver.helicone_template === "string"
+          ? JSON.parse(ver.helicone_template)
+          : ver.helicone_template;
+
+      const metadata =
+        typeof ver.metadata === "string"
+          ? JSON.parse(ver.metadata)
+          : (ver.metadata as {
+              provider?: string;
+              isProduction?: boolean;
+              inputs?: Record<string, string>;
+            });
+
+      // 2. Derive "masterVersion" if needed
+      const masterVersion =
+        metadata.isProduction === true
+          ? ver.major_version
+          : promptVersions?.find(
+              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+            )?.major_version ?? ver.major_version;
+
+      // 3. First collect all variables and their default values from the template inputs
+      const variables = Object.entries(metadata.inputs || {}).map(
+        ([name, value]) => ({
+          name,
+          value: value as string,
+          isValid: isValidVariableName(name),
+        })
       );
-      return;
-    }
-    const promptData = {
-      model: model,
-      messages: history.map((msg) => {
-        if (typeof msg === "string") {
+
+      // 4. Convert messages with Helicone tags to variable syntax
+      const processedMessages = templateData.messages.map((msg: any) => {
+        if (typeof msg.content === "string") {
+          // Convert Helicone tags to variable syntax
+          const content = replaceTagsWithVariables(msg.content);
+          return {
+            ...msg,
+            content,
+          };
+        } else if (typeof msg.content === "object") {
+          // Handle object content (if any)
           return msg;
         }
-        return {
-          role: msg.role,
-          content: [
-            {
-              text: msg.content,
-              type: "text",
-            },
-          ],
-        };
-      }),
-    };
-
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/subversion",
-      {
-        params: {
-          path: {
-            promptVersionId: prompt?.latest_version_id || "",
-          },
-        },
-        body: {
-          newHeliconeTemplate: JSON.stringify(promptData),
-          isMajorVersion: true,
-          metadata: {
-            createdFromUi: true,
-          },
-        },
-      }
-    );
-
-    if (result.error || !result.data.data) {
-      notification.setNotification("Failed to create subversion", "error");
-      return;
-    }
-    notification.setNotification("New version created successfully", "success");
-    refetchPromptVersions();
-    refetchPrompt();
-  };
-
-  const timeIncrement = getTimeInterval(timeFilter);
-
-  const promptIdFilterLeaf: FilterLeaf = {
-    request_response_rmt: {
-      properties: {
-        "Helicone-Prompt-Id": {
-          equals: prompt?.user_defined_id,
-        },
-      },
-    },
-  };
-
-  const params: BackendMetricsCall<any>["params"] = {
-    timeFilter: timeFilter,
-    userFilters: {
-      left: promptIdFilterLeaf,
-      operator: "and",
-      right: "all",
-    } as FilterBranch,
-    dbIncrement: timeIncrement,
-    timeZoneDifference: new Date().getTimezoneOffset(),
-  };
-
-  const {
-    data,
-    isLoading: isPromptRequestsLoading,
-    refetch,
-    total,
-  } = usePromptRequestsOverTime(
-    params,
-    "promptRequests" + prompt?.user_defined_id
-  );
-
-  const { experiments, isLoading: isExperimentsLoading } = useExperiments(
-    {
-      page,
-      pageSize: currentPageSize,
-    },
-    props.id
-  );
-
-  const {
-    datasets: datasets,
-    isLoading: isDataSetsLoading,
-    refetch: refetchDataSets,
-  } = useGetDataSets();
-
-  const sortedPrompts = prompts?.sort((a, b) => {
-    if (a.major_version === b.major_version) {
-      return b.minor_version - a.minor_version;
-    }
-    return b.major_version - a.major_version;
-  });
-
-  const [selectedVersion, setSelectedVersion] = useState<string>("");
-
-  useEffect(() => {
-    if (sortedPrompts?.length) {
-      setSelectedVersion(
-        `${sortedPrompts[0].major_version}.${sortedPrompts[0].minor_version}`
-      );
-    }
-  }, [sortedPrompts]);
-
-  const selectedPrompt = useMemo(() => {
-    return prompts?.find(
-      (p) =>
-        p.major_version === parseInt(selectedVersion.split(".")[0]) &&
-        p.minor_version === parseInt(selectedVersion.split(".")[1])
-    );
-  }, [prompts, selectedVersion]);
-
-  const model = useMemo(() => {
-    try {
-      return (
-        (selectedPrompt?.helicone_template as any).model || MODEL_LIST[0].value
-      );
-    } catch (error) {
-      console.error("Error parsing helicone_template:", error);
-      return MODEL_LIST[0].value;
-    }
-  }, [selectedPrompt]);
-
-  const { inputs } = useInputs(selectedPrompt?.id);
-
-  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-
-  const filteredExperiments = experiments.filter((experiment) => {
-    if (
-      selectedDatasets.length &&
-      !selectedDatasets.includes(experiment.datasetId)
-    ) {
-      return false;
-    }
-
-    if (
-      selectedModels.length &&
-      experiment.model &&
-      !selectedModels.includes(experiment.model)
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const setSelectedInputAndVersion = (version: string) => {
-    setSelectedVersion(version);
-    setSelectedInput(undefined);
-  };
-
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    if ((key as string) === "custom") {
-      value = value.replace("custom:", "");
-      const start = new Date(value.split("_")[0]);
-      const end = new Date(value.split("_")[1]);
-      setInterval(key);
-      setTimeFilter({
-        start,
-        end,
+        return msg;
       });
-    } else {
-      setInterval(key);
-      setTimeFilter({
-        start: getTimeIntervalAgo(key),
-        end: new Date(),
-      });
-    }
-  };
+      console.log("Processed messages:", processedMessages);
 
-  const handleInputSelect = (input: PromptInput | undefined) => {
-    setSelectedInput((prevInput) => {
-      if (prevInput?.id === input?.id) {
-        return undefined; // Deselect if the same input is clicked again
-      }
-      return input;
-    });
-  };
-
-  const promoteToProduction = async (promptVersionId: string) => {
-    if (prompt?.metadata?.createdFromUi === false) {
-      notification.setNotification(
-        "Prompt was not created from the UI, please change the prompt in your codebase to use the new version",
-        "error"
-      );
-      return;
-    }
-    const getPreviousProductionId = () => {
-      const productionPrompt = prompts?.find(
-        (p) => p.metadata?.isProduction === true
-      );
-      if (productionPrompt) return productionPrompt.id;
-
-      // If no production prompt, find the one with the highest major version
-      const latestPrompt = prompts?.reduce((latest, current) => {
-        if (!latest || current.major_version > latest.major_version) {
-          return current;
+      // 5. Extract any additional variables from messages that might not be in inputs
+      processedMessages.forEach((msg: any) => {
+        if (typeof msg.content === "string") {
+          const messageVars = extractVariables(msg.content, true);
+          messageVars.forEach(({ name, isValid }) => {
+            // Only add if not already present
+            if (!variables.find((v) => v.name === name)) {
+              variables.push({
+                name,
+                value: metadata.inputs?.[name] ?? "",
+                isValid: isValid ?? true,
+              });
+            }
+          });
         }
-        return latest;
-      }, null as (typeof prompts extends (infer T)[] ? T : never) | null);
+      });
 
-      return latestPrompt?.id || "";
-    };
+      // 6. Update state with the processed data
+      const newState = {
+        promptId: id,
+        masterVersion: masterVersion,
+        version: ver.major_version,
+        versionId: ver.id,
+        messages: processedMessages,
+        parameters: {
+          provider: metadata.provider ?? "openai",
+          model: templateData.model ?? "gpt-4o-mini",
+          temperature: templateData.temperature ?? 0.7,
+        },
+        variables: variables,
+        evals: templateData.evals || [],
+        structure: templateData.structure,
+        isDirty: false,
+      };
+      setState(newState);
+    },
+    [id, promptVersions]
+  );
+  // - Update State
+  const updateState = useCallback(
+    (
+      updates:
+        | Partial<PromptState>
+        | ((prev: PromptState | null) => Partial<PromptState>),
+      markDirty: boolean = true
+    ) => {
+      setState((prev) => {
+        if (!prev) return null;
+        const newUpdates =
+          typeof updates === "function" ? updates(prev) : updates;
+        return {
+          ...prev,
+          ...newUpdates,
+          isDirty: markDirty ? true : prev.isDirty,
+        };
+      });
+    },
+    []
+  );
+  // - Message Change
+  const handleMessageChange = useCallback(
+    (index: number, content: string) => {
+      updateState((prev) => {
+        if (!prev) return {};
 
-    const result = await jawn.POST(
-      "/v1/prompt/version/{promptVersionId}/promote",
-      {
-        params: {
-          path: {
-            promptVersionId: promptVersionId,
+        const newMessages = prev.messages.map((msg, i) =>
+          i === index ? { ...msg, content } : msg
+        );
+
+        // Extract variables from all messages
+        const messageVariables = newMessages.reduce<Variable[]>((acc, msg) => {
+          if (typeof msg.content !== "string") return acc;
+          const messageVars = extractVariables(msg.content, true);
+          return [
+            ...acc,
+            ...messageVars.map((v) => ({
+              name: v.name,
+              value:
+                prev.variables?.find((pv) => pv.name === v.name)?.value || "",
+              isValid: v.isValid,
+            })),
+          ];
+        }, []);
+
+        // Keep only unique variables while preserving their existing values
+        const mergedVariables = messageVariables.reduce<Variable[]>(
+          (acc, variable) => {
+            if (!acc.some((v) => v.name === variable.name)) {
+              // Preserve the existing value if it exists
+              const existingVar = prev.variables?.find(
+                (v) => v.name === variable.name
+              );
+              acc.push({
+                ...variable,
+                value: existingVar?.value || variable.value || "",
+              });
+            }
+            return acc;
           },
-        },
-        body: {
-          previousProductionVersionId: getPreviousProductionId(),
-        },
+          []
+        );
+
+        return {
+          messages: newMessages,
+          variables: mergedVariables,
+        };
+      });
+    },
+    [updateState]
+  );
+  // - Remove Message
+  const handleRemoveMessage = useCallback(
+    (index: number) => {
+      updateState({
+        messages: removeMessagePair(state!.messages, index),
+      });
+    },
+    [state, updateState]
+  );
+  // - Create Variable
+  const handleVariableCreate = useCallback(
+    (newVariable: Variable) => {
+      updateState((prev) => {
+        if (!prev) return {};
+        const currentVars = [...(prev.variables || [])];
+        const existingIndex = currentVars.findIndex(
+          (v) => v.name === newVariable.name
+        );
+
+        if (existingIndex >= 0) {
+          currentVars[existingIndex] = {
+            ...currentVars[existingIndex],
+            ...newVariable,
+          };
+        } else {
+          currentVars.push(newVariable);
+        }
+
+        return { variables: currentVars };
+      });
+    },
+    [updateState]
+  );
+  // - Change Variable
+  const handleVariableChange = useCallback(
+    (index: number, value: string) => {
+      console.log("Changing variable at index:", index, "to value:", value);
+      updateState((prev) => {
+        if (!prev?.variables) return {};
+        console.log("Previous variables:", prev.variables);
+        const updatedVariables = [...prev.variables];
+        updatedVariables[index] = { ...updatedVariables[index], value };
+        console.log("Updated variables:", updatedVariables);
+        return { variables: updatedVariables };
+      });
+    },
+    [updateState]
+  );
+  // - Promote Version
+  const handleVersionPromote = useCallback(
+    async (version: any) => {
+      if (!version) return;
+
+      const currentProductionVersion = promptVersions?.find(
+        (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+      );
+
+      try {
+        const result = await jawnClient.POST(
+          "/v1/prompt/version/{promptVersionId}/promote",
+          {
+            params: {
+              path: {
+                promptVersionId: version.id,
+              },
+            },
+            body: {
+              previousProductionVersionId:
+                currentProductionVersion?.id ?? version.id,
+            },
+          }
+        );
+
+        if (result.error) {
+          setNotification("Failed to promote version", "error");
+          return;
+        }
+
+        await refetchPromptVersions();
+        // Update state to reflect the new master version
+        setState((prev) =>
+          prev
+            ? {
+                ...prev,
+                masterVersion: version.major_version,
+              }
+            : null
+        );
+        setNotification(
+          `Promoted version ${version.major_version} to production.`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Error promoting version:", error);
+        setNotification("Failed to promote version", "error");
       }
+    },
+    [jawnClient, promptVersions, refetchPromptVersions, setNotification]
+  );
+  // - Save &/Or Run
+  const handleSaveAndRun = useCallback(async () => {
+    if (!state || !canRun) return;
+
+    // 1. ABORT: If already streaming
+    if (isStreaming) {
+      abortController.current?.abort();
+      setIsStreaming(false);
+      return;
+    }
+
+    // 2. STREAMING STATE + CLEAR RESPONSE
+    setIsStreaming(true);
+    updateState({ response: "" }, false);
+
+    const variables = state.variables || [];
+    const variableMap = Object.fromEntries(
+      variables.map((v) => [v.name, v.value || ""])
     );
 
-    if (result.error || !result.data) {
-      notification.setNotification(
-        "Failed to promote version to production",
-        "error"
-      );
-      return;
+    // 3. SAVE: If dirty
+    if (state.isDirty) {
+      const latestVersionId = promptVersions?.[0]?.id;
+      if (!latestVersionId) return;
+
+      // 3.1. Build Helicone Template for Saving
+      const heliconeTemplate = {
+        model: state.parameters.model,
+        temperature: state.parameters.temperature,
+        messages: state.messages.map((msg) => ({
+          ...msg,
+          content:
+            typeof msg.content === "string"
+              ? convertToHeliconeTags(msg.content)
+              : msg.content || "",
+        })),
+      };
+
+      const metadata = {
+        isProduction: false,
+        createdFromUi: true,
+        provider: state.parameters.provider,
+        inputs: variableMap,
+      };
+
+      try {
+        let result = await jawnClient.POST(
+          "/v1/prompt/version/{promptVersionId}/subversion",
+          {
+            params: { path: { promptVersionId: latestVersionId } },
+            body: {
+              newHeliconeTemplate: heliconeTemplate,
+              metadata,
+              isMajorVersion: true,
+            },
+          }
+        );
+
+        if (result?.error || !result?.data) {
+          setNotification("Error saving prompt", "error");
+          return;
+        }
+
+        loadVersionData(result.data.data);
+        await refetchPromptVersions();
+      } catch (error) {
+        console.error("Save error:", error);
+        setNotification("Failed to save and run prompt", "error");
+        return;
+      }
     }
-    notification.setNotification(
-      "Version promoted to production successfully",
-      "success"
-    );
-    refetchPromptVersions();
-    refetchPrompt();
-  };
 
-  const startExperiment = async (
-    promptVersionId: string,
-    promptData: string
-  ) => {
-    const promptVersion = prompts?.find((p) => p.id === promptVersionId);
+    // 5. RUN: Replace variables with their values for local execution
+    const runTemplate = {
+      ...state.parameters,
+      messages: state.messages.map((msg) => ({
+        ...msg,
+        content:
+          typeof msg.content === "string"
+            ? replaceVariables(msg.content, variables)
+            : msg.content || "",
+      })),
+    };
 
-    if (!promptVersion) {
-      notification.setNotification("Prompt version not found", "error");
-      return;
+    // 6. EXECUTE
+    try {
+      abortController.current = new AbortController();
+
+      try {
+        const stream = await generateStream({
+          ...runTemplate,
+          signal: abortController.current.signal,
+        } as any);
+
+        await readStream(
+          stream,
+          (chunk: string) => {
+            setState((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                response: (prev.response || "") + chunk,
+              };
+            });
+          },
+          abortController.current.signal
+        );
+      } catch (error) {
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Error:", error);
+          setNotification(error.message, "error");
+        }
+      } finally {
+        setIsStreaming(false);
+        abortController.current = null;
+      }
+    } catch (error) {
+      console.error("Failed to save state:", error);
+      setNotification("Failed to save prompt state", "error");
+      setIsStreaming(false);
     }
+  }, [
+    state,
+    isStreaming,
+    canRun,
+    jawnClient,
+    setNotification,
+    refetchPromptVersions,
+    loadVersionData,
+    updateState,
+    promptVersions,
+  ]);
+  // - Handle ID Edit
+  const handleIdEdit = useCallback(
+    async (newId: string) => {
+      const kebabId = toKebabCase(newId);
+      if (kebabId !== id) {
+        const result = await jawnClient.PATCH(
+          "/v1/prompt/{promptId}/user-defined-id",
+          {
+            params: {
+              path: {
+                promptId: prompt?.id || "",
+              },
+            },
+            body: {
+              userDefinedId: kebabId,
+            },
+          }
+        );
 
-    const experimentTableResult = await jawn.POST("/v2/experiment/new", {
-      body: {
-        name: `${prompt?.user_defined_id}_V${promptVersion?.major_version}.${promptVersion?.minor_version}`,
-        originalPromptVersion: promptVersionId,
-      },
-    });
+        if (result.error) {
+          setNotification("Failed to update prompt ID.", "error");
+          return;
+        }
 
-    if (experimentTableResult.error || !experimentTableResult.data) {
-      notification.setNotification("Failed to create experiment", "error");
-      return;
-    }
+        setNotification(`Updated prompt ID to ${kebabId}.`, "success");
+        await refetchPrompt();
+      }
+    },
+    [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
+  );
 
-    router.push(
-      `/experiments/${experimentTableResult.data.data?.experimentId}`
-    );
-  };
-
-  const deletePromptVersion = async (promptVersionId: string) => {
-    if (prompt?.metadata?.createdFromUi === false) {
-      notification.setNotification(
-        "Prompt was not created from the UI, please change the prompt in your codebase to use the new version",
-        "error"
-      );
-      return;
-    }
-    const version = prompts?.find((p) => p.id === promptVersionId);
-    if (version?.metadata?.isProduction) {
-      notification.setNotification("Cannot delete production version", "error");
-      return;
-    }
-    const result = await jawn.DELETE("/v1/prompt/version/{promptVersionId}", {
-      params: {
-        path: {
-          promptVersionId: promptVersionId,
-        },
-      },
-    });
-    if (result.error || !result.data) {
-      notification.setNotification("Failed to delete version", "error");
-      return;
-    }
-    notification.setNotification("Version deleted successfully", "success");
-    refetchPromptVersions();
-    refetchPrompt();
-  };
-
-  const org = useOrg();
-
-  const [isVersionsExpanded, setIsVersionsExpanded] = useState(true);
-  const [isInputsExpanded, setIsInputsExpanded] = useState(true);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [isOverMaxWidth, setIsOverMaxWidth] = useState(false);
-
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
+  const router = useRouter();
+  // EFFECTS
+  // - Load Initial State
   useEffect(() => {
-    if (isSearchVisible && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (
+      !state &&
+      promptVersions &&
+      promptVersions.length > 0 &&
+      !isVersionsLoading
+    ) {
+      loadVersionData(promptVersions[0]);
     }
-  }, [isSearchVisible]);
-
+  }, [isVersionsLoading, loadVersionData, promptVersions, state]);
+  // - Handle Keyboard Shortcuts
   useEffect(() => {
-    const handleResize = () => {
-      if (window && window.innerWidth > 1808) {
-        setIsOverMaxWidth(true);
-      } else {
-        setIsOverMaxWidth(false);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key === "Enter" &&
+        prompt?.metadata?.createdFromUi !== false
+      ) {
+        event.preventDefault();
+        handleSaveAndRun();
       }
     };
 
-    handleResize();
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSaveAndRun, prompt?.metadata?.createdFromUi]);
 
-    // also check on resize
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  // Add this new function to handle the button click
-  const handleSearchButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // This stops the event from propagating to the parent div
-    setIsSearchVisible(!isSearchVisible);
+  // HELPERS
+  // - Add Message Pair
+  const handleAddMessagePair = () => {
+    updateState((prev) => {
+      if (!prev || !canAddMessagePair(prev.messages)) return {};
+      return {
+        messages: [
+          ...prev.messages,
+          { role: "assistant", content: "" },
+          { role: "user", content: "" },
+        ],
+      };
+    });
+  };
+  // - Add Prefill
+  const handleAddPrefill = () => {
+    updateState((prev) => {
+      if (
+        !prev ||
+        !canAddPrefill(prev.parameters.provider) ||
+        !canAddPrefillMessage(prev.messages)
+      )
+        return {};
+      return {
+        messages: [...prev.messages, { role: "assistant", content: "" }],
+      };
+    });
   };
 
+  const { newFromPromptVersion } = useExperiment();
+
+  // RENDER
+  // - Loading Page
+  if (isPromptLoading || isVersionsLoading || !state) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <LoadingAnimation title="Loading prompt..." />
+      </div>
+    );
+  }
+  // - Page
   return (
-    <IslandContainer className="mx-0">
-      <div className="w-full h-full flex flex-col space-y-4 pt-4">
-        <Tabs defaultValue="prompt">
-          <div
-            className={cn(
-              "flex flex-row items-center justify-between ml-8",
-              isOverMaxWidth ? "" : "mr-8"
-            )}
+    <Tabs className="relative flex flex-col" defaultValue="editor">
+      {/* Header */}
+      <GlassHeader>
+        {/* Left Side: Navigation */}
+        <div className="flex flex-row items-center gap-2">
+          <Link
+            className="text-base text-slate-500 hover:text-heliblue"
+            href="/prompts"
           >
-            <div className="flex items-center space-x-4">
-              <HcBreadcrumb
-                pages={[
-                  { href: "/prompts", name: "Prompts" },
-                  {
-                    href: `/prompts/${id}`,
-                    name: prompt?.user_defined_id || "Loading...",
-                  },
-                ]}
+            <PiCaretLeftBold />
+          </Link>
+          <VersionSelector
+            id={prompt?.user_defined_id || ""}
+            currentVersion={state.version}
+            masterVersion={state.masterVersion}
+            versions={promptVersions || []}
+            isLoading={isVersionsLoading}
+            isDirty={state.isDirty}
+            onVersionSelect={loadVersionData}
+            onVersionPromote={handleVersionPromote}
+            onIdEdit={handleIdEdit}
+          />
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="editor">Editor</TabsTrigger>
+            <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          </TabsList>
+        </div>
+
+        {/* Right Side: Actions */}
+        <div className="flex flex-row items-center gap-2">
+          {/* Run Button */}
+          <ActionButton
+            label={isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
+            icon={isStreaming ? PiStopBold : PiPlayBold}
+            className={
+              isStreaming
+                ? "bg-red-500 hover:bg-red-500/90 text-white"
+                : "bg-heliblue hover:bg-heliblue/90 text-white"
+            }
+            onClick={handleSaveAndRun}
+            disabled={!canRun}
+          >
+            {isStreaming && <PiSpinnerGapBold className="animate-spin" />}
+
+            <div
+              className={`flex items-center gap-1 text-sm ${
+                canRun && prompt?.metadata?.createdFromUi !== false
+                  ? "text-white opacity-60"
+                  : "text-slate-400"
+              }`}
+            >
+              <PiCommandBold className="h-4 w-4" />
+              <MdKeyboardReturn className="h-4 w-4" />
+            </div>
+          </ActionButton>
+
+          {/* Deploy Button */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <ActionButton
+                label="Deploy"
+                className="bg-white"
+                icon={PiRocketLaunchBold}
+                onClick={() => {}}
+                disabled={prompt?.metadata?.createdFromUi === false}
+              />
+            </DialogTrigger>
+            <DialogContent className="w-full max-w-3xl bg-white">
+              <DialogHeader>
+                <DialogTitle>Deploy Prompt</DialogTitle>
+              </DialogHeader>
+
+              {/* Code example */}
+              <DiffHighlight
+                code={`
+export async function getPrompt(
+  id: string,
+  variables: Record<string, any>
+): Promise<any> {
+  const getHeliconePrompt = async (id: string) => {
+    const res = await fetch(
+      \`https://api.helicone.ai/v1/prompt/\${id}/template\`,
+      {
+        headers: {
+          Authorization: \`Bearer \${YOUR_HELICONE_API_KEY}\`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          inputs: variables,
+        }),
+      }
+    );
+
+    return (await res.json()) as Result<PromptVersionCompiled, any>;
+  };
+
+  const heliconePrompt = await getHeliconePrompt(id);
+  if (heliconePrompt.error) {
+    throw new Error(heliconePrompt.error);
+  }
+  return heliconePrompt.data?.filled_helicone_template;
+}
+
+async function pullPromptAndRunCompletion() {
+  const prompt = await getPrompt("${
+    prompt?.user_defined_id || "my-prompt-id"
+  }", {
+    ${
+      state?.variables
+        ?.map((v) => `${v.name}: "${v.value || "value"}"`)
+        .join(",\n    ") || 'color: "red"'
+    }
+  });
+  console.log(prompt);
+
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+    baseURL: \`https://oai.helicone.ai/v1/\${YOUR_HELICONE_API_KEY}\`,
+  });
+  const response = await openai.chat.completions.create(
+    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
+  );
+  console.log(response);
+}`}
+                language="typescript"
+                newLines={[]}
+                oldLines={[]}
+                minHeight={false}
+              />
+            </DialogContent>
+          </Dialog>
+
+          {/* Experiment Button */}
+          <ActionButton
+            label="Experiment"
+            className="bg-white"
+            icon={<FlaskConicalIcon className="h-4 w-4" />}
+            disabled={newFromPromptVersion.isLoading}
+            onClick={async () => {
+              const result = await newFromPromptVersion.mutateAsync({
+                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                originalPromptVersion: state.versionId,
+              });
+              router.push(`/experiments/${result.data?.data?.experimentId}`);
+            }}
+          />
+        </div>
+      </GlassHeader>
+
+      {/* Prompt Editor Tab */}
+      <TabsContent className="p-4" value="editor">
+        <ResizablePanels
+          leftPanel={
+            <PromptPanels
+              messages={state.messages}
+              onMessageChange={handleMessageChange}
+              onAddMessagePair={handleAddMessagePair}
+              onAddPrefill={handleAddPrefill}
+              canAddPrefill={canAddPrefill(state.parameters.provider)}
+              onRemoveMessage={handleRemoveMessage}
+              onVariableCreate={handleVariableCreate}
+              variables={state.variables || []}
+            />
+          }
+          rightPanel={
+            <div className="flex h-full flex-col gap-4">
+              <ResponsePanel response={state.response || ""} />
+
+              <VariablesPanel
+                variables={state.variables || []}
+                onVariableChange={handleVariableChange}
+                promptVersionId={state.versionId}
               />
 
-              <HoverCard>
-                <HoverCardTrigger>
-                  <InfoIcon
-                    width={16}
-                    height={16}
-                    className="text-slate-500 cursor-pointer"
-                  />
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="w-[220px] p-0 z-[1000] bg-white"
-                  align="start"
-                >
-                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-base font-semibold text-slate-700">
-                        Prompt Name
-                      </h3>
-                      <div className="flex flex-row items-center gap-2">
-                        <p className="text-sm text-slate-500 truncate">
-                          {prompt?.user_defined_id}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-sm font-semibold text-slate-700">
-                        Versions
-                      </h3>
-                      <p className="text-sm text-slate-500 truncate">
-                        {sortedPrompts?.length}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-sm font-semibold text-slate-700">
-                        Last used
-                      </h3>
-                      <p className="text-sm text-slate-500 truncate">
-                        {prompt?.last_used
-                          ? getTimeAgo(new Date(prompt?.last_used))
-                          : "Never"}{" "}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-sm font-semibold text-slate-700">
-                        Created on
-                      </h3>
-                      <p className="text-sm text-slate-500 truncate">
-                        {prompt?.created_at &&
-                          new Date(prompt?.created_at).toDateString()}{" "}
-                      </p>
-                    </div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-              <HoverCard>
-                {prompt?.metadata?.createdFromUi === true ? (
-                  <>
-                    <HoverCardTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size={"sm"}
-                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1] text-xs font-normal"
-                      >
-                        {/* <PencilIcon className="h-4 w-4 mr-2" /> */}
-                        Editable
-                      </Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent
-                      className="max-w-[15rem] bg-white "
-                      align="center"
-                    >
-                      <p className="text-sm">
-                        This prompt was created{" "}
-                        <span className="font-semibold">in the UI</span>. You
-                        can edit / delete them, or promote to prod.
-                      </p>
-                    </HoverCardContent>
-                  </>
-                ) : (
-                  <>
-                    <HoverCardTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size={"sm"}
-                        className="h-6 bg-[#F1F5F9] border border-[#CBD5E1] text-xs font-normal"
-                      >
-                        {/* <EyeIcon className="h-4 w-4 mr-2" /> */}
-                        View only
-                      </Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="max-w-[15rem]" align="center">
-                      <p className="text-sm">
-                        This prompt was created{" "}
-                        <span className="font-semibold">in code</span>. You
-                        won&apos;t be able to edit this from the UI.
-                      </p>
-                    </HoverCardContent>
-                  </>
-                )}
-              </HoverCard>
+              <ParametersPanel
+                parameters={state.parameters}
+                onParameterChange={(updates) => {
+                  updateState((prev) => {
+                    if (!prev) return {};
+                    return {
+                      parameters: {
+                        ...prev.parameters,
+                        ...updates,
+                      },
+                    };
+                  });
+                }}
+              />
             </div>
-            <div className="flex items-center space-x-4">
-              <TabsList className="grid grid-cols-2">
-                <TabsTrigger value="prompt">Prompt & Inputs</TabsTrigger>
-                <TabsTrigger value="metrics">Metrics</TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
+          }
+        />
+      </TabsContent>
 
-          <TabsContent value="prompt">
-            <div className="flex items-start relative">
-              <div className="py-4 flex flex-col space-y-4 w-full h-[calc(100vh-76px)]">
-                <div className="flex h-full">
-                  <div className="w-2/3 overflow-y-auto">
-                    <PromptPlayground
-                      prompt={selectedPrompt?.helicone_template || ""}
-                      selectedInput={selectedInput || undefined}
-                      onSubmit={async (history, model) => {
-                        await createSubversion(history, model);
-                      }}
-                      submitText="Test"
-                      initialModel={model}
-                      isPromptCreatedFromUi={
-                        prompt?.metadata?.createdFromUi as boolean | undefined
-                      }
-                      className="border-y border-slate-200 dark:border-slate-700"
-                    />
-                  </div>
-                  <div className="w-1/3 flex flex-col h-full">
-                    <div className="border-y border-x border-slate-200 dark:border-slate-700 bg-[#F9FAFB] dark:bg-black flex flex-col h-full">
-                      <div
-                        className="flex flex-row items-center justify-between px-4 py-3.5 cursor-pointer"
-                        onClick={() =>
-                          setIsVersionsExpanded(!isVersionsExpanded)
-                        }
-                      >
-                        <h2 className="font-medium text-sm">Versions</h2>
-                        <ChevronDownIcon
-                          className={`h-5 w-5 transition-transform ${
-                            isVersionsExpanded ? "rotate-180" : ""
-                          }`}
-                        />
-                      </div>
-
-                      {isVersionsExpanded && (
-                        <ScrollArea className="h-[25vh] flex-shrink-0">
-                          <div>
-                            {sortedPrompts?.map((promptVersion, index) => {
-                              const isProduction =
-                                promptVersion.metadata?.isProduction === true;
-                              const isSelected =
-                                selectedVersion ===
-                                `${promptVersion.major_version}.${promptVersion.minor_version}`;
-                              const isFirst = index === 0;
-                              const isLast = index === sortedPrompts.length - 1;
-
-                              return (
-                                <div
-                                  key={promptVersion.id}
-                                  className={`flex flex-row w-full h-12 relative ${
-                                    isSelected
-                                      ? "bg-sky-100 dark:bg-sky-950"
-                                      : "bg-white dark:bg-slate-950"
-                                  } ${
-                                    isFirst
-                                      ? "border-t border-slate-200 dark:border-slate-700"
-                                      : ""
-                                  } ${
-                                    isLast
-                                      ? "border-b border-slate-200 dark:border-slate-700"
-                                      : ""
-                                  }`}
-                                >
-                                  <div className="flex items-center absolute left-0 h-full">
-                                    {isSelected && (
-                                      <div className="bg-sky-500 h-full w-1" />
-                                    )}
-                                  </div>
-                                  <div
-                                    className={`flex-grow px-4 py-2 flex flex-row cursor-pointer ${
-                                      !isFirst
-                                        ? "border-t border-slate-200 dark:border-slate-700"
-                                        : ""
-                                    }`}
-                                    onClick={() =>
-                                      setSelectedInputAndVersion(
-                                        `${promptVersion.major_version}.${promptVersion.minor_version}`
-                                      )
-                                    }
-                                  >
-                                    <div className="flex items-center justify-between w-full">
-                                      <div className="flex items-center space-x-2 min-w-0 flex-grow overflow-hidden">
-                                        <span className="font-medium text-sm whitespace-nowrap flex-shrink-0">
-                                          V{promptVersion.major_version}.
-                                          {promptVersion.minor_version}
-                                        </span>
-                                        {promptVersion.model &&
-                                          promptVersion.model.length > 0 && (
-                                            <Tooltip>
-                                              <TooltipTrigger className="max-w-[calc(100%-6rem)] flex-shrink">
-                                                <Badge
-                                                  variant={"default"}
-                                                  className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-medium rounded-lg px-2 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white w-full"
-                                                >
-                                                  <span className="block truncate">
-                                                    {promptVersion.model}
-                                                  </span>
-                                                </Badge>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                {promptVersion.model}
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          )}
-                                        <span className="flex-shrink-0 ml-auto">
-                                          {isProduction && (
-                                            <Badge
-                                              variant={"default"}
-                                              className="bg-sky-200 dark:bg-slate-800 text-sky-700 dark:text-white text-sm font-medium rounded-lg px-4 hover:bg-sky-200 dark:hover:bg-slate-800 hover:text-sky-700 dark:hover:text-white"
-                                            >
-                                              Prod
-                                            </Badge>
-                                          )}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-                                        <span className="text-sm text-slate-500">
-                                          {getTimeAgo(
-                                            new Date(promptVersion.created_at)
-                                          )}
-                                        </span>
-                                        <div className="flex items-center space-x-2">
-                                          {prompt?.metadata?.createdFromUi ===
-                                          true ? (
-                                            <DropdownMenu>
-                                              <DropdownMenuTrigger asChild>
-                                                <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                  <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                                </button>
-                                              </DropdownMenuTrigger>
-                                              <DropdownMenuContent align="start">
-                                                {!isProduction && (
-                                                  <DropdownMenuItem
-                                                    onClick={() =>
-                                                      promoteToProduction(
-                                                        promptVersion.id
-                                                      )
-                                                    }
-                                                  >
-                                                    <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
-                                                    Promote to prod
-                                                  </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    startExperiment(
-                                                      promptVersion.id,
-                                                      promptVersion.helicone_template
-                                                    )
-                                                  }
-                                                >
-                                                  <BeakerIcon className="h-4 w-4 mr-2" />
-                                                  Experiment
-                                                </DropdownMenuItem>
-                                                {!isProduction && (
-                                                  <DropdownMenuItem
-                                                    onClick={() =>
-                                                      deletePromptVersion(
-                                                        promptVersion.id
-                                                      )
-                                                    }
-                                                  >
-                                                    <TrashIcon className="h-4 w-4 mr-2 text-red-500" />
-                                                    <p className="text-red-500">
-                                                      Delete
-                                                    </p>
-                                                  </DropdownMenuItem>
-                                                )}
-                                              </DropdownMenuContent>
-                                            </DropdownMenu>
-                                          ) : promptVersion.minor_version ===
-                                            0 ? (
-                                            <DropdownMenu>
-                                              <DropdownMenuTrigger asChild>
-                                                <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full">
-                                                  <EllipsisHorizontalIcon className="h-6 w-6 text-slate-500" />
-                                                </button>
-                                              </DropdownMenuTrigger>
-                                              <DropdownMenuContent>
-                                                <DropdownMenuItem
-                                                  onClick={() =>
-                                                    startExperiment(
-                                                      promptVersion.id,
-                                                      promptVersion.helicone_template
-                                                    )
-                                                  }
-                                                >
-                                                  <BeakerIcon className="h-4 w-4 mr-2" />
-                                                  Experiment
-                                                </DropdownMenuItem>
-                                              </DropdownMenuContent>
-                                            </DropdownMenu>
-                                          ) : (
-                                            <></>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </ScrollArea>
-                      )}
-                      <div
-                        className="flex flex-row items-center justify-between px-4 h-12 flex-shrink-0 overflow-hidden cursor-pointer border-y border-slate-200 dark:border-slate-700"
-                        onClick={() => setIsInputsExpanded(!isInputsExpanded)}
-                      >
-                        <h2 className="font-medium text-sm">Inputs</h2>
-                        <div className="flex items-center space-x-2">
-                          {isInputsExpanded && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="relative flex items-center">
-                                  <div
-                                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                                      isSearchVisible ? "w-40 sm:w-64" : "w-0"
-                                    }`}
-                                  >
-                                    <Input
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                      }}
-                                      ref={searchInputRef}
-                                      type="text"
-                                      value={searchRequestId}
-                                      onChange={(e) =>
-                                        setSearchRequestId(e.target.value)
-                                      }
-                                      placeholder="Search by request id..."
-                                      className={clsx(
-                                        "w-40 sm:w-64 text-sm pr-8 transition-transform duration-300 ease-in-out outline-none border-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
-                                        isSearchVisible
-                                          ? "translate-x-0"
-                                          : "translate-x-full"
-                                      )}
-                                    />
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className={
-                                      isSearchVisible
-                                        ? "absolute right-0 hover:bg-transparent"
-                                        : ""
-                                    }
-                                    onClick={handleSearchButtonClick} // Use the new handler here
-                                  >
-                                    {isSearchVisible ? (
-                                      <XMarkIcon className="h-4 w-4" />
-                                    ) : (
-                                      <MagnifyingGlassIcon className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {isSearchVisible
-                                  ? "Close search"
-                                  : "Open search"}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          <ChevronDownIcon
-                            className={`h-5 w-5 transition-transform ${
-                              isInputsExpanded ? "rotate-180" : ""
-                            }`}
-                          />
-                        </div>
-                      </div>
-
-                      {isInputsExpanded && (
-                        <div className="flex-grow overflow-hidden">
-                          <ScrollArea className="h-full">
-                            <ul className="flex flex-col">
-                              {inputs
-                                ?.filter((input) =>
-                                  input.source_request.includes(searchRequestId)
-                                )
-                                .map((input, index, filteredInputs) => (
-                                  <PromptInputItem
-                                    key={input.id}
-                                    input={input}
-                                    isSelected={selectedInput?.id === input.id}
-                                    isFirst={index === 0}
-                                    isLast={index === filteredInputs.length - 1}
-                                    onSelect={handleInputSelect}
-                                  />
-                                ))}
-                            </ul>
-                          </ScrollArea>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="metrics">
-            <div className="flex flex-col space-y-16 py-4 px-4">
-              <div className="w-full h-full flex flex-col space-y-4">
-                <div className="flex items-center justify-between w-full">
-                  <ThemedTimeFilter
-                    timeFilterOptions={[
-                      { key: "24h", value: "24H" },
-                      { key: "7d", value: "7D" },
-                      { key: "1m", value: "1M" },
-                      { key: "3m", value: "3M" },
-                      // { key: "all", value: "All" },
-                    ]}
-                    custom={true}
-                    onSelect={function (key: string, value: string): void {
-                      onTimeSelectHandler(key as TimeInterval, value);
-                    }}
-                    isFetching={isPromptRequestsLoading}
-                    defaultValue={interval}
-                    currentTimeFilter={timeFilter}
-                  />
-                </div>
-
-                <div>
-                  <StyledAreaChart
-                    title={"Total Requests"}
-                    value={total}
-                    isDataOverTimeLoading={isPromptRequestsLoading}
-                    withAnimation={true}
-                  >
-                    <AreaChart
-                      className="h-[14rem]"
-                      data={
-                        data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          count: r.count,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["count"]}
-                      colors={["cyan"]}
-                      showYAxis={false}
-                      curveType="monotone"
-                      valueFormatter={(number: number | bigint) => {
-                        return `${new Intl.NumberFormat("us").format(
-                          Number(number)
-                        )}`;
-                      }}
-                    />
-                  </StyledAreaChart>
-                </div>
-              </div>
-              <div className="flex flex-col space-y-4 h-full w-full">
-                <h2 className="text-2xl font-semibold text-black dark:text-white">
-                  Experiment Logs
-                </h2>
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-wrap items-center space-x-2 w-full">
-                    <div className="w-full max-w-[16rem]">
-                      <MultiSelect
-                        placeholder="Dataset"
-                        value={selectedDatasets}
-                        onValueChange={(value) => {
-                          setSelectedDatasets(value);
-                        }}
-                      >
-                        {datasets.map((dataset) => (
-                          <MultiSelectItem value={dataset.id} key={dataset.id}>
-                            {dataset.name}
-                          </MultiSelectItem>
-                        ))}
-                      </MultiSelect>
-                    </div>
-                    <div className="w-full max-w-[16rem]">
-                      <MultiSelect
-                        placeholder="Model"
-                        value={selectedModels}
-                        onValueChange={(value) => {
-                          setSelectedModels(value);
-                        }}
-                      >
-                        {MODEL_LIST.map((model) => (
-                          <MultiSelectItem
-                            value={model.value}
-                            key={model.value}
-                          >
-                            {model.label}
-                          </MultiSelectItem>
-                        ))}
-                      </MultiSelect>
-                    </div>
-                    <div className="pl-2">
-                      <Button
-                        variant={"ghost"}
-                        size={"sm"}
-                        onClick={() => {
-                          setSelectedDatasets([]);
-                          setSelectedModels([]);
-                        }}
-                      >
-                        Clear All
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                {isExperimentsLoading ? (
-                  <div className="h-48 flex justify-center items-center">
-                    <LoadingAnimation title="Loading Experiments..." />
-                  </div>
-                ) : (
-                  <SimpleTable
-                    data={filteredExperiments}
-                    columns={[
-                      {
-                        key: "id",
-                        header: "ID",
-                        render: (item) => (
-                          <span className="underline text-black dark:text-white">
-                            {item.id}
-                          </span>
-                        ),
-                      },
-                      {
-                        key: "status",
-                        header: "Status",
-                        render: (item) => (
-                          <StatusBadge statusType={item.status || "unknown"} />
-                        ),
-                      },
-                      {
-                        key: "createdAt",
-                        header: "Created At",
-                        render: (item) => (
-                          <span>{getUSDateFromString(item.createdAt)}</span>
-                        ),
-                      },
-                      {
-                        key: "datasetName",
-                        header: "Dataset",
-                        render: (item) => item.datasetName,
-                      },
-                      {
-                        key: "model",
-                        header: "Model",
-                        render: (item) => (
-                          <ModelPill model={item.model || "unknown"} />
-                        ),
-                      },
-                      {
-                        key: "runCount",
-                        header: "Run Count",
-                        render: (item) => item.runCount || 0,
-                      },
-                    ]}
-                    onSelect={(item) => {
-                      router.push(`/prompts/${id}/experiments/${item.id}`);
-                    }}
-                  />
-                )}
-
-                <TableFooter
-                  currentPage={currentPage}
-                  pageSize={100}
-                  count={experiments.length}
-                  isCountLoading={false}
-                  onPageChange={function (newPageNumber: number): void {
-                    // throw new Error("Function not implemented.");
-                  }}
-                  onPageSizeChange={function (newPageSize: number): void {
-                    // throw new Error("Function not implemented.");
-                  }}
-                  pageSizeOptions={[25, 50, 100]}
-                />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </IslandContainer>
+      {/* Metrics Tab */}
+      <TabsContent value="metrics">
+        <PromptMetricsTab
+          id={id}
+          promptUserDefinedId={prompt?.user_defined_id || ""}
+        />
+      </TabsContent>
+    </Tabs>
   );
-};
-
-export default PromptIdPage;
+}

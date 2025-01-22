@@ -91,7 +91,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
                 setOpen={setOpen}
               />
             </div>
-            <div className="flex-grow max-w-full overflow-hidden relative">
+            <div className="flex-grow max-w-full relative">
               <OnboardingBackground />
               <MainContent banner={banner} pathname={pathname}>
                 <ErrorBoundary>{children}</ErrorBoundary>

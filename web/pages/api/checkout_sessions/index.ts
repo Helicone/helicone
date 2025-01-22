@@ -3,8 +3,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { DEMO_EMAIL } from "../../../lib/constants";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
-import { getStripeCustomer } from "../../../utlis/stripeHelpers";
-import { stripeServer } from "../../../utlis/stripeServer";
+import { getStripeCustomer } from "../../../utils/stripeHelpers";
+import { stripeServer } from "../../../utils/stripeServer";
 
 export const stripeStarterPriceId = process.env.STRIPE_STARTER_PRICE_ID;
 if (!stripeStarterPriceId) {

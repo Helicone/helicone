@@ -1,7 +1,6 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
-import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 import { Button } from "@/components/ui/button";
 import {
   Card,
