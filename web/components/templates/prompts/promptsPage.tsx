@@ -166,9 +166,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                   <p className="text-sm font-medium flex gap-2">
                     <b>Need to create new prompts?</b>
                     <ProFeatureWrapper featureName="Prompts">
-                      <button className="underline">
-                        Get unlimited prompts & more.
-                      </button>
+                      <button className="underline">Get prompts & more.</button>
                     </ProFeatureWrapper>
                   </p>
                 </InfoBox>

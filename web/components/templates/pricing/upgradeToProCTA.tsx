@@ -67,7 +67,7 @@ export const UpgradeToProCTA = ({
                   htmlFor="unlimited-prompts"
                   className="whitespace-nowrap"
                 >
-                  Unlimited Prompts + Experiments + Evals
+                  Prompts & Experiments
                 </Label>
                 <p className="text-sm text-muted-foreground whitespace-nowrap text-slate-500">
                   + ${costForPrompts.data?.data ?? "loading..."}/mo

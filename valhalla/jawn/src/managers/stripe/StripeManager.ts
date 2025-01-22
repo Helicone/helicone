@@ -36,7 +36,7 @@ export class StripeManager extends BaseManager {
   public async getCostForPrompts(): Promise<Result<number, string>> {
     const subscriptionResult = await this.getSubscription();
     if (!subscriptionResult.data) {
-      return err("No existing subscription found");
+      return ok(COST_OF_PROMPTS);
     }
 
     const subscription = subscriptionResult.data;
