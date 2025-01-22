@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { IconType } from "react-icons";
+import { ReactElement } from "react";
 
 interface BaseProps {
   label: string;
-  icon?: IconType;
+  icon?: IconType | ReactElement;
   disabled?: boolean;
   className?: string;
   children?: React.ReactNode;
@@ -19,9 +20,16 @@ export default function ActionButton(props: ActionButtonProps) {
       : props.className
   }`;
 
+  const IconComponent = props.icon;
+
   const content = (
     <>
-      {props.icon && <props.icon className="h-5 w-5 group-hover:scale-105" />}
+      {props.icon &&
+        (typeof props.icon === "function" ? (
+          <props.icon className="group-hover:scale-105" />
+        ) : (
+          <span className="group-hover:scale-105">{props.icon}</span>
+        ))}
       <span className="font-medium">{props.label}</span>
       {props.children}
     </>

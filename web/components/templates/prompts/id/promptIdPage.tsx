@@ -23,7 +23,7 @@ import { canAddPrefill } from "@/utils/messages";
 import PromptMetricsTab from "./PromptMetricsTab";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
-import { PiCommandBold } from "react-icons/pi";
+import { PiCommandBold, PiRocketLaunchBold } from "react-icons/pi";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { toKebabCase } from "@/utils/strings";
@@ -80,12 +80,14 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Can Run
   const canRun = useMemo(
     () =>
-      state?.messages.some(
+      (state?.messages.some(
         (m) =>
           m.role === "user" &&
           (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-      ) ?? false,
-    [state?.messages]
+      ) ??
+        false) &&
+      prompt?.metadata?.createdFromUi !== false,
+    [state?.messages, prompt?.metadata?.createdFromUi]
   );
 
   // CALLBACKS
@@ -517,7 +519,11 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Handle Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key === "Enter" &&
+        prompt?.metadata?.createdFromUi !== false
+      ) {
         event.preventDefault();
         handleSaveAndRun();
       }
@@ -525,7 +531,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveAndRun]);
+  }, [handleSaveAndRun, prompt?.metadata?.createdFromUi]);
 
   // HELPERS
   // - Add Message Pair
@@ -612,13 +618,23 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
             <div
               className={`flex items-center gap-1 text-sm ${
-                canRun ? "text-white opacity-60" : "text-slate-400"
+                canRun && prompt?.metadata?.createdFromUi !== false
+                  ? "text-white opacity-60"
+                  : "text-slate-400"
               }`}
             >
               <PiCommandBold className="h-4 w-4" />
               <MdKeyboardReturn className="h-4 w-4" />
             </div>
           </ActionButton>
+
+          <ActionButton
+            label="Deploy"
+            className="bg-white"
+            icon={PiRocketLaunchBold}
+            onClick={() => {}}
+            disabled={prompt?.metadata?.createdFromUi === false}
+          />
         </div>
       </GlassHeader>
 
