@@ -7,14 +7,12 @@ import { cn } from "@/lib/utils";
 const Tabs = TabsPrimitive.Root;
 
 const tabsListVariants = cva(
-  "inline-flex h-10 items-center justify-center rounded-md p-1",
+  "inline-flex items-center justify-center rounded-lg p-0.5 border border-slate-100",
   {
     variants: {
       variant: {
-        default:
-          "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
-        secondary:
-          "bg-white text-slate-500 dark:bg-slate-950 dark:text-slate-400",
+        default: "bg-slate-100 dark:bg-slate-800 dark:text-slate-400",
+        secondary: "bg-white dark:bg-slate-950 dark:text-slate-400",
       },
     },
     defaultVariants: {
@@ -40,14 +38,14 @@ const TabsList = React.forwardRef<
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 const tabsTriggerVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 interactive",
   {
     variants: {
       variant: {
         default:
-          "data-[state=active]:bg-white data-[state=active]:text-slate-950 data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
+          "data-[state=active]:font-semibold text-slate-700 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
         secondary:
-          "bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
+          "data-[state=active]:font-semibold text-slate-700 bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-black dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
       },
     },
     defaultVariants: {
@@ -79,7 +77,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+      "ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
       className
     )}
     {...props}

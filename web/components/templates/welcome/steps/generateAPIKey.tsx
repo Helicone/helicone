@@ -1,6 +1,6 @@
 import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
-import { generateAPIKeyHelper } from "../../../../utlis/generateAPIKeyHelper";
+import { generateAPIKeyHelper } from "../../../../utils/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/org/organizationContext";
 import useNotification from "../../../shared/notification/useNotification";
 import Image from "next/image";
