@@ -453,7 +453,7 @@ export class PromptController extends Controller {
     } else {
       this.setStatus(200); // set return status 201
     }
-    return resultMap(result, data => data?.[0]);
+    return resultMap(result, (data) => data?.[0]);
   }
 
   @Delete("version/{promptVersionId}")

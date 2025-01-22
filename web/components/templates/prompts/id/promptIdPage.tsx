@@ -671,6 +671,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               <VariablesPanel
                 variables={state.variables || []}
                 onVariableChange={handleVariableChange}
+                promptVersionId={state.versionId}
               />
 
               <ParametersPanel

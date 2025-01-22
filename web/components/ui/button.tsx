@@ -33,10 +33,15 @@ const buttonVariants = cva(
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-xs",
       },
+      asPill: {
+        true: "rounded-full",
+        false: "",
+      },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      asPill: false,
     },
   }
 );
@@ -45,14 +50,26 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  asPill?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      children,
+      asPill = false,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className, asPill }))}
         ref={ref}
         {...(props as any)}
       >
