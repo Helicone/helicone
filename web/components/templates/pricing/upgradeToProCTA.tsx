@@ -6,11 +6,13 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useCostForPrompts } from "./hooks";
+import { ContactCTA } from "./contactCTA";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
   defaultAlerts = false,
   showAddons = false,
+  showContactCTA = false,
 }) => {
   const org = useOrg();
   const subscription = useQuery({
@@ -92,7 +94,7 @@ export const UpgradeToProCTA = ({
           </div>
         </div>
       )}
-
+      {showContactCTA && <ContactCTA />}
       <Button
         onClick={async () => {
           if (isPro) {

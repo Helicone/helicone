@@ -52,6 +52,7 @@ import { ISLAND_MARGIN } from "@/components/ui/islandContainer";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../../ui/scroll-area";
 import PromptPlayground, { PromptObject } from "./id/promptPlayground";
+import { ContactCTA } from "../pricing/contactCTA";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -583,6 +584,7 @@ const chatCompletion = await openai.chat.completions.create(
                         <UpgradeToProCTA
                           defaultPrompts={true}
                           showAddons={true}
+                          showContactCTA={true}
                         />
                       </div>
                       <div className="space-x-2 mt-5">

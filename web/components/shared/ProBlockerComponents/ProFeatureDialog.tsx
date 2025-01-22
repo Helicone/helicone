@@ -92,6 +92,7 @@ export function ProFeatureDialog({
               defaultPrompts={featureName === "Prompts"}
               defaultAlerts={featureName === "Alerts"}
               showAddons={featureName === "Prompts" || featureName === "Alerts"}
+              showContactCTA={true}
             />
           </div>
         </div>
