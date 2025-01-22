@@ -1,6 +1,7 @@
 import { Client } from "pg";
 import { Result } from "../result";
 import { clickhouseDb } from "../../db/ClickhouseWrapper";
+import { HELICONE_DB } from "./pgpClient";
 
 export function paramsToValues(params: (number | string | boolean | Date)[]) {
   return params
@@ -73,14 +74,9 @@ export async function dbExecute<T>(
   });
 
   try {
-    // Let's print out the time it takes to execute the query
-    await client.connect();
+    const result = await HELICONE_DB.any(query, parameters);
 
-    const result = await client.query(query, parameters);
-
-    await client.end();
-
-    return { data: result.rows, error: null };
+    return { data: result, error: null };
   } catch (err) {
     console.error("Error executing query: ", query, parameters);
     console.error(err);

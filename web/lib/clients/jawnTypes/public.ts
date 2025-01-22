@@ -222,6 +222,9 @@ export interface paths {
   "/v1/trace/log-python": {
     post: operations["LogPythonTrace"];
   };
+  "/v1/stripe/subscription/cost-for-prompts": {
+    get: operations["GetCostForPrompts"];
+  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
@@ -3675,6 +3678,16 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetCostForPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
       };
     };
   };

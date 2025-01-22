@@ -5,7 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 
@@ -13,14 +13,14 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<Tier, string>>) {
-  const { data: org, error: orgError } = await supabaseServer
+  const { data: org, error: orgError } = await getSupabaseServer()
     .from("organization")
     .select("*")
     .eq("id", orgId)
     .single();
 
   const { data: orgOwnerSettings, error: userSettingsError } =
-    await supabaseServer
+    await getSupabaseServer()
       .from("user_settings")
       .select("*")
       .eq("user", org?.owner || "")

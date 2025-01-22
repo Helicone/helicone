@@ -298,6 +298,12 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://qstash.upstash.io",
       };
+    } else if (hostParts[0] === "x") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.x.ai",
+      };
     } else if (hostParts[0].includes("deepseek")) {
       return {
         ...env,

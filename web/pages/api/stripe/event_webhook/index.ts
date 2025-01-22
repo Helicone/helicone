@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
 import {
   getEvaluatorUsage,
@@ -21,7 +21,7 @@ const PricingVersionOld = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
@@ -65,7 +65,7 @@ const PricingVersionOld = {
       updateFields.tier = "pro";
     }
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update(updateFields)
       .eq("stripe_customer_id", subscriptionUpdated.customer);
@@ -81,7 +81,7 @@ const PricingVersionOld = {
     // Subscription has been deleted, either due to non-payment or being manually canceled.
     const subscriptionDeleted = event.data.object as Stripe.Subscription;
 
-    await supabaseServer
+    await getSupabaseServer()
       .from("organization")
       .update({
         tier: "free",
@@ -98,7 +98,7 @@ const PricingVersionOld = {
     const orgId = checkoutCompleted.metadata?.orgId;
     const tier = checkoutCompleted.metadata?.tier;
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
@@ -117,7 +117,7 @@ const PricingVersion20240913 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",

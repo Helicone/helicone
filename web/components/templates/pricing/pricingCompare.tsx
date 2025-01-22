@@ -1,4 +1,5 @@
 import { CheckIcon } from "lucide-react";
+import { ContactCTA } from "./contactCTA";
 import { UpgradeToProCTA } from "./upgradeToProCTA";
 
 export const PricingCompare = ({
@@ -60,6 +61,7 @@ export const PricingCompare = ({
           />
         </div>
       </div>
+      <ContactCTA />
     </>
   );
 };
