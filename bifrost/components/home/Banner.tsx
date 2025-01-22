@@ -13,9 +13,9 @@ const Banner = () => {
             href="https://news.ycombinator.com/newest"
             className="font-medium underline hover:text-blue-200"
           >
-            We're on HackerNews
+            We&apos;re on HackerNews
           </Link>
-          ! If Helicone has helped you, we'd love to get your thoughts and
+          ! If Helicone has helped you, we&apos;d love to get your thoughts and
           support.
         </p>
       </div>
