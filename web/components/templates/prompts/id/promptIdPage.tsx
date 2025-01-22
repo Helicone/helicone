@@ -42,6 +42,14 @@ import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
 import { FlaskConicalIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useExperiment } from "./hooks";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { DiffHighlight } from "../../welcome/diffHighlight";
 
 interface PromptIdPageProps {
   id: string;
@@ -620,6 +628,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
+          {/* Run Button */}
           <ActionButton
             label={isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
             icon={isStreaming ? PiStopBold : PiPlayBold}
@@ -645,13 +654,84 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             </div>
           </ActionButton>
 
-          <ActionButton
-            label="Deploy"
-            className="bg-white"
-            icon={PiRocketLaunchBold}
-            onClick={() => {}}
-            disabled={prompt?.metadata?.createdFromUi === false}
-          />
+          {/* Deploy Button */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <ActionButton
+                label="Deploy"
+                className="bg-white"
+                icon={PiRocketLaunchBold}
+                onClick={() => {}}
+                disabled={prompt?.metadata?.createdFromUi === false}
+              />
+            </DialogTrigger>
+            <DialogContent className="w-full max-w-3xl bg-white">
+              <DialogHeader>
+                <DialogTitle>Deploy Prompt</DialogTitle>
+              </DialogHeader>
+
+              {/* Code example */}
+              <DiffHighlight
+                code={`
+export async function getPrompt(
+  id: string,
+  variables: Record<string, any>
+): Promise<any> {
+  const getHeliconePrompt = async (id: string) => {
+    const res = await fetch(
+      \`https://api.helicone.ai/v1/prompt/\${id}/template\`,
+      {
+        headers: {
+          Authorization: \`Bearer \${YOUR_HELICONE_API_KEY}\`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          inputs: variables,
+        }),
+      }
+    );
+
+    return (await res.json()) as Result<PromptVersionCompiled, any>;
+  };
+
+  const heliconePrompt = await getHeliconePrompt(id);
+  if (heliconePrompt.error) {
+    throw new Error(heliconePrompt.error);
+  }
+  return heliconePrompt.data?.filled_helicone_template;
+}
+
+async function pullPromptAndRunCompletion() {
+  const prompt = await getPrompt("${
+    prompt?.user_defined_id || "my-prompt-id"
+  }", {
+    ${
+      state?.variables
+        ?.map((v) => `${v.name}: "${v.value || "value"}"`)
+        .join(",\n    ") || 'color: "red"'
+    }
+  });
+  console.log(prompt);
+
+  const openai = new OpenAI({
+    apiKey: "YOUR_OPENAI_API_KEY",
+    baseURL: \`https://oai.helicone.ai/v1/\${YOUR_HELICONE_API_KEY}\`,
+  });
+  const response = await openai.chat.completions.create(
+    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
+  );
+  console.log(response);
+}`}
+                language="typescript"
+                newLines={[]}
+                oldLines={[]}
+                minHeight={false}
+              />
+            </DialogContent>
+          </Dialog>
+
+          {/* Experiment Button */}
           <ActionButton
             label="Experiment"
             className="bg-white"
