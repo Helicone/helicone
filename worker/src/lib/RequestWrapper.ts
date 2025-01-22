@@ -654,7 +654,7 @@ export async function getProviderKeyFromPortalKey(
     .from("decrypted_provider_keys")
     .select("decrypted_provider_key")
     .eq("id", providerKeyId.data?.id ?? "")
-    .eq("soft_delete", "false")
+    .eq("soft_delete", false)
     .single();
 
   return map(mapPostgrestErr(providerKey), (x) => ({
@@ -689,7 +689,7 @@ export async function getProviderKeyFromProxy(
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single(),
     supabaseClient
       .from("helicone_proxy_key_limits")
@@ -721,7 +721,7 @@ export async function getProviderKeyFromProxy(
     .from("decrypted_provider_keys")
     .select("decrypted_provider_key")
     .eq("id", storedProxyKey.data.provider_key_id)
-    .eq("soft_delete", "false")
+    .eq("soft_delete", false)
     .single();
 
   if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
