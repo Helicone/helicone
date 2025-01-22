@@ -39,7 +39,6 @@ import {
   PiCaretLeftBold,
 } from "react-icons/pi";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
-import { formatPrompt } from "@helicone/prompts";
 
 interface PromptIdPageProps {
   id: string;
@@ -111,7 +110,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             )?.major_version ?? ver.major_version;
 
       // 3. First collect all variables and their default values from the template inputs
-      const inputs = templateData.inputs || {};
+      const inputs = ver?.metadata?.inputs || {};
       const variables = Object.entries(inputs).map(([name, value]) => ({
         name,
         value: value as string,
@@ -159,7 +158,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: processedMessages,
         parameters: {
-          provider: templateData.provider || "openai",
+          provider: ver.metadata.provider || "openai",
           model: templateData.model || "gpt-4o-mini",
           temperature: templateData.temperature || 0.7,
         },
@@ -372,15 +371,15 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // 3.1. Build Helicone Template for Saving
       const heliconeTemplate = {
-        ...state.parameters,
+        model: state.parameters.model,
+        temperature: state.parameters.temperature,
         messages: state.messages.map((msg) => ({
           ...msg,
           content:
             typeof msg.content === "string"
-              ? formatPrompt(convertToHeliconeTags(msg.content), variableMap)
+              ? convertToHeliconeTags(msg.content)
               : msg.content || "",
         })),
-        inputs: variableMap,
       };
 
       try {
@@ -393,6 +392,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               metadata: {
                 isProduction: false,
                 createdFromUi: true,
+                inputs: variableMap,
+                provider: state.parameters.provider,
               },
               isMajorVersion: true,
             },
@@ -408,7 +409,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         await refetchPromptVersions();
       } catch (error) {
         console.error("Failed to save state:", error);
-        setNotification("Failed to save prompt state", "error");
+        setNotification("Failed to save and run prompt state", "error");
         return;
       }
     }
