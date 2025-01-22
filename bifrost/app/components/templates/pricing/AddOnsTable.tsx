@@ -31,7 +31,7 @@ const rows: FeatureRowProps[] = [
       <>
         <h3 className="font-bold text-xl">Included</h3>
         <p className="text-center text-sm font-light text-slate-500">
-          Unlimited prompts and versions.
+          Prompts and versions.
         </p>
       </>
     ),
