@@ -1,35 +1,64 @@
-# Optimizing LLM Performance Through Caching: Techniques, Tools, and Tips
+LLM inference can be a bottleneck in production environments. It requires careful optimization in production environments, as it often leads to high computational costs, long latency, and inefficiency.
 
-LLM inference is computationally intensive and requires careful optimization in production environments. Among various methods for lowering cost, reducing compute, and improving latency, caching stands out as an old reliable.
+One of the most effective ways to tackle this challenge is through caching—an approach that reduces the need to recompute repetitive operations, saves on API calls, and minimizes latency.
 
-Caching is particularly effective because it can optimize processes at multiple levels within LLM-powered systems.
+![LLM Caching](/static/blog/llm-caching/llm-caching-strategy-cover.png)
 
-In this post, we will discuss:
+In this post, we'll dive into the caching strategies that can have a major impact on the performance of your LLM-powered systems.
 
-- Patterns of redundancy in LLMs and LLM-powered systems
-- KV-Caches as a model-level solution
-- Prompt caching (context caching)
-- Solutions offered by LLM providers and ways to utilize them
+You will learn about:
+
+- How caching eliminates patterns of redundancy in LLM systems
+- KV-Caching to reduce inference costs
+- Prompt caching to avoid recomputing common inputs
+- Solutions from LLM providers (OpenAI, Google, and Anthropic), and how to use their built-in caching mechanisms
 - Caching LLM responses (exact vs semantic caches)
 - Monitoring and best practices
 
 ## Redundant Patterns in LLM Systems
 
-Within LLMs, there are certain processes that, by nature, involve a lot of duplicative computation. We will add to these the more classic, service-level redundancies and discuss them in connection since redundancies cascade through architectural layers.
+LLM systems inherently involve repetitive computations that contribute to inefficiencies and higher resource usage. These redundancies can span different layers of the system's architecture, each adding to the overall computational load.
 
-With a rough hierarchical structure in mind, let's discuss what causes redundancy on each level:
+Understanding these redundancies is key to optimizing LLM performance, and caching provides an effective solution to reduce unnecessary computations.
 
-- **Autoregressive Token Generation (recompute on token):** LLMs calculate each new token as a function of all the tokens that came before.
-- **Stateless Architecture (recompute on prompt):** LLMs do not hold session memory; instead, they accumulate conversation history within inputs.
-- **Particular App Behavior (recompute on functionality):** LLM-driven applications, like any other, have specific operations they perform and set methods of performing them, which need communicating to the model.
+Let's break down the common sources of redundancy at each level of the LLM workflow:
+
+### 1. Autoregressive Token Generation (Recompute on Token)
+
+In autoregressive models, each new token generated depends on the preceding tokens. As the model generates tokens one by one, it needs to recalculate the context for every new token, leading to redundant computation. This can be particularly inefficient when generating long sequences where earlier tokens do not change.
+
+<BottomLine
+  title="Solution"
+  description="Caching token-level context (such as KV pairs) can prevent the need to recompute the same information repeatedly for each token, significantly reducing the computational burden."
+/>
+
+### 2. Stateless Architecture (Recompute on Prompt)
+
+Many LLMs operate without persistent memory, meaning they do not retain previous interactions or data once a session ends. As a result, every new prompt includes the entire conversation history or context, requiring the model to recompute the entire sequence each time.
+
+<BottomLine
+  title="Solution"
+  description="By using prompt caching or context caching, you can store and reuse previously seen context, avoiding the need to reprocess the same conversation history across multiple interactions. This leads to faster processing and lower compute costs."
+/>
+
+### 3. Application-Specific Behavior (Recompute on Functionality)
+
+LLMs in applications often perform repetitive operations with well-defined behaviors, such as generating responses to similar queries or applying the same set of instructions across multiple invocations. These tasks often require recalculating the same functions or processing the same data multiple times.
+
+<BottomLine
+  title="Solution"
+  description="Caching repeated queries or responses at the application layer allows the system to bypass redundant computation. This can significantly reduce the number of API calls and lower operational costs."
+/>
 
 We can remedy the issue at each level through caching, and a combination of such efforts at all levels would help minimize our applications' inference costs.
 
-We will start our discussion on the token level, with an introduction to KV-Cache. We will observe its effects on the prompt level, as it significantly lowers the computational load of long prompts. We will discuss the advantages that come with this newfound freedom on the application level, as well as mechanisms to lower the number and cost of API calls.
+Next, we will explore the token level first, with an introduction to KV-Cache.
 
-## KV Caching
+## KV Caching: Token-Level Solution
 
 When generating a new token, LLMs have to consider all the tokens that came before to determine how well the new piece will fit into the semantic, syntactic, and pragmatic context. The calculated context becomes obsolete, however, right after a new addition, requiring the LLM to recalculate all the ways each token affects the others.
+
+### How KV Caching Works
 
 In transformers, for each token, two main pieces of information are kept:
 
@@ -48,9 +77,11 @@ The idea behind KV caching is to store each token's "potentiality" (the Key and 
 
 There are optimization methods and different types of KV-caching mechanisms (such as KCache or FastGen), but here, we will assume the LLM service handles these internals, as major providers currently offer them under various names such as prompt or context caching.
 
-## Prompt Caching (Context Caching)
+While KV caching optimizes token-level computations, prompt caching extends this efficiency to entire conversation histories or repeated system instructions.
 
-### Use Cases
+## Prompt Caching: Expanding to Entire Conversations
+
+### Use Cases & Practical Examples
 
 There are certain scenarios where we embed a lot of the same information in repeated prompts. These could be:
 
@@ -97,14 +128,6 @@ It is important to read the latest documentation for these constraints and consi
 
 Note that this involves a trade of compute for storage. The provider may charge less for cache reads yet more for cache writes. In addition, storage durations can increase costs.
 
-## Best Practices for Context Caching
-
-To best utilize context caching, the system should:
-
-- **Adapt prompts to “trigger” caching:** Usually, this means starting prompts with similar content with identical strings of text. Providers typically check the prompt prefix up to a certain breakpoint. For example, if you’re doing RAG, place the retrieved context at the end of the prompt and keep instructions at the top.
-- **Track cache performance:** LLM services report when cached tokens are used. Keep track of cache hits and associated costs to ensure the benefit is measurable.
-- **Provide its own caching capabilities:** This, we will discuss next.
-
 ## Caching LLM Responses
 
 While prompt caching significantly reduces the cost per API call, creating a cache reserve of common queries and their inferred responses at the application layer can further minimize these calls, eliminate costs, reduce latency, and support scalability.
@@ -115,6 +138,14 @@ Most of these frameworks support two distinct cache types:
 
 - **Standard Cache:** Matches on the exact string (or the hash value) of the prompt.
 - **Semantic Cache:** Matches based on the “semantic similarity” of prompts.
+
+## Best Practices for Context Caching
+
+To best utilize context caching, the system should:
+
+- **Adapt prompts to “trigger” caching:** Usually, this means starting prompts with similar content with identical strings of text. Providers typically check the prompt prefix up to a certain breakpoint. For example, if you’re doing RAG, place the retrieved context at the end of the prompt and keep instructions at the top.
+- **Track cache performance:** LLM services report when cached tokens are used. Keep track of cache hits and associated costs to ensure the benefit is measurable.
+- **Provide its own caching capabilities:** This, we will discuss next.
 
 ### Why Implement an Additional Cache Layer?
 
@@ -136,3 +167,29 @@ Optimizing LLM systems through caching requires understanding the application's 
 - Balancing cache storage costs against compute savings
 
 Tools like **Helicone.ai** provide comprehensive insights into cache performance and other LLM metrics, supporting data-driven optimization. This ensures caching mechanisms enhance rather than hinder overall performance, maintaining efficiency across token-, prompt-, and application-level caches.
+
+## Key Takeaways (AI generated)
+
+- Caching is a powerful tool for optimizing LLM performance across various system layers.
+- KV caching optimizes token-level computations, while prompt caching extends this efficiency to entire conversation histories or repeated system instructions.
+- Major LLM providers offer built-in caching support through their APIs, with significant cost savings for cache reads.
+- Implementing an additional cache layer can further minimize costs, reduce latency, and support scalability.
+- Best practices include adapting prompts to trigger caching, tracking cache performance, and providing its own caching capabilities.
+- Tools like Helicone.ai provide comprehensive insights into cache performance and other LLM metrics, supporting data-driven optimization.
+
+### You might be interested in:
+
+- [5 Powerful Ways to Optimize LLM Costs](https://www.helicone.ai/blog/slash-llm-cost)
+- [A Developer's Guide to Preventing Prompt Injection](https://www.helicone.ai/blog/preventing-prompt-injection)
+- [Best Practices for AI Developers](https://www.helicone.ai/blog/ai-best-practices)
+
+<CallToAction
+  title="Get Started with Helicone"
+  description="Helicone is a platform that helps you optimize LLM performance through caching and other techniques. Get started today and see the difference it can make for your application."
+  primaryButtonText="Get Started"
+  primaryButtonLink="/"
+  secondaryButtonText="Learn More"
+  secondaryButtonLink="/"
+/>
+
+<Questions />
