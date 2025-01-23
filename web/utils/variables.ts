@@ -123,17 +123,20 @@ export function processMessageContent(
 
   // Handle array content type
   if (Array.isArray(content)) {
-    // Find the first text content
-    const textContent = content.find(
-      (item) => typeof item === "string" || item.type === "text"
-    );
-
-    // Extract the text content
-    const text =
-      typeof textContent === "string" ? textContent : textContent?.text || "";
-
-    // Process the content
-    return processContent(text, { convertTags, variables });
+    let textContent = "";
+    for (const item of content) {
+      if (
+        typeof item === "object" &&
+        item &&
+        "type" in item &&
+        item.type === "text" &&
+        "text" in item
+      ) {
+        textContent = item.text;
+        break;
+      }
+    }
+    return processContent(textContent, { convertTags, variables });
   }
 
   // Handle string content type
