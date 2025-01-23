@@ -9,10 +9,8 @@ import PromptPanels from "@/components/shared/prompts/PromptPanels";
 import { PromptState, Variable } from "@/types/prompt-state";
 import {
   extractVariables,
-  replaceVariables,
-  convertToHeliconeTags,
-  replaceTagsWithVariables,
   isValidVariableName,
+  processMessageContent,
 } from "@/utils/variables";
 import {
   canAddMessagePair,
@@ -50,6 +48,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DiffHighlight } from "../../welcome/diffHighlight";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 interface PromptIdPageProps {
   id: string;
@@ -137,47 +136,31 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         })
       );
 
-      // 4. Convert messages with Helicone tags to variable syntax
-      const processedMessages = templateData.messages.map((msg: any) => {
-        if (typeof msg.content === "string") {
-          // Convert Helicone tags to variable syntax
-          const content = replaceTagsWithVariables(msg.content);
-          return {
-            ...msg,
-            content,
-          };
-        } else if (typeof msg.content === "object") {
-          // Handle object content (if any)
-          return msg;
-        }
-        return msg;
-      });
-      console.log("Processed messages:", processedMessages);
-
-      // 5. Extract any additional variables from messages that might not be in inputs
-      processedMessages.forEach((msg: any) => {
-        if (typeof msg.content === "string") {
-          const messageVars = extractVariables(msg.content, true);
-          messageVars.forEach(({ name, isValid }) => {
-            // Only add if not already present
-            if (!variables.find((v) => v.name === name)) {
-              variables.push({
-                name,
-                value: metadata.inputs?.[name] ?? "",
-                isValid: isValid ?? true,
-              });
-            }
-          });
-        }
+      // 4. Extract any additional variables from messages that might not be in inputs
+      templateData.messages.forEach((msg: any) => {
+        const messageContent = processMessageContent(msg, {
+          convertTags: true,
+        });
+        const messageVars = extractVariables(messageContent, true);
+        messageVars.forEach(({ name, isValid }) => {
+          // Only add if not already present
+          if (!variables.find((v) => v.name === name)) {
+            variables.push({
+              name,
+              value: metadata.inputs?.[name] ?? "",
+              isValid: isValid ?? true,
+            });
+          }
+        });
       });
 
-      // 6. Update state with the processed data
+      // 5. Update state with the processed data
       const newState = {
         promptId: id,
         masterVersion: masterVersion,
         version: ver.major_version,
         versionId: ver.id,
-        messages: processedMessages,
+        messages: templateData.messages,
         parameters: {
           provider: metadata.provider ?? "openai",
           model: templateData.model ?? "gpt-4o-mini",
@@ -187,7 +170,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         evals: templateData.evals || [],
         structure: templateData.structure,
         isDirty: false,
-      };
+      } as PromptState;
       setState(newState);
     },
     [id, promptVersions]
@@ -219,14 +202,33 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       updateState((prev) => {
         if (!prev) return {};
 
-        const newMessages = prev.messages.map((msg, i) =>
-          i === index ? { ...msg, content } : msg
-        );
+        const newMessages = prev.messages.map((msg, i) => {
+          if (i !== index) return msg;
+
+          // Preserve the original message structure
+          if (Array.isArray(msg.content)) {
+            return {
+              ...msg,
+              content: [
+                {
+                  type: "text" as const,
+                  text: content,
+                },
+              ],
+            };
+          }
+
+          // Default to string content
+          return { ...msg, content };
+        });
 
         // Extract variables from all messages
         const messageVariables = newMessages.reduce<Variable[]>((acc, msg) => {
-          if (typeof msg.content !== "string") return acc;
-          const messageVars = extractVariables(msg.content, true);
+          const messageContent = processMessageContent(
+            msg as ChatCompletionMessageParam,
+            { convertTags: true }
+          );
+          const messageVars = extractVariables(messageContent, true);
           return [
             ...acc,
             ...messageVars.map((v) => ({
@@ -257,7 +259,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         );
 
         return {
-          messages: newMessages,
+          messages: newMessages as ChatCompletionMessageParam[],
           variables: mergedVariables,
         };
       });
@@ -392,13 +394,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       const heliconeTemplate = {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
-        messages: state.messages.map((msg) => ({
-          ...msg,
-          content:
-            typeof msg.content === "string"
-              ? convertToHeliconeTags(msg.content)
-              : msg.content || "",
-        })),
+        messages: state.messages,
       };
 
       const metadata = {
@@ -440,10 +436,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       ...state.parameters,
       messages: state.messages.map((msg) => ({
         ...msg,
-        content:
-          typeof msg.content === "string"
-            ? replaceVariables(msg.content, variables)
-            : msg.content || "",
+        content: processMessageContent(msg, { variables }),
       })),
     };
 
