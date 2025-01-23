@@ -1180,7 +1180,8 @@
 					"QSTASH",
 					"FIRECRAWL",
 					"AWS",
-					"DEEPSEEK"
+					"DEEPSEEK",
+					"X"
 				]
 			},
 			"Provider": {
