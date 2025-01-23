@@ -1,5 +1,6 @@
 import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
+import Banner from "@/components/home/Banner";
 
 export const Layout = async ({
   children,
@@ -16,6 +17,7 @@ export const Layout = async ({
 
   return (
     <>
+      <Banner />
       <NavBar stars={stars} />
       {children}
       {!hideFooter && <Footer />}
