@@ -316,6 +316,31 @@ const DesktopSidebar = ({
                 </div>
               </div>
 
+              {/* <Button
+                variant="outline"
+                className="mx-2 text-[13px] font-medium"
+                onClick={() => {
+                  jawn.POST("/v1/organization/setup-demo");
+                }}
+              >
+                Stup date
+              </Button> */}
+
+              {org?.currentOrg?.tier === "demo" &&
+                org.allOrgs.filter(
+                  (org) => org.tier !== "demo" && org.owner === user?.id
+                ).length === 0 && (
+                  <Button
+                    variant="outline"
+                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
+                    onClick={() => {
+                      setShowEndOnboardingConfirmation(true);
+                    }}
+                  >
+                    Ready to Integrate
+                  </Button>
+                )}
+
               {/* InfoBox */}
               {canShowInfoBox &&
                 !isCollapsed &&
