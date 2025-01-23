@@ -86,11 +86,6 @@
   }
 }
 
-input {
-  appearance: none;
-  outline: none;
-}
-
 /* Hide the arrows for Chrome, Safari, Edge, and Opera */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
