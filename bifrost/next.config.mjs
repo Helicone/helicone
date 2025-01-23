@@ -14,6 +14,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/selfhost",
+        destination:
+          "https://docs.helicone.ai/getting-started/self-host/overview",
+        permanent: true,
+      },
+      {
         source: "/video",
         destination: "https://www.youtube.com/@helicone",
         permanent: true,
