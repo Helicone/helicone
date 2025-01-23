@@ -10,7 +10,7 @@ const Banner = () => {
         <p>
           🔥{" "}
           <Link
-            href="https://news.ycombinator.com/newest"
+            href="https://news.ycombinator.com/item?id=42806254"
             className="font-medium underline hover:text-blue-200"
           >
             We&apos;re on HackerNews
