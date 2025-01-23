@@ -5,10 +5,10 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { User } from "@supabase/auth-helpers-nextjs";
-import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AreaChart as TremorAreaChart } from "@tremor/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import { ModelMetric } from "../../../lib/api/models/models";
 import {
   getIncrementAsMinutes,
   getTimeMap,
@@ -58,6 +58,19 @@ import { useDashboardPage } from "./useDashboardPage";
 import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
 import DemoDisclaimerModal from "./DemoDisclaimerModal";
 import { TimeFilter } from "@/types/timeFilter";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { ErrorGraph } from "./errorGraph";
+import { ModelsGraph } from "./modelsGraph";
+import { CostsGraph, formatNumberString } from "./costsGraph";
+import { UsersGraph } from "./usersGraph";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -71,21 +84,20 @@ function max(arr: number[]) {
   return arr.reduce((p, c) => (p > c ? p : c), 0);
 }
 
-export function formatNumberString(
-  numString: string,
-  minimumFractionDigits?: boolean
-) {
-  const num = parseFloat(numString);
-  if (minimumFractionDigits) {
-    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
-  } else {
-    return num.toLocaleString("en-US");
-  }
-}
-
 export type Loading<T> = T | "loading";
 
 export type DashboardMode = "requests" | "costs" | "errors";
+
+const requestsConfig = {
+  success: {
+    label: "Success",
+    color: "oklch(var(--chart-3))", // green
+  },
+  error: {
+    label: "Error",
+    color: "oklch(var(--chart-4))", // red
+  },
+} satisfies ChartConfig;
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user, organizationLayout } = props;
@@ -196,6 +208,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     if (orgContext?.currentOrg?.tier === "demo") {
       setIsLive(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgContext?.currentOrg?.tier]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
@@ -283,11 +296,11 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   useEffect(() => {
     if (initialLoadRef.current && filterMap.length > 0 && !isAnyLoading) {
-      console.log("load");
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterMap, getAdvancedFilters]);
 
   const onSetAdvancedFiltersHandler = useCallback(
@@ -303,6 +316,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         searchParams.set("filters", currentAdvancedFilters);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [encodeFilters, refetch]
   );
 
@@ -371,19 +385,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
-  const listColors = ["purple", "blue", "green", "yellow", "orange"];
-
-  const modelMapper = (model: ModelMetric, index: number) => {
-    // TODO add the filter to the advancedFilters
-    return {
-      name: model.model || "n/a",
-      value: model.total_requests,
-      color: listColors[index % listColors.length],
-      // href: urlString,
-      // target: "_self",
-    };
-  };
-
   // put this forEach inside of a useCallback to prevent unnecessary re-renders
   const getStatusCountsOverTime = useCallback(() => {
     const statusCounts: {
@@ -436,6 +437,8 @@ const DashboardPage = (props: DashboardPageProps) => {
       error: counts.error,
     };
   });
+
+  console.log(flattenedOverTime);
 
   const accumulatedStatusCounts = Object.entries(
     getStatusCountsOverTime().accStatusCounts
@@ -580,200 +583,148 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-                    <div className="flex flex-row items-center justify-between">
-                      <div className="flex flex-col space-y-0.5">
-                        <p className="text-slate-500 text-sm">Requests</p>
-                        <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
-                          {metrics.totalRequests?.data?.data
-                            ? `${formatNumberString(
-                                metrics.totalRequests?.data?.data.toFixed(2)
-                              )}`
-                            : "0"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div
-                      className={clsx("p-2", "w-full")}
-                      style={{
-                        height: "212px",
-                      }}
-                    >
-                      {overTimeData.requests.isLoading ? (
-                        <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
-                          <LoadingAnimation height={175} width={175} />
+                  <Card className="h-full">
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-row items-center justify-between">
+                        <div className="flex flex-col space-y-0.5">
+                          <p className="text-slate-500 text-sm">Requests</p>
+                          <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
+                            {metrics.totalRequests?.data?.data
+                              ? `${formatNumberString(
+                                  metrics.totalRequests?.data?.data.toFixed(2)
+                                )}`
+                              : "0"}
+                          </p>
                         </div>
-                      ) : (
-                        <AreaChart
-                          className="h-[14rem]"
-                          data={flattenedOverTime}
-                          index="date"
-                          categories={["success", "error"]}
-                          colors={["green", "red"]}
-                          showYAxis={false}
-                          curveType="monotone"
-                          animationDuration={1000}
-                          showAnimation={true}
-                        />
-                      )}
-                    </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div
+                        className={clsx("w-full")}
+                        style={{
+                          height: "212px",
+                        }}
+                      >
+                        {overTimeData.requests.isLoading ? (
+                          <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
+                            <LoadingAnimation height={175} width={175} />
+                          </div>
+                        ) : (
+                          <ChartContainer
+                            className="h-full w-full"
+                            config={requestsConfig}
+                          >
+                            <AreaChart
+                              className="h-[14rem]"
+                              data={flattenedOverTime}
+                            >
+                              <CartesianGrid vertical={false} />
+                              <XAxis
+                                dataKey="date"
+                                tickLine={false}
+                                axisLine={false}
+                                minTickGap={30}
+                              />
+                              <ChartTooltip
+                                cursor={false}
+                                content={
+                                  <ChartTooltipContent indicator="line" />
+                                }
+                              />
+                              <defs>
+                                <linearGradient
+                                  id="fillSuccess"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="5%"
+                                    stopColor="var(--color-success)"
+                                    stopOpacity={0.8}
+                                  />
+                                  <stop
+                                    offset="95%"
+                                    stopColor="var(--color-success)"
+                                    stopOpacity={0.1}
+                                  />
+                                </linearGradient>
+                                <linearGradient
+                                  id="fillError"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="5%"
+                                    stopColor="var(--color-error)"
+                                    stopOpacity={0.8}
+                                  />
+                                  <stop
+                                    offset="95%"
+                                    stopColor="var(--color-error)"
+                                    stopOpacity={0.1}
+                                  />
+                                </linearGradient>
+                              </defs>
+                              <Area
+                                dataKey="success"
+                                type="monotone"
+                                fill="url(#fillSuccess)"
+                                fillOpacity={0.4}
+                                stroke="var(--color-success)"
+                              />
+                              <Area
+                                dataKey="error"
+                                type="monotone"
+                                fill="url(#fillError)"
+                                fillOpacity={0.4}
+                                stroke="var(--color-error)"
+                              />
+                              <ChartLegend
+                                verticalAlign="top"
+                                layout="horizontal"
+                                content={
+                                  <ChartLegendContent textClassName="text-xs text-slate-500" />
+                                }
+                                wrapperStyle={{
+                                  right: 0,
+                                  width: "auto",
+                                }}
+                              />
+                            </AreaChart>
+                          </ChartContainer>
+                        )}
+                      </div>
+                    </CardContent>
                   </Card>
                 </div>
                 <div key="errors">
-                  <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-                    <div className="flex flex-col h-full">
-                      <h2 className="text-slate-500 text-sm mb-2">
-                        All Errors
-                      </h2>
-                      {(() => {
-                        const totalErrors = accumulatedStatusCounts.reduce(
-                          (sum, e) => sum + e.value,
-                          0
-                        );
-                        const errorPercentage =
-                          (totalErrors /
-                            (metrics.totalRequests?.data?.data ?? 1)) *
-                            100 || 0;
-                        return (
-                          <div className="mb-2 text-sm">
-                            <span className="font-semibold">
-                              {formatLargeNumber(totalErrors)}
-                            </span>{" "}
-                            total errors (
-                            <span className="font-semibold">
-                              {errorPercentage.toFixed(2)}%
-                            </span>{" "}
-                            of all requests)
-                          </div>
-                        );
-                      })()}
-                      <div className="flex-grow overflow-hidden flex flex-col">
-                        <div className="flex flex-row justify-between items-center pb-2">
-                          <p className="text-xs font-semibold text-slate-700">
-                            Error Type
-                          </p>
-                          <p className="text-xs font-semibold text-slate-700">
-                            Percentage
-                          </p>
-                        </div>
-                        <div className="overflow-y-auto flex-grow">
-                          <BarList
-                            data={(() => {
-                              const totalErrors =
-                                accumulatedStatusCounts.reduce(
-                                  (sum, e) => sum + e.value,
-                                  0
-                                );
-                              return accumulatedStatusCounts
-                                .sort((a, b) => b.value - a.value)
-                                .map((error, index) => ({
-                                  name: `${error.name} (${formatLargeNumber(
-                                    error.value
-                                  )})`,
-                                  value: (error.value / totalErrors) * 100,
-                                  color: listColors[index % listColors.length],
-                                }));
-                            })()}
-                            className="h-full"
-                            showAnimation={true}
-                            valueFormatter={(value: number) =>
-                              `${value.toFixed(1)}%`
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                  <ErrorGraph
+                    accumulatedStatusCounts={accumulatedStatusCounts}
+                    totalRequests={metrics.totalRequests?.data?.data ?? 1}
+                  />
                 </div>
                 <div key="models">
-                  <StyledAreaChart
-                    title={`Top Models`}
-                    value={undefined}
-                    isDataOverTimeLoading={isModelsLoading}
-                    withAnimation={true}
-                  >
-                    <div className="flex flex-row justify-between items-center pb-2">
-                      <p className="text-xs font-semibold text-slate-700">
-                        Name
-                      </p>
-                      <p className="text-xs font-semibold text-slate-700">
-                        Requests
-                      </p>
-                    </div>
-                    <BarList
-                      data={
-                        models?.data
-                          ?.map((model, index) => modelMapper(model, index))
-                          .sort(
-                            (a, b) =>
-                              b.value - a.value - (b.name === "n/a" ? 1 : 0)
-                          ) ?? []
-                      }
-                      className="overflow-auto h-full"
-                      showAnimation={true}
-                    />
-                  </StyledAreaChart>
+                  <ModelsGraph modelData={models?.data ?? []} />
                 </div>
                 <div key="costs">
-                  <StyledAreaChart
-                    title={"Costs"}
-                    value={
-                      metrics.totalCost.data?.data
-                        ? `$${formatNumberString(
-                            metrics.totalCost.data?.data < 0.02
-                              ? metrics.totalCost.data?.data.toFixed(7)
-                              : metrics.totalCost.data?.data.toFixed(2),
-                            true
-                          )}`
-                        : "$0.00"
-                    }
-                    isDataOverTimeLoading={overTimeData.costs.isLoading}
-                  >
-                    <BarChart
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.costs.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          costs: r.cost,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["costs"]}
-                      colors={["blue"]}
-                      showYAxis={false}
-                      valueFormatter={(number: number | bigint) =>
-                        `$ ${new Intl.NumberFormat("us")
-                          .format(number)
-                          .toString()}`
-                      }
-                    />
-                  </StyledAreaChart>
+                  <CostsGraph
+                    metricsData={metrics.totalCost.data?.data ?? 0}
+                    isLoading={overTimeData.costs.isLoading}
+                    overTimeData={overTimeData.costs.data?.data ?? []}
+                    timeIncrement={timeIncrement}
+                  />
                 </div>
                 <div key="users">
-                  <StyledAreaChart
-                    title={"Users"}
-                    value={
-                      metrics.activeUsers.data?.data
-                        ? formatLargeNumber(metrics.activeUsers.data?.data)
-                        : "0"
-                    }
-                    isDataOverTimeLoading={overTimeData.users.isLoading}
-                  >
-                    <BarChart
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.users.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          users: r.count,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["users"]}
-                      colors={["orange"]}
-                      showYAxis={false}
-                    />
-                  </StyledAreaChart>
+                  <UsersGraph
+                    metricsData={metrics.activeUsers.data?.data ?? 0}
+                    isLoading={overTimeData.users.isLoading}
+                    overTimeData={overTimeData.users.data?.data ?? []}
+                    timeIncrement={timeIncrement}
+                  />
                 </div>
                 <div key="countries">
                   <CountryPanel
@@ -813,7 +764,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )} s / req`}
                     isDataOverTimeLoading={overTimeData.latency.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.latency.data?.data?.map((r) => ({
@@ -854,7 +805,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       overTimeData.timeToFirstToken.isLoading
                     }
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.timeToFirstToken.data?.data?.map((r) => ({
@@ -883,7 +834,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )}`}
                     isDataOverTimeLoading={overTimeData.threats.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.threats.data?.data?.map((r) => ({
@@ -938,7 +889,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )} tokens`}
                     isDataOverTimeLoading={overTimeData.users.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.promptTokensOverTime.data?.data?.map(

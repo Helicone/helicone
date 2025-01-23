@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { useQuantiles } from "../../../services/hooks/quantiles";
-import { Card, LineChart, Select, SelectItem } from "@tremor/react";
-import { clsx } from "../../shared/clsx";
+import { LineChart } from "@tremor/react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { cn } from "@/lib/utils";
 
 type QuantilesGraphProps = {
   uiFilters: FilterNode;
@@ -47,92 +55,91 @@ export const QuantilesGraph = ({
   );
 
   return (
-    <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-      <div className="flex flex-row items-center justify-between w-full">
-        <div className="flex flex-col space-y-0.5 w-full">
-          <p className="text-gray-500 text-sm">Quantiles</p>
-          {currentMetric === "Latency" ? (
+    <Card className="h-full overflow-y-auto">
+      <CardContent className="pt-6">
+        <div className="flex flex-row items-center justify-between w-full">
+          <div className="flex flex-col space-y-0.5">
+            <p className="text-slate-500 text-sm">Quantiles</p>
             <p className="text-black dark:text-white text-xl font-semibold">
-              {`Max: ${new Intl.NumberFormat("us").format(
-                maxQuantile / 1000
-              )} s`}
+              {currentMetric === "Latency"
+                ? `Max: ${new Intl.NumberFormat("us").format(
+                    maxQuantile / 1000
+                  )} s`
+                : `Max: ${new Intl.NumberFormat("us").format(
+                    maxQuantile
+                  )} tokens`}
             </p>
-          ) : (
-            <p className="text-black dark:text-white text-xl font-semibold">
-              {`Max: ${new Intl.NumberFormat("us").format(maxQuantile)} tokens`}
-            </p>
-          )}
-        </div>
-        <div>
-          {!quantilesIsLoading && (
-            <Select
-              placeholder="Select property"
-              value={currentMetric}
-              onValueChange={setCurrentMetric}
-              className="border border-gray-400 rounded-lg w-fit"
-            >
-              {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
-                <SelectItem key={key} value={key}>
-                  {key}
-                </SelectItem>
-              ))}
-            </Select>
-          )}
-        </div>
-      </div>
-
-      <div
-        className={clsx("p-2", "w-full")}
-        style={{
-          height: "212px",
-        }}
-      >
-        {quantilesIsLoading ? (
-          <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
-            <LoadingAnimation height={175} width={175} />
           </div>
-        ) : (
-          <LineChart
-            className="h-[14rem]"
-            data={
-              quantiles?.data?.map((r) => {
-                const time = new Date(r.time);
-                // return all of the values on a 0-100 scale where 0 is the min value and 100 is the max value of
-                return {
-                  date: getTimeMap(timeIncrement)(time),
-                  P75: r.p75,
-                  P90: r.p90,
-                  P95: r.p95,
-                  P99: r.p99,
-                };
-              }) ?? []
-            }
-            index="date"
-            categories={["P75", "P90", "P95", "P99"]}
-            colors={[
-              "yellow",
-              "red",
-              "green",
-              "blue",
-              "orange",
-              "indigo",
-              "orange",
-              "pink",
-            ]}
-            showYAxis={false}
-            curveType="monotone"
-            valueFormatter={(number: number | bigint) => {
-              if (currentMetric === "Latency") {
-                return `${new Intl.NumberFormat("us").format(
-                  Number(number) / 1000
-                )} s`;
-              } else {
-                return `${new Intl.NumberFormat("us").format(number)} tokens`;
+          <div>
+            {!quantilesIsLoading && (
+              <Select value={currentMetric} onValueChange={setCurrentMetric}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select metric" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from(quantilesMetrics.entries()).map(([key]) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        </div>
+
+        <div
+          className={cn("p-2", "w-full")}
+          style={{
+            height: "212px",
+          }}
+        >
+          {quantilesIsLoading ? (
+            <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
+              <LoadingAnimation height={175} width={175} />
+            </div>
+          ) : (
+            <LineChart
+              className="h-full w-full"
+              data={
+                quantiles?.data?.map((r) => {
+                  const time = new Date(r.time);
+                  return {
+                    date: getTimeMap(timeIncrement)(time),
+                    P75: r.p75,
+                    P90: r.p90,
+                    P95: r.p95,
+                    P99: r.p99,
+                  };
+                }) ?? []
               }
-            }}
-          />
-        )}
-      </div>
+              index="date"
+              categories={["P75", "P90", "P95", "P99"]}
+              colors={[
+                "yellow",
+                "red",
+                "green",
+                "blue",
+                "orange",
+                "indigo",
+                "orange",
+                "pink",
+              ]}
+              showYAxis={false}
+              curveType="monotone"
+              valueFormatter={(number: number | bigint) => {
+                if (currentMetric === "Latency") {
+                  return `${new Intl.NumberFormat("us").format(
+                    Number(number) / 1000
+                  )} s`;
+                } else {
+                  return `${new Intl.NumberFormat("us").format(number)} tokens`;
+                }
+              }}
+            />
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };
