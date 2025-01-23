@@ -1,4 +1,5 @@
 import { Variable } from "@/types/prompt-state";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export function extractVariables(
   content: string,
@@ -101,4 +102,65 @@ export function replaceTagsWithVariables(
     const varName = (key1 || key2).trim();
     return `{{${varName}}}`;
   });
+}
+
+/**
+ * Unified function to convert a message's content to a string and handle variable replacement
+ * Works with both string content and array content types
+ */
+export function processMessageContent(
+  message: ChatCompletionMessageParam,
+  options: {
+    convertTags?: boolean;
+    variables?: Variable[];
+  } = {}
+): string {
+  const { convertTags = false, variables } = options;
+  const content = message.content;
+
+  // Handle null/undefined content
+  if (!content) return "";
+
+  // Handle array content type
+  if (Array.isArray(content)) {
+    // Find the first text content
+    const textContent = content.find(
+      (item) => typeof item === "string" || item.type === "text"
+    );
+
+    // Extract the text content
+    const text =
+      typeof textContent === "string" ? textContent : textContent?.text || "";
+
+    // Process the content
+    return processContent(text, { convertTags, variables });
+  }
+
+  // Handle string content type
+  return processContent(content, { convertTags, variables });
+}
+
+/**
+ * Helper function to process content string with optional variable replacement
+ */
+function processContent(
+  content: string,
+  options: {
+    convertTags?: boolean;
+    variables?: Variable[];
+  } = {}
+): string {
+  const { convertTags = false, variables } = options;
+
+  // First convert helicone tags to variables if needed
+  let processedContent = convertTags
+    ? replaceTagsWithVariables(content)
+    : content;
+
+  // Then replace variables with their values if variables are provided
+  if (variables) {
+    processedContent = replaceVariables(processedContent, variables);
+  }
+
+  return processedContent;
 }

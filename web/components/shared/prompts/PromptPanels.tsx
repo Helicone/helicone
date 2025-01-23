@@ -12,6 +12,10 @@ import {
   isRemovableMessage,
 } from "@/utils/messages";
 import PromptBox from "@/components/shared/prompts/PromptBox";
+import {
+  processMessageContent,
+  convertToHeliconeTags,
+} from "@/utils/variables";
 
 interface PromptPanelsProps {
   messages: ChatCompletionMessageParam[];
@@ -84,12 +88,10 @@ export default function PromptPanels({
             )}
           </div>
           <PromptBox
-            value={
-              typeof message.content === "string"
-                ? message.content
-                : JSON.stringify(message.content)
+            value={processMessageContent(message, { convertTags: true })}
+            onChange={(content) =>
+              onMessageChange(index, convertToHeliconeTags(content))
             }
-            onChange={(content) => onMessageChange(index, content)}
             onVariableCreate={onVariableCreate}
             contextText={""} // TODO: Add context for better auto-complete
             variables={variables}
