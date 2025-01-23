@@ -6,149 +6,129 @@ import {
   PiCaretDownBold,
 } from "react-icons/pi";
 
-const PROVIDERS = [
-  "anthropic",
-  "google",
-  "meta-llama",
-  "mistralai",
-  "openai",
-  "cohere",
-  "qwen",
-  "nousresearch",
-  "x-ai",
-  "amazon",
-  "microsoft",
-  "perplexity",
-  "deepseek",
-  "nvidia",
-  "sao10k",
-  "neversleep",
-  "eva-unit-01",
-  "gryphe",
-  "liquid",
-  "alpindale",
-  "aetherwiing",
-  "cognitivecomputations",
-  "infermatic",
-  "thedrummer",
-  "undi95",
-] as const;
-
-const MODELS = {
-  anthropic: ["claude-3.5-haiku", "claude-3.5-sonnet", "claude-3-opus"],
-  google: [
-    "gemini-flash-1.5",
-    "gemini-flash-1.5-8b",
-    "gemini-pro-1.5",
-    "gemini-pro",
-    "gemini-flash-1.5-8b-exp",
-    "gemma-2-27b-it",
-    "gemma-2-9b-it",
-  ],
-  "meta-llama": [
-    "llama-3.1-70b-instruct",
-    "llama-3.1-8b-instruct",
-    "llama-3.1-405b-instruct",
-    "llama-3.2-1b-instruct",
-    "llama-3.2-3b-instruct",
-    "llama-3.2-11b-vision-instruct",
-    "llama-3.2-90b-vision-instruct",
-    "llama-3-70b-instruct",
-    "llama-3-8b-instruct",
-    "llama-3-70b-instruct:nitro",
-    "llama-3-8b-instruct:nitro",
-    "llama-3-8b-instruct:extended",
-    "llama-guard-2-8b",
-    "llama-3.1-405b",
-  ],
-  mistralai: [
-    "mistral-nemo",
-    "codestral-2501",
-    "mixtral-8x7b-instruct",
-    "ministral-8b",
-    "ministral-3b",
-    "mistral-7b-instruct",
-    "mistral-large",
-    "mistral-small",
-    "codestral-mamba",
-    "pixtral-12b",
-    "pixtral-large-2411",
-    "mistral-7b-instruct-v0.1",
-    "mistral-7b-instruct-v0.3",
-    "mistral-medium",
-    "mistral-large-2411",
-    "mistral-large-2407",
-    "mixtral-8x7b-instruct:nitro",
-    "mixtral-8x22b-instruct",
-    "mistral-tiny",
-  ],
-  openai: [
-    "gpt-4o-mini",
-    "gpt-4o",
-    // "o1-preview",
-    // "o1-mini",
-    // "o1-preview-2024-09-12",
-    // "o1-mini-2024-09-12",
-    "gpt-4-turbo",
-    "gpt-4",
-    "gpt-3.5-turbo",
-    "chatgpt-4o-latest",
-  ],
-  cohere: [
-    "command-r-08-2024",
-    "command-r-plus-08-2024",
-    "command-r-plus",
-    "command-r",
-    "command-r-plus-04-2024",
-    "command-r7b-12-2024",
-  ],
-  qwen: [
-    "qwen-2.5-coder-32b-instruct",
-    "qwen-2.5-72b-instruct",
-    "qwen-2.5-7b-instruct",
-    "qwen-2-vl-7b-instruct",
-    "qwen-2-vl-72b-instruct",
-    "qwq-32b-preview",
-    "qvq-72b-preview",
-    "qwen-2-72b-instruct",
-  ],
-  nousresearch: [
-    "hermes-3-llama-3.1-405b",
-    "hermes-3-llama-3.1-70b",
-    "hermes-2-pro-llama-3-8b",
-    "nous-hermes-llama2-13b",
-  ],
-  "x-ai": ["grok-2-1212", "grok-beta", "grok-2-vision-1212"],
-  amazon: ["nova-lite-v1", "nova-micro-v1", "nova-pro-v1"],
-  microsoft: ["wizardlm-2-8x22b", "wizardlm-2-7b", "phi-4"],
-  perplexity: [
-    "llama-3.1-sonar-large-128k-online",
-    "llama-3.1-sonar-large-128k-chat",
-    "llama-3.1-sonar-huge-128k-online",
-    "llama-3.1-sonar-small-128k-online",
-  ],
-  deepseek: ["deepseek-r1", "deepseek-chat"],
-  nvidia: ["llama-3.1-nemotron-70b-instruct"],
-  sao10k: [
-    "l3-euryale-70b",
-    "l3.1-euryale-70b",
-    "l3-lunaris-8b",
-    "l3.1-70b-hanami-x1",
-  ],
-  neversleep: [
-    "llama-3-lumimaid-8b",
-    "llama-3.1-lumimaid-8b",
-    "llama-3-lumimaid-70b",
-    "llama-3.1-lumimaid-70b",
-    "noromaid-20b",
-  ],
-  "eva-unit-01": ["eva-qwen-2.5-72b", "eva-llama-3.33-70b"],
-  gryphe: [
-    "mythomax-l2-13b",
-    "mythomax-l2-13b:nitro",
-    "mythomax-l2-13b:extended",
-  ],
-  alpindale: ["goliath-120b", "magnum-72b"],
+const PROVIDER_MODELS = {
+  // General Use Cases
+  anthropic: {
+    models: ["claude-3.5-haiku", "claude-3.5-sonnet", "claude-3-opus"],
+  },
+  openai: {
+    models: [
+      "gpt-4o-mini",
+      "gpt-4o",
+      "gpt-4-turbo",
+      "gpt-4",
+      "gpt-3.5-turbo",
+      "chatgpt-4o-latest",
+    ],
+  },
+  google: {
+    models: [
+      "gemini-flash-1.5",
+      "gemini-flash-1.5-8b",
+      "gemini-pro-1.5",
+      "gemma-2-27b-it",
+      "gemma-2-9b-it",
+    ],
+  },
+  "meta-llama": {
+    models: [
+      "llama-3.1-70b-instruct",
+      "llama-3.1-8b-instruct",
+      "llama-3.1-405b-instruct",
+      "llama-3.2-1b-instruct",
+      "llama-3.2-3b-instruct",
+      "llama-3.2-11b-vision-instruct",
+      "llama-3.2-90b-vision-instruct",
+      "llama-3-70b-instruct",
+      "llama-3-8b-instruct",
+      "llama-3-70b-instruct:nitro",
+      "llama-3-8b-instruct:nitro",
+      "llama-3-8b-instruct:extended",
+      "llama-guard-2-8b",
+      "llama-3.1-405b",
+    ],
+  },
+  deepseek: {
+    models: ["deepseek-r1", "deepseek-chat"],
+  },
+  mistralai: {
+    models: [
+      "mistral-nemo",
+      "codestral-2501",
+      "mixtral-8x7b-instruct",
+      "ministral-8b",
+      "ministral-3b",
+      "mistral-7b-instruct",
+      "mistral-large",
+      "mistral-small",
+      "codestral-mamba",
+      "pixtral-12b",
+      "pixtral-large-2411",
+      "mistral-7b-instruct-v0.1",
+      "mistral-7b-instruct-v0.3",
+      "mistral-medium",
+      "mistral-large-2411",
+      "mistral-large-2407",
+      "mixtral-8x7b-instruct:nitro",
+      "mixtral-8x22b-instruct",
+      "mistral-tiny",
+    ],
+  },
+  qwen: {
+    models: [
+      "qwen-2.5-72b-instruct",
+      "qwen-2.5-7b-instruct",
+      "qwen-2.5-coder-32b-instruct",
+      "eva-qwen-2.5-72b",
+    ],
+  },
+  "x-ai": {
+    models: ["grok-2-1212", "grok-beta", "grok-2-vision-1212"],
+  },
+  perplexity: {
+    models: [
+      "llama-3.1-sonar-large-128k-online",
+      "llama-3.1-sonar-large-128k-chat",
+      "llama-3.1-sonar-huge-128k-online",
+      "llama-3.1-sonar-small-128k-online",
+    ],
+  },
+  cohere: {
+    models: ["command-r-plus", "command-r"],
+  },
+  amazon: {
+    models: ["nova-lite-v1", "nova-micro-v1", "nova-pro-v1"],
+  },
+  microsoft: {
+    models: ["wizardlm-2-8x22b", "wizardlm-2-7b", "phi-4"],
+  },
+  nvidia: {
+    models: ["llama-3.1-nemotron-70b-instruct"],
+  },
+  // Finetunes and Roleplay Use Cases
+  nousresearch: {
+    models: [
+      "hermes-3-llama-3.1-405b",
+      "hermes-3-llama-3.1-70b",
+      "hermes-2-pro-llama-3-8b",
+      "nous-hermes-llama2-13b",
+    ],
+  },
+  sao10k: {
+    models: [
+      "l3-euryale-70b",
+      "l3.1-euryale-70b",
+      "l3-lunaris-8b",
+      "l3.1-70b-hanami-x1",
+    ],
+  },
+  gryphe: {
+    models: [
+      "mythomax-l2-13b",
+      "mythomax-l2-13b:nitro",
+      "mythomax-l2-13b:extended",
+    ],
+  },
 } as const;
 
 interface Parameters {
@@ -162,6 +142,7 @@ interface ParametersPanelProps {
   parameters: Parameters;
   onParameterChange: (updates: Partial<Parameters>) => void;
 }
+
 export default function ParametersPanel({
   parameters,
   onParameterChange,
@@ -169,19 +150,21 @@ export default function ParametersPanel({
   // Initialize provider if not set
   useEffect(() => {
     if (!parameters.provider) {
-      const defaultProvider = PROVIDERS[0];
+      const defaultProvider = Object.keys(PROVIDER_MODELS)[0];
       onParameterChange({
         provider: defaultProvider,
-        model: MODELS[defaultProvider][0],
+        model:
+          PROVIDER_MODELS[defaultProvider as keyof typeof PROVIDER_MODELS]
+            .models[0],
       });
     }
   }, [parameters.provider, onParameterChange]);
 
   const handleProviderChange = (provider: string) => {
-    const validProvider = provider as keyof typeof MODELS;
+    const validProvider = provider as keyof typeof PROVIDER_MODELS;
     onParameterChange({
       provider: validProvider,
-      model: MODELS[validProvider][0],
+      model: PROVIDER_MODELS[validProvider].models[0],
     });
   };
 
@@ -202,13 +185,17 @@ export default function ParametersPanel({
             <SelectDropdown
               value={parameters.provider}
               onChange={handleProviderChange}
-              options={PROVIDERS}
+              options={Object.keys(PROVIDER_MODELS)}
               variant="sm"
             />
             <SelectDropdown
               value={parameters.model}
               onChange={(model) => onParameterChange({ model })}
-              options={MODELS[parameters.provider as keyof typeof MODELS]}
+              options={
+                PROVIDER_MODELS[
+                  parameters.provider as keyof typeof PROVIDER_MODELS
+                ].models
+              }
               variant="lg"
             />
           </div>
