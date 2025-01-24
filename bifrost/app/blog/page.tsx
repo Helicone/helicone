@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },
@@ -312,11 +317,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-api-providers",
     },
   },
   {
