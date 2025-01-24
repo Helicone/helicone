@@ -135,6 +135,19 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           isValid: isValidVariableName(name),
         })
       );
+      if (Array.isArray(templateData.content)) {
+        const messages = [];
+        for (const item of templateData.content) {
+          if (item.type === "text") {
+            messages.push({
+              role: "assistant",
+              content: item.text,
+            });
+          }
+        }
+        templateData.messages = messages;
+      }
+      console.log("templateData", templateData);
 
       // 4. Extract any additional variables from messages that might not be in inputs
       templateData.messages.forEach((msg: any) => {
