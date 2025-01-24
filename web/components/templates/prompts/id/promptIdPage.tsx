@@ -61,7 +61,16 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // PARAMS
   const { id, currentPage, pageSize } = props;
 
+  // STATE
+  const [state, setState] = useState<PromptState | null>(null);
+
+  // STREAMING
+  const [isStreaming, setIsStreaming] = useState(false);
+  const abortController = useRef<AbortController | null>(null);
+
   // HOOKS
+  // - Router
+  const router = useRouter();
   // - Jawn Client
   const jawnClient = useJawnClient();
   // - Prompt Table
@@ -78,13 +87,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   } = usePromptVersions(id);
   // - Notifications
   const { setNotification } = useNotification();
-
-  // STATE
-  const [state, setState] = useState<PromptState | null>(null);
-
-  // STREAMING
-  const [isStreaming, setIsStreaming] = useState(false);
-  const abortController = useRef<AbortController | null>(null);
+  // - Experiment
+  const { newFromPromptVersion } = useExperiment();
 
   // VALIDATION
   // - Can Run
@@ -378,6 +382,36 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     },
     [jawnClient, promptVersions, refetchPromptVersions, setNotification]
   );
+  // - Handle ID Edit
+  const handleIdEdit = useCallback(
+    async (newId: string) => {
+      const kebabId = toKebabCase(newId);
+      if (kebabId !== id) {
+        const result = await jawnClient.PATCH(
+          "/v1/prompt/{promptId}/user-defined-id",
+          {
+            params: {
+              path: {
+                promptId: prompt?.id || "",
+              },
+            },
+            body: {
+              userDefinedId: kebabId,
+            },
+          }
+        );
+
+        if (result.error) {
+          setNotification("Failed to update prompt ID.", "error");
+          return;
+        }
+
+        setNotification(`Updated prompt ID to ${kebabId}.`, "success");
+        await refetchPrompt();
+      }
+    },
+    [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
+  );
   // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
     if (!state || !canRun) return;
@@ -503,38 +537,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     updateState,
     promptVersions,
   ]);
-  // - Handle ID Edit
-  const handleIdEdit = useCallback(
-    async (newId: string) => {
-      const kebabId = toKebabCase(newId);
-      if (kebabId !== id) {
-        const result = await jawnClient.PATCH(
-          "/v1/prompt/{promptId}/user-defined-id",
-          {
-            params: {
-              path: {
-                promptId: prompt?.id || "",
-              },
-            },
-            body: {
-              userDefinedId: kebabId,
-            },
-          }
-        );
 
-        if (result.error) {
-          setNotification("Failed to update prompt ID.", "error");
-          return;
-        }
-
-        setNotification(`Updated prompt ID to ${kebabId}.`, "success");
-        await refetchPrompt();
-      }
-    },
-    [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
-  );
-
-  const router = useRouter();
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
@@ -592,8 +595,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       };
     });
   };
-
-  const { newFromPromptVersion } = useExperiment();
 
   // RENDER
   // - Loading Page
