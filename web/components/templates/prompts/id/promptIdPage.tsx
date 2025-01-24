@@ -147,7 +147,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         }
         templateData.messages = messages;
       }
-      console.log("templateData", templateData);
 
       // 4. Extract any additional variables from messages that might not be in inputs
       templateData.messages.forEach((msg: any) => {
