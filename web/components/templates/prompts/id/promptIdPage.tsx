@@ -48,7 +48,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DiffHighlight } from "../../welcome/diffHighlight";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { autoFillInputs } from "@helicone/prompts";
 
 interface PromptIdPageProps {
   id: string;
@@ -443,14 +443,16 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       }
     }
 
-    // 5. RUN: Replace variables with their values for local execution
+    // 5. RUN: Use autoFillInputs to handle variable replacement
     const runTemplate = {
       ...state.parameters,
-      messages: state.messages.map((msg) => ({
-        ...msg,
-        content: processMessageContent(msg, { variables }),
-      })),
+      messages: autoFillInputs({
+        inputs: variableMap,
+        autoInputs: [],
+        template: state.messages,
+      }),
     };
+    console.log("Run template:", runTemplate);
 
     // 6. EXECUTE
     try {

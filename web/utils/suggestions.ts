@@ -80,7 +80,7 @@ export const suggestionReducer = (
   return newState;
 };
 
-export const SUGGESTION_DELAY = 600;
+export const SUGGESTION_DELAY = 10;
 export const MIN_LENGTH_FOR_SUGGESTIONS = 8;
 
 export function cleanSuggestionIfNeeded(

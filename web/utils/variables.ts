@@ -115,7 +115,6 @@ export function processMessageContent(
     variables?: Variable[];
   } = {}
 ): string {
-  const { convertTags = false, variables } = options;
   const content = message.content;
 
   // Handle null/undefined content
@@ -136,11 +135,17 @@ export function processMessageContent(
         break;
       }
     }
-    return processContent(textContent, { convertTags, variables });
+    return processContent(textContent, {
+      convertTags: options.convertTags,
+      variables: options.variables,
+    });
   }
 
   // Handle string content type
-  return processContent(content, { convertTags, variables });
+  return processContent(content, {
+    convertTags: options.convertTags,
+    variables: options.variables,
+  });
 }
 
 /**
@@ -153,16 +158,14 @@ function processContent(
     variables?: Variable[];
   } = {}
 ): string {
-  const { convertTags = false, variables } = options;
-
   // First convert helicone tags to variables if needed
-  let processedContent = convertTags
+  let processedContent = options.convertTags
     ? replaceTagsWithVariables(content)
     : content;
 
   // Then replace variables with their values if variables are provided
-  if (variables) {
-    processedContent = replaceVariables(processedContent, variables);
+  if (options.variables) {
+    processedContent = replaceVariables(processedContent, options.variables);
   }
 
   return processedContent;
