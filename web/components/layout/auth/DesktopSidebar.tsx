@@ -263,7 +263,7 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto flex flex-col justify-between h-full mb-2">
               {/* Navigation items */}
               <div className="flex flex-col">
                 {((!isCollapsed &&
@@ -316,28 +316,19 @@ const DesktopSidebar = ({
                 </div>
               </div>
 
-              {/* <Button
-                variant="outline"
-                className="mx-2 text-[13px] font-medium"
-                onClick={() => {
-                  jawn.POST("/v1/organization/setup-demo");
-                }}
-              >
-                Stup date
-              </Button> */}
-
               {org?.currentOrg?.tier === "demo" &&
                 org.allOrgs.filter(
                   (org) => org.tier !== "demo" && org.owner === user?.id
                 ).length === 0 && (
                   <Button
-                    variant="outline"
-                    className="mx-2 text-[13px] font-medium bg-slate-200 border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:dark:text-slate-400 hover:dark:bg-slate-700"
+                    variant="secondary"
+                    size={"lg"}
+                    className="w-full px-2"
                     onClick={() => {
                       setShowEndOnboardingConfirmation(true);
                     }}
                   >
-                    Ready to Integrate
+                    Ready to Integrate 🚀
                   </Button>
                 )}
 
