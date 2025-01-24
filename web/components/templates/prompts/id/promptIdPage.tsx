@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dialog";
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { autoFillInputs } from "@helicone/prompts";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 interface PromptIdPageProps {
   id: string;
