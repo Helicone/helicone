@@ -91,7 +91,7 @@ Dify AI is an open-source platform that simplifies the development of AI agents 
 
 1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate an API key.
 
-2. Then choose a provider that's supproted by Helicone. See <a href="https://docs.helicone.ai/other-integrations/dify" target="_blank" rel="noopener">docs</a> for details.
+2. Configure API Base in Dify to use Helicone. See <a href="https://docs.helicone.ai/other-integrations/dify" target="_blank" rel="noopener">Dify Integration docs</a> for details.
 
 ### Other Dify Comparisons:
 
@@ -161,6 +161,22 @@ LlamaIndex specializes in data integration and retrieval, making it ideal for ap
 | • **Focused on indexing and efficient retrieval**: its advanced indexing techniques ensure fast and accurate retrieval of relevant information. | • **Limited functionality:** Primarily focused on data retrieval, less suitable for complex NLP tasks.                          |
 | • **Customizable workflows:** tailor the RAG process to specific use cases, including model options, retrieval strategy, etc.                   |                                                                                                                                 |
 
+### Integrating LLM Observability with LlamaIndex
+
+1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a write-only API key.
+
+2. Set the `OPENAI_API_BASE` environment variable.
+
+```python
+import os
+os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+```
+
+3. Create your LlamaIndex agent.
+
+- All LLM calls made by these agents will be automatically logged and monitored by Helicone. Use the dashboard to view logs, analyze performance, and optimize your AI agents.
+- See <a href="https://docs.helicone.ai/integrations/openai/llamaindex#llamaindex-integration" target="_blank" rel="noopener">LlamaIndex Integration docs</a> for details.
+
 ### Other LlamaIndex Comparisons:
 
 - **<a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" rel="noopener" target="_blank">LlamaIndex vs. LangChain</a>**
@@ -196,6 +212,23 @@ CrewAI <a href="https://docs.crewai.com/concepts/tools" rel="noopener" target="_
 | • **Role-based collaboration:** allows for defining agents with specific roles & goals. Agents work as a team, can review and improve each other's output. | • **Basic code execution:** Not as robust in handling complex code execution as some other platforms like AutoGen. |
 | • **Quick prototype & deployment:** fast set-up and highly modular design that lets you test complex agent interaction and deploy them easily.             | • **Lack advanced features:** Less suited for highly specialized or computation-heavy tasks.                       |
 | • **Integration with LangChain**: Integrates well with LangChain and its related tools.                                                                    | • **Limited customization:** Less flexibility compared to more developer-centric platforms.                        |
+
+### Integrating LLM Observability with CrewAI
+
+1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a `write-only` API key.
+
+2. Set up environment variables
+
+```bash
+import os
+
+os.environ["OPENAI_BASE_URL"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+```
+
+3. Create and run your CrewAI agent.
+
+- Helicone will automatically log and monitor all LLM calls made by the agent. Use the dashboard to view logs, analyze performance, and optimize your AI agents.
+- See <a href="https://docs.helicone.ai/getting-started/integration-method/crewai#crew-ai-integration" target="_blank" rel="noopener">CrewAI Integration docs</a> for details.
 
 ### Other CrewAI Comparisons:
 
@@ -234,6 +267,33 @@ LangChain agents use the idea of **"chains"** to let you connect multiple module
 | • **User-friendly interface:** Intuitive and beginner-friendly as developers with basic knowledge of LLMs can also build an agent. | • **Steep learning curve:** Offers greater flexibility and customizability, more suitable for users of higher coding proficiency. |
 | • **Scalability:** Useful for prototyping complex AI solutions and large datasets efficiently.                                     | • **Poor documentation:** often outdated or unclear, however, has a large active community for support.                           |
 | • **Integrations:** Has many integrations which requires more coding effort, but offers flexibility for custom models.             | • **Not suitable for production environments**: due to instability and frequent changes.                                          |
+
+### Integrating LLM Observability with LangChain
+
+1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a `write-only` API key.
+
+2. Set up environment variables
+
+```
+export HELICONE_API_KEY=your_helicone_api_key
+```
+
+3. Modify your LangChain OpenAI configuration to use Helicone:
+
+```javascript
+const llm = new OpenAI({
+  modelName: "gpt-3.5-turbo",
+  configuration: {
+    basePath: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    },
+  },
+});
+```
+
+- All LLM calls made by the agent will be automatically logged and monitored by Helicone. For Antrhopic's Claude, a similar approach can be used.
+- See <a href="https://docs.helicone.ai/integrations/openai/langchain" target="_blank" rel="noopener">OpenAI LangChain docs</a> or <a href="https://docs.helicone.ai/integrations/anthropic/langchain" target="_blank" rel="noopener">Anthropic LangChain docs</a> for details.
 
 ### Other LangChain Comparisons:
 
