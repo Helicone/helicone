@@ -1,35 +1,15 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
-export type MessageRole = "developer" | "system" | "user" | "assistant";
+export type HeliconeMessage =
+  | ChatCompletionMessageParam
+  | `<helicone-auto-prompt-input idx=${number} />`;
 
-export interface Message {
-  role: string;
-  content: string | object;
-}
-
-export type Messages = Message[];
-
-export interface PromptListItem {
-  promptId: string;
-  masterVersion: number;
-  deleted?: boolean;
-  updatedAt: string;
-  description?: string;
-}
-
-export interface PromptVersion {
-  id: string;
-  minor_version: number;
-  major_version: number;
-  prompt_v2: string;
-  model: string;
-  helicone_template: string;
-  created_at: string;
-  metadata: Record<string, any>;
-  parent_prompt_version?: string | null;
-  experiment_id?: string | null;
-  updated_at?: string;
-}
+export type StateMessage = {
+  role: "developer" | "system" | "user" | "assistant" | "tool";
+  content: string;
+  toolCallId?: string;
+  idx?: number;
+};
 
 export interface PromptState {
   promptId: string;
@@ -38,7 +18,7 @@ export interface PromptState {
   versionId: string; // The actual version ID (UUID) used for API calls
   version: number;
 
-  messages: ChatCompletionMessageParam[];
+  messages: StateMessage[];
   parameters: Parameters;
   variables?: Variable[];
   evals?: EvalReference[];
@@ -58,6 +38,7 @@ export interface Variable {
   name: string;
   value: string;
   isValid?: boolean;
+  isMessage?: boolean;
 }
 
 export interface EvalReference {

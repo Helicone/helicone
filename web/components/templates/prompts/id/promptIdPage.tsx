@@ -5,19 +5,19 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
-import PromptPanels from "@/components/shared/prompts/PromptPanels";
+import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
 import { PromptState, Variable } from "@/types/prompt-state";
 import {
   extractVariables,
   isValidVariableName,
-  processMessageContent,
+  deduplicateVariables,
 } from "@/utils/variables";
 import {
-  canAddMessagePair,
-  canAddPrefillMessage,
+  isLastMessageUser,
+  heliconeToStateMessages,
   removeMessagePair,
 } from "@/utils/messages";
-import { canAddPrefill } from "@/utils/messages";
+import { isPrefillSupported } from "@/utils/messages";
 import PromptMetricsTab from "./PromptMetricsTab";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
@@ -49,7 +49,6 @@ import {
 } from "@/components/ui/dialog";
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { autoFillInputs } from "@helicone/prompts";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 interface PromptIdPageProps {
   id: string;
@@ -96,6 +95,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     () =>
       (state?.messages.some(
         (m) =>
+          typeof m !== "string" &&
           m.role === "user" &&
           (typeof m.content === "string" ? m.content.trim().length > 0 : true)
       ) ??
@@ -132,52 +132,51 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               (v) => (v.metadata as { isProduction?: boolean })?.isProduction
             )?.major_version ?? ver.major_version;
 
-      // 3. First collect all variables and their default values from the template inputs
-      const variables = Object.entries(metadata.inputs || {}).map(
+      // 3. Convert any messages in the template to StateMessages
+      const stateMessages = heliconeToStateMessages(templateData.messages);
+
+      // 4.A. First collect all variables and their default values from the metadata inputs
+      let variables: Variable[] = Object.entries(metadata.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
           isValid: isValidVariableName(name),
+          isMessage: false,
         })
       );
-      if (Array.isArray(templateData.content)) {
-        const messages = [];
-        for (const item of templateData.content) {
-          if (item.type === "text") {
-            messages.push({
-              role: "assistant",
-              content: item.text,
-            });
-          }
-        }
-        templateData.messages = messages;
-      }
-
-      // 4. Extract any additional variables from messages that might not be in inputs
-      templateData.messages.forEach((msg: any) => {
-        const messageContent = processMessageContent(msg, {
-          convertTags: true,
-        });
-        const messageVars = extractVariables(messageContent, true);
-        messageVars.forEach(({ name, isValid }) => {
-          // Only add if not already present
-          if (!variables.find((v) => v.name === name)) {
-            variables.push({
-              name,
-              value: metadata.inputs?.[name] ?? "",
-              isValid: isValid ?? true,
-            });
-          }
+      // 4.B. Extract additional variables contained in message content
+      stateMessages.forEach((msg) => {
+        const vars = extractVariables(msg.content, "helicone");
+        vars.forEach((v) => {
+          variables.push({
+            name: v.name,
+            value: metadata.inputs?.[v.name] ?? v.value ?? "",
+            isValid: v.isValid ?? true,
+            isMessage: msg.idx !== undefined,
+          });
         });
       });
+      // 4.C. Add message variables to the list
+      stateMessages.forEach((msg) => {
+        msg.idx !== undefined &&
+          variables.push({
+            name: `message_${msg.idx}`,
+            value: "msg.content",
+            isValid: true,
+            isMessage: true,
+          });
+      });
 
-      // 5. Update state with the processed data
-      const newState = {
+      // 4.D. Deduplicate variables
+      variables = deduplicateVariables(variables);
+
+      // 6. Update state with the processed data
+      setState({
         promptId: id,
         masterVersion: masterVersion,
         version: ver.major_version,
         versionId: ver.id,
-        messages: templateData.messages,
+        messages: stateMessages,
         parameters: {
           provider: metadata.provider ?? "openai",
           model: templateData.model ?? "gpt-4o-mini",
@@ -187,8 +186,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         evals: templateData.evals || [],
         structure: templateData.structure,
         isDirty: false,
-      } as PromptState;
-      setState(newState);
+      });
     },
     [id, promptVersions]
   );
@@ -219,65 +217,44 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       updateState((prev) => {
         if (!prev) return {};
 
-        const newMessages = prev.messages.map((msg, i) => {
+        // Replace the message content at the changed index
+        const updatedMessages = prev.messages.map((msg, i) => {
           if (i !== index) return msg;
-
-          // Preserve the original message structure
-          if (Array.isArray(msg.content)) {
-            return {
-              ...msg,
-              content: [
-                {
-                  type: "text" as const,
-                  text: content,
-                },
-              ],
-            };
-          }
-
-          // Default to string content
           return { ...msg, content };
         });
 
-        // Extract variables from all messages
-        const messageVariables = newMessages.reduce<Variable[]>((acc, msg) => {
-          const messageContent = processMessageContent(
-            msg as ChatCompletionMessageParam,
-            { convertTags: true }
-          );
-          const messageVars = extractVariables(messageContent, true);
-          return [
-            ...acc,
-            ...messageVars.map((v) => ({
-              name: v.name,
-              value:
-                prev.variables?.find((pv) => pv.name === v.name)?.value || "",
-              isValid: v.isValid,
-            })),
-          ];
-        }, []);
+        // Extract variables from all updatedMessages, preserving existing variable data, and deduplicating
+        const existingVariables = prev.variables || [];
+        console.log("Existing variables:", existingVariables);
 
-        // Keep only unique variables while preserving their existing values
-        const mergedVariables = messageVariables.reduce<Variable[]>(
-          (acc, variable) => {
-            if (!acc.some((v) => v.name === variable.name)) {
-              // Preserve the existing value if it exists
-              const existingVar = prev.variables?.find(
-                (v) => v.name === variable.name
-              );
-              acc.push({
-                ...variable,
-                value: existingVar?.value || variable.value || "",
-              });
-            }
-            return acc;
-          },
-          []
+        const extractedVars = updatedMessages.flatMap((msg) => {
+          const vars = extractVariables(msg.content, "helicone");
+          console.log("Extracted vars from message:", msg.content, vars);
+          return vars;
+        });
+        console.log("All extracted vars:", extractedVars);
+
+        const updatedVariables = deduplicateVariables(
+          extractedVars.map((newVar) => {
+            const existingVar = existingVariables.find(
+              (v) => v.name === newVar.name
+            );
+            console.log(
+              "Processing var:",
+              newVar.name,
+              "existing:",
+              existingVar,
+              "new:",
+              newVar
+            );
+            return existingVar || newVar;
+          })
         );
+        console.log("Final updated variables:", updatedVariables);
 
         return {
-          messages: newMessages as ChatCompletionMessageParam[],
-          variables: mergedVariables,
+          messages: updatedMessages,
+          variables: updatedVariables,
         };
       });
     },
@@ -319,13 +296,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Change Variable
   const handleVariableChange = useCallback(
     (index: number, value: string) => {
-      console.log("Changing variable at index:", index, "to value:", value);
       updateState((prev) => {
         if (!prev?.variables) return {};
-        console.log("Previous variables:", prev.variables);
         const updatedVariables = [...prev.variables];
         updatedVariables[index] = { ...updatedVariables[index], value };
-        console.log("Updated variables:", updatedVariables);
         return { variables: updatedVariables };
       });
     },
@@ -571,28 +545,29 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Add Message Pair
   const handleAddMessagePair = () => {
     updateState((prev) => {
-      if (!prev || !canAddMessagePair(prev.messages)) return {};
-      return {
-        messages: [
-          ...prev.messages,
-          { role: "assistant", content: "" },
-          { role: "user", content: "" },
-        ],
-      };
+      if (prev && isLastMessageUser(prev.messages)) {
+        return {
+          messages: [
+            ...prev.messages,
+            { role: "assistant", content: "" },
+            { role: "user", content: "" },
+          ],
+        };
+      } else return {};
     });
   };
   // - Add Prefill
   const handleAddPrefill = () => {
     updateState((prev) => {
       if (
-        !prev ||
-        !canAddPrefill(prev.parameters.provider) ||
-        !canAddPrefillMessage(prev.messages)
-      )
-        return {};
-      return {
-        messages: [...prev.messages, { role: "assistant", content: "" }],
-      };
+        prev &&
+        isPrefillSupported(prev.parameters.provider) &&
+        isLastMessageUser(prev.messages)
+      ) {
+        return {
+          messages: [...prev.messages, { role: "assistant", content: "" }],
+        };
+      } else return {};
     });
   };
 
@@ -761,15 +736,15 @@ async function pullPromptAndRunCompletion() {
       <TabsContent className="p-4" value="editor">
         <ResizablePanels
           leftPanel={
-            <PromptPanels
+            <MessagesPanel
               messages={state.messages}
               onMessageChange={handleMessageChange}
               onAddMessagePair={handleAddMessagePair}
               onAddPrefill={handleAddPrefill}
-              canAddPrefill={canAddPrefill(state.parameters.provider)}
               onRemoveMessage={handleRemoveMessage}
               onVariableCreate={handleVariableCreate}
               variables={state.variables || []}
+              isPrefillSupported={isPrefillSupported(state.parameters.provider)}
             />
           }
           rightPanel={
