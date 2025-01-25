@@ -60,8 +60,11 @@ export default function MessagesPanel({
             {/* Header */}
             <div className="flex items-center justify-between">
               {/* Message Role */}
-              <h2 className="text-lg font-semibold capitalize text-slate-700">
-                {msg.idx ? "Variable" : msg.role}
+              <h2 className="text-lg font-semibold">
+                <span className="capitalize text-secondary">{msg.role}</span>
+                {msg.idx !== undefined && (
+                  <span className="text-slate-400"> - message_{msg.idx}</span>
+                )}
               </h2>
 
               {/* Suggest starting prompt */}
@@ -95,11 +98,6 @@ export default function MessagesPanel({
                   <PiTrashBold className="w-4 h-4 text-secondary" />
                 </Button>
               )}
-
-              {/* Message Variable */}
-              {/* {isVariable && (
-                <PiDatabaseBold className="w-4 h-4 text-secondary" />
-              )} */}
             </div>
 
             {/* Prompt Box */}
@@ -111,6 +109,7 @@ export default function MessagesPanel({
               onVariableCreate={onVariableCreate}
               contextText={""} // TODO: Add context for better auto-complete
               variables={variables}
+              disabled={msg.idx !== undefined}
             />
           </div>
         );

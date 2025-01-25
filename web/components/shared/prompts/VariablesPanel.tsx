@@ -8,9 +8,11 @@ import {
 import { Variable } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
 import { populateVariables } from "./helpers";
-import { usePromptInputs } from "./hooks";
+import { useInputs } from "@/services/hooks/prompts/inputs";
 import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
 import { memo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
 
@@ -31,17 +33,45 @@ export default function VariablesPanel({
   onVariableChange,
   promptVersionId,
 }: VariablesPanelProps) {
+  const jawn = useJawnClient();
   // - Filter Valid Variables
   const validVariablesWithIndices = variables
     .map((v, i) => ({ variable: v, originalIndex: i }))
     .filter(({ variable }) => isValidVariableName(variable.name));
 
-  const { getRandomInput, hasInputs } = usePromptInputs(promptVersionId);
+  const { inputs, isLoading, refetch } = useInputs(promptVersionId);
+  const hasInputs = inputs && inputs.length > 0;
+
+  const getRandomInput = useMutation({
+    mutationFn: async () => {
+      return await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId: promptVersionId ?? "unknown",
+            },
+          },
+          body: {
+            limit: 1,
+            random: true,
+          },
+        }
+      );
+    },
+  });
 
   const importRandom = async () => {
     const res = await getRandomInput.mutateAsync();
+    const randomInput = res.data?.data?.[0];
+    if (!randomInput) return;
+
     populateVariables({
-      inputsFromBackend: res.data?.data?.[0]?.inputs ?? {},
+      inputsFromBackend: randomInput.inputs ?? {},
+      autoPromptInputs: randomInput.auto_prompt_inputs as {
+        role: string;
+        content: string;
+      }[],
       validVariablesWithIndices,
       onVariableChange,
     });
@@ -72,7 +102,7 @@ export default function VariablesPanel({
               <TooltipContent>
                 <p>
                   {hasInputs
-                    ? "Import from Production"
+                    ? "Import specific values from Production"
                     : "No production data available"}
                 </p>
               </TooltipContent>
@@ -96,7 +126,7 @@ export default function VariablesPanel({
               <TooltipContent>
                 <p>
                   {hasInputs
-                    ? "Randomized from production data"
+                    ? "Import random values from Production"
                     : "No production data available"}
                 </p>
               </TooltipContent>
@@ -135,6 +165,10 @@ export default function VariablesPanel({
 
           populateVariables({
             inputsFromBackend: row.inputs,
+            autoPromptInputs: row.autoInputs as {
+              role: string;
+              content: string;
+            }[],
             validVariablesWithIndices,
             onVariableChange,
           });
@@ -165,7 +199,7 @@ const VariableItem = memo(
           onChange={(e) => onVariableChange(originalIndex, e.target.value)}
           placeholder={
             variable.isMessage
-              ? "This message will not be saved with version."
+              ? "Import variable value from production..."
               : `Enter default value for {{${variable.name}}}...`
           }
           className="w-[32rem] border focus:ring-1 focus:ring-heliblue  rounded-md px-2 py-1 enabled:hover:shadow-md"

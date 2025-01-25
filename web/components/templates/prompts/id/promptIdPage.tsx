@@ -161,7 +161,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         msg.idx !== undefined &&
           variables.push({
             name: `message_${msg.idx}`,
-            value: "msg.content",
+            value: "",
             isValid: true,
             isMessage: true,
           });
@@ -298,8 +298,41 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     (index: number, value: string) => {
       updateState((prev) => {
         if (!prev?.variables) return {};
+
+        // TODO: Make variables carry an optional idx instead of isMessage, so all of this can be cleaned up with (index: number, value: string, idx?: number)
+        // TODO: This will also allow me to clean up the populateVariables helper function from VariablesPanel
         const updatedVariables = [...prev.variables];
-        updatedVariables[index] = { ...updatedVariables[index], value };
+        const variable = updatedVariables[index];
+        updatedVariables[index] = { ...variable, value };
+
+        // If this is a message variable, also update the corresponding message
+        const messageMatch = variable.name.match(/^message_(\d+)$/);
+        if (messageMatch) {
+          const messageIdx = parseInt(messageMatch[1]);
+          let parsedValue;
+          try {
+            parsedValue = JSON.parse(value);
+          } catch (e) {
+            return { variables: updatedVariables };
+          }
+
+          const updatedMessages = prev.messages.map((msg) => {
+            if (msg.idx === messageIdx) {
+              return {
+                ...msg,
+                role: parsedValue.role,
+                content: parsedValue.content,
+              };
+            }
+            return msg;
+          });
+
+          return {
+            variables: updatedVariables,
+            messages: updatedMessages,
+          };
+        }
+
         return { variables: updatedVariables };
       });
     },

@@ -39,6 +39,7 @@ export interface Variable {
   value: string;
   isValid?: boolean;
   isMessage?: boolean;
+  idx?: number;
 }
 
 export interface EvalReference {
