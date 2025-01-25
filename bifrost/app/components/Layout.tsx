@@ -17,7 +17,7 @@ export const Layout = async ({
 
   return (
     <>
-      <Banner />
+      {/* <Banner /> */}
       <NavBar stars={stars} />
       {children}
       {!hideFooter && <Footer />}
