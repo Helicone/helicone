@@ -117,6 +117,9 @@ export const FreePlanCard = () => {
             >
               Upgrade to Pro
             </Button>
+            <span className="text-slate-500 text-[12px]">
+              7 days free trial
+            </span>
           </Col>
           <div>
             <button
