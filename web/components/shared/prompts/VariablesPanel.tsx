@@ -1,4 +1,3 @@
-import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -8,11 +7,20 @@ import {
 } from "@/components/ui/tooltip";
 import { Variable } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
-import { ImportIcon, ShuffleIcon } from "lucide-react";
 import { populateVariables } from "./helpers";
-import { usePromptInputs } from "./hooks";
+import { useInputs } from "@/services/hooks/prompts/inputs";
 import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
-import { useState } from "react";
+import { memo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+
+import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
+
+interface VariableItemProps {
+  variable: Variable;
+  originalIndex: number;
+  onVariableChange: (index: number, value: string) => void;
+}
 
 interface VariablesPanelProps {
   variables: Variable[];
@@ -25,17 +33,45 @@ export default function VariablesPanel({
   onVariableChange,
   promptVersionId,
 }: VariablesPanelProps) {
+  const jawn = useJawnClient();
   // - Filter Valid Variables
   const validVariablesWithIndices = variables
     .map((v, i) => ({ variable: v, originalIndex: i }))
     .filter(({ variable }) => isValidVariableName(variable.name));
 
-  const { getRandomInput, hasInputs } = usePromptInputs(promptVersionId);
+  const { inputs, isLoading, refetch } = useInputs(promptVersionId);
+  const hasInputs = inputs && inputs.length > 0;
+
+  const getRandomInput = useMutation({
+    mutationFn: async () => {
+      return await jawn.POST(
+        "/v1/prompt/version/{promptVersionId}/inputs/query",
+        {
+          params: {
+            path: {
+              promptVersionId: promptVersionId ?? "unknown",
+            },
+          },
+          body: {
+            limit: 1,
+            random: true,
+          },
+        }
+      );
+    },
+  });
 
   const importRandom = async () => {
     const res = await getRandomInput.mutateAsync();
+    const randomInput = res.data?.data?.[0];
+    if (!randomInput) return;
+
     populateVariables({
-      inputsFromBackend: res.data?.data?.[0]?.inputs ?? {},
+      inputsFromBackend: randomInput.inputs ?? {},
+      autoPromptInputs: randomInput.auto_prompt_inputs as {
+        role: string;
+        content: string;
+      }[],
       validVariablesWithIndices,
       onVariableChange,
     });
@@ -47,56 +83,56 @@ export default function VariablesPanel({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-700">Variables</h2>
 
-        <Row className="gap-2">
-          <TooltipProvider>
+        <div className="flex flex-row gap-2">
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
                   <Button
-                    variant={"secondary"}
-                    size={"sm_sleek"}
+                    variant={"outline"}
+                    size={"square_icon"}
                     asPill
                     disabled={!hasInputs}
                     onClick={() => setOpenInputSelector(true)}
                   >
-                    <ImportIcon className="w-4 h-4" />
+                    <PiDatabaseBold className="w-4 h-4 text-secondary" />
                   </Button>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>
                   {hasInputs
-                    ? "Import from Production"
+                    ? "Import specific values from Production"
                     : "No production data available"}
                 </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <TooltipProvider>
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
                   <Button
-                    variant={"secondary"}
-                    size={"sm_sleek"}
+                    variant={"outline"}
+                    size={"square_icon"}
                     asPill
                     onClick={importRandom}
                     disabled={!hasInputs}
                   >
-                    <ShuffleIcon className="w-4 h-4" />
+                    <PiShuffleBold className="w-4 h-4 text-secondary" />
                   </Button>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>
                   {hasInputs
-                    ? "Randomized from production data"
+                    ? "Import random values from Production"
                     : "No production data available"}
                 </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </Row>
+        </div>
       </div>
 
       {/* No Variables */}
@@ -110,30 +146,12 @@ export default function VariablesPanel({
         <div className="flex flex-col divide-y divide-slate-100">
           {/* Variables */}
           {validVariablesWithIndices.map(({ variable, originalIndex }) => (
-            <div
+            <VariableItem
               key={`${variable.name}-${originalIndex}`}
-              className="flex flex-col py-2 first:pt-0"
-            >
-              <div className="flex flex-d items-center justify-between gap-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`font-medium ${
-                      variable.value ? "text-heliblue" : "text-red-500"
-                    }`}
-                  >
-                    {variable.name}
-                  </span>
-                </div>
-                <input
-                  value={variable.value}
-                  onChange={(e) =>
-                    onVariableChange(originalIndex, e.target.value)
-                  }
-                  placeholder={`Enter default value for {{${variable.name}}}...`}
-                  className="w-[32rem] border border-slate-100 focus:ring-1 focus:ring-heliblue hover:shadow-md rounded-md px-2 py-1"
-                />
-              </div>
-            </div>
+              variable={variable}
+              originalIndex={originalIndex}
+              onVariableChange={onVariableChange}
+            />
           ))}
         </div>
       )}
@@ -147,6 +165,10 @@ export default function VariablesPanel({
 
           populateVariables({
             inputsFromBackend: row.inputs,
+            autoPromptInputs: row.autoInputs as {
+              role: string;
+              content: string;
+            }[],
             validVariablesWithIndices,
             onVariableChange,
           });
@@ -156,3 +178,35 @@ export default function VariablesPanel({
     </div>
   );
 }
+
+const VariableItem = memo(
+  ({ variable, originalIndex, onVariableChange }: VariableItemProps) => (
+    <div className="flex flex-col py-2 first:pt-0">
+      <div className="flex flex-d items-center justify-between gap-2 text-sm">
+        <div className="flex items-center gap-2">
+          <div
+            className={`font-medium flex flex-row items-center gap-1 ${
+              variable.value ? "text-heliblue" : "text-red-500"
+            }`}
+          >
+            <span>{variable.name}</span>
+            <span>{variable.isMessage && <PiChatBold />}</span>
+          </div>
+        </div>
+        <input
+          value={variable.value}
+          disabled={variable.isMessage}
+          onChange={(e) => onVariableChange(originalIndex, e.target.value)}
+          placeholder={
+            variable.isMessage
+              ? "Import variable value from production..."
+              : `Enter default value for {{${variable.name}}}...`
+          }
+          className="w-[32rem] border focus:ring-1 focus:ring-heliblue  rounded-md px-2 py-1 enabled:hover:shadow-md"
+        />
+      </div>
+    </div>
+  )
+);
+
+VariableItem.displayName = "VariableItem";

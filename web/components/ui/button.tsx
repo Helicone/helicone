@@ -32,6 +32,7 @@ const buttonVariants = cva(
         icon: "h-10 w-10",
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-xs",
+        square_icon: "h-7 w-7 p-0",
       },
       asPill: {
         true: "rounded-full",
