@@ -19,7 +19,7 @@ const rows: FeatureRowProps[] = [
     pro: (
       <>
         <Row className="items-center gap-[4px]">
-          <h3 className="font-bold text-xl">$200</h3>
+          <h3 className="font-bold text-xl">$50</h3>
           <p className="text-slate-500">/mo</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
