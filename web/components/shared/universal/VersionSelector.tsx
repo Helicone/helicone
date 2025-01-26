@@ -1,5 +1,5 @@
 "use client";
-import { PromptVersion } from "@/types/prompt-state";
+import { PromptVersionReference } from "@/types/prompt-state";
 import { formatDate } from "@/utils/date";
 import { toKebabCase } from "@/utils/strings";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -21,9 +21,9 @@ interface VersionSelectorProps {
   currentVersion: number;
   isDirty: boolean;
 
-  versions: PromptVersion[];
-  onVersionSelect: (version: PromptVersion) => void;
-  onVersionPromote: (version: PromptVersion) => void;
+  versions: PromptVersionReference[];
+  onVersionSelect: (version: PromptVersionReference) => void;
+  onVersionPromote: (version: PromptVersionReference) => void;
   onIdEdit: (newId: string) => void;
 }
 

@@ -42,6 +42,20 @@ export interface Variable {
   idx?: number;
 }
 
+export interface PromptVersionReference {
+  id: string;
+  minor_version: number;
+  major_version: number;
+  prompt_v2: string;
+  model: string;
+  helicone_template: string;
+  created_at: string;
+  metadata: Record<string, any>;
+  parent_prompt_version?: string | null;
+  experiment_id?: string | null;
+  updated_at?: string;
+}
+
 export interface EvalReference {
   evalId: string;
   version: number;

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
-import { PromptState, Variable } from "@/types/prompt-state";
+import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
 import {
   extractVariables,
   isValidVariableName,
@@ -309,7 +309,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         const messageMatch = variable.name.match(/^message_(\d+)$/);
         if (messageMatch) {
           const messageIdx = parseInt(messageMatch[1]);
-          let parsedValue;
+          let parsedValue: StateMessage;
           try {
             parsedValue = JSON.parse(value);
           } catch (e) {
