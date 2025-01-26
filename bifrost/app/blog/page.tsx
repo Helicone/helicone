@@ -226,6 +226,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openai-o3",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
     },
   },
@@ -247,11 +252,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "rag-chunking-strategies",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "openai-o3",
     },
   },
   {
