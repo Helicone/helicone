@@ -1,5 +1,5 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
 import { ReactElement, ReactNode, useState } from "react";
@@ -21,6 +21,7 @@ import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
+import { env } from "next-runtime-env";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,11 +54,42 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
 
+export function SupabaseProvider({
+  children,
+  initialSession,
+}: {
+  children: React.ReactNode;
+  initialSession?: Session | null;
+}) {
+  const [supabaseClient] = useState(() => {
+    if (
+      env("NEXT_PUBLIC_SUPABASE_URL") &&
+      env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    ) {
+      return createBrowserSupabaseClient({
+        supabaseUrl: env("NEXT_PUBLIC_SUPABASE_URL"),
+        supabaseKey: env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+      });
+    }
+    return null;
+  });
+
+  if (!supabaseClient) {
+    return <>{children}</>;
+  }
+
+  return (
+    <SessionContextProvider
+      supabaseClient={supabaseClient}
+      initialSession={initialSession}
+    >
+      {children}
+    </SessionContextProvider>
+  );
+}
+
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
-
-  // Create a new supabase browser client on every first render.
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
 
@@ -66,10 +98,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <>
       <PHProvider>
-        <SessionContextProvider
-          supabaseClient={supabaseClient}
-          initialSession={pageProps.initialSession}
-        >
+        <SupabaseProvider>
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
@@ -86,7 +115,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               </DndProvider>
             </NotificationProvider>
           </QueryClientProvider>
-        </SessionContextProvider>
+        </SupabaseProvider>
       </PHProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (

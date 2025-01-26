@@ -216,6 +216,16 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "preventing-prompt-injection",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-frameworks",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
     },
   },

@@ -53,7 +53,9 @@ const PromptDelete = (props: PromptDeleteProps) => {
               Cancel
             </button>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 // handleDeleteAlert(alertId);
                 setIsLoading(true);
                 jawnClient

@@ -2395,7 +2395,8 @@
 					"QSTASH",
 					"FIRECRAWL",
 					"AWS",
-					"DEEPSEEK"
+					"DEEPSEEK",
+					"X"
 				]
 			},
 			"Provider": {
@@ -8693,6 +8694,59 @@
 				}
 			}
 		},
+		"/v1/prompt/{promptId}/user-defined-id": {
+			"patch": {
+				"operationId": "UpdatePromptUserDefinedId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"userDefinedId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"userDefinedId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/version/{promptVersionId}/edit-label": {
 			"post": {
 				"operationId": "EditPromptVersionLabel",
@@ -10665,6 +10719,33 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/stripe/subscription/cost-for-prompts": {
+			"get": {
+				"operationId": "GetCostForPrompts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/stripe/subscription/free/usage": {

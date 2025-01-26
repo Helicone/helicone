@@ -1,6 +1,6 @@
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -10,7 +10,7 @@ import { Result } from "../../../lib/result";
 async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;
   if (count > 0) {
-    const { error } = await supabaseServer
+    const { error } = await getSupabaseServer()
       .from("organization")
       .update({ has_onboarded: true })
       .eq("id", orgId);

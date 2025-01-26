@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 import { resultMap } from "../../../../lib/result";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 
@@ -50,7 +50,7 @@ export default async function handler(
 
       customerId = customer.id;
 
-      await supabaseServer
+      await getSupabaseServer()
         .from("organization")
         .update({ stripe_customer_id: customerId })
         .eq("id", orgId);

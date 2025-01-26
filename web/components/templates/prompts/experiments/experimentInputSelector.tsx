@@ -5,6 +5,7 @@ import useNotification from "../../../shared/notification/useNotification";
 import PromptPropertyCard from "../id/promptPropertyCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 
 interface ExperimentInputSelectorProps {
   open: boolean;
@@ -18,10 +19,18 @@ interface ExperimentInputSelectorProps {
       autoInputs: any[];
     }[]
   ) => void;
+  selectJustOne?: boolean;
 }
 
 const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
-  const { open, setOpen, promptVersionId, onSuccess, handleAddRows } = props;
+  const {
+    open,
+    setOpen,
+    promptVersionId,
+    onSuccess,
+    handleAddRows,
+    selectJustOne,
+  } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 
@@ -130,14 +139,16 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             <h2 className="font-semibold text-xl">
               Select Inputs ({inputRecords.length})
             </h2>
-            <Button
-              variant="secondary"
-              size="sm"
-              title={isAllSelected ? "Deselect All" : "Select All"}
-              onClick={handleSelectAll}
-            >
-              {isAllSelected ? "Deselect All" : "Select All"}
-            </Button>
+            {!selectJustOne && (
+              <Button
+                variant="secondary"
+                size="sm"
+                title={isAllSelected ? "Deselect All" : "Select All"}
+                onClick={handleSelectAll}
+              >
+                {isAllSelected ? "Deselect All" : "Select All"}
+              </Button>
+            )}
           </div>
           <p className="text-gray-500 text-sm pb-4">
             Select the inputs you want to include in the dataset.
@@ -149,7 +160,25 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
             {!isLoading &&
               !isError &&
               inputRecords.map((request) => (
-                <li key={request.id} className="w-full flex items-start">
+                <li
+                  key={request.id}
+                  className={clsx(
+                    "w-full flex items-start",
+                    selectJustOne && "cursor-pointer"
+                  )}
+                  onClick={() => {
+                    if (selectJustOne) {
+                      handleAddRows([
+                        {
+                          autoInputs: request.autoInputs,
+                          inputs: request.inputs,
+                          inputRecordId: request.id,
+                        },
+                      ]);
+                      setOpen(false);
+                    }
+                  }}
+                >
                   <input
                     type="checkbox"
                     className="mt-2 mr-2 rounded border-slate-300 dark:border-slate-700"
@@ -172,42 +201,44 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
           </ul>
         </div>
 
-        <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
-          <Button
-            variant={"secondary"}
-            size={"sm"}
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </Button>
+        {!selectJustOne && (
+          <div className="flex justify-end space-x-4 sticky bottom-0 py-4 bg-white">
+            <Button
+              variant={"secondary"}
+              size={"sm"}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
 
-          <Button
-            size={"sm"}
-            onClick={async () => {
-              if (selectedRequests.length === 0) {
-                setNotification("Please select at least one input.", "error");
-                return;
-              }
+            <Button
+              size={"sm"}
+              onClick={async () => {
+                if (selectedRequests.length === 0) {
+                  setNotification("Please select at least one input.", "error");
+                  return;
+                }
 
-              await handleAddRows(
-                selectedRequests.map((request) => ({
-                  inputRecordId: request.id,
-                  inputs: request.inputs,
-                  autoInputs: request.autoInputs,
-                }))
-              );
+                await handleAddRows(
+                  selectedRequests.map((request) => ({
+                    inputRecordId: request.id,
+                    inputs: request.inputs,
+                    autoInputs: request.autoInputs,
+                  }))
+                );
 
-              if (onSuccess) {
-                onSuccess(true);
+                if (onSuccess) {
+                  onSuccess(true);
 
-                setNotification("Added inputs to dataset", "success");
-                setOpen(false);
-              }
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
+                  setNotification("Added inputs to dataset", "success");
+                  setOpen(false);
+                }
+              }}
+            >
+              Confirm
+            </Button>
+          </div>
+        )}
       </div>
     </ThemedDrawer>
   );

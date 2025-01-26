@@ -127,6 +127,9 @@ export interface paths {
   "/v1/prompt/create": {
     post: operations["CreatePrompt"];
   };
+  "/v1/prompt/{promptId}/user-defined-id": {
+    patch: operations["UpdatePromptUserDefinedId"];
+  };
   "/v1/prompt/version/{promptVersionId}/edit-label": {
     post: operations["EditPromptVersionLabel"];
   };
@@ -160,6 +163,9 @@ export interface paths {
   };
   "/v1/settings/query": {
     get: operations["GetSettings"];
+  };
+  "/v1/stripe/subscription/cost-for-prompts": {
+    get: operations["GetCostForPrompts"];
   };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
@@ -592,7 +598,7 @@ Json: JsonObject;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X";
     Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -2798,6 +2804,28 @@ export interface operations {
       };
     };
   };
+  UpdatePromptUserDefinedId: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   EditPromptVersionLabel: {
     parameters: {
       path: {
@@ -3017,6 +3045,16 @@ export interface operations {
           "application/json": {
             useAzureForExperiment: boolean;
           };
+        };
+      };
+    };
+  };
+  GetCostForPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
         };
       };
     };
