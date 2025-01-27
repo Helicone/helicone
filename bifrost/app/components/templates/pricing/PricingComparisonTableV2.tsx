@@ -25,7 +25,7 @@ const rows: FeatureRowProps[] = [
     description: (
       <>
         <p className="text-slate-500">
-          Include 10,000 free requests every month!
+          Includes 10,000 free requests every month!
         </p>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1" className="border-none">
@@ -57,11 +57,11 @@ const rows: FeatureRowProps[] = [
     pro: (
       <>
         <Row className="items-center gap-[4px]">
-          <h3 className="font-bold text-xl">100k</h3>
-          <p className="text-slate-500">/mo</p>
+          <h3 className="font-bold text-xl">10k</h3>
+          <p className="text-slate-500">/mo to unlimited</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
-          From $0.32 down to $0.02 per 1k requests.
+          From $0.35 down to $0.08 per 1k requests.
         </p>
       </>
     ),
@@ -97,6 +97,24 @@ const rows: FeatureRowProps[] = [
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
+  },
+  {
+    title: "Evals",
+    description:
+      "Run LLM-as-a-Judge and Python evals to assess model and prompt performance.",
+    free: <XMarkIcon className="w-6 h-6 text-red-500" />,
+    pro: (
+      <div className="text-center">
+        <p className="text-slate-500">Pass-through cost</p>
+        <p className="text-sm font-light text-slate-500">(no markup)</p>
+      </div>
+    ),
+    enterprise: (
+      <div className="text-center">
+        <p className="text-slate-500">Pass-through cost</p>
+        <p className="text-sm font-light text-slate-500">(no markup)</p>
+      </div>
+    ),
   },
   {
     title: "Rate limits",

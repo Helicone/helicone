@@ -10,6 +10,7 @@ import {
   Route,
   Security,
   Tags,
+  Patch,
 } from "tsoa";
 import { Result, resultMap } from "../../lib/shared/result";
 import {
@@ -227,6 +228,25 @@ export class PromptController extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
+
+  @Patch("{promptId}/user-defined-id")
+  public async updatePromptUserDefinedId(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptId: string,
+    @Body() requestBody: { userDefinedId: string }
+  ): Promise<Result<null, string>> {
+    const promptManager = new PromptManager(request.authParams);
+    const result = await promptManager.updatePromptUserDefinedId(
+      promptId,
+      requestBody.userDefinedId
+    );
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
     }
     return result;
   }

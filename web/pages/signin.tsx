@@ -4,11 +4,12 @@ import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 import { GetServerSidePropsContext } from "next";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
-import { supabaseServer } from "../lib/supabaseServer";
+import { getSupabaseServer } from "../lib/supabaseServer";
 import { Result, err, ok } from "../lib/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { env } from "next-runtime-env";
 
 const SignIn = ({
   customerPortal,
@@ -115,14 +116,14 @@ const SignIn = ({
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+  if (env("NEXT_PUBLIC_IS_ON_PREM") === "true") {
     return {
       props: {},
     };
   }
 
   if (isCustomerDomain(context.req.headers.host ?? "")) {
-    const org = await supabaseServer
+    const org = await getSupabaseServer()
       .from("organization")
       .select("*")
       .eq("domain", context.req.headers.host ?? "")

@@ -1,11 +1,11 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
-import ModelPill from "../../../templates/requestsV2/modelPill";
-import StatusBadge from "../../../templates/requestsV2/statusBadge";
+import { NormalizedRequest } from "../../../templates/requests/builder/abstractRequestBuilder";
+import ModelPill from "../../../templates/requests/modelPill";
+import StatusBadge from "../../../templates/requests/statusBadge";
 import { formatNumber } from "../../../templates/users/initialColumns";
 import { clsx } from "../../clsx";
 import { useState } from "react";
-import CostPill from "../../../templates/requestsV2/costPill";
+import CostPill from "../../../templates/requests/costPill";
 import { getUSDateFromString } from "../../utils/utils";
 
 interface RequestRowProps {

@@ -13,16 +13,25 @@ interface AuthHeaderProps {
   headerActions?: ReactNode;
   actions?: ReactNode;
   isWithinIsland?: boolean;
+  className?: string;
 }
 
 const AuthHeader = (props: AuthHeaderProps) => {
-  const { title, breadcrumb, headerActions, actions, isWithinIsland } = props;
+  const {
+    title,
+    breadcrumb,
+    headerActions,
+    actions,
+    isWithinIsland,
+    className,
+  } = props;
 
   return (
     <div
       className={cn(
         "flex flex-row items-center justify-between py-4 w-full",
-        !isWithinIsland && ISLAND_MARGIN
+        !isWithinIsland && ISLAND_MARGIN,
+        className
       )}
     >
       <div className="flex flex-col items-start space-y-2">

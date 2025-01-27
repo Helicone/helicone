@@ -216,7 +216,12 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "text-classification-with-llms",
+      folderName: "preventing-prompt-injection",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-frameworks",
     },
   },
   {
@@ -232,6 +237,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "openai-structured-outputs",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "text-classification-with-llms",
     },
   },
   {

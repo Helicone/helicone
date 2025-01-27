@@ -3,15 +3,15 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
-import { handleLogCostCalculation } from "../../../utlis/LogCostCalculation";
+import { handleLogCostCalculation } from "../../../utils/LogCostCalculation";
 
 async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<Object, string>>) {
-  const { data, error } = await supabaseServer
+  const { data, error } = await getSupabaseServer()
     .from("organization")
     .select("stripe_subscription_id, stripe_subscription_item_id, tier")
     .eq("id", orgId)

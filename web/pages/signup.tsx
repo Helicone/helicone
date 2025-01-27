@@ -10,7 +10,7 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
-
+import { env } from "next-runtime-env";
 const SignUp = () => {
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
@@ -129,7 +129,7 @@ export default SignUp;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  if (process.env.NEXT_PUBLIC_IS_ON_PREM === "true") {
+  if (env("NEXT_PUBLIC_IS_ON_PREM") === "true") {
     return {
       props: {},
     };

@@ -1,4 +1,4 @@
-import getNormalizedRequest from "../../components/templates/requestsV2/builder/requestBuilder";
+import getNormalizedRequest from "../../components/templates/requests/builder/requestBuilder";
 import { modelCost } from "../api/metrics/costCalc";
 import { HeliconeRequest } from "../api/request/request";
 import { Session, Trace } from "./sessionTypes";

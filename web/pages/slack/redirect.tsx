@@ -1,7 +1,7 @@
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { withAuthSSR } from "@/lib/api/handlerWrappers";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { getSupabaseServer } from "@/lib/supabaseServer";
 import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { ReactElement } from "react";
@@ -42,7 +42,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await getSupabaseServer()
     .from("organization")
     .select("*")
     .eq("id", state);
@@ -112,7 +112,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const { data: slackData, error: slackError } = await supabaseServer
+  const { data: slackData, error: slackError } = await getSupabaseServer()
     .from("integrations")
     .insert({
       integration_name: "slack",

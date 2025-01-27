@@ -27,7 +27,7 @@ const tiers: {
     featured: false,
     description: "Everything you need to get your startup off the ground.",
     mainFeatures: [
-      "Up to 100k request logs",
+      "Up to 10k request logs",
       "Dashboards and Analytics",
       "Beta access to prompt templates",
       "Caching and other tooling",
