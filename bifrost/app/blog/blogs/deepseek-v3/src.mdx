@@ -87,44 +87,28 @@ DeepSeek-V3 showcased its prowess in competitive programming, scoring in the `51
 | API Access                                       | OpenAI-compatible API available through the <a href="http://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek Platform</a>. Invoke DeepSeek-V3 by specifying model=`deepseek-chat`. <br/><br/> You can also use <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other endpoint providers</a>.                        |
 | Local Deployment                                 | Clone the official repository to access DeepSeek V3, including pre-trained model checkpoints, documentation, and code examples.                                                                                                                                                                                                                                            |
 
-## Monitoring Applications Powered by DeepSeek V3
-
-Connect DeepSeek with Helicone to get powerful observability for your LLM application. Integration is easy, follow these steps:
-
-### 1. Create a Helicone API Key
-
-Create a <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> account, then <a href="https://us.helicone.ai/developer" target="_blank" rel="noopener">generate an API key</a>.
-
-### 2. Create a DeepSeek API Key
-
-Create a <a href="platform.deepseek.ai" target="_blank" rel="noopener">DeepSeek</a> account, then generate an API key.
-
-### 3. Set both API keys as environment variables
-
+<CallToAction
+  title="How to Monitor DeepSeek V3 Applications"
+  description="Integrate your DeepSeek application with Helicone to get powerful LLM analytics and observability. Follow these steps:"
+  primaryButtonText="Read the Docs"
+  primaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/deepseek"
+  secondaryButtonText="Get Started for Free"
+  secondaryButtonLink="https://helicone.ai"
+>
 ```bash
+# Set DeepSeek + Helicone API Keys as environment variables
 HELICONE_API_KEY=<your API key>
 DEEPSEEK_API_KEY=<your API key>
+
+# Update the base URL
+https://api.deepseek.ai/v1/chat/completions # old
+https://deepseek.helicone.ai/v1/chat/completions # new
+
+# Add Auth headers
+Helicone-Auth: `Bearer ${HELICONE_API_KEY}`
+Authorization: `Bearer ${DEEPSEEK_API_KEY}`
 ```
-
-### 4. Modify the base URL and add Auth headers
-
-Replace your base URL with the Helicone Gateway URL:
-
-```bash
-# Old base URL
-https://api.deepseek.ai/v1/chat/completions
-
-# New base URL
-https://deepseek.helicone.ai/v1/chat/completions
-```
-
-Add the following headers:
-
-```bash
-Authorization: Bearer <your API key>
-```
-
-For details, please refer to the <a href="https://docs.helicone.ai/getting-started/integration-method/deepseek" target="_blank" rel="noopener">DeepSeek integration documentation</a>.
+</CallToAction>
 
 ## Should you use DeepSeek-V3?
 

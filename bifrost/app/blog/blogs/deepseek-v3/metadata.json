@@ -1,7 +1,7 @@
 {
-  "title": "DeepSeek-V3: The New Open-Source MoE Model",
-  "title1": "DeepSeek-V3: The New Open-Source MoE Model",
-  "title2": "DeepSeek-V3: The New Open-Source MoE Model",
+  "title": "DeepSeek-V3 Release: New Open-Source MoE Model",
+  "title1": "DeepSeek-V3 Release: New Open-Source MoE Model",
+  "title2": "DeepSeek-V3 Release: New Open-Source MoE Model",
   "description": "A deepdive into DeepSeek-V3, the 671B parameter open-source MoE model that rivals GPT-4 at fraction of the cost. Compare benchmarks, deployment options, and real-world performance metrics.",
   "images": "/static/blog/deepseek-v3/cover.webp",
   "time": "7 minute read",
