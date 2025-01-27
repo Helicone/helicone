@@ -50,6 +50,7 @@ interface PromptBoxProps {
   onVariableCreate?: (variable: Variable) => void;
   contextText?: string;
   variables?: Variable[];
+  disabled?: boolean;
 }
 
 export default function PromptBox({
@@ -58,6 +59,7 @@ export default function PromptBox({
   onVariableCreate,
   contextText = "",
   variables = [],
+  disabled = false,
 }: PromptBoxProps) {
   const [suggestionState, dispatch] = useReducer(suggestionReducer, {
     isTyping: false,
@@ -622,7 +624,9 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className="group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue hover:shadow-md rounded-xl bg-white border border-slate-100"
+      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white border border-slate-100 ${
+        disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
+      }`}
     >
       <textarea
         ref={textareaRef}
@@ -634,11 +638,12 @@ export default function PromptBox({
         className="col-[1] row-[1] h-full w-full border-none bg-transparent p-4 outline-none"
         style={{
           ...sharedTextAreaStyles,
-          caretColor: "black",
+          caretColor: disabled ? "transparent" : "black",
           color: "transparent",
           resize: "none",
         }}
         placeholder="Start typing your prompt..."
+        disabled={disabled}
       />
       <pre
         aria-hidden="true"
