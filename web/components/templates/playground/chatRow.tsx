@@ -377,7 +377,7 @@ const ChatRow = (props: ChatRowProps) => {
         <div className="flex flex-col space-y-2">
           {message.content !== null && message.content !== "" && (
             <code className="text-xs whitespace-pre-wrap font-semibold">
-              {message.content}
+              {JSON.stringify(message.content, null, 2)}
             </code>
           )}
           {tools.map((tool, index) => (
