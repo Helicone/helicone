@@ -1,14 +1,11 @@
-import { Message } from "@/components/templates/requests/mapper/types";
+import { Message } from "@/llm-mappers/types";
 import React from "react";
 
 export const OpenAIImage: React.FC<{
-  item: any;
+  imageUrl: string;
   selectedProperties?: Record<string, string>;
   isHeliconeTemplate?: boolean;
-}> = ({ item, selectedProperties, isHeliconeTemplate }) => {
-  const imageUrl =
-    typeof item.image_url === "string" ? item.image_url : item.image_url.url;
-
+}> = ({ imageUrl, selectedProperties, isHeliconeTemplate }) => {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={imageUrl} alt="" width={600} height={600} />;
 };

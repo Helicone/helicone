@@ -1,4 +1,4 @@
-import { Message } from "@/components/templates/requests/mapper/types";
+import { Message } from "@/llm-mappers/types";
 import React from "react";
 import { renderFunctionCall } from "./renderFunctionCall";
 

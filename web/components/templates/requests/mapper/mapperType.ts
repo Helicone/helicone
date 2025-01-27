@@ -1,4 +1,4 @@
-import { HeliconeRequest, Provider } from "../../../../lib/api/request/request";
+import { HeliconeRequest, Provider } from "../../lib/api/request/request";
 import { MapperType } from "./types";
 
 const isAssistantRequest = (request: HeliconeRequest) => {
@@ -36,6 +36,10 @@ export const getMapperType = ({
   path?: string | null;
   isAssistant?: boolean;
 }): MapperType => {
+  if (/^gpt-3\.5-turbo-instruct/.test(model)) {
+    return "openai-instruct";
+  }
+
   if (
     /^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model) ||
     /^(ft:)?gpt-(4|3\.5|35)(?!-turbo-instruct)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(

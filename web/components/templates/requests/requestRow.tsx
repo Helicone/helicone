@@ -27,8 +27,8 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import NewDataset from "../datasets/NewDataset";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
-import { RenderMappedRequest } from "./mapper/RenderHeliconeRequest";
-import { MappedLLMRequest } from "./mapper/types";
+import { RenderMappedRequest } from "./RenderHeliconeRequest";
+import { MappedLLMRequest } from "../../../llm-mappers/types";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 

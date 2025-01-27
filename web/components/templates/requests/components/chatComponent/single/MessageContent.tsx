@@ -1,12 +1,11 @@
-import React, { useMemo, useRef } from "react";
+import { Message } from "@/packages/cost/llm-mappers/types";
+import React, { useRef } from "react";
 import { PROMPT_MODES } from "../chatTopBar";
-
 import { AutoInputMessage } from "./AutoInputMessage";
 import { ExpandableMessage } from "./ExpandableMessage";
 import { FunctionCall } from "./FunctionCall";
 import { ImageRow } from "./images/ImageRow";
 import { FunctionMessage } from "./renderingUtils";
-import { Message } from "@/components/templates/requests/mapper/types";
 
 interface MessageContentProps {
   message: Message;

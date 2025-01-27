@@ -1,5 +1,5 @@
+import { isJSON } from "@/packages/cost/llm-mappers/utils/contentHelpers";
 import React from "react";
-import { isJSON } from "./utils";
 
 export const renderFunctionCall = (
   name: string,

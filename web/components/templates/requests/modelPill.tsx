@@ -1,6 +1,6 @@
+import { getMapperType } from "@/packages/cost/llm-mappers/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
-import { getMapperType } from "./mapper/mapperType";
-import { MapperType } from "./mapper/types";
+import { MapperType } from "@/packages/cost/llm-mappers/types";
 
 interface ModelPillProps {
   model: string;
@@ -27,6 +27,8 @@ const ModelPill = (props: ModelPillProps) => {
     "black-forest-labs-image":
       "bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-900 dark:text-yellow-300 dark:ring-yellow-800",
     "openai-assistant":
+      "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    "openai-instruct":
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
     unknown:
       "bg-gray-50 text-gray-700 ring-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800",

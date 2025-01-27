@@ -14,7 +14,7 @@ import { useEffect } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
-import { MappedLLMRequest } from "./mapper/types";
+import { MappedLLMRequest } from "../../../llm-mappers/types";
 import RequestRow from "./requestRow";
 
 interface RequestDivProps {

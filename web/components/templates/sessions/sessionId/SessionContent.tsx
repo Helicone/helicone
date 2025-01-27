@@ -4,7 +4,7 @@ import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
-import getNormalizedRequest from "../../requests/builder/requestBuilder";
+
 import RequestDrawerV2 from "../../requests/requestDrawerV2";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
 
 interface SessionContentProps {
   session: Session;
@@ -115,12 +116,18 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               models={session.traces.map((trace) => trace.request.model ?? "")}
               promptTokens={session.traces.reduce(
                 (acc, trace) =>
-                  acc + (parseInt(`${trace?.request?.promptTokens}`) || 0),
+                  acc +
+                  (parseInt(
+                    `${trace?.request?.heliconeMetadata?.promptTokens}`
+                  ) || 0),
                 0
               )}
               completionTokens={session.traces.reduce(
                 (acc, trace) =>
-                  acc + (parseInt(`${trace?.request?.completionTokens}`) || 0),
+                  acc +
+                  (parseInt(
+                    `${trace?.request?.heliconeMetadata?.completionTokens}`
+                  ) || 0),
                 0
               )}
               sessionId={session_id as string}
@@ -200,7 +207,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
             requests.requests.requests?.find(
               (r) => r.request_id === selectedRequestId
             ) &&
-            getNormalizedRequest(
+            heliconeRequestToMappedContent(
               requests.requests.requests?.find(
                 (r) => r.request_id === selectedRequestId
               )!

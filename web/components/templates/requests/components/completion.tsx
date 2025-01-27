@@ -2,40 +2,27 @@ import { useState } from "react";
 import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { MappedLLMRequest } from "../../../../llm-mappers/types";
 
 interface CompletionProps {
-  request: string;
-
-  // a completion response can be an error
-  response: {
-    title: string;
-    text: string;
-    image_url?: string;
-  };
-
-  rawRequest: any;
-  rawResponse: any;
-
+  mappedRequest: MappedLLMRequest;
   defaultMode?: "pretty" | "json";
 }
 
 export const Completion = (props: CompletionProps) => {
-  const {
-    request,
-    response,
-    rawRequest,
-    rawResponse,
-    defaultMode = "pretty",
-  } = props;
+  const { mappedRequest, defaultMode = "pretty" } = props;
 
   const [mode, setMode] = useState<"pretty" | "json">(defaultMode);
 
   const renderImageRow = () => {
-    const image_url = response?.image_url;
-    if (image_url) {
+    const image_url = mappedRequest.preview.response;
+    if (
+      image_url &&
+      (mappedRequest._type === "openai-image" ||
+        mappedRequest._type === "black-forest-labs-image")
+    ) {
       return (
         <div className="flex flex-col space-y-4 divide-y divide-slate-100 dark:divide-slate-900">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image_url} alt={""} width={200} height={200} />
@@ -86,15 +73,15 @@ export const Completion = (props: CompletionProps) => {
                 Request
               </p>
               <pre className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {JSON.stringify(rawRequest, null, 2)}
+                {JSON.stringify(mappedRequest.raw.request, null, 2)}
               </pre>
             </div>
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
-                {response.title}
+                Response
               </p>
               <pre className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {JSON.stringify(rawResponse, null, 2)}
+                {JSON.stringify(mappedRequest.raw.response, null, 2)}
               </pre>
             </div>
           </div>
@@ -105,15 +92,16 @@ export const Completion = (props: CompletionProps) => {
                 Request
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {removeLeadingWhitespace(request)}
+                {removeLeadingWhitespace(mappedRequest.preview.request)}
               </p>
             </div>
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
-                {response.title}
+                Response
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {response && removeLeadingWhitespace(response.text)}
+                {mappedRequest.preview.response &&
+                  removeLeadingWhitespace(mappedRequest.preview.response)}
                 {renderImageRow()}
               </p>
             </div>

@@ -1,5 +1,5 @@
+import { isJSON } from "@/packages/cost/llm-mappers/utils/contentHelpers";
 import React from "react";
-import { isJSON } from "../../requests/components/chatComponent/single/utils";
 
 // Update the props to accept auto_prompt_inputs directly
 export const FunctionCall: React.FC<{ auto_prompt_inputs: any[] }> = ({

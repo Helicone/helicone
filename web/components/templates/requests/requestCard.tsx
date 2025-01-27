@@ -9,8 +9,8 @@ import { CustomProperties } from "./customProperties";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 
-import { RenderMappedRequest } from "./mapper/RenderHeliconeRequest";
-import { MappedLLMRequest } from "./mapper/types";
+import { RenderMappedRequest } from "./RenderHeliconeRequest";
+import { MappedLLMRequest } from "../../../llm-mappers/types";
 
 interface RequestCardProps {
   request: MappedLLMRequest;

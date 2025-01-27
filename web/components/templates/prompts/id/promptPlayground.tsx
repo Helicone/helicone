@@ -14,7 +14,7 @@ import {
   getMessages,
   getRequestMessages,
   getResponseMessage,
-} from "../../requests/mapper/utils/messageUtils";
+} from "../../../../llm-mappers/utils/messageUtils";
 import {
   Message,
   PromptMessage,

@@ -4,7 +4,7 @@ import { clsx } from "../../shared/clsx";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
-import { MappedLLMRequest } from "./mapper/types";
+import { MappedLLMRequest } from "../../../llm-mappers/types";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 

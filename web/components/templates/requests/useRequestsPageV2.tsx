@@ -1,6 +1,7 @@
+import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import { useState } from "react";
-
-import { HeliconeRequest } from "../../../lib/api/request/request";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
@@ -13,11 +14,7 @@ import {
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "@/types/timeFilter";
-
-import { heliconeRequestToMappedContent } from "./mapper/getMappedContent";
 
 const useRequestsPageV2 = (
   currentPage: number,

@@ -1,8 +1,8 @@
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 import React, { useMemo, useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { MappedLLMRequest } from "../../mapper/types";
 import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
 import { JsonView } from "./jsonView";
 import { MessageRenderer } from "./MessageRenderer";
