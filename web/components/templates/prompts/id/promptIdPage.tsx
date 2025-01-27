@@ -133,7 +133,9 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             )?.major_version ?? ver.major_version;
 
       // 3. Convert any messages in the template to StateMessages
-      const stateMessages = heliconeToStateMessages(templateData.messages);
+      const stateMessages = heliconeToStateMessages(
+        templateData.messages || templateData.content
+      );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
       let variables: Variable[] = Object.entries(metadata.inputs || {}).map(
