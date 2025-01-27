@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { Result } from "../../result";
-import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
-import { stripeServer } from "../../../utlis/stripeServer";
+import { getStripeCustomerFromNext } from "../../../utils/stripeHelpers";
+import { stripeServer } from "../../../utils/stripeServer";
 
 export async function deleteSubscription(
   req: NextApiRequest,

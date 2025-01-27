@@ -1,13 +1,13 @@
 import { Result } from "../../../lib/result";
 
+import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getStripeCustomer } from "../../../utlis/stripeHelpers";
-import { stripeServer } from "../../../utlis/stripeServer";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
-import { dbExecute } from "../../../lib/api/db/dbExecute";
+import { getStripeCustomer } from "../../../utils/stripeHelpers";
+import { stripeServer } from "../../../utils/stripeServer";
 
 async function getOwner(orgId: String, userId: string) {
   const query = `
