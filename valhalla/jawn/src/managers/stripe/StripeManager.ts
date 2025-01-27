@@ -12,12 +12,43 @@ import { costOf } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 
-const proProductPrices = {
+const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
   prompts: process.env.PRICE_PROD_PROMPTS_ID!,
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
+} as const;
+
+const getProProductPrices = async (): Promise<
+  typeof DEFAULT_PRODUCT_PRICES
+> => {
+  const db = await supabaseServer.client.from("helicone_settings").select("*");
+
+  return Object.entries(DEFAULT_PRODUCT_PRICES)
+    .map(([productId, defaultPriceId]) => {
+      const setting = db.data?.find(
+        (setting) => setting.name === `price:${productId}`
+      );
+      if (setting) {
+        return { [productId]: setting.settings as string };
+      } else {
+        // Populate with default prices
+        if (!db.error) {
+          supabaseServer.client.from("helicone_settings").insert({
+            name: `price:${productId}`,
+            settings: defaultPriceId,
+          });
+        }
+      }
+      return { [productId]: defaultPriceId };
+    })
+    .reduce(
+      (acc, curr) => ({ ...acc, ...curr }),
+      {}
+    ) as typeof DEFAULT_PRODUCT_PRICES;
 };
+
+const COST_OF_PROMPTS = 50;
 
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
@@ -29,6 +60,36 @@ export class StripeManager extends BaseManager {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2024-06-20",
     });
+  }
+
+  public async getCostForPrompts(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_PROMPTS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["prompts"]
+      )
+    ) {
+      const priceTheyArePayingForPrompts = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["prompts"]
+      );
+      if (
+        priceTheyArePayingForPrompts &&
+        priceTheyArePayingForPrompts.price.unit_amount &&
+        priceTheyArePayingForPrompts?.quantity &&
+        priceTheyArePayingForPrompts.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_PROMPTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
@@ -236,6 +297,8 @@ WHERE (${builtFilter.filter})`,
     isNewCustomer: boolean,
     body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
+    const proProductPrices = await getProProductPrices();
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
@@ -273,6 +336,7 @@ WHERE (${builtFilter.filter})`,
         tier: "pro-20240913",
       },
       subscription_data: {
+        trial_period_days: isNewCustomer ? 7 : undefined,
         metadata: {
           orgId: this.authParams.organizationId,
           tier: "pro-20240913",
@@ -331,26 +395,6 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  private async verifyProSubscriptionWithStripe(): Promise<
-    Result<Stripe.Subscription, string>
-  > {
-    const subscriptionResult = await this.getSubscription();
-    if (!subscriptionResult.data) {
-      return err("No existing subscription found");
-    }
-
-    const subscription = subscriptionResult.data;
-
-    const existingProducts = subscription.items.data.map(
-      (item) => (item.price.product as Stripe.Product).id
-    );
-
-    if (!existingProducts.includes(proProductPrices["pro-users"])) {
-      return err("User does not have a pro subscription");
-    }
-
-    return ok(subscription);
-  }
   private async getEvaluatorsUsage({
     startTime,
   }: {
@@ -515,6 +559,7 @@ WHERE (${builtFilter.filter})`,
   private async addProductToStripe(
     productType: "alerts" | "prompts"
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -615,6 +660,7 @@ WHERE (${builtFilter.filter})`,
   private async deleteProductFromStripe(
     productType: "alerts" | "prompts"
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -690,6 +736,7 @@ WHERE (${builtFilter.filter})`,
 
   // Takes the existing subscription and adds any missing products
   public async migrateToPro(): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -841,6 +888,7 @@ WHERE (${builtFilter.filter})`,
   public async updateProUserCount(
     count: number
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {

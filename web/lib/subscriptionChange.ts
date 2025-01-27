@@ -1,4 +1,4 @@
-import getStripe from "../utlis/getStripe";
+import getStripe from "../utils/getStripe";
 
 export async function fetchPostJSON(url: string, data?: {}) {
   try {

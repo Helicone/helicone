@@ -6,16 +6,17 @@ const Banner = () => {
     <div
       className={cn("flex flex-col justify-center w-full h-auto pb-4 relative")}
     >
-      <div className="bg-slate-100 text-slate-500 text-center text-sm md:text-base py-3 w-full">
+      <div className="bg-blue-600 text-blue-50 text-center text-sm md:text-base py-3 w-full">
         <p>
-          🎁 Our holiday gift to you:{" "}
+          🔥{" "}
           <Link
-            href="https://docs.helicone.ai/features/experiments"
-            className="font-semibold underline hover:text-slate-600"
+            href="https://news.ycombinator.com/item?id=42806254"
+            className="font-medium underline hover:text-blue-200"
           >
-            Experiments
-          </Link>{" "}
-          is here!
+            We&apos;re on HackerNews
+          </Link>
+          ! If Helicone has helped you, we&apos;d love to get your thoughts and
+          support.
         </p>
       </div>
     </div>

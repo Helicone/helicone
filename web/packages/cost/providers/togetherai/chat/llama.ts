@@ -150,6 +150,26 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "meta-llama/Meta-Llama-3.3-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
     },
     cost: {

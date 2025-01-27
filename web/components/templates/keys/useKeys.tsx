@@ -1,7 +1,7 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { generateAPIKeyHelper } from "@/utlis/generateAPIKeyHelper";
+import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 
