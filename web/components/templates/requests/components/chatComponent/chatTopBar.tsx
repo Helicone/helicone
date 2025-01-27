@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
-import { Message } from "./types";
+import { Message } from "@/packages/cost/llm-mappers/types";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown"] as const;
 

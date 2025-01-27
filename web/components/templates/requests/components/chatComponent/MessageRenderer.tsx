@@ -2,7 +2,7 @@ import React from "react";
 
 import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
-import { PromptMessage } from "./types";
+import { PromptMessage } from "@/packages/cost/llm-mappers/types";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageRendererProps {

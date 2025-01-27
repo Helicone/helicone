@@ -271,32 +271,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 chat={[
                   {
                     id: "1",
-                    content: [
-                      {
-                        type: "text",
-                        text: "Hi, what can I do in the playground?",
-                      },
-                    ],
+                    content: "Hi, what can I do in the playground?",
                     role: "user",
+                    _type: "message",
                   },
                   {
                     id: "2",
-                    content: [
-                      {
-                        type: "text",
-                        text: "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
-                      },
-                    ],
+                    content:
+                      "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
+                    _type: "message",
                     role: "assistant",
                   },
                   {
                     id: "3",
-                    content: [
-                      {
-                        type: "text",
-                        text: "What is the weather in Tokyo?",
-                      },
-                    ],
+                    content: "What is the weather in Tokyo?",
+                    _type: "message",
                     role: "user",
                   },
                 ]}

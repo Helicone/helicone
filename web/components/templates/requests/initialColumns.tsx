@@ -1,10 +1,10 @@
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
-import { MappedLLMRequest } from "../../../llm-mappers/types";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
 

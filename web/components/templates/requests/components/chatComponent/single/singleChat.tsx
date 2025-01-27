@@ -1,4 +1,4 @@
-import { Message } from "@/llm-mappers/types";
+import { Message } from "@/packages/cost/llm-mappers/types";
 import React, { useMemo } from "react";
 import { clsx } from "../../../../../shared/clsx";
 import { PROMPT_MODES } from "../chatTopBar";

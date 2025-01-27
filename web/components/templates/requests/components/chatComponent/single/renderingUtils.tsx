@@ -1,4 +1,4 @@
-import { Message } from "@/llm-mappers/types";
+import { Message } from "@/packages/cost/llm-mappers/types";
 import React from "react";
 
 export const OpenAIImage: React.FC<{

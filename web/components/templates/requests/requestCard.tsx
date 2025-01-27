@@ -1,4 +1,5 @@
 import { getUSDateFromString } from "@/components/shared/utils/utils";
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 import { useState } from "react";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
@@ -7,10 +8,8 @@ import { formatNumber } from "../users/initialColumns";
 import CostPill from "./costPill";
 import { CustomProperties } from "./customProperties";
 import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
-
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
-import { MappedLLMRequest } from "../../../llm-mappers/types";
+import StatusBadge from "./statusBadge";
 
 interface RequestCardProps {
   request: MappedLLMRequest;

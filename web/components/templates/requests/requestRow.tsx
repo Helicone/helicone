@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 import {
   ArrowPathIcon,
   MinusIcon,
@@ -27,9 +28,8 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import NewDataset from "../datasets/NewDataset";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
-import { RenderMappedRequest } from "./RenderHeliconeRequest";
-import { MappedLLMRequest } from "../../../llm-mappers/types";
 import ModelPill from "./modelPill";
+import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import StatusBadge from "./statusBadge";
 
 function getPathName(url: string) {
