@@ -1,4 +1,4 @@
-import { isJSON } from "@/packages/cost/llm-mappers/utils/contentHelpers";
+import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 import React from "react";
 
 // Update the props to accept auto_prompt_inputs directly

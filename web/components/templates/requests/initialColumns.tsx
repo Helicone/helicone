@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";

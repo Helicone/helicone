@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { FlaskConicalIcon, TestTube2 } from "lucide-react";

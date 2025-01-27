@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 export interface Trace {
   start_unix_timestamp_ms: number;

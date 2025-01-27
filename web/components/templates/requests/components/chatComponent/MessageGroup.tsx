@@ -1,5 +1,5 @@
 import React from "react";
-import { PromptMessage } from "@/packages/cost/llm-mappers/types";
+import { PromptMessage } from "@/packages/llm-mapper/types";
 import { SingleChat } from "./single/singleChat";
 import { PROMPT_MODES } from "./chatTopBar";
 

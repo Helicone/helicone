@@ -9,8 +9,8 @@ import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import StatusBadge from "../../../requests/statusBadge";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
 import { FaChevronRight } from "react-icons/fa";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
-import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
 
 interface ChatSessionProps {

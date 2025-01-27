@@ -40,7 +40,7 @@ import useOnboardingContext, {
 } from "@/components/layout/onboardingContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;

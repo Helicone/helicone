@@ -1,4 +1,4 @@
-import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useState } from "react";

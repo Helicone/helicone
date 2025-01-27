@@ -3,8 +3,8 @@ import { ChatCompletionTool } from "openai/resources";
 import useRequestsPageV2 from "../../components/templates/requests/useRequestsPageV2";
 import { getTimeIntervalAgo } from "@/lib/timeCalculations/time";
 import { useMemo } from "react";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
-import { Message } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { Message } from "@/packages/llm-mapper/types";
 
 export const getChat = (
   requests: MappedLLMRequest[]

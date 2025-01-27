@@ -1,4 +1,4 @@
-import { LlmSchema } from "@/packages/cost/llm-mappers/types";
+import { LlmSchema } from "@/packages/llm-mapper/types";
 import { ProviderName } from "../../../packages/cost/providers/mappings";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {

@@ -18,7 +18,7 @@ import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
-import { Message } from "@/packages/cost/llm-mappers/types";
+import { Message } from "@/packages/llm-mapper/types";
 
 // Define types for content items
 type ImageUrlItem = {

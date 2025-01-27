@@ -1,5 +1,5 @@
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";

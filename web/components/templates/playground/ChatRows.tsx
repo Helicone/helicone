@@ -3,7 +3,7 @@ import ChatRow from "./chatRow";
 import ModelResponseGroup from "./ModelResponseGroup";
 
 import { Col } from "../../layout/common";
-import { Message } from "@/packages/cost/llm-mappers/types";
+import { Message } from "@/packages/llm-mapper/types";
 
 // Extend Message type to include model property
 type ExtendedMessage = Message & {

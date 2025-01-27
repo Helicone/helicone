@@ -24,7 +24,7 @@ import RequestDrawerV2 from "@/components/templates/requests/requestDrawerV2";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
-import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 
 interface TreeViewProps {
   session: Session;

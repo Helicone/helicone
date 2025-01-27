@@ -14,12 +14,12 @@ import {
   getMessages,
   getRequestMessages,
   getResponseMessage,
-} from "@/packages/cost/llm-mappers/utils/messageUtils";
+} from "@/packages/llm-mapper/utils/messageUtils";
 
 import { Input } from "./MessageInput";
 import MessageRendererComponent from "./MessageRendererComponent";
 import { PlaygroundChatTopBar, PROMPT_MODES } from "./playgroundChatTopBar";
-import { Message, PromptMessage } from "@/packages/cost/llm-mappers/types";
+import { Message, PromptMessage } from "@/packages/llm-mapper/types";
 
 export type PromptObject = {
   model: string;

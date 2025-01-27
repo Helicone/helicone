@@ -6,7 +6,7 @@ import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
-import { isJSON } from "@/packages/cost/llm-mappers/utils/contentHelpers";
+import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;

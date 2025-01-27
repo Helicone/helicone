@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { RenderMappedRequest } from "@/components/templates/requests/RenderHeliconeRequest";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 

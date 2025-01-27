@@ -1,6 +1,6 @@
-import { getMapperType } from "@/packages/cost/llm-mappers/utils/getMapperType";
+import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
-import { MapperType } from "@/packages/cost/llm-mappers/types";
+import { MapperType } from "@/packages/llm-mapper/types";
 
 interface ModelPillProps {
   model: string;

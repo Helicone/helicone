@@ -1,7 +1,7 @@
 import { HeliconeRequest } from "@/lib/api/request/request";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
-import { getMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
-import { getMapperTypeFromHeliconeRequest } from "@/packages/cost/llm-mappers/utils/getMapperType";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
 import { useMemo } from "react";
 import { Chat } from "./components/chatComponent/chat";
 import { Completion } from "./components/completion";

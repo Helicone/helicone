@@ -2,7 +2,7 @@ import {
   HeliconeRequest,
   MapperType,
   Provider,
-} from "@/packages/cost/llm-mappers/types";
+} from "@/packages/llm-mapper/types";
 
 const isAssistantRequest = (request: HeliconeRequest) => {
   return (

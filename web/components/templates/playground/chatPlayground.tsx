@@ -16,7 +16,7 @@ import {
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
 import { SingleChat } from "../requests/components/chatComponent/single/singleChat";
-import { Message } from "@/packages/cost/llm-mappers/types";
+import { Message } from "@/packages/llm-mapper/types";
 import ModelPill from "../requests/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";

@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 
 interface SessionContentProps {
   session: Session;

@@ -1,4 +1,4 @@
-import { heliconeRequestToMappedContent } from "@/packages/cost/llm-mappers/utils/getMappedContent";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { modelCost } from "../api/metrics/costCalc";
 import { HeliconeRequest } from "../api/request/request";
 import { Session, Trace } from "./sessionTypes";

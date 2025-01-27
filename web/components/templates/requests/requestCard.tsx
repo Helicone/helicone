@@ -1,5 +1,5 @@
 import { getUSDateFromString } from "@/components/shared/utils/utils";
-import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useState } from "react";
 import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
