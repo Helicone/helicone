@@ -822,6 +822,15 @@ WHEN (request_response_rmt.provider = 'DEEPSEEK') THEN (
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'AVIAN') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-405B-Instruct') THEN 1500 * request_response_rmt.prompt_tokens + 1500 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.3-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-8B-Instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
