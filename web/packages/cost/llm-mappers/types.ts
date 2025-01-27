@@ -13,6 +13,7 @@ export type Message = {
   image_url?: string;
 };
 
+export type PromptMessage = Message | string;
 interface FunctionCall {
   name?: string;
   arguments?: object;
