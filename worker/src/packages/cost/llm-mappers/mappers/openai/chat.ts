@@ -228,7 +228,7 @@ const getLLMSchemaResponse = (response: any) => {
     }
   } else {
     return {
-      messages: response?.choices?.map((choice) => ({
+      messages: response?.choices?.map((choice: any) => ({
         content: getFormattedMessageContent(choice?.message?.content ?? ""),
         role: choice?.message?.role ?? "",
         tool_calls: choice?.message?.function_call
@@ -238,7 +238,7 @@ const getLLMSchemaResponse = (response: any) => {
                 arguments: JSON.parse(choice.message.function_call.arguments),
               },
             ]
-          : choice?.message?.tool_calls?.map((tool) => ({
+          : choice?.message?.tool_calls?.map((tool: any) => ({
               name: tool?.function?.name ?? "",
               arguments: JSON.parse(tool?.function?.arguments ?? ""),
             })) ?? [],

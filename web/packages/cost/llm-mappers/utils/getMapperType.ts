@@ -1,4 +1,4 @@
-import { HeliconeRequest, Provider } from "@/packages/cost/llm-mappers/types";
+import { HeliconeRequest, Provider } from "../../lib/api/request/request";
 import { MapperType } from "../types";
 
 const isAssistantRequest = (request: HeliconeRequest) => {
