@@ -263,7 +263,7 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto flex flex-col justify-between h-full mb-2">
               {/* Navigation items */}
               <div className="flex flex-col">
                 {((!isCollapsed &&
@@ -315,6 +315,22 @@ const DesktopSidebar = ({
                   </nav>
                 </div>
               </div>
+
+              {org?.currentOrg?.tier === "demo" &&
+                org.allOrgs.filter(
+                  (org) => org.tier !== "demo" && org.owner === user?.id
+                ).length === 0 && (
+                  <Button
+                    variant="secondary"
+                    size={"lg"}
+                    className="w-full px-2"
+                    onClick={() => {
+                      setShowEndOnboardingConfirmation(true);
+                    }}
+                  >
+                    Ready to Integrate 🚀
+                  </Button>
+                )}
 
               {/* InfoBox */}
               {canShowInfoBox &&

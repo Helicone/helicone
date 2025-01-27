@@ -1,5 +1,5 @@
 "use client";
-import { PromptVersion } from "@/types/prompt-state";
+import { PromptVersionReference } from "@/types/prompt-state";
 import { formatDate } from "@/utils/date";
 import { toKebabCase } from "@/utils/strings";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import {
   PiPencilSimpleBold,
 } from "react-icons/pi";
 import Tooltip from "./Tooltip";
+import useNotification from "../notification/useNotification";
 
 interface VersionSelectorProps {
   isLoading: boolean;
@@ -20,9 +21,9 @@ interface VersionSelectorProps {
   currentVersion: number;
   isDirty: boolean;
 
-  versions: PromptVersion[];
-  onVersionSelect: (version: PromptVersion) => void;
-  onVersionPromote: (version: PromptVersion) => void;
+  versions: PromptVersionReference[];
+  onVersionSelect: (version: PromptVersionReference) => void;
+  onVersionPromote: (version: PromptVersionReference) => void;
   onIdEdit: (newId: string) => void;
 }
 
@@ -37,6 +38,7 @@ export default function VersionSelector({
   onVersionPromote,
   onIdEdit: onIdChange,
 }: VersionSelectorProps) {
+  const { setNotification } = useNotification();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(id);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -134,7 +136,10 @@ export default function VersionSelector({
             >
               <button
                 className="text-slate-700 flex items-center justify-center hover:text-heliblue active:scale-95 transition-transform"
-                onClick={() => navigator.clipboard.writeText(id)}
+                onClick={() => {
+                  navigator.clipboard.writeText(id);
+                  setNotification("Copied Prompt ID to clipboard", "success");
+                }}
               >
                 <PiCopyBold className="h-4 w-4" />
               </button>
