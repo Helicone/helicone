@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LlmSchema } from "../../types";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
@@ -84,7 +85,7 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
     }
   } else {
     return {
-      messages: response?.choices?.map((choice) => ({
+      messages: response?.choices?.map((choice: any) => ({
         content: getFormattedMessageContent(choice?.text ?? ""),
         role: "assistant",
         _type: "message",

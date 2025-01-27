@@ -1,5 +1,4 @@
-import { HeliconeRequest, Provider } from "../../lib/api/request/request";
-import { MapperType } from "../types";
+import { HeliconeRequest, MapperType, Provider } from "../types";
 
 const isAssistantRequest = (request: HeliconeRequest) => {
   return (

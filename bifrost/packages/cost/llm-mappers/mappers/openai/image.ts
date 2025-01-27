@@ -2,8 +2,8 @@ import { LlmSchema } from "../../types";
 import { MapperFn } from "../types";
 
 const getRequestText = (requestBody: any) => {
-  if (this.response.request_body.prompt) {
-    return this.response.request_body.prompt;
+  if (requestBody.prompt) {
+    return requestBody.prompt;
   }
 
   return "";
