@@ -5,7 +5,7 @@ import RoleButton from "./new/roleButton";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import ModelPill from "../requests/modelPill";
-import { Message } from "../requests/components/chatComponent/types";
+import { Message } from "@/packages/cost/llm-mappers/types";
 
 interface ModelResponseGroupProps {
   modelMessage: Message[];

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { removeLeadingWhitespace } from "../../../shared/utils/utils";
+import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { MappedLLMRequest } from "../../../../llm-mappers/types";
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 
 interface CompletionProps {
   mappedRequest: MappedLLMRequest;

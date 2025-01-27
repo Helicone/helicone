@@ -14,7 +14,7 @@ import {
   getMessages,
   getRequestMessages,
   getResponseMessage,
-} from "../../../../llm-mappers/utils/messageUtils";
+} from "@/packages/cost/llm-mappers/utils/messageUtils";
 
 import { Input } from "./MessageInput";
 import MessageRendererComponent from "./MessageRendererComponent";
@@ -80,6 +80,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             ? "system"
             : "user") as "system" | "user",
           content: inputs ? replaceTemplateVariables(content, inputs) : content,
+          _type: "message",
         }));
     }
 
@@ -102,6 +103,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
             : Array.isArray(msg.content)
             ? msg.content.map((c) => c.text).join("\n")
             : msg.content,
+          _type: "message",
         };
       }) || []
     );
@@ -141,6 +143,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
       id: `msg-${currentChat.length}`,
       role: "user",
       content: "",
+      _type: "message",
     };
     setCurrentChat([...currentChat, newMessage]);
   };
@@ -202,19 +205,18 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
         model: selectedModel || initialModel || "",
         messages: currentChat.map((message) => {
           if (typeof message === "string") {
-            return message;
+            return {
+              content: message,
+              _type: "message",
+            };
           }
           return {
             id: message.id,
             role: message.role as "user" | "assistant" | "system",
-            content: [
-              {
-                text: Array.isArray(message.content)
-                  ? message.content.join(" ")
-                  : message.content ?? "",
-                type: "text",
-              },
-            ],
+            content: Array.isArray(message.content)
+              ? message.content.join(" ")
+              : message.content ?? "",
+            _type: "message",
           };
         }),
       };

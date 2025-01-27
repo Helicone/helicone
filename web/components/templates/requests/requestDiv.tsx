@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { MappedLLMRequest } from "@/packages/cost/llm-mappers/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { FlaskConicalIcon, TestTube2 } from "lucide-react";
@@ -14,7 +15,6 @@ import { useEffect } from "react";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
-import { MappedLLMRequest } from "../../../llm-mappers/types";
 import RequestRow from "./requestRow";
 
 interface RequestDivProps {

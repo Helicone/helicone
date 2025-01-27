@@ -111,7 +111,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               className="mx-8 pt-10"
               // @ts-ignore
               users={session.traces
-                .map((trace) => trace.request.user)
+                .map((trace) => trace.request.heliconeMetadata.user)
                 .filter((user) => user !== "" && user != null)}
               models={session.traces.map((trace) => trace.request.model ?? "")}
               promptTokens={session.traces.reduce(

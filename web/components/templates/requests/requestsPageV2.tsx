@@ -306,7 +306,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   });
 
   const initialRequest = useGetRequestsWithBodies(
-    0,
+    1,
     1,
     {
       request_response_rmt: {
@@ -319,13 +319,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   useEffect(() => {
-    if (initialRequest.requests.length > 0) {
+    if (initialRequest.requests.length > 0 && !selectedData) {
+      console.log("initialRequest", initialRequest);
       setSelectedData(
         heliconeRequestToMappedContent(initialRequest.requests[0])
       );
       setOpen(true);
     }
-  }, [initialRequest]);
+  }, [initialRequest, selectedData]);
 
   //convert this using useCallback
 

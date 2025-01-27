@@ -1,7 +1,7 @@
 import React from "react";
 import ChatRow from "./chatRow";
 import ModelResponseGroup from "./ModelResponseGroup";
-import { Message } from "../requests/components/chatComponent/types";
+import { Message } from "@/packages/cost/llm-mappers/types";
 import { Col } from "../../layout/common";
 
 interface ChatRowsProps {

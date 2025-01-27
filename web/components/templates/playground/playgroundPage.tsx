@@ -80,7 +80,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const reqBody =
-    singleRequest !== null ? (singleRequest.requestBody as any) : null;
+    singleRequest !== null ? (singleRequest.raw.request as any) : null;
 
   const [temperature, setTemperature] = useState<number>(
     reqBody !== null ? reqBody.temperature : 0.7
