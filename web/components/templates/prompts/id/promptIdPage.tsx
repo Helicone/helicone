@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
+import { PromptState, StateMessage, StateVariable } from "@/types/prompt-state";
 import {
   heliconeToStateMessages,
   isLastMessageUser,
@@ -143,12 +143,11 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: Variable[] = Object.entries(metadata.inputs || {}).map(
+      let variables: StateVariable[] = Object.entries(metadata.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
           isValid: isValidVariableName(name),
-          isMessage: false,
         })
       );
       // 4.B. Extract additional variables contained in message content
@@ -159,7 +158,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             name: v.name,
             value: metadata.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
-            isMessage: msg.idx !== undefined,
           });
         });
       });
@@ -170,7 +168,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             name: `message_${msg.idx}`,
             value: "",
             isValid: true,
-            isMessage: true,
+            idx: msg.idx,
           });
       });
 
@@ -278,7 +276,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   );
   // - Create Variable
   const handleVariableCreate = useCallback(
-    (newVariable: Variable) => {
+    (newVariable: StateVariable) => {
       updateState((prev) => {
         if (!prev) return {};
         const currentVars = [...(prev.variables || [])];
@@ -306,16 +304,12 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       updateState((prev) => {
         if (!prev?.variables) return {};
 
-        // TODO: Make variables carry an optional idx instead of isMessage, so all of this can be cleaned up with (index: number, value: string, idx?: number)
-        // TODO: This will also allow me to clean up the populateVariables helper function from VariablesPanel
         const updatedVariables = [...prev.variables];
         const variable = updatedVariables[index];
         updatedVariables[index] = { ...variable, value };
 
-        // If this is a message variable, also update the corresponding message
-        const messageMatch = variable.name.match(/^message_(\d+)$/);
-        if (messageMatch) {
-          const messageIdx = parseInt(messageMatch[1]);
+        // If this variable has an idx, also update the corresponding message
+        if (variable.idx !== undefined) {
           let parsedValue: StateMessage;
           try {
             parsedValue = JSON.parse(value);
@@ -324,7 +318,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           }
 
           const updatedMessages = prev.messages.map((msg) => {
-            if (msg.idx === messageIdx) {
+            if (msg.idx === variable.idx) {
               return {
                 ...msg,
                 role: parsedValue.role,
