@@ -111,7 +111,30 @@ For those interested in exploring Gemini 2.0’s capabilities, Google is offerin
 
 Developers can access the model in code by using `gemini-2.0-flash-thinking-exp` or `gemini-2.0-flash-thinking-exp-1219`.
 
-## Pricing: Is Gemini 2.0 free or paid?
+## Integrate Gemini 2.0 Flash with Helicone ⚡️
+
+Helicone is an open-source observability tool that helps you monitor, debug and improve your Gemini-powered AI apps.
+
+Integrate with a few lines of code:
+
+```javascript
+const model = genAI.getGenerativeModel(
+  {
+    model: "gemini-2.0-flash-exp",
+  },
+  requestOptions = {
+    customHeaders: new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
+    }),
+    baseUrl: "https://gateway.helicone.ai",
+  } as RequestOptions
+);
+```
+
+Please see our <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini integration docs</a> for details.
+
+## Gemini 2.0 Flash Pricing
 
 ### Free access through AI Studio
 
@@ -128,57 +151,7 @@ For users requiring more extensive capabilities, Gemini 2.0 Flash offers flexibl
 | Context Caching         | $0.01875 per million tokens          | $0.0375 per million tokens            |
 | Context Caching Storage | $1.00 per million tokens per hour    | $1.00 per million tokens per hour     |
 
-## Building Reliable LLM Applications with Gemini 2.0
-
-When building an LLM application, especially with new models or switching from one model to another, it’s important to monitor AI responses to ensure consistent performance for your end-users. We recommend to:
-
-### Step 1. Set up an LLM observability and monitoring tool
-
-Start by choosing an observability tool. **Helicone** has a generous <a href="https://helicone.ai/pricing" target="_blank" rel="noopener">free tier</a> and it's easy to set up.
-
-Next, <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">follow the instruction to integrate</a> your Gemini-powered AI app. If you choose to use Helicone, this step takes about a minute.
-
-![Integrating Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/listen-for-events.webp)
-
-Once you've integrated your Gemini-powered AI app, you can start monitoring your model's response time, latency and costs in real time.
-
-### Step 2. Monitor user behaviors and evaluate model outputs
-
-Analyze your user behavior patterns regularly.
-
-You can gain insights through user feedback or by reviewing your request logs.
-
-In Helicone, all your logs are filterable in the `Request` tab.
-
-![Track request and response logs for Gemini-2.0 powered AI app with Helicone](/static/blog/gemini-2.0-flash/requests.webp)
-
-You can **filter by errors** or by **other custom properties like user segment**, **environment**, or **session ID** to get more granular insights, identify opportunities and performance bottlenecks.
-
-This will give you insights on if you should improve your prompt, cut down API costs, or improve speed - just to name a few.
-
-### Step 3. Iterate on your prompt
-
-As LLMs are sensitive to model and prompt changes, use Helicone's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments feature</a> to test and compare different versions of your prompts.
-
-This will help you see quickly which prompt version result in the best output, or if the new changes you made caused performance regressions.
-
-![Compare different versions of your prompt with Helicone](/static/blog/gemini-2.0-flash/experiments.webp)
-
-### Step 4. Push new changes to production
-
-Once you are happy with your changes, push your new changes to production.
-
-**Helicone will automatically track your prompt changes** and version it for you. You can continue to monitor your model's performance and improve your prompts.
-
-![Merge PR in GitHub](/static/blog/gemini-2.0-flash/merge.webp)
-
-### Step 5. Repeat from Step 2
-
-A continuous improvement cycle is key to building a reliable LLM application. **Keep monitoring your model's performance & improving your prompts to make sure your application is always performing at its best.**
-
-Use Helicone’s dashboard to monitor your model’s response time, latency and costs in real time.
-
-![Helicone dashboard](/static/blog/gemini-2.0-flash/dashboard.webp)
+Please see our <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini integration docs</a> for details.
 
 ## What's Next for Google Gemini?
 
