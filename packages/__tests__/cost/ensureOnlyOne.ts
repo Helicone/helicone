@@ -1,8 +1,8 @@
 import { expect, test } from "@jest/globals";
 
-import { clickhousePriceCalc } from "../src";
-import { openAIProvider } from "../src/providers/openai";
-import { playgroundModels } from "../src/providers/mappings";
+import { clickhousePriceCalc } from "../../cost";
+import { openAIProvider } from "../../cost/providers/openai";
+import { playgroundModels } from "../../cost/providers/mappings";
 
 test("check that there are no two models that are the same", () => {
   openAIProvider.costs.forEach((cost) => {
@@ -819,15 +819,6 @@ END
 WHEN (request_response_rmt.provider = 'DEEPSEEK') THEN (
   CASE
   WHEN (request_response_rmt.model ILIKE 'deepseek-chat') THEN 14 * request_response_rmt.prompt_tokens + 28 * request_response_rmt.completion_tokens
-  ELSE 0
-END
-)
-WHEN (request_response_rmt.provider = 'AVIAN') THEN (
-  CASE
-  WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-405B-Instruct') THEN 1500 * request_response_rmt.prompt_tokens + 1500 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.3-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-8B-Instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )
