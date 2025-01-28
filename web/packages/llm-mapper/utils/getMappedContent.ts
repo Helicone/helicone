@@ -109,7 +109,7 @@ export const getMappedContent = ({
       },
       schema: {
         request: {
-          prompt: `Error: ${e.message}`,
+          prompt: `Error: ${(e as Error).message}`,
         },
       },
     };
