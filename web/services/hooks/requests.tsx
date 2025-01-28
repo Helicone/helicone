@@ -7,6 +7,7 @@ import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { ok } from "assert";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -32,7 +33,53 @@ function processFilter(filter: any): any {
   return result;
 }
 
-const requestBodyCache = new Map<string, HeliconeRequest>();
+interface RequestBodyContent {
+  request: any;
+  response: any;
+}
+
+const requestBodyCache = new Map<string, RequestBodyContent>();
+
+export const useGetRequestWithBodies = (requestId: string) => {
+  const org = useOrg();
+
+  return useQuery({
+    queryKey: ["single-request", requestId, org?.currentOrg?.id],
+    queryFn: async () => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const response = await jawn.GET(`/v1/request/{requestId}`, {
+        params: {
+          path: {
+            requestId,
+          },
+        },
+      });
+      if (!response.data?.data?.signed_body_url) return response.data;
+      if (response.data.data && response.data.data.signed_body_url) {
+        const contentResponse = await fetch(response.data.data.signed_body_url);
+        if (contentResponse.ok) {
+          const text = await contentResponse.text();
+          let content = JSON.parse(text);
+          if (response.data?.data?.asset_urls) {
+            content = placeAssetIdValues(
+              response.data?.data?.asset_urls,
+              content
+            );
+          }
+          requestBodyCache.set(response.data?.data?.request_id, content);
+          if (requestBodyCache.size > 1000) {
+            requestBodyCache.clear();
+          }
+          response.data.data.response_body = content.response;
+          response.data.data.request_body = content.request;
+        }
+      }
+
+      return response.data as Result<HeliconeRequest, string>;
+    },
+    enabled: !!requestId && !!org?.currentOrg?.id,
+  });
+};
 
 export const useGetRequestsWithBodies = (
   currentPage: number,
