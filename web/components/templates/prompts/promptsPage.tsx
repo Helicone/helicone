@@ -46,6 +46,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ActionButton from "@/components/shared/universal/ActionButton";
+import FeaturePreview from "../featurePreview/featurePreview";
+import PromptsPreview from "../featurePreview/promptsPreview";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -144,21 +146,23 @@ const PromptsPage = (props: PromptsPageProps) => {
       <AuthHeader
         className="min-w-full"
         title={
-          <div className="flex items-center gap-2">
-            Prompts
-            {hasLimitedAccess && (
-              <InfoBox className="ml-4">
-                <p className="text-sm font-medium flex gap-2">
-                  <b>Need to create new prompts?</b>
-                  <ProFeatureWrapper featureName="Prompts">
-                    <button className="underline">
-                      Get unlimited prompts & more.
-                    </button>
-                  </ProFeatureWrapper>
-                </p>
-              </InfoBox>
-            )}
-          </div>
+          hasAccess || hasLimitedAccess ? (
+            <div className="flex items-center gap-2">
+              Prompts
+              {hasLimitedAccess && (
+                <InfoBox className="ml-4">
+                  <p className="text-sm font-medium flex gap-2">
+                    <b>Need to create new prompts?</b>
+                    <ProFeatureWrapper featureName="Prompts">
+                      <button className="underline">
+                        Get unlimited prompts & more.
+                      </button>
+                    </ProFeatureWrapper>
+                  </p>
+                </InfoBox>
+              )}
+            </div>
+          ) : null
         }
         actions={
           hasAccess ? (
@@ -220,13 +224,7 @@ const chatCompletion = await openai.chat.completions.create(
                 </DialogContent>
               </Dialog>
             </>
-          ) : (
-            <ProFeatureWrapper featureName="Prompts" enabled={false}>
-              <Button variant="action" size="default">
-                <PiPlusBold /> New Prompt
-              </Button>
-            </ProFeatureWrapper>
-          )
+          ) : null
         }
       />
 
@@ -393,68 +391,7 @@ const chatCompletion = await openai.chat.completions.create(
               )
             ) : (
               <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-                <Card className="max-w-4xl">
-                  <CardHeader>
-                    <CardTitle>Get Started with Prompts</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      You haven&apos;t created any prompts yet. Let&apos;s get
-                      started!
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <InfoBox>
-                      <p className="text-sm font-medium">
-                        Version prompts, create prompt templates, and run
-                        experiments to improve prompt outputs.
-                      </p>
-                    </InfoBox>
-                    <div className="bg-muted p-4 rounded-lg">
-                      <div className="flex space-x-2 mb-2">
-                        <Button variant="outline" size="sm">
-                          Code Example
-                        </Button>
-                      </div>
-                      <DiffHighlight
-                        code={`
-  // 1. Add this line
-  import { hprompt } from "@helicone/helicone";
-  
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [
-        {
-          role: "user",
-          // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-          content: hprompt\`Write a story about \${{ scene }}\`,
-        },
-      ],
-      model: "gpt-3.5-turbo",
-    },
-    {
-      // 4. Add Prompt Id Header
-      headers: {
-        "Helicone-Prompt-Id": "prompt_story",
-      },
-    }
-  );
-                                `}
-                        language="typescript"
-                        newLines={[]}
-                        oldLines={[]}
-                        minHeight={false}
-                      />
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col items-start">
-                    <div className="space-x-2 mt-5">
-                      <Button variant="outline" asChild>
-                        <Link href="https://docs.helicone.ai/features/prompts">
-                          View documentation
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
+                <PromptsPreview />
               </div>
             )}
           </>
