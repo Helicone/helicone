@@ -1,16 +1,13 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
-import {
-  getModelFromPath,
-  mapGeminiPro,
-} from "../../components/templates/requests/builder/mappers/geminiMapper";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { ok } from "assert";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -36,9 +33,55 @@ function processFilter(filter: any): any {
   return result;
 }
 
-const requestBodyCache = new Map<string, HeliconeRequest>();
+interface RequestBodyContent {
+  request: any;
+  response: any;
+}
 
-const useGetRequestsWithBodies = (
+const requestBodyCache = new Map<string, RequestBodyContent>();
+
+export const useGetRequestWithBodies = (requestId: string) => {
+  const org = useOrg();
+
+  return useQuery({
+    queryKey: ["single-request", requestId, org?.currentOrg?.id],
+    queryFn: async () => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const response = await jawn.GET(`/v1/request/{requestId}`, {
+        params: {
+          path: {
+            requestId,
+          },
+        },
+      });
+      if (!response.data?.data?.signed_body_url) return response.data;
+      if (response.data.data && response.data.data.signed_body_url) {
+        const contentResponse = await fetch(response.data.data.signed_body_url);
+        if (contentResponse.ok) {
+          const text = await contentResponse.text();
+          let content = JSON.parse(text);
+          if (response.data?.data?.asset_urls) {
+            content = placeAssetIdValues(
+              response.data?.data?.asset_urls,
+              content
+            );
+          }
+          requestBodyCache.set(response.data?.data?.request_id, content);
+          if (requestBodyCache.size > 1000) {
+            requestBodyCache.clear();
+          }
+          response.data.data.response_body = content.response;
+          response.data.data.request_body = content.request;
+        }
+      }
+
+      return response.data as Result<HeliconeRequest, string>;
+    },
+    enabled: !!requestId && !!org?.currentOrg?.id,
+  });
+};
+
+export const useGetRequestsWithBodies = (
   currentPage: number,
   currentPageSize: number,
   advancedFilter: FilterNode,
@@ -119,31 +162,11 @@ const useGetRequestsWithBodies = (
       const content = urlQueries[index].data;
       if (!content) return request;
 
-      const model =
-        request.model_override ||
-        request.response_model ||
-        request.request_model ||
-        content.response?.model ||
-        content.request?.model ||
-        content.response?.body?.model ||
-        getModelFromPath(request.target_url) ||
-        "";
-
       let updatedRequest = {
         ...request,
         request_body: content.request,
         response_body: content.response,
       };
-
-      if (
-        request.provider === "GOOGLE" &&
-        model.toLowerCase().includes("gemini")
-      ) {
-        updatedRequest.llmSchema = mapGeminiPro(
-          updatedRequest as HeliconeRequest,
-          model
-        );
-      }
 
       return updatedRequest;
     });

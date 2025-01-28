@@ -70,6 +70,7 @@ export interface HeliconeRequest {
   properties: Record<string, string>;
   assets: Array<string>;
   target_url: string;
+  model?: string;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {

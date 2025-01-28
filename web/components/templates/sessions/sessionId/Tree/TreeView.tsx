@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
-import getNormalizedRequest from "../../../requests/builder/requestBuilder";
+
 import { TraceSpan } from "../Span";
 import { Tree } from "./Tree";
 import { useGetRequests } from "../../../../../services/hooks/requests";
@@ -23,6 +23,8 @@ import {
 import RequestDrawerV2 from "@/components/templates/requests/requestDrawerV2";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 
 interface TreeViewProps {
   session: Session;
@@ -141,11 +143,17 @@ const TreeView: React.FC<TreeViewProps> = ({
                     (r) => r.request_id === requestIdToShow
                   ) && (
                     <>
-                      {getNormalizedRequest(
-                        requests.requests.requests?.find(
-                          (r) => r.request_id === requestIdToShow
-                        )!
-                      ).render()}
+                      {requests.requests.requests?.find(
+                        (r) => r.request_id === requestIdToShow
+                      ) && (
+                        <RenderHeliconeRequest
+                          heliconeRequest={
+                            requests.requests.requests?.find(
+                              (r) => r.request_id === requestIdToShow
+                            )!
+                          }
+                        />
+                      )}
                     </>
                   )}
               </div>
@@ -157,7 +165,7 @@ const TreeView: React.FC<TreeViewProps> = ({
         <RequestDrawerV2
           open={showDrawer}
           setOpen={setShowDrawer}
-          request={getNormalizedRequest(
+          request={heliconeRequestToMappedContent(
             requests.requests.requests?.find(
               (r) => r.request_id === requestIdToShow
             )!

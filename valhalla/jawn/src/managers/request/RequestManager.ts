@@ -22,6 +22,22 @@ import { ScoreManager } from "../score/ScoreManager";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
+export const getModelFromPath = (path: string) => {
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
+
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+};
 
 const deltaTime = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
@@ -481,6 +497,11 @@ export class RequestManager extends BaseManager {
               completionTokens: r.completion_tokens ?? 0,
               promptTokens: r.prompt_tokens ?? 0,
             }),
+            model:
+              r.model_override ??
+              r.request_model ??
+              r.response_model ??
+              getModelFromPath(r.target_url),
           };
         })
         .filter((r) => {

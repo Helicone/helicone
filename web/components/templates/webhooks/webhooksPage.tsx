@@ -264,7 +264,8 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
   if (
     org?.currentOrg?.tier !== "enterprise" &&
-    org?.currentOrg?.tier !== "pro-20240913"
+    org?.currentOrg?.tier !== "pro-20240913" &&
+    org?.currentOrg?.tier !== "demo"
   ) {
     return (
       <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
