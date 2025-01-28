@@ -54,6 +54,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
+import EvalsPanel from "@/components/shared/prompts/EvalsPanel";
 
 interface PromptIdPageProps {
   id: string;
@@ -816,6 +817,8 @@ async function pullPromptAndRunCompletion() {
                   });
                 }}
               />
+
+              <EvalsPanel />
             </div>
           }
         />
