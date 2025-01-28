@@ -632,7 +632,7 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 caret-black dark:caret-white ${
+      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 caret-black dark:caret-white ${
         disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
       }`}
     >

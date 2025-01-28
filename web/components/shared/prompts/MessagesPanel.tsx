@@ -58,7 +58,7 @@ export default function MessagesPanel({
         return (
           <div key={index} className="flex flex-col gap-2">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="h-8 flex items-center justify-between">
               {/* Message Role */}
               <h2 className="font-semibold">
                 <span className="capitalize text-secondary">{msg.role}</span>

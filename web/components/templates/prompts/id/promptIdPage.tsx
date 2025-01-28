@@ -684,6 +684,22 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             </div>
           </Button>
 
+          {/* Experiment Button */}
+          <Button
+            variant="outline"
+            disabled={newFromPromptVersion.isLoading}
+            onClick={async () => {
+              const result = await newFromPromptVersion.mutateAsync({
+                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                originalPromptVersion: state.versionId,
+              });
+              router.push(`/experiments/${result.data?.data?.experimentId}`);
+            }}
+          >
+            <FlaskConicalIcon className="h-4 w-4 mr-2" />
+            <span>Experiment</span>
+          </Button>
+
           {/* Deploy Button */}
           <Dialog>
             <DialogTrigger asChild>
@@ -696,13 +712,15 @@ export default function PromptIdPage(props: PromptIdPageProps) {
                 <span>Deploy</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-full max-w-3xl bg-white">
+            <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
               <DialogHeader>
                 <DialogTitle>Deploy Prompt</DialogTitle>
               </DialogHeader>
 
               {/* Code example */}
               <DiffHighlight
+                maxHeight={false}
+                className="h-full"
                 code={`
 export async function getPrompt(
   id: string,
@@ -754,29 +772,12 @@ async function pullPromptAndRunCompletion() {
   );
   console.log(response);
 }`}
-                language="typescript"
+                language="tsx"
                 newLines={[]}
                 oldLines={[]}
-                minHeight={false}
               />
             </DialogContent>
           </Dialog>
-
-          {/* Experiment Button */}
-          <Button
-            variant="outline"
-            disabled={newFromPromptVersion.isLoading}
-            onClick={async () => {
-              const result = await newFromPromptVersion.mutateAsync({
-                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
-                originalPromptVersion: state.versionId,
-              });
-              router.push(`/experiments/${result.data?.data?.experimentId}`);
-            }}
-          >
-            <FlaskConicalIcon className="h-4 w-4 mr-2" />
-            <span>Experiment</span>
-          </Button>
         </div>
       </GlassHeader>
 

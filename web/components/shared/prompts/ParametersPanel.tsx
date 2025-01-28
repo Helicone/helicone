@@ -1,10 +1,14 @@
-import { useEffect, useMemo, memo } from "react";
+import { useEffect } from "react";
+import { PiTargetBold, PiPaintBrushBold, PiPlugsBold } from "react-icons/pi";
+
 import {
-  PiTargetBold,
-  PiPaintBrushBold,
-  PiPlugsBold,
-  PiCaretDownBold,
-} from "react-icons/pi";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 const PROVIDER_MODELS = {
   // General Use Cases
@@ -170,11 +174,12 @@ export default function ParametersPanel({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="h-8 flex items-center justify-between">
         <h2 className="font-semibold text-secondary">Parameters</h2>
       </div>
-      <div className="divide-y divide-slate-100">
-        <div className="flex flex-row items-center justify-between gap-4 py-2 first:pt-0">
+      <div className="divide-y divide-slate-100 dark:divide-slate-900">
+        <div className="flex flex-row items-center justify-between gap-4 py-1 first:pt-0">
           <div className="flex items-center gap-2">
             <PiPlugsBold className="text-secondary" />
             <label className="text-sm font-medium text-secondary">
@@ -182,22 +187,38 @@ export default function ParametersPanel({
             </label>
           </div>
           <div className="flex gap-2">
-            <SelectDropdown
+            <Select
               value={parameters.provider}
-              onChange={handleProviderChange}
-              options={Object.keys(PROVIDER_MODELS)}
-              variant="sm"
-            />
-            <SelectDropdown
+              onValueChange={handleProviderChange}
+            >
+              <SelectTrigger className="w-28 h-8">
+                <SelectValue placeholder="Provider" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(PROVIDER_MODELS).map((provider) => (
+                  <SelectItem key={provider} value={provider}>
+                    {provider}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
               value={parameters.model}
-              onChange={(model) => onParameterChange({ model })}
-              options={
-                PROVIDER_MODELS[
+              onValueChange={(model) => onParameterChange({ model })}
+            >
+              <SelectTrigger className="w-44 h-8">
+                <SelectValue placeholder="Model" />
+              </SelectTrigger>
+              <SelectContent>
+                {PROVIDER_MODELS[
                   parameters.provider as keyof typeof PROVIDER_MODELS
-                ].models
-              }
-              variant="lg"
-            />
+                ].models.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="flex flex-row items-center justify-between gap-4 py-2">
@@ -213,16 +234,16 @@ export default function ParametersPanel({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm">{parameters.temperature.toFixed(1)}</span>
-            <input
-              type="range"
-              min="0"
-              max="2"
-              step="0.01"
-              value={parameters.temperature}
-              onChange={(e) =>
-                onParameterChange({ temperature: parseFloat(e.target.value) })
+            <Slider
+              value={[parameters.temperature]}
+              min={0}
+              max={2}
+              step={0.01}
+              onValueChange={([value]) =>
+                onParameterChange({ temperature: value })
               }
-              className="flex-1 accent-heliblue w-48 h-2.5 rounded-full bg-slate-200 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-heliblue [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:cursor-grab"
+              className="h-8 w-48"
+              variant="action"
             />
           </div>
         </div>
@@ -230,42 +251,3 @@ export default function ParametersPanel({
     </div>
   );
 }
-
-interface SelectDropdownProps {
-  value: string;
-  onChange: (value: string) => void;
-  options: readonly string[];
-  variant?: "sm" | "lg";
-}
-
-const SelectDropdown = memo(function SelectDropdown({
-  value,
-  onChange,
-  options,
-  variant = "lg",
-}: SelectDropdownProps) {
-  const optionElements = useMemo(
-    () =>
-      options.map((option) => (
-        <option key={option} value={option} className="truncate">
-          {option}
-        </option>
-      )),
-    [options]
-  );
-
-  return (
-    <div className={`relative ${variant === "sm" ? "w-28" : "w-44"}`}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="interactive w-full appearance-none rounded-lg pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-heliblue bg-white border border-slate-100 cursor-pointer hover:bg-slate-50 truncate"
-      >
-        {optionElements}
-      </select>
-      <PiCaretDownBold className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-    </div>
-  );
-});
-
-SelectDropdown.displayName = "SelectDropdown";

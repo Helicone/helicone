@@ -29,6 +29,10 @@
   @apply cursor-grab rounded-full border-2 border-solid border-slate-200 bg-white hover:shadow-md;
 }
 
+.text-primary {
+  @apply text-black dark:text-white;
+}
+
 .text-secondary {
   @apply text-slate-700 dark:text-slate-300;
 }
