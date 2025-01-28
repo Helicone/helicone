@@ -2,7 +2,10 @@ import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
-import { useGetRequestsWithBodies } from "@/services/hooks/requests";
+import {
+  useGetRequestsWithBodies,
+  useGetRequestWithBodies,
+} from "@/services/hooks/requests";
 import {
   UIFilterRow,
   UIFilterRowNode,
@@ -305,25 +308,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     );
   });
 
-  const initialRequest = useGetRequestsWithBodies(
-    1,
-    1,
-    {
-      request_response_rmt: {
-        request_id: {
-          equals: initialRequestId,
-        },
-      },
-    },
-    {}
-  );
+  const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
   useEffect(() => {
-    if (initialRequest.requests.length > 0 && !selectedData) {
-      console.log("initialRequest", initialRequest);
-      setSelectedData(
-        heliconeRequestToMappedContent(initialRequest.requests[0])
-      );
+    if (initialRequest.data?.data && !selectedData) {
+      setSelectedData(heliconeRequestToMappedContent(initialRequest.data.data));
       setOpen(true);
     }
   }, [initialRequest, selectedData]);
@@ -648,7 +637,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             requestWithStreamUsage={requestWithoutStream !== undefined}
           />
         </div>
-
         {!isCached && userId === undefined && (
           <AuthHeader
             title={isCached ? "Cached Requests" : "Requests"}
@@ -690,7 +678,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           />
         )}
-
         {/* Add this wrapper */}
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />

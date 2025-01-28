@@ -2,7 +2,6 @@ import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
-// import crypto from "crypto";
 
 type AnthropicContent = {
   type: string;
@@ -72,7 +71,20 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
 };
 
 const getRequestMessages = (request: any) => {
-  const requestMessages: Message[] =
+  const requestMessages: Message[] = [];
+
+  // Add system message first if it exists
+  if (request?.system) {
+    requestMessages.push({
+      id: crypto.randomUUID(),
+      role: "system",
+      content: request.system,
+      _type: "message",
+    });
+  }
+
+  // Then add other messages
+  const messages =
     request.messages?.map((message: any) => {
       // Handle array content (for images + text, tool use, tool results)
       if (Array.isArray(message.content)) {
@@ -133,19 +145,8 @@ const getRequestMessages = (request: any) => {
       };
     }) || [];
 
-  if (
-    request?.system &&
-    !requestMessages.some(
-      (msg: any) => msg?.role === "system" && msg?.content === request?.system
-    )
-  ) {
-    requestMessages.push({
-      id: crypto.randomUUID(),
-      role: "system",
-      content: request?.system,
-      _type: "message",
-    });
-  }
+  requestMessages.push(...messages);
+
   return requestMessages;
 };
 

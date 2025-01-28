@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { mapGeminiPro } from "../../llm-mapper/mappers/gemini/chat";
+import { mapAnthropicRequest } from "../../llm-mapper/mappers/anthropic/chat";
 
 describe("mapGeminiPro", () => {
   it("should handle basic text messages", () => {
@@ -143,6 +144,57 @@ describe("mapGeminiPro", () => {
         message: "Invalid request",
         code: 400,
       },
+    });
+  });
+});
+
+describe("mapAnthropicRequest", () => {
+  it("should handle system messages", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        system: "You are a helpful assistant",
+        messages: [
+          {
+            role: "user",
+            content: "Hello",
+          },
+        ],
+      },
+      response: {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: "Hi there!",
+          },
+        ],
+      },
+      statusCode: 200,
+      model: "claude-3-sonnet",
+    });
+
+    // Check system message is first in request messages
+    expect(result.schema.request.messages![0]).toEqual({
+      role: "system",
+      content: "You are a helpful assistant",
+      _type: "message",
+      id: expect.any(String),
+    });
+
+    // Check user message follows
+    expect(result.schema.request.messages![1]).toEqual({
+      role: "user",
+      content: "Hello",
+      _type: "message",
+    });
+
+    // Check response message
+    expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
+      content: "Hi there!",
+      _type: "message",
+      id: expect.any(String),
     });
   });
 });
