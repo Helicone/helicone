@@ -25,6 +25,7 @@ interface LLMRequestBody {
   model?: string;
   provider?: string;
   prompt?: string | null;
+  input?: string | string[];
   max_tokens?: number | null;
   temperature?: number | null;
   top_p?: number | null;
