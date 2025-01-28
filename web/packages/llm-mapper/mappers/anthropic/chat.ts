@@ -154,6 +154,16 @@ const anthropicContentToMessage = (
   content: AnthropicContent,
   role: string
 ): Message => {
+  if (!content?.type) {
+    return {
+      id: content?.id || crypto.randomUUID(),
+      content: getFormattedMessageContent(
+        "UKNOWN ANTHROPIC BODY" + JSON.stringify(content)
+      ),
+      _type: "message",
+      role,
+    };
+  }
   if (content.type === "text") {
     return {
       id: content.id || crypto.randomUUID(),
