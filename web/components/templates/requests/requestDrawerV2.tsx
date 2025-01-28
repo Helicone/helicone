@@ -1,13 +1,13 @@
-import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
+import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
+import { useMemo } from "react";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
-import { clsx } from "../../shared/clsx";
 import RequestRow from "./requestRow";
-import { useMemo } from "react";
 
 interface RequestDrawerV2Props {
   open: boolean;
@@ -16,7 +16,7 @@ interface RequestDrawerV2Props {
   hasNext?: boolean;
   onPrevHandler?: () => void;
   onNextHandler?: () => void;
-  request?: NormalizedRequest;
+  request?: MappedLLMRequest;
   properties?: string[];
 }
 
@@ -39,7 +39,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
     () =>
       ((propsProperties?.length ?? 0) > 0
         ? propsProperties
-        : Object.keys(request?.customProperties ?? {})) ?? [],
+        : Object.keys(request?.heliconeMetadata.customProperties ?? {})) ?? [],
     [request, propsProperties]
   );
   const setOpenHandler = (drawerOpen: boolean) => {
@@ -83,7 +83,6 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                 onClick={() => {
                   setNotification("Copied to clipboard", "success");
                   const copy = { ...request };
-                  delete copy.render;
                   navigator.clipboard.writeText(
                     JSON.stringify(copy || {}, null, 4)
                   );

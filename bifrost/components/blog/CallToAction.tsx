@@ -10,15 +10,17 @@ interface CallToActionProps {
   primaryButtonLink?: string;
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
+  children?: React.ReactNode;
 }
 
 export function CallToAction({
   title = "Ready to learn more?",
   description = "Join Helicone's community or contact us to learn more.",
-  primaryButtonText = "Sign up for free",
+  primaryButtonText = "Get Started for Free",
   primaryButtonLink = "/signup",
-  secondaryButtonText = "Contact us",
+  secondaryButtonText = "Contact Us",
   secondaryButtonLink = "/contact",
+  children,
 }: CallToActionProps) {
   return (
     <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
@@ -27,6 +29,7 @@ export function CallToAction({
         <p className="text-[#6B8C9C] text-md leading-relaxed mb-6">
           {description}
         </p>
+        {children && <div className="mb-6">{children}</div>}
         <div className="flex flex-col sm:flex-row gap-4">
           <Button
             onClick={() => window.open(primaryButtonLink, "_blank")}

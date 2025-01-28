@@ -115,7 +115,7 @@ export const UpgradeToProCTA = ({
           ? "Loading..."
           : isPro
           ? "Upgrade"
-          : "Upgrade to Pro"}
+          : "Start 7-day free trial"}
       </Button>
     </div>
   );

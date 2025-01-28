@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
-import { NormalizedRequest } from "../../../templates/requests/builder/abstractRequestBuilder";
+
 import ModelPill from "../../../templates/requests/modelPill";
 import StatusBadge from "../../../templates/requests/statusBadge";
 import { formatNumber } from "../../../templates/users/initialColumns";
@@ -7,13 +7,14 @@ import { clsx } from "../../clsx";
 import { useState } from "react";
 import CostPill from "../../../templates/requests/costPill";
 import { getUSDateFromString } from "../../utils/utils";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 interface RequestRowProps {
   index: number;
   length: number;
   isSelected: boolean;
-  row: NormalizedRequest;
-  onSelectRow: (row: NormalizedRequest) => void;
+  row: MappedLLMRequest;
+  onSelectRow: (row: MappedLLMRequest) => void;
   properties: string[];
 }
 
@@ -43,20 +44,25 @@ const RequestRow = (props: RequestRowProps) => {
     >
       <div className="flex flex-row space-x-4 items-center ">
         <p className="text-sm font-semibold">
-          {getUSDateFromString(row.createdAt)}
+          {getUSDateFromString(row.heliconeMetadata.createdAt)}
         </p>
         <StatusBadge
-          statusType={row.status.statusType}
-          errorCode={row.status.code}
+          statusType={row.heliconeMetadata.status.statusType}
+          errorCode={row.heliconeMetadata.status.code}
         />
       </div>
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-wrap gap-4 items-center">
           <ModelPill model={row.model} />
-          <p className="text-xs font-semibold">{Number(row.latency) / 1000}s</p>
-          {row.cost !== null ? (
-            <p className="text-xs font-semibold">${formatNumber(row.cost)}</p>
-          ) : row.status && row.status.code === 200 ? (
+          <p className="text-xs font-semibold">
+            {Number(row.heliconeMetadata.latency) / 1000}s
+          </p>
+          {row.heliconeMetadata.cost !== null ? (
+            <p className="text-xs font-semibold">
+              ${formatNumber(row.heliconeMetadata.cost)}
+            </p>
+          ) : row.heliconeMetadata.status &&
+            row.heliconeMetadata.status.code === 200 ? (
             <CostPill />
           ) : (
             <p className="text-xs font-semibold"></p>
@@ -74,28 +80,36 @@ const RequestRow = (props: RequestRowProps) => {
       {isSelected && isExpanded && (
         <div className="flex flex-col space-y-4 text-gray-900 dark:text-gray-100">
           <p className="text-sm">
-            <span className="font-semibold">User:</span> {row.user}
+            <span className="font-semibold">User:</span>{" "}
+            {row.heliconeMetadata.user}
           </p>
           <p className="text-sm">
             <span className="font-semibold">Total Tokens:</span>{" "}
-            {row.totalTokens}{" "}
+            {row.heliconeMetadata.totalTokens}{" "}
             <span className="text-gray-500 text-xs">
-              (Completion: {row.completionTokens} / Prompt: {row.promptTokens})
+              (Completion: {row.heliconeMetadata.completionTokens} / Prompt:{" "}
+              {row.heliconeMetadata.promptTokens})
             </span>
           </p>
-          {row.customProperties &&
+          {row.heliconeMetadata.customProperties &&
             properties.length > 0 &&
-            Object.keys(row.customProperties).length > 0 && (
+            Object.keys(row.heliconeMetadata.customProperties).length > 0 && (
               <>
                 {properties.map((property, i) => {
                   if (
-                    row.customProperties &&
-                    row.customProperties.hasOwnProperty(property)
+                    row.heliconeMetadata.customProperties &&
+                    row.heliconeMetadata.customProperties.hasOwnProperty(
+                      property
+                    )
                   ) {
                     return (
                       <p className="text-sm" key={i}>
                         <span className="font-semibold">{property}:</span>{" "}
-                        {row.customProperties[property] as string}
+                        {
+                          row.heliconeMetadata.customProperties[
+                            property
+                          ] as string
+                        }
                       </p>
                     );
                   }

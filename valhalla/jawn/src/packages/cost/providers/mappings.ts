@@ -17,6 +17,7 @@ import { anthropicProvider } from "./anthropic";
 import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as xCosts } from "./x";
+import { costs as avianCosts } from "./avian";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -55,6 +56,7 @@ const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
 const deepseek = /^https:\/\/api\.deepseek\.com/;
 // https://api.x.ai
 const x = /^https:\/\/api\.x\.ai/;
+const avianPattern = /^https:\/\/api\.avian\.io/;
 
 export const providersNames = [
   "OPENAI",
@@ -82,6 +84,7 @@ export const providersNames = [
   "AWS",
   "DEEPSEEK",
   "X",
+  "AVIAN",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -214,6 +217,11 @@ export const providers: {
     pattern: deepseek,
     provider: "DEEPSEEK",
     costs: deepseekCosts,
+  },
+  {
+    pattern: avianPattern,
+    provider: "AVIAN",
+    costs: avianCosts,
   },
 ];
 

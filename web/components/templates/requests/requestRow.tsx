@@ -1,15 +1,21 @@
-import {
-  ArrowPathIcon,
-  MinusIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import {
+  ArrowPathIcon,
+  MinusIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   addRequestLabel,
@@ -18,19 +24,13 @@ import {
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
 import ThemedModal from "../../shared/themed/themedModal";
-import NewDataset from "../datasets/NewDataset";
-import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { formatNumber } from "../../shared/utils/formatNumber";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import useOnboardingContext from "@/components/layout/onboardingContext";
+import NewDataset from "../datasets/NewDataset";
+import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import ModelPill from "./modelPill";
+import { RenderMappedRequest } from "./RenderHeliconeRequest";
+import StatusBadge from "./statusBadge";
 
 function getPathName(url: string) {
   try {
@@ -41,7 +41,7 @@ function getPathName(url: string) {
 }
 
 const RequestRow = (props: {
-  request: NormalizedRequest;
+  request: MappedLLMRequest;
   properties: string[];
   open?: boolean;
   wFull?: boolean;
@@ -72,23 +72,23 @@ const RequestRow = (props: {
   const { setNotification } = useNotification();
 
   const promptId = useMemo(() => {
-    return request.customProperties?.["Helicone-Prompt-Id"] as
+    return request.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] as
       | string
       | undefined;
-  }, [request.customProperties]);
+  }, [request.heliconeMetadata.customProperties]);
 
   const sessionData = useMemo(() => {
-    const sessionId = request.customProperties?.["Helicone-Session-Id"] as
-      | string
-      | undefined;
+    const sessionId = request.heliconeMetadata.customProperties?.[
+      "Helicone-Session-Id"
+    ] as string | undefined;
     return { sessionId };
-  }, [request.customProperties]);
+  }, [request.heliconeMetadata.customProperties]);
 
   const experimentId = useMemo(() => {
-    return request.customProperties?.["Helicone-Experiment-Id"] as
-      | string
-      | undefined;
-  }, [request.customProperties]);
+    return request.heliconeMetadata.customProperties?.[
+      "Helicone-Experiment-Id"
+    ] as string | undefined;
+  }, [request.heliconeMetadata.customProperties]);
 
   const promptData = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
@@ -117,20 +117,26 @@ const RequestRow = (props: {
 
     properties.forEach((property) => {
       if (
-        request.customProperties &&
-        request.customProperties.hasOwnProperty(property)
+        request.heliconeMetadata.customProperties &&
+        request.heliconeMetadata.customProperties.hasOwnProperty(property)
       ) {
         currentProperties.push({
-          [property]: request.customProperties[property] as string,
+          [property]: request.heliconeMetadata.customProperties[
+            property
+          ] as string,
         });
       }
     });
 
     setCurrentProperties(currentProperties);
     const currentScores: Record<string, number> =
-      (request.scores as Record<string, number>) || {};
+      (request.heliconeMetadata.scores as Record<string, number>) || {};
     setCurrentScores(currentScores);
-  }, [properties, request.customProperties, request.scores]);
+  }, [
+    properties,
+    request.heliconeMetadata.customProperties,
+    request.heliconeMetadata.scores,
+  ]);
 
   const onAddLabelHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -248,7 +254,6 @@ const RequestRow = (props: {
   };
 
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
 
   return (
     <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
@@ -264,7 +269,7 @@ const RequestRow = (props: {
               Created At
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {getUSDateFromString(request.createdAt)}
+              {getUSDateFromString(request.heliconeMetadata.createdAt)}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -275,29 +280,31 @@ const RequestRow = (props: {
               <ModelPill model={request.model} />
             </div>
           </li>
-          {request.status.statusType === "success" && (
+          {request.heliconeMetadata.status.statusType === "success" && (
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Prompt Tokens
               </p>
               <div className="flex flex-row items-center space-x-1">
                 <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.promptTokens && request.promptTokens >= 0
-                    ? request.promptTokens
+                  {request.heliconeMetadata.promptTokens &&
+                  request.heliconeMetadata.promptTokens >= 0
+                    ? request.heliconeMetadata.promptTokens
                     : "not found"}
                 </p>
               </div>
             </li>
           )}
-          {request.status.statusType === "success" && (
+          {request.heliconeMetadata.status.statusType === "success" && (
             <li className="flex flex-row justify-between items-center py-2 gap-4">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Completion Tokens
               </p>
               <div className="flex flex-row items-center space-x-1">
                 <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.completionTokens && request.completionTokens >= 0
-                    ? request.completionTokens
+                  {request.heliconeMetadata.completionTokens &&
+                  request.heliconeMetadata.completionTokens >= 0
+                    ? request.heliconeMetadata.completionTokens
                     : "not found"}
                 </p>
               </div>
@@ -308,7 +315,7 @@ const RequestRow = (props: {
               Latency
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              <span>{Number(request.latency) / 1000}s</span>
+              <span>{Number(request.heliconeMetadata.latency) / 1000}s</span>
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -316,9 +323,10 @@ const RequestRow = (props: {
               Cost
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {request.cost !== null && request.cost !== undefined
-                ? `$${formatNumber(request.cost)}`
-                : request.status.statusType === "success"
+              {request.heliconeMetadata.cost !== null &&
+              request.heliconeMetadata.cost !== undefined
+                ? `$${formatNumber(request.heliconeMetadata.cost)}`
+                : request.heliconeMetadata.status.statusType === "success"
                 ? "Calculating..."
                 : "N/A"}
             </p>
@@ -328,8 +336,8 @@ const RequestRow = (props: {
               Status
             </p>
             <StatusBadge
-              statusType={request.status.statusType}
-              errorCode={request.status.code}
+              statusType={request.heliconeMetadata.status.statusType}
+              errorCode={request.heliconeMetadata.status.code}
             />
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -337,7 +345,7 @@ const RequestRow = (props: {
               User
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {request.user}
+              {request.heliconeMetadata.user}
             </p>
           </li>
           <li className="flex flex-row justify-between items-center py-2 gap-4">
@@ -345,7 +353,7 @@ const RequestRow = (props: {
               Path
             </p>
             <p className="text-gray-700 dark:text-gray-300 truncate">
-              {getPathName(request.path)}
+              {getPathName(request.heliconeMetadata.path)}
             </p>
           </li>
           {displayPreview && (
@@ -358,26 +366,26 @@ const RequestRow = (props: {
               </p>
             </li>
           )}
-          {request.temperature !== undefined &&
-            request.temperature !== null && (
+          {request.schema.request.temperature !== undefined &&
+            request.schema.request.temperature !== null && (
               <li className="flex flex-row justify-between items-center py-2">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">
                   Temperature
                 </p>
                 <p className="text-gray-700 dark:text-gray-300 truncate">
-                  {Number(request.temperature || 0).toFixed(2)}
+                  {Number(request.schema.request.temperature || 0).toFixed(2)}
                 </p>
               </li>
             )}
 
-          {request.timeToFirstToken !== undefined &&
-            request.timeToFirstToken !== null && (
+          {request.heliconeMetadata.timeToFirstToken !== undefined &&
+            request.heliconeMetadata.timeToFirstToken !== null && (
               <li className="flex flex-row justify-between items-center py-2">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">
                   Time to First Token
                 </p>
                 <p className="text-gray-700 dark:text-gray-300 truncate">
-                  {request.timeToFirstToken}ms
+                  {request.heliconeMetadata.timeToFirstToken}ms
                 </p>
               </li>
             )}
@@ -502,7 +510,21 @@ const RequestRow = (props: {
                             size="sm_sleek"
                             className="flex flex-row items-center space-x-2 truncate select-text"
                             onClick={() => {
-                              navigator.clipboard.writeText(`${property[key]}`);
+                              try {
+                                navigator.clipboard.writeText(
+                                  `${property[key]}`
+                                );
+                                setNotification(
+                                  "Copied to clipboard!",
+                                  "success"
+                                );
+                              } catch (error) {
+                                console.error("Failed to copy:", error);
+                                setNotification(
+                                  "Failed to copy to clipboard",
+                                  "error"
+                                );
+                              }
                             }}
                           >
                             <span>{key}:</span> <span>{property[key]}</span>
@@ -665,20 +687,25 @@ const RequestRow = (props: {
         <FeedbackButtons
           requestId={request.id}
           defaultValue={
-            request.scores && request.scores["helicone-score-feedback"]
-              ? Number(request.scores["helicone-score-feedback"]) === 1
+            request.heliconeMetadata.scores &&
+            request.heliconeMetadata.scores["helicone-score-feedback"]
+              ? Number(
+                  request.heliconeMetadata.scores["helicone-score-feedback"]
+                ) === 1
                 ? true
                 : false
               : null
           }
         />
       </div>
+
       {displayPreview && (
         <div className="flex flex-col space-y-8">
-          <div className="flex flex-col space-y-2">{request.render()}</div>
+          <div className="flex flex-col space-y-2">
+            <RenderMappedRequest mapperContent={request} />
+          </div>
         </div>
       )}
-
       <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset
