@@ -163,19 +163,13 @@ LlamaIndex specializes in data integration and retrieval, making it ideal for ap
 
 ### Integrating LLM Observability with LlamaIndex
 
-1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a write-only API key.
-
-2. Set the `OPENAI_API_BASE` environment variable.
+Generate a write-only API key in Helicone. Then set the `OPENAI_API_BASE` environment variable as follows:
 
 ```python
-import os
 os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
 ```
 
-3. Create your LlamaIndex agent.
-
-- All LLM calls made by these agents will be automatically logged and monitored by Helicone. Use the dashboard to view logs, analyze performance, and optimize your AI agents.
-- See <a href="https://docs.helicone.ai/integrations/openai/llamaindex#llamaindex-integration" target="_blank" rel="noopener">LlamaIndex Integration docs</a> for details.
+All LLM calls made by these agents will be automatically logged and monitored by Helicone. See <a href="https://docs.helicone.ai/integrations/openai/llamaindex#llamaindex-integration" target="_blank" rel="noopener">LlamaIndex Integration docs</a> for details.
 
 ### Other LlamaIndex Comparisons:
 
@@ -215,20 +209,13 @@ CrewAI <a href="https://docs.crewai.com/concepts/tools" rel="noopener" target="_
 
 ### Integrating LLM Observability with CrewAI
 
-1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a `write-only` API key.
+Generate a write-only API key in Helicone. Then set the `OPENAI_API_BASE` environment variable as follows:
 
-2. Set up environment variables
-
-```bash
-import os
-
+```python
 os.environ["OPENAI_BASE_URL"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
 ```
 
-3. Create and run your CrewAI agent.
-
-- Helicone will automatically log and monitor all LLM calls made by the agent. Use the dashboard to view logs, analyze performance, and optimize your AI agents.
-- See <a href="https://docs.helicone.ai/getting-started/integration-method/crewai#crew-ai-integration" target="_blank" rel="noopener">CrewAI Integration docs</a> for details.
+Helicone will automatically log and monitor all LLM calls made by the agent. See <a href="https://docs.helicone.ai/getting-started/integration-method/crewai#crew-ai-integration" target="_blank" rel="noopener">CrewAI Integration docs</a> for details.
 
 ### Other CrewAI Comparisons:
 
@@ -270,15 +257,7 @@ LangChain agents use the idea of **"chains"** to let you connect multiple module
 
 ### Integrating LLM Observability with LangChain
 
-1. Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then generate a `write-only` API key.
-
-2. Set up environment variables
-
-```
-export HELICONE_API_KEY=your_helicone_api_key
-```
-
-3. Modify your LangChain OpenAI configuration to use Helicone:
+Generate a `write-only` API key in Helicone. Then modify your LangChain OpenAI configuration to use Helicone:
 
 ```javascript
 const llm = new OpenAI({
@@ -292,8 +271,7 @@ const llm = new OpenAI({
 });
 ```
 
-- All LLM calls made by the agent will be automatically logged and monitored by Helicone. For Antrhopic's Claude, a similar approach can be used.
-- See <a href="https://docs.helicone.ai/integrations/openai/langchain" target="_blank" rel="noopener">OpenAI LangChain docs</a> or <a href="https://docs.helicone.ai/integrations/anthropic/langchain" target="_blank" rel="noopener">Anthropic LangChain docs</a> for details.
+All LLM calls made by the agent will be automatically logged and monitored by Helicone. See <a href="https://docs.helicone.ai/integrations/openai/langchain" target="_blank" rel="noopener">OpenAI LangChain docs</a> or <a href="https://docs.helicone.ai/integrations/anthropic/langchain" target="_blank" rel="noopener">Anthropic LangChain docs</a> for details.
 
 ### Other LangChain Comparisons:
 
