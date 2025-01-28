@@ -8,6 +8,7 @@ import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
 import { getHeliconeCookie } from "@/lib/cookies";
+import { env } from "next-runtime-env";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -337,7 +338,7 @@ const useOrgsContextManager = () => {
         date_joined: org.created_at || "",
       });
 
-      if (user && !process.env.NEXT_PUBLIC_IS_ON_PREM) {
+      if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {
         window.pylon = {
           chat_settings: {
             app_id: "f766dfd3-28f8-40a8-872f-351274cbd306",

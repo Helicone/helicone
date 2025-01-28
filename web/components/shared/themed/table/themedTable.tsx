@@ -17,7 +17,7 @@ import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
+
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import {
@@ -40,6 +40,7 @@ import useOnboardingContext, {
 } from "@/components/layout/onboardingContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -298,7 +299,7 @@ export default function ThemedTable<T extends { id?: string }>(
             ) : makeRow && view === "row" ? (
               <RequestRowView
                 rows={rows.map(
-                  (row) => row.original as unknown as NormalizedRequest
+                  (row) => row.original as unknown as MappedLLMRequest
                 )}
                 properties={makeRow.properties}
               />

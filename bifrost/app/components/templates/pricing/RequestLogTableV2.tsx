@@ -12,36 +12,39 @@ const BASE_LOG_PRICING: {
   },
   {
     lower: 10_000,
+    upper: 25_000,
+    rate: 0.0016,
+  },
+  {
+    lower: 25_000,
+    upper: 50_000,
+    rate: 0.0008,
+  },
+  {
+    lower: 50_000,
+    upper: 100_000,
+    rate: 0.00035,
+  },
+  {
+    lower: 100_000,
     upper: 2_000_000,
-    rate: 0.000248,
+    rate: 0.0003,
   },
   {
     lower: 2_000_000,
     upper: 15_000_000,
-    rate: 0.000104,
+    rate: 0.000128,
   },
   {
     lower: 15_000_000,
-    upper: 50_000_000,
-    rate: 0.0000655,
-  },
-  {
-    lower: 50_000_000,
-    upper: 100_000_000,
-    rate: 0.0000364,
-  },
-  {
-    lower: 100_000_000,
     upper: Number.MAX_SAFE_INTEGER,
-    rate: 0.0000187,
+    rate: 0.000083,
   },
 ];
 
-const MULTIPLIER = 1.3;
-
 export const HELICONE_LOG_PRICING = BASE_LOG_PRICING.map((pricing) => ({
   ...pricing,
-  rate: pricing.rate * MULTIPLIER,
+  rate: pricing.rate,
 }));
 
 const RequestLogTableV2 = (props: RequestLogTableProps) => {

@@ -135,7 +135,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
               <Link href={documentationLink}>View documentation</Link>
             </Button>
             <Button asChild className="w-1/2">
-              <Link href="/settings/billing">Start 14-day free trial</Link>
+              <Link href="/settings/billing">Start 7-day free trial</Link>
             </Button>
           </div>
         </CardFooter>

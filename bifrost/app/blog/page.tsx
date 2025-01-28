@@ -216,7 +216,26 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+<<<<<<< HEAD
       folderName: "openai-structured-outputs",
+=======
+      folderName: "preventing-prompt-injection",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "deepseek-v3",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-frameworks",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+>>>>>>> main
     },
   },
   {
@@ -227,6 +246,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "text-classification-with-llms",
     },
   },
   {

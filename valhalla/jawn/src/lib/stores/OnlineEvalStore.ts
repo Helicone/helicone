@@ -1,5 +1,5 @@
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, PromiseGenericResult } from "../shared/result";
+import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
 
 export type EvaluatorConfig = {
@@ -24,6 +24,20 @@ export type OnlineEvaluatorByEvaluatorId = {
 export class OnlineEvalStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
+  }
+  public async hasOnlineEvals(orgId: string): Promise<Result<boolean, string>> {
+    const { data, error } = await dbExecute<{
+      count: number;
+    }>(
+      `SELECT COUNT(*) as count FROM online_evaluators WHERE organization = $1`,
+      [orgId]
+    );
+
+    if (error) {
+      return ok(false);
+    }
+
+    return ok((data?.[0]?.count ?? 0) > 0);
   }
 
   public async getOnlineEvalsByOrgId(

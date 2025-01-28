@@ -6,7 +6,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 
 const characters =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -28,7 +28,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     supabaseClient: client,
   } = option;
 
-  const { error: ffError, data: ffData } = await supabaseServer
+  const { error: ffError, data: ffData } = await getSupabaseServer()
     .from("feature_flags")
     .select("*")
     .eq("org_id", orgId)
@@ -57,7 +57,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     return;
   }
 
-  const { error: webhookError, data: webhook } = await supabaseServer
+  const { error: webhookError, data: webhook } = await getSupabaseServer()
     .from("webhooks")
     .insert([
       {
@@ -77,7 +77,7 @@ async function handler(option: HandlerWrapperOptions<Result<boolean, string>>) {
     return;
   }
   const { error: webHookSubscriptionError, data: webHookSubscriptionData } =
-    await supabaseServer
+    await getSupabaseServer()
       .from("webhook_subscriptions")
       .insert([
         {

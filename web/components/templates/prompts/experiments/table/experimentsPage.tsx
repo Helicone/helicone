@@ -1,23 +1,33 @@
-import AuthHeader from "../../../../shared/authHeader";
-import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
-import ThemedTable from "../../../../shared/themed/table/themedTable";
-import { useRouter } from "next/router";
-import useNotification from "../../../../shared/notification/useNotification";
-import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
-import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { Dialog } from "../../../../ui/dialog";
-import { useState } from "react";
-import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
+import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useMemo, useState } from "react";
+import { useJawnClient } from "../../../../../lib/clients/jawnHook";
+import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
+import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
+import AuthHeader from "../../../../shared/authHeader";
+import useNotification from "../../../../shared/notification/useNotification";
+import ThemedTable from "../../../../shared/themed/table/themedTable";
+import { Dialog } from "../../../../ui/dialog";
+import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -28,6 +38,18 @@ const ExperimentsPage = () => {
   const { experiments, isLoading } = useExperimentTables();
 
   const org = useOrg();
+
+  const hasAccess = useMemo(() => {
+    return (
+      org?.currentOrg?.tier === "growth" ||
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro" ||
+      org?.currentOrg?.tier === "demo" ||
+      (org?.currentOrg?.tier === "pro-20240913" &&
+        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+          ?.addons?.prompts)
+    );
+  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
 
   const { setNotification } = useNotification();
 
@@ -85,7 +107,7 @@ const ExperimentsPage = () => {
             tier={org?.currentOrg?.tier ?? "free"}
           />
         </div>
-      ) : (
+      ) : hasAccess ? (
         <>
           <ThemedTable
             defaultColumns={[
@@ -116,6 +138,57 @@ const ExperimentsPage = () => {
             }}
             fullWidth={true}
           />
+        </>
+      ) : (
+        <>
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+            <Card className="max-w-4xl">
+              <CardHeader>
+                <CardTitle>Unlock Experiment Features</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Take your LLM development to the next level with
+                  Helicone&apos;s powerful experimentation tools. Compare
+                  models, test prompts, and optimize outputs with data-driven
+                  insights.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <InfoBox>
+                  <p className="text-sm font-medium">
+                    Run A/B tests on prompts, evaluate performance, and make
+                    data-driven decisions to improve your AI outputs. Test
+                    safely with production data without impacting users.
+                  </p>
+                </InfoBox>
+                <div className="bg-muted p-4 rounded-lg space-y-3">
+                  <div className="text-sm text-muted-foreground">
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>Run experiments with real production data</li>
+                      <li>Compare multiple prompt versions</li>
+                      <li>Score and evaluate outputs</li>
+                      <li>Safe testing without user impact</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col items-center">
+                <div className="w-full">
+                  <UpgradeToProCTA
+                    defaultPrompts={true}
+                    showAddons={true}
+                    showContactCTA={true}
+                  />
+                </div>
+                <div className="space-x-2 mt-5">
+                  <Button variant="outline" asChild>
+                    <Link href="https://docs.helicone.ai/features/prompts#prompts-and-experiments">
+                      View documentation
+                    </Link>
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
         </>
       )}
     </>

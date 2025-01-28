@@ -5,7 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import crypto from "crypto";
 import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
@@ -41,7 +41,7 @@ async function handler({
   }
 
   const { data: providerKey, error } = await getDecryptedProviderKeyById(
-    supabaseServer,
+    getSupabaseServer(),
     providerKeyId
   );
 
@@ -77,7 +77,7 @@ async function handler({
 
   // Constraint prevents provider key mapping twice to same helicone proxy key
   // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
-  const newProxyMapping = await supabaseServer
+  const newProxyMapping = await getSupabaseServer()
     .from("helicone_proxy_keys")
     .insert({
       id: proxyKeyId,
@@ -107,7 +107,7 @@ async function handler({
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
   if (limits.length > 0) {
-    const insertLimits = await supabaseServer
+    const insertLimits = await getSupabaseServer()
       .from("helicone_proxy_key_limits")
       .insert(
         limits.map((limit) => ({
@@ -120,7 +120,7 @@ async function handler({
         }))
       );
     if (insertLimits.error) {
-      const remove = await supabaseServer
+      const remove = await getSupabaseServer()
         .from("helicone_proxy_keys")
         .delete()
         .eq("id", proxyKeyId);

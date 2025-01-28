@@ -59,7 +59,7 @@ export class ProviderKeyGet extends BaseAPIRoute {
       .eq("reseller_id", authParams.organizationId)
       .eq("id", customerId)
       .eq("organization_type", "customer")
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single();
 
     if (customers.error) {

@@ -38,6 +38,19 @@ export interface LLMUsage {
 @Tags("Stripe")
 @Security("api_key")
 export class StripeController extends Controller {
+  @Get("/subscription/cost-for-prompts")
+  public async getCostForPrompts(@Request() request: JawnAuthenticatedRequest) {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getCostForPrompts();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
   @Get("/subscription/free/usage")
   public async getFreeUsage(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);

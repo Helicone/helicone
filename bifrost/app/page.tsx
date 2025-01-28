@@ -42,7 +42,7 @@ export default async function Home() {
     <Layout>
       <main className="bg-white text-landing-description">
         <div className="max-w-8xl mx-auto">
-          <Banner />
+          {/* <Banner /> */}
           <Hero />
           <Prototype />
           <Companies />

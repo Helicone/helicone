@@ -7,8 +7,6 @@ interface AnthropicProxyProps {
   apiKey: string;
 }
 
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
 const CODE_CONVERTS = {
   curl: (key: string) => `
 curl --request POST \\

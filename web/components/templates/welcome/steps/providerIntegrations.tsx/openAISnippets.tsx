@@ -2,8 +2,8 @@ import { useState } from "react";
 import { DiffHighlight } from "../../diffHighlight";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+import { env } from "next-runtime-env";
+const BASE_PATH = env("NEXT_PUBLIC_BASE_PATH");
 
 const CODE_CONVERTS = {
   curl: (key: string) => `curl "${BASE_PATH}/chat/completions" \\

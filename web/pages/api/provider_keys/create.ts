@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 import crypto from "crypto";
@@ -39,7 +39,7 @@ async function handler({
   }
 
   const keyId = crypto.randomUUID();
-  const { error } = await supabaseServer.from("provider_keys").insert({
+  const { error } = await getSupabaseServer().from("provider_keys").insert({
     id: keyId,
     org_id: userData.orgId,
     provider_name: providerName,

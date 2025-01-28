@@ -2,10 +2,14 @@ import {
   EvaluatorManager,
   getEvaluatorScoreName,
 } from "../../managers/evaluator/EvaluatorManager";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { KVCache } from "../cache/kvCache";
 import { err, PromiseGenericResult } from "../shared/result";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+
+const kvCache = new KVCache(60); // 1 minutes
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -15,6 +19,16 @@ export class OnlineEvalHandler extends AbstractLogHandler {
     }
 
     const onlineEvalStore = new OnlineEvalStore(orgId);
+    const hasOnlineEvals = await cacheResultCustom(
+      "has-online-evals-" + orgId,
+      async () => await onlineEvalStore.hasOnlineEvals(orgId),
+      kvCache
+    );
+
+    if (hasOnlineEvals.data === false) {
+      return await super.handle(context);
+    }
+
     const onlineEvals = await onlineEvalStore.getOnlineEvalsByOrgId(orgId);
 
     if (onlineEvals.error) {

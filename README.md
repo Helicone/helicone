@@ -40,7 +40,7 @@
 - 🛜 **Gateway**: [Caching](https://docs.helicone.ai/features/advanced-usage/caching), [custom rate limits](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits), [LLM security](https://docs.helicone.ai/features/advanced-usage/llm-security), and more with our gateway
 - 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
 
-> 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (100k requests/month) - No credit card required!
+> 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (10k requests/month) - No credit card required!
 
 ## Quick Start ⚡️ One line of code
 
@@ -56,7 +56,8 @@
      baseURL: `https://oai.helicone.ai/v1/${process.env.HELICONE_API_KEY}`,
    });
    ```
-  or - use headers for more secure environments
+
+   or - use headers for more secure environments
 
    ```typescript
    import OpenAI from "openai";
@@ -65,7 +66,7 @@
      apiKey: process.env.OPENAI_API_KEY,
      baseURL: `https://oai.helicone.ai/v1`,
      defaultHeaders: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
      },
    });
    ```
@@ -91,6 +92,7 @@ The fastest and most reliable way to get started with Helicone. Get started for 
 Helicone is simple to self-host and update. To get started locally, just use our [docker-compose](https://docs.helicone.ai/getting-started/self-deploy-docker) file.
 
 Pre-Request:
+
 - Copy the shared directory to the valhalla directory
 - Create a valhalla folder in the valhalla directory and put /valhalla/jawn in it
 
@@ -183,7 +185,7 @@ Helicone is comprised of five services:
 We ❤️ our contributors! We warmly welcome contributions for documentation, integrations, costs, and feature requests.
 
 - If you have an idea for how Helicone can be better, create a [GitHub issue](https://github.com/Helicone/helicone/issues) or vote on the [roadmap](https://github.com/Helicone/helicone/labels/roadmap)
-- Update costs instructions in [costs/README.md](https://github.com/Helicone/helicone/blob/main/costs/README.md)
+- Update costs instructions in [costs/README.md](https://github.com/Helicone/helicone/blob/main/packages/README.md)
 - Join [discord](https://discord.gg/zsSTcH2qhG) to ask questions
 
 ## License

@@ -3,8 +3,6 @@ import { DiffHighlight } from "../../diffHighlight";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
 const CODE_CONVERTS = {
   typescript: (key: string) => `import OpenAI from "openai";
 

@@ -15,9 +15,9 @@ import {
 } from "openai/resources/chat";
 import { fetchAnthropic } from "../../../services/lib/providers/anthropic";
 import { fetchOpenAI } from "../../../services/lib/providers/openAI";
-import { SingleChat } from "../requests/chatComponent/single/singleChat";
-import { Message } from "../requests/chatComponent/types";
-import ModelPill from "../requestsV2/modelPill";
+import { SingleChat } from "../requests/components/chatComponent/single/singleChat";
+import { Message } from "@/packages/llm-mapper/types";
+import ModelPill from "../requests/modelPill";
 import ChatRow from "./chatRow";
 import RoleButton from "./new/roleButton";
 import { PlaygroundModel } from "./types";
@@ -30,15 +30,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+// Extend the Message type to include model and latency
+type ExtendedMessage = Message & {
+  model?: string;
+  latency?: number;
+};
+
 interface ChatPlaygroundProps {
   requestId: string;
-  chat: Message[];
+  chat: ExtendedMessage[];
   models: PlaygroundModel[];
   temperature: number;
   maxTokens: number;
   tools?: ChatCompletionTool[];
   providerAPIKey?: string;
-  onSubmit?: (history: Message[]) => void;
+  onSubmit?: (history: ExtendedMessage[]) => void;
   submitText?: string;
   customNavBar?: {
     onBack: () => void;
@@ -61,12 +67,12 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
   const { setNotification } = useNotification();
 
-  const [currentChat, setCurrentChat] = useState<Message[]>(chat);
+  const [currentChat, setCurrentChat] = useState<ExtendedMessage[]>(chat);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewPayload, setPreviewPayload] = useState<string>("");
 
-  const generatePayload = (history: Message[]) => {
+  const generatePayload = (history: ExtendedMessage[]) => {
     const cleanMessages = history.filter((message) => !message.model);
 
     return JSON.stringify(
@@ -82,7 +88,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     );
   };
 
-  const handleSubmit = async (history: Message[]) => {
+  const handleSubmit = async (history: ExtendedMessage[]) => {
     if (models.length < 1) {
       setNotification("Please select a model", "error");
       return;
@@ -97,13 +103,13 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
     const responses = await Promise.all(
       models.map(async (model) => {
         // Filter and map the history as before
-        const cleanMessages = (history: Message[]) => {
+        const cleanMessages = (history: ExtendedMessage[]) => {
           return history
             .filter(
               (message) =>
                 message.model === model.name || message.model === undefined
             )
-            .map(({ id, ...rest }) => rest); // Remove only the id field
+            .map(({ id, model, latency, ...rest }) => rest); // Remove id, model, and latency fields
         };
 
         const historyWithoutId = cleanMessages(history);
@@ -207,8 +213,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
           id: crypto.randomUUID(),
           content: getContent(data),
           role: getRole(data),
-          model: model.name, // Include the model in the message
-          latency, // client side calculated latency
+          model: model.name,
+          latency,
+          _type: "message",
         });
       }
     });
@@ -224,7 +231,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
   };
 
   const generateChatRows = () => {
-    let modelMessage: Message[] = [];
+    let modelMessage: ExtendedMessage[] = [];
     const renderRows: JSX.Element[] = [];
 
     currentChat.forEach((c, i) => {
@@ -346,7 +353,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                       },
                     },
                     { type: "text", text: userText },
-                  ];
+                  ] as any;
                   setCurrentChat(newChat);
                   return;
                 }
@@ -360,7 +367,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                       image: imageObj,
                     },
                     { type: "text", text: userText },
-                  ];
+                  ] as any;
                   setCurrentChat(newChat);
                   return;
                 } else {
@@ -515,6 +522,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     id: crypto.randomUUID(),
                     content: "",
                     role: "user",
+                    _type: "message",
                   });
                   setCurrentChat(newChat);
                 } else if (lastMessage.role === "user") {
@@ -523,6 +531,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     id: crypto.randomUUID(),
                     content: "",
                     role: "assistant",
+                    _type: "message",
                   });
                   setCurrentChat(newChat);
                 } else {
@@ -531,6 +540,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                     id: crypto.randomUUID(),
                     content: "",
                     role: "user",
+                    _type: "message",
                   });
                   setCurrentChat(newChat);
                 }

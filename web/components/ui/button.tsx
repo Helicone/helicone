@@ -4,12 +4,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 select-none",
   {
     variants: {
       variant: {
         default:
           "bg-slate-900 text-slate-50 hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90",
+        action:
+          "bg-heliblue text-white hover:bg-heliblue/90 border border-slate-100 font-semibold interactive rounded-xl",
         destructive:
           "bg-red-400 text-white hover:bg-red-500 dark:bg-red-700 dark:text-slate-100 dark:hover:bg-red-800",
         outline:
@@ -23,18 +25,24 @@ const buttonVariants = cva(
         link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
       },
       size: {
-        default: "h-10 px-4 py-2",
+        default: "px-4 py-2 h-10",
         xs: "h-8 px-3",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-xs",
+        square_icon: "h-7 w-7 p-0",
+      },
+      asPill: {
+        true: "rounded-full",
+        false: "",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      asPill: false,
     },
   }
 );
@@ -43,17 +51,31 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  asPill?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      children,
+      asPill = false,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className, asPill }))}
         ref={ref}
         {...(props as any)}
-      />
+      >
+        {children}
+      </Comp>
     );
   }
 );
