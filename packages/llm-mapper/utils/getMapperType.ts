@@ -39,6 +39,10 @@ export const getMapperType = ({
     return "openai-instruct";
   }
 
+  if (model == "black-forest-labs/FLUX.1-schnell") {
+    return "black-forest-labs-image";
+  }
+
   if (
     /^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model) ||
     /^(ft:)?gpt-(4|3\.5|35)(?!-turbo-instruct)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(
@@ -64,10 +68,6 @@ export const getMapperType = ({
 
   if (model && model.toLowerCase().includes("gemini")) {
     return "gemini-chat";
-  }
-
-  if (model == "black-forest-labs/FLUX.1-schnell") {
-    return "black-forest-labs-image";
   }
 
   if (model === "dall-e-3" || model === "dall-e-2") {

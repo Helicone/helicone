@@ -2,6 +2,9 @@ import { LlmSchema } from "../../types";
 import { MapperFn } from "../types";
 
 const getRequestText = (requestBody: any) => {
+  if (requestBody.prompt) {
+    return requestBody.prompt;
+  }
   if (typeof requestBody.input === "string") {
     return requestBody.input;
   }
@@ -16,6 +19,15 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     if (responseBody?.error) {
       return responseBody?.error?.message || "";
     }
+
+    // Handle Black Forest Labs image response
+    if (
+      responseBody?.data?.[0]?.b64_json &&
+      !Array.isArray(responseBody?.data?.[0]?.embedding)
+    ) {
+      return "Image generated successfully";
+    }
+
     // Return first embedding vector truncated for preview
     const embedding = responseBody?.data?.[0]?.embedding;
     if (Array.isArray(embedding)) {
@@ -41,6 +53,7 @@ export const mapOpenAIEmbedding: MapperFn<any, any> = ({
   const requestToReturn: LlmSchema["request"] = {
     model: request.model,
     input: request.input,
+    prompt: request.prompt,
     messages: [
       {
         role: "user",
@@ -50,6 +63,40 @@ export const mapOpenAIEmbedding: MapperFn<any, any> = ({
     ],
   };
 
+  // Handle Black Forest Labs image response
+  if (
+    response?.data?.[0]?.b64_json &&
+    !Array.isArray(response?.data?.[0]?.embedding)
+  ) {
+    const llmSchema: LlmSchema = {
+      request: requestToReturn,
+      response: {
+        model: response?.model || model,
+        messages: [
+          {
+            role: "assistant",
+            content: "Image generated",
+            _type: "image",
+            image_url: response.data[0].b64_json,
+          },
+        ],
+      },
+    };
+
+    return {
+      schema: llmSchema,
+      preview: {
+        request: getRequestText(request),
+        response: getResponseText(response, statusCode),
+        concatenatedMessages: [
+          ...(llmSchema.request.messages || []),
+          ...(llmSchema.response?.messages || []),
+        ],
+      },
+    };
+  }
+
+  // Handle regular embedding response
   const responseMessages =
     response?.data?.map((item: any, index: number) => ({
       role: "assistant",
