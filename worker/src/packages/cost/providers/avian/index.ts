@@ -1,4 +1,4 @@
-import { ModelRow } from "@/cost/interfaces/Cost";
+import { ModelRow } from "../../../cost/interfaces/Cost";
 
 export const costs: ModelRow[] = [
   {
