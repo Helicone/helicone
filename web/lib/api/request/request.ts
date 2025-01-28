@@ -1,3 +1,4 @@
+import { LlmSchema } from "@/packages/llm-mapper/types";
 import { ProviderName } from "../../../packages/cost/providers/mappings";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
@@ -10,7 +11,6 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import { Result, resultMap } from "../../result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
-import { LlmSchema } from "../models/requestResponseModel";
 
 export type Provider = ProviderName | "CUSTOM";
 const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
@@ -50,6 +50,7 @@ export interface HeliconeRequest {
   properties: Record<string, string>;
   assets: Array<string>;
   target_url: string;
+  model: string;
 }
 
 export async function getRequests(

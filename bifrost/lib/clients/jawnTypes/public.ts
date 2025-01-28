@@ -21,61 +21,6 @@ export interface paths {
   "/v1/evals/score-distributions/query": {
     post: operations["QueryScoreDistributions"];
   };
-  "/v2/experiment/create/empty": {
-    post: operations["CreateEmptyExperiment"];
-  };
-  "/v2/experiment/create/from-request/{requestId}": {
-    post: operations["CreateExperimentFromRequest"];
-  };
-  "/v2/experiment/new": {
-    post: operations["CreateNewExperiment"];
-  };
-  "/v2/experiment": {
-    get: operations["GetExperiments"];
-  };
-  "/v2/experiment/{experimentId}": {
-    get: operations["GetExperimentById"];
-  };
-  "/v2/experiment/{experimentId}/prompt-version": {
-    post: operations["CreateNewPromptVersionForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/prompt-versions": {
-    get: operations["GetPromptVersionsForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/input-keys": {
-    get: operations["GetInputKeysForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/add-manual-row": {
-    post: operations["AddManualRowToExperiment"];
-  };
-  "/v2/experiment/{experimentId}/row/insert/batch": {
-    post: operations["CreateExperimentTableRowBatch"];
-  };
-  "/v2/experiment/{experimentId}/row/update": {
-    post: operations["UpdateExperimentTableRow"];
-  };
-  "/v2/experiment/{experimentId}/run-hypothesis": {
-    post: operations["RunHypothesis"];
-  };
-  "/v2/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/should-run-evaluators": {
-    get: operations["ShouldRunEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
-    get: operations["GetExperimentPromptVersionScores"];
-  };
-  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
-    get: operations["GetExperimentScore"];
-  };
   "/v1/prompt/query": {
     post: operations["GetPrompts"];
   };
@@ -148,6 +93,61 @@ export interface paths {
   };
   "/v1/evaluator/llm/test": {
     post: operations["TestLLMEvaluator"];
+  };
+  "/v2/experiment/create/empty": {
+    post: operations["CreateEmptyExperiment"];
+  };
+  "/v2/experiment/create/from-request/{requestId}": {
+    post: operations["CreateExperimentFromRequest"];
+  };
+  "/v2/experiment/new": {
+    post: operations["CreateNewExperiment"];
+  };
+  "/v2/experiment": {
+    get: operations["GetExperiments"];
+  };
+  "/v2/experiment/{experimentId}": {
+    get: operations["GetExperimentById"];
+  };
+  "/v2/experiment/{experimentId}/prompt-version": {
+    post: operations["CreateNewPromptVersionForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/prompt-versions": {
+    get: operations["GetPromptVersionsForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/input-keys": {
+    get: operations["GetInputKeysForExperiment"];
+  };
+  "/v2/experiment/{experimentId}/add-manual-row": {
+    post: operations["AddManualRowToExperiment"];
+  };
+  "/v2/experiment/{experimentId}/row/insert/batch": {
+    post: operations["CreateExperimentTableRowBatch"];
+  };
+  "/v2/experiment/{experimentId}/row/update": {
+    post: operations["UpdateExperimentTableRow"];
+  };
+  "/v2/experiment/{experimentId}/run-hypothesis": {
+    post: operations["RunHypothesis"];
+  };
+  "/v2/experiment/{experimentId}/evaluators": {
+    get: operations["GetExperimentEvaluators"];
+    post: operations["CreateExperimentEvaluator"];
+  };
+  "/v2/experiment/{experimentId}/evaluators/{evaluatorId}": {
+    delete: operations["DeleteExperimentEvaluator"];
+  };
+  "/v2/experiment/{experimentId}/evaluators/run": {
+    post: operations["RunExperimentEvaluators"];
+  };
+  "/v2/experiment/{experimentId}/should-run-evaluators": {
+    get: operations["ShouldRunEvaluators"];
+  };
+  "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
+    get: operations["GetExperimentPromptVersionScores"];
+  };
+  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
+    get: operations["GetExperimentScore"];
   };
   "/v1/request/query": {
     post: operations["GetRequests"];
@@ -610,169 +610,10 @@ export interface components {
       error: null;
     };
     "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-    };
-    "ResultSuccess_ExperimentV2-Array_": {
-      data: components["schemas"]["ExperimentV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.string_": {
-      [key: string]: string;
-    };
-    ExperimentV2Output: {
-      id: string;
-      request_id: string;
-      is_original: boolean;
-      prompt_version_id: string;
-      created_at: string;
-      input_record_id: string;
-    };
-    ExperimentV2Row: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      prompt_version: string;
-      requests: components["schemas"]["ExperimentV2Output"][];
-      auto_prompt_inputs: unknown[];
-    };
-    ExtendedExperimentData: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-      rows: components["schemas"]["ExperimentV2Row"][];
-    };
-    ResultSuccess_ExtendedExperimentData_: {
-      data: components["schemas"]["ExtendedExperimentData"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.any_": {
       [key: string]: unknown;
     };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      helicone_template: string;
-      created_at: string;
-      metadata: components["schemas"]["Record_string.any_"];
-      parent_prompt_version?: string | null;
-      experiment_id?: string | null;
-      updated_at?: string;
-    };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
-    CreateNewPromptVersionForExperimentParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-      parentPromptVersionId: string;
-    };
-Json: JsonObject;
-    ExperimentV2PromptVersion: {
-      created_at: string | null;
-      experiment_id: string | null;
-      helicone_template: components["schemas"]["Json"] | null;
-      id: string;
-      /** Format: double */
-      major_version: number;
-      metadata: components["schemas"]["Json"] | null;
-      /** Format: double */
-      minor_version: number;
-      model: string | null;
-      organization: string;
-      prompt_v2: string;
-      soft_delete: boolean | null;
-    };
-    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
-      data: components["schemas"]["ExperimentV2PromptVersion"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    EvaluatorResult: {
-      id: string;
-      created_at: string;
-      scoring_type: string;
-      llm_template: unknown;
-      organization_id: string;
-      updated_at: string;
-      name: string;
-      code_template: unknown;
-    };
-    "ResultSuccess_EvaluatorResult-Array_": {
-      data: components["schemas"]["EvaluatorResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_boolean_: {
-      data: boolean;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
-    ScoreV2: {
-      valueType: string;
-      value: number | string;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreV2_": {
-      [key: string]: components["schemas"]["ScoreV2"];
-    };
-    "ResultSuccess_Record_string.ScoreV2__": {
-      data: components["schemas"]["Record_string.ScoreV2_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ScoreV2-or-null_": {
-      data: components["schemas"]["ScoreV2"] | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     PromptsResult: {
       id: string;
       user_defined_id: string;
@@ -860,12 +701,37 @@ Json: JsonObject;
       heliconeTemplate: unknown;
       experimentId?: string;
     };
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
+      updated_at?: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
     PromptCreateSubversionParams: {
       newHeliconeTemplate: unknown;
       isMajorVersion?: boolean;
       metadata?: components["schemas"]["Record_string.any_"];
       experimentId?: string;
       bumpForMajorPromptVersionId?: string;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.string_": {
+      [key: string]: string;
     };
     PromptInputRecord: {
       id: string;
@@ -963,6 +829,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    EvaluatorResult: {
+      id: string;
+      created_at: string;
+      scoring_type: string;
+      llm_template: unknown;
+      organization_id: string;
+      updated_at: string;
+      name: string;
+      code_template: unknown;
+    };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
       /** @enum {number|null} */
@@ -975,6 +851,12 @@ Json: JsonObject;
       name: string;
       code_template?: unknown;
     };
+    "ResultSuccess_EvaluatorResult-Array_": {
+      data: components["schemas"]["EvaluatorResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorResult-Array.string_": components["schemas"]["ResultSuccess_EvaluatorResult-Array_"] | components["schemas"]["ResultError_string_"];
     UpdateEvaluatorParams: {
       scoring_type?: string;
       llm_template?: unknown;
@@ -1040,8 +922,126 @@ Json: JsonObject;
       evaluator_llm_template?: string;
       evaluator_scoring_type: string;
     };
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+    };
+    "ResultSuccess_ExperimentV2-Array_": {
+      data: components["schemas"]["ExperimentV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2Output: {
+      id: string;
+      request_id: string;
+      is_original: boolean;
+      prompt_version_id: string;
+      created_at: string;
+      input_record_id: string;
+    };
+    ExperimentV2Row: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      prompt_version: string;
+      requests: components["schemas"]["ExperimentV2Output"][];
+      auto_prompt_inputs: unknown[];
+    };
+    ExtendedExperimentData: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+      rows: components["schemas"]["ExperimentV2Row"][];
+    };
+    ResultSuccess_ExtendedExperimentData_: {
+      data: components["schemas"]["ExtendedExperimentData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    CreateNewPromptVersionForExperimentParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+      parentPromptVersionId: string;
+    };
+Json: JsonObject;
+    ExperimentV2PromptVersion: {
+      created_at: string | null;
+      experiment_id: string | null;
+      helicone_template: components["schemas"]["Json"] | null;
+      id: string;
+      /** Format: double */
+      major_version: number;
+      metadata: components["schemas"]["Json"] | null;
+      /** Format: double */
+      minor_version: number;
+      model: string | null;
+      organization: string;
+      prompt_v2: string;
+      soft_delete: boolean | null;
+    };
+    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
+      data: components["schemas"]["ExperimentV2PromptVersion"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_boolean_: {
+      data: boolean;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
+    ScoreV2: {
+      valueType: string;
+      value: number | string;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.ScoreV2_": {
+      [key: string]: components["schemas"]["ScoreV2"];
+    };
+    "ResultSuccess_Record_string.ScoreV2__": {
+      data: components["schemas"]["Record_string.ScoreV2_"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ScoreV2-or-null_": {
+      data: components["schemas"]["ScoreV2"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN";
     Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1150,6 +1150,7 @@ Json: JsonObject;
       properties: components["schemas"]["Record_string.string_"];
       assets: string[];
       target_url: string;
+      model?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2433,334 +2434,6 @@ export interface operations {
       };
     };
   };
-  CreateEmptyExperiment: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentFromRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          originalPromptVersion: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperiments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentById: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
-        };
-      };
-    };
-  };
-  CreateNewPromptVersionForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionsForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
-        };
-      };
-    };
-  };
-  GetInputKeysForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  AddManualRowToExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowBatch: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rows: {
-              autoInputs: unknown[];
-              inputs: components["schemas"]["Record_string.string_"];
-              inputRecordId: string;
-            }[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunHypothesis: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputRecordId: string;
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  ShouldRunEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentPromptVersionScores: {
-    parameters: {
-      path: {
-        experimentId: string;
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentScore: {
-    parameters: {
-      path: {
-        experimentId: string;
-        requestId: string;
-        scoreKey: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
-        };
-      };
-    };
-  };
   GetPrompts: {
     requestBody: {
       content: {
@@ -3243,6 +2916,334 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["EvaluatorScoreResult"];
+        };
+      };
+    };
+  };
+  CreateEmptyExperiment: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentFromRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  CreateNewExperiment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          originalPromptVersion: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
+        };
+      };
+    };
+  };
+  GetExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentById: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
+        };
+      };
+    };
+  };
+  CreateNewPromptVersionForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
+        };
+      };
+    };
+  };
+  GetInputKeysForExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  AddManualRowToExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowBatch: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rows: {
+              autoInputs: unknown[];
+              inputs: components["schemas"]["Record_string.string_"];
+              inputRecordId: string;
+            }[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateExperimentTableRow: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"];
+          inputRecordId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RunHypothesis: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordId: string;
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          evaluatorId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteExperimentEvaluator: {
+    parameters: {
+      path: {
+        experimentId: string;
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RunExperimentEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  ShouldRunEvaluators: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentPromptVersionScores: {
+    parameters: {
+      path: {
+        experimentId: string;
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
+        };
+      };
+    };
+  };
+  GetExperimentScore: {
+    parameters: {
+      path: {
+        experimentId: string;
+        requestId: string;
+        scoreKey: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
         };
       };
     };

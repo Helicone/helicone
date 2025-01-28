@@ -1,45 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { usePrompt, usePromptVersions } from "@/services/hooks/prompts/prompts";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import useNotification from "@/components/shared/notification/useNotification";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import ResizablePanels from "@/components/shared/universal/ResizablePanels";
+import useNotification from "@/components/shared/notification/useNotification";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
-import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
-import {
-  extractVariables,
-  isValidVariableName,
-  deduplicateVariables,
-} from "@/utils/variables";
-import {
-  isLastMessageUser,
-  heliconeToStateMessages,
-  removeMessagePair,
-} from "@/utils/messages";
-import { isPrefillSupported } from "@/utils/messages";
-import PromptMetricsTab from "./PromptMetricsTab";
-import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
-import { PiCommandBold, PiRocketLaunchBold } from "react-icons/pi";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
-import { toKebabCase } from "@/utils/strings";
-import Link from "next/link";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
-import ActionButton from "@/components/shared/universal/ActionButton";
-import VersionSelector from "@/components/shared/universal/VersionSelector";
-import { MdKeyboardReturn } from "react-icons/md";
-import {
-  PiSpinnerGapBold,
-  PiStopBold,
-  PiPlayBold,
-  PiCaretLeftBold,
-} from "react-icons/pi";
+import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
-import { FlaskConicalIcon } from "lucide-react";
-import { useRouter } from "next/router";
-import { useExperiment } from "./hooks";
+import ActionButton from "@/components/shared/universal/ActionButton";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
+import ResizablePanels from "@/components/shared/universal/ResizablePanels";
+import VersionSelector from "@/components/shared/universal/VersionSelector";
 import {
   Dialog,
   DialogContent,
@@ -47,8 +15,44 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DiffHighlight } from "../../welcome/diffHighlight";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
+import {
+  heliconeToStateMessages,
+  isLastMessageUser,
+  isPrefillSupported,
+  removeMessagePair,
+} from "@/utils/messages";
+import { toKebabCase } from "@/utils/strings";
+import {
+  deduplicateVariables,
+  extractVariables,
+  isValidVariableName,
+} from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
+import { FlaskConicalIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MdKeyboardReturn } from "react-icons/md";
+import {
+  PiCaretLeftBold,
+  PiCommandBold,
+  PiPlayBold,
+  PiRocketLaunchBold,
+  PiSpinnerGapBold,
+  PiStopBold,
+} from "react-icons/pi";
+import {
+  usePrompt,
+  usePromptVersions,
+} from "../../../../services/hooks/prompts/prompts";
+import { DiffHighlight } from "../../welcome/diffHighlight";
+import { useExperiment } from "./hooks";
+import PromptMetricsTab from "./PromptMetricsTab";
 
 interface PromptIdPageProps {
   id: string;

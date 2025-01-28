@@ -1,12 +1,12 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { getUSDateFromString } from "../../shared/utils/utils";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import ModelPill from "./modelPill";
-import StatusBadge from "./statusBadge";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
+import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
+import ModelPill from "./modelPill";
+import StatusBadge from "./statusBadge";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -27,14 +27,14 @@ function formatNumber(num: number) {
 
 export const getInitialColumns: (
   isCached?: boolean
-) => ColumnDef<NormalizedRequest>[] = (isCached = false) => [
+) => ColumnDef<MappedLLMRequest>[] = (isCached = false) => [
   {
     id: "createdAt",
     accessorKey: "createdAt",
     header: "Created At",
     cell: (info) => (
       <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(info.getValue() as string)}
+        {getUSDateFromString(info.row.original.heliconeMetadata.createdAt)}
       </span>
     ),
     meta: {
@@ -47,7 +47,7 @@ export const getInitialColumns: (
     accessorKey: "status",
     header: "Status",
     cell: (info) => {
-      const status = info.getValue() as NormalizedRequest["status"];
+      const status = info.row.original.heliconeMetadata.status;
 
       if (!status) {
         return <span>{JSON.stringify(status)}</span>;
@@ -67,7 +67,7 @@ export const getInitialColumns: (
     id: "requestText",
     accessorKey: "requestText",
     header: "Request",
-    cell: (info) => info.getValue(),
+    cell: (info) => info.row.original.preview.request,
     meta: {
       sortKey: "request_prompt",
     },
@@ -76,7 +76,7 @@ export const getInitialColumns: (
     id: "responseText",
     accessorKey: "responseText",
     header: "Response",
-    cell: (info) => info.getValue(),
+    cell: (info) => info.row.original.preview.response,
     meta: {
       sortKey: "response_text",
     },
@@ -85,7 +85,7 @@ export const getInitialColumns: (
     id: "model",
     accessorKey: "model",
     header: "Model",
-    cell: (info) => <ModelPill model={info.getValue() as string} />,
+    cell: (info) => <ModelPill model={info.row.original.model} />,
     meta: {
       sortKey: "body_model",
     },
@@ -96,7 +96,7 @@ export const getInitialColumns: (
     accessorKey: "totalTokens",
     header: "Total Tokens",
     cell: (info) => {
-      const tokens = Number(info.getValue());
+      const tokens = Number(info.row.original.heliconeMetadata.totalTokens);
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
     meta: {
@@ -108,7 +108,7 @@ export const getInitialColumns: (
     accessorKey: "promptTokens",
     header: "Prompt Tokens",
     cell: (info) => {
-      const tokens = Number(info.getValue());
+      const tokens = Number(info.row.original.heliconeMetadata.promptTokens);
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
     meta: {
@@ -120,7 +120,9 @@ export const getInitialColumns: (
     accessorKey: "completionTokens",
     header: "Completion Tokens",
     cell: (info) => {
-      const tokens = Number(info.getValue());
+      const tokens = Number(
+        info.row.original.heliconeMetadata.completionTokens
+      );
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
     meta: {
@@ -133,7 +135,12 @@ export const getInitialColumns: (
     accessorKey: "latency",
     header: "Latency",
     cell: (info) => (
-      <span>{isCached ? 0 : Number(info.getValue()) / 1000}s</span>
+      <span>
+        {isCached
+          ? 0
+          : Number(info.row.original.heliconeMetadata.latency) / 1000}
+        s
+      </span>
     ),
     meta: {
       sortKey: "latency",
@@ -143,7 +150,7 @@ export const getInitialColumns: (
     id: "user",
     accessorKey: "user",
     header: "User",
-    cell: (info) => info.getValue(),
+    cell: (info) => info.row.original.heliconeMetadata.user,
     meta: {
       sortKey: "user_id",
     },
@@ -153,8 +160,8 @@ export const getInitialColumns: (
     accessorKey: "cost",
     header: "Cost",
     cell: (info) => {
-      const statusCode = info.row.original.status.code;
-      const num = Number(info.getValue());
+      const statusCode = info.row.original.heliconeMetadata.status.code;
+      const num = Number(info.row.original.heliconeMetadata.cost);
 
       if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
@@ -170,7 +177,7 @@ export const getInitialColumns: (
     accessorKey: "scores",
     header: "Feedback",
     cell: (info) => {
-      const scores = info.getValue() as NormalizedRequest["scores"];
+      const scores = info.row.original.heliconeMetadata.scores;
       const rating =
         scores && scores["helicone-score-feedback"]
           ? Number(scores["helicone-score-feedback"]) === 1
@@ -197,7 +204,9 @@ export const getInitialColumns: (
     accessorKey: "promptId",
     header: "Prompt ID",
     cell: (info) => {
-      const promptId = info.getValue() as string;
+      const promptId = info.row.original.heliconeMetadata.customProperties?.[
+        "Helicone-Prompt-Id"
+      ] as string;
       return <span>{promptId}</span>;
     },
   },
@@ -206,7 +215,7 @@ export const getInitialColumns: (
     accessorKey: "countryCode",
     header: "Country",
     cell: (info) => {
-      const countryCode = info.getValue();
+      const countryCode = info.row.original.heliconeMetadata.countryCode;
       const country = COUTNRY_CODE_DIRECTORY.find(
         (c) => c.isoCode === countryCode
       );

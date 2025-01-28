@@ -1181,7 +1181,8 @@
 					"FIRECRAWL",
 					"AWS",
 					"DEEPSEEK",
-					"X"
+					"X",
+					"AVIAN"
 				]
 			},
 			"Provider": {
@@ -1567,6 +1568,9 @@
 						"type": "array"
 					},
 					"target_url": {
+						"type": "string"
+					},
+					"model": {
 						"type": "string"
 					}
 				},

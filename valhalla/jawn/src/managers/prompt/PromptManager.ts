@@ -20,7 +20,7 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
-import { ExperimentV2Manager } from "../experiment/ExperimentV2Manager";
+
 
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
@@ -531,11 +531,12 @@ export class PromptManager extends BaseManager {
     }
 
     const lastVersion = result.data[result.data.length - 1];
-    const filledTemplate = this.fillTemplate(
-      lastVersion.helicone_template,
-      inputs
-    );
-
+    const filledTemplate = autoFillInputs({
+      inputs: inputs,
+      autoInputs: lastVersion.auto_prompt_inputs,
+      template: lastVersion.helicone_template,
+    });
+    
     return ok({
       id: lastVersion.id,
       minor_version: lastVersion.minor_version,
@@ -544,48 +545,6 @@ export class PromptManager extends BaseManager {
       model: lastVersion.model,
       filled_helicone_template: filledTemplate,
     });
-  }
-
-  private fillTemplate(
-    template: string | object,
-    inputs: Record<string, string>
-  ): string {
-    let jsonTemplate: object;
-    if (typeof template === "string") {
-      try {
-        jsonTemplate = JSON.parse(template);
-      } catch (error) {
-        console.error("Error parsing template:", error);
-        return "";
-      }
-    } else {
-      jsonTemplate = template;
-    }
-
-    const fillObject = (obj: any): any => {
-      if (typeof obj === "string") {
-        return obj.replace(
-          /<helicone-prompt-input key="(\w+)" \/>/g,
-          (match, key) => {
-            const value = inputs[key] || "";
-            return `<helicone-prompt-input key="${key}">${value}</helicone-prompt-input>`;
-          }
-        );
-      }
-      if (Array.isArray(obj)) {
-        return obj.map(fillObject);
-      }
-      if (typeof obj === "object" && obj !== null) {
-        const newObj: any = {};
-        for (const [key, value] of Object.entries(obj)) {
-          newObj[key] = fillObject(value);
-        }
-        return newObj;
-      }
-      return obj;
-    };
-
-    return fillObject(jsonTemplate);
   }
 
   async getPrompts(
