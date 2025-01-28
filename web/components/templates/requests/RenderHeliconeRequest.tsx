@@ -26,7 +26,8 @@ export const RenderMappedRequest = (
     mapperContent._type === "openai-chat" ||
     mapperContent._type === "gemini-chat" ||
     mapperContent._type === "anthropic-chat" ||
-    mapperContent._type === "openai-image"
+    mapperContent._type === "openai-image" ||
+    mapperContent._type === "black-forest-labs-image"
   ) {
     if (
       mapperContent.heliconeMetadata.status.code >= 200 &&
