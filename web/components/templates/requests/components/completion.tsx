@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ChatTopBar, PROMPT_MODES } from "./chatComponent/chatTopBar";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -66,9 +64,7 @@ export const Completion = (props: CompletionProps) => {
               setNotification("Copied to clipboard", "success");
             }}
           >
-            <pre >
-              {JSON.stringify(mappedRequest, null, 2)}
-            </pre>
+            <pre>{JSON.stringify(mappedRequest, null, 2)}</pre>
           </div>
         ) : mode === "JSON" ? (
           <div className="flex flex-col space-y-4 bg-slate-100 dark:bg-black relative rounded-b-md">
