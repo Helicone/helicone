@@ -39,7 +39,7 @@ jobs:
           npm run test
 
       - name: Ensure copy was ran
-        working-directory: costs
+        working-directory: packages
         run: |
           # Make sure the content of /src is copied to ../worker/src/packages/cost and ../web/packages/cost before pushing
           # we can do this by calculating size of the content of /src and then copying it to the respective folders

@@ -1,10 +1,20 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { Button } from "@/components/ui/button";
+import { useGetRequestsWithBodies } from "@/services/hooks/requests";
+import {
+  UIFilterRow,
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { HeliconeRequest } from "../../../lib/api/request/request";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
@@ -14,15 +24,12 @@ import {
   isFilterRowNode,
   isUIFilterRow,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import { UIFilterRowNode } from "@/services/lib/filters/types";
 import {
   OrganizationFilter,
   OrganizationLayout,
   transformFilter,
   transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
-import { placeAssetIdValues } from "../../../services/lib/requestTraverseHelper";
 import {
   SortDirection,
   SortLeafRequest,
@@ -33,29 +40,19 @@ import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { UIFilterRow } from "@/services/lib/filters/types";
+import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "@/types/timeFilter";
-import { NormalizedRequest } from "./builder/abstractRequestBuilder";
-import {
-  getModelFromPath,
-  mapGeminiProJawn,
-} from "./builder/mappers/geminiMapper";
-import getNormalizedRequest from "./builder/requestBuilder";
+import NewDataset from "../datasets/NewDataset";
 import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import RequestCard from "./requestCard";
-import TableFooter from "./tableFooter";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import { useRouter } from "next/router";
-import ThemedModal from "../../shared/themed/themedModal";
-import NewDataset from "../datasets/NewDataset";
-import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import { Button } from "@/components/ui/button";
 import RequestDiv from "./requestDiv";
 import StreamWarning from "./StreamWarning";
+import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -143,6 +140,7 @@ function getCreatedAtColumn(isCached: boolean): string {
 }
 
 const RequestsPageV2 = (props: RequestsPageV2Props) => {
+  // TODO CLEAN UP AND SIMPLIFY ALL THIS STATE
   const {
     currentPage,
     pageSize,
@@ -171,7 +169,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const [selectedData, setSelectedData] = useState<
-    NormalizedRequest | undefined
+    MappedLLMRequest | undefined
   >(undefined);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -280,7 +278,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isBodyLoading,
     isCountLoading,
     isRefetching,
-    normalizedRequests,
+    requests,
     properties,
     refetch,
     filterMap,
@@ -299,87 +297,36 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isLive
   );
 
-  const requestWithoutStream = normalizedRequests.find((r) => {
+  const requestWithoutStream = requests.find((r) => {
     return (
-      (r.requestBody as any)?.stream &&
-      !(r.requestBody as any)?.stream_options?.include_usage &&
-      r.provider === "OPENAI"
+      r.schema.request.stream &&
+      !r.raw.request?.stream_options?.include_usage &&
+      r.heliconeMetadata.provider === "OPENAI"
     );
   });
 
+  const initialRequest = useGetRequestsWithBodies(
+    1,
+    1,
+    {
+      request_response_rmt: {
+        request_id: {
+          equals: initialRequestId,
+        },
+      },
+    },
+    {}
+  );
+
   useEffect(() => {
-    if (initialRequestId && selectedData === undefined) {
-      const fetchRequest = async () => {
-        const response = await jawn.POST("/v1/request/query-clickhouse", {
-          body: {
-            filter: {
-              left: {
-                request_response_rmt: {
-                  request_id: {
-                    equals: initialRequestId,
-                  },
-                },
-              },
-              operator: "and",
-              right: "all",
-            },
-            offset: 0,
-            limit: 1,
-            sort: {},
-          },
-        });
-
-        const result = response.data;
-
-        // update below logic to work for single request
-        if (result?.data?.[0] && !result.error) {
-          const request = result.data[0];
-
-          if (request?.signed_body_url) {
-            try {
-              const contentResponse = await fetch(request.signed_body_url);
-              if (contentResponse.ok) {
-                const text = await contentResponse.text();
-
-                let content = JSON.parse(text);
-
-                if (request.asset_urls) {
-                  content = placeAssetIdValues(request.asset_urls, content);
-                }
-
-                request.request_body = content.request;
-                request.response_body = content.response;
-
-                const model =
-                  request.request_model ||
-                  getModelFromPath(request.target_url) ||
-                  "";
-
-                if (
-                  request.provider === "GOOGLE" &&
-                  model.toLowerCase().includes("gemini")
-                ) {
-                  request.llmSchema = mapGeminiProJawn(
-                    result.data[0] as HeliconeRequest,
-                    model
-                  );
-                }
-              }
-            } catch (error) {
-              console.log(`Error fetching content: ${error}`);
-            }
-          }
-
-          const normalizedRequest = getNormalizedRequest(
-            result.data[0] as HeliconeRequest
-          );
-          setSelectedData(normalizedRequest);
-          setOpen(true);
-        }
-      };
-      fetchRequest();
+    if (initialRequest.requests.length > 0 && !selectedData) {
+      console.log("initialRequest", initialRequest);
+      setSelectedData(
+        heliconeRequestToMappedContent(initialRequest.requests[0])
+      );
+      setOpen(true);
     }
-  }, [initialRequestId]);
+  }, [initialRequest, selectedData]);
 
   //convert this using useCallback
 
@@ -593,8 +540,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             ? `property-${property}`
             : `${property}`,
           accessorFn: (row) => {
-            const value = row.customProperties
-              ? row.customProperties[property]
+            const value = row.heliconeMetadata.customProperties
+              ? row.heliconeMetadata.customProperties[property]
               : "";
             return value;
           },
@@ -619,18 +566,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     selectAll,
     isShiftPressed,
   } = useSelectMode({
-    items: normalizedRequests,
-    getItemId: (request: NormalizedRequest) => request.id,
+    items: requests,
+    getItemId: (request: MappedLLMRequest) =>
+      request.heliconeMetadata.requestId,
   });
 
-  const onRowSelectHandler = (row: NormalizedRequest, index: number) => {
+  const onRowSelectHandler = (row: MappedLLMRequest, index: number) => {
     if (selectMode) {
       toggleSelection(row);
     } else {
       setSelectedDataIndex(index);
       setSelectedData(row);
       setOpen(true);
-      searchParams.set("requestId", row.id);
+      searchParams.set("requestId", row.heliconeMetadata.requestId);
     }
   };
 
@@ -760,7 +708,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   selectedData && open ? [selectedData.id] : selectedIds
                 }
                 showCheckboxes={selectMode}
-                defaultData={normalizedRequests}
+                defaultData={requests}
                 defaultColumns={columnsWithProperties}
                 skeletonLoading={isDataLoading}
                 dataLoading={isBodyLoading}
@@ -788,7 +736,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                       }
                     : undefined
                 }
-                exportData={normalizedRequests.map((request) => {
+                exportData={requests.map((request) => {
                   const flattenedRequest: any = {};
                   Object.entries(request).forEach(([key, value]) => {
                     // key is properties and value is not null
@@ -857,7 +805,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                       }
                       hasNext={
                         selectedDataIndex !== undefined &&
-                        selectedDataIndex < normalizedRequests.length - 1
+                        selectedDataIndex < requests.length - 1
                       }
                       onPrevHandler={() => {
                         if (
@@ -865,27 +813,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                           selectedDataIndex > 0
                         ) {
                           setSelectedDataIndex(selectedDataIndex - 1);
-                          setSelectedData(
-                            normalizedRequests[selectedDataIndex - 1]
-                          );
+                          setSelectedData(requests[selectedDataIndex - 1]);
                           searchParams.set(
                             "requestId",
-                            normalizedRequests[selectedDataIndex - 1].id
+                            requests[selectedDataIndex - 1].id
                           );
                         }
                       }}
                       onNextHandler={() => {
                         if (
                           selectedDataIndex !== undefined &&
-                          selectedDataIndex < normalizedRequests.length - 1
+                          selectedDataIndex < requests.length - 1
                         ) {
                           setSelectedDataIndex(selectedDataIndex + 1);
-                          setSelectedData(
-                            normalizedRequests[selectedDataIndex + 1]
-                          );
+                          setSelectedData(requests[selectedDataIndex + 1]);
                           searchParams.set(
                             "requestId",
-                            normalizedRequests[selectedDataIndex + 1].id
+                            requests[selectedDataIndex + 1].id
                           );
                         }
                       }}

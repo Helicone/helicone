@@ -22,7 +22,8 @@ export const NewExperimentDialog = () => {
       {
         id: "1",
         role: "system",
-        content: [{ text: "You are a helpful assistant.", type: "text" }],
+        content: "You are a helpful assistant.",
+        _type: "message",
       },
     ],
   });

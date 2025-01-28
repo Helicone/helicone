@@ -25,13 +25,14 @@ const buttonVariants = cva(
         link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
       },
       size: {
-        default: "px-3 py-1.5 text-base",
+        default: "px-4 py-2 h-10",
         xs: "h-8 px-3",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-xs",
+        square_icon: "h-7 w-7 p-0",
       },
       asPill: {
         true: "rounded-full",

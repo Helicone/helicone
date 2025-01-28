@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "deepseek-v3",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "prompt-evaluation-frameworks",
     },
   },
@@ -242,6 +247,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "openai-structured-outputs",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "text-classification-with-llms",
     },
   },
   {
