@@ -9,12 +9,10 @@ In this guide, we'll walk you through the essential prompt engineering technique
 - What is Prompt Engineering?
 - Why is Prompt Engineering Important?
 - Comparing LLM Strengths: Gemini vs. GPT-4 vs. Claude 3.5 Sonnet
-- Key Prompting Techniques & Best Practices
-- Why Prompt Management Matters
-- Tools for Prompt Management
+- Prompting Techniques & Best Practices
+- Top Prompt Management Tools
 - How to Write Successful Prompts
-- Improve Your Prompt Engineering Skills in 2025
-- Conclusion
+- How to Improve Your Prompt Engineering Skills
 
 ---
 
@@ -63,7 +61,7 @@ Each model has its own strengths and fall short in certain areas. The key is to 
 
 ### 1. Be specific and provide context
 
-The rule of thumb is to provide just enough instructions and context to help guide the AI’s response. You can mention the audience and tone, or aim to ask for one thing at a time to avoid overloading your prompt.
+The rule of thumb is to provide just enough instruction and context to guide the LLM. You can mention the audience, tone, or ask for one thing at a time to avoid overloading your prompt.
 
 Here's an example:
 
@@ -75,7 +73,13 @@ Better: "Write a 300-word article about the health benefits of owning a dog, inc
 
 ### 2. Use structured formats
 
-Organize your prompts with clear sections or steps.
+A structured format organizes the prompt into clear, logical sections or steps. Structured prompts often include:
+
+- Headings or labels to separate different parts of the prompt.
+- Bullet points or numbered lists to break down complex tasks.
+- Placeholders or templates to guide the AI's response.
+
+Here's an example:
 
 ```
 Task: Write a product description
@@ -92,15 +96,19 @@ Length: 150 words
 
 ### 3. Leverage role-playing
 
-Assign a specific role or persona to the AI for more tailored responses.
+Ask the LLM to assume a specific role or persona to to tailor its responses to a particular context or audience. This technique is especially useful for generating content in a specific tone or style.
 
-```
-Act as an experienced data scientist explaining the concept of neural networks to a junior developer. Include an analogy to help illustrate the concept.
-```
+For example:
+
+> Act as an experienced data scientist explaining the concept of neural networks to a junior developer. Include an analogy to help illustrate the concept.
 
 ### 4. Implement few-shot learning
 
-Provide examples of desired inputs and outputs to guide the AI's response.
+Provide examples to help the model understand the desired input and output.
+
+For instance, if you want the model to generate product descriptions, give it a couple of examples of well-written descriptions.
+
+Here's another example:
 
 ```
 Convert the following sentences to past tense:
@@ -119,19 +127,27 @@ Output: They were studying for their exam.
 
 Specify the desired format or structure of the AI's response.
 
-```
-Generate a list of 5 book recommendations for someone who enjoys science fiction. Format your response as a numbered list with the book title, author, and a one-sentence description for each recommendation.
-```
+Constraint outputs can be useful for generating structured data, such as lists, tables, or specific formats.
+
+For example:
+
+> Generate a list of 5 book recommendations for someone who enjoys science fiction. Format your response as a numbered list with the book title, author, and a one-sentence description for each recommendation.
 
 ### 6. Use Chain-of-Thought prompting
 
-Prompt for a series of intermediate reasoning steps can significantly improve the ability of large language models to perform complex reasoning.
+This technique involves breaking down complex tasks into smaller, logical steps. You can ask the AI to "think step-by-step," which can achieve more accurate and detailed responses.
 
-We explain this technique in detail in our <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought Prompting</a> guide.
+Here are 2 examples:
+
+> Explain the process of photosynthesis step-by-step, including the role of chlorophyll and sunlight.
 
 ![Use Chain-of-Thought prompting to improve model output](/static/blog/prompt-engineering-tools/chain-of-thought.webp)
 
-_Image Source: <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting in LLM</a>_
+_Image Source: <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting Paper</a>_
+
+CoT is particularly effective for problem-solving, reasoning, and generating structured outputs like summaries or explanations.
+
+We explain this technique in detail in our <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought Prompting</a> guide.
 
 ## How to write successful prompts
 
@@ -143,22 +159,15 @@ _Image Source: <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="n
 
 ## Top Prompt Management Tools
 
-To streamline your prompt engineering workflow and improve your LLM outputs, here are some of the best prompting tools we recommend for your AI development:
+Prompt management tools offer features like A/B testing, real-time feedback, and automated optimization, making it easier to refine prompts for better results.
+
+Some of the best prompting tools we recommend:
 
 1. **<a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>**: An open-source platform offering automatic prompt versioning, prompt experiments, and comprehensive analytics for performance optimization.
 2. **<a href="https://platform.openai.com/playground/chat" target="_blank" rel="noopener noreferrer">OpenAI Playground</a>**: An interactive environment for testing and refining prompts with various GPT models.
 3. **<a href="https://pezzo.ai/" target="_blank" rel="noopener noreferrer">Pezzo</a>**: An developer-first AI platform to manage prompts in one place.
 4. **<a href="https://agenta.ai/" target="_blank" rel="noopener noreferrer">Agenta</a>**: An collaborative LLM development platform to collaborate on prompts, compare versions, and easily test them.
 5. **<a href="https://www.langchain.com/" target="_blank" rel="noopener noreferrer">LangChain</a>**: A framework for developing applications powered by LLMs, including prompt management features.
-
-## Challenges that Prompt Management Tools Solve
-
-Effective prompt management is crucial for optimizing AI interactions. Here's more in depth on <a href="https://www.helicone.ai/blog/prompt-management" target="_blank" rel="noopener">what prompt management really is</a>. Without a dedicated prompt management tool, you'll face the following issues:
-
-- ⚠️ **Fragmented Prompt Management.** Prompts are scattered across documents or codebases, making them hard to track and increasing the risk of errors.
-- ⚠️ **Limited Analytics.** Without analytics, understanding how prompts perform is a guessing game. It's difficult to optimize prompts and get high-quality responses.
-- ⚠️ **No Version Control.** You have to track prompt changes manually and may overwrite or lose valuable iterations.
-- ⚠️ **Reduced Collaboration.** Team collaboration on prompt development is often done ad-hoc using email or chat. It becomes harder to gather feedback, leading to slower improvement cycles.
 
 ## Improve your prompt engineering skills in 2025
 
