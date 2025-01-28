@@ -22,8 +22,8 @@ export interface PromptState {
   messages: StateMessage[];
   parameters: Parameters;
   variables?: StateVariable[];
-  evals?: EvalReference[];
-  structure?: string; // TODO: Real structure when feature is added
+  evals?: any[]; // TODO: Add evals to the state
+  structure?: any; // TODO: Real structure when feature is added
 
   isDirty: boolean;
   response?: string;
@@ -55,38 +55,3 @@ export interface PromptVersionReference {
   experiment_id?: string | null;
   updated_at?: string;
 }
-
-export interface EvalReference {
-  evalId: string;
-  version: number;
-}
-
-export interface BaseEvalState {
-  evalId: string;
-  masterVersion: number;
-  deleted: boolean;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-  version: number;
-}
-
-export interface PythonEvalState extends BaseEvalState {
-  type: "python";
-  python: string;
-}
-
-export interface TypeScriptEvalState extends BaseEvalState {
-  type: "typescript";
-  typescript: string;
-}
-
-export interface ClassifierEvalState extends BaseEvalState {
-  type: "classifier";
-  classifier: string;
-}
-
-export type EvalState =
-  | PythonEvalState
-  | TypeScriptEvalState
-  | ClassifierEvalState;
