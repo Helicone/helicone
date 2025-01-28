@@ -246,6 +246,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "text-classification-with-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "chain-of-thought-prompting",
     },
   },
