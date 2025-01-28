@@ -9,13 +9,17 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import { Message } from "@/packages/llm-mapper/types";
 
-export const PROMPT_MODES = ["Pretty", "JSON", "Markdown"] as const;
+export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
 function cycleMode(
-  mode: (typeof PROMPT_MODES)[number]
+  mode: (typeof PROMPT_MODES)[number],
+  isShiftKeyPressed: boolean
 ): (typeof PROMPT_MODES)[number] {
+  if (isShiftKeyPressed) {
+    return "Debug";
+  }
   const index = PROMPT_MODES.indexOf(mode);
-  return PROMPT_MODES[(index + 1) % PROMPT_MODES.length];
+  return PROMPT_MODES[(index + 1) % (PROMPT_MODES.length - 1)];
 }
 
 interface ChatTopBarProps {
@@ -88,8 +92,8 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
           </button>
         )}
         <button
-          onClick={() => {
-            setMode(cycleMode(mode));
+          onClick={(e) => {
+            setMode(cycleMode(mode, e.shiftKey));
           }}
           className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
         >

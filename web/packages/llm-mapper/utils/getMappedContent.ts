@@ -4,21 +4,25 @@ import { mapGeminiPro } from "../mappers/gemini/chat";
 import { mapOpenAIRequest } from "../mappers/openai/chat";
 import { mapDalleRequest } from "../mappers/openai/dalle";
 import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
+import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
 
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { MappedLLMRequest, MapperType } from "../types";
 import { modelCost } from "../../cost/costCalc";
 import { MapperFn } from "../mappers/types";
+import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
+import { mapOpenAIAssistant } from "../mappers/openai/assistant";
+import { mapOpenAIModeration } from "../mappers/openai/moderation";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,
-  "black-forest-labs-image": mapOpenAIRequest,
-  "openai-assistant": mapOpenAIRequest,
+  "black-forest-labs-image": mapBlackForestLabsImage,
+  "openai-assistant": mapOpenAIAssistant,
   "openai-image": mapDalleRequest,
-  "openai-moderation": mapOpenAIRequest,
-  "openai-embedding": mapOpenAIRequest,
+  "openai-moderation": mapOpenAIModeration,
+  "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;

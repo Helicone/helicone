@@ -31,7 +31,7 @@ const getResponseText = (responseBody: any) => {
   return JSON.stringify(responseBody, null, 2);
 };
 
-export const mapOpenAIRequest: MapperFn<any, any> = ({
+export const mapOpenAIAssistant: MapperFn<any, any> = ({
   request,
   response,
   statusCode = 200,

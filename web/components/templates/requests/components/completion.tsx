@@ -3,17 +3,20 @@ import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { ChatTopBar, PROMPT_MODES } from "./chatComponent/chatTopBar";
+import useNotification from "@/components/shared/notification/useNotification";
 
 interface CompletionProps {
   mappedRequest: MappedLLMRequest;
-  defaultMode?: "pretty" | "json";
+  defaultMode?: (typeof PROMPT_MODES)[number];
 }
 
 export const Completion = (props: CompletionProps) => {
-  const { mappedRequest, defaultMode = "pretty" } = props;
+  const { mappedRequest, defaultMode = "Pretty" } = props;
 
-  const [mode, setMode] = useState<"pretty" | "json">(defaultMode);
+  const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>(defaultMode);
 
+  const { setNotification } = useNotification();
   const renderImageRow = () => {
     const image_url = mappedRequest.preview.response;
     if (
@@ -41,32 +44,33 @@ export const Completion = (props: CompletionProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-slate-200 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 h-full">
-        <div className="h-10 px-2 flex flex-row items-center justify-end w-full bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-100">
-          {defaultMode === "json" ? (
-            <Tooltip title="Model is pending mapping">
-              <button className="hover:cursor-not-allowed flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg">
-                <ChevronUpDownIcon className="h-4 w-4" />
-                <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                  {mode === "pretty" ? "JSON" : "Pretty"}
-                </p>
-              </button>
-            </Tooltip>
-          ) : (
-            <button
-              onClick={() => {
-                setMode(mode === "pretty" ? "json" : "pretty");
-              }}
-              className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
-            >
-              <ChevronUpDownIcon className="h-4 w-4" />
-              <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-                {mode === "pretty" ? "JSON" : "Pretty"}
-              </p>
-            </button>
-          )}
-        </div>
+        <ChatTopBar
+          allExpanded={false}
+          isModal={true}
+          requestMessages={[]}
+          requestId={mappedRequest.id}
+          model={mappedRequest.model}
+          setOpen={() => {}}
+          mode={mode}
+          setMode={setMode}
+          toggleAllExpanded={() => {}}
+        />
 
-        {mode === "json" ? (
+        {mode === "Debug" ? (
+          <div
+            className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"
+            onClick={() => {
+              navigator.clipboard.writeText(
+                JSON.stringify(mappedRequest, null, 2)
+              );
+              setNotification("Copied to clipboard", "success");
+            }}
+          >
+            <pre >
+              {JSON.stringify(mappedRequest, null, 2)}
+            </pre>
+          </div>
+        ) : mode === "JSON" ? (
           <div className="flex flex-col space-y-4 bg-slate-100 dark:bg-black relative rounded-b-md">
             <div className="flex flex-col space-y-2 p-4">
               <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
