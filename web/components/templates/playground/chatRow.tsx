@@ -18,11 +18,30 @@ import { enforceString } from "../../../lib/helpers/typeEnforcers";
 import AddFileButton from "./new/addFileButton";
 import ThemedModal from "../../shared/themed/themedModal";
 import MarkdownEditor from "../../shared/markdownEditor";
-import { Message } from "../requests/builder/components/chatComponent/types";
+import { Message } from "@/packages/llm-mapper/types";
+
+// Define types for content items
+type ImageUrlItem = {
+  url: string;
+};
+
+type ContentItem = {
+  type: "text" | "image" | "image_url";
+  text?: string;
+  image?: File;
+  image_url?: ImageUrlItem;
+  _type?: "message";
+};
+
+// Extend Message type to support array content
+type ExtendedMessage = Omit<Message, "content"> & {
+  content?: string | ContentItem[];
+  id?: string;
+};
 
 interface ChatRowProps {
   index: number;
-  message: Message;
+  message: ExtendedMessage;
   callback: (
     userText: string,
     role: string,
@@ -31,7 +50,7 @@ interface ChatRowProps {
   deleteRow: (rowId: string) => void;
 }
 
-export const hasImage = (content: string | any[] | null) => {
+export const hasImage = (content: string | ContentItem[] | null): boolean => {
   if (Array.isArray(content)) {
     return content.some(
       (element) => element.type === "image" || element.type === "image_url"
@@ -179,21 +198,22 @@ const ChatRow = (props: ChatRowProps) => {
     }
   }, []);
 
-  const [currentMessage, setCurrentMessage] = useState(message);
+  const [currentMessage, setCurrentMessage] =
+    useState<ExtendedMessage>(message);
   const [minimize, setMinimize] = useState(false);
 
   const [role, setRole] = useState<
     "system" | "user" | "assistant" | "function"
-  >(currentMessage.role);
+  >(currentMessage.role as "system" | "user" | "assistant" | "function");
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const searchAndGetImage = (message: Message) => {
+  const searchAndGetImage = (message: ExtendedMessage) => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
       const image = message.content.find(
         (element) => element.type === "image" || element.type === "image_url"
       );
-      return image.image_url?.url || image.image;
+      return image?.image_url?.url || image?.image || null;
     }
     return null;
   };
@@ -204,14 +224,14 @@ const ChatRow = (props: ChatRowProps) => {
 
   const { setNotification } = useNotification();
 
-  const getContentAsString = (rawMessage: Message) => {
+  const getContentAsString = (rawMessage: ExtendedMessage): string => {
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
         (element) => element.type === "text"
       );
-      return textMessage?.text as string;
+      return textMessage?.text || "";
     } else {
-      return rawMessage.content as string;
+      return rawMessage.content || "";
     }
   };
 
@@ -221,32 +241,38 @@ const ChatRow = (props: ChatRowProps) => {
     setFile(file);
     const newMessage = {
       ...currentMessage,
+      _type: "message" as const,
     };
     if (file instanceof File) {
       newMessage.content = [
         {
           type: "text",
           text,
+          _type: "message",
         },
         {
           type: "image",
           image: file,
+          _type: "message",
         },
       ];
-    }
-    if (typeof file === "string") {
+    } else if (typeof file === "string") {
       newMessage.content = [
         {
           type: "text",
           text,
+          _type: "message",
         },
         {
           type: "image_url",
           image_url: {
             url: file,
           },
+          _type: "message",
         },
       ];
+    } else {
+      newMessage.content = text;
     }
 
     setCurrentMessage(newMessage);
@@ -259,16 +285,72 @@ const ChatRow = (props: ChatRowProps) => {
     return keyName ? keyName[1] : "";
   };
 
-  const getContent = (message: Message, minimize: boolean) => {
-    // check if the content is an array and it has an image type or image_url type
+  const getContent = (
+    message: ExtendedMessage,
+    minimize: boolean
+  ): JSX.Element => {
     const content = message.content;
 
     if (Array.isArray(content)) {
       const textMessage = content.find((element) => element.type === "text");
-      // if minimize is true, substring the text to 100 characters
       const text = minimize
-        ? `${textMessage?.text.substring(0, 100)}...`
-        : textMessage?.text;
+        ? `${textMessage?.text?.substring(0, 100)}...`
+        : textMessage?.text || "";
+
+      const imageElements = content
+        .filter(
+          (item): item is ContentItem =>
+            item.type === "image_url" || item.type === "image"
+        )
+        .map((item, index) => (
+          <div key={index} className="relative">
+            {item.image_url?.url ? (
+              item.image_url.url.includes("helicone-prompt-input") ? (
+                <div className="p-5 border">
+                  {extractKey(item.image_url.url)}
+                </div>
+              ) : (
+                <img
+                  src={item.image_url.url}
+                  alt={""}
+                  width={256}
+                  height={256}
+                />
+              )
+            ) : item.image ? (
+              <img
+                src={URL.createObjectURL(item.image)}
+                alt={""}
+                width={256}
+                height={256}
+              />
+            ) : (
+              <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+                Unsupported Image Type
+              </div>
+            )}
+            <button
+              onClick={() => {
+                setFile(null);
+                const newMessage = {
+                  ...currentMessage,
+                  _type: "message" as const,
+                };
+                if (newMessage.content && Array.isArray(newMessage.content)) {
+                  const textContent = newMessage.content.find(
+                    (element) => element.type === "text"
+                  );
+                  newMessage.content = textContent?.text || "";
+                }
+
+                setCurrentMessage(newMessage);
+                callback(contentAsString || "", role, null);
+              }}
+            >
+              <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
+            </button>
+          </div>
+        ));
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
@@ -279,91 +361,33 @@ const ChatRow = (props: ChatRowProps) => {
           <AddFileButton
             file={file}
             onFileChange={(file) => {
-              onFileChangeHandler(file, textMessage?.text);
+              onFileChangeHandler(file, textMessage?.text || "");
             }}
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
             <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
-              {content.map((item, index) =>
-                item.type === "image_url" || item.type === "image" ? (
-                  <div key={index} className="relative">
-                    {item.image_url?.url ? (
-                      item.image_url.url.includes("helicone-prompt-input") ? (
-                        <div className="p-5 border">
-                          {extractKey(item.image_url.url)}
-                        </div>
-                      ) : (
-                        <img
-                          src={item.image_url.url}
-                          alt={""}
-                          width={256}
-                          height={256}
-                        />
-                      )
-                    ) : item.image ? (
-                      <img
-                        src={URL.createObjectURL(item.image)}
-                        alt={""}
-                        width={256}
-                        height={256}
-                      />
-                    ) : (
-                      <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
-                        Unsupported Image Type
-                      </div>
-                    )}
-                    <button
-                      onClick={() => {
-                        setFile(null);
-                        const newMessage = {
-                          ...currentMessage,
-                        };
-                        if (
-                          newMessage.content &&
-                          Array.isArray(newMessage.content)
-                        ) {
-                          newMessage.content = newMessage.content.filter(
-                            (element) =>
-                              element.type !== "image" &&
-                              element.type !== "image_url"
-                          );
-                        }
-
-                        setCurrentMessage(newMessage);
-                        callback(contentAsString || "", role, null);
-                      }}
-                    >
-                      <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
-                    </button>
-                  </div>
-                ) : null
-              )}
+              {imageElements}
             </div>
           )}
         </div>
       );
     } else if (message.tool_calls) {
       const tools = message.tool_calls;
-      const functionTools = tools.filter((tool) => tool.type === "function");
       return (
         <div className="flex flex-col space-y-2">
           {message.content !== null && message.content !== "" && (
             <code className="text-xs whitespace-pre-wrap font-semibold">
-              {message.content}
+              {JSON.stringify(message.content, null, 2)}
             </code>
           )}
-          {functionTools.map((tool, index) => {
-            const toolFunc = tool.function;
-            return (
-              <pre
-                key={index}
-                className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
-              >
-                {`${toolFunc.name}(${toolFunc.arguments})`}
-              </pre>
-            );
-          })}
+          {tools.map((tool, index) => (
+            <pre
+              key={index}
+              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+            >
+              {`${tool.name}(${JSON.stringify(tool.arguments)})`}
+            </pre>
+          ))}
         </div>
       );
     } else {
@@ -374,14 +398,14 @@ const ChatRow = (props: ChatRowProps) => {
             text={
               minimize
                 ? `${contentString?.substring(0, 100)}...`
-                : contentString
+                : contentString || ""
             }
             selectedProperties={undefined}
           />
           <AddFileButton
             file={file}
             onFileChange={(file) => {
-              onFileChangeHandler(file, contentString);
+              onFileChangeHandler(file, contentString || "");
             }}
           />
         </div>
@@ -406,9 +430,9 @@ const ChatRow = (props: ChatRowProps) => {
                 setRole(newRole);
                 const newMessage = {
                   ...currentMessage,
+                  role: newRole,
+                  _type: "message" as const,
                 };
-
-                newMessage.role = newRole;
                 setCurrentMessage(newMessage);
                 callback(contentAsString || "", newRole, file);
               }}
@@ -457,7 +481,7 @@ const ChatRow = (props: ChatRowProps) => {
               <Tooltip title="Delete" placement="top">
                 <button
                   onClick={() => {
-                    deleteRow(currentMessage.id);
+                    deleteRow(currentMessage.id || "");
                   }}
                   className="text-red-500 font-semibold"
                 >
@@ -472,13 +496,24 @@ const ChatRow = (props: ChatRowProps) => {
                 <MarkdownEditor
                   text={contentAsString || ""}
                   setText={function (text: string): void {
-                    const newMessages = { ...currentMessage };
+                    const newMessages = {
+                      ...currentMessage,
+                      _type: "message" as const,
+                    };
                     const messageContent = newMessages.content;
                     if (Array.isArray(messageContent)) {
                       const textMessage = messageContent.find(
                         (element) => element.type === "text"
                       );
-                      textMessage.text = text;
+                      if (textMessage) {
+                        textMessage.text = text;
+                      } else {
+                        messageContent.push({
+                          type: "text",
+                          text,
+                          _type: "message",
+                        });
+                      }
                     } else {
                       newMessages.content = text;
                     }

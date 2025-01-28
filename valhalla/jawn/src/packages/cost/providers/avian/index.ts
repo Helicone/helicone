@@ -1,4 +1,4 @@
-import { ModelRow } from "../../interfaces/Cost";
+import { ModelRow } from "../../../../bifrost/packages/cost/interfaces/Cost";
 
 export const costs: ModelRow[] = [
   {
