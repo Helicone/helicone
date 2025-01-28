@@ -21,7 +21,7 @@ export interface PromptState {
 
   messages: StateMessage[];
   parameters: Parameters;
-  variables?: Variable[];
+  variables?: StateVariable[];
   evals?: EvalReference[];
   structure?: string; // TODO: Real structure when feature is added
 
@@ -35,11 +35,10 @@ export interface Parameters {
   temperature: number;
   // TODO: Add more parameters
 }
-export interface Variable {
+export interface StateVariable {
   name: string;
   value: string;
   isValid?: boolean;
-  isMessage?: boolean;
   idx?: number;
 }
 
