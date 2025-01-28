@@ -82,7 +82,7 @@ export const getMapperType = ({
     return "openai-embedding";
   }
 
-  if (/^claude/.test(model)) {
+  if (/^claude/.test(model) || provider === "ANTHROPIC") {
     return "anthropic-chat";
   }
 
