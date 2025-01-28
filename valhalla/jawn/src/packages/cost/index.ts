@@ -55,19 +55,22 @@ export function costOfPrompt({
   promptTokens,
   completionTokens,
   provider: provider,
+  images = 1,
 }: {
   model: string;
   promptTokens: number;
   completionTokens: number;
   provider: string;
+  images?: number;
 }) {
   const cost = costOf({ model, provider });
   if (!cost) {
     return null;
   }
-  return (
-    cost.prompt_token * promptTokens + cost.completion_token * completionTokens
-  );
+  const tokenCost =
+    cost.prompt_token * promptTokens + cost.completion_token * completionTokens;
+  const imageCost = (cost.per_image ?? 0) * images;
+  return tokenCost + imageCost;
 }
 
 function caseForCost(costs: ModelRow[], table: string, multiple: number) {
@@ -78,14 +81,26 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       const costPerMultiple = {
         prompt: Math.round(cost.cost.prompt_token * multiple),
         completion: Math.round(cost.cost.completion_token * multiple),
+        image: Math.round((cost.cost.per_image ?? 0) * multiple),
       };
 
+      const promptTokenCost =
+        costPerMultiple.prompt > 0
+          ? ` + ${costPerMultiple.prompt} * ${table}.prompt_tokens`
+          : "";
+      const completionTokenCost =
+        costPerMultiple.completion > 0
+          ? ` + ${costPerMultiple.completion} * ${table}.completion_tokens`
+          : "";
+      const imageCostPart =
+        costPerMultiple.image > 0 ? ` + ${costPerMultiple.image}` : "";
+
       if (cost.model.operator === "equals") {
-        return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
+        return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
       } else if (cost.model.operator === "startsWith") {
-        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
+        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
       } else if (cost.model.operator === "includes") {
-        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
+        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
       } else {
         throw new Error("Unknown operator");
       }
