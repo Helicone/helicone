@@ -143,13 +143,13 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: StateVariable[] = Object.entries(metadata.inputs || {}).map(
-        ([name, value]) => ({
-          name,
-          value: value as string,
-          isValid: isValidVariableName(name),
-        })
-      );
+      let variables: StateVariable[] = Object.entries(
+        metadata.inputs || {}
+      ).map(([name, value]) => ({
+        name,
+        value: value as string,
+        isValid: isValidVariableName(name),
+      }));
       // 4.B. Extract additional variables contained in message content
       stateMessages.forEach((msg) => {
         const vars = extractVariables(msg.content, "helicone");
