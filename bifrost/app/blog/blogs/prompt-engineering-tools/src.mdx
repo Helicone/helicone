@@ -1,8 +1,8 @@
 Writing effective prompts has become a crucial skill for developers and researchers working with large language models (LLMs) like GPT, Gemini, and Claude. Crafting the right prompts can be the difference between a useful response and hours of debugging.
 
-In this guide, we'll walk you through the essential prompt engineering techniques, tools and best practices to help you make your LLM interactions more accurate and efficient. Let's dive in!
-
 ![Prompt Engineering Tools](/static/blog/prompt-engineering-tools/prompt-engineering-cover.webp)
+
+In this guide, we'll walk you through the essential prompt engineering techniques, tools and best practices to help you make your LLM interactions more accurate and efficient. Let's dive in!
 
 ### Table of Contents
 
@@ -34,10 +34,10 @@ OpenAI's <a href="https://platform.openai.com/docs/guides/prompt-engineering" ta
 
 That's where prompt engineering comes in.
 
-- **Improves AI model performance**: Precise prompts help models generate more accurate and relevant responses.
-- **Reduces errors and hallucinations**: Clear instructions minimize the risk of the AI producing incorrect or nonsensical information.
-- **Improves consistency in outputs**: Structured prompts lead to more consistent and reliable results.
-- **Enables more complex and nuanced tasks**: Advanced prompting techniques allow for handling sophisticated tasks that require detailed reasoning.
+- **Improve AI model performance**: Precise prompts help models generate more accurate and relevant responses.
+- **Reduce errors and hallucinations**: Clear instructions minimize the risk of the AI producing incorrect or nonsensical information.
+- **Improve consistency in outputs**: Structured prompts lead to more consistent and reliable results.
+- **Take on more complex and nuanced tasks**: Advanced prompting techniques allow for handling sophisticated tasks that require detailed reasoning.
 
 ## Understanding LLMs Strengths
 
@@ -50,12 +50,14 @@ Understanding the capabilities of different large language models (LLMs) helps y
 | Gemini            | • Multimodal capabilities<br/>• Advanced reasoning<br/>• Handles diverse data types                                       | • Inconsistent performance across versions<br/>• Persona consistency issues<br/>• Training data biases |
 | Claude 3.5 Sonnet | • Strong logical reasoning<br/>• Detailed analysis<br/>• Focus on safety                                                  | • Conservative with sensitive topics<br/>• Limited multimodal support<br/>• No real-time information   |
 
-<BottomLine
-  title="Bottom Line"
-  description="Each model has its own strengths and fall short in certain areas. The key is to understand what your chosen model does best, then craft prompts that play to those strengths. This way, you'll get much better results from your interactions."
-/>
+### How to leverage these strengths?
 
-For a detailed comparison, check out <a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet</a> and <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs. OpenAI o1</a>.
+Each model has its own strengths and fall short in certain areas. The key is to understand what your chosen model does best, then craft prompts that play to those strengths. This way, you'll get much better results from your interactions.
+
+### Interested in detailed comparisons?
+
+- **<a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs. OpenAI o1</a>**
 
 ## Key Prompting Techniques & Best Practices
 
@@ -134,14 +136,14 @@ _Image Source: <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="n
 ## How to write successful prompts
 
 - **Iterate and refine**: Don't expect perfection on the first try. Continuously improve your prompts based on your LLM output. Use tools like <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments</a> to test and create prompts quickly.
-- **Be concise yet comprehensive**: Provide enough detail without being overwhelming. Use clear language to minimize misunderstandings.
+- **Be concise but comprehensive**: Provide enough detail without being overwhelming. Use clear language to minimize misunderstandings.
 - **Test across models**: Different models can interpret prompts differently. There are many benchmarks to measure the effectiveness of your prompts, by setting up <a href="https://docs.helicone.ai/features/advanced-usage/feedback" target="_blank" rel="noopener">user feedback</a> or <a href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">scores</a> in Helicone.
-- **Document your prompts**: Keep a record for future reference and to track what works best.
+- **Document your prompts**: Keep a record for future reference and to track what works best. We'll look at some prompt management tools to help you do this.
 - **Study successful prompts**: Analyze prompts that produce high-quality outputs to understand what makes them effective.
 
-## Tools for Prompt Management
+## Top Prompt Management Tools
 
-To streamline your prompt engineering workflow and improve your LLM outputs, here are some of the **<span style={{color: '#0ea5e9'}}>best prompting tools</span>** we recommend for your AI application development:
+To streamline your prompt engineering workflow and improve your LLM outputs, here are some of the best prompting tools we recommend for your AI development:
 
 1. **<a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>**: An open-source platform offering automatic prompt versioning, prompt experiments, and comprehensive analytics for performance optimization.
 2. **<a href="https://platform.openai.com/playground/chat" target="_blank" rel="noopener noreferrer">OpenAI Playground</a>**: An interactive environment for testing and refining prompts with various GPT models.
