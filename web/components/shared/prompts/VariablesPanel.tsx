@@ -81,7 +81,7 @@ export default function VariablesPanel({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-700">Variables</h2>
+        <h2 className="font-semibold text-secondary">Variables</h2>
 
         <div className="flex flex-row gap-2">
           <TooltipProvider delayDuration={0}>

@@ -8,7 +8,12 @@ import {
   useState,
 } from "react";
 import { PiArrowRightBold, PiCheckBold, PiXBold } from "react-icons/pi";
-import Tooltip from "../universal/Tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 
 interface ToolbarProps {
   isVisible: boolean;
@@ -175,11 +180,11 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 : undefined,
             zIndex: 2,
           }}
-          className={`z-50 absolute top-0 left-0 rounded-full glass shadow-md 
+          className={`!z-50 fixed top-0 left-0 rounded-full glass shadow-md 
             ${
               activeInput && !activeInput.showConfirmation
                 ? "border-2 border-heliblue"
-                : "border border-slate-100"
+                : "border border-slate-200 dark:border-slate-800"
             }
             ${
               activeInput
@@ -202,7 +207,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 <div className="relative w-full h-full">
                   <textarea
                     ref={textareaRef}
-                    className="w-64 h-full p-2.5 py-1 text-sm bg-white outline-none resize-none rounded-l-lg hover:shadow-md placeholder-slate-400"
+                    className="w-64 h-full px-2.5 py-1.5 text-sm bg-white dark:bg-slate-900 outline-none resize-none rounded-l-lg hover:shadow-md placeholder-slate-400 dark:placeholder-slate-600"
                     value={activeInput.value}
                     required
                     placeholder={
@@ -263,7 +268,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                         .map((suggestion, index) => (
                           <button
                             key={index}
-                            className="text-xs text-slate-400 hover:underline"
+                            className="text-xs text-tertiary hover:underline"
                             onClick={(e) => {
                               e.preventDefault();
                               const tool = tools[activeInput.index];
@@ -287,7 +292,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 </div>
               ) : (
                 // Single Line Input
-                <input
+                <Input
                   className="h-full w-32 p-2.5 text-sm bg-white rounded-l-full outline-none hover:shadow-md placeholder-slate-400"
                   type="text"
                   value={activeInput.value}
@@ -377,10 +382,31 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 const isOnly = tools.length === 1;
 
                 return (
-                  <Tooltip
-                    className="h-full w-12"
-                    key={index}
-                    content={
+                  <Tooltip key={index} delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => handleToolClick(tool, index)}
+                        className={`flex justify-center items-center px-2.5 group-two interactive h-full w-12 text-base
+                          ${
+                            isOnly
+                              ? "rounded-full"
+                              : isFirst
+                              ? "rounded-l-full"
+                              : isLast
+                              ? "rounded-r-full"
+                              : ""
+                          }`}
+                      >
+                        <span className="text-base group-two-hover:scale-105">
+                          {tool.icon}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="z-[9999]"
+                    >
                       <div className="flex flex-row items-center gap-1 text-sm">
                         <span>{tool.label}</span>
                         {tool.hotkey && (
@@ -389,28 +415,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                           </span>
                         )}
                       </div>
-                    }
-                    position="top"
-                    margin="0"
-                    glass={false}
-                  >
-                    <button
-                      onClick={() => handleToolClick(tool, index)}
-                      className={`flex justify-center items-center px-2.5 group-two interactive h-full w-full text-base
-                        ${
-                          isOnly
-                            ? "rounded-full"
-                            : isFirst
-                            ? "rounded-l-full"
-                            : isLast
-                            ? "rounded-r-full"
-                            : ""
-                        }`}
-                    >
-                      <span className="text-base group-two-hover:scale-105">
-                        {tool.icon}
-                      </span>
-                    </button>
+                    </TooltipContent>
                   </Tooltip>
                 );
               })}
@@ -421,10 +426,9 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
         {/* Pending Edit Preview */}
         {pendingEdit && activeInput?.showConfirmation && (
           <div
-            className="absolute z-20 mt-[3px]"
+            className="fixed z-40 inset-0 mt-[3px] max-w-lg"
             style={{
               transform: `translate(${position.preview.left}px, ${position.preview.top}px)`,
-              maxWidth: "calc(100% - 2rem)",
             }}
           >
             <span
@@ -441,14 +445,11 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
 
         {/* Highlight Overlay */}
         {activeInput && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ zIndex: 1 }}
-          >
+          <div className="fixed z-1 inset-0 pointer-events-none">
             {position.highlights.map((highlight, index) => (
               <div
                 key={index}
-                className={`absolute ${
+                className={`fixed ${
                   pendingEdit && activeInput?.showConfirmation
                     ? "bg-red-300"
                     : "bg-blue-200"

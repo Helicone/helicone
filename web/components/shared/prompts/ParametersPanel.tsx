@@ -171,13 +171,13 @@ export default function ParametersPanel({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-700">Parameters</h2>
+        <h2 className="font-semibold text-secondary">Parameters</h2>
       </div>
       <div className="divide-y divide-slate-100">
         <div className="flex flex-row items-center justify-between gap-4 py-2 first:pt-0">
           <div className="flex items-center gap-2">
-            <PiPlugsBold className="text-slate-700" />
-            <label className="text-sm font-medium text-slate-700">
+            <PiPlugsBold className="text-secondary" />
+            <label className="text-sm font-medium text-secondary">
               Provider / Model
             </label>
           </div>
@@ -203,11 +203,11 @@ export default function ParametersPanel({
         <div className="flex flex-row items-center justify-between gap-4 py-2">
           <div className="flex items-center gap-2">
             {parameters.temperature < 1 ? (
-              <PiTargetBold className="text-slate-700" />
+              <PiTargetBold className="text-secondary" />
             ) : (
-              <PiPaintBrushBold className="text-slate-700" />
+              <PiPaintBrushBold className="text-secondary" />
             )}
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-secondary">
               Temperature
             </label>
           </div>
