@@ -4,6 +4,7 @@ import { mapGeminiPro } from "../mappers/gemini/chat";
 import { mapOpenAIRequest } from "../mappers/openai/chat";
 import { mapDalleRequest } from "../mappers/openai/dalle";
 import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
+import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
 
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { MappedLLMRequest, MapperType } from "../types";
@@ -18,7 +19,7 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-assistant": mapOpenAIRequest,
   "openai-image": mapDalleRequest,
   "openai-moderation": mapOpenAIRequest,
-  "openai-embedding": mapOpenAIRequest,
+  "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;

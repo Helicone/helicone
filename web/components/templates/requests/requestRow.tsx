@@ -510,7 +510,21 @@ const RequestRow = (props: {
                             size="sm_sleek"
                             className="flex flex-row items-center space-x-2 truncate select-text"
                             onClick={() => {
-                              navigator.clipboard.writeText(`${property[key]}`);
+                              try {
+                                navigator.clipboard.writeText(
+                                  `${property[key]}`
+                                );
+                                setNotification(
+                                  "Copied to clipboard!",
+                                  "success"
+                                );
+                              } catch (error) {
+                                console.error("Failed to copy:", error);
+                                setNotification(
+                                  "Failed to copy to clipboard",
+                                  "error"
+                                );
+                              }
                             }}
                           >
                             <span>{key}:</span> <span>{property[key]}</span>
@@ -692,7 +706,6 @@ const RequestRow = (props: {
           </div>
         </div>
       )}
-
       <div className="min-h-[100px]">{/* space */}</div>
       <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
         <NewDataset

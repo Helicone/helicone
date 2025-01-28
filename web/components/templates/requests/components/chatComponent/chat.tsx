@@ -3,9 +3,8 @@ import React, { useMemo, useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
 import ThemedModal from "../../../../shared/themed/themedModal";
+import { ChatContent } from "./ChatContent";
 import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
-import { JsonView } from "./jsonView";
-import { MessageRenderer } from "./MessageRenderer";
 
 interface ChatProps {
   mappedRequest: MappedLLMRequest;
@@ -86,41 +85,29 @@ export const Chat: React.FC<ChatProps> = ({
       >
         <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
-          {mode === "JSON" ? (
-            <JsonView
-              requestBody={mappedRequest.raw.request}
-              responseBody={mappedRequest.raw.response}
-            />
-          ) : messagesToRender.length > 0 ? (
-            <MessageRenderer
-              messages={messagesToRender}
-              showAllMessages={showAllMessages}
-              expandedChildren={expandedChildren}
-              setExpandedChildren={setExpandedChildren}
-              selectedProperties={selectedProperties}
-              isHeliconeTemplate={isHeliconeTemplate}
-              autoInputs={autoInputs}
-              setShowAllMessages={setShowAllMessages}
-              mode={mode}
-            />
-          ) : (
-            <div className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2">
-              n/a
-            </div>
-          )}
+
+          <ChatContent
+            mode={mode}
+            mappedRequest={mappedRequest}
+            messagesToRender={messagesToRender}
+            showAllMessages={showAllMessages}
+            expandedChildren={expandedChildren}
+            setExpandedChildren={setExpandedChildren}
+            selectedProperties={selectedProperties}
+            isHeliconeTemplate={isHeliconeTemplate}
+            autoInputs={autoInputs}
+            setShowAllMessages={setShowAllMessages}
+          />
         </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-          <ChatTopBar {...chatTopBarProps} isModal={true} />
-          {mode === "JSON" ? (
-            <JsonView
-              requestBody={mappedRequest.schema.request}
-              responseBody={mappedRequest.schema.response}
-            />
-          ) : messagesToRender.length > 0 ? (
-            <MessageRenderer
-              messages={messagesToRender}
+          <>
+            <ChatTopBar {...chatTopBarProps} isModal={true} />
+            <ChatContent
+              mode={mode}
+              mappedRequest={mappedRequest}
+              messagesToRender={messagesToRender}
               showAllMessages={showAllMessages}
               expandedChildren={expandedChildren}
               setExpandedChildren={setExpandedChildren}
@@ -128,13 +115,8 @@ export const Chat: React.FC<ChatProps> = ({
               isHeliconeTemplate={isHeliconeTemplate}
               autoInputs={autoInputs}
               setShowAllMessages={setShowAllMessages}
-              mode={mode}
             />
-          ) : (
-            <div className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2">
-              n/a
-            </div>
-          )}
+          </>
         </div>
       </ThemedModal>
     </>

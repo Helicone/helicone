@@ -2,10 +2,9 @@ import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
-import {
-  useGetRequestsWithBodies,
-  useGetRequestWithBodies,
-} from "@/services/hooks/requests";
+import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import {
   UIFilterRow,
   UIFilterRowNode,
@@ -48,8 +47,6 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import NewDataset from "../datasets/NewDataset";
 import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import RequestCard from "./requestCard";
 import RequestDiv from "./requestDiv";
 import StreamWarning from "./StreamWarning";
@@ -312,7 +309,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   useEffect(() => {
     if (initialRequest.data?.data && !selectedData) {
-      setSelectedData(heliconeRequestToMappedContent(initialRequest.data.data));
+      setSelectedData(
+        heliconeRequestToMappedContent(
+          initialRequest.data.data as HeliconeRequest
+        )
+      );
       setOpen(true);
     }
   }, [initialRequest, selectedData]);

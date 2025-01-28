@@ -52,7 +52,10 @@ export const RenderMappedRequest = (
         </div>
       );
     }
-  } else if (mapperContent._type === "openai-instruct") {
+  } else if (
+    mapperContent._type === "openai-instruct" ||
+    mapperContent._type === "openai-embedding"
+  ) {
     if (
       mapperContent.heliconeMetadata.status.code >= 200 &&
       mapperContent.heliconeMetadata.status.code < 300
