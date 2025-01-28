@@ -1,18 +1,18 @@
-import { HeliconeRequest } from "../types";
 import { mapAnthropicRequest } from "../mappers/anthropic/chat";
 import { mapGeminiPro } from "../mappers/gemini/chat";
 import { mapOpenAIRequest } from "../mappers/openai/chat";
 import { mapDalleRequest } from "../mappers/openai/dalle";
-import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
 import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
+import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
+import { HeliconeRequest } from "../types";
 
-import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
-import { MappedLLMRequest, MapperType } from "../types";
 import { modelCost } from "../../cost/costCalc";
-import { MapperFn } from "../mappers/types";
 import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
 import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
+import { MapperFn } from "../mappers/types";
+import { MappedLLMRequest, MapperType } from "../types";
+import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
@@ -92,16 +92,33 @@ export const getMappedContent = ({
   if (!mapper) {
     throw new Error(`Mapper not found: ${JSON.stringify(mapperType)}`);
   }
-  const result = mapper({
-    request: heliconeRequest.request_body,
-    response: heliconeRequest.response_body,
-    statusCode: heliconeRequest.response_status,
-    model: heliconeRequest.model,
-  });
+  let result: ReturnType<MapperFn<any, any>>;
+  try {
+    result = mapper({
+      request: heliconeRequest.request_body,
+      response: heliconeRequest.response_body,
+      statusCode: heliconeRequest.response_status,
+      model: heliconeRequest.model,
+    });
+  } catch (e) {
+    result = {
+      preview: {
+        concatenatedMessages: [],
+        request: JSON.stringify(heliconeRequest.request_body),
+        response: JSON.stringify(heliconeRequest.response_body),
+      },
+      schema: {
+        request: {
+          prompt: `Error: ${e.message}`,
+        },
+      },
+    };
+  }
 
   return {
     _type: mapperType,
-    ...result,
+    preview: result.preview,
+    schema: result.schema,
     model: heliconeRequest.model,
     id: heliconeRequest.request_id,
     raw: {
