@@ -81,28 +81,34 @@ For **content creation**, its mastery of style control enables writers, marketer
 
 In **research and analytics**, Gemini-Exp-1206 excels at synthesizing complex data and delivering actionable insights, proving invaluable for researchers and decision-makers alike.
 
-## Limitations with Gemini-Exp-1206
-
-- As a developing model, it lacks comprehensive testing and reliability compared to established AI systems like GPT-4. The model may not be robust enough for enterprise-scale deployment or production-ready apps.
-- Gemini-Exp-1206 remains an experimental prototype with limitations. With limited testing data and fewer user votes raise concerns about reliability across real-world scenarios.
-- Continuous refinement and innovation will be crucial for success in the competitive generative AI landscape.
-
 ## Integrate Gemini-Exp-1206 with Helicone ⚡️
 
 Helicone is an open-source observability tool that helps you monitor, debug and improve your `Gemini-Exp-1206` powered AI apps.
 
 Integrate with a few lines of code in JavaScript:
 
-```bash
-# change the endpoint to helicone
-https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_GENERATIVE_API_KEY}
-
-# add the following headers
-'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-'Helicone-Target-URL': `https://generativelanguage.googleapis.com`,
+```javascript
+const model = genAI.getGenerativeModel(
+  {
+    model: "model-name",
+  },
+  requestOptions = {
+    customHeaders: new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
+    }),
+    baseUrl: "https://gateway.helicone.ai",
+  } as RequestOptions
+);
 ```
 
-Please see detailed integration for JavaScript, Python and more in <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">documentation</a>.
+Please see detailed integration docs for JavaScript, Python and more <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">here</a>.
+
+## Limitations with Gemini-Exp-1206
+
+- As a developing model, it lacks comprehensive testing and reliability compared to established AI systems like GPT-4. The model may not be robust enough for enterprise-scale deployment or production-ready apps.
+- Gemini-Exp-1206 remains an experimental prototype with limitations. With limited testing data and fewer user votes raise concerns about reliability across real-world scenarios.
+- Continuous refinement and innovation will be crucial for success in the competitive generative AI landscape.
 
 ## What’s next for Gemini?
 
