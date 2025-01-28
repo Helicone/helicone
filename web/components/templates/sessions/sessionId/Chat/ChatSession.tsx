@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGetRequests } from "../../../../../services/hooks/requests";
-import getNormalizedRequest from "../../../requests/builder/requestBuilder";
+
 import { Row } from "../../../../layout/common/row";
 import { Col } from "../../../../layout/common/col";
 import RequestDrawerV2 from "../../../requests/requestDrawerV2";
@@ -9,6 +9,9 @@ import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import StatusBadge from "../../../requests/statusBadge";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
 import { FaChevronRight } from "react-icons/fa";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
 
 interface ChatSessionProps {
   requests: ReturnType<typeof useGetRequests>;
@@ -22,7 +25,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
   );
 
   const [requestDrawerRequest, setRequestDrawerRequest] = useState<
-    ReturnType<typeof getNormalizedRequest> | undefined
+    MappedLLMRequest | undefined
   >(undefined);
   const [open, setOpen] = useState(false);
 
@@ -31,34 +34,41 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
   return (
     <div className="chat-session">
       {sortedRequests.map((request, idx) => {
-        const normalizeRequest = getNormalizedRequest(request);
+        const mappedRequest = heliconeRequestToMappedContent(request);
         return (
           <Row
             key={request.request_id}
             className="request-item mb-4 shadow-sm border-y border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950"
           >
             <div className="flex-1">
-              {normalizeRequest.render({
-                hideTopBar: true,
-                messageSlice: idx === 0 ? undefined : "lastTwo",
-                className: "",
-              })}
+              <RenderHeliconeRequest
+                heliconeRequest={request}
+                hideTopBar={true}
+                messageSlice={idx === 0 ? undefined : "lastTwo"}
+                className={""}
+              />
             </div>
             <div className="lg:min-w-[350px] p-5 rounded-lg bg-slate-100 dark:bg-black">
               <Col className="justify-between h-full">
                 <Col className="gap-y-2">
                   <Row className="justify-between mb-2 w-full">
                     <StatusBadge
-                      statusType={normalizeRequest.status.statusType}
-                      errorCode={normalizeRequest.status.code}
+                      statusType={
+                        mappedRequest.heliconeMetadata.status.statusType
+                      }
+                      errorCode={mappedRequest.heliconeMetadata.status.code}
                     />
                     <FeedbackButtons
-                      requestId={normalizeRequest.id}
+                      requestId={mappedRequest.id}
                       defaultValue={
-                        normalizeRequest.scores &&
-                        normalizeRequest.scores["helicone-score-feedback"]
+                        mappedRequest.heliconeMetadata.scores &&
+                        mappedRequest.heliconeMetadata.scores[
+                          "helicone-score-feedback"
+                        ]
                           ? Number(
-                              normalizeRequest.scores["helicone-score-feedback"]
+                              mappedRequest.heliconeMetadata.scores[
+                                "helicone-score-feedback"
+                              ]
                             ) === 1
                             ? true
                             : false
@@ -80,7 +90,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                       Cost
                     </div>
                     <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
-                      $ {normalizeRequest.cost}
+                      $ {mappedRequest.heliconeMetadata.cost}
                     </div>
                   </Row>
                   <Row className="justify-between flex-wrap">
@@ -88,19 +98,19 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                       Latency
                     </div>
                     <div className="text-sm font-light text-slate-500 dark:text-slate-200 w-full sm:w-auto">
-                      {normalizeRequest.latency} ms
+                      {mappedRequest.heliconeMetadata.latency} ms
                     </div>
                   </Row>
                   <Col className="justify-between flex-wrap">
                     <div className="text-sm font-medium text-slate-500 dark:text-slate-200 w-full sm:w-auto">
                       Custom Properties
                     </div>
-                    {normalizeRequest.customProperties &&
+                    {mappedRequest.heliconeMetadata.customProperties &&
                       properties.properties &&
                       properties.properties.length > 0 && (
                         <CustomPropertiesCard
                           customProperties={Object.entries(
-                            normalizeRequest.customProperties
+                            mappedRequest.heliconeMetadata.customProperties
                           )
                             .filter(
                               ([key]) => !key.includes("Helicone-Session")
@@ -118,7 +128,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({ requests }) => {
                   <button
                     className="text-sm flex items-center text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     onClick={() => {
-                      setRequestDrawerRequest(normalizeRequest);
+                      setRequestDrawerRequest(mappedRequest);
                       setOpen(true);
                     }}
                   >

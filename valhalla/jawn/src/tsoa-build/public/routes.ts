@@ -1088,6 +1088,7 @@ const models: TsoaRoute.Models = {
             "properties": {"ref":"Record_string.string_","required":true},
             "assets": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "target_url": {"dataType":"string","required":true},
+            "model": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

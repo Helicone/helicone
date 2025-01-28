@@ -84,7 +84,7 @@ export const providersNames = [
   "AWS",
   "DEEPSEEK",
   "X",
-  "AVIAN"
+  "AVIAN",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];

@@ -16,7 +16,7 @@ import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 import AddFileButton from "../../playground/new/addFileButton";
 import ThemedModal from "../../../shared/themed/themedModal";
 import MarkdownEditor from "../../../shared/markdownEditor";
-import { Message } from "../../requests/builder/components/chatComponent/types";
+import { Message } from "@/packages/llm-mapper/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
@@ -24,9 +24,32 @@ import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "@/components/layout/onboardingContext";
 
+// Update type definitions
+type ImageUrlItem = {
+  url: string;
+};
+
+type ContentItem = {
+  type: "text" | "image" | "image_url";
+  text?: string;
+  image?: File;
+  image_url?: ImageUrlItem;
+  _type?: "message";
+};
+
+// Extend Message type to support array content
+type ExtendedMessage = Omit<Message, "content"> & {
+  content?: string | ContentItem[];
+  id?: string;
+  function?: {
+    name: string;
+    arguments: string;
+  };
+};
+
 interface PromptChatRowProps {
   index: number;
-  message: Message;
+  message: ExtendedMessage;
   callback: (
     userText: string,
     role: string,
@@ -41,10 +64,12 @@ interface PromptChatRowProps {
   ) => void;
 }
 
-export const hasImage = (content: string | any[] | null) => {
+// Update hasImage function to be type-safe
+export const hasImage = (content: string | ContentItem[] | null): boolean => {
   if (Array.isArray(content)) {
     return content.some(
-      (element) => element.type === "image" || element.type === "image_url"
+      (element): element is ContentItem & { type: "image" | "image_url" } =>
+        element.type === "image" || element.type === "image_url"
     );
   }
   return false;
@@ -215,7 +240,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
 
   const [role, setRole] = useState<
     "system" | "user" | "assistant" | "function"
-  >(currentMessage.role);
+  >((message.role as "system" | "user" | "assistant" | "function") || "user");
 
   // Set isEditing to true by default
   const [isEditing, setIsEditing] = useState(editMode);
@@ -225,69 +250,86 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     setIsEditing(editMode);
   }, [editMode]);
 
-  const searchAndGetImage = (message: Message) => {
+  const searchAndGetImage = (
+    message: ExtendedMessage
+  ): string | File | null => {
     if (Array.isArray(message.content) && hasImage(message.content)) {
       const image = message.content.find(
-        (element) => element.type === "image" || element.type === "image_url"
+        (element): element is ContentItem & { type: "image" | "image_url" } =>
+          element.type === "image_url" || element.type === "image"
       );
-      return image.image_url?.url || image.image;
+      if (image?.image_url?.url) {
+        return image.image_url.url;
+      }
+      if (image?.image) {
+        return image.image;
+      }
     }
     return null;
   };
 
-  const [file, setFile] = useState<File | string | null>(
+  const [fileObj, setFileObj] = useState<File | string | null>(
     searchAndGetImage(message)
   );
 
   const { setNotification } = useNotification();
 
-  const getContentAsString = (rawMessage: Message) => {
+  // Update getContentAsString function
+  const getContentAsString = (rawMessage: ExtendedMessage): string => {
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
-        (element) => element.type === "text"
+        (element): element is ContentItem & { type: "text" } =>
+          element.type === "text"
       );
-      return textMessage?.text as string;
+      return textMessage?.text || "";
     } else {
-      return rawMessage.content as string;
+      return rawMessage.content || "";
     }
   };
 
   const contentAsString = getContentAsString(currentMessage);
 
+  // Update onFileChangeHandler
   const onFileChangeHandler = (file: File | string | null, text: string) => {
-    setFile(file);
-    const newMessage = {
+    setFileObj(file);
+    const newMessage: ExtendedMessage = {
       ...currentMessage,
+      _type: "message",
     };
     if (file instanceof File) {
       newMessage.content = [
         {
           type: "text",
           text,
+          _type: "message",
         },
         {
           type: "image",
           image: file,
+          _type: "message",
         },
       ];
-    }
-    if (typeof file === "string") {
+    } else if (typeof file === "string") {
       newMessage.content = [
         {
           type: "text",
           text,
+          _type: "message",
         },
         {
           type: "image_url",
           image_url: {
             url: file,
           },
+          _type: "message",
         },
       ];
+    } else {
+      newMessage.content = text;
     }
 
     setCurrentMessage(newMessage);
-    callback(contentAsString || "", role, file);
+    callback(text, role, file);
   };
 
   const extractKey = (text: string) => {
@@ -297,42 +339,46 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   };
 
   const getContent = (
-    message: Message,
+    message: ExtendedMessage,
     minimize: boolean,
     playgroundMode?: "prompt" | "experiment" | "experiment-compact"
   ) => {
-    // check if the content is an array and it has an image type or image_url type
     const content = message.content;
 
     if (Array.isArray(content)) {
-      const textMessage = content.find((element) => element.type === "text");
-      // if minimize is true, substring the text to 100 characters
-      const text =
-        minimize && textMessage?.text.length > 100
-          ? `${textMessage?.text.substring(0, 100)}...`
-          : `${textMessage?.text}`;
-
-      const isStatic = textMessage?.text.includes("<helicone-prompt-static>");
+      const textMessage = content.find(
+        (element): element is ContentItem & { type: "text" } =>
+          element.type === "text"
+      );
+      const text = textMessage?.text || "";
+      const isMinimized = minimize && text.length > 100;
+      const displayText = isMinimized ? `${text.substring(0, 100)}...` : text;
+      const isStatic = text.includes("<helicone-prompt-static>");
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
             text={removeLeadingWhitespace(
               isStatic
-                ? text.replace(
+                ? displayText.replace(
                     /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
                     "$1"
                   )
-                : text
+                : displayText
             )}
             selectedProperties={selectedProperties}
             playgroundMode={playgroundMode}
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {hasImage(content) && (
             <div className="flex flex-wrap items-center pt-4 border-t border-slate-300 dark:border-slate-700">
-              {content.map((item, index) =>
-                item.type === "image_url" || item.type === "image" ? (
+              {content
+                .filter(
+                  (
+                    item
+                  ): item is ContentItem & { type: "image" | "image_url" } =>
+                    item.type === "image_url" || item.type === "image"
+                )
+                .map((item, index) => (
                   <div key={index} className="relative">
                     {item.image_url?.url ? (
                       item.image_url.url.includes("helicone-prompt-input") ? (
@@ -361,19 +407,19 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                     )}
                     <button
                       onClick={() => {
-                        setFile(null);
+                        setFileObj(null);
                         const newMessage = {
                           ...currentMessage,
+                          _type: "message" as const,
                         };
                         if (
                           newMessage.content &&
                           Array.isArray(newMessage.content)
                         ) {
-                          newMessage.content = newMessage.content.filter(
-                            (element) =>
-                              element.type !== "image" &&
-                              element.type !== "image_url"
+                          const textContent = newMessage.content.find(
+                            (element) => element.type === "text"
                           );
+                          newMessage.content = textContent?.text || "";
                         }
 
                         setCurrentMessage(newMessage);
@@ -383,45 +429,41 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       <XMarkIcon className="absolute -top-2 -right-2 h-4 w-4 text-white bg-red-500 rounded-full p-0.5" />
                     </button>
                   </div>
-                ) : null
-              )}
+                ))}
             </div>
           )}
         </div>
       );
     } else if (message.tool_calls) {
       const tools = message.tool_calls;
-      const functionTools = tools.filter((tool) => tool.type === "function");
       return (
         <div className="flex flex-col space-y-2">
-          {message.content !== null && message.content !== "" && (
+          {typeof message.content === "string" && message.content !== "" && (
             <code className="text-xs whitespace-pre-wrap font-semibold">
               {message.content}
             </code>
           )}
-          {functionTools.map((tool, index) => {
-            const toolFunc = tool.function;
-            return (
-              <pre
-                key={index}
-                className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
-              >
-                {`${toolFunc.name}(${toolFunc.arguments})`}
-              </pre>
-            );
-          })}
+          {tools.map((tool, index) => (
+            <pre
+              key={index}
+              className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
+            >
+              {`${tool.name}(${JSON.stringify(tool.arguments)})`}
+            </pre>
+          ))}
         </div>
       );
     } else {
-      const contentString = enforceString(content);
+      const contentString = enforceString(content) || "";
+      const isMinimized = minimize && contentString.length > 100;
+      const displayText = isMinimized
+        ? `${contentString.substring(0, 100)}...`
+        : contentString;
+
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
           <RenderWithPrettyInputKeys
-            text={
-              minimize
-                ? `${contentString?.substring(0, 100)}...`
-                : contentString
-            }
+            text={displayText}
             selectedProperties={selectedProperties}
             playgroundMode={playgroundMode}
           />
@@ -479,7 +521,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   // Update currentMessage when the prop message changes
   useEffect(() => {
     setCurrentMessage(message);
-    setRole(message.role);
+    setRole(message.role as "system" | "user" | "assistant" | "function");
   }, [message]);
 
   const isStatic = contentAsString?.includes("<helicone-prompt-static>");
@@ -489,28 +531,47 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const textMessage = isCurrentMessageContentArray
     ? currentMessageContent.find((element) => element.type === "text")
     : null;
-  const showMinimizeButton = textMessage && textMessage.text.length > 100;
+  const showMinimizeButton =
+    textMessage && textMessage.text && textMessage.text.length > 100;
 
   const { isOnboardingVisible, currentStep } = useOnboardingContext();
+
+  const handleCallback = (
+    content: string | undefined,
+    newRole: "system" | "user" | "assistant" | "function",
+    file: File | null
+  ) => {
+    callback(content || "", newRole, file);
+  };
 
   const setText = (text: string): void => {
     const newVariables = extractVariables(text);
     const replacedText = replaceVariablesWithTags(text, newVariables);
     const newMessages = { ...currentMessage };
     const messageContent = newMessages.content;
+
     if (Array.isArray(messageContent)) {
       const textMessage = messageContent.find(
-        (element) => element.type === "text"
+        (element): element is ContentItem & { type: "text"; text: string } =>
+          element.type === "text" && typeof element.text === "string"
       );
       if (textMessage) {
         textMessage.text = replacedText;
+      } else {
+        messageContent.push({
+          type: "text",
+          text: replacedText,
+          _type: "message",
+        });
       }
     } else {
       newMessages.content = replacedText;
     }
 
     setCurrentMessage(newMessages);
-    callback(replacedText, role, file);
+    if (fileObj instanceof File) {
+      handleCallback(replacedText, role, fileObj);
+    }
     setPromptVariables(newVariables);
   };
 
@@ -574,15 +635,19 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               <RoleButton
                 size="small"
                 role={role}
-                onRoleChange={(newRole) => {
+                onRoleChange={(
+                  newRole: "system" | "user" | "assistant" | "function"
+                ) => {
                   setRole(newRole);
                   const newMessage = {
                     ...currentMessage,
+                    role: newRole,
+                    _type: "message" as const,
                   };
-
-                  newMessage.role = newRole;
                   setCurrentMessage(newMessage);
-                  callback(contentAsString || "", newRole, file);
+                  if (fileObj instanceof File) {
+                    handleCallback(contentAsString, newRole, fileObj);
+                  }
                 }}
                 disabled={!editMode}
               />
@@ -629,7 +694,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
               {editMode && (
                 <div className="flex w-full flex-row items-center justify-end space-x-2">
                   <AddFileButton
-                    file={file}
+                    file={fileObj}
                     onFileChange={(file) => {
                       onFileChangeHandler(file, contentAsString || "");
                     }}
@@ -638,7 +703,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                   <Tooltip title="Delete" placement="top">
                     <button
                       onClick={() => {
-                        deleteRow(currentMessage.id);
+                        deleteRow(currentMessage.id || "");
                       }}
                       className="text-red-500 font-semibold"
                     >
@@ -675,7 +740,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       }
 
                       setCurrentMessage(newMessages);
-                      callback(replacedText, role, file);
+                      if (fileObj instanceof File) {
+                        handleCallback(replacedText, role, fileObj);
+                      }
                       setPromptVariables(newVariables);
                     }}
                     language="markdown"
