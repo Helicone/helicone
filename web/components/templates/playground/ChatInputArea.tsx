@@ -6,7 +6,7 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import { Message } from "../requests/chatComponent/types";
+import { Message } from "@/packages/llm-mapper/types";
 
 interface ChatInputAreaProps {
   currentChat: Message[];
@@ -33,7 +33,12 @@ const ChatInputArea: React.FC<ChatInputAreaProps> = ({
           onClick={() => {
             setCurrentChat([
               ...currentChat,
-              { id: crypto.randomUUID(), role: "user", content: "" },
+              {
+                id: crypto.randomUUID(),
+                role: "user",
+                content: "",
+                _type: "message",
+              },
             ]);
           }}
           className={clsx(

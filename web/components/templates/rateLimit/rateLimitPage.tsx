@@ -15,7 +15,7 @@ import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import RequestsPageV2 from "../requestsV2/requestsPageV2";
+import RequestsPageV2 from "../requests/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";

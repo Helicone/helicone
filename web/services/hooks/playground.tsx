@@ -1,12 +1,13 @@
 import { ChatCompletionTool } from "openai/resources";
-import { Message } from "../../components/templates/requests/chatComponent/types";
-import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
-import useRequestsPageV2 from "../../components/templates/requestsV2/useRequestsPageV2";
+
+import useRequestsPageV2 from "../../components/templates/requests/useRequestsPageV2";
 import { getTimeIntervalAgo } from "@/lib/timeCalculations/time";
 import { useMemo } from "react";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { Message } from "@/packages/llm-mapper/types";
 
 export const getChat = (
-  requests: NormalizedRequest[]
+  requests: MappedLLMRequest[]
 ): {
   chat: Message[];
   isChat: boolean;
@@ -23,8 +24,8 @@ export const getChat = (
   const singleRequest = requests[0];
 
   const getSourceChat = () => {
-    if (singleRequest.provider === "ANTHROPIC") {
-      const requestBody = JSON.parse(JSON.stringify(singleRequest.requestBody));
+    if (singleRequest.heliconeMetadata.provider === "ANTHROPIC") {
+      const requestBody = JSON.parse(JSON.stringify(singleRequest.raw.request));
       if (requestBody && requestBody.system && requestBody.messages) {
         const systemMessage = {
           role: "system",
@@ -33,16 +34,16 @@ export const getChat = (
         requestBody.messages.unshift(systemMessage);
         return JSON.parse(JSON.stringify(requestBody));
       } else {
-        return JSON.parse(JSON.stringify(singleRequest.requestBody));
+        return JSON.parse(JSON.stringify(singleRequest.raw.request));
       }
     } else {
-      return JSON.parse(JSON.stringify(singleRequest.requestBody));
+      return JSON.parse(JSON.stringify(singleRequest.raw.request));
     }
   };
 
   const sourceChat = getSourceChat();
 
-  const sourceResponse = JSON.parse(JSON.stringify(requests[0].responseBody));
+  const sourceResponse = JSON.parse(JSON.stringify(singleRequest.raw.response));
 
   if (!Array.isArray(sourceChat.messages)) {
     return {
@@ -54,7 +55,7 @@ export const getChat = (
   const sourcePrompt = [...sourceChat.messages];
 
   if (
-    singleRequest.provider === "ANTHROPIC" &&
+    singleRequest.heliconeMetadata.provider === "ANTHROPIC" &&
     sourceResponse &&
     sourceResponse.content &&
     sourceResponse.content[0] &&
@@ -130,7 +131,7 @@ export const usePlaygroundPage = (requestId: string) => {
     false
   );
 
-  const { chat, isChat, tools } = getChat(requests.normalizedRequests);
+  const { chat, isChat, tools } = getChat(requests.requests);
 
   return {
     isLoading:
@@ -138,11 +139,10 @@ export const usePlaygroundPage = (requestId: string) => {
       requests.isBodyLoading ||
       requests.isRefetching ||
       requests.isCountLoading,
-    data: requests.normalizedRequests,
+    data: requests.requests,
     chat,
     refetch: requests.refetch,
-    hasData:
-      requests.normalizedRequests && requests.normalizedRequests.length > 0,
+    hasData: requests.requests && requests.requests.length > 0,
     isChat,
     tools,
   };

@@ -18,7 +18,10 @@ class MyDocument extends Document {
 
     return (
       <Html className={isOpenStatsPage ? "open-stats-html" : ""}>
-        <Head />
+        <Head>
+          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+          <script src="/__ENV.js" />
+        </Head>
         <body className={isOpenStatsPage ? "open-stats-body" : ""}>
           <Main />
           <NextScript />

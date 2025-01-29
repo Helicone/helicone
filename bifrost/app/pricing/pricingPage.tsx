@@ -242,7 +242,7 @@ export default function PricingPage() {
                     What are the limits for each plan?
                   </AccordionTrigger>
                   <AccordionContent className="text-slate-600 text-sm">
-                    For the Pro plan, you have access to 100k requests per month
+                    For the Pro plan, you have access to 10k requests per month
                     and all features such as Playground, Cache, Exports, Evals
                     and more. You will also be able to enable Prompts and Alerts
                     as add-ons.
@@ -264,7 +264,7 @@ export default function PricingPage() {
                     <br />
                     <br />
                     If you are already on the Pro plan, you will be
-                    automatically charged for your usage over 100k requests per
+                    automatically charged for your usage over 10k requests per
                     month.
                   </AccordionContent>
                 </AccordionItem>

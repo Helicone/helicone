@@ -1,11 +1,9 @@
 import { ReactElement, useMemo } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
-
-import { useGetRequests } from "../../services/hooks/requests";
-
-import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
 import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
+import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
+import { useGetRequests } from "../../services/hooks/requests";
 
 const SessionDetail = ({ session_id }: { session_id: string }) => {
   const ThreeMonthsAgo = useMemo(() => {

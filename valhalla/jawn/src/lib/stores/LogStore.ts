@@ -9,17 +9,7 @@ import { shouldBumpVersion } from "@helicone/prompts";
 import { sanitizeObject } from "../../utils/sanitize";
 import { mapScores } from "../../managers/score/ScoreManager";
 
-const pgp = pgPromise();
-const db = pgp({
-  connectionString: process.env.SUPABASE_DATABASE_URL,
-  ssl:
-    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
-      ? {
-          rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
-        }
-      : undefined,
-});
+import { HELICONE_PGP as pgp, HELICONE_DB as db } from "../shared/db/pgpClient";
 
 process.on("exit", () => {
   pgp.end();

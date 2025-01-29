@@ -3,7 +3,7 @@ import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
 import { AdminOnPremPage } from "../../components/templates/admin/onPrem/adminOnPrem";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
-import { supabaseServer } from "../../lib/supabaseServer";
+import { getSupabaseServer } from "../../lib/supabaseServer";
 
 interface AdminProps {
   user: User;
@@ -28,7 +28,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   // const { data } = await jawn.GET("/v1/admin/admins/query");
 
-  const { data, error } = await supabaseServer.from("admins").select("*");
+  const { data, error } = await getSupabaseServer().from("admins").select("*");
 
   const admins = data?.map((admin) => admin.user_id || "") || [];
 

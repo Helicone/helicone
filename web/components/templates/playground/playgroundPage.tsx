@@ -4,7 +4,7 @@ import { clsx } from "../../shared/clsx";
 import ChatPlayground from "./chatPlayground";
 import { useDebounce } from "../../../services/hooks/debounce";
 import AuthHeader from "../../shared/authHeader";
-import RequestDrawerV2 from "../requestsV2/requestDrawerV2";
+import RequestDrawerV2 from "../requests/requestDrawerV2";
 import useNotification from "../../shared/notification/useNotification";
 import {
   CodeBracketSquareIcon,
@@ -80,7 +80,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const reqBody =
-    singleRequest !== null ? (singleRequest.requestBody as any) : null;
+    singleRequest !== null ? (singleRequest.raw.request as any) : null;
 
   const [temperature, setTemperature] = useState<number>(
     reqBody !== null ? reqBody.temperature : 0.7
@@ -271,32 +271,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 chat={[
                   {
                     id: "1",
-                    content: [
-                      {
-                        type: "text",
-                        text: "Hi, what can I do in the playground?",
-                      },
-                    ],
+                    content: "Hi, what can I do in the playground?",
                     role: "user",
+                    _type: "message",
                   },
                   {
                     id: "2",
-                    content: [
-                      {
-                        type: "text",
-                        text: "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
-                      },
-                    ],
+                    content:
+                      "Welcome to the playground! This is a space where you can replay user requests, experiment with various prompts, and test different models. Feel free to explore and interact with the available features. Let's get started!",
+                    _type: "message",
                     role: "assistant",
                   },
                   {
                     id: "3",
-                    content: [
-                      {
-                        type: "text",
-                        text: "What is the weather in Tokyo?",
-                      },
-                    ],
+                    content: "What is the weather in Tokyo?",
+                    _type: "message",
                     role: "user",
                   },
                 ]}

@@ -117,6 +117,9 @@ export const FreePlanCard = () => {
             >
               Upgrade to Pro
             </Button>
+            <span className="text-slate-500 text-[12px]">
+              7 days free trial
+            </span>
           </Col>
           <div>
             <button
@@ -197,8 +200,8 @@ const ComparisonItem = ({
 
 const proFeatures = [
   {
-    title: "100k requests",
-    description: "Higher limit compared to 10k.",
+    title: "Unlimited scaling",
+    description: "Scale your requests without limits.",
   },
   {
     title: "3 month log retention",

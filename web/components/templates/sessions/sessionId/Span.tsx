@@ -140,7 +140,7 @@ export const TraceSpan = ({
                     <p className="text-xs font-normal text-slate-500">
                       <span className="font-semibold">Start:</span>{" "}
                       {new Date(
-                        trace?.trace.request.createdAt ?? 0
+                        trace?.trace.request.heliconeMetadata.createdAt ?? 0
                       ).toLocaleString()}
                     </p>
                   </Col>
@@ -297,7 +297,7 @@ export const TraceSpan = ({
                     <p className="text-xs font-normal text-slate-500">
                       <span className="font-semibold">Start:</span>{" "}
                       {new Date(
-                        trace?.trace.request.createdAt ?? 0
+                        trace?.trace.request.heliconeMetadata.createdAt ?? 0
                       ).toLocaleString()}
                     </p>
                   </Col>

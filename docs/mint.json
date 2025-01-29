@@ -177,6 +177,8 @@
           ]
         },
         "getting-started/integration-method/fireworks",
+        "getting-started/integration-method/deepseek",
+        "getting-started/integration-method/x",
         {
           "group": "Vector DB",
           "pages": [

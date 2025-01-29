@@ -11,5 +11,6 @@ WORKDIR /app
 COPY . /app
 RUN find /app -name ".env.*" -exec rm {} \;
 
+RUN python3 -m pip install -r requirements.txt
 
-CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT}
+CMD python3 ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user ${CLICKHOUSE_USER} --password ${CLICKHOUSE_PASSWORD}

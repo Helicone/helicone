@@ -1,4 +1,4 @@
-import { NormalizedRequest } from "../../components/templates/requestsV2/builder/abstractRequestBuilder";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 export interface Trace {
   start_unix_timestamp_ms: number;
@@ -6,7 +6,7 @@ export interface Trace {
   properties: Record<string, string>;
   path: string;
   request_id: string;
-  request: NormalizedRequest;
+  request: MappedLLMRequest;
 }
 
 export interface Session {

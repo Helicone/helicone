@@ -9,8 +9,8 @@ import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import {
   getGenericRequestText,
   getGenericResponseText,
-} from "../requestsV2/helpers";
-import DatasetButton from "../requestsV2/buttons/datasetButton";
+} from "../requests/helpers";
+import DatasetButton from "../requests/buttons/datasetButton";
 import {
   FolderPlusIcon,
   Square2StackIcon,
@@ -21,7 +21,7 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
-import TableFooter from "../requestsV2/tableFooter";
+import TableFooter from "../requests/tableFooter";
 import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/org/organizationContext";
 import ExportButton from "../../shared/themed/table/exportButton";

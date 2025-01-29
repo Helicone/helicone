@@ -48,7 +48,7 @@ export class CustomerGet extends BaseAPIRoute {
       .select("*")
       .eq("reseller_id", authParams.organizationId)
       .eq("organization_type", "customer")
-      .eq("soft_delete", "false");
+      .eq("soft_delete", false);
 
     if (customers.error) {
       throw new Error(JSON.stringify(customers.error));

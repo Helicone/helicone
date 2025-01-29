@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { NormalizedRequest } from "../../../templates/requestsV2/builder/abstractRequestBuilder";
+
+import { RenderMappedRequest } from "@/components/templates/requests/RenderHeliconeRequest";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 
 interface RequestRowViewProps {
-  rows: NormalizedRequest[];
+  rows: MappedLLMRequest[];
   properties: string[];
 }
 
 const RequestRowView = (props: RequestRowViewProps) => {
   const { rows, properties } = props;
 
-  const [selectedRow, setSelectedRow] = useState<NormalizedRequest | null>(
-    null
-  );
+  const [selectedRow, setSelectedRow] = useState<MappedLLMRequest | null>(null);
 
   return (
     <div className="flex flex-row gap-4 w-full relative h-[75vh]">
@@ -25,7 +25,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
             length={rows.length}
             isSelected={selectedRow?.id === row.id}
             row={row}
-            onSelectRow={(row: NormalizedRequest) => {
+            onSelectRow={(row: MappedLLMRequest) => {
               setSelectedRow(row);
             }}
             properties={properties}
@@ -34,7 +34,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
       </ul>
       {selectedRow ? (
         <div className="flex flex-col space-y-2 w-full h-full overflow-auto">
-          {selectedRow.render()}
+          <RenderMappedRequest mapperContent={selectedRow} />
         </div>
       ) : (
         <div className="flex flex-col space-y-4 justify-center items-center h-full w-full bg-white border border-gray-300 dark:bg-black dark:border-gray-700 rounded-lg">

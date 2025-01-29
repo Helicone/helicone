@@ -8,7 +8,7 @@ import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
-import { supabaseServer } from "../lib/supabaseServer";
+import { getSupabaseServer } from "../lib/supabaseServer";
 
 interface DashboardProps {
   user: User;
@@ -41,7 +41,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   const { context } = options;
 
   const { data: orgLayout, error: organizationLayoutError } =
-    await supabaseServer
+    await getSupabaseServer()
       .from("organization_layout")
       .select("*")
       .eq("organization_id", orgId)

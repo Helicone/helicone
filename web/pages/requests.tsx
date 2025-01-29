@@ -1,6 +1,6 @@
 import { User } from "@supabase/auth-helpers-react";
 import AuthLayout from "../components/layout/auth/authLayout";
-import RequestsPageV2 from "../components/templates/requestsV2/requestsPageV2";
+import RequestsPageV2 from "../components/templates/requests/requestsPageV2";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement, useEffect } from "react";
 import {
@@ -8,7 +8,7 @@ import {
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { supabaseServer } from "../lib/supabaseServer";
+import { getSupabaseServer } from "../lib/supabaseServer";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `
@@ -128,7 +128,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   const pageSize = parseInt(page_size as string, 10) || 25;
 
   const { data: orgLayout, error: organizationLayoutError } =
-    await supabaseServer
+    await getSupabaseServer()
       .from("organization_layout")
       .select("*")
       .eq("organization_id", orgId)
