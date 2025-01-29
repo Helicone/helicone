@@ -30,10 +30,10 @@ export function costOf({
     return null;
   }
 
-  // We need to concat allCosts because we need to check the provider costs first and if it is not founder thn fall back to make the best guess.
+  // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
   // This is because we did not backfill the provider on supabase yet, and we do not plan to
   // This is really for legacy
-  // TODO after 07/2024 we can probably remove this
+  // TODO: after 07/2024 we can probably remove this
   const costs = providerCost.costs.concat(allCosts);
 
   const cost = costs.find((cost) => {
@@ -51,17 +51,22 @@ export function costOf({
 }
 
 export function costOfPrompt({
+  provider,
   model,
   promptTokens,
+  promptCacheWriteTokens,
+  promptCacheReadTokens,
   completionTokens,
-  provider: provider,
   images = 1,
+
   perCall = 1,
 }: {
+  provider: string;
   model: string;
   promptTokens: number;
+  promptCacheWriteTokens: number;
+  promptCacheReadTokens: number;
   completionTokens: number;
-  provider: string;
   images?: number;
   perCall?: number;
 }) {
@@ -69,11 +74,41 @@ export function costOfPrompt({
   if (!cost) {
     return null;
   }
-  const tokenCost =
-    cost.prompt_token * promptTokens + cost.completion_token * completionTokens;
+
+  let totalCost = 0;
+
+  // Calculate regular prompt tokens (excluding cache tokens)
+  const regularPromptTokens = Math.max(
+    0,
+    promptTokens - (promptCacheWriteTokens + promptCacheReadTokens)
+  );
+
+  // Add cost for regular prompt tokens
+  totalCost += cost.prompt_token * regularPromptTokens;
+
+  // Add cost for cache write tokens if applicable
+  if (cost.prompt_cache_write_token && promptCacheWriteTokens > 0) {
+    totalCost += cost.prompt_cache_write_token * promptCacheWriteTokens;
+  } else if (promptCacheWriteTokens > 0) {
+    totalCost += cost.prompt_token * promptCacheWriteTokens;
+  }
+
+  // Add cost for cache read tokens if applicable
+  if (cost.prompt_cache_read_token && promptCacheReadTokens > 0) {
+    totalCost += cost.prompt_cache_read_token * promptCacheReadTokens;
+  } else if (promptCacheReadTokens > 0) {
+    totalCost += cost.prompt_token * promptCacheReadTokens;
+  }
+
+  // Add cost for completion tokens
+  totalCost += cost.completion_token * completionTokens;
+
+  // Add cost for images
   const imageCost = (cost.per_image ?? 0) * images;
   const perCallCost = (cost.per_call ?? 0) * perCall;
-  return tokenCost + imageCost + perCallCost;
+  totalCost += imageCost + perCallCost;
+
+  return totalCost;
 }
 
 function caseForCost(costs: ModelRow[], table: string, multiple: number) {

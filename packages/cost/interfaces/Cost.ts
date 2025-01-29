@@ -34,6 +34,8 @@ export interface ModelRow {
   model: TextOperator;
   cost: {
     prompt_token: number;
+    prompt_cache_write_token?: number;
+    prompt_cache_read_token?: number;
     completion_token: number;
     per_image?: number;
     per_call?: number;
@@ -45,3 +47,4 @@ export interface ModelRow {
     end: string;
   };
 }
+
