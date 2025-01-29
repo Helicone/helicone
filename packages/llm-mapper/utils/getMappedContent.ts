@@ -13,6 +13,8 @@ import { mapOpenAIModeration } from "../mappers/openai/moderation";
 import { MapperFn } from "../mappers/types";
 import { MappedLLMRequest, MapperType } from "../types";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapVectorDB } from "../mappers/vector-db";
+import { mapTool } from "../mappers/tool";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
@@ -24,6 +26,8 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-moderation": mapOpenAIModeration,
   "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
+  "vector-db": mapVectorDB,
+  tool: mapTool,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
