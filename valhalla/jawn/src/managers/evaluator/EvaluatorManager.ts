@@ -14,6 +14,8 @@ import {
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { convertTestInputToHeliconeRequest } from "./convert";
+import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
 
@@ -58,7 +60,11 @@ export class EvaluatorManager extends BaseManager {
     config: LastMileConfigForm;
     testInput: TestInput;
   }) {
-    return ok(null);
+    return runLastMileEvaluator(
+      convertTestInputToHeliconeRequest(testInput),
+      config,
+      testInput.inputs
+    );
   }
   testPythonEvaluator({
     code,

@@ -12,15 +12,14 @@ import { useState } from "react";
 import { testEvaluator } from "@/components/templates/evals/testing/test";
 import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import MarkdownEditor from "../../../../shared/markdownEditor";
 import { EvaluatorTestResult } from "../types";
 import { PreviewLastMile } from "./PreviewLastMile";
-import { useQuery } from "@tanstack/react-query";
-import { HeliconeRequest } from "@/lib/api/request/request";
-import { Label } from "@/components/ui/label";
 
 export function TestEvaluator() {
   const { testConfig, setTestConfig, testInput, setTestInput } =
@@ -30,7 +29,7 @@ export function TestEvaluator() {
     testInput?.promptTemplate ?? ""
   );
   const [result, setResult] = useState<EvaluatorTestResult>(null);
-  const [activeTab, setActiveTab] = useState("inputs");
+  const [activeTab, setActiveTab] = useState("inputBody");
 
   const jawn = useJawnClient();
 
@@ -107,12 +106,12 @@ export function TestEvaluator() {
             onValueChange={setActiveTab}
           >
             <TabsList>
+              <TabsTrigger value="inputBody">Input Body</TabsTrigger>
+              <TabsTrigger value="outputBody">Output Body</TabsTrigger>
               <TabsTrigger value="inputs">Inputs</TabsTrigger>
               {promptTemplate !== undefined && (
                 <TabsTrigger value="prompt">Prompt Template</TabsTrigger>
               )}
-              <TabsTrigger value="inputBody">Input Body</TabsTrigger>
-              <TabsTrigger value="outputBody">Output Body</TabsTrigger>
             </TabsList>
 
             <TabsContent value="inputs" className="space-y-4 mt-4">
@@ -322,7 +321,7 @@ export function TestEvaluator() {
           onClick={async () => {
             if (!testConfig) return;
             setResult({ _type: "running" });
-            const rez = await testEvaluator(testConfig, jawn);
+            const rez = await testEvaluator(testConfig, jawn, testInput);
             setResult(rez);
           }}
         >

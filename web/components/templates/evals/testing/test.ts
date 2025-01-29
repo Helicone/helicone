@@ -1,11 +1,14 @@
-import { EvaluatorTestResult } from "@/components/templates/evals/CreateNewEvaluator/types";
-import { TestConfig } from "./types";
-
+import {
+  EvaluatorTestResult,
+  TestInput,
+} from "@/components/templates/evals/CreateNewEvaluator/types";
 import { ClientType } from "@/lib/clients/jawn";
+import { TestConfig } from "./types";
 
 export async function testEvaluator(
   testData: TestConfig,
-  jawn: ClientType
+  jawn: ClientType,
+  testInput: TestInput
 ): Promise<EvaluatorTestResult> {
   if (testData._type === "llm") {
     const result = await jawn.POST("/v1/evaluator/llm/test", {
@@ -14,7 +17,7 @@ export async function testEvaluator(
           evaluator_scoring_type: testData.evaluator_scoring_type,
           evaluator_llm_template: testData.evaluator_llm_template,
         },
-        testInput: testData.testInput,
+        testInput: testInput,
         evaluatorName: testData.evaluator_name,
       },
     });
@@ -34,12 +37,35 @@ export async function testEvaluator(
     const result = await jawn.POST("/v1/evaluator/python/test", {
       body: {
         code: testData.code,
-        testInput: testData.testInput,
+        testInput: testInput,
       },
     });
     if (result?.data?.data) {
       return {
         ...(result?.data?.data ?? {}),
+        _type: "completed",
+      };
+    } else {
+      return {
+        _type: "error",
+        error: result?.data?.error ?? "Unknown error - try again",
+      };
+    }
+  } else if (testData._type === "lastmile") {
+    const result = await jawn.POST("/v1/evaluator/lastmile/test", {
+      body: {
+        config: testData.config,
+        testInput: testInput,
+      },
+    });
+    if (result?.data?.data) {
+      return {
+        output: result.data.data.score.toString(),
+        traces: [
+          `Input:\n${result.data.data.input}`,
+          `Output:\n${result.data.data.output}`,
+          `Ground Truth:\n${result.data.data.ground_truth}`,
+        ],
         _type: "completed",
       };
     } else {

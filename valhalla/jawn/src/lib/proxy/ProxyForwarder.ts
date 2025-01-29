@@ -1,4 +1,4 @@
-import { Provider } from "../../models/models";
+import { Provider } from "../../packages/llm-mapper/types";
 import { KafkaProducer } from "../clients/KafkaProducer";
 import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";

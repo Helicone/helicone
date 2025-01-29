@@ -4,7 +4,10 @@ import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
 import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
-import { HandlerContext, Message } from "../lib/handlers/HandlerContext";
+import {
+  HandlerContext,
+  KafkaMessageContents,
+} from "../lib/handlers/HandlerContext";
 import { LogStore } from "../lib/stores/LogStore";
 import { PromptHandler } from "../lib/handlers/PromptHandler";
 import { PostHogHandler } from "../lib/handlers/PostHogHandler";
@@ -22,7 +25,9 @@ import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 import { OnlineEvalHandler } from "../lib/handlers/OnlineEvalHandler";
 
 export class LogManager {
-  public async processLogEntry(logMessage: Message): Promise<void> {
+  public async processLogEntry(
+    logMessage: KafkaMessageContents
+  ): Promise<void> {
     await this.processLogEntries([logMessage], {
       batchId: "",
       partition: 0,
@@ -32,7 +37,7 @@ export class LogManager {
   }
 
   public async processLogEntries(
-    logMessages: Message[],
+    logMessages: KafkaMessageContents[],
     batchContext: {
       batchId: string;
       partition: number;
@@ -156,7 +161,7 @@ export class LogManager {
       lastOffset: string;
       messageCount: number;
     },
-    logMessages: Message[]
+    logMessages: KafkaMessageContents[]
   ): Promise<void> {
     console.log(`Upserting logs for batch ${batchContext.batchId}`);
     const start = performance.now();

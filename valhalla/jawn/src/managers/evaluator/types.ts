@@ -1,4 +1,4 @@
-type DataEntry =
+export type DataEntry =
   | {
       _type: "system-prompt";
     }

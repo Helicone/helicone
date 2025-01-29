@@ -349,15 +349,25 @@ export class EvaluatorController extends Controller {
       config: LastMileConfigForm;
       testInput: TestInput;
     }
-  ): Promise<Result<null, string>> {
+  ): Promise<
+    Result<
+      {
+        score: number;
+        input: string;
+        output: string;
+        ground_truth?: string;
+      },
+      string
+    >
+  > {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.testLastMileEvaluator(requestBody);
-    if (result.error || !result.data) {
+    if (result.error) {
       this.setStatus(500);
       return err(result.error || "Failed to test last mile evaluator");
     } else {
       this.setStatus(200);
-      return ok(null);
+      return ok(result.data!);
     }
   }
 }

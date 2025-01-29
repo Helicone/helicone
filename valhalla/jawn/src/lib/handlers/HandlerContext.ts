@@ -1,17 +1,17 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { Provider } from "../../models/models";
+import { Provider } from "../../packages/llm-mapper/types";
 import { SetOnce } from "../../utils/setOnce";
 import { AuthParams, OrgParams } from "../db/supabase";
 
 export class HandlerContext extends SetOnce {
-  public message: Message;
+  public message: KafkaMessageContents;
   public authParams?: AuthParams;
   public orgParams?: OrgParams;
   public usage: Usage;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
 
-  constructor(message: Message) {
+  constructor(message: KafkaMessageContents) {
     super();
     this.message = message;
     this.processedLog = {
@@ -98,7 +98,7 @@ export type HeliconeMeta = {
   heliconeManualAccessKey?: string;
 };
 
-export type Message = {
+export type KafkaMessageContents = {
   authorization: string;
   heliconeMeta: HeliconeMeta;
   log: Log;

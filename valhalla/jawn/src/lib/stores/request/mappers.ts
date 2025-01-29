@@ -1,5 +1,5 @@
 import { LlmSchema } from "../../shared/requestResponseModel";
-import { HeliconeRequest } from "./request";
+import { HeliconeRequest } from "../../../packages/llm-mapper/types";
 
 export function mapGeminiPro(
   request: HeliconeRequest,

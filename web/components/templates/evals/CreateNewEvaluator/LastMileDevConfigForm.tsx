@@ -125,7 +125,8 @@ const DEFAULT_FAITHFULNESS_TYPE: LastMileConfigForm = {
     _type: "system-prompt",
   },
   output: {
-    _type: "system-prompt",
+    _type: "output-body",
+    content: "message",
   },
 };
 
@@ -136,7 +137,8 @@ const DEFAULT_RELEVANCE_TYPE: LastMileConfigForm = {
     _type: "system-prompt",
   },
   output: {
-    _type: "system-prompt",
+    _type: "output-body",
+    content: "message",
   },
 };
 
@@ -147,7 +149,8 @@ const DEFAULT_CONTEXT_RELEVANCE_TYPE: LastMileConfigForm = {
     _type: "system-prompt",
   },
   output: {
-    _type: "system-prompt",
+    _type: "output-body",
+    content: "message",
   },
 };
 
@@ -170,14 +173,13 @@ export const LastMileDevConfigForm: React.FC<{
   const { setTestConfig: setTestData } = useTestDataStore();
 
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
-    DEFAULT_FAITHFULNESS_TYPE
+    DEFAULT_RELEVANCE_TYPE
   );
 
   useEffect(() => {
     setTestData((prev) => {
       if (!prev) return null;
       return {
-        testInput: prev.testInput,
         _type: "lastmile",
         evaluator_name: "",
         config: evaluatorType,
@@ -206,9 +208,9 @@ export const LastMileDevConfigForm: React.FC<{
           <SelectValue placeholder="Select evaluator type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="faithfulness">Faithfulness</SelectItem>
           <SelectItem value="relevance">Relevance</SelectItem>
           <SelectItem value="context_relevance">Context Relevance</SelectItem>
+          <SelectItem value="faithfulness">Faithfulness</SelectItem>
         </SelectContent>
       </Select>
       {evaluatorType.input && (

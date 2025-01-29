@@ -1,8 +1,5 @@
 import { Col } from "@/components/layout/common";
 import { DataEntry, LastMileConfigForm, TestInput } from "../types";
-import { Label } from "@/components/ui/label";
-import { useMemo } from "react";
-import getNormalizedRequest from "@/components/templates/requestsV2/builder/requestBuilder";
 
 export function RenderDataEntry(dataEntry: DataEntry) {
   return <div>{dataEntry._type}</div>;
@@ -23,7 +20,7 @@ export function PreviewLastMile({
   return (
     <div>
       <Col>
-        <Label>Input</Label>
+        {/* <Label>Input</Label>
 
         {JSON.stringify(testDataConfig.input)}
         <Label>Output</Label>
@@ -35,7 +32,7 @@ export function PreviewLastMile({
             <Label>Ground Truth</Label>
             {JSON.stringify(testDataConfig.groundTruth)}
           </div>
-        )}
+        )} */}
       </Col>
     </div>
   );
