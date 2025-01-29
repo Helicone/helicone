@@ -33,6 +33,7 @@ export interface CreateEvaluatorParams {
   llm_template?: any;
   name: string;
   code_template?: any;
+  last_mile_config?: any;
 }
 
 export interface UpdateEvaluatorParams {
@@ -40,6 +41,7 @@ export interface UpdateEvaluatorParams {
   llm_template?: any;
   code_template?: any;
   name?: string;
+  last_mile_config?: any;
 }
 
 export interface EvaluatorResult {

@@ -250,6 +250,13 @@ export const LastMileDevConfigForm: React.FC<{
       <Row className="justify-between mt-4">
         <Button
           onClick={() => {
+            if (!evaluatorType.name) {
+              notification.setNotification(
+                "Evaluator name is required",
+                "error"
+              );
+              return;
+            }
             if (existingEvaluatorId) {
               jawn
                 .PUT(`/v1/evaluator/{evaluatorId}`, {
@@ -259,9 +266,10 @@ export const LastMileDevConfigForm: React.FC<{
                     },
                   },
                   body: {
-                    llm_template: openAIFunction,
-                    scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
-                    name: configFormParams.name,
+                    llm_template: null,
+                    last_mile_config: evaluatorType,
+                    scoring_type: `LASTMILE`,
+                    name: evaluatorType.name,
                   },
                 })
                 .then((res) => {
@@ -270,15 +278,16 @@ export const LastMileDevConfigForm: React.FC<{
                       "Evaluator updated successfully",
                       "success"
                     );
+                    invalidate();
                   }
                 });
             } else {
               jawn
                 .POST("/v1/evaluator", {
                   body: {
-                    llm_template: openAIFunction,
-                    scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
-                    name: configFormParams.name,
+                    last_mile_config: evaluatorType,
+                    scoring_type: `LASTMILE`,
+                    name: evaluatorType.name,
                   },
                 })
                 .then((res) => {

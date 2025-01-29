@@ -1481,7 +1481,8 @@
 					"name": {
 						"type": "string"
 					},
-					"code_template": {}
+					"code_template": {},
+					"last_mile_config": {}
 				},
 				"required": [
 					"scoring_type",
@@ -1532,7 +1533,8 @@
 					"code_template": {},
 					"name": {
 						"type": "string"
-					}
+					},
+					"last_mile_config": {}
 				},
 				"type": "object",
 				"additionalProperties": false

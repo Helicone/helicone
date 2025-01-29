@@ -460,9 +460,9 @@ export class EvaluatorManager extends BaseManager {
 
     const result = await dbExecute<EvaluatorResult>(
       `
-      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name
+      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name, last_mile_config
       `,
       [
         params.scoring_type,
@@ -470,6 +470,7 @@ export class EvaluatorManager extends BaseManager {
         this.authParams.organizationId,
         params.name,
         params.code_template,
+        params.last_mile_config,
       ]
     );
 
@@ -526,6 +527,11 @@ export class EvaluatorManager extends BaseManager {
     if (params.code_template !== undefined) {
       updateFields.push(`code_template = $${paramIndex++}`);
       updateValues.push(params.code_template);
+    }
+
+    if (params.last_mile_config !== undefined) {
+      updateFields.push(`last_mile_config = $${paramIndex++}`);
+      updateValues.push(params.last_mile_config);
     }
 
     if (updateFields.length === 0) {

@@ -368,6 +368,7 @@ export interface components {
       llm_template?: unknown;
       name: string;
       code_template?: unknown;
+      last_mile_config?: unknown;
     };
     "ResultSuccess_EvaluatorResult-Array_": {
       data: components["schemas"]["EvaluatorResult"][];
@@ -380,6 +381,7 @@ export interface components {
       llm_template?: unknown;
       code_template?: unknown;
       name?: string;
+      last_mile_config?: unknown;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
