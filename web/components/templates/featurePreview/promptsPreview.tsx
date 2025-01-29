@@ -26,7 +26,16 @@ const promptFeatures: Feature[] = [
     imageSrc: "/static/features/prompts/feature2.png",
     imageAlt: "Version control interface",
   },
-  // ... other prompt features
+  {
+    title: "Test Prompts in Real-Time",
+    description: [
+      "Edit and run prompts side-by-side with instant feedback",
+      "Experiment with different models, messages, temperatures, and parameters",
+    ],
+    imageSrc: "/static/features/prompts/feature3.png",
+    imageAlt: "Prompt testing interface",
+    isImageLeft: true,
+  },
 ];
 
 const pricingPlans: PricingPlan[] = [

@@ -3,6 +3,7 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import LogoBox from "./LogoBox";
 import FeaturePreviewSection from "./featurePreviewSection";
+import { Button } from "@/components/ui/button";
 
 interface FeaturePreviewProps {
   title: string;
@@ -39,63 +40,73 @@ const FeaturePreview = ({
   const [selectedPlan, setSelectedPlan] = useState(pricingPlans[0].name);
 
   return (
-    <div className="relative min-h-[200vh]">
+    <div className="min-h-[200vh]">
       <div className="relative h-screen">
         <div className="absolute inset-0 max-w-7xl mx-auto z-[30] pointer-events-none">
           <LogoBox
             imgSrc="/static/pricing/anthropic.webp"
-            className="w-[130px] h-[130px] absolute bottom-[22vh] translate-x-[30px] left-40 rotate-[10deg]"
+            className="w-[130px] h-[130px] absolute 
+            top-[500px] 2xl:top-[500px] left-[150px] translate-x-[30px] rotate-[10deg]"
             innerClassName="bg-white p-4"
           />
           <LogoBox
             imgSrc="/static/pricing/gemini.webp"
-            className="w-[90px] h-[90px] absolute top-1/3 translate-x-[-50px] right-10 rotate-[-25deg]"
+            className="w-24 h-24 absolute 
+            top-[200px] 2xl:top-[200px] right-10 translate-x-[-50px] rotate-[-25deg]"
             innerClassName="bg-white"
           />
           <LogoBox
             imgSrc="/static/pricing/logo2.webp"
-            className="w-[120px] h-[120px] absolute bottom-[30vh] translate-x-[30px] left-0 rotate-[8deg]"
+            className="w-[120px] h-[120px] absolute 
+            top-[430px] 2xl:top-[430px] left-0 translate-x-[30px] rotate-[8deg]"
           />
           <LogoBox
             imgSrc="/static/pricing/chatgpt.webp"
-            className="w-[140px] h-[140px] absolute bottom-40 translate-y-[-20px] right-1/4 translate-x-[150px] rotate-[15deg]"
+            className="w-[140px] h-[140px] absolute
+            top-[500px] 2xl:top-[500px] right-1/4 translate-x-[150px] rotate-[15deg]"
             innerClassName="bg-[#0FA37F] rounded-3xl"
             size="large"
           />
           <LogoBox
             imgSrc="/static/pricing/togetherai.webp"
-            className="w-[80px] h-[80px] absolute bottom-[52vh] translate-x-[30px] left-14 rotate-[6deg]"
+            className="w-[80px] h-[80px] absolute 
+            top-[300px] 2xl:top-[300px] left-14 translate-x-[50px] rotate-[6deg]"
             innerClassName="rounded-3xl"
             size="small"
           />
           <LogoBox
             imgSrc="/static/pricing/mistral.webp"
-            className="w-[90px] h-[90px] absolute bottom-[10vh] translate-x-[30px] left-0 rotate-[-15deg]"
+            className="w-24 h-24 absolute 
+            top-[650px] 2xl:top-[650px] left-0 translate-x-[30px] rotate-[-15deg]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/groq.svg"
-            className="w-[110px] h-[110px] absolute bottom-[33vh] -translate-y-[50px] right-10 rotate-[12deg]"
+            className="w-[110px] h-[110px] absolute 
+            top-[400px] 2xl:top-[400px] right-10 -translate-y-[50px] rotate-[12deg]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/logo3.webp"
-            className="w-[100px] h-[100px] absolute bottom-0 translate-y-[-20px] right-1/4 translate-x-[200px] rotate-[-25deg]"
+            className="w-28 h-28 absolute 
+            top-[700px] 2xl:top-[700px] right-1/4 translate-x-[200px] rotate-[-25deg]"
             innerClassName="bg-white p-2"
             size="medium"
           />
           <LogoBox
             imgSrc="/static/pricing/logo4.webp"
-            className="w-[80px] h-[80px] absolute bottom-[5vh] translate-x-[30px] left-32 rotate-[-15deg]"
+            className="w-20 h-20 absolute 
+            top-[700px] 2xl:top-[700px] left-32 translate-x-[30px] rotate-[-15deg]"
             size="small"
           />
         </div>
 
-        <div className="relative z-30 flex flex-col items-center justify-center min-h-[calc(100vh-280px)] p-4">
-          <div className="text-center mb-8">
-            <div className="text-[#031727] text-[40px] font-semibold leading-[52px] tracking-normal">
+        {/* Feature Preview */}
+        <div className="flex flex-col items-center mx-auto mb-0">
+          <div className="text-center mb-8 lg:mb-4">
+            <div className="text-[#031727] text-[40px] lg:text-[32px] font-semibold leading-[52px] tracking-normal">
               {title} <br />
               {subtitle}
             </div>
@@ -125,42 +136,35 @@ const FeaturePreview = ({
                   key={plan.name}
                   onClick={() => setSelectedPlan(plan.name)}
                   className={`
-                      w-[320px] h-[303px] p-5 bg-white rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
-                      relative overflow-hidden
-                      ${
-                        plan.name === selectedPlan
-                          ? "border-2 border-sky-500"
-                          : "border border-slate-200"
-                      }
-                      group
-                    `}
+                    w-[320px] h-[303px] lg:w-[300px] lg:h-[280px] p-5 rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
+                    relative overflow-hidden bg-white
+                    ${
+                      plan.name === selectedPlan
+                        ? "border-2 border-sky-500"
+                        : "border border-slate-200"
+                    }
+                    group hover:bg-sky-100 transition-colors duration-300
+                  `}
                 >
-                  <div
-                    className="
-                      absolute inset-0 
-                      bg-gradient-to-t from-sky-500/20 via-sky-500/5 via-35% to-transparent to-40%
-                      opacity-0 group-hover:opacity-100
-                      transition-opacity duration-300
-                      pointer-events-none
-                    "
-                  />
-                  <div className="relative z-10 self-stretch h-[255px] flex-col justify-start items-start gap-6 flex">
+                  <div className="relative z-10 self-stretch h-[255px] flex-col justify-start items-start gap-6 lg:gap-2 flex">
                     <div className="self-stretch h-[87px] flex-col justify-start items-start gap-3 flex">
                       <div className="self-stretch justify-between items-center inline-flex">
                         <div className="text-slate-900 text-lg font-medium leading-none">
                           {plan.name}
                         </div>
-                        <div className="w-[27px] h-[27px] bg-white rounded-full border border-black flex items-center justify-center">
-                          {plan.name === selectedPlan && (
-                            <div className="w-[17px] h-[17px] bg-sky-500 rounded-full" />
-                          )}
-                        </div>
+                        <div
+                          className={`w-[24px] h-[24px] rounded-full ${
+                            plan.name === selectedPlan
+                              ? "border-[7px] border-sky-500"
+                              : "border border-slate-500"
+                          } bg-white flex items-center justify-center p-0`}
+                        ></div>
                       </div>
                       <div>
-                        <span className="text-slate-900 text-[40px] font-normal font-['Inter']">
+                        <span className="text-slate-900 text-[40px] font-medium">
                           ${plan.price}
                         </span>
-                        <span className="text-slate-400 text-[40px] font-light font-['Inter']">
+                        <span className="text-slate-500 text-[40px] font-light">
                           /mo
                         </span>
                       </div>
@@ -197,27 +201,41 @@ const FeaturePreview = ({
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <div className="h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex">
-              <div className="text-white text-lg font-medium leading-normal tracking-normal">
+          <div className="flex flex-col items-center gap-4 mt-8 w-[220px] lg:mt-4">
+            <a
+              href="https://docs.helicone.ai"
+              target="_blank"
+              className="w-full"
+            >
+              <Button
+                className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
+                variant="action"
+              >
                 Start 7-day free trial
-              </div>
-            </div>
+              </Button>
+            </a>
 
-            <div className="h-11 p-2.5 justify-center items-center gap-2.5 inline-flex cursor-pointer">
-              <div className="text-slate-700 text-lg font-semibold leading-normal tracking-tight">
-                Read the doc
-              </div>
-            </div>
+            <a
+              href="https://docs.helicone.ai"
+              target="_blank"
+              className="w-full"
+            >
+              <Button
+                className="w-full bg-transparent border-none rounded-xl hover:bg-slate-200 text-slate-700 text-lg font-semibold leading-normal tracking-tight hover:no-underline h-[52px] px-6 py-1.5"
+                variant="action"
+              >
+                Read the docs
+              </Button>
+            </a>
           </div>
         </div>
-      </div>
 
-      <FeaturePreviewSection
-        pageTitle={pageTitle}
-        features={features}
-        ctaImage={ctaImage}
-      />
+        <FeaturePreviewSection
+          pageTitle={pageTitle}
+          features={features}
+          ctaImage={ctaImage}
+        />
+      </div>
     </div>
   );
 };
