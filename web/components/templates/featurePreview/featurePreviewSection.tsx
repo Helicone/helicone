@@ -22,8 +22,8 @@ const FeaturePreviewSection = ({
   showCTA = true,
 }: FeaturePreviewSectionProps) => {
   return (
-    <div className="-mt-56 bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
-      <div className="bg-white rounded-3xl relative z-0">
+    <div className="-mt-56 relative bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
+      <div className="bg-white rounded-3xl relative">
         {/* Reduced padding-top from pt-20 to pt-10 */}
         <div className="w-[668px] mx-auto pt-10 mb-20">
           <h2 className="text-center text-[#031727] text-4xl font-semibold font-['Inter'] leading-[48px] tracking-tight">
@@ -32,7 +32,7 @@ const FeaturePreviewSection = ({
         </div>
 
         {/* Features List */}
-        <div className="w-[1092px] flex-col justify-start items-start gap-10 inline-flex mx-auto px-10">
+        <div className="w-[1092px] flex-col justify-start items-start gap-10 inline-flex mx-auto px-0">
           {features.map((feature, index) => (
             <div
               key={index}
