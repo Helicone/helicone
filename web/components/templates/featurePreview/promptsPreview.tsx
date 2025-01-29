@@ -11,7 +11,11 @@ const promptFeatures: Feature[] = [
       "Create templates with variables and track real production inputs",
       "Connect to any major AI provider (Anthropic, OpenAI, Google, Meta, DeepSeek and more)",
     ],
-    imageSrc: "/static/features/prompts/feature1.png",
+    media: {
+      type: "video",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts1_fs.mp4",
+      fallbackImage: "/static/features/prompts/feature1.png",
+    },
     imageAlt: "Prompt building interface",
     isImageLeft: true,
   },
@@ -23,8 +27,27 @@ const promptFeatures: Feature[] = [
       "Track commit messages to understand why changes were made",
       "Deploy any version using just the prompt ID",
     ],
-    imageSrc: "/static/features/prompts/feature2.png",
+    media: {
+      type: "video",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts2_fs.mp4",
+      fallbackImage: "/static/features/prompts/feature2.png",
+    },
     imageAlt: "Version control interface",
+  },
+  {
+    title: "Prompt Editor Copilot",
+    description: [
+      "Write prompts faster with auto-complete and smart suggestions",
+      "Add variables (⌘E) and XML delimiters (⌘J) with quick shortcuts",
+      "Perform any edits you describe with natural language (⌘K)",
+    ],
+    media: {
+      type: "video",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts3_fs.mp4",
+      fallbackImage: "/static/features/prompts/feature3.png",
+    },
+    imageAlt: "Prompt testing interface",
+    isImageLeft: true,
   },
   {
     title: "Test Prompts in Real-Time",
@@ -32,9 +55,13 @@ const promptFeatures: Feature[] = [
       "Edit and run prompts side-by-side with instant feedback",
       "Experiment with different models, messages, temperatures, and parameters",
     ],
-    imageSrc: "/static/features/prompts/feature3.png",
+    media: {
+      type: "video",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts4_fs.mp4",
+      fallbackImage: "/static/features/prompts/feature4.png",
+    },
     imageAlt: "Prompt testing interface",
-    isImageLeft: true,
+    isImageLeft: false,
   },
 ];
 

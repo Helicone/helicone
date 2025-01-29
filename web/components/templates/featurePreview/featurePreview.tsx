@@ -40,8 +40,8 @@ const FeaturePreview = ({
   const [selectedPlan, setSelectedPlan] = useState(pricingPlans[0].name);
 
   return (
-    <div className="min-h-[200vh]">
-      <div className="relative h-screen">
+    <div className="min-h-screen">
+      <div className="relative">
         <div className="absolute inset-0 max-w-7xl mx-auto z-[30] pointer-events-none">
           <LogoBox
             imgSrc="/static/pricing/anthropic.webp"
@@ -104,7 +104,7 @@ const FeaturePreview = ({
         </div>
 
         {/* Feature Preview */}
-        <div className="flex flex-col items-center mx-auto mb-0">
+        <div className="flex flex-col items-center mx-auto mb-8">
           <div className="text-center mb-8 lg:mb-4">
             <div className="text-[#031727] text-[40px] lg:text-[32px] font-semibold leading-[52px] tracking-normal">
               {title} <br />

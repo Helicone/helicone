@@ -1,9 +1,14 @@
 import { CheckIcon } from "@heroicons/react/24/solid";
+import React from "react";
 
 export type Feature = {
   title: string;
+  media: {
+    type: "video" | "image";
+    src: string;
+    fallbackImage?: string;
+  };
   description: string[];
-  imageSrc: string;
   imageAlt: string;
   isImageLeft?: boolean;
 };
@@ -40,10 +45,9 @@ const FeaturePreviewSection = ({
             >
               {feature.isImageLeft ? (
                 <>
-                  <img
-                    className="w-[563px] h-[311px] rounded-[18px] border border-slate-200"
-                    src={feature.imageSrc}
-                    alt={feature.imageAlt}
+                  <FeatureMedia
+                    media={feature.media}
+                    imageAlt={feature.imageAlt}
                   />
                   <FeatureText
                     title={feature.title}
@@ -56,10 +60,9 @@ const FeaturePreviewSection = ({
                     title={feature.title}
                     description={feature.description}
                   />
-                  <img
-                    className="w-[563px] h-[311px] rounded-[18px] border border-slate-200"
-                    src={feature.imageSrc}
-                    alt={feature.imageAlt}
+                  <FeatureMedia
+                    media={feature.media}
+                    imageAlt={feature.imageAlt}
                   />
                 </>
               )}
@@ -77,7 +80,7 @@ const FeaturePreviewSection = ({
                 />
               )}
               <button className="w-[210px] h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex">
-                <div className="text-white text-base font-bold font-['Inter'] leading-normal tracking-tight">
+                <div className="text-white text-base font-bold leading-normal tracking-tight">
                   Start 7-day free trial
                 </div>
               </button>
@@ -89,6 +92,53 @@ const FeaturePreviewSection = ({
   );
 };
 
+const FeatureMedia = ({
+  media,
+  imageAlt,
+}: {
+  media: Feature["media"];
+  imageAlt: string;
+}) => {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries[0].isIntersecting ? video.play() : video.pause();
+    });
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  if (media.type === "video") {
+    return (
+      <div className="w-[563px] h-[311px] rounded-[18px] border border-slate-200 overflow-hidden">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          src={media.src}
+          poster={media.fallbackImage}
+          muted
+          loop
+          playsInline
+        />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      loading="lazy"
+      className="w-[563px] h-[311px] rounded-[18px] border border-slate-200 object-cover"
+      src={media.src}
+      alt={imageAlt}
+    />
+  );
+};
+
 const FeatureText = ({
   title,
   description,
@@ -97,7 +147,7 @@ const FeatureText = ({
   description: string[];
 }) => (
   <div className="w-[449px] flex-col justify-start items-start gap-3 inline-flex">
-    <div className="text-slate-900 text-3xl font-semibold font-['Inter'] whitespace-pre-line">
+    <div className="text-slate-900 text-2xl font-medium whitespace-pre-line">
       {title}
     </div>
     <div className="self-stretch flex-col justify-start items-start flex">
@@ -109,7 +159,7 @@ const FeatureText = ({
           <div className="h-[24.53px] py-1 justify-start items-center gap-2.5 flex">
             <CheckIcon className="h-[16.53px] text-green-500" />
           </div>
-          <div className="grow shrink basis-0 text-slate-700 text-base font-medium font-['Inter'] leading-normal">
+          <div className="grow shrink basis-0 text-slate-600 text-base font-medium leading-normal">
             {text}
           </div>
         </div>
