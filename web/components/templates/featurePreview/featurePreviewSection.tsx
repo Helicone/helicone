@@ -22,11 +22,11 @@ const FeaturePreviewSection = ({
   showCTA = true,
 }: FeaturePreviewSectionProps) => {
   return (
-    <div className="-mt-56 relative bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
+    <div className="-mt-60 relative bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
       <div className="bg-white rounded-3xl relative">
         {/* Reduced padding-top from pt-20 to pt-10 */}
-        <div className="w-[668px] mx-auto pt-10 mb-20">
-          <h2 className="text-center text-[#031727] text-4xl font-semibold font-['Inter'] leading-[48px] tracking-tight">
+        <div className="w-[500px] mx-auto pt-10 mb-20">
+          <h2 className="text-center text-[#031727] text-3xl font-medium leading-[48px] tracking-tight">
             {pageTitle}
           </h2>
         </div>

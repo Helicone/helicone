@@ -4,15 +4,22 @@ const LogoBox = ({
   className,
   innerClassName,
   imgSrc,
+  size = "medium",
 }: {
   className?: string;
   innerClassName?: string;
   imgSrc: string;
+  size?: "small" | "medium" | "large";
 }) => {
   return (
     <div
       className={cn(
-        "bg-[#E2F1FD66] rounded-3xl p-3 2xl:p-3.5 shadow-xl hidden lg:block border-2 border-white",
+        "bg-[#ECF6FC] rounded-3xl shadow-xl hidden lg:block border border-white",
+        {
+          "p-2": size === "small",
+          "p-2.5": size === "medium",
+          "p-3": size === "large",
+        },
         className
       )}
     >

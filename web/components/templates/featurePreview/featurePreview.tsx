@@ -1,4 +1,4 @@
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import LogoBox from "./LogoBox";
@@ -39,57 +39,63 @@ const FeaturePreview = ({
   const [selectedPlan, setSelectedPlan] = useState(pricingPlans[0].name);
 
   return (
-    <div className="relative">
-      <div className="absolute inset-0 max-w-7xl mx-auto z-[30] pointer-events-none">
-        <LogoBox
-          imgSrc="/static/pricing/anthropic.webp"
-          className="w-[130px] h-[130px] 2xl:w-[190px] 2xl:h-[190px] absolute bottom-[18vh] left-20 rotate-[13deg]"
-          innerClassName="bg-white p-4"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/gemini.webp"
-          className="w-24 h-24 2xl:w-28 2xl:h-28 absolute top-20 left-1/4 2xl:translate-x-[-200px] translate-x-[-100px] rotate-[-15deg]"
-          innerClassName="bg-white"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/logo2.webp"
-          className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-40 right-1/3 2xl:translate-x-[50px] translate-x-[80px] rotate-[13deg]"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/chatgpt.webp"
-          className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-16 right-1/4 2xl:translate-x-[150px] translate-x-[150px] rotate-[15deg]"
-          innerClassName="bg-[#0FA37F] rounded-3xl"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/togetherai.webp"
-          className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-12 right-0 2xl:-translate-x-[100px] -translate-x-[40px] rotate-[6deg]"
-          innerClassName="rounded-3xl"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/mistral.webp"
-          className="w-24 h-24 2xl:w-28 2xl:h-28 absolute bottom-1/3 right-1/4 2xl:translate-x-[100px] translate-x-[100px] -rotate-[15deg]"
-          innerClassName="bg-white p-2"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/groq.svg"
-          className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/2 2xl:-translate-y-[100px] -translate-y-[50px] right-0 2xl:-translate-x-[150px] -translate-x-[80px] rotate-[27deg]"
-          innerClassName="bg-white p-2"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/logo3.webp"
-          className="w-28 h-28 2xl:w-32 2xl:h-32 absolute bottom-0 right-1/4 2xl:translate-x-[100px] translate-x-[180px] rotate-[-32deg]"
-          innerClassName="bg-white p-2"
-        />
-        <LogoBox
-          imgSrc="/static/pricing/logo4.webp"
-          className="w-20 h-20 2xl:w-24 2xl:h-24 absolute bottom-24 right-0 2xl:-translate-x-[150px] -translate-x-[60px] rotate-[-15deg]"
-        />
-      </div>
-
+    <div className="relative min-h-[200vh]">
       <div className="relative h-screen">
-        <div className="relative z-30 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] p-4">
+        <div className="absolute inset-0 max-w-7xl mx-auto z-[30] pointer-events-none">
+          <LogoBox
+            imgSrc="/static/pricing/anthropic.webp"
+            className="w-[130px] h-[130px] absolute bottom-[22vh] translate-x-[30px] left-40 rotate-[10deg]"
+            innerClassName="bg-white p-4"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/gemini.webp"
+            className="w-[90px] h-[90px] absolute top-1/3 translate-x-[-50px] right-10 rotate-[-25deg]"
+            innerClassName="bg-white"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/logo2.webp"
+            className="w-[120px] h-[120px] absolute bottom-[30vh] translate-x-[30px] left-0 rotate-[8deg]"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/chatgpt.webp"
+            className="w-[140px] h-[140px] absolute bottom-40 translate-y-[-20px] right-1/4 translate-x-[150px] rotate-[15deg]"
+            innerClassName="bg-[#0FA37F] rounded-3xl"
+            size="large"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/togetherai.webp"
+            className="w-[80px] h-[80px] absolute bottom-[52vh] translate-x-[30px] left-14 rotate-[6deg]"
+            innerClassName="rounded-3xl"
+            size="small"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/mistral.webp"
+            className="w-[90px] h-[90px] absolute bottom-[10vh] translate-x-[30px] left-0 rotate-[-15deg]"
+            innerClassName="bg-white p-2"
+            size="medium"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/groq.svg"
+            className="w-[110px] h-[110px] absolute bottom-[33vh] -translate-y-[50px] right-10 rotate-[12deg]"
+            innerClassName="bg-white p-2"
+            size="medium"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/logo3.webp"
+            className="w-[100px] h-[100px] absolute bottom-0 translate-y-[-20px] right-1/4 translate-x-[200px] rotate-[-25deg]"
+            innerClassName="bg-white p-2"
+            size="medium"
+          />
+          <LogoBox
+            imgSrc="/static/pricing/logo4.webp"
+            className="w-[80px] h-[80px] absolute bottom-[5vh] translate-x-[30px] left-32 rotate-[-15deg]"
+            size="small"
+          />
+        </div>
+
+        <div className="relative z-30 flex flex-col items-center justify-center min-h-[calc(100vh-280px)] p-4">
           <div className="text-center mb-8">
-            <div className="text-[#031727] text-[40px] font-semibold font-['Inter'] leading-[52px] tracking-tight">
+            <div className="text-[#031727] text-[40px] font-semibold leading-[52px] tracking-normal">
               {title} <br />
               {subtitle}
             </div>
@@ -97,15 +103,17 @@ const FeaturePreview = ({
 
           <div className="h-[367px] flex-col justify-start items-start gap-6 inline-flex">
             <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
-              <div className="w-[18px] h-[18px] relative overflow-hidden"></div>
+              <div className="w-[18px] h-[18px] relative overflow-hidden">
+                <LightBulbIcon className="w-full h-full text-sky-500" />
+              </div>
               <div>
-                <span className="text-sky-500 text-base font-medium font-['Inter'] leading-normal tracking-tight">
+                <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
                   Adding prompt management requires a{" "}
                 </span>
-                <span className="text-sky-500 text-base font-medium font-['Inter'] underline leading-normal tracking-tight">
+                <span className="text-sky-500 text-base font-medium underline leading-normal tracking-tight">
                   Pro plan
                 </span>
-                <span className="text-sky-500 text-base font-medium font-['Inter'] leading-normal tracking-tight">
+                <span className="text-sky-500 text-base font-medium leading-normal tracking-tight">
                   .{" "}
                 </span>
               </div>
@@ -117,7 +125,7 @@ const FeaturePreview = ({
                   key={plan.name}
                   onClick={() => setSelectedPlan(plan.name)}
                   className={`
-                      w-[340px] h-[303px] p-6 bg-white rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
+                      w-[320px] h-[303px] p-5 bg-white rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
                       relative overflow-hidden
                       ${
                         plan.name === selectedPlan
@@ -139,7 +147,7 @@ const FeaturePreview = ({
                   <div className="relative z-10 self-stretch h-[255px] flex-col justify-start items-start gap-6 flex">
                     <div className="self-stretch h-[87px] flex-col justify-start items-start gap-3 flex">
                       <div className="self-stretch justify-between items-center inline-flex">
-                        <div className="text-slate-900 text-lg font-semibold font-['Inter'] leading-none">
+                        <div className="text-slate-900 text-lg font-medium leading-none">
                           {plan.name}
                         </div>
                         <div className="w-[27px] h-[27px] bg-white rounded-full border border-black flex items-center justify-center">
@@ -149,10 +157,10 @@ const FeaturePreview = ({
                         </div>
                       </div>
                       <div>
-                        <span className="text-slate-900 text-[40px] font-medium font-['Inter']">
+                        <span className="text-slate-900 text-[40px] font-normal font-['Inter']">
                           ${plan.price}
                         </span>
-                        <span className="text-slate-500 text-[40px] font-normal font-['Inter']">
+                        <span className="text-slate-400 text-[40px] font-light font-['Inter']">
                           /mo
                         </span>
                       </div>
@@ -163,22 +171,22 @@ const FeaturePreview = ({
                           key={feature.name}
                           className="self-stretch h-9 flex-col justify-start items-start flex"
                         >
-                          <div className="self-stretch p-2 justify-start items-start gap-2 inline-flex">
-                            <div className="w-[16.53px] h-[16.53px] relative overflow-hidden">
+                          <div className="self-stretch p-2 justify-start items-center inline-flex gap-2">
+                            <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
                               {feature.included ? (
                                 <CheckIcon className="w-full h-full text-green-500" />
                               ) : (
                                 <XMarkIcon className="w-full h-full text-red-500" />
                               )}
                             </div>
-                            <div className="grow shrink basis-0 text-slate-700 text-base font-medium font-['Inter'] leading-tight">
+                            <div className="grow shrink basis-0 text-slate-700 text-base font-[16px] leading-tight">
                               {feature.name}
                               {feature.additionalCost &&
                                 ` (${feature.additionalCost})`}
                             </div>
                           </div>
                           {index < plan.features.length - 1 && (
-                            <div className="self-stretch h-[0px] border border-slate-200" />
+                            <div className="self-stretch h-[0px] border-t border-slate-200" />
                           )}
                         </div>
                       ))}
@@ -190,14 +198,14 @@ const FeaturePreview = ({
           </div>
 
           <div className="flex flex-col items-center gap-4 mt-8">
-            <div className="h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex cursor-pointer">
-              <div className="text-white text-lg font-bold font-['Inter'] leading-normal tracking-tight">
+            <div className="h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex">
+              <div className="text-white text-lg font-medium leading-normal tracking-normal">
                 Start 7-day free trial
               </div>
             </div>
 
             <div className="h-11 p-2.5 justify-center items-center gap-2.5 inline-flex cursor-pointer">
-              <div className="text-[#031727] text-lg font-semibold font-['Inter'] leading-normal tracking-tight">
+              <div className="text-slate-700 text-lg font-semibold leading-normal tracking-tight">
                 Read the doc
               </div>
             </div>
