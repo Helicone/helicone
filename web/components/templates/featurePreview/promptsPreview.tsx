@@ -18,6 +18,7 @@ const promptFeatures: Feature[] = [
     },
     imageAlt: "Prompt building interface",
     isImageLeft: true,
+    ctaText: "Start building",
   },
   {
     title: "Control Every Version of Your Prompts",
@@ -33,6 +34,7 @@ const promptFeatures: Feature[] = [
       fallbackImage: "/static/features/prompts/feature2.png",
     },
     imageAlt: "Version control interface",
+    ctaText: "Deploy now",
   },
   {
     title: "Prompt Editor Copilot",
@@ -48,6 +50,7 @@ const promptFeatures: Feature[] = [
     },
     imageAlt: "Prompt testing interface",
     isImageLeft: true,
+    ctaText: "Start editing",
   },
   {
     title: "Test Prompts in Real-Time",
@@ -62,6 +65,7 @@ const promptFeatures: Feature[] = [
     },
     imageAlt: "Prompt testing interface",
     isImageLeft: false,
+    ctaText: "Test prompts",
   },
 ];
 

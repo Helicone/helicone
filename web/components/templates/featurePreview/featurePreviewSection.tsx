@@ -1,3 +1,6 @@
+import { BulletListItem } from "@/components/ui/bullet-list";
+import { BulletList } from "@/components/ui/bullet-list";
+import { Button } from "@/components/ui/button";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import React from "react";
 
@@ -11,6 +14,8 @@ export type Feature = {
   description: string[];
   imageAlt: string;
   isImageLeft?: boolean;
+  ctaText?: string;
+  ctaLink?: string;
 };
 
 export type FeaturePreviewSectionProps = {
@@ -37,12 +42,9 @@ const FeaturePreviewSection = ({
         </div>
 
         {/* Features List */}
-        <div className="w-[1092px] flex-col justify-start items-start gap-12 inline-flex mx-auto px-12">
+        <div className="w-[1092px] flex-col justify-start items-start gap-24 inline-flex mx-auto px-12">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="self-stretch justify-start items-center gap-20 inline-flex"
-            >
+            <div key={index} className="flex flex-row gap-16">
               {feature.isImageLeft ? (
                 <>
                   <FeatureMedia
@@ -52,6 +54,8 @@ const FeaturePreviewSection = ({
                   <FeatureText
                     title={feature.title}
                     description={feature.description}
+                    ctaText={feature.ctaText}
+                    ctaLink={feature.ctaLink}
                   />
                 </>
               ) : (
@@ -59,6 +63,8 @@ const FeaturePreviewSection = ({
                   <FeatureText
                     title={feature.title}
                     description={feature.description}
+                    ctaText={feature.ctaText}
+                    ctaLink={feature.ctaLink}
                   />
                   <FeatureMedia
                     media={feature.media}
@@ -115,7 +121,7 @@ const FeatureMedia = ({
 
   if (media.type === "video") {
     return (
-      <div className="w-[563px] h-[311px] rounded-[18px] border border-slate-200 overflow-hidden">
+      <div className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-slate-200 overflow-hidden">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -132,7 +138,7 @@ const FeatureMedia = ({
   return (
     <img
       loading="lazy"
-      className="w-[563px] h-[311px] rounded-[18px] border border-slate-200 object-cover"
+      className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-slate-200 object-cover"
       src={media.src}
       alt={imageAlt}
     />
@@ -142,30 +148,41 @@ const FeatureMedia = ({
 const FeatureText = ({
   title,
   description,
+  ctaText,
+  ctaLink,
 }: {
   title: string;
   description: string[];
-}) => (
-  <div className="w-[449px] flex-col justify-start items-start gap-3 inline-flex">
-    <div className="text-slate-900 text-2xl font-medium whitespace-pre-line">
-      {title}
-    </div>
-    <div className="self-stretch flex-col justify-start items-start flex">
-      {description.map((text, index) => (
-        <div
-          key={index}
-          className="self-stretch p-2 bg-white justify-start items-start gap-2 inline-flex"
-        >
-          <div className="h-[24.53px] py-1 justify-start items-center gap-2.5 flex">
-            <CheckIcon className="h-[16.53px] text-green-500" />
-          </div>
-          <div className="grow shrink basis-0 text-slate-600 text-base font-medium leading-normal">
-            {text}
-          </div>
+  ctaText?: string;
+  ctaLink?: string;
+}) => {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <div className="flex flex-col justify-between">
+      <div className="text-slate-900 text-2xl font-medium whitespace-pre-line">
+        {title}
+      </div>
+      <BulletList>
+        {description.map((text, index) => (
+          <BulletListItem key={index}>{text}</BulletListItem>
+        ))}
+      </BulletList>
+      {ctaText && (
+        <div className="mt-auto">
+          <Button
+            onClick={scrollToTop}
+            className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
+            variant="action"
+          >
+            {ctaText}
+          </Button>
         </div>
-      ))}
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default FeaturePreviewSection;
