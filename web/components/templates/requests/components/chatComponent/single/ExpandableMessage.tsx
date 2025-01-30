@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "../../../../../shared/clsx";
 import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
