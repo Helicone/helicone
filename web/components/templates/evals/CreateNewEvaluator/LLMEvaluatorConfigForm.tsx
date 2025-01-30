@@ -1,5 +1,5 @@
 import { Col, Row } from "@/components/layout/common";
-import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
+import { generateOpenAITemplate } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
 import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
 import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Button } from "@/components/ui/button";
@@ -27,11 +27,8 @@ import { InfoIcon } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import {
-  exTestInput,
-  LLM_AS_A_JUDGE_OPTIONS,
-} from "../../templates/evals/testing/examples";
-import useNotification from "../notification/useNotification";
+import useNotification from "../../../shared/notification/useNotification";
+import { LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { TestInput } from "./types";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
@@ -93,7 +90,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
 
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
 
   const {
     LLMEvaluatorConfigFormPreset: configFormParams,
@@ -127,13 +124,11 @@ export const LLMEvaluatorConfigForm: React.FC<{
       evaluator_llm_template: openAIFunction,
       evaluator_scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
       evaluator_name: configFormParams.name,
-      testInput: configFormParams.testInput ?? exTestInput,
     });
   }, [
     openAIFunction,
     configFormParams.expectedValueType,
     configFormParams.name,
-    configFormParams.testInput,
     setTestData,
   ]);
 

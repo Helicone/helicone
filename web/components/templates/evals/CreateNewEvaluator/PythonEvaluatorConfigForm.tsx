@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import React, { useEffect, useState } from "react";
-import MarkdownEditor from "../markdownEditor";
-import useNotification from "../notification/useNotification";
+import MarkdownEditor from "../../../shared/markdownEditor";
+import useNotification from "../../../shared/notification/useNotification";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -42,7 +42,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
   const { invalidate } = useInvalidateEvaluators();
 
   const [text, setText] = useState<string>(configFormParams.code);
-  const { setTestData } = useTestDataStore();
+  const { setTestConfig: setTestData } = useTestDataStore();
 
   const jawn = useJawnClient();
   const [name, setName] = useState<string>(defaultName);
@@ -51,7 +51,6 @@ export const PythonEvaluatorConfigForm: React.FC<{
       _type: "python",
       code: text,
       evaluator_name: name,
-      testInput: configFormParams.testInput!,
     });
   }, [text, configFormParams.testInput, setTestData, name]);
 

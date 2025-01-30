@@ -1,6 +1,7 @@
 import {
   CreateEvaluatorParams,
   EvaluatorResult,
+  TestInput,
   UpdateEvaluatorParams,
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
@@ -10,10 +11,14 @@ import {
   ExperimentOutputForScores,
   ExperimentV2Manager,
 } from "../../managers/experiment/ExperimentV2Manager";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { convertTestInputToHeliconeRequest } from "./convert";
+import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
+import { LastMileConfigForm } from "./types";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -49,6 +54,19 @@ export function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  testLastMileEvaluator({
+    config,
+    testInput,
+  }: {
+    config: LastMileConfigForm;
+    testInput: TestInput;
+  }) {
+    return runLastMileEvaluator(
+      convertTestInputToHeliconeRequest(testInput),
+      config,
+      testInput.inputs
+    );
+  }
   testPythonEvaluator({
     code,
     requestBodyString,
@@ -92,6 +110,7 @@ export class EvaluatorManager extends BaseManager {
     request_id,
     requestBody,
     responseBody,
+    heliconeRequest,
   }: {
     evaluator: EvaluatorResult;
     inputRecord: {
@@ -101,8 +120,14 @@ export class EvaluatorManager extends BaseManager {
     request_id: string;
     requestBody: string;
     responseBody: string;
+    heliconeRequest: HeliconeRequest;
   }): Promise<Result<{ score: number | boolean }, string>> {
-    if (evaluator.llm_template) {
+    if (evaluator.last_mile_config) {
+      return runLastMileEvaluator(heliconeRequest, evaluator.last_mile_config, {
+        inputs: inputRecord.inputs,
+        autoInputs: inputRecord.autoInputs,
+      });
+    } else if (evaluator.llm_template) {
       const llmAsAJudge = new LLMAsAJudge({
         scoringType: evaluator.scoring_type as
           | "LLM-CHOICE"
@@ -443,9 +468,9 @@ export class EvaluatorManager extends BaseManager {
 
     const result = await dbExecute<EvaluatorResult>(
       `
-      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name
+      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name, last_mile_config
       `,
       [
         params.scoring_type,
@@ -453,6 +478,7 @@ export class EvaluatorManager extends BaseManager {
         this.authParams.organizationId,
         params.name,
         params.code_template,
+        params.last_mile_config,
       ]
     );
 
@@ -464,7 +490,7 @@ export class EvaluatorManager extends BaseManager {
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
       FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
@@ -477,7 +503,7 @@ export class EvaluatorManager extends BaseManager {
   async queryEvaluators(): Promise<Result<EvaluatorResult[], string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template, last_mile_config
       FROM evaluator
       WHERE organization_id = $1
       ORDER BY created_at DESC
@@ -511,6 +537,11 @@ export class EvaluatorManager extends BaseManager {
       updateValues.push(params.code_template);
     }
 
+    if (params.last_mile_config !== undefined) {
+      updateFields.push(`last_mile_config = $${paramIndex++}`);
+      updateValues.push(params.last_mile_config);
+    }
+
     if (updateFields.length === 0) {
       return err("No fields to update");
     }
@@ -520,7 +551,7 @@ export class EvaluatorManager extends BaseManager {
       UPDATE evaluator
       SET ${updateFields.join(", ")}
       WHERE id = $${paramIndex++} AND organization_id = $${paramIndex++}
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
       `,
       [...updateValues, evaluatorId, this.authParams.organizationId]
     );

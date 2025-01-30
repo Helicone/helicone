@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { Message } from "../../lib/handlers/HandlerContext";
+import { KafkaMessageContents } from "../../lib/handlers/HandlerContext";
 import { LogManager } from "../../managers/LogManager";
 
 @Route("v1/log")
@@ -13,7 +13,7 @@ export class LogController extends Controller {
   @Post("/request")
   public async getRequests(
     @Body()
-    logMessage: Message,
+    logMessage: KafkaMessageContents,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<void> {
     const logManager = new LogManager();

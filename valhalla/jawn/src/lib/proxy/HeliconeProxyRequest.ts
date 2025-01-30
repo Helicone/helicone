@@ -1,6 +1,6 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { IHeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
-import { Provider } from "../../models/models";
+import { Provider } from "../../packages/llm-mapper/types";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
 
 import { RequestWrapper } from "../requestWrapper/requestWrapper";

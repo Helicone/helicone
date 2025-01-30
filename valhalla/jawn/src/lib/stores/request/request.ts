@@ -18,7 +18,9 @@ import {
 import { LlmSchema } from "../../shared/requestResponseModel";
 import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
-import { Provider } from "../../../models/models";
+import { Provider } from "../../../packages/llm-mapper/types";
+import { HeliconeRequest } from "../../../packages/llm-mapper/types";
+
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
 export interface HeliconeRequestAsset {
@@ -30,47 +32,6 @@ export interface Asset {
   request_id: string;
   organization_id: string;
   created_at: string;
-}
-
-export interface HeliconeRequest {
-  /**
-   * @example "Happy"
-   */
-  response_id: string | null;
-  response_created_at: string | null;
-  response_body?: any;
-  response_status: number;
-  response_model: string | null;
-  request_id: string;
-  request_created_at: string;
-  request_body: any;
-  request_path: string;
-  request_user_id: string | null;
-  request_properties: Record<string, string> | null;
-  request_model: string | null;
-  model_override: string | null;
-  helicone_user: string | null;
-  provider: Provider;
-  delay_ms: number | null;
-  time_to_first_token: number | null;
-  total_tokens: number | null;
-  prompt_tokens: number | null;
-  completion_tokens: number | null;
-  prompt_id: string | null;
-  feedback_created_at?: string | null;
-  feedback_id?: string | null;
-  feedback_rating?: boolean | null;
-  signed_body_url?: string | null;
-  llmSchema: LlmSchema | null;
-  country_code: string | null;
-  asset_ids: string[] | null;
-  asset_urls: Record<string, string> | null;
-  scores: Record<string, number> | null;
-  costUSD?: number | null;
-  properties: Record<string, string>;
-  assets: Array<string>;
-  target_url: string;
-  model?: string;
 }
 
 function addJoinQueries(joinQuery: string, filter: FilterNode): string {

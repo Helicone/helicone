@@ -8,7 +8,6 @@ import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
-  HeliconeRequest,
   HeliconeRequestAsset,
   getRequestAsset,
   getRequests,
@@ -16,6 +15,7 @@ import {
   getRequestsCachedClickhouse,
   getRequestsClickhouse,
 } from "../../lib/stores/request/request";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";

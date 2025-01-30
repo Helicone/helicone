@@ -26,12 +26,14 @@ import {
   EvaluatorScoreResult,
 } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { OPENAI_KEY } from "../../lib/clients/constant";
+import { LastMileConfigForm } from "../../managers/evaluator/types";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
   llm_template?: any;
   name: string;
   code_template?: any;
+  last_mile_config?: any;
 }
 
 export interface UpdateEvaluatorParams {
@@ -39,6 +41,7 @@ export interface UpdateEvaluatorParams {
   llm_template?: any;
   code_template?: any;
   name?: string;
+  last_mile_config?: any;
 }
 
 export interface EvaluatorResult {
@@ -50,6 +53,7 @@ export interface EvaluatorResult {
   updated_at: string;
   name: string;
   code_template: any;
+  last_mile_config: any;
 }
 
 type EvaluatorExperiment = {
@@ -62,7 +66,7 @@ type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
 };
 
-type TestInput = {
+export type TestInput = {
   inputBody: string;
   outputBody: string;
 
@@ -338,5 +342,35 @@ export class EvaluatorController extends Controller {
       this.setStatus(500);
     }
     return result;
+  }
+
+  @Post("/lastmile/test")
+  public async testLastMileEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      config: LastMileConfigForm;
+      testInput: TestInput;
+    }
+  ): Promise<
+    Result<
+      {
+        score: number;
+        input: string;
+        output: string;
+        ground_truth?: string;
+      },
+      string
+    >
+  > {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.testLastMileEvaluator(requestBody);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error || "Failed to test last mile evaluator");
+    } else {
+      this.setStatus(200);
+      return ok(result.data!);
+    }
   }
 }
