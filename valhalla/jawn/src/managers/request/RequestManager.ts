@@ -423,11 +423,13 @@ export class RequestManager extends BaseManager {
 
     return resultMap(requests, (req) => {
       return req.map((r) => {
+        const model =
+          r.model_override ?? r.response_model ?? r.request_model ?? "";
         return {
           ...r,
+          model: model,
           costUSD: costOfPrompt({
-            model:
-              r.model_override ?? r.response_model ?? r.request_model ?? "",
+            model: model,
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,
