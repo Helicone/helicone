@@ -1427,7 +1427,8 @@
 					"name": {
 						"type": "string"
 					},
-					"code_template": {}
+					"code_template": {},
+					"last_mile_config": {}
 				},
 				"required": [
 					"id",
@@ -1437,7 +1438,8 @@
 					"organization_id",
 					"updated_at",
 					"name",
-					"code_template"
+					"code_template",
+					"last_mile_config"
 				],
 				"type": "object",
 				"additionalProperties": false

@@ -1,5 +1,5 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { Provider } from "../../packages/llm-mapper/types";
+import { HeliconeRequest, Provider } from "../../packages/llm-mapper/types";
 import { SetOnce } from "../../utils/setOnce";
 import { AuthParams, OrgParams } from "../db/supabase";
 
@@ -129,4 +129,41 @@ export type ExperimentCellValue = {
   columnId: string;
   rowIndex: number;
   value: string;
+};
+
+export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
+  return {
+    request_body: context.processedLog.request.body,
+    response_body: context.processedLog.response.body,
+    request_id: context.message.log.request.id,
+    response_id: context.message.log.response.id,
+    request_created_at:
+      context.message.log.request.requestCreatedAt.toISOString(),
+    response_created_at:
+      context.message.log.response.responseCreatedAt.toISOString(),
+    response_status: context.message.log.response.status,
+    request_model: context.processedLog.request.model ?? null,
+    response_model: null,
+    request_path: context.message.log.request.path,
+    request_user_id: context.message.log.request.userId ?? null,
+    request_properties: context.message.log.request.properties ?? null,
+    model_override: null,
+    helicone_user: null,
+    provider: context.message.log.request.provider,
+    delay_ms: context.message.log.response.delayMs ?? null,
+    time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
+    total_tokens: context.usage.totalTokens ?? null,
+    prompt_tokens: context.usage.promptTokens ?? null,
+    completion_tokens: context.usage.completionTokens ?? null,
+    prompt_id: context.message.log.request.promptId ?? null,
+    llmSchema: null,
+    country_code: context.message.log.request.countryCode ?? null,
+    asset_ids: null,
+    asset_urls: null,
+    scores: null,
+    properties: context.message.log.request.properties ?? {},
+    assets: [],
+    target_url: context.message.log.request.targetUrl,
+    model: context.processedLog.model ?? "",
+  };
 };

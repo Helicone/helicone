@@ -589,6 +589,7 @@ const models: TsoaRoute.Models = {
             "updated_at": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "code_template": {"dataType":"any","required":true},
+            "last_mile_config": {"dataType":"any","required":true},
         },
         "additionalProperties": false,
     },

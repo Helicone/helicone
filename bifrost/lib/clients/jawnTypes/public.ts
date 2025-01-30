@@ -841,6 +841,7 @@ export interface components {
       updated_at: string;
       name: string;
       code_template: unknown;
+      last_mile_config: unknown;
     };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];

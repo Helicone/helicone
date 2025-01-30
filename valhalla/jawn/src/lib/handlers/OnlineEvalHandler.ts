@@ -7,7 +7,7 @@ import { KVCache } from "../cache/kvCache";
 import { err, PromiseGenericResult } from "../shared/result";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import { HandlerContext, toHeliconeRequest } from "./HandlerContext";
 
 const kvCache = new KVCache(60); // 1 minutes
 
@@ -95,11 +95,13 @@ export class OnlineEvalHandler extends AbstractLogHandler {
             organization_id: context.authParams?.organizationId ?? "",
             scoring_type: onlineEval.evaluator_scoring_type,
             updated_at: "n/a",
+            last_mile_config: onlineEval.last_mile_config,
           },
           inputRecord,
           request_id: context.message.log.request.id,
           requestBody: JSON.stringify(context.processedLog.request.body),
           responseBody: JSON.stringify(context.processedLog.response.body),
+          heliconeRequest: toHeliconeRequest(context),
         });
 
         if (result.error) {

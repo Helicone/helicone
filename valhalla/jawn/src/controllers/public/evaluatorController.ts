@@ -53,6 +53,7 @@ export interface EvaluatorResult {
   updated_at: string;
   name: string;
   code_template: any;
+  last_mile_config: any;
 }
 
 type EvaluatorExperiment = {

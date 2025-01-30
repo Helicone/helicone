@@ -32,6 +32,7 @@ function SelectDataEntryType({
       return {
         _type: "lastmile",
         evaluator_name: "",
+        config: DEFAULT_RELEVANCE_TYPE,
       };
     });
   }, [setTestData]);
@@ -164,7 +165,8 @@ export const LastMileDevConfigForm: React.FC<{
   onSubmit: () => void;
   existingEvaluatorId?: string;
   openTestPanel?: () => void;
-}> = ({ existingEvaluatorId, onSubmit, openTestPanel }) => {
+  preset?: LastMileConfigForm;
+}> = ({ existingEvaluatorId, onSubmit, openTestPanel, preset }) => {
   const notification = useNotification();
 
   const jawn = useJawnClient();
@@ -173,7 +175,7 @@ export const LastMileDevConfigForm: React.FC<{
   const { setTestConfig: setTestData } = useTestDataStore();
 
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
-    DEFAULT_RELEVANCE_TYPE
+    preset || DEFAULT_RELEVANCE_TYPE
   );
 
   useEffect(() => {
@@ -181,11 +183,18 @@ export const LastMileDevConfigForm: React.FC<{
       if (!prev) return null;
       return {
         _type: "lastmile",
-        evaluator_name: "",
+        evaluator_name: evaluatorType.name,
         config: evaluatorType,
       };
     });
   }, [setTestData, evaluatorType]);
+
+  // Initialize with preset if available
+  useEffect(() => {
+    if (preset) {
+      setEvaluatorType(preset);
+    }
+  }, [preset]);
 
   return (
     <Col className="h-full flex flex-col gap-2">
