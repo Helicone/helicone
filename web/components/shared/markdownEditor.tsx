@@ -9,7 +9,7 @@ import Editor from "react-simple-code-editor";
 import { Editor as MonacoEditor } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 const MAX_EDITOR_HEIGHT = 500;
 const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
