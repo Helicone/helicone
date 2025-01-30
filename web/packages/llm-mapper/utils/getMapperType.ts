@@ -24,6 +24,15 @@ export const getMapperTypeFromHeliconeRequest = (
     return "tool";
   }
 
+  // Check for OpenAI Assistant responses
+  if (
+    heliconeRequest.response_body?.object === "thread.run" ||
+    heliconeRequest.response_body?.assistant_id ||
+    heliconeRequest.response_body?.thread_id
+  ) {
+    return "openai-assistant";
+  }
+
   return getMapperType({
     model,
     provider: heliconeRequest.provider,
