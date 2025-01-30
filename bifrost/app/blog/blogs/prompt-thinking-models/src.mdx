@@ -1,32 +1,38 @@
 Thinking models are all the rage right now.
 
-These models effectively internalize the [Chain-of-Thought (CoT) prompting](https://www.datacamp.com/tutorial/chain-of-thought-prompting) process that was first popularized by Google researchers in a [2022 paper](https://arxiv.org/pdf/2201.11903). Unlike traditional LLMs—which require CoT to "reason"—they handle reasoning natively, which often leads to better results.
+![Thinking Models](/static/blog/blog/prompt-thinking-models/cover.webp)
 
-However, their reasoning ability also means you need to prompt them differently for the best results, and **most people get it wrong**. 
+These models effectively internalize the <a href="https://www.datacamp.com/tutorial/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought prompting</a> process that was first popularized by Google researchers in a <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">2022 paper</a>. Unlike traditional LLMs—which require CoT to "reason"—they handle reasoning natively, which often leads to better results.
+
+However, their reasoning ability also means you need to prompt them differently for the best results, and **most people get it wrong**.
 
 Here's how to do it.
 
 ## Prompt Thinking Models Like a Pro
-Thinking models require a different approach compared to standard LLMs. 
+
+Thinking models require a different approach compared to standard LLMs.
 
 Here’s a quick summary before diving into details:
 
-### **✅ DOs**
+### ✅ DOs
+
 - **Use minimal prompting** to let the model think independently.
 - **Encourage more reasoning** for better performance at complex tasks by prompting for additional processing time.
-{/* - **Use structured prompts** when necessary for consistency. */}
-- **Use [ensembling](https://www.promptlayer.com/glossary/prompt-ensembling)** for highly complex tasks requiring high accuracy.
+  {/* - **Use structured prompts** when necessary for consistency. */}
+- **Use <a href="https://www.promptlayer.com/glossary/prompt-ensembling" target="_blank" rel="noopener">ensembling</a>** for highly complex tasks requiring high accuracy.
 
-### **❌ DON’Ts**
+### ❌ DON’Ts
+
 - **Avoid few-shot and CoT prompting.** Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
 - **Don’t use thinking models for structured outputs** unless absolutely necessary. They perform worse with structured outputs than traditional models.
 - **Avoid overloading the model with unnecessary details.** More context isn’t always better.
 
-Most of these insights come from [research](https://arxiv.org/pdf/2411.03590) carried out by OpenAI and Microsoft as well as our own personal experience.
+Most of these insights come from <a href="https://arxiv.org/pdf/2411.03590" target="_blank" rel="noopener">research</a> carried out by OpenAI and Microsoft as well as our own personal experience.
 
 Let's get into the details!
 
 ## 1. Use Minimal Prompting
+
 Thinking models work best when given **concise, direct, and structured** prompts.
 
 Too much information can actually reduce accuracy. Unlike previous models where more context helped, thinking models already structure their reasoning internally. The best approach is to state the problem clearly and let the model figure out the steps.
@@ -34,6 +40,7 @@ Too much information can actually reduce accuracy. Unlike previous models where 
 Fewer instructions allow the model to **engage its reasoning process naturally**.
 
 ## 2. Encourage More Reasoning for Complex Tasks
+
 More complex problems benefit from additional reasoning time.
 
 Thinking models use **reasoning tokens**, which allow them to internally process a problem before outputting an answer. By **prompting the model to take its time**, you can improve the quality of the response. However, this also increases token usage, impacting cost.
@@ -46,6 +53,7 @@ Encouraging longer reasoning helps for **multi-step problems**, improving accura
 />
 
 ## 3. Avoid Few-Shot and Chain-of-Thought Prompting
+
 Traditional few-shot (where you give a bunch of examples) and CoT prompting strategies **reduce performance** for thinking models.
 
 According to the paper, openAI's **o1-preview model performed worse** when given few-shot examples. This contrasts with older models, where few-shot learning improved results. Thinking models are already designed to break down problems internally, so explicit step-by-step guidance can interfere with their reasoning.
@@ -53,6 +61,7 @@ According to the paper, openAI's **o1-preview model performed worse** when given
 Zero-shot prompts work **better** than few-shot prompts.
 
 ## 4. Use Thinking Models for Complex Multi-Step Tasks
+
 Thinking models perform best on tasks that require **five or more steps**.
 
 When solving problems with three to five steps, they offer only a **slight improvement** over standard models. For simpler tasks (fewer than three steps), performance **may actually degrade** compared to traditional LLMs, because they "overthink."
@@ -65,6 +74,7 @@ If a task is highly structured or simple, a regular LLM like GPT-4 may be a bett
 />
 
 ## 5. Structure Prompts for Consistent Outputs
+
 Thinking models struggle with structured outputs but can be guided to maintain consistency.
 
 If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully. However, **if structured output is critical**, you’re better off using a standard LLM instead of a thinking model.
@@ -72,6 +82,7 @@ If you need a structured response (e.g., JSON, tables, fixed formats), structure
 Thinking models are **not optimized for structured output** but can approximate it with carefully designed prompts.
 
 ## 6. Use Ensembling for Highly Complex Tasks
+
 For high-stakes or complex problems, ensembling improves performance.
 
 Ensembling involves **running multiple prompts** (either the same prompt multiple times or variations of the prompt) and aggregating the results. This approach increases accuracy but **raises costs** because multiple queries are required.
@@ -80,7 +91,7 @@ While ensembling boosts performance, it’s expensive and should only be used wh
 
 <CallToAction
   title="Observe your Thinking Models with Helicone"
-  description="If you'd like full visibilty into what your models have been thinking about, you need Helicone. Get started in as little as 5 minutes."
+  description="If you'd like full visibility into what your models have been thinking about, you need Helicone. Get started in as little as 5 minutes."
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="Contact Us"
@@ -88,7 +99,8 @@ While ensembling boosts performance, it’s expensive and should only be used wh
 />
 
 ## Conclusion
-Prompting thinking models like DeepSeek R1 and OpenAI o1 requires a different mindset and approach.
+
+Prompting thinking models like DeepSeek R1 and <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI o1</a> requires a different mindset and approach.
 
 Minimal, **clear prompts** work best, while **forcing few-shot examples or step-by-step reasoning reduces effectiveness**. When you must get a structured output, use standard LLMs instead. For even better responses, ensembling remains a powerful—though costly—technique.
 
