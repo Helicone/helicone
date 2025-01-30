@@ -130,7 +130,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // 2. Derive "masterVersion" if needed
       const masterVersion =
-        metadata.isProduction === true
+        metadata?.isProduction === true
           ? ver.major_version
           : promptVersions?.find(
               (v) => (v.metadata as { isProduction?: boolean })?.isProduction
@@ -142,7 +142,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: Variable[] = Object.entries(metadata.inputs || {}).map(
+      let variables: Variable[] = Object.entries(metadata?.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
@@ -156,7 +156,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         vars.forEach((v) => {
           variables.push({
             name: v.name,
-            value: metadata.inputs?.[v.name] ?? v.value ?? "",
+            value: metadata?.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
             isMessage: msg.idx !== undefined,
           });
@@ -184,7 +184,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: stateMessages,
         parameters: {
-          provider: metadata.provider ?? "openai",
+          provider: metadata?.provider ?? "openai",
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
         },
