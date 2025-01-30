@@ -230,6 +230,42 @@ export class EvaluatorManager extends BaseManager {
         request_id: run.request_id,
         requestBody,
         responseBody,
+        heliconeRequest: {
+          request_id: run.request_id,
+          request_created_at: new Date().toISOString(),
+          request_body: requestBody,
+          request_path: "",
+          request_user_id: null,
+          request_properties: null,
+          request_model: null,
+          model_override: null,
+          response_id: null,
+          response_created_at: null,
+          response_status: 200,
+          response_model: null,
+          helicone_user: null,
+          provider: "OPENAI",
+          delay_ms: null,
+          time_to_first_token: null,
+          total_tokens: null,
+          prompt_tokens: null,
+          completion_tokens: null,
+          prompt_id: null,
+          llmSchema: null,
+          country_code: null,
+          asset_ids: null,
+          asset_urls: null,
+          scores: Object.fromEntries(
+            Object.entries(run.scores || {}).map(([key, value]) => [
+              key,
+              typeof value.value === "number" ? value.value : 0,
+            ])
+          ),
+          properties: {},
+          assets: [],
+          target_url: "",
+          model: "gpt-3.5-turbo",
+        },
       });
       if (scoreResult.error) {
         return err(scoreResult.error);
