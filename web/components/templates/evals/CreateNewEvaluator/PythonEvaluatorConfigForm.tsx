@@ -51,7 +51,6 @@ export const PythonEvaluatorConfigForm: React.FC<{
       _type: "python",
       code: text,
       evaluator_name: name,
-      testInput: configFormParams.testInput!,
     });
   }, [text, configFormParams.testInput, setTestData, name]);
 

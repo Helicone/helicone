@@ -27,8 +27,8 @@ import { InfoIcon } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { exTestInput, LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import useNotification from "../../../shared/notification/useNotification";
+import { LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { TestInput } from "./types";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
