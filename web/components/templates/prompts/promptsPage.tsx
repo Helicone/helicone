@@ -162,7 +162,11 @@ const PromptsPage = (props: PromptsPageProps) => {
         actions={
           hasAccess ? (
             <>
-              <Button variant="action">
+              <Button
+                variant="action"
+                onClick={handleCreatePrompt}
+                disabled={isCreatingPrompt}
+              >
                 {isCreatingPrompt ? (
                   <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
                 ) : (
