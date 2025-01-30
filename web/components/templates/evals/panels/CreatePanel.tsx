@@ -65,10 +65,10 @@ export const CreatePanel = ({
             <TabsTrigger value="python">
               Python <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
-            <TabsTrigger value="lastmile">
+            {/* <TabsTrigger value="lastmile">
               LastMile.Dev <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
-            {/* <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger> */}
+             */}
             <TabsTrigger value="typescript" disabled>
               Typescript{" "}
               <span className="text-xs text-gray-500 px-3">(soon)</span>
