@@ -102,5 +102,5 @@ export const getMapperType = ({
     return "anthropic-chat";
   }
 
-  return "unknown";
+  return "openai-chat";
 };
