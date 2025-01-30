@@ -45,7 +45,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ActionButton from "@/components/shared/universal/ActionButton";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -163,19 +162,18 @@ const PromptsPage = (props: PromptsPageProps) => {
         actions={
           hasAccess ? (
             <>
-              <ActionButton
-                className="bg-heliblue hover:bg-heliblue/90 text-white"
-                label={isCreatingPrompt ? "Creating..." : "New Prompt"}
-                icon={
-                  isCreatingPrompt ? (
-                    <PiSpinnerGapBold className="animate-spin" />
-                  ) : (
-                    <PiPlusBold />
-                  )
-                }
+              <Button
+                variant="action"
                 onClick={handleCreatePrompt}
                 disabled={isCreatingPrompt}
-              />
+              >
+                {isCreatingPrompt ? (
+                  <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <PiPlusBold className="h-4 w-4 mr-2" />
+                )}
+                {isCreatingPrompt ? "Creating..." : "New Prompt"}
+              </Button>
 
               <Dialog>
                 <DialogTrigger asChild>
@@ -183,13 +181,15 @@ const PromptsPage = (props: PromptsPageProps) => {
                     Import from Code
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-full max-w-3xl bg-white">
+                <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
                   <DialogHeader>
                     <DialogTitle>Import from Code</DialogTitle>
                   </DialogHeader>
 
                   {/* TODO: Allow for Python tab as well */}
                   <DiffHighlight
+                    className="h-full"
+                    maxHeight={false}
                     code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
@@ -212,7 +212,7 @@ const chatCompletion = await openai.chat.completions.create(
     },
   }
 );`}
-                    language="typescript"
+                    language="tsx"
                     newLines={[]}
                     oldLines={[]}
                     minHeight={false}
@@ -222,8 +222,8 @@ const chatCompletion = await openai.chat.completions.create(
             </>
           ) : (
             <ProFeatureWrapper featureName="Prompts" enabled={false}>
-              <Button variant="action" size="default">
-                <PiPlusBold /> New Prompt
+              <Button variant="action">
+                <PiPlusBold className="h-4 w-4 mr-2" /> New Prompt
               </Button>
             </ProFeatureWrapper>
           )
