@@ -24,7 +24,10 @@ const getRequestText = (requestBody: any) => {
   if (typeof result === "string") {
     return result;
   }
-  return JSON.stringify(requestBody);
+  if (Array.isArray(result)) {
+    return result.map((item) => item.text || JSON.stringify(item)).join(" ");
+  }
+  return JSON.stringify(result);
 };
 
 const getResponseText = (responseBody: any, statusCode: number = 200) => {
@@ -78,7 +81,13 @@ const getRequestMessages = (request: any) => {
     requestMessages.push({
       id: crypto.randomUUID(),
       role: "system",
-      content: request.system,
+      content: Array.isArray(request.system)
+        ? request.system
+            .map((item: any) => item.text || JSON.stringify(item))
+            .join(" ")
+        : typeof request.system === "string"
+        ? request.system
+        : JSON.stringify(request.system),
       _type: "message",
     });
   }
@@ -139,7 +148,14 @@ const getRequestMessages = (request: any) => {
 
       // Handle regular text content
       return {
-        content: getFormattedMessageContent(message.content),
+        content:
+          typeof message.content === "string"
+            ? message.content
+            : Array.isArray(message.content)
+            ? message.content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(message.content),
         role: message.role,
         _type: getContentType(message as any),
       };
@@ -157,9 +173,14 @@ const anthropicContentToMessage = (
   if (!content?.type) {
     return {
       id: content?.id || crypto.randomUUID(),
-      content: getFormattedMessageContent(
-        "UKNOWN ANTHROPIC BODY" + JSON.stringify(content)
-      ),
+      content:
+        typeof content === "string"
+          ? content
+          : Array.isArray(content)
+          ? content
+              .map((item: any) => item.text || JSON.stringify(item))
+              .join(" ")
+          : JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
@@ -167,7 +188,7 @@ const anthropicContentToMessage = (
   if (content.type === "text") {
     return {
       id: content.id || crypto.randomUUID(),
-      content: getFormattedMessageContent(content.text),
+      content: content.text || JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
@@ -187,9 +208,14 @@ const anthropicContentToMessage = (
     return {
       id: content.id || crypto.randomUUID(),
       role: role,
-      content: getFormattedMessageContent(
-        "UKNOWN ANTHROPIC BODY" + JSON.stringify(content)
-      ),
+      content:
+        typeof content === "string"
+          ? content
+          : Array.isArray(content)
+          ? content
+              .map((item: any) => item.text || JSON.stringify(item))
+              .join(" ")
+          : JSON.stringify(content, null, 2),
       _type: "message",
     };
   }
@@ -206,7 +232,7 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
     } else {
       return {
         error: {
-          heliconeMessage: JSON.stringify(response.error),
+          heliconeMessage: JSON.stringify(response.error, null, 2),
         },
       };
     }
