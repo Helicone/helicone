@@ -3,9 +3,9 @@
     "title1": "How to safely switch your production apps to DeepSeek with Helicone",
     "title2": "How to safely switch your production apps to DeepSeek with Helicone",
     "description": "Learn how to use Helicone's experiments feature to safely switch to DeepSeek. This guide covers regression testing, model comparison, and seamless transition using production data without impacting users.",
-    "images": "/static/blog/experiments/gpt-4o.webp",
-    "time": "5 minute read",
-    "author": "Scott Nguyen",
-    "date": "May 14, 2024"
+    "images": "/static/blog/switch-to-deepseek/cover.webp",
+    "time": "8 minute read",
+    "author": "Cole Gottank",
+    "date": "January 31, 2025"
   }
   
