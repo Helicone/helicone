@@ -11,10 +11,7 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  COMPOSITE_OPTIONS,
-  LLM_AS_A_JUDGE_OPTIONS,
-} from "../../templates/evals/testing/examples";
+import { COMPOSITE_OPTIONS, LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { EvaluatorType } from "@/components/templates/evals/testing/types";
 
 export const EvaluatorTypeDropdown: React.FC<{

@@ -1,8 +1,9 @@
-import { LLMEvaluatorConfigFormPreset } from "@/components/shared/CreateNewEvaluator/LLMEvaluatorConfigForm";
+import { LLMEvaluatorConfigFormPreset } from "@/components/templates/evals/CreateNewEvaluator/LLMEvaluatorConfigForm";
 import {
   EvaluatorTestResult,
+  LastMileConfigForm,
   TestInput,
-} from "@/components/shared/CreateNewEvaluator/types";
+} from "@/components/templates/evals/CreateNewEvaluator/types";
 import {
   COMPOSITE_OPTIONS,
   LLM_AS_A_JUDGE_OPTIONS,
@@ -12,20 +13,25 @@ export type TestFunction = (
   testInputs: TestInput
 ) => Promise<EvaluatorTestResult>;
 
-export type TestData =
+export type TestConfig =
   | {
       _type: "llm";
       evaluator_llm_template: string;
       evaluator_scoring_type: string;
       evaluator_name: string;
-      testInput: TestInput;
     }
   | {
       _type: "python";
       evaluator_name: string;
       code: string;
-      testInput: TestInput;
+    }
+  | {
+      _type: "lastmile";
+      evaluator_name: string;
+
+      config: LastMileConfigForm;
     };
+
 export type CompositeOption = {
   name: string;
   _type: "composite";

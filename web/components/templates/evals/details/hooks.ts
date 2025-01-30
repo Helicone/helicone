@@ -2,19 +2,10 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEvaluators } from "../EvaluatorHook";
-
-type NotUndefined<T> = T extends undefined ? never : T;
-type NotNull<T> = T extends null ? never : T;
+import { Evaluator } from "./types";
 
 export function useEvaluatorDetails(
-  evaluator: NotNull<
-    NotUndefined<
-      NotUndefined<
-        ReturnType<typeof useEvaluators>["evaluators"]["data"]
-      >["data"]
-    >["data"]
-  >[number],
+  evaluator: Evaluator,
   onSuccess: () => void
 ) {
   const org = useOrg();

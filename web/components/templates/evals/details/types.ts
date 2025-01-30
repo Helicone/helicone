@@ -1,10 +1,11 @@
-import { useEvaluators } from "../EvaluatorHook";
-
-type NotUndefined<T> = T extends undefined ? never : T;
-type NotNull<T> = T extends null ? never : T;
-
-export type Evaluator = NotNull<
-  NotUndefined<
-    NotUndefined<ReturnType<typeof useEvaluators>["evaluators"]["data"]>["data"]
-  >["data"]
->[number];
+export interface Evaluator {
+  id: string;
+  created_at: string;
+  scoring_type: string;
+  llm_template: unknown;
+  organization_id: string;
+  updated_at: string;
+  name: string;
+  code_template: unknown;
+  last_mile_config?: unknown;
+}

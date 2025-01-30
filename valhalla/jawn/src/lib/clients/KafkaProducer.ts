@@ -1,5 +1,8 @@
 import { Kafka } from "@upstash/kafka";
-import { HeliconeScoresMessage, Message } from "../handlers/HandlerContext";
+import {
+  HeliconeScoresMessage,
+  KafkaMessageContents,
+} from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { LogManager } from "../../managers/LogManager";
 
@@ -33,7 +36,7 @@ export class KafkaProducer {
     });
   }
 
-  async sendMessageHttp(msg: Message) {
+  async sendMessageHttp(msg: KafkaMessageContents) {
     try {
       const logManager = new LogManager();
 
@@ -50,7 +53,7 @@ export class KafkaProducer {
   }
 
   async sendMessages(
-    msgs: Message[],
+    msgs: KafkaMessageContents[],
     topic: Topics
   ): PromiseGenericResult<string> {
     if (!this.kafka) {
