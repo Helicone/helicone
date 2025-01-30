@@ -9,6 +9,7 @@ import {
   PiRocketLaunchBold,
   PiStopBold,
   PiSpinnerGapBold,
+  PiBrainBold,
 } from "react-icons/pi";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
@@ -34,6 +35,7 @@ import {
   isLastMessageUser,
   isPrefillSupported,
   removeMessagePair,
+  parseImprovedMessages,
 } from "@/utils/messages";
 import {
   deduplicateVariables,
@@ -44,7 +46,6 @@ import { FlaskConicalIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
-
 import {
   usePrompt,
   usePromptVersions,
@@ -55,6 +56,10 @@ import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import EvalsPanel from "@/components/shared/prompts/EvalsPanel";
+import UniversalPopup from "@/components/shared/universal/Popup";
+import { $system, $user } from "@/utils/llm";
+import autoImprovePrompt from "@/prompts/auto-improve";
+import AutoImprove from "@/components/shared/prompts/AutoImprove";
 
 interface PromptIdPageProps {
   id: string;
@@ -68,6 +73,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
   // STATE
   const [state, setState] = useState<PromptState | null>(null);
+  const [isAutoIterateOpen, setIsAutoIterateOpen] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
 
   // STREAMING
   const [isStreaming, setIsStreaming] = useState(false);
@@ -547,6 +554,143 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     promptVersions,
   ]);
 
+  // WIP
+  const handleImprove = useCallback(async () => {
+    setIsImproving(true);
+
+    const prompt = autoImprovePrompt(state?.messages || []);
+
+    try {
+      abortController.current = new AbortController();
+
+      const stream = await generateStream({
+        provider: "deepseek",
+        model: "deepseek-r1",
+        messages: [$system(prompt.system), $user(prompt.user)],
+        temperature: 1,
+        includeReasoning: true,
+        signal: abortController.current.signal,
+        stop: ["</improved_user>", "</response_format>"], // TODO: Make this dynamic
+      });
+
+      await readStream(
+        stream,
+        (chunk: string) => {
+          try {
+            const jsonResponse = JSON.parse(chunk);
+
+            // Handle different types of chunks
+            if (jsonResponse.type === "content") {
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content:
+                      (prev?.improvement?.content || "") + jsonResponse.chunk,
+                    reasoning: prev?.improvement?.reasoning || "",
+                  },
+                }),
+                false
+              );
+            } else if (jsonResponse.type === "reasoning") {
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content: prev?.improvement?.content || "",
+                    reasoning:
+                      (prev?.improvement?.reasoning || "") + jsonResponse.chunk,
+                  },
+                }),
+                false
+              );
+            } else if (jsonResponse.type === "final") {
+              // Final message just confirms the complete content and reasoning
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content: jsonResponse.content,
+                    reasoning: jsonResponse.reasoning,
+                  },
+                }),
+                false
+              );
+            }
+          } catch (error) {
+            console.error("Error parsing chunk:", error);
+          }
+        },
+        abortController.current.signal
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("Error generating improvements:", error);
+        setNotification("Failed to generate improvements", "error");
+      }
+    } finally {
+      setIsImproving(false);
+      abortController.current = null;
+    }
+  }, [state?.messages, updateState, setNotification]);
+
+  const handleApplyImprovement = useCallback(async () => {
+    if (!state?.improvement?.content) return;
+
+    try {
+      const improvedMessages = parseImprovedMessages(state.improvement.content);
+      const latestVersionId = promptVersions?.[0]?.id;
+      if (!latestVersionId) return;
+
+      // Build Helicone Template for Saving
+      const heliconeTemplate = {
+        model: state.parameters.model,
+        temperature: state.parameters.temperature,
+        messages: improvedMessages,
+      };
+
+      const metadata = {
+        isProduction: false,
+        createdFromUi: true,
+        provider: state.parameters.provider,
+        inputs: Object.fromEntries(
+          (state.variables || []).map((v) => [v.name, v.value || ""])
+        ),
+      };
+
+      const result = await jawnClient.POST(
+        "/v1/prompt/version/{promptVersionId}/subversion",
+        {
+          params: { path: { promptVersionId: latestVersionId } },
+          body: {
+            newHeliconeTemplate: heliconeTemplate,
+            metadata,
+            isMajorVersion: true,
+          },
+        }
+      );
+
+      if (result?.error || !result?.data) {
+        setNotification("Error saving improved prompt", "error");
+        return;
+      }
+
+      // Load the new version data and refresh the versions list
+      loadVersionData(result.data.data);
+      await refetchPromptVersions();
+
+      setNotification("Successfully applied improvements", "success");
+      setIsAutoIterateOpen(false);
+    } catch (error) {
+      console.error("Error applying improvements:", error);
+      setNotification("Failed to apply improvements", "error");
+    }
+  }, [
+    state,
+    promptVersions,
+    jawnClient,
+    loadVersionData,
+    refetchPromptVersions,
+    setNotification,
+  ]);
+
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
@@ -647,6 +791,15 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
+          <Button
+            variant="link"
+            onClick={() => setIsAutoIterateOpen(true)}
+            disabled={state.isDirty}
+          >
+            <PiBrainBold className="h-4 w-4 mr-2" />
+            Auto-Improve
+          </Button>
+
           {/* Run & Save Button */}
           <Button
             className={`${
@@ -831,6 +984,28 @@ async function pullPromptAndRunCompletion() {
           promptUserDefinedId={prompt?.user_defined_id || ""}
         />
       </TabsContent>
+
+      {/* Auto-improve Popup */}
+      <UniversalPopup
+        title="Auto-Improve (Beta)"
+        width="w-full max-w-7xl"
+        isOpen={isAutoIterateOpen}
+        onClose={() => {
+          setIsAutoIterateOpen(false);
+          updateState({ improvement: undefined }, false);
+        }}
+      >
+        <AutoImprove
+          isImproving={isImproving}
+          improvement={state.improvement}
+          version={state.version}
+          messages={state.messages}
+          onStartImprove={handleImprove}
+          onApplyImprovement={handleApplyImprovement}
+          onCancel={() => setIsAutoIterateOpen(false)}
+          updateState={(updates) => updateState(updates, false)}
+        />
+      </UniversalPopup>
     </Tabs>
   );
 }
