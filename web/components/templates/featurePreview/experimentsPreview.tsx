@@ -89,33 +89,20 @@ const ExperimentsPreview = () => {
     "experiments",
     "Experiments"
   );
+  const [selectedPlan, setSelectedPlan] = useState<string>();
 
   const handleStartTrial = async (selectedPlan?: string) => {
-    return new Promise<void>((resolve, reject) => {
-      if (!selectedPlan) {
-        notification.setNotification(
-          "Please select a plan to continue",
-          "error"
-        );
-        return;
-      }
-      setIsConfirmDialogOpen(true);
-    });
+    if (!selectedPlan) {
+      notification.setNotification("Please select a plan to continue", "error");
+      return;
+    }
+    setSelectedPlan(selectedPlan);
+    setIsConfirmDialogOpen(true);
   };
 
   const confirmExperimentsChange = async () => {
-    try {
-      const success = await handleConfirmTrial();
-      if (success) {
-        setIsConfirmDialogOpen(false);
-      }
-    } catch (error) {
-      setIsConfirmDialogOpen(false);
-      notification.setNotification(
-        "Failed to start trial. Please try again or contact support.",
-        "error"
-      );
-    }
+    const success = await handleConfirmTrial(selectedPlan);
+    if (success) setIsConfirmDialogOpen(false);
   };
 
   return (

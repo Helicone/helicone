@@ -13,7 +13,7 @@ interface FeaturePreviewProps<T extends string> {
   pricingPlans: PricingPlan<T>[];
   featureSectionProps: FeaturePreviewSectionProps;
   proRequired?: boolean;
-  onStartTrial?: (selectedPlan?: T) => Promise<void>;
+  onStartTrial?: (selectedPlan: T) => Promise<void>;
 }
 
 export type PricingPlan<T extends string = string> = {

@@ -139,20 +139,20 @@ const PromptsPreview = () => {
     "prompts",
     "Prompts"
   );
+  const [selectedPlan, setSelectedPlan] = useState<PromptPricingPlanName>();
 
   const handleStartTrial = async (selectedPlan?: PromptPricingPlanName) => {
     if (!selectedPlan) {
       notification.setNotification("Please select a plan to continue", "error");
       return;
     }
+    setSelectedPlan(selectedPlan);
     setIsConfirmDialogOpen(true);
   };
 
   const confirmPromptsChange = async () => {
-    const success = await handleConfirmTrial();
-    if (success) {
-      setIsConfirmDialogOpen(false);
-    }
+    const success = await handleConfirmTrial(selectedPlan);
+    if (success) setIsConfirmDialogOpen(false);
   };
 
   let pricingPlan: PricingPlan<PromptPricingPlanName>[] = [];

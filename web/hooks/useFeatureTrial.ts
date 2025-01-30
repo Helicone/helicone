@@ -20,9 +20,22 @@ export const useFeatureTrial = (
   });
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (selectedPlan?: string) => {
+      const isTeamBundle = selectedPlan === "Team Bundle";
       const jawn = getJawnClient(org?.currentOrg?.id);
 
+      // Handle Team Bundle selection
+      if (isTeamBundle) {
+        const endpoint =
+          subscription.data?.data?.status === "canceled"
+            ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
+            : "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle";
+
+        const { data } = await jawn.POST(endpoint);
+        return { type: "redirect" as const, url: data };
+      }
+
+      // Existing logic for individual addons
       if (proRequired) {
         const endpoint =
           subscription.data?.data?.status === "canceled"
@@ -48,9 +61,9 @@ export const useFeatureTrial = (
     },
   });
 
-  const handleConfirmTrial = async () => {
+  const handleConfirmTrial = async (selectedPlan?: string) => {
     try {
-      const result = await mutation.mutateAsync();
+      const result = await mutation.mutateAsync(selectedPlan);
 
       if (result.type === "redirect") {
         window.open(result.url, "_blank");

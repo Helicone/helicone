@@ -330,6 +330,22 @@ WHERE (${builtFilter.filter})`,
               },
             ]
           : []),
+        ...(body?.addons?.experiments
+          ? [
+              {
+                price: proProductPrices["experiments"],
+                quantity: 1,
+              },
+            ]
+          : []),
+        ...(body?.addons?.evals
+          ? [
+              {
+                price: proProductPrices["evals"],
+                quantity: 1,
+              },
+            ]
+          : []),
       ],
       mode: "subscription",
       success_url: `${origin}/dashboard`,

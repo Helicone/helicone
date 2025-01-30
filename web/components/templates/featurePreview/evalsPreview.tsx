@@ -100,20 +100,20 @@ const EvalsPreview = () => {
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { handleConfirmTrial, proRequired } = useFeatureTrial("evals", "Evals");
+  const [selectedPlan, setSelectedPlan] = useState<EvalsPricingPlanName>();
 
   const handleStartTrial = async (selectedPlan?: EvalsPricingPlanName) => {
     if (!selectedPlan) {
       notification.setNotification("Please select a plan to continue", "error");
       return;
     }
+    setSelectedPlan(selectedPlan);
     setIsConfirmDialogOpen(true);
   };
 
   const confirmEvalsChange = async () => {
-    const success = await handleConfirmTrial();
-    if (success) {
-      setIsConfirmDialogOpen(false);
-    }
+    const success = await handleConfirmTrial(selectedPlan);
+    if (success) setIsConfirmDialogOpen(false);
   };
 
   return (

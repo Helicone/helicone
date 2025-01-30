@@ -71,6 +71,7 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: UpgradeToProRequest
   ) {
+    console.log(`Body JSON: ${JSON.stringify(body)}`);
     const stripeManager = new StripeManager(request.authParams);
 
     const clientOrigin = request.headers.origin;
