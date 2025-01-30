@@ -2,18 +2,24 @@ import { XMarkIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import LogoBox from "./LogoBox";
-import FeaturePreviewSection from "./featurePreviewSection";
+import FeaturePreviewSection, {
+  FeaturePreviewSectionProps,
+} from "./featurePreviewSection";
 import { Button } from "@/components/ui/button";
 
 interface FeaturePreviewProps {
   title: string;
   subtitle: string;
   pricingPlans: PricingPlan[];
-  proRequiredText?: string;
-  pageTitle: string;
-  features: any[];
-  ctaImage: string;
+  featureSectionProps: FeaturePreviewSectionProps;
 }
+
+export type PricingPlan = {
+  name: string;
+  isSelected?: boolean;
+  price: string;
+  features: PricingFeature[];
+};
 
 type PricingFeature = {
   name: string;
@@ -21,23 +27,16 @@ type PricingFeature = {
   additionalCost?: string;
 };
 
-export type PricingPlan = {
-  name: string;
-  price: string;
-  isSelected?: boolean;
-  features: PricingFeature[];
-};
-
 const FeaturePreview = ({
   title,
   subtitle,
   pricingPlans,
-  proRequiredText,
-  pageTitle,
-  features,
-  ctaImage,
+  featureSectionProps,
 }: FeaturePreviewProps) => {
-  const [selectedPlan, setSelectedPlan] = useState(pricingPlans[0].name);
+  const [selectedPlan, setSelectedPlan] = useState(() => {
+    const defaultPlan = pricingPlans.find((plan) => plan.isSelected);
+    return defaultPlan?.name;
+  });
 
   return (
     <div className="min-h-screen">
@@ -230,11 +229,7 @@ const FeaturePreview = ({
           </div>
         </div>
 
-        <FeaturePreviewSection
-          pageTitle={pageTitle}
-          features={features}
-          ctaImage={ctaImage}
-        />
+        <FeaturePreviewSection {...featureSectionProps} />
       </div>
     </div>
   );

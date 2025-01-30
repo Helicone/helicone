@@ -13,8 +13,8 @@ const promptFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts1_fs.mp4",
-      fallbackImage: "/static/features/prompts/feature1.png",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts1_2.mp4",
+      fallbackImage: "/static /features/prompts/feature1.png",
     },
     imageAlt: "Prompt building interface",
     isImageLeft: true,
@@ -30,7 +30,7 @@ const promptFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts2_fs.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts2_2.mp4",
       fallbackImage: "/static/features/prompts/feature2.png",
     },
     imageAlt: "Version control interface",
@@ -45,7 +45,7 @@ const promptFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts3_fs.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts3_2.mp4",
       fallbackImage: "/static/features/prompts/feature3.png",
     },
     imageAlt: "Prompt testing interface",
@@ -60,7 +60,7 @@ const promptFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts4_fs.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/prompts4_2.mp4",
       fallbackImage: "/static/features/prompts/feature4.png",
     },
     imageAlt: "Prompt testing interface",
@@ -103,11 +103,17 @@ const PromptsPreview = () => {
       <FeaturePreview
         title="Prompt Management"
         subtitle="in a Shared Workspace"
-        proRequiredText="Adding prompt management requires a Pro plan"
         pricingPlans={pricingPlans}
-        pageTitle="Create, Version and Test Prompts Collaboratively"
-        features={promptFeatures}
-        ctaImage="/static/features/prompts/cta.png"
+        featureSectionProps={{
+          pageTitle: "Create, Version and Test Prompts Collaboratively",
+          features: promptFeatures,
+          quote: {
+            prefix:
+              "The ability to test prompt variations on production traffic without touching a line of code is magical.",
+            highlight: "It feels like we're cheating; it's just that good!",
+            suffix: "",
+          },
+        }}
       />
     </>
   );
