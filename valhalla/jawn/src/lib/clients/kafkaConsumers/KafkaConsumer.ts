@@ -1,7 +1,10 @@
 import * as Sentry from "@sentry/node";
 import { KafkaMessage } from "kafkajs";
 import { LogManager } from "../../../managers/LogManager";
-import { HeliconeScoresMessage, Message } from "../../handlers/HandlerContext";
+import {
+  HeliconeScoresMessage,
+  KafkaMessageContents,
+} from "../../handlers/HandlerContext";
 import {
   GenericResult,
   PromiseGenericResult,
@@ -206,13 +209,13 @@ export const consume = async ({
 };
 function mapKafkaMessageToMessage(
   kafkaMessage: KafkaMessage[]
-): GenericResult<Message[]> {
-  const messages: Message[] = [];
+): GenericResult<KafkaMessageContents[]> {
+  const messages: KafkaMessageContents[] = [];
   for (const message of kafkaMessage) {
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        const parsedMsg = JSON.parse(kafkaValue.value) as KafkaMessageContents;
         messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
         return err(`Failed to parse message: ${error}`);
@@ -246,7 +249,7 @@ function mapKafkaMessageToScoresMessage(
   return ok(messages);
 }
 
-function mapMessageDates(message: Message): Message {
+function mapMessageDates(message: KafkaMessageContents): KafkaMessageContents {
   return {
     ...message,
     log: {
@@ -576,13 +579,13 @@ export const consumeScoresDlq = async () => {
 
 function mapDlqKafkaMessageToMessage(
   kafkaMessage: KafkaMessage[]
-): GenericResult<Message[]> {
-  const messages: Message[] = [];
+): GenericResult<KafkaMessageContents[]> {
+  const messages: KafkaMessageContents[] = [];
   for (const message of kafkaMessage) {
     if (message.value) {
       try {
         const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(kafkaValue.value) as Message;
+        const parsedMsg = JSON.parse(kafkaValue.value) as KafkaMessageContents;
         messages.push(mapMessageDates(parsedMsg));
       } catch (error) {
         return err(`Failed to parse message: ${error}`);
@@ -596,7 +599,7 @@ function mapDlqKafkaMessageToMessage(
 }
 
 async function consumeMiniBatch(
-  messages: Message[],
+  messages: KafkaMessageContents[],
   firstOffset: string,
   lastOffset: string,
   miniBatchId: string,

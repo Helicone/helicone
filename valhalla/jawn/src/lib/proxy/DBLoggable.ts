@@ -1,12 +1,12 @@
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
-import { Provider } from "../../models/models";
+import { Provider } from "../../packages/llm-mapper/types";
 import { PromptSettings } from "../requestWrapper/requestWrapper";
 import { err, ok } from "../shared/result";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
 import { KafkaProducer } from "../clients/KafkaProducer";
 import { AuthParams, OrgParams } from "../db/supabase";
 import { S3Manager } from "./S3Manager";
-import { Message } from "../handlers/HandlerContext";
+import { KafkaMessageContents } from "../handlers/HandlerContext";
 import { Headers } from "node-fetch";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
@@ -128,7 +128,7 @@ export class DBLoggable {
     }
 
     const endTime = this.timing.endTime ?? responseEndTime;
-    const kafkaMessage: Message = {
+    const kafkaMessage: KafkaMessageContents = {
       authorization: requestHeaders.heliconeAuthV2.token,
       heliconeMeta: {
         modelOverride: requestHeaders.modelOverride ?? undefined,

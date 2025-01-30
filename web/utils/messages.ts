@@ -1,4 +1,5 @@
 import { StateMessage, HeliconeMessage } from "@/types/prompt-state";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export function isLastMessageUser(messages: StateMessage[]): boolean {
   const lastMessage = messages[messages.length - 1];
@@ -25,6 +26,14 @@ export function removeMessagePair(
   else return [...messages.slice(0, index), ...messages.slice(index + 1)];
 }
 
+export function inferMessageRole(
+  hasSystemStart: boolean,
+  messageIndex: number
+): "user" | "assistant" {
+  const adjustedIndex = hasSystemStart ? messageIndex - 1 : messageIndex;
+  return adjustedIndex % 2 === 0 ? "user" : "assistant";
+}
+
 export function heliconeToStateMessages(
   messages: HeliconeMessage[]
 ): StateMessage[] {
@@ -32,46 +41,41 @@ export function heliconeToStateMessages(
   let hasSystemStart = false;
   if (messages.length > 0 && typeof messages[0] !== "string") {
     hasSystemStart =
-      messages[0].role === "system" || messages[0].role === "developer";
+      (messages[0] as ChatCompletionMessageParam).role === "system" ||
+      (messages[0] as ChatCompletionMessageParam).role === "developer";
   }
 
-  return messages.map((message, arrayIndex) => {
-    // Handle Helicone auto-prompt input string
+  return messages.map((message, messageIndex) => {
+    // 1. Handle Helicone auto-prompt input string
     if (typeof message === "string") {
       const idxMatch = message.match(/idx=(\d+)/);
       const idx = idxMatch ? parseInt(idxMatch[1]) : undefined;
 
-      // If we had a system/developer start, shift the alternating pattern by 1
-      const adjustedIndex = hasSystemStart ? arrayIndex - 1 : arrayIndex;
       return {
-        role: adjustedIndex % 2 === 0 ? "user" : "assistant",
+        role: inferMessageRole(hasSystemStart, messageIndex),
         content: message,
         idx,
       };
     }
 
-    // At this point, message is ChatCompletionMessageParam
+    // 2. Handle direct content
     const baseMessage: StateMessage = {
-      role:
-        message.role === "function"
-          ? "tool"
-          : (message.role as StateMessage["role"]), // Type assertion since we know these align
-      content: typeof message.content === "string" ? message.content : "",
+      role: !("role" in message)
+        ? inferMessageRole(hasSystemStart, messageIndex) // Infer role if not present
+        : message.role === "function"
+        ? "tool" // "function" always becomes "tool"
+        : message.role, // Role is present
+      content:
+        "text" in message // Content is "text"
+          ? message.text
+          : typeof message.content === "string" // Content is "content"
+          ? message.content
+          : "", // Content not found directly
     };
 
-    // Handle tool/function calls
-    if ("tool_call_id" in message && typeof message.tool_call_id === "string") {
-      baseMessage.toolCallId = message.tool_call_id;
-    } else if (
-      "function_call_id" in message &&
-      typeof message.function_call_id === "string"
-    ) {
-      baseMessage.toolCallId = message.function_call_id;
-    }
-
     // Handle non-string content (arrays of content parts)
-    if (Array.isArray(message.content)) {
-      baseMessage.content = message.content
+    if ("content" in message && Array.isArray(message.content)) {
+      baseMessage.content = (message.content as any[])
         .map((part: any) => {
           if (typeof part === "string") return part;
           if (part && typeof part === "object" && "text" in part)
@@ -79,6 +83,16 @@ export function heliconeToStateMessages(
           return "";
         })
         .join("");
+    }
+
+    // Add toolCallId to state message if present
+    if ("tool_call_id" in message && typeof message.tool_call_id === "string") {
+      baseMessage.toolCallId = message.tool_call_id;
+    } else if (
+      "function_call_id" in message &&
+      typeof message.function_call_id === "string"
+    ) {
+      baseMessage.toolCallId = message.function_call_id;
     }
 
     return baseMessage;

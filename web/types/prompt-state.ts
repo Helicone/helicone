@@ -1,8 +1,9 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export type HeliconeMessage =
-  | ChatCompletionMessageParam
-  | `<helicone-auto-prompt-input idx=${number} />`;
+  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
+  | { type: "text"; text: string } // Assistants API - from content: []
+  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
 
 export type StateMessage = {
   role: "developer" | "system" | "user" | "assistant" | "tool";

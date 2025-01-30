@@ -291,6 +291,7 @@ export type Database = {
           code_template: Json | null
           created_at: string
           id: string
+          last_mile_config: Json | null
           llm_template: Json | null
           name: string
           organization_id: string
@@ -301,6 +302,7 @@ export type Database = {
           code_template?: Json | null
           created_at?: string
           id?: string
+          last_mile_config?: Json | null
           llm_template?: Json | null
           name: string
           organization_id: string
@@ -311,6 +313,7 @@ export type Database = {
           code_template?: Json | null
           created_at?: string
           id?: string
+          last_mile_config?: Json | null
           llm_template?: Json | null
           name?: string
           organization_id?: string
@@ -1016,6 +1019,7 @@ export type Database = {
           api_key_hash: string
           api_key_name: string
           created_at: string
+          governance: boolean
           id: number
           key_permissions: string | null
           organization_id: string
@@ -1027,6 +1031,7 @@ export type Database = {
           api_key_hash: string
           api_key_name: string
           created_at?: string
+          governance?: boolean
           id?: number
           key_permissions?: string | null
           organization_id: string
@@ -1038,6 +1043,7 @@ export type Database = {
           api_key_hash?: string
           api_key_name?: string
           created_at?: string
+          governance?: boolean
           id?: number
           key_permissions?: string | null
           organization_id?: string
