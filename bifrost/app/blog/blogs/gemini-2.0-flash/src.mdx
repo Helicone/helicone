@@ -1,4 +1,6 @@
-Google has unveiled **Gemini 2.0 Flash** in December 2024, an experimental AI reasoning model that sets itself apart through transparent reasoning processes and enhanced problem-solving capabilities. As a direct competitor to <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1</a> reasoning model, this release signifies Google's push toward more transparent and capable AI models.
+Google has unveiled **Gemini 2.0 Flash** in December 2024, an experimental AI reasoning model that sets itself apart through transparent reasoning processes and enhanced problem-solving capabilities.
+
+As a direct competitor to <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1</a> reasoning model, this release signifies Google's push toward more transparent and capable AI models.
 
 ![Google released Gemini 2.0 Flash](/static/blog/gemini-2.0-flash/gemini-2.0.webp)
 
@@ -56,7 +58,7 @@ Gemini 2.0 Flash outperforms previous models in terms of handling multiple types
 
 Moreover, Gemini 2.0 is expected to become widely available to users in early 2025. Google has already started limited testing of Gemini 2.0 in <a href="https://blog.google/products/gemini/google-gemini-ai-collection-2024/" target="_blank" rel="noopener">AI Overviews for Search</a> in December 2024. The broader rollout of Gemini 2.0 to Google Search and other Google products is planned for early 2025.
 
-## How Gemini 2.0 Stacks Up Against Previous Versions
+## How Gemini 2.0 Compares to Its Predecessors
 
 When <a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/#gemini-2-0-flash" target="_blank" rel="noopener">comparing Gemini 2.0</a> with previous iterations, there are several notable improvements:
 
@@ -82,6 +84,52 @@ Compared to OpenAI and Anthropic's latest models (o1 and Claude 3.5 Sonnet), Ope
 
 Gemini 2.0 Flash Experimental trails in general knowledge with `76.4%` MMLU, a strong math performance at `89.7%` and competitive in multimodal tasks at `70.7%` MMMU.
 
+## Gemini 2.0 Flash Pricing
+
+### Free access through AI Studio
+
+An experimental version of Gemini 2.0 Flash Thinking is available at no cost through Google AI Studio, with the limitations of a maximum context window of 32,767 tokens and usage restrictions or 2 requests per minute (RPM) and 50 requests per day (RPD).
+
+### Pay-as-you-go pricing
+
+For users requiring more extensive capabilities, Gemini 2.0 Flash offers flexible pay-as-you-go pricing based on token usage.
+
+| Operation               | Standard Prompts (Up to 128K tokens) | Extended Prompts (Beyond 128K tokens) |
+| ----------------------- | ------------------------------------ | ------------------------------------- |
+| Input Processing        | $0.075 per million tokens            | $0.15 per million tokens              |
+| Output Generation       | $0.30 per million tokens             | $0.60 per million tokens              |
+| Context Caching         | $0.01875 per million tokens          | $0.0375 per million tokens            |
+| Context Caching Storage | $1.00 per million tokens per hour    | $1.00 per million tokens per hour     |
+
+Please see our <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini integration docs</a> for details.
+
+## Where to Access Gemini 2.0
+
+As of now, an experimental version of Gemini 2.0 is available to developers and trusted testers. Google has already begun integrating it into several of its products and services, including Google Search, and through the Gemini API in <a href="https://aistudio.google.com/?utm_source=gfd&utm_medium=referral&utm_campaign=blog-dec&utm_content=gemini2-L0" target="_blank" rel="noopener nofollow noreferrer">Google AI Studio</a> and <a href="https://console.cloud.google.com/vertex-ai/studio/freeform?model=gemini-2.0-flash-exp" target="_blank" rel="noopener">Vertex AI</a>.
+
+For those interested in exploring Gemini 2.0’s capabilities, Google is offering free access through AI Studio, where developers can experiment with the <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live" target="_blank" rel="noopener">multimodal live API</a> and other advanced features.
+
+Developers can access the model in code by using `gemini-2.0-flash-thinking-exp` or `gemini-2.0-flash-thinking-exp-1219`.
+
+## Integrate Gemini 2.0 Flash with Helicone ⚡️
+
+Integrate LLM observability with a few lines of code. See <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">docs</a> for details.
+
+```javascript
+const model = genAI.getGenerativeModel(
+  {
+    model: "gemini-2.0-flash-thinking-exp",
+  },
+  requestOptions = {
+    customHeaders: new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
+    }),
+    baseUrl: "https://gateway.helicone.ai",
+  } as RequestOptions
+);
+```
+
 ## Limitations
 
 ### People and Image Editing Restrictions
@@ -102,56 +150,6 @@ Sometimes, image generation might not trigger as expected, and there are a few t
 
 - If the model outputs text instead of an image, try explicitly asking for an image in your prompt (e.g., “generate an image” or “please provide images as you go along”).
 - On some occasions, the model may stop generating an image halfway through. If this happens, kindly attempt the request again or modify your prompt slightly to get the desired output.
-
-## Where to Access Gemini 2.0
-
-As of now, an experimental version of Gemini 2.0 is available to developers and trusted testers. Google has already begun integrating it into several of its products and services, including Google Search, and through the Gemini API in <a href="https://aistudio.google.com/?utm_source=gfd&utm_medium=referral&utm_campaign=blog-dec&utm_content=gemini2-L0" target="_blank" rel="noopener nofollow noreferrer">Google AI Studio</a> and <a href="https://console.cloud.google.com/vertex-ai/studio/freeform?model=gemini-2.0-flash-exp" target="_blank" rel="noopener">Vertex AI</a>.
-
-For those interested in exploring Gemini 2.0’s capabilities, Google is offering free access through AI Studio, where developers can experiment with the <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live" target="_blank" rel="noopener">multimodal live API</a> and other advanced features.
-
-Developers can access the model in code by using `gemini-2.0-flash-thinking-exp` or `gemini-2.0-flash-thinking-exp-1219`.
-
-## Integrate Gemini 2.0 Flash with Helicone ⚡️
-
-Helicone is an open-source observability tool that helps you monitor, debug and improve your Gemini-powered AI apps.
-
-Integrate with a few lines of code:
-
-```javascript
-const model = genAI.getGenerativeModel(
-  {
-    model: "emini-2.0-flash-thinking-exp",
-  },
-  requestOptions = {
-    customHeaders: new Headers({
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
-    }),
-    baseUrl: "https://gateway.helicone.ai",
-  } as RequestOptions
-);
-```
-
-Please see our <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini integration docs</a> for details.
-
-## Gemini 2.0 Flash Pricing
-
-### Free access through AI Studio
-
-An experimental version of Gemini 2.0 Flash Thinking is available at no cost through Google AI Studio, with the limitations of a maximum context window of 32,767 tokens and usage restrictions or 2 requests per minute (RPM) and 50 requests per day (RPD).
-
-### Pay-as-you-go pricing
-
-For users requiring more extensive capabilities, Gemini 2.0 Flash offers flexible pay-as-you-go pricing based on token usage.
-
-| Operation               | Standard Prompts (Up to 128K tokens) | Extended Prompts (Beyond 128K tokens) |
-| ----------------------- | ------------------------------------ | ------------------------------------- |
-| Input Processing        | $0.075 per million tokens            | $0.15 per million tokens              |
-| Output Generation       | $0.30 per million tokens             | $0.60 per million tokens              |
-| Context Caching         | $0.01875 per million tokens          | $0.0375 per million tokens            |
-| Context Caching Storage | $1.00 per million tokens per hour    | $1.00 per million tokens per hour     |
-
-Please see our <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini integration docs</a> for details.
 
 ## What's Next for Google Gemini?
 

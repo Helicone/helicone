@@ -66,32 +66,31 @@ At a glance, Llama 3.3’s **<span style={{color: '#03A9F4'}}>open-source nature
 | **Fine-Tuning**          | Easy and flexible 🏆            | Limited (API-based)       | Limited (API-based) |
 | **Ideal Use Cases**      | Cost-sensitive, domain-specific | Broad tasks               | General NLP tasks   |
 
-### How to access Llama 3.3 70B?
+## How to access Llama 3.3 70B?
 
-Llama 3.3 70B is available through <a href="https://www.llama.com/" target="_blank" rel="noopener">Meta's official Llama site</a>, <a href="https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct" target="_blank" rel="noopener">Hugging Face</a>, <a href="https://ollama.com/library/llama3.3" target="_blank" rel="noopener">Ollama</a>, <a href="https://fireworks.ai/models/fireworks/llama-v3p3-70b-instruct" target="_blank" rel="noopener">Fireworks AI</a>, and <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">other AI inferencing platforms</a>.
+Llama 3.3 70B is available through Meta's official Llama site, OpenRouter, Hugging Face, and other <a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">AI inferencing platforms</a>.
 
-## Integrate Gemini-Exp-1206 with Helicone ⚡️
+## Integrate Llama 3.3 with Helicone ⚡️
 
-Helicone is an open-source observability tool that helps you monitor, debug and improve your `Gemini-Exp-1206` powered AI apps.
+Integrate observability with OpenRouter in a few lines of code. See <a href="https://docs.helicone.ai/getting-started/integration-method/openrouter" target="_blank" rel="noopener">docs</a> for details.
 
-Integrate with a few lines of code in JavaScript:
-
-```javascript
-const model = genAI.getGenerativeModel(
-  {
-    model: "model-name",
+```js
+fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
+    "HTTP-Referer": `${YOUR_SITE_URL}`, // Optional, for including your app on openrouter.ai rankings.
+    "X-Title": `${YOUR_SITE_NAME}`, // Optional. Shows in rankings on openrouter.ai.
+    "Content-Type": "application/json",
   },
-  requestOptions = {
-    customHeaders: new Headers({
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
-    }),
-    baseUrl: "https://gateway.helicone.ai",
-  } as RequestOptions
-);
+  body: JSON.stringify({
+    model: "meta-llama/llama-3.3-70b-instruct",
+    messages: [{ role: "user", content: "What is the meaning of life?" }],
+    stream: true,
+  }),
+});
 ```
-
-Please see detailed integration docs for JavaScript, Python and more <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">here</a>.
 
 ## Use Cases of Llama 3.3
 
@@ -108,24 +107,6 @@ Llama 3.3 70B is versatile and can be used for various tasks, including:
 1. **License restrictions:** The license prohibits using any part of the Llama models, including response outputs, to train other AI models.
 2. **Limited modalities:** Llama 3.3 70B is a text-only model, lacking capabilities in other modalities such as image or audio processing
 3. **Knowledge cutoff:** The model's knowledge is limited to information up to December 2023, making it potentially outdated for current events or recent developments79.
-
-## Integrate Llama 3.3 with Helicone ⚡️
-
-Helicone is an open-source observability tool that helps you monitor, debug and improve your Llama-powered AI apps.
-
-Integrate with a few lines of code:
-
-```js
-// Create a new HeliconeManualLogger instance
-import { HeliconeManualLogger } from "@helicone/helpers";
-
-const heliconeLogger = new HeliconeManualLogger({
-  apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
-  headers: {}, // Additional headers to be sent with the request
-});
-```
-
-Please see our <a href="https://docs.helicone.ai/getting-started/integration-method/custom#custom-model-integration" target="_blank" rel="noopener">custom model integration docs</a> for details.
 
 ## Conclusion
 
