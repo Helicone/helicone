@@ -503,7 +503,8 @@ export class RequestManager extends BaseManager {
               r.model_override ??
               r.request_model ??
               r.response_model ??
-              getModelFromPath(r.target_url),
+              getModelFromPath(r.target_url) ??
+              "unknown",
           };
         })
         .filter((r) => {
