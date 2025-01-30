@@ -6,20 +6,22 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
-const tabsListVariants = cva(
-  "inline-flex items-center justify-center rounded-lg p-0.5 border border-slate-100",
-  {
-    variants: {
-      variant: {
-        default: "bg-slate-100 dark:bg-slate-800 dark:text-slate-400",
-        secondary: "bg-white dark:bg-slate-950 dark:text-slate-400",
-      },
+const tabsListVariants = cva("inline-flex items-center justify-center p-0.5", {
+  variants: {
+    variant: {
+      default: "bg-slate-200 dark:bg-slate-800",
+      secondary: "bg-white dark:bg-slate-950 dark:text-slate-400",
     },
-    defaultVariants: {
-      variant: "default",
+    asPill: {
+      true: "rounded-full",
+      false: "rounded-lg",
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+    asPill: false,
+  },
+});
 
 interface TabsListProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>,
@@ -28,28 +30,39 @@ interface TabsListProps
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   TabsListProps
->(({ className, variant, ...props }, ref) => (
+>(({ className, variant, asPill, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn(tabsListVariants({ variant, className }))}
+    className={cn(tabsListVariants({ variant, asPill, className }))}
     {...props}
   />
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 const tabsTriggerVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 interactive",
+  "inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 peer first:rounded-r-none last:rounded-l-none [&:not(:first-child):not(:last-child)]:rounded-none peer-first:rounded-l-none peer-last:rounded-r-none",
   {
     variants: {
       variant: {
         default:
-          "data-[state=active]:font-semibold text-slate-700 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
+          "text-secondary data-[state=active]:text-primary border-slate-200 dark:border-slate-800 hover:bg-slate-100 hover:data-[state=active]:bg-slate-100 dark:hover:data-[state=active]:bg-slate-900 dark:hover:bg-slate-900 data-[state=active]:bg-white text-tertiary data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-slate-50",
         secondary:
-          "data-[state=active]:font-semibold text-slate-700 bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-black dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
+          "bg-white hover:bg-slate-100 data-[state=active]:bg-slate-100 data-[state=active]:text-black dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-50",
+      },
+      size: {
+        default: "text-sm",
+        xs: "text-xs",
+      },
+      asPill: {
+        true: "first:rounded-l-full last:rounded-r-full [&:not(:first-child):not(:last-child)]:rounded-none",
+        false:
+          "first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
+      asPill: false,
     },
   }
 );
@@ -61,10 +74,10 @@ interface TabsTriggerProps
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, variant, ...props }, ref) => (
+>(({ className, variant, size, asPill, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
-    className={cn(tabsTriggerVariants({ variant, className }))}
+    className={cn(tabsTriggerVariants({ variant, size, asPill, className }))}
     {...props}
   />
 ));

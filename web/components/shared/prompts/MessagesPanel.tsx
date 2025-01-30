@@ -58,12 +58,12 @@ export default function MessagesPanel({
         return (
           <div key={index} className="flex flex-col gap-2">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="h-8 flex items-center justify-between">
               {/* Message Role */}
-              <h2 className="text-lg font-semibold">
+              <h2 className="font-semibold">
                 <span className="capitalize text-secondary">{msg.role}</span>
                 {msg.idx !== undefined && (
-                  <span className="text-slate-400"> - message_{msg.idx}</span>
+                  <span className="text-tertiary"> - message_{msg.idx}</span>
                 )}
               </h2>
 
@@ -80,7 +80,7 @@ export default function MessagesPanel({
                       "I need help writing a professional email."
                     );
                   }}
-                  className="flex flex-row items-center gap-2 text-slate-400 hover:underline"
+                  className="flex flex-row items-center gap-2 text-tertiary hover:underline"
                 >
                   <PiMagicWandBold />
                   Suggest starting prompt
@@ -120,23 +120,24 @@ export default function MessagesPanel({
         <button
           onClick={onAddMessagePair}
           disabled={!canAddMessages}
-          className={`flex flex-row items-center gap-2 ${
+          className={`flex flex-row items-center gap-2 text-sm ${
             canAddMessages
               ? "text-heliblue hover:underline"
-              : "cursor-not-allowed text-slate-400"
+              : "cursor-not-allowed text-tertiary"
           }`}
         >
           <PiDiceTwoBold />
           Add Message Pair
         </button>
+
         {isPrefillSupported && (
           <button
             onClick={onAddPrefill}
             disabled={!canAddMessages}
-            className={`flex flex-row items-center gap-2 ${
+            className={`flex flex-row items-center gap-2 text-sm ${
               canAddMessages
                 ? "text-emerald-400 hover:underline"
-                : "cursor-not-allowed text-slate-400"
+                : "cursor-not-allowed text-tertiary"
             }`}
           >
             <PiDiceOneBold />
