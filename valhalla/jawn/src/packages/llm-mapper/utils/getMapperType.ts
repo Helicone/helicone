@@ -16,10 +16,27 @@ export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
 ) => {
+  if (heliconeRequest.request_body?._type === "vector_db") {
+    return "vector-db";
+  }
+
+  if (heliconeRequest.request_body?._type === "tool") {
+    return "tool";
+  }
+
+  // Check for OpenAI Assistant responses
+  if (
+    heliconeRequest.response_body?.object === "thread.run" ||
+    heliconeRequest.response_body?.assistant_id ||
+    heliconeRequest.response_body?.thread_id
+  ) {
+    return "openai-assistant";
+  }
+
   return getMapperType({
     model,
     provider: heliconeRequest.provider,
-    path: heliconeRequest.target_url,
+    path: heliconeRequest.request_path,
     isAssistant: isAssistantRequest(heliconeRequest),
   });
 };
@@ -35,6 +52,14 @@ export const getMapperType = ({
   path?: string | null;
   isAssistant?: boolean;
 }): MapperType => {
+  if (model.includes("deepseek")) {
+    return "openai-chat";
+  }
+
+  if (model === "vector_db") {
+    return "vector-db";
+  }
+
   if (/^gpt-3\.5-turbo-instruct/.test(model)) {
     return "openai-instruct";
   }
@@ -86,5 +111,5 @@ export const getMapperType = ({
     return "anthropic-chat";
   }
 
-  return "unknown";
+  return "openai-chat";
 };

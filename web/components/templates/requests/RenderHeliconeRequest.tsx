@@ -5,6 +5,9 @@ import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/ge
 import { useMemo } from "react";
 import { Chat } from "./components/chatComponent/chat";
 import { Completion } from "./components/completion";
+import { Assistant } from "./components/assistant/Assistant";
+import { VectorDB } from "./components/vector-db/VectorDB";
+import { Tool } from "./components/tool/Tool";
 
 type RenderMappedRequestProps = {
   selectedProperties?: Record<string, string>;
@@ -14,78 +17,6 @@ type RenderMappedRequestProps = {
   messageSlice?: "lastTwo";
   className?: string;
   autoInputs?: any[];
-};
-
-const VectorDB = ({ mappedRequest }: { mappedRequest: MappedLLMRequest }) => {
-  const { schema } = mappedRequest;
-  const isError = mappedRequest.heliconeMetadata.status.code >= 400;
-
-  return (
-    <div className="w-full flex flex-col text-left space-y-4 text-sm">
-      <div className="w-full flex flex-col text-left space-y-1">
-        <p className="font-semibold text-gray-900">Request</p>
-        <div className="p-2 border border-gray-300 bg-gray-50 rounded-md whitespace-pre-wrap">
-          {mappedRequest.preview.request}
-        </div>
-      </div>
-      <div className="w-full flex flex-col text-left space-y-1">
-        <p className="font-semibold text-gray-900">
-          {isError ? "Error" : "Response"}
-        </p>
-        <div
-          className={`p-2 border border-gray-300 ${
-            isError ? "bg-red-50" : "bg-green-50"
-          } rounded-md whitespace-pre-wrap`}
-        >
-          {mappedRequest.preview.response}
-        </div>
-      </div>
-      {schema.response?.messages?.[0]?.content && !isError && (
-        <div className="w-full flex flex-col text-left space-y-1">
-          <p className="font-semibold text-gray-900">Details</p>
-          <div className="p-2 border border-gray-300 bg-gray-50 rounded-md whitespace-pre-wrap">
-            {schema.response.messages[0].content}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const Tool = ({ mappedRequest }: { mappedRequest: MappedLLMRequest }) => {
-  const { schema, raw } = mappedRequest;
-  const isError = mappedRequest.heliconeMetadata.status.code >= 400;
-
-  return (
-    <div className="w-full flex flex-col text-left space-y-4 text-sm">
-      <div className="w-full flex flex-col text-left space-y-1">
-        <p className="font-semibold text-gray-900">Tool Request</p>
-        <div className="p-2 border border-gray-300 bg-gray-50 rounded-md whitespace-pre-wrap">
-          {mappedRequest.preview.request}
-        </div>
-      </div>
-      <div className="w-full flex flex-col text-left space-y-1">
-        <p className="font-semibold text-gray-900">
-          {isError ? "Error" : "Summary"}
-        </p>
-        <div
-          className={`p-2 border border-gray-300 ${
-            isError ? "bg-red-50" : "bg-green-50"
-          } rounded-md whitespace-pre-wrap`}
-        >
-          {mappedRequest.preview.response}
-        </div>
-      </div>
-      {!isError && raw.response && (
-        <div className="w-full flex flex-col text-left space-y-1">
-          <p className="font-semibold text-gray-900">Full Response</p>
-          <div className="p-2 border border-gray-300 bg-gray-50 rounded-md whitespace-pre-wrap overflow-auto max-h-96">
-            {JSON.stringify(raw.response, null, 2)}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 };
 
 export const RenderMappedRequest = (
@@ -151,6 +82,8 @@ export const RenderMappedRequest = (
     return <VectorDB mappedRequest={mapperContent} />;
   } else if (mapperContent._type === "tool") {
     return <Tool mappedRequest={mapperContent} />;
+  } else if (mapperContent._type === "openai-assistant") {
+    return <Assistant mappedRequest={mapperContent} />;
   }
   return (
     <>
