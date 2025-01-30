@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -11,6 +10,7 @@ import { EditPanel } from "./panels/EditPanel";
 import { MainPanel } from "./panels/mainPanel";
 import { TestPanel } from "./panels/TestPanel";
 import { PanelType } from "./panels/types";
+import EvalsPreview from "../featurePreview/evalsPreview";
 
 const EvalsPage = () => {
   const org = useOrg();
@@ -19,13 +19,8 @@ const EvalsPage = () => {
 
   if (org?.currentOrg?.tier === "free") {
     return (
-      <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
-        <FeatureUpgradeCard
-          title="Unlock Evaluators"
-          description="The Free plan does not include the Evaluators feature, but getting access is easy."
-          infoBoxText="Evaluate your prompts and models to drive improvements."
-          documentationLink="https://docs.helicone.ai/features/sessions"
-        />
+      <div className="mt-[16px] flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <EvalsPreview />
       </div>
     );
   }
