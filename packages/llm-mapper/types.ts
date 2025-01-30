@@ -67,6 +67,8 @@ export type MapperType =
   | "openai-moderation"
   | "openai-embedding"
   | "openai-instruct"
+  | "vector-db"
+  | "tool"
   | "unknown";
 
 type HeliconeMetadata = {
