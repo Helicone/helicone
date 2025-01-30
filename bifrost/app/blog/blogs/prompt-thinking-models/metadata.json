@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "title": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o3",
   "title1": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o3",
   "title2": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o3",
@@ -9,3 +10,16 @@
   "date": "February 10, 2025", 
   "badge": "Prompt Engineering"
 }
+=======
+    "title": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1",
+    "title1": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1",
+    "title2": "How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1",
+    "description": "Comprehensive guide on how to prompt thinking models like DeepSeek R1 and OpenAI o1",
+    "images": "/static/blog/prompt-thinking-models/cover.webp",
+    "time": "5 minute read",
+    "author": "Lina Lam",
+    "date": "January 31, 2025", 
+    "badge": "guide"
+  }
+  
+>>>>>>> d83cf2566 (added image)
