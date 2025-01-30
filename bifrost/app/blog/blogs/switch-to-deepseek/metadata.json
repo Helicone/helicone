@@ -5,7 +5,8 @@
     "description": "Learn how to use Helicone's experiments feature to safely switch to DeepSeek. This guide covers regression testing, model comparison, and seamless transition using production data without impacting users.",
     "images": "/static/blog/switch-to-deepseek/cover.webp",
     "time": "8 minute read",
-    "author": "Cole Gottank",
-    "date": "January 31, 2025"
+    "author": "Cole Gottdank",
+    "date": "January 31, 2025",
+    "badge": "how-to"
   }
   
