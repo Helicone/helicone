@@ -1,23 +1,23 @@
 import { Metadata } from "next";
-import CommunityPage from "./communityPage";
+import CustomersPage from "./customersPage";
 
 export const metadata: Metadata = {
-  title: "Helicone Community | AI Projects & Integrations",
+  title: "Helicone Customers | AI Companies & Integrations",
   description:
     "Discover the AI companies and integrations powering by Helicone. Join our community and see how teams are building and scaling with our platform.",
   icons: "https://www.helicone.ai/static/logo.webp",
   openGraph: {
     type: "website",
     siteName: "Helicone.ai",
-    url: "https://www.helicone.ai/community",
-    title: "Helicone Community | AI Projects & Integrations",
+    url: "https://www.helicone.ai/customers",
+    title: "Helicone Customers | AI Companies & Integrations",
     description:
       "Discover the AI companies and integrations powering by Helicone. Join our community and see how teams are building and scaling with our platform.",
     images: "/static/new-open-graph.png",
     locale: "en_US",
   },
   twitter: {
-    title: "Helicone Community | AI Projects & Integrations",
+    title: "Helicone Customers | AI Companies & Integrations",
     description:
       "Discover the AI companies and integrations powering by Helicone. Join our community and see how teams are building and scaling with our platform.",
     card: "summary_large_image",
@@ -26,5 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <CommunityPage />;
+  return <CustomersPage searchParams={{ category: "all" }} />;
 }

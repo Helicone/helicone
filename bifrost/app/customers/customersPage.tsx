@@ -1,14 +1,16 @@
-"use client";
 import { clsx } from "@/components/shared/utils";
 import Image from "next/image";
-import { useState } from "react";
-import { Customers } from "./customers";
-import { Integrations } from "./integrations";
+import { CaseStudies } from "./caseStudies";
 import { Projects } from "./projects";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
-export default function CommunityPage() {
+
+interface CustomersPageProps {
+  searchParams: { category?: string; q?: string };
+}
+
+export default function CustomersPage({ searchParams }: CustomersPageProps) {
 
   return (
     <div className="w-full bg-white h-full antialiased relative text-black mb-[24px]">
@@ -27,7 +29,7 @@ export default function CommunityPage() {
           applications.
         </p>
 
-        {/* <Projects /> */}
+        <CaseStudies searchParams={searchParams} />
 
         <h2 className="text-3xl font-semibold tracking-tight max-w-4xl">
           Community Projects
@@ -47,7 +49,6 @@ export default function CommunityPage() {
           </Link>
         </Button>
         <Projects />
-
       </div>
     </div>
   );

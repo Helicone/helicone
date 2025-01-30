@@ -182,6 +182,16 @@ const MobileNav = () => {
 
 const resourcesComponents: LinkItem[] = [
   {
+    title: "Customer Stories",
+    link: {
+      href: "/customers",
+      isExternal: false,
+    },
+    description:
+      "Built for scale, security, and control",
+    icon: <Gem className="size-5 navbar-icon-style" />,
+  },
+  {
     title: "Changelog",
     link: {
       href: "/changelog",
@@ -201,17 +211,6 @@ const resourcesComponents: LinkItem[] = [
       "Insights on AI development and best practices",
     icon: <Newspaper className="size-5 navbar-icon-style" />,
   },
-  {
-    title: "Community",
-    link: {
-      href: "/community",
-      isExternal: false,
-    },
-    description:
-      "Built for scale, security, and control",
-    icon: <Gem className="size-5 navbar-icon-style" />,
-  },
-
 ]
 
 const toolsComponents: LinkItem[] = [

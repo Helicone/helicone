@@ -1,6 +1,5 @@
 import { clsx } from "@/utils/clsx";
 import Link from "next/link";
-import { SparklesIcon } from "@heroicons/react/20/solid";
 
 interface ProjectTag {
   name: string;
