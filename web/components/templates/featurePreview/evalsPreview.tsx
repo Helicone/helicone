@@ -1,19 +1,10 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useFeatureTrial } from "@/hooks/useFeatureTrial";
+import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 
 const evalFeatures: Feature[] = [
   {
@@ -77,7 +68,10 @@ const evalFeatures: Feature[] = [
   },
 ];
 
-const paidPlan: PricingPlan[] = [
+type EvalsPricingPlanName = "Pro + Eval" | "Team Bundle";
+type EvalsPlan = "evals" | "team_bundle";
+
+const paidPlan: PricingPlan<EvalsPricingPlanName>[] = [
   {
     name: "Pro + Eval",
     price: "100",
@@ -103,79 +97,24 @@ const paidPlan: PricingPlan[] = [
 ];
 
 const EvalsPreview = () => {
-  const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const { handleConfirmTrial, proRequired } = useFeatureTrial("evals", "Evals");
 
-  const addProductToSubscription = useMutation({
-    mutationFn: async (productType: "alerts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType: "alerts",
-            },
-          },
-        }
-      );
-      return result;
-    },
-  });
-
-  const subscription = useQuery({
-    queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      return subscription;
-    },
-  });
-
-  const handleStartTrial = async (selectedPlan?: string) => {
-    return new Promise<void>((resolve, reject) => {
-      if (!selectedPlan) {
-        notification.setNotification(
-          "Please select a plan to continue",
-          "error"
-        );
-        return;
-      }
-      setIsConfirmDialogOpen(true);
-    });
+  const handleStartTrial = async (selectedPlan?: EvalsPricingPlanName) => {
+    if (!selectedPlan) {
+      notification.setNotification("Please select a plan to continue", "error");
+      return;
+    }
+    setIsConfirmDialogOpen(true);
   };
 
   const confirmEvalsChange = async () => {
-    try {
-      const { response } = await addProductToSubscription.mutateAsync("alerts");
-
-      if (response.status >= 200 && response.status < 300) {
-        setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Your Evals trial has begun! Refreshing page...",
-          "success"
-        );
-        await subscription.refetch();
-      } else {
-        setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Failed to start trial. Please try again or contact support.",
-          "error"
-        );
-      }
-    } catch (error) {
+    const success = await handleConfirmTrial();
+    if (success) {
       setIsConfirmDialogOpen(false);
-      notification.setNotification(
-        "Failed to start trial. Please try again or contact support.",
-        "error"
-      );
     }
   };
-
-  let proRequired =
-    org?.currentOrg?.tier === "free" || org?.currentOrg?.tier === "growth";
 
   return (
     <>
@@ -197,26 +136,12 @@ const EvalsPreview = () => {
         }}
       />
 
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Start Evals Trial</DialogTitle>
-            <DialogDescription>
-              Would you like to start your Evals trial? You can cancel anytime
-              during the trial period.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmEvalsChange}>Start Trial</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TrialConfirmationDialog
+        featureName={"Evals"}
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={confirmEvalsChange}
+      />
     </>
   );
 };

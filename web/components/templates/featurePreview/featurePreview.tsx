@@ -7,17 +7,17 @@ import FeaturePreviewSection, {
 } from "./featurePreviewSection";
 import { Button } from "@/components/ui/button";
 
-interface FeaturePreviewProps {
+interface FeaturePreviewProps<T extends string> {
   title: string;
   subtitle: string;
-  pricingPlans: PricingPlan[];
+  pricingPlans: PricingPlan<T>[];
   featureSectionProps: FeaturePreviewSectionProps;
   proRequired?: boolean;
-  onStartTrial?: (selectedPlan?: string) => Promise<void>;
+  onStartTrial?: (selectedPlan?: T) => Promise<void>;
 }
 
-export type PricingPlan = {
-  name: string;
+export type PricingPlan<T extends string = string> = {
+  name: T;
   isSelected?: boolean;
   price: string;
   priceSubtext?: string;
@@ -30,17 +30,17 @@ type PricingFeature = {
   additionalCost?: string;
 };
 
-const FeaturePreview = ({
+const FeaturePreview = <T extends string>({
   title,
   subtitle,
   pricingPlans,
   featureSectionProps,
   proRequired = false,
   onStartTrial,
-}: FeaturePreviewProps) => {
-  const [selectedPlan, setSelectedPlan] = useState(() => {
+}: FeaturePreviewProps<T>) => {
+  const [selectedPlan, setSelectedPlan] = useState<T>(() => {
     const defaultPlan = pricingPlans.find((plan) => plan.isSelected);
-    return defaultPlan?.name;
+    return defaultPlan?.name ?? pricingPlans[0].name;
   });
 
   return (

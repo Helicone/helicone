@@ -17,6 +17,9 @@ const DEFAULT_PRODUCT_PRICES = {
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
   prompts: process.env.PRICE_PROD_PROMPTS_ID!,
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
+  experiments: process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!,
+  evals: process.env.PRICE_PROD_EVALS_ID!,
+  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
 } as const;
 
 const getProProductPrices = async (): Promise<
@@ -395,6 +398,108 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
+  private async portalLinkUpgradeToTeamBundle(
+    origin: string,
+    customerId: string,
+    isNewCustomer: boolean
+  ): Promise<Result<string, string>> {
+    const proProductPrices = await getProProductPrices();
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      customer: customerId,
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: proProductPrices["request-volume"],
+        },
+        {
+          price: proProductPrices["team_bundle"],
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${origin}/dashboard`,
+      cancel_url: `${origin}/dashboard`,
+      metadata: {
+        orgId: this.authParams.organizationId,
+        tier: "team-20250130",
+      },
+      subscription_data: {
+        trial_period_days: isNewCustomer ? 7 : undefined,
+        metadata: {
+          orgId: this.authParams.organizationId,
+          tier: "team-20250130",
+        },
+      },
+    };
+
+    const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
+    if (isWaterlooEmail) {
+      sessionParams.discounts = [
+        {
+          coupon: "WATERLOO2025",
+        },
+      ];
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
+
+    const session = await this.stripe.checkout.sessions.create(sessionParams);
+
+    return ok(session.url!);
+  }
+
+  async upgradeToTeamBundleLink(
+    returnUrl: string,
+    quantity?: number
+  ): Promise<Result<string, string>> {
+    try {
+      const subscriptionResult = await this.getSubscription();
+      if (subscriptionResult.data) {
+        return err("User already has a pro subscription");
+      }
+
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+
+      const proProductPrices = await getProProductPrices();
+
+      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+        returnUrl,
+        customerId.data,
+        true
+      );
+
+      return sessionUrl;
+    } catch (error: any) {
+      return err(`Error upgrading to team bundle: ${error.message}`);
+    }
+  }
+
+  async upgradeToTeamBundleExistingCustomer(
+    returnUrl: string,
+    quantity?: number
+  ): Promise<Result<string, string>> {
+    try {
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+
+      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+        returnUrl,
+        customerId.data,
+        false
+      );
+
+      return sessionUrl;
+    } catch (error: any) {
+      return err(`Error upgrading to team bundle: ${error.message}`);
+    }
+  }
+
   private async getEvaluatorsUsage({
     startTime,
   }: {
@@ -557,7 +662,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async addProductToStripe(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -616,7 +721,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async addProductToSubscription(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const stripeAddResult = await this.addProductToStripe(productType);
     if (stripeAddResult.error) {

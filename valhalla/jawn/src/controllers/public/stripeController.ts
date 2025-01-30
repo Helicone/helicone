@@ -17,6 +17,8 @@ export interface UpgradeToProRequest {
   addons?: {
     alerts?: boolean;
     prompts?: boolean;
+    experiments?: boolean;
+    evals?: boolean;
   };
 }
 
@@ -105,6 +107,43 @@ export class StripeController extends Controller {
     return result.data;
   }
 
+  @Post("/subscription/new-customer/upgrade-to-team-bundle")
+  public async upgradeToTeamBundle(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const stripeManager = new StripeManager(request.authParams);
+    const clientOrigin = request.headers.origin;
+
+    const result = await stripeManager.upgradeToTeamBundleLink(
+      `${clientOrigin}`
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Post("/subscription/existing-customer/upgrade-to-team-bundle")
+  public async upgradeExistingCustomerToTeamBundle(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const stripeManager = new StripeManager(request.authParams);
+
+    const result = await stripeManager.upgradeToTeamBundleExistingCustomer(
+      request.headers.origin ?? ""
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
   @Post("/subscription/manage-subscription")
   public async manageSubscription(
     @Request() request: JawnAuthenticatedRequest
@@ -140,7 +179,7 @@ export class StripeController extends Controller {
   @Post("/subscription/add-ons/{productType}")
   public async addOns(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() productType: "alerts" | "prompts"
+    @Path() productType: "alerts" | "prompts" | "experiments" | "evals"
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.addProductToSubscription(productType);

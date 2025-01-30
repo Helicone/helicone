@@ -3027,6 +3027,12 @@
 				"properties": {
 					"addons": {
 						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
 							"prompts": {
 								"type": "boolean"
 							},
@@ -8114,6 +8120,58 @@
 				}
 			}
 		},
+		"/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
+			"post": {
+				"operationId": "UpgradeToTeamBundle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
+			"post": {
+				"operationId": "UpgradeExistingCustomerToTeamBundle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/subscription/manage-subscription": {
 			"post": {
 				"operationId": "ManageSubscription",
@@ -8206,7 +8264,9 @@
 							"type": "string",
 							"enum": [
 								"alerts",
-								"prompts"
+								"prompts",
+								"experiments",
+								"evals"
 							]
 						}
 					}

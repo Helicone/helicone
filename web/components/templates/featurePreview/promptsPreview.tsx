@@ -1,19 +1,12 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useFeatureTrial } from "@/hooks/useFeatureTrial";
+import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
+
+type PromptPricingPlanName = "Prompt" | "Pro + Prompt" | "Team Bundle";
 
 const promptFeatures: Feature[] = [
   {
@@ -81,7 +74,7 @@ const promptFeatures: Feature[] = [
   },
 ];
 
-const freePlan: PricingPlan[] = [
+const freePlan: PricingPlan<PromptPricingPlanName>[] = [
   {
     name: "Pro + Prompt",
     price: "50",
@@ -110,7 +103,7 @@ const freePlan: PricingPlan[] = [
   },
 ];
 
-const paidPlan: PricingPlan[] = [
+const paidPlan: PricingPlan<PromptPricingPlanName>[] = [
   {
     name: "Prompt",
     price: "50",
@@ -142,87 +135,34 @@ const PromptsPreview = () => {
   const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const { handleConfirmTrial, proRequired } = useFeatureTrial(
+    "prompts",
+    "Prompts"
+  );
 
-  const addProductToSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "prompts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType,
-            },
-          },
-        }
-      );
-      return result;
-    },
-  });
-
-  const subscription = useQuery({
-    queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      return subscription;
-    },
-  });
-
-  const handleStartTrial = async (selectedPlan?: string) => {
-    return new Promise<void>((resolve, reject) => {
-      if (!selectedPlan) {
-        notification.setNotification(
-          "Please select a plan to continue",
-          "error"
-        );
-        return;
-      }
-      setIsConfirmDialogOpen(true);
-    });
+  const handleStartTrial = async (selectedPlan?: PromptPricingPlanName) => {
+    if (!selectedPlan) {
+      notification.setNotification("Please select a plan to continue", "error");
+      return;
+    }
+    setIsConfirmDialogOpen(true);
   };
 
   const confirmPromptsChange = async () => {
-    try {
-      const { response } = await addProductToSubscription.mutateAsync(
-        "prompts"
-      );
-
-      if (response.status >= 200 && response.status < 300) {
-        setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Your Prompts trial has begun! Refreshing page...",
-          "success"
-        );
-        await subscription.refetch();
-      } else {
-        setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Failed to start trial. Please try again or contact support.",
-          "error"
-        );
-      }
-    } catch (error) {
+    const success = await handleConfirmTrial();
+    if (success) {
       setIsConfirmDialogOpen(false);
-      notification.setNotification(
-        "Failed to start trial. Please try again or contact support.",
-        "error"
-      );
     }
   };
 
-  let pricingPlan: PricingPlan[] = [];
-  let proRequired = false;
+  let pricingPlan: PricingPlan<PromptPricingPlanName>[] = [];
   if (org?.currentOrg?.tier === "free" || org?.currentOrg?.tier === "growth") {
-    pricingPlan = paidPlan;
-    proRequired = true;
+    pricingPlan = freePlan;
   } else if (
     org?.currentOrg?.tier === "enterprise" ||
     org?.currentOrg?.tier === "pro-20240913"
   ) {
     pricingPlan = paidPlan;
-    proRequired = false;
   }
 
   return (
@@ -244,26 +184,12 @@ const PromptsPreview = () => {
           },
         }}
       />
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Start Prompts Trial</DialogTitle>
-            <DialogDescription>
-              Would you like to start your Prompts trial? You can cancel anytime
-              during the trial period.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmPromptsChange}>Start Trial</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TrialConfirmationDialog
+        featureName="Prompts"
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={confirmPromptsChange}
+      />
     </>
   );
 };

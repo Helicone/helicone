@@ -1,19 +1,10 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useFeatureTrial } from "@/hooks/useFeatureTrial";
+import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 
 const experimentFeatures: Feature[] = [
   {
@@ -94,33 +85,10 @@ const ExperimentsPreview = () => {
   const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-
-  const addProductToSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "experiments") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType: "alerts",
-            },
-          },
-        }
-      );
-      return result;
-    },
-  });
-
-  const subscription = useQuery({
-    queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      return subscription;
-    },
-  });
+  const { handleConfirmTrial, proRequired } = useFeatureTrial(
+    "experiments",
+    "Experiments"
+  );
 
   const handleStartTrial = async (selectedPlan?: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -137,23 +105,9 @@ const ExperimentsPreview = () => {
 
   const confirmExperimentsChange = async () => {
     try {
-      const { response } = await addProductToSubscription.mutateAsync(
-        "experiments"
-      );
-
-      if (response.status >= 200 && response.status < 300) {
+      const success = await handleConfirmTrial();
+      if (success) {
         setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Your Experiments trial has begun! Refreshing page...",
-          "success"
-        );
-        await subscription.refetch();
-      } else {
-        setIsConfirmDialogOpen(false);
-        notification.setNotification(
-          "Failed to start trial. Please try again or contact support.",
-          "error"
-        );
       }
     } catch (error) {
       setIsConfirmDialogOpen(false);
@@ -163,9 +117,6 @@ const ExperimentsPreview = () => {
       );
     }
   };
-
-  let proRequired =
-    org?.currentOrg?.tier === "free" || org?.currentOrg?.tier === "growth";
 
   return (
     <>
@@ -187,26 +138,12 @@ const ExperimentsPreview = () => {
           },
         }}
       />
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Start Experiments Trial</DialogTitle>
-            <DialogDescription>
-              Would you like to start your Experiments trial? You can cancel
-              anytime during the trial period.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmExperimentsChange}>Start Trial</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TrialConfirmationDialog
+        featureName="Experiments"
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        onConfirm={confirmExperimentsChange}
+      />
     </>
   );
 };
