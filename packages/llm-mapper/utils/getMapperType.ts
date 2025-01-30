@@ -43,6 +43,10 @@ export const getMapperType = ({
   path?: string | null;
   isAssistant?: boolean;
 }): MapperType => {
+  if (model.includes("deepseek")) {
+    return "openai-chat";
+  }
+
   if (model === "vector_db") {
     return "vector-db";
   }
