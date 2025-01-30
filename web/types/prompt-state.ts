@@ -27,6 +27,7 @@ export interface PromptState {
 
   isDirty: boolean;
   response?: string;
+  improvement?: { content: string; reasoning: string }; // Updated to store both content and reasoning
 }
 
 export interface Parameters {
