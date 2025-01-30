@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "../../../../../shared/clsx";
 import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 
+import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;
@@ -60,6 +60,19 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
     return !expanded && showButton;
   }, [expanded, showButton]);
 
+  const [showOriginalText, setShowOriginalText] = useState(false);
+  const { isTextJson, formattedText } = useMemo(() => {
+    try {
+      const parsedText = JSON.parse(formattedMessageContent);
+      return {
+        isTextJson: true,
+        formattedText: JSON.stringify(parsedText, null, 2),
+      };
+    } catch (e) {
+      return { isTextJson: false, formattedText: formattedMessageContent };
+    }
+  }, [formattedMessageContent]);
+
   if (formattedMessageContent.length > 2_000_000) {
     return (
       <div className="text-red-500 font-normal">
@@ -81,8 +94,8 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
           {mode === "Pretty" ? (
             <RenderWithPrettyInputKeys
               text={
-                isJSON(formattedMessageContent)
-                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
+                isTextJson && showOriginalText
+                  ? formattedText
                   : formattedMessageContent
               }
               selectedProperties={selectedProperties}
@@ -90,13 +103,28 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
           ) : (
             <MarkdownEditor
               language="markdown"
-              text={formattedMessageContent}
+              text={
+                isTextJson && showOriginalText
+                  ? formattedText
+                  : formattedMessageContent
+              }
               setText={() => {}}
               className=""
             />
           )}
         </div>
       </div>
+      {isTextJson && (
+        <div className="flex items-center gap-2 mb-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-md p-2">
+          <span>JSON detected - showing formatted view</span>
+          <button
+            onClick={() => setShowOriginalText(!showOriginalText)}
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {showOriginalText ? "Show formatted" : "Show raw"}
+          </button>
+        </div>
+      )}
       {showButton && (
         <div className="w-full flex justify-center items-center pt-2 pr-24">
           <button onClick={handleToggle}>
