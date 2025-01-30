@@ -12,12 +12,15 @@ interface FeaturePreviewProps {
   subtitle: string;
   pricingPlans: PricingPlan[];
   featureSectionProps: FeaturePreviewSectionProps;
+  proRequired?: boolean;
+  onStartTrial?: (selectedPlan?: string) => Promise<void>;
 }
 
 export type PricingPlan = {
   name: string;
   isSelected?: boolean;
   price: string;
+  priceSubtext?: string;
   features: PricingFeature[];
 };
 
@@ -32,6 +35,8 @@ const FeaturePreview = ({
   subtitle,
   pricingPlans,
   featureSectionProps,
+  proRequired = false,
+  onStartTrial,
 }: FeaturePreviewProps) => {
   const [selectedPlan, setSelectedPlan] = useState(() => {
     const defaultPlan = pricingPlans.find((plan) => plan.isSelected);
@@ -111,23 +116,25 @@ const FeaturePreview = ({
             </div>
           </div>
 
-          <div className="h-[367px] flex-col justify-start items-start gap-6 inline-flex">
-            <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
-              <div className="w-[18px] h-[18px] relative overflow-hidden">
-                <LightBulbIcon className="w-full h-full text-sky-500" />
+          <div className="max-h-[367px] flex-col justify-start items-start inline-flex gap-6">
+            {proRequired && (
+              <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
+                <div className="w-[18px] h-[18px] relative overflow-hidden">
+                  <LightBulbIcon className="w-full h-full text-sky-500" />
+                </div>
+                <div>
+                  <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
+                    Adding prompt management requires a{" "}
+                  </span>
+                  <span className="text-sky-500 text-base font-medium underline leading-normal tracking-tight">
+                    Pro plan
+                  </span>
+                  <span className="text-sky-500 text-base font-medium leading-normal tracking-tight">
+                    .{" "}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
-                  Adding prompt management requires a{" "}
-                </span>
-                <span className="text-sky-500 text-base font-medium underline leading-normal tracking-tight">
-                  Pro plan
-                </span>
-                <span className="text-sky-500 text-base font-medium leading-normal tracking-tight">
-                  .{" "}
-                </span>
-              </div>
-            </div>
+            )}
 
             <div className="justify-center items-center gap-6 inline-flex">
               {pricingPlans.map((plan) => (
@@ -159,13 +166,20 @@ const FeaturePreview = ({
                           } bg-white flex items-center justify-center p-0`}
                         ></div>
                       </div>
-                      <div>
-                        <span className="text-slate-900 text-[40px] font-medium">
-                          ${plan.price}
-                        </span>
-                        <span className="text-slate-500 text-[40px] font-light">
-                          /mo
-                        </span>
+                      <div className="flex flex-row items-baseline gap-1">
+                        <div>
+                          <span className="text-slate-900 text-[40px] font-medium">
+                            ${plan.price}
+                          </span>
+                          <span className="text-slate-500 text-[40px] font-light">
+                            /mo
+                          </span>
+                        </div>
+                        {plan.priceSubtext && (
+                          <div className="text-slate-500 text-sm mt-1">
+                            {plan.priceSubtext}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="self-stretch h-36 flex-col justify-start items-start flex">
@@ -201,18 +215,13 @@ const FeaturePreview = ({
           </div>
 
           <div className="flex flex-col items-center gap-4 mt-8 w-[220px] lg:mt-4">
-            <a
-              href="https://docs.helicone.ai"
-              target="_blank"
-              className="w-full"
+            <Button
+              onClick={() => onStartTrial?.(selectedPlan)}
+              className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
+              variant="action"
             >
-              <Button
-                className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
-                variant="action"
-              >
-                Start 7-day free trial
-              </Button>
-            </a>
+              Start 7-day free trial
+            </Button>
 
             <a
               href="https://docs.helicone.ai"
@@ -229,7 +238,10 @@ const FeaturePreview = ({
           </div>
         </div>
 
-        <FeaturePreviewSection {...featureSectionProps} />
+        <FeaturePreviewSection
+          {...featureSectionProps}
+          onStartTrial={() => onStartTrial?.(selectedPlan) || Promise.resolve()}
+        />
       </div>
     </div>
   );

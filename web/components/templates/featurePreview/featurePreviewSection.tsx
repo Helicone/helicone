@@ -26,6 +26,7 @@ export type FeaturePreviewSectionProps = {
     highlight: string;
     suffix: string;
   };
+  onStartTrial?: () => Promise<void>;
 };
 
 const FeaturePreviewSection = ({
@@ -34,6 +35,7 @@ const FeaturePreviewSection = ({
   ctaImage,
   showCTA = true,
   quote,
+  onStartTrial,
 }: FeaturePreviewSectionProps) => {
   return (
     <div className="bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
@@ -90,6 +92,7 @@ const FeaturePreviewSection = ({
                 </h2>
               )}
               <Button
+                onClick={onStartTrial}
                 className="text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5"
                 variant="action"
               >
