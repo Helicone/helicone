@@ -1,21 +1,24 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 
+const ADDON_FEATURES = ["evals", "experiments", "prompts", "alerts"] as const;
+const NON_FREE_FEATURES = ["sessions"] as const;
+
 export const useHasAccess = (
-  feature: "evals" | "experiments" | "prompts" | "alerts"
+  feature: (typeof ADDON_FEATURES)[number] | (typeof NON_FREE_FEATURES)[number]
 ) => {
   const org = useOrg();
 
   return useMemo(() => {
     const tier = org?.currentOrg?.tier;
     const stripeMetadata = org?.currentOrg?.stripe_metadata as {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
+      addons?: { [key in (typeof ADDON_FEATURES)[number]]?: boolean };
     };
+
+    // Handle non-free features first
+    if (NON_FREE_FEATURES.includes(feature as any)) {
+      return tier !== "free";
+    }
 
     // Handle legacy tiers and team bundle
     if (
@@ -28,9 +31,12 @@ export const useHasAccess = (
       return true;
     }
 
-    // Handle pro-20240913 tier with addons
+    // Handle pro-20240913 tier with addons (ONLY addon features reach here)
     if (tier === "pro-20240913") {
-      return stripeMetadata?.addons?.[feature] ?? false;
+      return (
+        stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
+        false
+      );
     }
 
     // Free tier
