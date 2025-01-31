@@ -139,9 +139,11 @@ export default function VariablesPanel({
       {/* No Variables */}
       {validVariablesWithIndices.length === 0 ? (
         <p className="text-sm text-slate-400 text-center text-balance">
-          Make your prompt dynamic with variables. Type{" "}
+          Make your prompt dynamic with{" "}
+          <span className="font-semibold">Variables</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
-          value in a message and press ⌘ E.
+          value in a message and press{" "}
+          <span className="text-heliblue">⌘ E</span>.
         </p>
       ) : (
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">

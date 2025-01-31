@@ -55,7 +55,6 @@ import { autoFillInputs } from "@helicone/prompts";
 import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
-import EvalsPanel from "@/components/shared/prompts/EvalsPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
 import { $system, $user } from "@/utils/llm";
 import autoImprovePrompt from "@/prompts/auto-improve";
@@ -956,6 +955,9 @@ async function pullPromptAndRunCompletion() {
                 promptVersionId={state.versionId}
               />
 
+              {/* TODO: Planned */}
+              {/* <EvalsPanel /> */}
+
               <ParametersPanel
                 parameters={state.parameters}
                 onParameterChange={(updates) => {
@@ -970,8 +972,6 @@ async function pullPromptAndRunCompletion() {
                   });
                 }}
               />
-
-              <EvalsPanel />
             </div>
           }
         />

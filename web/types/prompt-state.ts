@@ -1,17 +1,5 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
-export type HeliconeMessage =
-  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
-  | { type: "text"; text: string } // Assistants API - from content: []
-  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
-
-export type StateMessage = {
-  role: "developer" | "system" | "user" | "assistant" | "tool";
-  content: string;
-  toolCallId?: string;
-  idx?: number;
-};
-
 export interface PromptState {
   promptId: string;
   masterVersion: number;
@@ -20,22 +8,34 @@ export interface PromptState {
   version: number;
 
   messages: StateMessage[];
-  parameters: Parameters;
+  parameters: StateParameters;
   variables?: StateVariable[];
   evals?: any[]; // TODO: Add evals to the state
   structure?: any; // TODO: Real structure when feature is added
 
   isDirty: boolean;
   response?: string;
-  improvement?: { content: string; reasoning: string }; // Updated to store both content and reasoning
+  improvement?: { reasoning: string; content: string };
 }
 
-export interface Parameters {
+export type StateMessage = {
+  role: "developer" | "system" | "user" | "assistant" | "tool";
+  content: string;
+  toolCallId?: string;
+  idx?: number;
+};
+export type HeliconeMessage =
+  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
+  | { type: "text"; text: string } // Assistants API - from content: []
+  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
+
+export interface StateParameters {
   provider: string;
   model: string;
   temperature: number;
   // TODO: Add more parameters
 }
+
 export interface StateVariable {
   name: string;
   value: string;
@@ -43,6 +43,9 @@ export interface StateVariable {
   idx?: number;
 }
 
+export interface StateEval {}
+
+// DB INTERFACE
 export interface PromptVersionReference {
   id: string;
   minor_version: number;
