@@ -342,7 +342,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         }
 
         return { variables: updatedVariables };
-      });
+      }, false);
     },
     [updateState]
   );
