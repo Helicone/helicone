@@ -11,7 +11,7 @@ import {
   ExperimentOutputForScores,
   ExperimentV2Manager,
 } from "../../managers/experiment/ExperimentV2Manager";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest, LlmSchema } from "../../packages/llm-mapper/types";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
@@ -118,8 +118,8 @@ export class EvaluatorManager extends BaseManager {
       autoInputs?: Record<string, string>;
     };
     request_id: string;
-    requestBody: string;
-    responseBody: string;
+    requestBody: LlmSchema;
+    responseBody: LlmSchema;
     heliconeRequest: HeliconeRequest;
   }): Promise<Result<{ score: number | boolean }, string>> {
     if (evaluator.last_mile_config) {
@@ -135,8 +135,8 @@ export class EvaluatorManager extends BaseManager {
           | "LLM-RANGE",
         llmTemplate: evaluator.llm_template,
         inputRecord,
-        outputBody: responseBody,
-        inputBody: requestBody,
+        outputBody: JSON.stringify(responseBody),
+        inputBody: JSON.stringify(requestBody),
         promptTemplate: evaluator.llm_template.promptTemplate,
         evaluatorName: evaluator.name,
         organizationId: this.authParams.organizationId,
@@ -149,8 +149,8 @@ export class EvaluatorManager extends BaseManager {
     } else if (evaluator.code_template) {
       const codeResult = await pythonEvaluator({
         code: evaluator.code_template,
-        requestBodyString: requestBody,
-        responseString: responseBody,
+        requestBodyString: JSON.stringify(requestBody),
+        responseString: JSON.stringify(responseBody),
         uniqueId: request_id,
         orgId: this.authParams.organizationId,
       });
@@ -220,8 +220,8 @@ export class EvaluatorManager extends BaseManager {
       autoInputs?: Record<string, string>;
     };
     run: ExperimentOutputForScores;
-    requestBody: string;
-    responseBody: string;
+    requestBody: any;
+    responseBody: any;
   }): Promise<Result<null, string>> {
     try {
       const scoreResult = await this.runLLMEvaluatorScore({
@@ -255,12 +255,8 @@ export class EvaluatorManager extends BaseManager {
           country_code: null,
           asset_ids: null,
           asset_urls: null,
-          scores: Object.fromEntries(
-            Object.entries(run.scores || {}).map(([key, value]) => [
-              key,
-              typeof value.value === "number" ? value.value : 0,
-            ])
-          ),
+          response_body: responseBody,
+          scores: {},
           properties: {},
           assets: [],
           target_url: "",
@@ -446,7 +442,8 @@ export class EvaluatorManager extends BaseManager {
         evaluator.organization_id,
         evaluator.updated_at,
         evaluator.name,
-        evaluator.code_template
+        evaluator.code_template,
+        evaluator.last_mile_config
       FROM evaluator_experiments_v3
       left join evaluator on evaluator_experiments_v3.evaluator = evaluator.id
       WHERE evaluator_experiments_v3.experiment = $1
