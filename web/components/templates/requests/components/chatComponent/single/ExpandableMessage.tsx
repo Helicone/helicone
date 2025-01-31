@@ -59,7 +59,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
     return !expanded && showButton;
   }, [expanded, showButton]);
 
-  const [showOriginalText, setShowOriginalText] = useState(false);
+  const [showOriginalText, setShowOriginalText] = useState(true);
   const { isTextJson, formattedText } = useMemo(() => {
     try {
       const parsedText = JSON.parse(formattedMessageContent);
@@ -120,7 +120,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
             onClick={() => setShowOriginalText(!showOriginalText)}
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
-            {showOriginalText ? "Show formatted" : "Show raw"}
+            {showOriginalText ? "Show raw" : "Show formatted"}
           </button>
         </div>
       )}
