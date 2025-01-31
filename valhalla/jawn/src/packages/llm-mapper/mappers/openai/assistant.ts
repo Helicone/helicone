@@ -26,11 +26,21 @@ const getRequestText = (requestBody: any) => {
 };
 
 const getResponseText = (responseBody: any, statusCode: number = 200) => {
+  if (responseBody?.error) {
+    return responseBody.error.message;
+  }
+
   if (statusCode !== 200 || responseBody?.status === "failed") {
-    return responseBody?.last_error?.message || "Assistant operation failed";
+    return typeof responseBody?.last_error === "string"
+      ? responseBody.last_error
+      : responseBody?.last_error?.message || "Assistant encountered an error";
   }
 
   const parts = [];
+
+  if (responseBody.id) {
+    parts.push(`Run ID: ${responseBody.id}`);
+  }
 
   if (responseBody.status) {
     parts.push(`Status: ${responseBody.status}`);
@@ -58,7 +68,7 @@ export const mapOpenAIAssistant: MapperFn<any, any> = ({
     messages: [
       {
         role: "system",
-        content: "OpenAI Assistant Interaction",
+        content: `Run ID: ${response?.id || "unknown"}`,
         _type: "message",
       },
       {
@@ -69,6 +79,7 @@ export const mapOpenAIAssistant: MapperFn<any, any> = ({
     ],
   };
 
+  const responseText = getResponseText(response, statusCode);
   const llmSchema: LlmSchema = {
     request: requestToReturn,
     response: {
@@ -76,7 +87,7 @@ export const mapOpenAIAssistant: MapperFn<any, any> = ({
       messages: [
         {
           role: "assistant",
-          content: getResponseText(response, statusCode),
+          content: responseText,
           _type: "message",
         },
       ],
@@ -87,7 +98,7 @@ export const mapOpenAIAssistant: MapperFn<any, any> = ({
     schema: llmSchema,
     preview: {
       request: getRequestText(request),
-      response: getResponseText(response, statusCode),
+      response: responseText,
       concatenatedMessages: [
         ...(llmSchema.request.messages || []),
         ...(llmSchema.response?.messages || []),
