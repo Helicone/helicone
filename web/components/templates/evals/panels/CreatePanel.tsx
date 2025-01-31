@@ -65,10 +65,9 @@ export const CreatePanel = ({
             <TabsTrigger value="python">
               Python <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
-            {/* <TabsTrigger value="lastmile">
+            <TabsTrigger value="lastmile">
               LastMile.Dev <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
-             */}
             <TabsTrigger value="typescript" disabled>
               Typescript{" "}
               <span className="text-xs text-gray-500 px-3">(soon)</span>
@@ -90,7 +89,7 @@ export const CreatePanel = ({
         <TabsContent value="python">
           <PythonEvaluatorConfigForm
             onSubmit={() => {
-              setPanels((prev) => prev.filter((p) => p._type !== "create"));
+              setPanels((prev) => [{ _type: "main" }]);
             }}
             openTestPanel={() => {
               setPanels((prev) => [{ _type: "create" }, { _type: "test" }]);
@@ -103,7 +102,7 @@ export const CreatePanel = ({
         <TabsContent value="lastmile">
           <LastMileDevConfigForm
             onSubmit={() => {
-              setPanels((prev) => prev.filter((p) => p._type !== "create"));
+              setPanels((prev) => [{ _type: "main" }]);
             }}
             openTestPanel={() => {
               setPanels((prev) => [{ _type: "create" }, { _type: "test" }]);
