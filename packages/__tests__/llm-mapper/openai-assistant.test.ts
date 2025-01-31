@@ -1,4 +1,4 @@
-import { mapOpenAIAssistant } from "../mappers/openai/assistant";
+import { mapOpenAIAssistant } from "@/llm-mapper/mappers/openai/assistant";
 
 describe("OpenAI Assistant Mapper", () => {
   it("should map assistant run correctly", () => {
