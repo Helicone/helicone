@@ -9,7 +9,6 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
@@ -21,20 +20,11 @@ import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { Button } from "../../ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
-
-// **Import PromptPlayground and PromptObject**
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -46,8 +36,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ActionButton from "@/components/shared/universal/ActionButton";
-import FeaturePreview from "../featurePreview/featurePreview";
 import PromptsPreview from "../featurePreview/promptsPreview";
+import { useHasAccess } from "@/hooks/useHasAccess";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -125,19 +115,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   };
 
   const org = useOrg();
-
-  const hasAccess = useMemo(() => {
-    return (
-      org?.currentOrg?.tier === "growth" ||
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro" ||
-      org?.currentOrg?.tier === "demo" ||
-      (org?.currentOrg?.tier === "pro-20240913" &&
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
-    );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
-
+  const hasAccess = useHasAccess("prompts");
   const hasLimitedAccess = useMemo(() => {
     return !hasAccess && (prompts?.length ?? 0) > 0;
   }, [hasAccess, prompts?.length]);
@@ -274,7 +252,7 @@ const chatCompletion = await openai.chat.completions.create(
               </div>
             )}
 
-            {filteredPrompts && (hasLimitedAccess || hasAccess) ? (
+            {filteredPrompts && (hasAccess || hasLimitedAccess) ? (
               searchParams.get("view") === "card" ? (
                 <ul
                   className={cn(

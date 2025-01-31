@@ -1,4 +1,3 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -82,7 +81,6 @@ const paidPlan: PricingPlan[] = [
 ];
 
 const ExperimentsPreview = () => {
-  const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { handleConfirmTrial, proRequired } = useFeatureTrial(

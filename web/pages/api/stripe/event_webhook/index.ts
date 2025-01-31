@@ -109,6 +109,41 @@ const PricingVersionOld = {
   },
 };
 
+const TeamVersion20250130 = {
+  async handleCreate(event: Stripe.Event) {
+    const subscription = event.data.object as Stripe.Subscription;
+    // subscription.metadata?.["helcionePricingVersion"] !==
+    const subscriptionId = subscription.id;
+    const subscriptionItemId = subscription?.items.data[0].id;
+    const orgId = subscription.metadata?.orgId;
+
+    const { data, error } = await getSupabaseServer()
+      .from("organization")
+      .update({
+        subscription_status: "active",
+        stripe_subscription_id: subscriptionId,
+        stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
+        tier: "team-20250130",
+        stripe_metadata: {
+          addons: {},
+        },
+      })
+      .eq("id", orgId || "");
+  },
+
+  handleUpdate: async (event: Stripe.Event) => {
+    // We don't need to do anything here because the subscription is already active
+    // All update states are handled in the jawn StripeManager
+    return;
+  },
+  handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
+    // We don't need to do anything here because the subscription is already active
+    // All update states are handled in the jawn StripeManager
+    return;
+  },
+  handleDelete: PricingVersionOld.handleDelete,
+};
+
 const PricingVersion20240913 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
@@ -316,9 +351,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const stripeObject = event.data.object as
       | Stripe.Subscription
       | Stripe.Checkout.Session;
+
     const pricingFunctions =
       stripeObject.metadata?.["tier"] === "pro-20240913"
         ? PricingVersion20240913
+        : stripeObject.metadata?.["tier"] === "team-20250130"
+        ? TeamVersion20250130
         : PricingVersionOld;
 
     if (event.type === "test_helpers.test_clock.advancing") {

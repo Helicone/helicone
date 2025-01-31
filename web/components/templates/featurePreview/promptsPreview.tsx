@@ -160,7 +160,8 @@ const PromptsPreview = () => {
     pricingPlan = freePlan;
   } else if (
     org?.currentOrg?.tier === "enterprise" ||
-    org?.currentOrg?.tier === "pro-20240913"
+    org?.currentOrg?.tier === "pro-20240913" ||
+    org?.currentOrg?.tier === "team-20250130"
   ) {
     pricingPlan = paidPlan;
   }

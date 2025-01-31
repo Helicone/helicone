@@ -421,6 +421,7 @@ WHERE (${builtFilter.filter})`,
   ): Promise<Result<string, string>> {
     const proProductPrices = await getProProductPrices();
 
+    console.log(`Team bundle prices`, proProductPrices["team_bundle"]);
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
@@ -466,10 +467,10 @@ WHERE (${builtFilter.filter})`,
   }
 
   async upgradeToTeamBundleLink(
-    returnUrl: string,
-    quantity?: number
+    returnUrl: string
   ): Promise<Result<string, string>> {
     try {
+      console.log("UPGRADE TO TEAM BUNDLE LINK");
       const subscriptionResult = await this.getSubscription();
       if (subscriptionResult.data) {
         return err("User already has a pro subscription");
@@ -479,8 +480,6 @@ WHERE (${builtFilter.filter})`,
       if (customerId.error || !customerId.data) {
         return err("Error getting or creating stripe customer");
       }
-
-      const proProductPrices = await getProProductPrices();
 
       const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
         returnUrl,
@@ -495,14 +494,28 @@ WHERE (${builtFilter.filter})`,
   }
 
   async upgradeToTeamBundleExistingCustomer(
-    returnUrl: string,
-    quantity?: number
+    returnUrl: string
   ): Promise<Result<string, string>> {
     try {
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No existing subscription found");
+      }
+
       const customerId = await this.getOrCreateStripeCustomer();
       if (customerId.error || !customerId.data) {
         return err("Error getting or creating stripe customer");
       }
+
+      const subscription = subscriptionResult.data;
+
+      const result = await this.stripe.subscriptions.update(subscription.id, {
+        cancel_at_period_end: false,
+        proration_behavior: "create_prorations",
+        cancellation_details: {
+          comment: "Upgrading to team bundle now",
+        },
+      });
 
       const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
         returnUrl,
@@ -779,7 +792,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async deleteProductFromStripe(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -824,7 +837,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async deleteProductFromSubscription(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const stripeDeleteResult = await this.deleteProductFromStripe(productType);
     if (stripeDeleteResult.error) {

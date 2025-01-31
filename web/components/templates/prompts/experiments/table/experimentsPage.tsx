@@ -1,14 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
@@ -27,6 +18,7 @@ import ThemedTable from "../../../../shared/themed/table/themedTable";
 import { Dialog } from "../../../../ui/dialog";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import ExperimentsPreview from "@/components/templates/featurePreview/experimentsPreview";
+import { useHasAccess } from "@/hooks/useHasAccess";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -35,20 +27,8 @@ const ExperimentsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
   const { experiments, isLoading } = useExperimentTables();
-
   const org = useOrg();
-
-  const hasAccess = useMemo(() => {
-    return (
-      org?.currentOrg?.tier === "growth" ||
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro" ||
-      org?.currentOrg?.tier === "demo" ||
-      (org?.currentOrg?.tier === "pro-20240913" &&
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
-    );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
+  const hasAccess = useHasAccess("experiments");
 
   const { setNotification } = useNotification();
 

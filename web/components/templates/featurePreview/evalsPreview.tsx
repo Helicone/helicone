@@ -69,7 +69,6 @@ const evalFeatures: Feature[] = [
 ];
 
 type EvalsPricingPlanName = "Pro + Eval" | "Team Bundle";
-type EvalsPlan = "evals" | "team_bundle";
 
 const paidPlan: PricingPlan<EvalsPricingPlanName>[] = [
   {
