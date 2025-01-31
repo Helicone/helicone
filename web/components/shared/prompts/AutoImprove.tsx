@@ -63,31 +63,30 @@ export default function AutoImprove({
       )}
 
       {/* Thinking View */}
-        <div className="w-full flex flex-col gap-2">
-          <div
-            className={`w-full flex items-center gap-2 ${
-              improvement?.content ? "h-64" : "max-h-[42rem]"
-            }`}
-          >
-            <div className="w-full h-full overflow-y-scroll">
-              {improvement?.reasoning !== "" ? (
-                <ReactMarkdown className="prose prose-sm dark:prose-invert text-secondary">
-                  {improvement?.reasoning || ""}
-                </ReactMarkdown>
-              ) : (
-                <p className="text-sm text-secondary">
-                  Connecting you with one of our expert hamsters...
-                </p>
-              )}
-            </div>
-            {isImproving ? (
-              <LoadingAnimation animation={hamster} />
+      <div className="w-full flex flex-col gap-2">
+        <div
+          className={`w-full flex items-center gap-2 ${
+            improvement?.content ? "h-64" : "max-h-[42rem]"
+          }`}
+        >
+          <div className="w-full h-full overflow-y-scroll">
+            {improvement?.reasoning !== "" ? (
+              <ReactMarkdown className="prose prose-sm dark:prose-invert text-secondary">
+                {improvement?.reasoning || ""}
+              </ReactMarkdown>
             ) : (
-              <div className="w-full"></div>
+              <p className="text-sm text-secondary">
+                Connecting you with one of our expert hamsters...
+              </p>
             )}
           </div>
+          {isImproving ? (
+            <LoadingAnimation animation={hamster} />
+          ) : (
+            <div className="w-full"></div>
+          )}
         </div>
-      
+      </div>
 
       {/* Difference View */}
       {improvement?.content && (
