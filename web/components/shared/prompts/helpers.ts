@@ -12,7 +12,10 @@ export const populateVariables = ({
   autoPromptInputs,
 }: {
   inputsFromBackend: Record<string, string>;
-  validVariablesWithIndices: { variable: StateVariable; originalIndex: number }[];
+  validVariablesWithIndices: {
+    variable: StateVariable;
+    originalIndex: number;
+  }[];
   onVariableChange: (index: number, value: string) => void;
   autoPromptInputs?: AutoPromptInput[];
 }) => {
