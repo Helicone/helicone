@@ -18,7 +18,7 @@ Thinking models require a different approach compared to standard LLMs. Here’s
 
 - Use minimal prompting to let the model think independently.
 - Encourage more reasoning for better performance at complex tasks by prompting for additional processing time.
-  {/* - **Use structured prompts** when necessary for consistency. */}
+- Use delimiters for clarity to separate distinct parts of input, improving interpretation.
 - Use ensembling for highly complex tasks requiring high accuracy.
 
 ### ❌ DON’Ts
@@ -63,6 +63,14 @@ Thinking models use **reasoning tokens**, which allow them to internally process
 ❌ How does renewable energy impact the economy? Answer quickly.
 ```
 
+```
+✅ Analyze the economic impact of renewable energy adoption over the next 20 years. Consider factors such as job creation, energy prices, and carbon reduction. Take your time and think through each aspect carefully.
+
+---
+
+❌ How does renewable energy impact the economy? Answer quickly.
+```
+
 Encouraging longer reasoning helps with **multi-step problems**, improving accuracy significantly.
 
 ## 3. Avoid Few-Shot and Chain-of-Thought Prompting
@@ -70,6 +78,22 @@ Encouraging longer reasoning helps with **multi-step problems**, improving accur
 Traditional <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> (where you give a bunch of examples) and <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">CoT</a> prompting strategies **reduce performance** for thinking models.
 
 According to the paper, openAI's <a href="https://arxiv.org/pdf/2411.03590" target="_blank" rel="noopener">o1-preview model performed worse</a> when given few-shot examples. This contrasts with older models, where few-shot learning improved results. Thinking models are already designed to break down problems internally, so explicit step-by-step guidance can interfere with their reasoning.
+
+```
+✅ What is the capital of Canada?
+
+---
+
+❌ Example 1:
+Q: What is the capital of France?
+A: Paris
+
+Example 2:
+Q: What is the capital of Japan?
+A: Tokyo
+
+Now answer this: What is the capital of Canada?
+```
 
 **Zero-shot prompts work better than few-shot prompts.**
 
@@ -98,11 +122,18 @@ If a task is highly structured or simple, a regular LLM like GPT-4 may be a bett
 
 For regular LLMs, developers typically use delimiters like triple quotation marks, XML tags, or section titles to clearly define distinct sections of the input. This makes it easier for the model to interpret the information correctly.
 
-Thinking models struggle with structured outputs but can be guided to maintain consistency.
+Thinking models, however, struggle with structured outputs but can be guided to maintain consistency. If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully. 
 
-If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully. However, if <a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">structured output</a> is critical, you’re better off using a standard LLM instead of a thinking model.
+```
+✅ [Task: Summarize the following text]
+Text: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
 
-Thinking models are **not optimized for structured output** but can approximate it with carefully designed prompts.
+---
+
+❌ Summarize this: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
+```
+
+If <a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">structured output</a> is critical, you’re better off using a standard LLM instead of a thinking model.
 
 ## 6. Use Ensembling for Highly Complex Tasks
 
