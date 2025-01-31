@@ -452,13 +452,14 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       const latestVersionId = promptVersions?.[0]?.id;
       if (!latestVersionId) return;
 
-      // 3.1. Build Helicone Template for Saving
+      // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
         messages: state.messages,
       };
 
+      // B. Build Metadata for Saving
       const metadata = {
         isProduction: false,
         createdFromUi: true,
