@@ -1,30 +1,57 @@
-This Friday, OpenAI released its latest reasoning model, **o3-mini**, the newest in the company’s o family of reasoning models.
+In December 2024, OpenAI announced o3 and o3-mini, with o3 set to <a href="https://openai.com/index/early-access-for-safety-testing/#how-to-apply" target="_blank" rel="noopener">launch in early 2025</a> after completing safety testing.
 
-Building on the foundation of OpenAI's <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">o1 models</a>, the o3 family introduces several notable improvements in performance, deeper level of reasoning capabilities, and testing results.
-
-OpenAI first revealed **o3** and **o3-mini** in December 2024, according to a statement by Sam Altman, announcing that o3 will be <a href="https://openai.com/index/early-access-for-safety-testing/#how-to-apply" target="_blank" rel="noopener">available for the public early 2025</a>, as the model has been finalized by extensive safety testing and is ready for release in a couple of weeks.
+Today, OpenAI released its newest reasoning model, **o3-mini**, positioned as a faster and cheaper alternative to the o1 family, optimized for STEM domains, particularly programming, math, and science.
 
 ![OpenAI o3 released](/static/blog/openai-o3/o3-cover.webp)
 
-## What is OpenAI's o3 model?
+Building on the foundation of OpenAI's <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">o1 models</a>, the o3 family introduces several notable improvements in performance, deeper level of reasoning capabilities, and testing results.
 
-Unlike traditional large language models (LLMs) that rely on simple pattern recognition, the o3 model incorporates a process called **"simulated reasoning" (SR)**, **<span style={{color: '#0ea5e9'}}>deepening its reasoning capabilities compared to o1</span>**. This allows the model to pause and reflect on its own internal thought processes before responding, mimicking human-like reasoning in a way that previous models like o1 couldn't.
+Let's dive into how o3 compares to top models in the market!
 
-What sets o3 apart from its predecessors is its ability to evaluate complex tasks with **<span style={{color: '#0ea5e9'}}>greater accuracy</span>**. In simple terms, while the o1 models were good at understanding and generating text, the o3 models take it a step further by thinking through problems and planning their responses ahead of time. This "private chain-of-thought" technique is a core feature that sets o3 apart.
+## TL;DR
 
-## The Release of o3-mini - a more adaptive model
+- o3-mini reportedly outperforms o1-mini in reliability, making `39%` fewer major mistakes on real-world questions, while delivering `24%` faster responses than o1
+- o3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek’s R1
+- Developers can choose from three reasoning effort levels (low, medium, high) to balance accuracy vs. speed.
+- o3-mini is accessible via ChatGPT and through OpenAI’s API
 
-Alongside the o3 model, OpenAI also unveiled the **o3-mini**. This version is more lightweight and offers an adaptive thinking time feature, allowing users to select low, medium, or high processing speeds depending on their needs. The o3-mini is designed for situations where you might not need the full power of o3 but still want to benefit from its advanced reasoning capabilities.
+## What sets OpenAI's o3 model apart?
 
-Although smaller and faster, the o3-mini is still a powerful tool. OpenAI claims that it outperforms o1 on several key benchmarks, making it a great option for those seeking more efficient performance.
+Unlike traditional large language models (LLMs) that rely on simple pattern recognition, the o3 model incorporates a process called **"simulated reasoning" (SR)**, deepening its reasoning capabilities compared to o1.
 
-## What is Simulated Reasoning?
+This allows the model to pause and reflect on its own internal thought processes before responding, mimicking human-like reasoning in a way that previous models like o1 couldn't.
 
-OpenAI's o3 and o3-mini models both uses simulated reasoning (SR), which is gaining traction lately, with Google launching its own <a href="https://www.helicone.ai/blog/google-gemini-2-0-flash-thinking" target="_blank" rel="noopener">Gemini 2.0 Flash Thinking</a> and DeepSeek launching their own models based on this approach. SR allows AI models to consider their own results and adjust their reasoning as they go, offering a more nuanced and accurate form of problem-solving compared to traditional LLMs.
+While the o1 models were good at understanding and generating text, the o3 models take it a step further by thinking through problems and planning their responses ahead of time. This "private chain-of-thought" technique is a core feature that sets o3 apart.
 
-Simulated reasoning models, including **OpenAI's o3**, are designed to scale at inference time. This means they can reason and make decisions faster than previous models, offering real-time responses that can handle complex, multi-faceted tasks. This approach also allows for better handling of more advanced and diverse problems, making it ideal for use cases in science, mathematics, and programming.
+### Simulated Reasoning gaining popularity
 
-## o3 vs o1: Benchmark Comparison
+OpenAI's o3 and o3-mini models both uses simulated reasoning (SR), which is gaining traction lately, with Google launching its own <a href="https://www.helicone.ai/blog/google-gemini-2-0-flash-thinking" target="_blank" rel="noopener">Gemini 2.0 Flash Thinking</a> and DeepSeek launching their own models based on this approach.
+
+SR allows AI models to consider their own results and adjust their reasoning as they go, offering a more nuanced and accurate form of problem-solving compared to traditional LLMs.
+
+Simulated reasoning models, including **OpenAI's o3**, are designed to scale at inference time. This means they can reason and make decisions faster than previous models, offering real-time responses that can handle complex, multi-faceted tasks.
+
+## o3-mini is a more adaptive model
+
+OpenAI also unveiled the **o3-mini** which is more lightweight and has an adaptive thinking time feature, allowing users to select low, medium, or high processing speeds depending on their needs.
+
+The o3-mini is designed for situations where you might not need the full power of o3 but still want to benefit from its advanced reasoning capabilities.
+
+Although smaller and faster, the o3-mini is still powerful. OpenAI claims that it outperforms o1 on several key benchmarks, making it a great option for those seeking more cost-effective performance.
+
+### o3-mini vs. deepseek's R1 model
+
+Despite its improvements, o3-mini is not a breakthrough across all benchmarks. While it edges out `DeepSeek’s R1 model` in select tests like AIME 2024, it lags in others, such as GPQA Diamond for PhD-level science queries.
+
+O3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek’s R1.
+
+| Model       | Uncached Input Tokens ($/M) | Cached Input Tokens ($/M) | Output Tokens ($/M) |
+| ----------- | --------------------------- | ------------------------- | ------------------- |
+| o3-mini     | $1.10                       | $0.55                     | $4.40               |
+| DeepSeek R1 | $0.55                       | $0.14                     | $2.19               |
+| o1-mini     | $3.00                       | $1.50                     | $12.00              |
+
+## Benchmark Comparison: o3 vs o1
 
 ### Reasoning Ability
 
@@ -61,7 +88,7 @@ ARC-AGI tests an AI model's ability to recognize patterns in novel situations an
 
 ![o3 arc-agi](/static/blog/openai-o3/arc-agi.webp)
 
-With 87.5% accuracy in visual reasoning, O3 addresses prior models' struggles with spatial and physical object analysis. This breakthrough enhances real-world applications like robotics, medical imaging, and AR, fueling the AGI conversation. O3’s advancements mark a key step toward smarter, more capable AI systems.
+With `87.5%` accuracy in visual reasoning, o3 addresses prior models' struggles with spatial and physical object analysis. This breakthrough enhances real-world applications like robotics, medical imaging, and AR, fueling the AGI conversation. O3’s advancements mark a key step toward smarter, more capable AI systems.
 
 ### American Invitational Mathematics Exam (AIME)
 
@@ -87,11 +114,24 @@ Why did OpenAI skip o2? According to OpenAI's CEO, Sam Altman, the decision was 
 
 So, in the spirit of "OpenAI being really bad at names," Altman humorously explained, the team decided to jump straight to o3 instead. While the name might seem a bit unconventional, the reasoning behind it was purely practical.
 
-## When can developers access o3?
+## How can developers access o3?
 
-As of now, OpenAI is not releasing **o3** and **o3-mini** models for general use. Instead, the company is initially <a href="https://openai.com/index/early-access-for-safety-testing/#how-to-apply" target="_blank" rel="noopener">providing access to safety researchers</a> for testing. This allows OpenAI to gather important feedback and ensure that the models are safe and effective for broader applications.
+- o3-mini is available in the API (Chat Completions, Assistants, and Batch API)
+- o3-mini is also available in ChatGPT and will <a href="https://openai.com/index/openai-o3-mini/" target="_blank" rel="noopener">replace o1-mini in the model picker</a>.
 
-OpenAI has announced that **o3-mini** will be available to a wider audience by late January, with the full **o3** model expected to follow shortly after. The release of these models is highly anticipated, and they represent a significant step forward in the development of AI with more advanced reasoning capabilities.
+## Integrate OpenAI o3 with Helicone ⚡️
+
+Integrate LLM observability with a few lines of code. See <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">docs</a> for details.
+
+```js
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+```
 
 ## Bottom Line
 
