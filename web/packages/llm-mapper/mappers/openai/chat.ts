@@ -3,11 +3,23 @@ import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
 
+// Helper function to check content type
+const isImageContent = (content: any): boolean => {
+  return (
+    typeof content === "object" &&
+    content !== null &&
+    content.type === "image_url" &&
+    content.image_url?.url
+  );
+};
+
 const getRequestText = (requestBody: any) => {
   try {
     const heliconeMessage = requestBody?.heliconeMessage;
     if (heliconeMessage) {
-      return heliconeMessage;
+      return typeof heliconeMessage === "string"
+        ? heliconeMessage
+        : JSON.stringify(heliconeMessage);
     }
 
     const messages = requestBody?.messages;
@@ -17,47 +29,57 @@ const getRequestText = (requestBody: any) => {
 
     const lastMessageContent = messages.at(-1)?.content;
 
+    // Handle array content
     if (Array.isArray(lastMessageContent)) {
-      const firstString = lastMessageContent.find(
-        (item) => typeof item === "string"
+      // Try to find first text content
+      const textContent = lastMessageContent.find(
+        (item: any) => typeof item === "string" || item?.type === "text"
       );
-      if (firstString) return firstString;
 
-      for (const message of [...messages].reverse()) {
-        if (typeof message.content === "string") {
-          return message.content;
-        }
-
-        let textContent = message.content?.find((c: any) => c.type === "text");
-
-        if (!textContent) {
-          textContent = message.content?.find(
-            (c: any) => typeof c === "string"
-          );
-        }
-
-        if (textContent && textContent.text) {
-          return textContent.text;
-        }
+      if (textContent) {
+        return typeof textContent === "string" ? textContent : textContent.text;
       }
-      return "";
-    } else if (
-      typeof lastMessageContent === "object" &&
-      lastMessageContent !== null
-    ) {
-      return lastMessageContent.transcript || "";
+
+      // Check for image content
+      const imageContent = lastMessageContent.find(isImageContent);
+      if (imageContent) {
+        return "[Image]";
+      }
+
+      // If no text or image found, stringify the array
+      return JSON.stringify(lastMessageContent);
     }
 
-    return typeof lastMessageContent === "string"
-      ? lastMessageContent
-      : JSON.stringify(lastMessageContent || "");
+    // Handle image content
+    if (isImageContent(lastMessageContent)) {
+      return "[Image]";
+    }
+
+    // Handle object content
+    if (typeof lastMessageContent === "object" && lastMessageContent !== null) {
+      if (lastMessageContent.transcript) {
+        return lastMessageContent.transcript;
+      }
+      if (lastMessageContent.text) {
+        return lastMessageContent.text;
+      }
+      return JSON.stringify(lastMessageContent);
+    }
+
+    // Handle string content
+    if (typeof lastMessageContent === "string") {
+      return lastMessageContent;
+    }
+
+    // Handle other types
+    return JSON.stringify(lastMessageContent || "");
   } catch (error) {
     console.error("Error parsing request text:", error);
     return "error_parsing_request";
   }
 };
 
-const getResponseText = (
+export const getResponseText = (
   responseBody: any,
   statusCode: number = 200,
   model: string
@@ -89,17 +111,35 @@ const getResponseText = (
     }
 
     // Handle streaming response chunks
-    if (responseBody?.object === "chat.completion.chunk") {
+    if (
+      responseBody?.object === "chat.completion.chunk" ||
+      responseBody?.choices?.[0]?.delta?.tool_calls
+    ) {
       const choice = responseBody.choices?.[0];
       if (choice?.delta?.content) {
         return choice.delta.content;
       }
-      // If there's no content in the delta, it might be a function call or tool call
+      // If there's no content in the delta, check for tool calls
+      if (choice?.delta?.tool_calls) {
+        const toolCalls = choice.delta.tool_calls.map((tool: any) => {
+          const args = JSON.parse(tool.function.arguments);
+
+          return `${tool.function.name}(${JSON.stringify(args)})`;
+        });
+        return `${toolCalls.join("\n")}`;
+      }
+      // If there's no tool calls in delta, check message
+      if (choice?.message?.tool_calls) {
+        const toolCalls = choice.message.tool_calls.map((tool: any) => {
+          const args = JSON.parse(tool.function.arguments);
+
+          return `${tool.function.name}(${JSON.stringify(args)})`;
+        });
+        return `${toolCalls.join("\n")}`;
+      }
+
       if (choice?.delta?.function_call) {
         return `Function Call: ${JSON.stringify(choice.delta.function_call)}`;
-      }
-      if (choice?.delta?.tool_calls) {
-        return `Tool Calls: ${JSON.stringify(choice.delta.tool_calls)}`;
       }
       return ""; // Empty string for other cases in streaming
     }
@@ -183,32 +223,41 @@ const getResponseText = (
 };
 
 const getRequestMessages = (request: any) => {
-  return (
-    request.messages
-      // Handle tool_result
-      ?.map((msg: any) => {
-        if (Array.isArray(msg.content)) {
-          return {
-            ...msg,
-            content: msg.content.map((item: any) => {
-              if (item.type === "tool_result") {
-                return {
-                  type: "text",
-                  text: `tool_result(${item.content})`,
-                };
-              }
-              return item;
-            }),
-          };
-        }
-        return msg;
-      })
-      ?.map((message: any) => ({
-        content: getFormattedMessageContent(message.content),
-        role: message.role,
-        _type: getContentType(message as any),
-      }))
-  );
+  return request.messages?.map((msg: any) => {
+    // Handle array content
+    if (Array.isArray(msg.content)) {
+      const textContent = msg.content.find((item: any) => item.type === "text");
+      const imageContent = msg.content.find(
+        (item: any) => item.type === "image_url"
+      );
+
+      if (textContent && imageContent) {
+        return {
+          role: msg.role,
+          _type: "image",
+          content: textContent.text,
+          image_url: imageContent.image_url.url,
+        };
+      }
+    }
+
+    // Handle single image content
+    if (msg.content?.type === "image_url") {
+      return {
+        role: msg.role,
+        _type: "image",
+        content: "[Image]",
+        image_url: msg.content.image_url.url,
+      };
+    }
+
+    // Default case - use existing content formatting
+    return {
+      content: getFormattedMessageContent(msg.content),
+      role: msg.role,
+      _type: getContentType(msg as any),
+    };
+  });
 };
 
 const getLLMSchemaResponse = (response: any) => {
@@ -258,7 +307,7 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
   const requestToReturn: LlmSchema["request"] = {
     frequency_penalty: request.frequency_penalty,
     max_tokens: request.max_tokens,
-    model: request.model,
+    model: model || request.model,
     presence_penalty: request.presence_penalty,
     temperature: request.temperature,
     top_p: request.top_p,

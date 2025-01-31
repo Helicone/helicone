@@ -3,6 +3,13 @@ import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
 
+const randomId = () => {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+};
+
 type AnthropicContent = {
   type: string;
   text?: string;
@@ -79,7 +86,7 @@ const getRequestMessages = (request: any) => {
   // Add system message first if it exists
   if (request?.system) {
     requestMessages.push({
-      id: crypto.randomUUID(),
+      id: randomId(),
       role: "system",
       content: Array.isArray(request.system)
         ? request.system
@@ -172,7 +179,7 @@ const anthropicContentToMessage = (
 ): Message => {
   if (!content?.type) {
     return {
-      id: content?.id || crypto.randomUUID(),
+      id: content?.id || randomId(),
       content:
         typeof content === "string"
           ? content
@@ -187,14 +194,14 @@ const anthropicContentToMessage = (
   }
   if (content.type === "text") {
     return {
-      id: content.id || crypto.randomUUID(),
+      id: content.id || randomId(),
       content: content.text || JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
   } else if (content.type === "tool_use") {
     return {
-      id: content.id || crypto.randomUUID(),
+      id: content.id || randomId(),
       tool_calls: [
         {
           arguments: content.input,
@@ -206,7 +213,7 @@ const anthropicContentToMessage = (
     };
   } else {
     return {
-      id: content.id || crypto.randomUUID(),
+      id: content.id || randomId(),
       role: role,
       content:
         typeof content === "string"
