@@ -15,9 +15,9 @@ export type Message = {
 
 export type PromptMessage = Message | string;
 
-interface FunctionCall {
-  name?: string;
-  arguments?: object;
+export interface FunctionCall {
+  name: string;
+  arguments: Record<string, any>;
 }
 
 interface LLMRequestBody {

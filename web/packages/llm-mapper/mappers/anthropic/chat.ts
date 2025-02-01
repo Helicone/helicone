@@ -202,14 +202,15 @@ const anthropicContentToMessage = (
   } else if (content.type === "tool_use") {
     return {
       id: content.id || randomId(),
+      content: "",
+      role: "assistant",
       tool_calls: [
         {
-          arguments: content.input,
-          name: content.name,
+          name: content.name ?? "",
+          arguments: content.input ?? {},
         },
       ],
       _type: "functionCall",
-      role,
     };
   } else {
     return {

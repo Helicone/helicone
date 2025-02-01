@@ -335,6 +335,162 @@ describe("OpenAI Chat Mapper", () => {
         },
       });
     });
+
+    it("should handle tool calls and tool responses correctly", () => {
+      const request = {
+        messages: [
+          {
+            role: "system",
+            content: "Test system message",
+          },
+        ],
+      };
+
+      const response = {
+        choices: [
+          {
+            message: {
+              role: "assistant",
+              content: "",
+              tool_calls: [
+                {
+                  function: {
+                    name: "create_reminder_tool",
+                    arguments:
+                      '{"reminder_time":"2024-08-20 21:30:00","reminder_message":"Reminder watch"}',
+                  },
+                  type: "function",
+                  id: "call_123",
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = mapOpenAIRequest({
+        request,
+        response,
+        statusCode: 200,
+        model: "gpt-4",
+      });
+
+      // Verify schema structure
+      expect(result.schema.response?.messages).toHaveLength(1);
+      expect(result.schema.response?.messages?.[0]).toMatchObject({
+        content: "",
+        role: "assistant",
+        _type: "functionCall",
+        tool_calls: [
+          {
+            name: "create_reminder_tool",
+            arguments: {
+              reminder_time: "2024-08-20 21:30:00",
+              reminder_message: "Reminder watch",
+            },
+          },
+        ],
+      });
+
+      // Verify concatenated messages
+      expect(result.preview.concatenatedMessages).toHaveLength(2);
+      expect(result.preview.concatenatedMessages[0]).toMatchObject({
+        content: "Test system message",
+        role: "system",
+        _type: "message",
+      });
+      expect(result.preview.concatenatedMessages[1]).toMatchObject({
+        content: "",
+        role: "assistant",
+        _type: "functionCall",
+        tool_calls: [
+          {
+            name: "create_reminder_tool",
+            arguments: {
+              reminder_time: "2024-08-20 21:30:00",
+              reminder_message: "Reminder watch",
+            },
+          },
+        ],
+      });
+    });
+
+    it("should handle tool calls in request messages", () => {
+      const request = {
+        messages: [
+          {
+            role: "system",
+            content: "Test system message",
+          },
+          {
+            role: "assistant",
+            content: "",
+            tool_calls: [
+              {
+                function: {
+                  name: "create_reminder_tool",
+                  arguments:
+                    '{"reminder_time":"2024-08-20 21:30:00","reminder_message":"Reminder watch"}',
+                },
+                type: "function",
+                id: "call_123",
+              },
+            ],
+          },
+          {
+            role: "tool",
+            content: "Reminder has been set!",
+            tool_call_id: "call_123",
+          },
+        ],
+      };
+
+      const result = mapOpenAIRequest({
+        request,
+        response: {},
+        statusCode: 200,
+        model: "gpt-4",
+      });
+
+      // Verify request messages are mapped correctly
+      expect(result.schema.request?.messages).toHaveLength(3);
+
+      // Check system message
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        content: "Test system message",
+        role: "system",
+        _type: "message",
+      });
+
+      // Check assistant message with tool call
+      expect(result.schema.request?.messages?.[1]).toMatchObject({
+        content: "",
+        role: "assistant",
+        _type: "functionCall",
+        tool_calls: [
+          {
+            name: "create_reminder_tool",
+            arguments: {
+              reminder_time: "2024-08-20 21:30:00",
+              reminder_message: "Reminder watch",
+            },
+          },
+        ],
+      });
+
+      // Check tool response message
+      expect(result.schema.request?.messages?.[2]).toMatchObject({
+        content: "Reminder has been set!",
+        role: "tool",
+        _type: "message",
+      });
+
+      // Verify concatenated messages
+      expect(result.preview.concatenatedMessages).toHaveLength(3);
+      expect(result.preview.concatenatedMessages).toEqual(
+        result.schema.request?.messages
+      );
+    });
   });
 });
 
