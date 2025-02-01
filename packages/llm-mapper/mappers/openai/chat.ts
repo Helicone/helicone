@@ -146,7 +146,7 @@ const getRequestMessages = (request: any): Message[] => {
         return {
           role: msg.role,
           _type: "image",
-          content: "[Image]",
+          content: msg.content.text,
           image_url: msg.content.image_url.url,
         };
       }
