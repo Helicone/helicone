@@ -45,14 +45,23 @@ export const RenderMappedRequest = (
     } else {
       return (
         <div className="w-full flex flex-col text-left space-y-8 text-sm">
-          {mapperContent?.schema.request?.messages &&
-            JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
+          <p className="font-semibold text-gray-900 text-sm">Request</p>
+          <pre className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            {mapperContent?.schema.request?.messages &&
+              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
+          </pre>
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
             <p className="font-semibold text-gray-900 text-sm">Error</p>
-            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {mapperContent?.schema.response?.error?.heliconeMessage ||
-                "An unknown error occurred."}
-            </p>
+            <pre className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
+              "string"
+                ? mapperContent?.schema.response?.error?.heliconeMessage
+                : JSON.stringify(
+                    mapperContent?.schema.response?.error?.heliconeMessage,
+                    null,
+                    2
+                  )}
+            </pre>
           </div>
         </div>
       );
