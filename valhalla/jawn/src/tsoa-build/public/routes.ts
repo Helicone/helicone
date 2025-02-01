@@ -1000,8 +1000,8 @@ const models: TsoaRoute.Models = {
     "FunctionCall": {
         "dataType": "refObject",
         "properties": {
-            "name": {"dataType":"string"},
-            "arguments": {"dataType":"object"},
+            "name": {"dataType":"string","required":true},
+            "arguments": {"ref":"Record_string.any_","required":true},
         },
         "additionalProperties": false,
     },

@@ -10,12 +10,10 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-slate-900 text-slate-50 hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90",
-        action:
-          "bg-heliblue text-white hover:bg-heliblue/90 border border-slate-100 font-semibold interactive rounded-xl",
-        destructive:
-          "bg-red-400 text-white hover:bg-red-500 dark:bg-red-700 dark:text-slate-100 dark:hover:bg-red-800",
         outline:
           "border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+        destructive:
+          "bg-red-400 text-white hover:bg-red-500 dark:bg-red-700 dark:text-slate-100 dark:hover:bg-red-800",
         secondary:
           "bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600",
         ghost:
@@ -23,6 +21,8 @@ const buttonVariants = cva(
         ghostLinear:
           "hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50",
         link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
+        action:
+          "text-white font-semibold hover:text-slate-100 border border-slate-200 bg-heliblue hover:bg-heliblue/90 dark:border-slate-800 dark:bg-heliblue dark:hover:bg-heliblue/90 dark:hover:text-slate-50 interactive",
       },
       size: {
         default: "px-4 py-2 h-10",

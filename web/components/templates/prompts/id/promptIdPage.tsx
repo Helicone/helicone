@@ -2,10 +2,21 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
+import {
+  PiCaretLeftBold,
+  PiCommandBold,
+  PiPlayBold,
+  PiRocketLaunchBold,
+  PiStopBold,
+  PiSpinnerGapBold,
+} from "react-icons/pi";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
+import { toKebabCase } from "@/utils/strings";
+import Link from "next/link";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
-import ActionButton from "@/components/shared/universal/ActionButton";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import {
@@ -16,8 +27,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
 import {
@@ -26,31 +35,23 @@ import {
   isPrefillSupported,
   removeMessagePair,
 } from "@/utils/messages";
-import { toKebabCase } from "@/utils/strings";
 import {
   deduplicateVariables,
   extractVariables,
   isValidVariableName,
 } from "@/utils/variables";
-import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
-import {
-  PiCaretLeftBold,
-  PiCommandBold,
-  PiPlayBold,
-  PiRocketLaunchBold,
-  PiSpinnerGapBold,
-  PiStopBold,
-} from "react-icons/pi";
+
 import {
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../../welcome/diffHighlight";
+import { autoFillInputs } from "@helicone/prompts";
+import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
@@ -130,7 +131,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // 2. Derive "masterVersion" if needed
       const masterVersion =
-        metadata.isProduction === true
+        metadata?.isProduction === true
           ? ver.major_version
           : promptVersions?.find(
               (v) => (v.metadata as { isProduction?: boolean })?.isProduction
@@ -142,7 +143,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: Variable[] = Object.entries(metadata.inputs || {}).map(
+      let variables: Variable[] = Object.entries(metadata?.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
@@ -156,7 +157,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         vars.forEach((v) => {
           variables.push({
             name: v.name,
-            value: metadata.inputs?.[v.name] ?? v.value ?? "",
+            value: metadata?.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
             isMessage: msg.idx !== undefined,
           });
@@ -184,7 +185,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: stateMessages,
         parameters: {
-          provider: metadata.provider ?? "openai",
+          provider: metadata?.provider ?? "openai",
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
         },
@@ -651,22 +652,30 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
-          {/* Run Button */}
-          <ActionButton
-            label={isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
-            icon={isStreaming ? PiStopBold : PiPlayBold}
-            className={
+          {/* Run & Save Button */}
+          <Button
+            className={`${
               isStreaming
-                ? "bg-red-500 hover:bg-red-500/90 text-white"
-                : "bg-heliblue hover:bg-heliblue/90 text-white"
-            }
-            onClick={handleSaveAndRun}
+                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90"
+                : ""
+            }`}
+            variant="action"
             disabled={!canRun}
+            onClick={handleSaveAndRun}
           >
-            {isStreaming && <PiSpinnerGapBold className="animate-spin" />}
-
+            {isStreaming ? (
+              <PiStopBold className="h-4 w-4 mr-2" />
+            ) : (
+              <PiPlayBold className="h-4 w-4 mr-2" />
+            )}
+            <span className="mr-2">
+              {isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
+            </span>
+            {isStreaming && (
+              <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+            )}
             <div
-              className={`flex items-center gap-1 text-sm ${
+              className={`flex items-center gap-0.5 text-sm ${
                 canRun && prompt?.metadata?.createdFromUi !== false
                   ? "text-white opacity-60"
                   : "text-slate-400"
@@ -675,26 +684,45 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               <PiCommandBold className="h-4 w-4" />
               <MdKeyboardReturn className="h-4 w-4" />
             </div>
-          </ActionButton>
+          </Button>
+
+          {/* Experiment Button */}
+          <Button
+            variant="outline"
+            disabled={newFromPromptVersion.isLoading}
+            onClick={async () => {
+              const result = await newFromPromptVersion.mutateAsync({
+                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                originalPromptVersion: state.versionId,
+              });
+              router.push(`/experiments/${result.data?.data?.experimentId}`);
+            }}
+          >
+            <FlaskConicalIcon className="h-4 w-4 mr-2" />
+            <span>Experiment</span>
+          </Button>
 
           {/* Deploy Button */}
           <Dialog>
             <DialogTrigger asChild>
-              <ActionButton
-                label="Deploy"
-                className="bg-white"
-                icon={PiRocketLaunchBold}
-                onClick={() => {}}
+              <Button
+                variant="outline"
                 disabled={prompt?.metadata?.createdFromUi === false}
-              />
+                onClick={() => {}}
+              >
+                <PiRocketLaunchBold className="h-4 w-4 mr-2" />
+                <span>Deploy</span>
+              </Button>
             </DialogTrigger>
-            <DialogContent className="w-full max-w-3xl bg-white">
+            <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
               <DialogHeader>
                 <DialogTitle>Deploy Prompt</DialogTitle>
               </DialogHeader>
 
               {/* Code example */}
               <DiffHighlight
+                maxHeight={false}
+                className="h-full"
                 code={`
 export async function getPrompt(
   id: string,
@@ -746,28 +774,12 @@ async function pullPromptAndRunCompletion() {
   );
   console.log(response);
 }`}
-                language="typescript"
+                language="tsx"
                 newLines={[]}
                 oldLines={[]}
-                minHeight={false}
               />
             </DialogContent>
           </Dialog>
-
-          {/* Experiment Button */}
-          <ActionButton
-            label="Experiment"
-            className="bg-white"
-            icon={<FlaskConicalIcon className="h-4 w-4" />}
-            disabled={newFromPromptVersion.isLoading}
-            onClick={async () => {
-              const result = await newFromPromptVersion.mutateAsync({
-                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
-                originalPromptVersion: state.versionId,
-              });
-              router.push(`/experiments/${result.data?.data?.experimentId}`);
-            }}
-          />
         </div>
       </GlassHeader>
 

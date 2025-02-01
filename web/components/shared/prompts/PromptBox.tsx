@@ -305,7 +305,7 @@ export default function PromptBox({
             key={i}
             className={` ${
               !isValid
-                ? "text-slate-400 line-through"
+                ? "text-tertiary line-through"
                 : hasValue
                 ? "text-heliblue"
                 : "text-red-500"
@@ -321,56 +321,64 @@ export default function PromptBox({
 
   // TOOLBAR: POSITION
   const updateToolboxPosition = useCallback(() => {
+    // Step 1. Get All the required measurements
     if (!selection || !textareaRef.current) return;
     const textarea = textareaRef.current;
     const pre = textarea.nextElementSibling as HTMLPreElement;
+    const viewPortWidth = window.innerWidth;
+    const viewPortHeight = window.innerHeight;
     if (!pre) return;
-
-    const selectionRange = createSelectionRange(pre, selection);
-    if (!selectionRange) return;
-
-    const { range, preRect } = selectionRange;
-
-    // Get all client rects for the range to handle multi-line selections
-    const rects = Array.from(range.getClientRects());
-    const highlights = rects.map((rect) => ({
-      left: rect.left - preRect.left,
-      top: rect.top - preRect.top - textarea.scrollTop - 2,
-      width: rect.width,
-      height: 24,
-    }));
-
-    // Get the width of the toolbox
     const toolbox = toolboxRef.current;
     if (!toolbox) return;
     const toolboxWidth = toolbox.getBoundingClientRect().width;
 
-    // Use the first line's rect for toolbar positioning
+    // Step 2. Get all client rects for the range to handle multi-line selections
+    const selectionRange = createSelectionRange(pre, selection);
+    if (!selectionRange) return;
+    const { range, preRect } = selectionRange;
+    const rects = Array.from(range.getClientRects());
     const firstRect = rects[0];
     const lastRect = rects[rects.length - 1];
+    const leftmostRect = Math.min(...rects.map((rect) => rect.left));
+    const rightmostRect = Math.max(
+      ...rects.map((rect) => rect.left + rect.width)
+    );
 
-    // Calculate toolbar position (centered above first line)
-    const toolbarLeft =
-      firstRect.left - preRect.left + firstRect.width / 2 - toolboxWidth / 2;
-    const toolbarTop = firstRect.top - preRect.top - textarea.scrollTop;
+    // Step 3. Calculate fake highlight positions
+    const highlights = rects.map((rect) => ({
+      left: rect.left,
+      top: rect.top - textarea.scrollTop - 2,
+      width: rect.width,
+      height: 24,
+    }));
 
-    // Calculate preview position (underneath first line)
-    const previewLeft = firstRect.left - preRect.left;
-    const previewTop = lastRect.bottom - preRect.top - textarea.scrollTop;
+    // Step 4. Calculate toolbar position (viewport-relative for fixed positioning)
+    const selectionCenter = leftmostRect + (rightmostRect - leftmostRect) / 2;
+    const toolbarLeft = Math.max(
+      0,
+      Math.min(selectionCenter - toolboxWidth / 2, viewPortWidth - toolboxWidth)
+    );
+    const toolbarTop = firstRect.top - 2;
 
+    // Step 5. Set the toolbar positions
     setToolbarPosition({
-      toolbar: { left: toolbarLeft, top: toolbarTop },
-      preview: { left: previewLeft, top: previewTop },
       highlights,
+      toolbar: { left: toolbarLeft, top: toolbarTop },
+      preview: { left: firstRect.left, top: lastRect.bottom },
     });
   }, [selection]);
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea) return;
+    const toolbox = toolboxRef.current;
+    if (!textarea || !toolbox) return;
 
     const resizeObserver = new ResizeObserver(() => {
       if (selection) requestAnimationFrame(updateToolboxPosition);
     });
+
+    // Observe both textarea and toolbox for size changes
+    resizeObserver.observe(textarea);
+    resizeObserver.observe(toolbox);
 
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -624,7 +632,7 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white border border-slate-100 ${
+      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 caret-black dark:caret-white ${
         disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
       }`}
     >
@@ -638,7 +646,6 @@ export default function PromptBox({
         className="col-[1] row-[1] h-full w-full border-none bg-transparent p-4 outline-none"
         style={{
           ...sharedTextAreaStyles,
-          caretColor: disabled ? "transparent" : "black",
           color: "transparent",
           resize: "none",
         }}
@@ -655,7 +662,7 @@ export default function PromptBox({
         {getColoredText()}
         {suggestionState.suggestion && (
           <>
-            <span className="text-slate-300 opacity-0 transition-opacity group-focus-within:opacity-100">
+            <span className="text-tertiary opacity-0 transition-opacity group-focus-within:opacity-100">
               {suggestionState.suggestion}
             </span>
             {!suggestionState.isStreaming && (

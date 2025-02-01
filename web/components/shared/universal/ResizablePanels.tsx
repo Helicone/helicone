@@ -55,7 +55,9 @@ export default function ResizablePanels({
     state.isResizing ? "cursor-col-resize" : "hover:cursor-col-resize"
   }`;
   const dividerClasses = `w-0.5 h-full rounded-full transition-colors ${
-    state.isResizing || state.isHovering ? "bg-heliblue" : "bg-slate-200"
+    state.isResizing || state.isHovering
+      ? "bg-heliblue dark:bg-heliblue"
+      : "bg-slate-200 dark:bg-slate-800"
   }`;
 
   return (

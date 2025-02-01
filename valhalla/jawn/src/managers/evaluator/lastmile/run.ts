@@ -111,14 +111,14 @@ export async function runLastMileEvaluator(
   }
   if (metrics._type === "faithfulness") {
     return ok({
-      score: result[0]["Faithfulness_score"],
+      score: Math.round(result[0]["Faithfulness_score"] * 100),
       input: data.input,
       output: data.output,
       ground_truth: data.ground_truth,
     });
   }
   return ok({
-    score: result[0]["Relevance_score"],
+    score: Math.round(result[0]["Relevance_score"] * 100),
     input: data.input,
     output: data.output,
   });

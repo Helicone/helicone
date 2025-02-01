@@ -661,8 +661,8 @@ Json: JsonObject;
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
-      name?: string;
-      arguments?: Record<string, never>;
+      name: string;
+      arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
       image_url?: string;

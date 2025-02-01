@@ -15,9 +15,9 @@ export type Message = {
 
 export type PromptMessage = Message | string;
 
-interface FunctionCall {
-  name?: string;
-  arguments?: object;
+export interface FunctionCall {
+  name: string;
+  arguments: Record<string, any>;
 }
 
 interface LLMRequestBody {
@@ -67,6 +67,8 @@ export type MapperType =
   | "openai-moderation"
   | "openai-embedding"
   | "openai-instruct"
+  | "vector-db"
+  | "tool"
   | "unknown";
 
 type HeliconeMetadata = {
