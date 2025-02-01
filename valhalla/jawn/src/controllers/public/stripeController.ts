@@ -53,6 +53,34 @@ export class StripeController extends Controller {
     return result.data;
   }
 
+  @Get("/subscription/cost-for-evals")
+  public async getCostForEvals(@Request() request: JawnAuthenticatedRequest) {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getCostForEvals();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Get("/subscription/cost-for-experiments")
+  public async getCostForExperiments(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getCostForExperiments();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
   @Get("/subscription/free/usage")
   public async getFreeUsage(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
@@ -196,7 +224,7 @@ export class StripeController extends Controller {
   @Delete("/subscription/add-ons/{productType}")
   public async deleteAddOns(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() productType: "alerts" | "prompts"
+    @Path() productType: "alerts" | "prompts" | "experiments" | "evals"
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.deleteProductFromSubscription(

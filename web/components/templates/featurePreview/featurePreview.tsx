@@ -1,6 +1,6 @@
 import { XMarkIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LogoBox from "./LogoBox";
 import FeaturePreviewSection, {
   FeaturePreviewSectionProps,
@@ -40,7 +40,7 @@ const FeaturePreview = <T extends string>({
 }: FeaturePreviewProps<T>) => {
   const [selectedPlan, setSelectedPlan] = useState<T>(() => {
     const defaultPlan = pricingPlans.find((plan) => plan.isSelected);
-    return defaultPlan?.name ?? pricingPlans[0].name;
+    return defaultPlan?.name ?? pricingPlans[0]?.name ?? ("" as T);
   });
 
   return (

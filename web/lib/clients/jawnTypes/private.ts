@@ -167,6 +167,12 @@ export interface paths {
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
+  "/v1/stripe/subscription/cost-for-evals": {
+    get: operations["GetCostForEvals"];
+  };
+  "/v1/stripe/subscription/cost-for-experiments": {
+    get: operations["GetCostForExperiments"];
+  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
@@ -3067,6 +3073,26 @@ export interface operations {
       };
     };
   };
+  GetCostForEvals: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
+  GetCostForExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
   GetFreeUsage: {
     responses: {
       /** @description Ok */
@@ -3165,7 +3191,7 @@ export interface operations {
   DeleteAddOns: {
     parameters: {
       path: {
-        productType: "alerts" | "prompts";
+        productType: "alerts" | "prompts" | "experiments" | "evals";
       };
     };
     responses: {

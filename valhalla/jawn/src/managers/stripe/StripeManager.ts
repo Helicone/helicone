@@ -11,6 +11,7 @@ import { Result, err, ok } from "../../lib/shared/result";
 import { costOf } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
+import { Database } from "../../lib/db/database.types";
 
 const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
@@ -52,6 +53,8 @@ const getProProductPrices = async (): Promise<
 };
 
 const COST_OF_PROMPTS = 50;
+const COST_OF_EVALS = 100;
+const COST_OF_EXPERIMENTS = 50;
 
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
@@ -93,6 +96,66 @@ export class StripeManager extends BaseManager {
     }
 
     return ok(COST_OF_PROMPTS);
+  }
+
+  public async getCostForEvals(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_EVALS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["evals"]
+      )
+    ) {
+      const priceTheyArePayingForEvals = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["evals"]
+      );
+      if (
+        priceTheyArePayingForEvals &&
+        priceTheyArePayingForEvals.price.unit_amount &&
+        priceTheyArePayingForEvals?.quantity &&
+        priceTheyArePayingForEvals.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForEvals.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_EVALS);
+  }
+
+  public async getCostForExperiments(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_EXPERIMENTS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["experiments"]
+      )
+    ) {
+      const priceTheyArePayingForExperiments = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["experiments"]
+      );
+      if (
+        priceTheyArePayingForExperiments &&
+        priceTheyArePayingForExperiments.price.unit_amount &&
+        priceTheyArePayingForExperiments?.quantity &&
+        priceTheyArePayingForExperiments.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForExperiments.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_EXPERIMENTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
@@ -421,7 +484,6 @@ WHERE (${builtFilter.filter})`,
   ): Promise<Result<string, string>> {
     const proProductPrices = await getProProductPrices();
 
-    console.log(`Team bundle prices`, proProductPrices["team_bundle"]);
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
@@ -470,7 +532,6 @@ WHERE (${builtFilter.filter})`,
     returnUrl: string
   ): Promise<Result<string, string>> {
     try {
-      console.log("UPGRADE TO TEAM BUNDLE LINK");
       const subscriptionResult = await this.getSubscription();
       if (subscriptionResult.data) {
         return err("User already has a pro subscription");
@@ -509,12 +570,21 @@ WHERE (${builtFilter.filter})`,
 
       const subscription = subscriptionResult.data;
 
-      const result = await this.stripe.subscriptions.update(subscription.id, {
+      if (
+        subscription.cancel_at_period_end ||
+        subscription.status === "canceled"
+      ) {
+        const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+          returnUrl,
+          customerId.data,
+          false
+        );
+        return sessionUrl;
+      }
+
+      await this.stripe.subscriptions.update(subscription.id, {
         cancel_at_period_end: false,
         proration_behavior: "create_prorations",
-        cancellation_details: {
-          comment: "Upgrading to team bundle now",
-        },
       });
 
       const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
@@ -762,16 +832,23 @@ WHERE (${builtFilter.filter})`,
       return err(currentOrgStripeMetadata.error);
     }
 
-    const currentMetadata = currentOrgStripeMetadata.data;
+    const orgData = await this.getOrganization();
+    if (orgData.error) {
+      return err(orgData.error);
+    }
+
+    const existingMetadata =
+      (orgData.data?.stripe_metadata as Record<string, any>) || {};
+    const existingAddons =
+      (existingMetadata.addons as Record<string, boolean>) || {};
 
     await supabaseServer.client
       .from("organization")
       .update({
         stripe_metadata: {
+          ...existingMetadata,
           addons: {
-            ...(typeof currentMetadata?.addons === "object"
-              ? currentMetadata?.addons
-              : {}),
+            ...existingAddons,
             [productType]: true,
           },
         },
@@ -844,21 +921,24 @@ WHERE (${builtFilter.filter})`,
       return err(stripeDeleteResult.error);
     }
 
-    const currentOrgStripeMetadata = await this.getStripeMetadata();
-    if (currentOrgStripeMetadata.error) {
-      return err(currentOrgStripeMetadata.error);
+    const orgData = await this.getOrganization();
+
+    if (orgData.error) {
+      return err("Failed to get organization data");
     }
 
-    const currentMetadata = currentOrgStripeMetadata.data;
+    const existingMetadata =
+      (orgData.data?.stripe_metadata as Record<string, any>) || {};
+    const existingAddons =
+      (existingMetadata.addons as Record<string, boolean>) || {};
 
     await supabaseServer.client
       .from("organization")
       .update({
         stripe_metadata: {
+          ...existingMetadata,
           addons: {
-            ...(typeof currentMetadata?.addons === "object"
-              ? currentMetadata?.addons
-              : {}),
+            ...existingAddons,
             [productType]: false,
           },
         },
@@ -929,13 +1009,29 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
+  public async getOrganization(): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"], string>
+  > {
+    const organization = await supabaseServer.client
+      .from("organization")
+      .select("*")
+      .eq("id", this.authParams.organizationId)
+      .single();
+
+    if (!organization.data) {
+      return err("No organization found");
+    }
+
+    return ok(organization.data);
+  }
+
   public async getSubscription(): Promise<Result<Stripe.Subscription, string>> {
     try {
-      const organization = await supabaseServer.client
-        .from("organization")
-        .select("*")
-        .eq("id", this.authParams.organizationId)
-        .single();
+      const organization = await this.getOrganization();
+
+      if (organization.error) {
+        return err(organization.error);
+      }
 
       if (!organization.data?.stripe_subscription_id) {
         return err("No subscription found for this organization");

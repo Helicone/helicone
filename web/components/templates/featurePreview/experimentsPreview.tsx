@@ -1,9 +1,15 @@
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
 import useNotification from "@/components/shared/notification/useNotification";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
+import { useOrg } from "@/components/layout/org/organizationContext";
+
+type ExperimentPricingPlanName =
+  | "Experiments"
+  | "Pro + Experiments"
+  | "Team Bundle";
 
 const experimentFeatures: Feature[] = [
   {
@@ -55,7 +61,7 @@ const experimentFeatures: Feature[] = [
   },
 ];
 
-const paidPlan: PricingPlan[] = [
+const freePlan: PricingPlan<ExperimentPricingPlanName>[] = [
   {
     name: "Pro + Experiments",
     price: "50",
@@ -80,7 +86,52 @@ const paidPlan: PricingPlan[] = [
   },
 ];
 
+const paidPlan: PricingPlan<ExperimentPricingPlanName>[] = [
+  {
+    name: "Experiments",
+    price: "50",
+    isSelected: true,
+    features: [
+      { name: "Pro seats (current plan)", included: true },
+      { name: "Prompts", included: true },
+      {
+        name: "Experiments",
+        included: false,
+        additionalCost: "+$50/mo",
+      },
+      { name: "Evals", included: false, additionalCost: "+$100/mo" },
+    ],
+  },
+  {
+    name: "Team Bundle",
+    price: "200",
+    features: [
+      { name: "Unlimited seats", included: true },
+      { name: "Prompts", included: true },
+      { name: "Experiments", included: true },
+      { name: "Evals", included: true },
+    ],
+  },
+];
+
 const ExperimentsPreview = () => {
+  const org = useOrg();
+  const pricingPlan: PricingPlan<ExperimentPricingPlanName>[] = useMemo(() => {
+    if (
+      org?.currentOrg?.tier === "free" ||
+      org?.currentOrg?.tier === "growth"
+    ) {
+      return freePlan;
+    } else if (
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "team-20250130"
+    ) {
+      return paidPlan;
+    }
+    return [];
+  }, [org]);
+
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { handleConfirmTrial, proRequired } = useFeatureTrial(
@@ -103,12 +154,16 @@ const ExperimentsPreview = () => {
     if (success) setIsConfirmDialogOpen(false);
   };
 
+  if (!org?.currentOrg) {
+    return null;
+  }
+
   return (
     <>
       <FeaturePreview
         title="Prompt Experimentation"
         subtitle="in a Spreadsheet-Like Environment"
-        pricingPlans={paidPlan}
+        pricingPlans={pricingPlan}
         proRequired={proRequired}
         onStartTrial={handleStartTrial}
         featureSectionProps={{

@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { CalendarIcon, CheckIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 
@@ -203,12 +203,18 @@ export const TeamPlanCard = () => {
           title="Learn about our Enterprise plan"
           description="Built for companies looking to scale. Includes everything in Team, plus dedicated support and custom SLAs."
           buttonText="Contact sales"
+          onButtonClick={() => {
+            window.open("https://helicone.ai/contact", "_blank");
+          }}
         />
 
         <PlanFeatureCard
           title="Need help with your Team plan?"
           description="Our support team is here to help with any questions about your subscription."
           buttonText="Contact support"
+          onButtonClick={() => {
+            window.open("https://helicone.ai/contact", "_blank");
+          }}
         />
       </div>
 

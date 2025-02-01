@@ -71,10 +71,11 @@ export const useFeatureTrial = (
       }
 
       notification.setNotification(
-        `${featureName} trial has been added! Refreshing page...`,
+        `${featureName} trial has been added!`,
         "success"
       );
       await subscription.refetch();
+      window.location.reload();
       return { success: true };
     } catch (error) {
       notification.setNotification(

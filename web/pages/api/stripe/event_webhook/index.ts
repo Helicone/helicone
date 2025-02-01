@@ -9,6 +9,20 @@ import {
 } from "@/lib/api/stripe/llmUsage";
 import { costOf } from "@/packages/cost";
 
+const ADDON_PRICES: Record<string, keyof Addons> = {
+  [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
+  [process.env.PRICE_PROD_PROMPTS_ID!]: "prompts",
+  [process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!]: "experiments",
+  [process.env.PRICE_PROD_EVALS_ID!]: "evals",
+};
+
+type Addons = {
+  alerts?: boolean;
+  prompts?: boolean;
+  experiments?: boolean;
+  evals?: boolean;
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 });
@@ -28,6 +42,7 @@ const PricingVersionOld = {
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
         tier: "growth",
+        stripe_metadata: {},
       })
       .eq("id", orgId || "");
   },
@@ -147,20 +162,60 @@ const TeamVersion20250130 = {
 const PricingVersion20240913 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
-    // subscription.metadata?.["helcionePricingVersion"] !==
     const subscriptionId = subscription.id;
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
+    const addons: Addons = {};
+
+    subscription.items.data.forEach((item) => {
+      console.log(`Price ID: ${item.price.id}`);
+      const addonKey = ADDON_PRICES[item.price.id];
+      if (addonKey) {
+        addons[addonKey] =
+          item.quantity !== undefined ? item.quantity > 0 : false;
+      }
+    });
+
+    console.log(`Subscription JSON: ${JSON.stringify(subscription)}`);
+    console.log(`Addons: ${JSON.stringify(addons)}`);
+
+    // const subscription = await this.stripe.subscriptions.retrieve(
+    //   organization.data.stripe_subscription_id,
+    //   {
+    //     expand: ["items.data.price.product"],
+    //   }
+    // );
+
+    // const currentOrgStripeMetadata = await this.getStripeMetadata();
+    // if (currentOrgStripeMetadata.error) {
+    //   return err(currentOrgStripeMetadata.error);
+    // }
+
+    // const currentMetadata = currentOrgStripeMetadata.data;
+
+    // await supabaseServer.client
+    //   .from("organization")
+    //   .update({
+    //     stripe_metadata: {
+    //       addons: {
+    //         ...(typeof currentMetadata?.addons === "object"
+    //           ? currentMetadata?.addons
+    //           : {}),
+    //         [productType]: false,
+    //       },
+    //     },
+
+    // subscription.
 
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
         stripe_subscription_id: subscriptionId,
-        stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
+        stripe_subscription_item_id: subscriptionItemId,
         tier: "pro-20240913",
         stripe_metadata: {
-          addons: {},
+          addons: addons,
         },
       })
       .eq("id", orgId || "");

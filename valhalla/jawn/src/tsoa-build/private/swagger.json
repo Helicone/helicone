@@ -8021,6 +8021,60 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/subscription/cost-for-evals": {
+			"get": {
+				"operationId": "GetCostForEvals",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/cost-for-experiments": {
+			"get": {
+				"operationId": "GetCostForExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/subscription/free/usage": {
 			"get": {
 				"operationId": "GetFreeUsage",
@@ -8307,7 +8361,9 @@
 							"type": "string",
 							"enum": [
 								"alerts",
-								"prompts"
+								"prompts",
+								"experiments",
+								"evals"
 							]
 						}
 					}
