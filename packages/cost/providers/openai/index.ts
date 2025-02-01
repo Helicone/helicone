@@ -514,7 +514,7 @@ const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000011,
-      completion_token: 0.00000055,
+      completion_token: 0.0000044,
     },
     showInPlayground: true,
   },
@@ -525,7 +525,7 @@ const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000011,
-      completion_token: 0.00000055,
+      completion_token: 0.0000044,
     },
     showInPlayground: true,
   },
