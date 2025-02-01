@@ -223,7 +223,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         log.response.status,
         responseBody
       );
-      const parser = this.getBodyProcessor(isStream, provider, responseBody);
+      const model = context.processedLog.model;
+      const parser = this.getBodyProcessor(
+        isStream,
+        provider,
+        responseBody,
+        model
+      );
       return await parser.parse({
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
@@ -298,13 +304,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   getBodyProcessor(
     isStream: boolean,
     provider: string,
-    responseBody: any
+    responseBody: any,
+    model?: string
   ): IBodyProcessor {
     if (!isStream && provider === "ANTHROPIC" && responseBody) {
       return new AnthropicBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
       return new GoogleBodyProcessor();
-    } else if (isStream && provider === "ANTHROPIC") {
+    } else if (
+      isStream &&
+      (provider === "ANTHROPIC" || model?.includes("claude"))
+    ) {
       return new AnthropicStreamBodyProcessor();
     } else if (isStream && provider === "GOOGLE") {
       return new GoogleStreamBodyProcessor();
