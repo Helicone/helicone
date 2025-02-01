@@ -310,6 +310,12 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.deepseek.com",
       };
+    } else if (hostParts[0] === "nebius") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.studio.nebius.ai",
+      };
     } else if (hostParts[0].includes("firecrawl")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {

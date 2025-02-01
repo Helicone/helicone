@@ -373,11 +373,11 @@ WHEN (request_response_rmt.model ILIKE 'gpt-3.5-turbo-0125') THEN 500 * request_
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo-2024-04-09') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo-0125-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002-v2') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-3-small') THEN 20 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002-v2') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-3-small') THEN 20 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_rmt.prompt_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
@@ -385,6 +385,14 @@ WHEN (request_response_rmt.model ILIKE 'o1-preview') THEN 15000 * request_respon
 WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
+WHEN (request_response_rmt.provider = 'NEBIUS') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'black-forest-labs/flux-schnell') THEN 1300000
+WHEN (request_response_rmt.model ILIKE 'black-forest-labs/flux-dev') THEN 7000000
+WHEN (request_response_rmt.model ILIKE 'stability-ai/sdxl') THEN 3000000
   ELSE 0
 END
 )
@@ -547,38 +555,38 @@ END
 )
 WHEN (request_response_rmt.provider = 'OPENROUTER') THEN (
   CASE
-  WHEN (request_response_rmt.model ILIKE 'google/gemini-2.0-flash-thinking-exp:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+  
 WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1') THEN 550 * request_response_rmt.prompt_tokens + 2190 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'sophosympatheia/rogue-rose-103b-v0.2:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'minimax/minimax-01') THEN 200 * request_response_rmt.prompt_tokens + 1100 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/codestral-2501') THEN 300 * request_response_rmt.prompt_tokens + 900 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'microsoft/phi-4') THEN 70 * request_response_rmt.prompt_tokens + 140 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'sao10k/l3.1-70b-hanami-x1') THEN 3000 * request_response_rmt.prompt_tokens + 3000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-chat') THEN 140 * request_response_rmt.prompt_tokens + 280 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qvq-72b-preview') THEN 250 * request_response_rmt.prompt_tokens + 500 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-2.0-flash-thinking-exp-1219:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'sao10k/l3.3-euryale-70b') THEN 700 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/o1') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'eva-unit-01/eva-llama-3.33-70b') THEN 4000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'x-ai/grok-2-vision-1212') THEN 2000 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'x-ai/grok-2-1212') THEN 2000 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'cohere/command-r7b-12-2024') THEN 38 * request_response_rmt.prompt_tokens + 150 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-2.0-flash-exp:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-exp-1206:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.3-70b-instruct') THEN 120 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'amazon/nova-lite-v1') THEN 60 * request_response_rmt.prompt_tokens + 240 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'amazon/nova-micro-v1') THEN 35 * request_response_rmt.prompt_tokens + 140 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'amazon/nova-pro-v1') THEN 800 * request_response_rmt.prompt_tokens + 3200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwq-32b-preview') THEN 120 * request_response_rmt.prompt_tokens + 180 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-exp-1121:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/learnlm-1.5-pro-experimental:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
+
 WHEN (request_response_rmt.model ILIKE 'eva-unit-01/eva-qwen-2.5-72b') THEN 4000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o-2024-11-20') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-large-2411') THEN 2000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-large-2407') THEN 2000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/pixtral-large-2411') THEN 2000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'x-ai/grok-vision-beta') THEN 5000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-exp-1114:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'infermatic/mn-inferor-12b') THEN 250 * request_response_rmt.prompt_tokens + 500 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2.5-coder-32b-instruct') THEN 70 * request_response_rmt.prompt_tokens + 160 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'raifle/sorcererlm-8x22b') THEN 4500 * request_response_rmt.prompt_tokens + 4500 * request_response_rmt.completion_tokens
@@ -603,13 +611,13 @@ WHEN (request_response_rmt.model ILIKE 'google/gemini-flash-1.5-8b') THEN 38 * r
 WHEN (request_response_rmt.model ILIKE 'anthracite-org/magnum-v2-72b') THEN 3000 * request_response_rmt.prompt_tokens + 3000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'liquid/lfm-40b') THEN 150 * request_response_rmt.prompt_tokens + 150 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'thedrummer/rocinante-12b') THEN 250 * request_response_rmt.prompt_tokens + 500 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-3b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-3b-instruct') THEN 15 * request_response_rmt.prompt_tokens + 25 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-1b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-1b-instruct') THEN 10 * request_response_rmt.prompt_tokens + 10 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-90b-vision-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-90b-vision-instruct') THEN 900 * request_response_rmt.prompt_tokens + 900 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-11b-vision-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-11b-vision-instruct') THEN 55 * request_response_rmt.prompt_tokens + 55 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2.5-72b-instruct') THEN 230 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-vl-72b-instruct') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
@@ -622,9 +630,9 @@ WHEN (request_response_rmt.model ILIKE 'mistralai/pixtral-12b') THEN 100 * reque
 WHEN (request_response_rmt.model ILIKE 'cohere/command-r-08-2024') THEN 143 * request_response_rmt.prompt_tokens + 570 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'cohere/command-r-plus-08-2024') THEN 2375 * request_response_rmt.prompt_tokens + 9500 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-vl-7b-instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-flash-1.5-exp') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'sao10k/l3.1-euryale-70b') THEN 700 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-flash-1.5-8b-exp') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'ai21/jamba-1-5-large') THEN 2000 * request_response_rmt.prompt_tokens + 8000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'ai21/jamba-1-5-mini') THEN 200 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'microsoft/phi-3.5-mini-128k-instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
@@ -638,27 +646,27 @@ WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o-2024-08-06') THEN 2500 * r
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-405b') THEN 2000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'nothingiisreal/mn-celeste-12b') THEN 800 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'perplexity/llama-3.1-sonar-small-128k-chat') THEN 200 * request_response_rmt.prompt_tokens + 200 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemini-pro-1.5-exp') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'perplexity/llama-3.1-sonar-large-128k-chat') THEN 1000 * request_response_rmt.prompt_tokens + 1000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'perplexity/llama-3.1-sonar-large-128k-online') THEN 1000 * request_response_rmt.prompt_tokens + 1000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'perplexity/llama-3.1-sonar-small-128k-online') THEN 200 * request_response_rmt.prompt_tokens + 200 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-405b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-405b-instruct') THEN 800 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-405b-instruct:nitro') THEN 14620 * request_response_rmt.prompt_tokens + 14620 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-8b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-8b-instruct') THEN 20 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-70b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-70b-instruct') THEN 120 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-70b-instruct:nitro') THEN 3250 * request_response_rmt.prompt_tokens + 3250 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-nemo') THEN 35 * request_response_rmt.prompt_tokens + 80 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/codestral-mamba') THEN 250 * request_response_rmt.prompt_tokens + 250 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o-mini') THEN 150 * request_response_rmt.prompt_tokens + 600 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o-mini-2024-07-18') THEN 150 * request_response_rmt.prompt_tokens + 600 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-7b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-7b-instruct') THEN 54 * request_response_rmt.prompt_tokens + 54 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'google/gemma-2-27b-it') THEN 270 * request_response_rmt.prompt_tokens + 270 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'alpindale/magnum-72b') THEN 1875 * request_response_rmt.prompt_tokens + 2250 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'google/gemma-2-9b-it:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'google/gemma-2-9b-it') THEN 30 * request_response_rmt.prompt_tokens + 60 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '01-ai/yi-large') THEN 3000 * request_response_rmt.prompt_tokens + 3000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'ai21/jamba-instruct') THEN 500 * request_response_rmt.prompt_tokens + 700 * request_response_rmt.completion_tokens
@@ -667,14 +675,14 @@ WHEN (request_response_rmt.model ILIKE 'anthropic/claude-3.5-sonnet-20240620') T
 WHEN (request_response_rmt.model ILIKE 'sao10k/l3-euryale-70b') THEN 700 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'cognitivecomputations/dolphin-mixtral-8x22b') THEN 900 * request_response_rmt.prompt_tokens + 900 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-72b-instruct') THEN 340 * request_response_rmt.prompt_tokens + 390 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-7b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-7b-instruct') THEN 30 * request_response_rmt.prompt_tokens + 55 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-7b-instruct:nitro') THEN 70 * request_response_rmt.prompt_tokens + 70 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-7b-instruct-v0.3') THEN 30 * request_response_rmt.prompt_tokens + 55 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'nousresearch/hermes-2-pro-llama-3-8b') THEN 25 * request_response_rmt.prompt_tokens + 40 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'microsoft/phi-3-mini-128k-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'microsoft/phi-3-mini-128k-instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'microsoft/phi-3-medium-128k-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'microsoft/phi-3-medium-128k-instruct') THEN 1000 * request_response_rmt.prompt_tokens + 1000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'neversleep/llama-3-lumimaid-70b') THEN 3375 * request_response_rmt.prompt_tokens + 4500 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'google/gemini-flash-1.5') THEN 75 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
@@ -688,7 +696,7 @@ WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o') THEN 2500 * request_resp
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4o:extended') THEN 6000 * request_response_rmt.prompt_tokens + 18000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'neversleep/llama-3-lumimaid-8b:extended') THEN 188 * request_response_rmt.prompt_tokens + 1125 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'neversleep/llama-3-lumimaid-8b') THEN 188 * request_response_rmt.prompt_tokens + 1125 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-8b-instruct:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-8b-instruct') THEN 30 * request_response_rmt.prompt_tokens + 60 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-8b-instruct:extended') THEN 188 * request_response_rmt.prompt_tokens + 1125 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-8b-instruct:nitro') THEN 200 * request_response_rmt.prompt_tokens + 200 * request_response_rmt.completion_tokens
@@ -726,7 +734,7 @@ WHEN (request_response_rmt.model ILIKE 'google/gemini-pro') THEN 500 * request_r
 WHEN (request_response_rmt.model ILIKE 'mistralai/mixtral-8x7b') THEN 540 * request_response_rmt.prompt_tokens + 540 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mixtral-8x7b-instruct') THEN 240 * request_response_rmt.prompt_tokens + 240 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mistralai/mixtral-8x7b-instruct:nitro') THEN 500 * request_response_rmt.prompt_tokens + 500 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'openchat/openchat-7b:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'openchat/openchat-7b') THEN 55 * request_response_rmt.prompt_tokens + 55 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'neversleep/noromaid-20b') THEN 1500 * request_response_rmt.prompt_tokens + 2250 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2:beta') THEN 8000 * request_response_rmt.prompt_tokens + 24000 * request_response_rmt.completion_tokens
@@ -734,11 +742,11 @@ WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2') THEN 8000 * request
 WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2.1:beta') THEN 8000 * request_response_rmt.prompt_tokens + 24000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2.1') THEN 8000 * request_response_rmt.prompt_tokens + 24000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'teknium/openhermes-2.5-mistral-7b') THEN 170 * request_response_rmt.prompt_tokens + 170 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'undi95/toppy-m-7b:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'undi95/toppy-m-7b:nitro') THEN 70 * request_response_rmt.prompt_tokens + 70 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'undi95/toppy-m-7b') THEN 70 * request_response_rmt.prompt_tokens + 70 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'alpindale/goliath-120b') THEN 9375 * request_response_rmt.prompt_tokens + 9375 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'openrouter/auto') THEN -1000000000 * request_response_rmt.prompt_tokens + -1000000000 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-3.5-turbo-1106') THEN 1000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4-1106-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'google/palm-2-chat-bison-32k') THEN 1000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
@@ -753,14 +761,14 @@ WHEN (request_response_rmt.model ILIKE 'openai/gpt-4-32k') THEN 60000 * request_
 WHEN (request_response_rmt.model ILIKE 'openai/gpt-4-32k-0314') THEN 60000 * request_response_rmt.prompt_tokens + 120000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'nousresearch/nous-hermes-llama2-13b') THEN 170 * request_response_rmt.prompt_tokens + 170 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'mancer/weaver') THEN 1500 * request_response_rmt.prompt_tokens + 2250 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'huggingfaceh4/zephyr-7b-beta:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2.0:beta') THEN 8000 * request_response_rmt.prompt_tokens + 24000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'anthropic/claude-2.0') THEN 8000 * request_response_rmt.prompt_tokens + 24000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'undi95/remm-slerp-l2-13b') THEN 800 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'undi95/remm-slerp-l2-13b:extended') THEN 1125 * request_response_rmt.prompt_tokens + 1125 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'google/palm-2-chat-bison') THEN 1000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'google/palm-2-codechat-bison') THEN 1000 * request_response_rmt.prompt_tokens + 2000 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'gryphe/mythomax-l2-13b:free') THEN 0 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+
 WHEN (request_response_rmt.model ILIKE 'gryphe/mythomax-l2-13b') THEN 65 * request_response_rmt.prompt_tokens + 65 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gryphe/mythomax-l2-13b:nitro') THEN 200 * request_response_rmt.prompt_tokens + 200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gryphe/mythomax-l2-13b:extended') THEN 1125 * request_response_rmt.prompt_tokens + 1125 * request_response_rmt.completion_tokens
@@ -822,6 +830,15 @@ WHEN (request_response_rmt.provider = 'DEEPSEEK') THEN (
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'AVIAN') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-405B-Instruct') THEN 1500 * request_response_rmt.prompt_tokens + 1500 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.3-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-70B-Instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-8B-Instruct') THEN 100 * request_response_rmt.prompt_tokens + 100 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
@@ -859,11 +876,11 @@ WHEN (request_response_rmt.model ILIKE 'gpt-3.5-turbo-0125') THEN 500 * request_
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo-2024-04-09') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-turbo-0125-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002-v2') THEN 100 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-3-small') THEN 20 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_rmt.prompt_tokens + 0 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-ada-002-v2') THEN 100 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-3-small') THEN 20 * request_response_rmt.prompt_tokens
+WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * request_response_rmt.prompt_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens

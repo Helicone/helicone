@@ -2599,7 +2599,8 @@
 					"AWS",
 					"DEEPSEEK",
 					"X",
-					"AVIAN"
+					"AVIAN",
+					"NEBIUS"
 				]
 			},
 			"Provider": {
