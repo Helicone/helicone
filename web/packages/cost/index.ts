@@ -84,25 +84,31 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
         image: Math.round((cost.cost.per_image ?? 0) * multiple),
       };
 
-      const promptTokenCost =
-        costPerMultiple.prompt > 0
-          ? ` + ${costPerMultiple.prompt} * ${table}.prompt_tokens`
-          : "";
-      const completionTokenCost =
-        costPerMultiple.completion > 0
-          ? ` + ${costPerMultiple.completion} * ${table}.completion_tokens`
-          : "";
-      const imageCostPart =
-        costPerMultiple.image > 0 ? ` + ${costPerMultiple.image}` : "";
-
-      if (cost.model.operator === "equals") {
-        return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
-      } else if (cost.model.operator === "startsWith") {
-        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
-      } else if (cost.model.operator === "includes") {
-        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${promptTokenCost}${completionTokenCost}${imageCostPart}`;
+      const costs = [];
+      if (costPerMultiple.prompt > 0) {
+        costs.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
+      }
+      if (costPerMultiple.completion > 0) {
+        costs.push(
+          `${costPerMultiple.completion} * ${table}.completion_tokens`
+        );
+      }
+      if (costPerMultiple.image > 0) {
+        costs.push(`${costPerMultiple.image}`);
+      }
+      if (costs.length > 0) {
+        const costString = costs.join(" + ");
+        if (cost.model.operator === "equals") {
+          return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costString}`;
+        } else if (cost.model.operator === "startsWith") {
+          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
+        } else if (cost.model.operator === "includes") {
+          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
+        } else {
+          throw new Error("Unknown operator");
+        }
       } else {
-        throw new Error("Unknown operator");
+        return ``;
       }
     })
     .join("\n")}
