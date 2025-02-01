@@ -36,6 +36,7 @@ export interface ModelRow {
     prompt_token: number;
     completion_token: number;
     per_image?: number;
+    per_call?: number;
   };
   showInPlayground?: boolean;
   targetUrl?: string;
