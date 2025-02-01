@@ -1,7 +1,16 @@
-import { LlmSchema } from "../../types";
+import { LlmSchema, Message, FunctionCall } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
+
+interface ToolCall {
+  function: {
+    name: string;
+    arguments: string;
+  };
+  type: string;
+  id: string;
+}
 
 // Helper function to check content type
 const isImageContent = (content: any): boolean => {
@@ -12,6 +21,21 @@ const isImageContent = (content: any): boolean => {
     content.image_url?.url
   );
 };
+
+const parseFunctionArguments = (
+  args: string | undefined
+): Record<string, any> => {
+  try {
+    return JSON.parse(args ?? "{}");
+  } catch {
+    return {};
+  }
+};
+
+const mapToolCallToFunction = (tool: ToolCall): FunctionCall => ({
+  name: tool.function?.name ?? "",
+  arguments: parseFunctionArguments(tool.function?.arguments),
+});
 
 const getRequestText = (requestBody: any) => {
   try {
@@ -84,10 +108,6 @@ export const getResponseText = (
   statusCode: number = 200,
   model: string
 ) => {
-  const hasNoContent = responseBody?.choices
-    ? responseBody?.choices?.[0]?.message?.content === null ||
-      responseBody?.choices?.[0]?.message?.content === undefined
-    : true;
   if (statusCode === 0 || statusCode === null) {
     return "";
   }
@@ -97,17 +117,9 @@ export const getResponseText = (
   }
 
   try {
-    // Handle pending response or network error scenarios upfront
-    if (statusCode === 0 || statusCode === null) return ""; // Pending response
+    // Handle non-success statuses
     if (![200, 201, -3].includes(statusCode)) {
-      // Network error or other non-success statuses
       return responseBody?.error?.message || responseBody?.helicone_error || "";
-    }
-
-    // For successful responses
-    if (responseBody?.error) {
-      // Check for an error from OpenAI
-      return responseBody.error.message || "";
     }
 
     // Handle streaming response chunks
@@ -119,102 +131,66 @@ export const getResponseText = (
       if (choice?.delta?.content) {
         return choice.delta.content;
       }
-      // If there's no content in the delta, check for tool calls
-      if (choice?.delta?.tool_calls) {
-        const toolCalls = choice.delta.tool_calls.map((tool: any) => {
-          const args = JSON.parse(tool.function.arguments);
 
-          return `${tool.function.name}(${JSON.stringify(args)})`;
-        });
-        return `${toolCalls.join("\n")}`;
-      }
-      // If there's no tool calls in delta, check message
-      if (choice?.message?.tool_calls) {
-        const toolCalls = choice.message.tool_calls.map((tool: any) => {
-          const args = JSON.parse(tool.function.arguments);
-
-          return `${tool.function.name}(${JSON.stringify(args)})`;
-        });
-        return `${toolCalls.join("\n")}`;
+      // Handle tool calls in delta or message
+      const toolCalls =
+        choice?.delta?.tool_calls || choice?.message?.tool_calls;
+      if (toolCalls) {
+        return toolCalls
+          .map((tool: ToolCall) => {
+            const args = parseFunctionArguments(tool.function.arguments);
+            return `${tool.function.name}(${JSON.stringify(args)})`;
+          })
+          .join("\n");
       }
 
       if (choice?.delta?.function_call) {
         return `Function Call: ${JSON.stringify(choice.delta.function_call)}`;
       }
-      return ""; // Empty string for other cases in streaming
+      return "";
     }
 
-    if (
-      /^claude/.test(model) &&
-      responseBody?.content?.[0].type === "tool_use"
-    ) {
-      // Check for tool_use in the content array
-      if (Array.isArray(responseBody?.content)) {
+    // Handle Claude model responses
+    if (/^claude/.test(model)) {
+      if (responseBody?.content?.[0].type === "tool_use") {
         const toolUse = responseBody.content.find(
           (item: any) => item.type === "tool_use"
         );
         if (toolUse) {
           return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
         }
-
-        // If no tool_use, find the text content
-        const textContent = responseBody.content.find(
-          (item: any) => item.type === "text"
-        );
-        if (textContent) {
-          return textContent.text || "";
-        }
+      }
+      if (responseBody?.content?.[0]?.text) {
+        return responseBody.content[0].text;
       }
     }
 
-    if (/^claude/.test(model) && responseBody?.content?.[0]?.text) {
-      // Specific handling for Claude model
-      return responseBody.content[0].text;
-    }
-
-    // Handle choices
+    // Handle regular choices
     const firstChoice = responseBody?.choices?.[0];
     if (firstChoice) {
+      const { message } = firstChoice;
+      const hasNoContent =
+        message?.content === null || message?.content === undefined;
+
       if (hasNoContent) {
-        // Logic for when there's no content
-        const { message } = firstChoice;
-
-        // Helper function to determine if there's a function call
-        const hasFunctionCall = () => {
-          if (message?.function_call) return true;
-          if (Array.isArray(message?.tool_calls)) {
-            return message.tool_calls.some(
-              (tool: any) => tool.type === "function"
-            );
-          }
-          return false;
-        };
-
-        // Helper function to check if message.text is an object
-        const hasText = () =>
-          typeof message?.text === "object" && message.text !== null;
-
-        if (hasText()) {
+        if (message?.text && typeof message.text === "object") {
           return JSON.stringify(message.text);
-        } else if (hasFunctionCall()) {
+        }
+
+        if (message?.tool_calls || message?.function_call) {
           const tools = message.tool_calls;
           const functionTool = tools?.find(
-            (tool: any) => tool.type === "function"
+            (tool: ToolCall) => tool.type === "function"
           )?.function;
+
           if (functionTool) {
             return `${functionTool.name}(${functionTool.arguments})`;
-          } else {
-            return JSON.stringify(message.function_call, null, 2);
           }
-        } else {
           return JSON.stringify(message.function_call, null, 2);
         }
-      } else {
-        // When there's content available
-        return firstChoice.message?.content || "";
       }
+      return firstChoice.message?.content || "";
     }
-    // Fallback for missing choices
     return "";
   } catch (error) {
     console.error("Error parsing response text:", error);
@@ -222,42 +198,66 @@ export const getResponseText = (
   }
 };
 
-const getRequestMessages = (request: any) => {
-  return request.messages?.map((msg: any) => {
-    // Handle array content
-    if (Array.isArray(msg.content)) {
-      const textContent = msg.content.find((item: any) => item.type === "text");
-      const imageContent = msg.content.find(
-        (item: any) => item.type === "image_url"
-      );
+export const getRequestMessages = (request: any): Message[] => {
+  return (
+    request.messages?.map((msg: any) => {
+      // Handle array content
+      if (Array.isArray(msg.content)) {
+        const textContent = msg.content.find(
+          (item: any) => item.type === "text"
+        );
+        const imageContent = msg.content.find(
+          (item: any) => item.type === "image_url"
+        );
 
-      if (textContent && imageContent) {
+        if (textContent && imageContent) {
+          return {
+            role: msg.role,
+            _type: "image",
+            content: textContent.text,
+            image_url: imageContent.image_url.url,
+          };
+        }
+      }
+
+      // Handle single image content
+      if (msg.content?.type === "image_url") {
         return {
           role: msg.role,
           _type: "image",
-          content: textContent.text,
-          image_url: imageContent.image_url.url,
+          content: "[Image]",
+          image_url: msg.content.image_url.url,
         };
       }
-    }
 
-    // Handle single image content
-    if (msg.content?.type === "image_url") {
+      // Handle tool calls
+      if (msg.tool_calls) {
+        return {
+          content: "",
+          role: msg.role,
+          tool_calls: msg.tool_calls.map(mapToolCallToFunction),
+          _type: "functionCall",
+        };
+      }
+
+      // Handle tool responses
+      if (msg.role === "tool") {
+        return {
+          content: getFormattedMessageContent(msg.content),
+          role: msg.role,
+          tool_call_id: msg.tool_call_id,
+          _type: "message",
+        };
+      }
+
+      // Default case - use existing content formatting
       return {
+        content: getFormattedMessageContent(msg.content),
         role: msg.role,
-        _type: "image",
-        content: "[Image]",
-        image_url: msg.content.image_url.url,
+        _type: getContentType(msg as any),
       };
-    }
-
-    // Default case - use existing content formatting
-    return {
-      content: getFormattedMessageContent(msg.content),
-      role: msg.role,
-      _type: getContentType(msg as any),
-    };
-  });
+    }) ?? []
+  );
 };
 
 const getLLMSchemaResponse = (response: any) => {
@@ -275,27 +275,44 @@ const getLLMSchemaResponse = (response: any) => {
         },
       };
     }
-  } else {
-    return {
-      messages: response?.choices?.map((choice: any) => ({
-        content: getFormattedMessageContent(choice?.message?.content ?? ""),
-        role: choice?.message?.role ?? "",
-        tool_calls: choice?.message?.function_call
-          ? [
-              {
-                name: choice.message.function_call.name,
-                arguments: JSON.parse(choice.message.function_call.arguments),
-              },
-            ]
-          : choice?.message?.tool_calls?.map((tool: any) => ({
-              name: tool?.function?.name ?? "",
-              arguments: JSON.parse(tool?.function?.arguments ?? ""),
-            })) ?? [],
-        _type: getContentType(choice.message as any),
-      })),
-      model: response?.model,
-    };
   }
+
+  return {
+    messages: response?.choices
+      ?.map((choice: any) => {
+        const message = choice?.message;
+        if (!message) return null;
+
+        // Handle tool calls
+        const hasFunctionCall = message.function_call || message.tool_calls;
+        if (hasFunctionCall) {
+          return {
+            content: "",
+            role: message.role ?? "assistant",
+            tool_calls: message.function_call
+              ? [
+                  {
+                    name: message.function_call.name,
+                    arguments: parseFunctionArguments(
+                      message.function_call.arguments
+                    ),
+                  },
+                ]
+              : message.tool_calls?.map(mapToolCallToFunction) ?? [],
+            _type: "functionCall",
+          };
+        }
+
+        // Handle regular messages
+        return {
+          content: getFormattedMessageContent(message.content ?? ""),
+          role: message.role ?? "",
+          _type: getContentType(message),
+        };
+      })
+      .filter(Boolean),
+    model: response?.model,
+  };
 };
 
 export const mapOpenAIRequest: MapperFn<any, any> = ({
@@ -319,6 +336,7 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     request: requestToReturn,
     response: getLLMSchemaResponse(response),
   };
+
   return {
     schema: llmSchema,
     preview: {

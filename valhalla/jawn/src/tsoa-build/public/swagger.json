@@ -2628,10 +2628,13 @@
 						"type": "string"
 					},
 					"arguments": {
-						"additionalProperties": false,
-						"type": "object"
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
+				"required": [
+					"name",
+					"arguments"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
