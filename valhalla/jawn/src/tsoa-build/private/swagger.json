@@ -1438,6 +1438,9 @@
 							"autoInput"
 						]
 					},
+					"tool_call_id": {
+						"type": "string"
+					},
 					"tool_calls": {
 						"items": {
 							"$ref": "#/components/schemas/FunctionCall"
