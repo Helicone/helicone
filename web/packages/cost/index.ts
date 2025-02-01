@@ -56,12 +56,14 @@ export function costOfPrompt({
   completionTokens,
   provider: provider,
   images = 1,
+  perCall = 1,
 }: {
   model: string;
   promptTokens: number;
   completionTokens: number;
   provider: string;
   images?: number;
+  perCall?: number;
 }) {
   const cost = costOf({ model, provider });
   if (!cost) {
@@ -70,7 +72,8 @@ export function costOfPrompt({
   const tokenCost =
     cost.prompt_token * promptTokens + cost.completion_token * completionTokens;
   const imageCost = (cost.per_image ?? 0) * images;
-  return tokenCost + imageCost;
+  const perCallCost = (cost.per_call ?? 0) * perCall;
+  return tokenCost + imageCost + perCallCost;
 }
 
 function caseForCost(costs: ModelRow[], table: string, multiple: number) {
@@ -82,6 +85,7 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
         prompt: Math.round(cost.cost.prompt_token * multiple),
         completion: Math.round(cost.cost.completion_token * multiple),
         image: Math.round((cost.cost.per_image ?? 0) * multiple),
+        per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
       };
 
       const costs = [];
@@ -96,6 +100,10 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       if (costPerMultiple.image > 0) {
         costs.push(`${costPerMultiple.image}`);
       }
+      if (costPerMultiple.per_call > 0) {
+        costs.push(`${costPerMultiple.per_call}`);
+      }
+
       if (costs.length > 0) {
         const costString = costs.join(" + ");
         if (cost.model.operator === "equals") {

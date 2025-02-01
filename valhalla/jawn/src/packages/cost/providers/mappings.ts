@@ -19,6 +19,8 @@ import { costs as deepseekCosts } from "./deepseek";
 import { costs as xCosts } from "./x";
 import { costs as avianCosts } from "./avian";
 import { costs as nebiusCosts } from "./nebius";
+import { costs as perplexityCosts } from "./perplexity";
+
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 const azurePattern =
@@ -173,6 +175,7 @@ export const providers: {
   {
     pattern: perplexity,
     provider: "PERPLEXITY",
+    costs: perplexityCosts,
   },
   {
     pattern: googleapis,
