@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import Experiment from "./experiment";
+import EvaluateSVG from "@/components/ui/evaluate";
 
 type ExperimentPricingPlanName =
   | "Experiments"
@@ -20,28 +22,27 @@ const experimentFeatures: Feature[] = [
       "Connect to any major AI provider (Anthropic, OpenAI, Google, Meta, DeepSeek and more)",
     ],
     media: {
-      type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments1.mp4",
-      fallbackImage: "/static/features/experiments/feature1.png",
+      type: "component",
+      component: () => <Experiment />,
     },
     imageAlt: "Experiment interface showing multiple prompts",
     isImageLeft: true,
     ctaText: "Start experimenting",
   },
   {
-    title: "Rapidly Iterate on Prompt and Model Variations",
+    title: "Evaluate Responses with Offline Testing",
     description: [
-      "Compare responses across different models and parameters in real-time",
-      "Save and share experiment results with your team",
-      "Track costs and performance metrics for each variation",
+      "Quantify response quality using LLM-as-judge or Python evaluators",
+      "Attach evaluators to experiments to track performance across iterations and model versions",
+      "Optimize edge cases using heatmap visualizations of scored responses",
     ],
     media: {
-      type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments2.mp4",
-      fallbackImage: "/static/features/experiments/feature2.png",
+      type: "component",
+      component: () => <EvaluateSVG />,
     },
-    imageAlt: "Experiment comparison interface",
-    ctaText: "Compare now",
+    imageAlt: "Evaluation interface showing heatmap of scored responses",
+    ctaText: "Enable evals",
+    ctaLink: "/evaluators",
   },
   {
     title: "Test Prompts with Historic & Real-World Data",
@@ -52,7 +53,7 @@ const experimentFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments3.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/experiments_last.mp4",
       fallbackImage: "/static/features/experiments/feature3.png",
     },
     imageAlt: "Historical data testing interface",

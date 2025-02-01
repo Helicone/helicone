@@ -6,14 +6,16 @@ import React from "react";
 export type Feature = {
   title: string;
   media: {
-    type: "video" | "image";
-    src: string;
+    type: "video" | "image" | "component";
+    src?: string;
     fallbackImage?: string;
+    component?: React.ComponentType;
   };
   description: string[];
   imageAlt: string;
   isImageLeft?: boolean;
   ctaText?: string;
+  ctaLink?: string;
 };
 
 export type FeaturePreviewSectionProps = {
@@ -61,6 +63,7 @@ const FeaturePreviewSection = ({
                     title={feature.title}
                     description={feature.description}
                     ctaText={feature.ctaText}
+                    ctaLink={feature.ctaLink}
                   />
                 </>
               ) : (
@@ -69,6 +72,7 @@ const FeaturePreviewSection = ({
                     title={feature.title}
                     description={feature.description}
                     ctaText={feature.ctaText}
+                    ctaLink={feature.ctaLink}
                   />
                   <FeatureMedia
                     media={feature.media}
@@ -127,9 +131,18 @@ const FeatureMedia = ({
     return () => observer.disconnect();
   }, []);
 
+  if (media.type === "component" && media.component) {
+    const Component = media.component;
+    return (
+      <div className="max-w-[563px] w-full">
+        <Component />
+      </div>
+    );
+  }
+
   if (media.type === "video") {
     return (
-      <div className="max-w-[563px] w-full spect-video rounded-[18px] border border-slate-200 overflow-hidden">
+      <div className="w-full aspect-video rounded-[18px] border border-slate-200 overflow-hidden">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -157,10 +170,12 @@ const FeatureText = ({
   title,
   description,
   ctaText,
+  ctaLink,
 }: {
   title: string;
   description: string[];
   ctaText?: string;
+  ctaLink?: string;
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -182,13 +197,24 @@ const FeatureText = ({
       </div>
       {ctaText && (
         <div className="mt-auto">
-          <Button
-            onClick={scrollToTop}
-            className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
-            variant="action"
-          >
-            {ctaText}
-          </Button>
+          {ctaLink ? (
+            <a href={ctaLink}>
+              <Button
+                className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
+                variant="action"
+              >
+                {ctaText}
+              </Button>
+            </a>
+          ) : (
+            <Button
+              onClick={scrollToTop}
+              className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
+              variant="action"
+            >
+              {ctaText}
+            </Button>
+          )}
         </div>
       )}
     </div>

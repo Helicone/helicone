@@ -29,7 +29,12 @@
   @apply cursor-grab rounded-full border-2 border-solid border-slate-200 bg-white hover:shadow-md;
 }
 
-
 .text-secondary {
   @apply text-slate-700 dark:text-slate-300;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
