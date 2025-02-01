@@ -1,6 +1,5 @@
 import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
-import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
 
 const randomId = () => {
