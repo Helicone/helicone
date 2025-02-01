@@ -3,39 +3,14 @@ import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
 import {
+  formatStreamingToolCalls,
   handleArrayContent,
   handleClaudeResponse,
-  handleImageMessage,
   handleObjectContent,
   handleToolCalls,
   handleToolResponse,
-  formatStreamingToolCalls,
   isImageContent,
 } from "./chat_helpers";
-
-interface ToolCall {
-  function: {
-    name: string;
-    arguments: string;
-  };
-  type: string;
-  id: string;
-}
-
-const parseFunctionArguments = (
-  args: string | undefined
-): Record<string, any> => {
-  try {
-    return JSON.parse(args ?? "{}");
-  } catch {
-    return {};
-  }
-};
-
-const mapToolCallToFunction = (tool: ToolCall): FunctionCall => ({
-  name: tool.function?.name ?? "",
-  arguments: parseFunctionArguments(tool.function?.arguments),
-});
 
 const getRequestText = (requestBody: any): string => {
   try {
@@ -76,7 +51,7 @@ const getRequestText = (requestBody: any): string => {
   }
 };
 
-const getResponseText = (
+export const getResponseText = (
   responseBody: any,
   statusCode: number = 200,
   model: string
@@ -158,12 +133,22 @@ const getRequestMessages = (request: any): Message[] => {
         );
 
         if (textContent && imageContent) {
-          return handleImageMessage(textContent, imageContent);
+          return {
+            role: msg.role,
+            _type: "image",
+            content: textContent.text,
+            image_url: imageContent.image_url.url,
+          };
         }
       }
 
       if (msg.content?.type === "image_url") {
-        return handleImageMessage(msg, msg.content);
+        return {
+          role: msg.role,
+          _type: "image",
+          content: "[Image]",
+          image_url: msg.content.image_url.url,
+        };
       }
 
       if (msg.tool_calls) {
