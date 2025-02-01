@@ -163,12 +163,14 @@ def main():
                         help='ClickHouse server user')
     parser.add_argument('--list-migrations', action='store_true',
                         help='List applied migrations')
+    parser.add_argument('--no-password', action='store_true',
+                        help='Do not prompt for password')
 
     args = parser.parse_args()
 
     password = os.getenv('CLICKHOUSE_PASSWORD')
 
-    if args.user and not password:
+    if args.user and not password and not args.no_password:
         password = getpass.getpass(
             prompt='Enter password for ClickHouse server user: ')
 
