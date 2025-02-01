@@ -672,6 +672,7 @@ export class DBLoggable {
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
+    // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
 
     const model =
