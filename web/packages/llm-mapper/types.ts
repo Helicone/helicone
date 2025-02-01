@@ -9,6 +9,7 @@ export type Message = {
   role?: string;
   content?: string;
   tool_calls?: FunctionCall[];
+  tool_call_id?: string;
   _type: "function" | "functionCall" | "image" | "message" | "autoInput";
   image_url?: string;
 };

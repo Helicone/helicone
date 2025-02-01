@@ -70,13 +70,10 @@ export const handleToolCalls = (message: any): Message => ({
   _type: "functionCall",
 });
 
-export const handleImageMessage = (
-  textContent: any,
-  imageContent: any
-): Message => ({
-  role: textContent.role,
+export const handleImageMessage = (msg: any, imageContent: any): Message => ({
+  role: msg.role,
   _type: "image",
-  content: textContent.text,
+  content: msg.content?.text,
   image_url: imageContent.image_url.url,
 });
 
