@@ -222,6 +222,19 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.groq.com",
       };
+    } else if (hostParts[0] === "perplexity") {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://api.perplexity.ai",
+        };
+      }
+
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.perplexity.ai",
+      };
     } else if (hostParts[0].includes("hyperbolic")) {
       return {
         ...env,

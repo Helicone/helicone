@@ -311,21 +311,29 @@ curl --request POST \
 
 # Approved Domains
 
-| Provider    | Domain Name                  | Cost Support | Dedicated Domain         |
-| ----------- | ---------------------------- | ------------ | ------------------------ |
-| OpenAI      | `api.openai.com`             | ✅           | `oai.helicone.ai`        |
-| Anthropic   | `api.anthropic.com`          | ✅           | `anthropic.helicone.ai`  |
-| Together-AI | `api.together.xyz`           | ✅           | `together.helicone.ai`   |
-| OpenRouter  | `openrouter.ai`              | ✅           | `openrouter.helicone.ai` |
-| Fireworks   | `api.fireworks.ai`           | ✅           | `fireworks.helicone.ai`  |
-| Azure       | `openai.azure.com`           | ✅           | ❌                       |
-| Groq        | `api.groq.com`               | ❌           | `groq.helicone.ai`       |
-| Deepinfra   | `api.deepinfra.com`          | ❌           | `deepinfra.helicone.ai`  |
-| Anyscale    | `api.endpoints.anyscale.com` | ❌           | ❌                       |
-| Cloudflare  | `gateway.ai.cloudflare.com`  | ❌           | ❌                       |
-| LemonFox    | `api.lemonfox.ai`            | ❌           | ❌                       |
-| Perplexity  | `api.perplexity.ai`          | ❌           | ❌                       |
-| Mistral     | `api.mistral.ai`             | ❌           | ❌                       |
+| Provider    | Domain Name                       | Cost Support | Dedicated Domain         |
+| ----------- | --------------------------------- | ------------ | ------------------------ |
+| OpenAI      | `api.openai.com`                  | ✅           | `oai.helicone.ai`        |
+| Anthropic   | `api.anthropic.com`               | ✅           | `anthropic.helicone.ai`  |
+| Together-AI | `api.together.xyz`                | ✅           | `together.helicone.ai`   |
+| OpenRouter  | `openrouter.ai`                   | ✅           | `openrouter.helicone.ai` |
+| Fireworks   | `api.fireworks.ai`                | ✅           | `fireworks.helicone.ai`  |
+| Azure       | `openai.azure.com`                | ✅           | ❌                       |
+| Groq        | `api.groq.com`                    | ❌           | `groq.helicone.ai`       |
+| Deepinfra   | `api.deepinfra.com`               | ❌           | `deepinfra.helicone.ai`  |
+| Anyscale    | `api.endpoints.anyscale.com`      | ✅           | ❌                       |
+| Cloudflare  | `gateway.ai.cloudflare.com`       | ❌           | ❌                       |
+| LemonFox    | `api.lemonfox.ai`                 | ❌           | ❌                       |
+| Perplexity  | `api.perplexity.ai`               | ✅           | `perplexity.helicone.ai` |
+| Mistral     | `api.mistral.ai`                  | ❌           | `mistral.helicone.ai`    |
+| DeepSeek    | `api.deepseek.com`                | ❌           | `deepseek.helicone.ai`   |
+| X.AI        | `api.x.ai`                        | ❌           | `x.helicone.ai`          |
+| AWS Bedrock | `bedrock-runtime.*.amazonaws.com` | ❌           | `bedrock.helicone.ai`    |
+| Nebius      | `api.studio.nebius.ai`            | ❌           | `nebius.helicone.ai`     |
+| Avian       | `api.avian.io`                    | ❌           | ❌                       |
+| Cohere      | `api.cohere.ai`                   | ❌           | ❌                       |
+| QStash      | `qstash.upstash.io`               | ❌           | `qstash.helicone.ai`     |
+| Firecrawl   | `api.firecrawl.dev`               | ❌           | `firecrawl.helicone.ai`  |
 
 ## Unapproved Domains
 
@@ -342,7 +350,11 @@ The integration is the same as the approved domains, but you will need to add th
 
 ## Automated Mappers ("Model is pending mapping")
 
-<Frame>![Helicone will automatically determine how to map any unsupported model that you throw at it using our automated mapper.](/images/integrations/model-is-pending-mapping.png)</Frame>
+<Frame>
+  ![Helicone will automatically determine how to map any unsupported model that
+  you throw at it using our automated
+  mapper.](/images/integrations/model-is-pending-mapping.png)
+</Frame>
 
 Helicone will automatically determine how to map any unsupported model that you throw at it using our automated mapper. Helicone intelligently determines the schema of the model and maps it to the appropriate schema for the provider. This allows you to use any model you want without having to wait for us to manually map it.
 

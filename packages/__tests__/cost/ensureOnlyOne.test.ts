@@ -541,6 +541,14 @@ WHEN (request_response_rmt.model ILIKE 'accounts/fireworks/models/llama-v3p1-405
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'PERPLEXITY') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'sonar-reasoning') THEN 10000 * request_response_rmt.prompt_tokens + 50000 * request_response_rmt.completion_tokens + 50
+WHEN (request_response_rmt.model ILIKE 'sonar') THEN 10000 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens + 50
+WHEN (request_response_rmt.model ILIKE 'sonar-pro') THEN 30000 * request_response_rmt.prompt_tokens + 150000 * request_response_rmt.completion_tokens + 50
+  ELSE 0
+END
+)
 WHEN (request_response_rmt.provider = 'GOOGLE') THEN (
   CASE
   WHEN (request_response_rmt.model ILIKE '%gemini-pro%') THEN 125 * request_response_rmt.prompt_tokens + 375 * request_response_rmt.completion_tokens
