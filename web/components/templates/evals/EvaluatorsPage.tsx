@@ -12,6 +12,7 @@ import { TestPanel } from "./panels/TestPanel";
 import { PanelType } from "./panels/types";
 import EvalsPreview from "../featurePreview/evalsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
+import AuthHeader from "@/components/shared/authHeader";
 
 const EvalsPage = () => {
   const hasAccess = useHasAccess("evals");
@@ -20,9 +21,12 @@ const EvalsPage = () => {
 
   if (!hasAccess) {
     return (
-      <div className="mt-[16px] flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <EvalsPreview />
-      </div>
+      <>
+        <AuthHeader title={null} />
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <EvalsPreview />
+        </div>
+      </>
     );
   }
 

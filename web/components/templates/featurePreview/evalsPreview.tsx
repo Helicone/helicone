@@ -148,13 +148,13 @@ const EvalsPreview = () => {
   return (
     <>
       <FeaturePreview
-        title="Evaluation using"
-        subtitle="LLM-as-a-Judge or Custom Evals"
+        title="LLM Evaluation Suite"
+        subtitle="for Performance Optimization"
         pricingPlans={pricingPlan}
         proRequired={proRequired}
         onStartTrial={handleStartTrial}
         featureSectionProps={{
-          pageTitle: "Comprehensive Evaluation Platform",
+          pageTitle: "Evaluate Pre-Deployment and Monitor Production",
           features: evalFeatures,
           quote: {
             prefix: '"The ability to evaluate prompts systematically',

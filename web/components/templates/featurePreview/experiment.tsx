@@ -212,7 +212,7 @@ const ExperimentTable = () => {
   };
 
   return (
-    <div ref={tableRef} className="relative w-full h-[500px] z-[1]">
+    <div ref={tableRef} className="relative w-full h-[400px] z-[1]">
       <div className="absolute inset-0 h-full w-1/6 pointer-events-none bg-gradient-to-r from-white to-transparent z-[2]"></div>
       <div className="absolute h-[100px] w-full bottom-0 right-0 pointer-events-none bg-gradient-to-t from-white to-transparent z-[2]"></div>
       <div className="w-full h-full border border-slate-200 rounded-2xl overflow-hidden">

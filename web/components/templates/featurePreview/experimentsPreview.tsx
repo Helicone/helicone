@@ -30,21 +30,6 @@ const experimentFeatures: Feature[] = [
     ctaText: "Start experimenting",
   },
   {
-    title: "Evaluate Responses with Offline Testing",
-    description: [
-      "Quantify response quality using LLM-as-judge or Python evaluators",
-      "Attach evaluators to experiments to track performance across iterations and model versions",
-      "Optimize edge cases using heatmap visualizations of scored responses",
-    ],
-    media: {
-      type: "component",
-      component: () => <EvaluateSVG />,
-    },
-    imageAlt: "Evaluation interface showing heatmap of scored responses",
-    ctaText: "Enable evals",
-    ctaLink: "/evaluators",
-  },
-  {
     title: "Test Prompts with Historic & Real-World Data",
     description: [
       "Identify and optimize for edge cases using real production data",
@@ -57,8 +42,25 @@ const experimentFeatures: Feature[] = [
       fallbackImage: "/static/features/experiments/feature3.png",
     },
     imageAlt: "Historical data testing interface",
+    isImageLeft: false,
+    ctaText: "Test with real-world data",
+  },
+  {
+    title: "Evaluate Responses with Offline Testing",
+    description: [
+      "Quantify response quality using LLM-as-judge or Python evaluators",
+      "Attach evaluators to experiments to track performance across iterations and model versions",
+      "Optimize edge cases using heatmap visualizations of scored responses",
+    ],
+    media: {
+      type: "video",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals_experiments.mp4",
+      fallbackImage: "/static/features/experiments/feature2.png",
+    },
+    imageAlt: "Evaluation interface showing heatmap of scored responses",
     isImageLeft: true,
-    ctaText: "Test with data",
+    ctaText: "Enable evals",
+    ctaLink: "/evaluators",
   },
 ];
 
