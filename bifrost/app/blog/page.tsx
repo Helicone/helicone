@@ -216,6 +216,21 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "effective-llm-caching",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-thinking-models",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "switch-to-deepseek",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },
