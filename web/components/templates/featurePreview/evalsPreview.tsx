@@ -1,19 +1,19 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
 import useNotification from "@/components/shared/notification/useNotification";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 import EvaluateSVG from "@/components/ui/evaluate";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const evalFeatures: Feature[] = [
   {
     title: "Catch Regression Pre-Deployment",
     description: [
-      "Monitor performance in real-time and catch regressions pre-deployment",
-      "Evaluate outputs with LLM-as-a-judge or custom evals",
-      "Connect to any major AI provider (Anthropic, OpenAI, Google, Meta, DeepSeek and more)",
+      "Three evaluation modes: LLM-as-a-Judge, executable Python (CodeSandbox), and LastMileAI RAG evals",
+      "Leverage LastMileAI's RAG-specific metrics including faithfulness, relevance, and answer quality scoring",
+      "Integrated with all major AI providers (Anthropic, OpenAI, Google, Meta, DeepSeek)",
     ],
     media: {
       type: "component",
@@ -25,53 +25,41 @@ const evalFeatures: Feature[] = [
     ctaText: "Start evaluating",
   },
   {
-    title: "Quantify Prompt Performance",
+    title: "Online Evals & Production Monitoring",
     description: [
-      "Monitor performance in real-time and catch regressions pre-deployment",
-      "Evaluate outputs with LLM-as-a-judge or custom evals",
-    ],
-    media: {
-      type: "video",
-      src: "",
-      fallbackImage: "/static/features/evals/feature2.png",
-    },
-    imageAlt: "Performance metrics interface",
-    ctaText: "Measure now",
-  },
-  {
-    title: "Create Online Evals",
-    description: [
-      "Create online evaluation to capture real-world scenarios",
-      "...",
+      "Attach evals to any filter (prompt, environment, etc.) with configurable sampling rates",
+      "Real-time dashboards track eval performance alongside request metrics",
+      "Compare results across model versions and prompt iterations",
     ],
     media: {
       type: "video",
       src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/online_evals.mp4",
-      fallbackImage: "/static/features/evals/feature3.png",
+      fallbackImage: "/static/features/evals/feature2.png",
     },
-    imageAlt: "Online evaluation interface",
-    isImageLeft: true,
-    ctaText: "Create eval",
+    imageAlt: "Production monitoring and evaluation interface",
+    ctaText: "Configure Monitoring",
   },
   {
-    title: "Create offline evals",
+    title: "Offline Evals for Experimentation",
     description: [
-      "Create offline evaluation using previous requests or synthetic data",
-      "...",
+      "Integrated with Experiments for pre-deployment validation",
+      "Maintain eval consistency between development and production",
+      "Batch test prompts against historical data or synthetic datasets",
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals4.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals_experiments.mp4",
       fallbackImage: "/static/features/evals/feature4.png",
     },
     imageAlt: "Offline evaluation interface",
-    ctaText: "Test offline",
+    isImageLeft: true,
+    ctaText: "Prevent Regressions",
   },
 ];
 
-type EvalsPricingPlanName = "Pro + Eval" | "Team Bundle";
+type EvalsPricingPlanName = "Evals" | "Pro + Eval" | "Team Bundle";
 
-const paidPlan: PricingPlan<EvalsPricingPlanName>[] = [
+const freePlan: PricingPlan<EvalsPricingPlanName>[] = [
   {
     name: "Pro + Eval",
     price: "100",
@@ -96,7 +84,32 @@ const paidPlan: PricingPlan<EvalsPricingPlanName>[] = [
   },
 ];
 
+const paidPlan: PricingPlan<EvalsPricingPlanName>[] = [
+  {
+    name: "Evals",
+    price: "100",
+    isSelected: true,
+    features: [
+      { name: "Pro seats (current plan)", included: true },
+      { name: "Evals", included: true },
+      { name: "Prompts (+$50/mo)", included: false },
+      { name: "Experiments (+$50/mo)", included: false },
+    ],
+  },
+  {
+    name: "Team Bundle",
+    price: "200",
+    features: [
+      { name: "Unlimited seats", included: true },
+      { name: "Evals", included: true },
+      { name: "Prompts", included: true },
+      { name: "Experiments", included: true },
+    ],
+  },
+];
+
 const EvalsPreview = () => {
+  const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const { handleConfirmTrial, proRequired } = useFeatureTrial("evals", "Evals");
@@ -116,16 +129,32 @@ const EvalsPreview = () => {
     if (success) setIsConfirmDialogOpen(false);
   };
 
+  const pricingPlan: PricingPlan<EvalsPricingPlanName>[] = useMemo(() => {
+    if (
+      org?.currentOrg?.tier === "free" ||
+      org?.currentOrg?.tier === "growth"
+    ) {
+      return freePlan;
+    } else if (
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "team-20250130"
+    ) {
+      return paidPlan;
+    }
+    return [];
+  }, [org]);
+
   return (
     <>
       <FeaturePreview
         title="Evaluation using"
         subtitle="LLM-as-a-Judge or Custom Evals"
-        pricingPlans={paidPlan}
+        pricingPlans={pricingPlan}
         proRequired={proRequired}
         onStartTrial={handleStartTrial}
         featureSectionProps={{
-          pageTitle: "Catch Regression Pre-Deployment",
+          pageTitle: "Comprehensive Evaluation Platform",
           features: evalFeatures,
           quote: {
             prefix: '"The ability to evaluate prompts systematically',
