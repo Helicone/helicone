@@ -172,10 +172,10 @@ const ExperimentsPreview = () => {
           features: experimentFeatures,
           quote: {
             prefix:
-              "Being able to experiment with different prompts and models",
+              '"Being able to experiment with different prompts and models',
             highlight: "cut our optimization time in half",
             suffix:
-              "and helped us find the perfect balance of cost and performance.",
+              'and helped us find the perfect balance of cost and performance."',
           },
         }}
       />

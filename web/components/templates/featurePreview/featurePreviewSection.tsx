@@ -134,7 +134,7 @@ const FeatureMedia = ({
   if (media.type === "component" && media.component) {
     const Component = media.component;
     return (
-      <div className="max-w-[563px] w-full">
+      <div className="max-w-[563px]">
         <Component />
       </div>
     );
@@ -142,10 +142,10 @@ const FeatureMedia = ({
 
   if (media.type === "video") {
     return (
-      <div className="w-full aspect-video rounded-[18px] border border-slate-200 overflow-hidden">
+      <div className="max-w-[563px] h-full aspect-video rounded-[18px]">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-full"
           src={media.src}
           poster={media.fallbackImage}
           muted

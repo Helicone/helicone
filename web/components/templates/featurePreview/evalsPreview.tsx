@@ -5,6 +5,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { useState } from "react";
 import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
+import EvaluateSVG from "@/components/ui/evaluate";
 
 const evalFeatures: Feature[] = [
   {
@@ -15,8 +16,8 @@ const evalFeatures: Feature[] = [
       "Connect to any major AI provider (Anthropic, OpenAI, Google, Meta, DeepSeek and more)",
     ],
     media: {
-      type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals1.mp4",
+      type: "component",
+      component: () => <EvaluateSVG />,
       fallbackImage: "/static/features/evals/feature1.png",
     },
     imageAlt: "Evaluation interface showing regression testing",
@@ -31,7 +32,7 @@ const evalFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals2.mp4",
+      src: "",
       fallbackImage: "/static/features/evals/feature2.png",
     },
     imageAlt: "Performance metrics interface",
@@ -45,7 +46,7 @@ const evalFeatures: Feature[] = [
     ],
     media: {
       type: "video",
-      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/evals3.mp4",
+      src: "https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/online_evals.mp4",
       fallbackImage: "/static/features/evals/feature3.png",
     },
     imageAlt: "Online evaluation interface",
@@ -127,10 +128,10 @@ const EvalsPreview = () => {
           pageTitle: "Catch Regression Pre-Deployment",
           features: evalFeatures,
           quote: {
-            prefix: "The ability to evaluate prompts systematically",
+            prefix: '"The ability to evaluate prompts systematically',
             highlight: "increased our deployment confidence by 90%",
             suffix:
-              "and helped us maintain consistent quality across all our AI features.",
+              'and helped us maintain consistent quality across all our AI features."',
           },
         }}
       />

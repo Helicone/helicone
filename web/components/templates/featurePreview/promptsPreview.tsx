@@ -179,8 +179,8 @@ const PromptsPreview = () => {
           features: promptFeatures,
           quote: {
             prefix:
-              "The ability to test prompt variations on production traffic without touching a line of code is magical.",
-            highlight: "It feels like we're cheating; it's just that good!",
+              '"The ability to test prompt variations on production traffic without touching a line of code is magical.',
+            highlight: "It feels like we're cheating; it's just that good!\"",
             suffix: "",
           },
         }}
