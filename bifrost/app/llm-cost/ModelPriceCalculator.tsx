@@ -10,6 +10,7 @@ import {
   Plus,
   XCircle,
   ChevronRight,
+  HelpCircle,
 } from "lucide-react";
 import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
 import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
@@ -24,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ModelPriceCalculatorProps = {
   model?: string;
@@ -433,6 +435,16 @@ Optimize your AI API costs:`;
           >
             Input Tokens
           </Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="w-4 h-4 text-slate-500 cursor-pointer" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Number of tokens in the input prompt.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="grow shrink basis-0 self-stretch relative">
             <Input
               id="inputTokens"
@@ -450,6 +462,16 @@ Optimize your AI API costs:`;
           >
             Output Tokens
           </Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="w-4 h-4 text-slate-500 cursor-pointer" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Number of tokens in the output response.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-1.5 inline-flex">
             <div className="self-stretch relative w-full">
               <Input

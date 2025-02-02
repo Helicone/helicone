@@ -5,9 +5,9 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Info, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 // Function to format provider names
 export function formatProviderName(provider: string): string {
@@ -374,8 +374,25 @@ type CalculatorInfoProps = {
 };
 
 const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setDarkMode(darkModeMediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setDarkMode(e.matches);
+    };
+
+    darkModeMediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      darkModeMediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
   return (
-    <div className="mt-12 space-y-8 max-w-3xl mx-auto">
+    <div className={`mt-12 space-y-8 max-w-3xl mx-auto ${darkMode ? "dark" : ""}`}>
       {model && provider ? (
         <>
           {(() => {
