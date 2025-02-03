@@ -29,10 +29,7 @@ Integrate LLM observability with a few lines of code. See <a href="https://docs.
 ```js
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
 });
 ```
 
