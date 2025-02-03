@@ -18,11 +18,6 @@ type AnthropicContent = {
   id?: string;
 };
 
-type AnthropicChoice = {
-  role: string;
-  content: AnthropicContent[] | AnthropicContent;
-};
-
 const getRequestText = (requestBody: any) => {
   const result = requestBody.tooLarge
     ? "Helicone Message: Input too large"
@@ -104,13 +99,33 @@ const getRequestMessages = (request: any) => {
     request.messages?.map((message: any) => {
       // Handle array content (for images + text, tool use, tool results)
       if (Array.isArray(message.content)) {
-        const hasImage = message.content.some((c: any) => c.type === "image");
         const hasToolUse = message.content.some(
           (c: any) => c.type === "tool_use"
         );
         const hasToolResult = message.content.some(
           (c: any) => c.type === "tool_result"
         );
+
+        // Create individual messages for each content item
+        const contentArray = message.content
+          .map((c: any) => {
+            if (c.type === "text") {
+              return {
+                content: c.text,
+                role: message.role,
+                _type: "message",
+              };
+            } else if (c.type === "image" || c.type === "image_url") {
+              return {
+                content: "",
+                role: message.role,
+                _type: "image",
+                image_url: c.image_url?.url || c.source?.data,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
 
         // Get text content from all text items
         const textContent = message.content
@@ -137,10 +152,7 @@ const getRequestMessages = (request: any) => {
         return {
           content: finalContent,
           role: message.role,
-          _type: hasImage ? "image" : "message",
-          image_url: hasImage
-            ? message.content.find((c: any) => c.type === "image")?.source?.data
-            : undefined,
+          _type: "contentArray",
           tool_calls: hasToolUse
             ? message.content
                 .filter((c: any) => c.type === "tool_use")
@@ -150,6 +162,7 @@ const getRequestMessages = (request: any) => {
                   arguments: c.input,
                 }))
             : undefined,
+          contentArray: contentArray.length > 0 ? contentArray : undefined,
         };
       }
 

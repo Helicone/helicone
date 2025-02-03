@@ -1099,9 +1099,10 @@ Json: JsonObject;
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      contentArray?: components["schemas"]["Message"][];
       image_url?: string;
       /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput";
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
