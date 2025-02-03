@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "effective-llm-caching",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },
