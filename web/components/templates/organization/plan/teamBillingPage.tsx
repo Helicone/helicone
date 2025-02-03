@@ -127,9 +127,9 @@ export const TeamPlanCard = () => {
               "Evaluators",
               "Priority Support via Slack (email cole@helicone.ai for access)",
             ].map((feature) => (
-              <div key={feature} className="flex items-center gap-2 text-sm">
-                <CheckIcon className="w-4 h-4 text-green-500" />
-                {feature}
+              <div key={feature} className="flex items-start gap-2 text-sm">
+                <CheckIcon className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>{feature}</span>
               </div>
             ))}
           </div>

@@ -235,19 +235,10 @@ export const ProPlanCard = () => {
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
               <div className="text-sm text-gray-500">
-                <p>
-                  Current billing period:{" "}
-                  {new Date(
-                    subscription.data.data.current_period_start * 1000
-                  ).toLocaleDateString()}{" "}
-                  -{" "}
-                  {new Date(
-                    subscription.data.data.current_period_end * 1000
-                  ).toLocaleDateString()}
-                </p>
+                <p>Current billing period: {getBillingCycleDates()}</p>
                 {isSubscriptionEnding && (
                   <p className="text-red-500 font-semibold mt-1">
-                    Your subscription will end on:{" "}
+                    Subscription ends{" "}
                     {new Date(
                       subscription.data.data.current_period_end * 1000
                     ).toLocaleDateString()}
@@ -255,10 +246,6 @@ export const ProPlanCard = () => {
                 )}
               </div>
             )}
-          <div className="text-xs text-muted-foreground flex items-center text-slate-500">
-            <CalendarIcon className="w-4 h-4 mr-1" />
-            {getBillingCycleDates()}
-          </div>
           <Col className="gap-4">
             <div className="flex flex-col">
               <div className="flex items-center justify-between">
