@@ -1,6 +1,7 @@
 import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { MapperFn } from "../types";
+import crypto from "crypto";
 
 const randomId = () => {
   return (

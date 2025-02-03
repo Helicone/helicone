@@ -2889,6 +2889,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"prompt_cache_write_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_cache_read_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"completion_tokens": {
 						"type": "number",
 						"format": "double",
@@ -2989,6 +2999,8 @@
 					"time_to_first_token",
 					"total_tokens",
 					"prompt_tokens",
+					"prompt_cache_write_tokens",
+					"prompt_cache_read_tokens",
 					"completion_tokens",
 					"prompt_id",
 					"llmSchema",
@@ -6120,6 +6132,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"promptCacheWriteTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"promptCacheReadTokens": {
+						"type": "number",
+						"format": "double"
+					},
 					"delayMs": {
 						"type": "number",
 						"format": "double"
@@ -6133,6 +6153,8 @@
 					"createdAt",
 					"completionTokens",
 					"promptTokens",
+					"promptCacheWriteTokens",
+					"promptCacheReadTokens",
 					"delayMs",
 					"model"
 				],
