@@ -39,7 +39,7 @@ export default function BundlePromo() {
             variant="default"
             size="lg"
             className="w-full sm:w-fit bg-sky-500 text-white font-bold text-sm md:text-md"
-            onClick={() => (window.location.href = "/signup")}
+            onClick={() => (window.location.href = "/settings/billing")}
           >
             Start 7-day free trial
           </Button>
