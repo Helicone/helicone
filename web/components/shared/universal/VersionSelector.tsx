@@ -102,12 +102,12 @@ export default function VersionSelector({
     // "pseudo border"
     <div
       ref={dropdownRef}
-      className={`pr-[1px] py-[1px] bg-gradient-to-r from-transparent to-slate-100 relative -ml-[calc(2px+0.625rem)] group ${
+      className={`pr-[1px] py-[1px] bg-gradient-to-r from-transparent to-slate-200 dark:to-slate-800 relative -ml-[calc(2px+0.625rem)] group ${
         isDropdownOpen ? "rounded-t-[1.1rem]" : "rounded-full"
       }`}
     >
       <div
-        className={`flex flex-row items-center from-transparent to-slate-200 bg-gradient-to-r pl-[calc(2px+0.625rem)] p-[2px] gap-2
+        className={`flex flex-row items-center from-transparent to-slate-200 dark:to-slate-800 bg-gradient-to-r pl-[calc(2px+0.625rem)] p-[2px] gap-2
             ${isDropdownOpen ? "rounded-t-[1.1rem]" : "rounded-full"}`}
       >
         {/* Rename Input OR ID Title + Tools */}
@@ -119,13 +119,13 @@ export default function VersionSelector({
             onKeyDown={handleKeyDown}
             onBlur={() => handleEditComplete(false)}
             autoFocus
-            className="px-2.5 -ml-[calc(0.625rem-2px)] appearance-none rounded-full text-xl outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue w-fit bg-white max-w-56"
+            className="px-2.5 -ml-[calc(0.625rem-2px)] appearance-none rounded-full text-xl outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue w-fit bg-white dark:bg-slate-950 max-w-56"
             aria-label="Edit prompt id"
           />
         ) : (
           <div className="flex flex-row items-center gap-2 [&:has(>div:nth-child(2):hover,>div:nth-child(3):hover)_h1]:text-heliblue">
             {/* ID Title */}
-            <h1 className="text-xl font-semibold text-nowrap">{id}</h1>
+            <h1 className="text-lg font-semibold text-nowrap">{id}</h1>
 
             {/* Copy Button */}
             <Tooltip
@@ -191,7 +191,7 @@ export default function VersionSelector({
         {/* Version Pill Button */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="w-full group-two justify-end  hover:shadow-md flex flex-row items-center rounded-full px-2.5 py-1 bg-white transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full group-two justify-end hover:bg-slate-100 dark:hover:bg-slate-900 hover:shadow-md flex flex-row items-center rounded-full px-2.5 py-1 bg-white dark:bg-slate-950 transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={versions.length === 0 || versions.length === 1} // No versions or only version 0
         >
           {/* Master/Dirty Indicator */}
@@ -201,7 +201,7 @@ export default function VersionSelector({
                 ? "bg-amber-500"
                 : currentVersion === masterVersion
                 ? "bg-heliblue"
-                : "bg-slate-500"
+                : "bg-slate-400 dark:bg-slate-600"
             }`}
           />
 
@@ -219,7 +219,7 @@ export default function VersionSelector({
         {/* Version Dropdown */}
         {isDropdownOpen && (
           <div
-            className="shadow-lg overflow-hidden absolute w-full top-full left-0 rounded-b-[1.1rem] bg-slate-200 border-b border-x border-b-slate-100 border-x-slate-100 z-40"
+            className="shadow-lg overflow-hidden absolute w-full top-full left-0 rounded-b-[1.1rem] bg-slate-200 dark:bg-slate-800 border-b border-x border-slate-200 dark:border-slate-800 z-40"
             role="menu"
           >
             <div className="p-[2px] overflow-x-hidden overflow-y-scroll h-full w-full flex flex-col max-h-[23.5rem]">
@@ -275,15 +275,17 @@ function VersionItem({
   if (isLoading) {
     return (
       <div className="w-full text-left px-2.5 py-1.5 text-sm animate-pulse space-y-2">
-        <div className="h-4 w-20 bg-slate-200 rounded" />
+        <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800 rounded" />
       </div>
     );
   }
 
   return (
     <button
-      className={`group-three w-full text-left px-2.5 py-1.5 text-sm hover:shadow-md transition-transform active:scale-95 flex flex-row items-center justify-between ${
-        isSelected ? "bg-white" : "bg-transparent text-slate-500"
+      className={`group-three w-full text-left px-2.5 py-1.5 text-sm hover:shadow-md flex flex-row items-center justify-between ${
+        isSelected
+          ? "bg-white dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900"
+          : "bg-transparent text-tertiary hover:bg-slate-100 dark:hover:bg-slate-900"
       } ${isLast ? "rounded-bl-[1rem]" : ""}`}
       onClick={onSelect}
       role="menuitem"
@@ -300,9 +302,7 @@ function VersionItem({
       )}
 
       {/* Version */}
-      <span className="font-medium group-three-hover:scale-105">
-        v{majorVersion}
-      </span>
+      <span className="font-medium">v{majorVersion}</span>
     </button>
   );
 }

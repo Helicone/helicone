@@ -256,6 +256,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "rag-chunking-strategies",
     },
   },
@@ -271,12 +276,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "claude-3.5-sonnet-vs-openai-o1",
+      folderName: "crewai-vs-dify-ai",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-dify-ai",
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
     },
   },
   {
@@ -306,12 +311,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-autogen",
+      folderName: "prompt-evaluation-for-llms",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-evaluation-for-llms",
+      folderName: "crewai-vs-autogen",
     },
   },
   {
@@ -322,11 +327,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-api-providers",
     },
   },
   {

@@ -49,6 +49,14 @@
       "request": "launch",
       "command": "npm run start",
       "cwd": "${workspaceFolder}/examples/score_example"
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Python: Current File",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
     }
   ]
 }

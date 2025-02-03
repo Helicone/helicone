@@ -28,7 +28,8 @@
 					"name": {
 						"type": "string"
 					},
-					"code_template": {}
+					"code_template": {},
+					"last_mile_config": {}
 				},
 				"required": [
 					"id",
@@ -38,7 +39,8 @@
 					"organization_id",
 					"updated_at",
 					"name",
-					"code_template"
+					"code_template",
+					"last_mile_config"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -102,7 +104,8 @@
 					"name": {
 						"type": "string"
 					},
-					"code_template": {}
+					"code_template": {},
+					"last_mile_config": {}
 				},
 				"required": [
 					"scoring_type",
@@ -153,7 +156,8 @@
 					"code_template": {},
 					"name": {
 						"type": "string"
-					}
+					},
+					"last_mile_config": {}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -465,6 +469,204 @@
 					"evaluator_scoring_type"
 				],
 				"type": "object"
+			},
+			"ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"ground_truth": {
+								"type": "string"
+							},
+							"output": {
+								"type": "string"
+							},
+							"input": {
+								"type": "string"
+							},
+							"score": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"output",
+							"input",
+							"score"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"DataEntry": {
+				"anyOf": [
+					{
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"system-prompt"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"inputKey": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"prompt-input"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"inputKey",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"input-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"output-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"BaseLastMileConfigForm": {
+				"properties": {
+					"output": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"input": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"output",
+					"input",
+					"name"
+				],
+				"type": "object"
+			},
+			"LastMileConfigForm": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/BaseLastMileConfigForm"
+					},
+					{
+						"anyOf": [
+							{
+								"properties": {
+									"_type": {
+										"type": "string",
+										"enum": [
+											"relevance",
+											"context_relevance"
+										]
+									}
+								},
+								"required": [
+									"_type"
+								],
+								"type": "object"
+							},
+							{
+								"properties": {
+									"groundTruth": {
+										"$ref": "#/components/schemas/DataEntry"
+									},
+									"_type": {
+										"type": "string",
+										"enum": [
+											"faithfulness"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"groundTruth",
+									"_type"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
 			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
@@ -1182,16 +1384,14 @@
 					"AWS",
 					"DEEPSEEK",
 					"X",
-					"AVIAN"
+					"AVIAN",
+					"NEBIUS"
 				]
 			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
-					},
-					{
-						"type": "string"
 					},
 					{
 						"type": "string",
@@ -1214,29 +1414,56 @@
 						"type": "string"
 					},
 					"arguments": {
-						"additionalProperties": false,
-						"type": "object"
+						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
+				"required": [
+					"name",
+					"arguments"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ChatMessage": {
+			"Message": {
 				"properties": {
-					"role": {
+					"image_url": {
 						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"function",
+							"functionCall",
+							"image",
+							"message",
+							"autoInput"
+						]
+					},
+					"tool_call_id": {
+						"type": "string"
+					},
+					"tool_calls": {
+						"items": {
+							"$ref": "#/components/schemas/FunctionCall"
+						},
+						"type": "array"
 					},
 					"content": {
 						"type": "string"
 					},
-					"function_call": {
-						"$ref": "#/components/schemas/FunctionCall"
+					"role": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
 					}
 				},
-				"type": "object",
-				"additionalProperties": false
+				"required": [
+					"_type"
+				],
+				"type": "object"
 			},
-			"Request": {
+			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
 						"$ref": "#/components/schemas/LlmType"
@@ -1250,6 +1477,19 @@
 					"prompt": {
 						"type": "string",
 						"nullable": true
+					},
+					"input": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						]
 					},
 					"max_tokens": {
 						"type": "number",
@@ -1266,17 +1506,8 @@
 						"format": "double",
 						"nullable": true
 					},
-					"n": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
 					"stream": {
 						"type": "boolean",
-						"nullable": true
-					},
-					"stop": {
-						"type": "string",
 						"nullable": true
 					},
 					"presence_penalty": {
@@ -1289,113 +1520,64 @@
 						"format": "double",
 						"nullable": true
 					},
-					"logprobs": {
+					"n": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
 					},
-					"best_of": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"logit_bias": {
-						"additionalProperties": false,
-						"type": "object",
-						"nullable": true
-					},
-					"user": {
-						"type": "string",
-						"nullable": true
-					},
-					"messages": {
+					"stop": {
 						"items": {
-							"$ref": "#/components/schemas/ChatMessage"
+							"type": "string"
 						},
 						"type": "array",
 						"nullable": true
 					},
-					"tooLarge": {
-						"type": "boolean"
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
 					},
-					"heliconeMessage": {
-						"type": "string"
-					}
+					"tool_choice": {}
 				},
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_number.string_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "string"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
-			},
-			"ErrorInfo": {
+			"LLMResponseBody": {
 				"properties": {
-					"code": {
-						"type": "string",
-						"nullable": true
-					},
-					"message": {
-						"type": "string",
-						"nullable": true
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Response": {
-				"properties": {
-					"completions": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Record_number.string_"
-							}
-						],
-						"nullable": true
-					},
-					"message": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ChatMessage"
-							}
-						],
-						"nullable": true
-					},
 					"error": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ErrorInfo"
-							}
+						"properties": {
+							"heliconeMessage": {}
+						},
+						"required": [
+							"heliconeMessage"
 						],
-						"nullable": true
+						"type": "object"
 					},
 					"model": {
 						"type": "string",
 						"nullable": true
 					},
-					"tooLarge": {
-						"type": "boolean"
-					},
-					"heliconeMessage": {
-						"type": "string"
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
 					}
 				},
-				"type": "object",
-				"additionalProperties": false
+				"type": "object"
 			},
 			"LlmSchema": {
 				"properties": {
 					"request": {
-						"$ref": "#/components/schemas/Request"
+						"$ref": "#/components/schemas/LLMRequestBody"
 					},
 					"response": {
 						"allOf": [
 							{
-								"$ref": "#/components/schemas/Response"
+								"$ref": "#/components/schemas/LLMResponseBody"
 							}
 						],
 						"nullable": true
@@ -1420,8 +1602,7 @@
 				"properties": {
 					"response_id": {
 						"type": "string",
-						"nullable": true,
-						"example": "Happy"
+						"nullable": true
 					},
 					"response_created_at": {
 						"type": "string",
@@ -1602,7 +1783,8 @@
 					"scores",
 					"properties",
 					"assets",
-					"target_url"
+					"target_url",
+					"model"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -3682,7 +3864,7 @@
 				],
 				"type": "object"
 			},
-			"Message": {
+			"KafkaMessageContents": {
 				"properties": {
 					"log": {
 						"$ref": "#/components/schemas/Log"
@@ -6024,6 +6206,54 @@
 				}
 			}
 		},
+		"/v1/evaluator/lastmile/test": {
+			"post": {
+				"operationId": "TestLastMileEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__score-number--input-string--output-string--ground_truth_63_-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"config": {
+										"$ref": "#/components/schemas/LastMileConfigForm"
+									}
+								},
+								"required": [
+									"testInput",
+									"config"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v2/experiment/create/empty": {
 			"post": {
 				"operationId": "CreateEmptyExperiment",
@@ -7000,6 +7230,15 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "includeBody",
+						"required": false,
+						"schema": {
+							"default": false,
+							"type": "boolean"
 						}
 					}
 				]
@@ -9297,7 +9536,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/Message",
+								"$ref": "#/components/schemas/KafkaMessageContents",
 								"description": "Log message to log"
 							}
 						}

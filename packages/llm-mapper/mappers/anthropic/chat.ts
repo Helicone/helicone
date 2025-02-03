@@ -1,7 +1,14 @@
 import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
-import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
+import crypto from "crypto";
+
+const randomId = () => {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+};
 
 type AnthropicContent = {
   type: string;
@@ -24,7 +31,10 @@ const getRequestText = (requestBody: any) => {
   if (typeof result === "string") {
     return result;
   }
-  return JSON.stringify(requestBody);
+  if (Array.isArray(result)) {
+    return result.map((item) => item.text || JSON.stringify(item)).join(" ");
+  }
+  return JSON.stringify(result);
 };
 
 const getResponseText = (responseBody: any, statusCode: number = 200) => {
@@ -76,9 +86,15 @@ const getRequestMessages = (request: any) => {
   // Add system message first if it exists
   if (request?.system) {
     requestMessages.push({
-      id: crypto.randomUUID(),
+      id: randomId(),
       role: "system",
-      content: request.system,
+      content: Array.isArray(request.system)
+        ? request.system
+            .map((item: any) => item.text || JSON.stringify(item))
+            .join(" ")
+        : typeof request.system === "string"
+        ? request.system
+        : JSON.stringify(request.system),
       _type: "message",
     });
   }
@@ -139,7 +155,14 @@ const getRequestMessages = (request: any) => {
 
       // Handle regular text content
       return {
-        content: getFormattedMessageContent(message.content),
+        content:
+          typeof message.content === "string"
+            ? message.content
+            : Array.isArray(message.content)
+            ? message.content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(message.content),
         role: message.role,
         _type: getContentType(message as any),
       };
@@ -156,40 +179,51 @@ const anthropicContentToMessage = (
 ): Message => {
   if (!content?.type) {
     return {
-      id: content?.id || crypto.randomUUID(),
-      content: getFormattedMessageContent(
-        "UKNOWN ANTHROPIC BODY" + JSON.stringify(content)
-      ),
+      id: content?.id || randomId(),
+      content:
+        typeof content === "string"
+          ? content
+          : Array.isArray(content)
+          ? content
+              .map((item: any) => item.text || JSON.stringify(item))
+              .join(" ")
+          : JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
   }
   if (content.type === "text") {
     return {
-      id: content.id || crypto.randomUUID(),
-      content: getFormattedMessageContent(content.text),
+      id: content.id || randomId(),
+      content: content.text || JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
   } else if (content.type === "tool_use") {
     return {
-      id: content.id || crypto.randomUUID(),
+      id: content.id || randomId(),
+      content: "",
+      role: "assistant",
       tool_calls: [
         {
-          arguments: content.input,
-          name: content.name,
+          name: content.name ?? "",
+          arguments: content.input ?? {},
         },
       ],
       _type: "functionCall",
-      role,
     };
   } else {
     return {
-      id: content.id || crypto.randomUUID(),
+      id: content.id || randomId(),
       role: role,
-      content: getFormattedMessageContent(
-        "UKNOWN ANTHROPIC BODY" + JSON.stringify(content)
-      ),
+      content:
+        typeof content === "string"
+          ? content
+          : Array.isArray(content)
+          ? content
+              .map((item: any) => item.text || JSON.stringify(item))
+              .join(" ")
+          : JSON.stringify(content, null, 2),
       _type: "message",
     };
   }
@@ -206,7 +240,7 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
     } else {
       return {
         error: {
-          heliconeMessage: JSON.stringify(response.error),
+          heliconeMessage: JSON.stringify(response.error, null, 2),
         },
       };
     }

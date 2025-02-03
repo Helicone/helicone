@@ -3,7 +3,7 @@ import {
   LLMOption,
 } from "@/components/templates/evals/testing/types";
 
-import { TestInput } from "../../../shared/CreateNewEvaluator/types";
+import { TestInput } from "../CreateNewEvaluator/types";
 
 export const exTestInput: TestInput = {
   inputBody: JSON.stringify(

@@ -15,4 +15,5 @@ volumes
 env/
 venv/
 test-hcone-sessions/
-__ENV.js
+
+web/public/__ENV.js

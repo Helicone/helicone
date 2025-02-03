@@ -30,6 +30,9 @@ const ModelPill = (props: ModelPillProps) => {
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
     "openai-instruct":
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    "vector-db":
+      "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900 dark:text-green-300 dark:ring-green-800",
+    tool: "bg-pink-50 text-pink-700 ring-pink-200 dark:bg-pink-900 dark:text-pink-300 dark:ring-pink-800",
     unknown:
       "bg-gray-50 text-gray-700 ring-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-800",
   };

@@ -313,6 +313,8 @@ services:
     environment:
       CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
       CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
   supabase-migration-runner:
     container_name: supabase-migration-runner
@@ -408,8 +410,8 @@ services:
   jawn:
     container_name: helicone-jawn
     build:
-      context: ../valhalla
-      dockerfile: ../valhalla/dockerfile
+      context: ../
+      dockerfile: valhalla/dockerfile
     restart: unless-stopped
     ports:
       - ${JAWN_PORT}:${JAWN_PORT}
@@ -433,6 +435,7 @@ services:
           "CLICKHOUSE_USER": "${CLICKHOUSE_USER}",
           "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD}"
         }
+      VERCEL_ENV: ${VERCEL_ENV}
 
   minio:
     container_name: helicone-minio

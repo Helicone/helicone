@@ -11,10 +11,7 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  COMPOSITE_OPTIONS,
-  LLM_AS_A_JUDGE_OPTIONS,
-} from "../../templates/evals/testing/examples";
+import { COMPOSITE_OPTIONS, LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { EvaluatorType } from "@/components/templates/evals/testing/types";
 
 export const EvaluatorTypeDropdown: React.FC<{
@@ -88,7 +85,7 @@ export const EvaluatorTypeDropdown: React.FC<{
         <TabsTrigger value="python">
           Python <span className="text-xs text-gray-500 px-3"></span>
         </TabsTrigger>
-        {/* <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger> */}
+        <TabsTrigger value="typescript">LastMile.Dev </TabsTrigger>
         <TabsTrigger value="typescript" disabled>
           Typescript <span className="text-xs text-gray-500 px-3">(soon)</span>
         </TabsTrigger>

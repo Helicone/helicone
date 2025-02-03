@@ -14,6 +14,7 @@ export type OnlineEvaluatorByOrgId = {
   evaluator_name: string;
   evaluator_created_at: string;
   config: any;
+  last_mile_config: any;
 } & EvaluatorConfig;
 
 export type OnlineEvaluatorByEvaluatorId = {
@@ -52,7 +53,8 @@ export class OnlineEvalStore extends BaseStore {
         evaluator.llm_template as evaluator_llm_template,
         evaluator.code_template as evaluator_code_template,
         evaluator.created_at as evaluator_created_at,
-        online_evaluators.config
+        online_evaluators.config,
+        evaluator.last_mile_config as last_mile_config
       FROM online_evaluators 
       JOIN evaluator ON online_evaluators.evaluator = evaluator.id 
       WHERE online_evaluators.organization = $1`,
