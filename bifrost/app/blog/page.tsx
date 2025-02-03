@@ -421,17 +421,17 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "text-classification-with-llms",
+      folderName: "helicone-vs-traceloop",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "chain-of-thought-prompting",
+      folderName: "helicone-vs-comet",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "rag-chunking-strategies",
+      folderName: "helicone-vs-honeyhive",
     },
   },
   {
@@ -446,7 +446,12 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "claude-3.5-sonnet-vs-openai-o1",
+      folderName: "rag-chunking-strategies",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gemini-2.0-flash",
     },
   },
   {
