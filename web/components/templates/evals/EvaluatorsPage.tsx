@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { useOrg } from "@/components/layout/org/organizationContext";
+import { useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,

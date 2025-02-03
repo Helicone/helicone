@@ -1,9 +1,7 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRightIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import {
   Table,
   TableHeader,

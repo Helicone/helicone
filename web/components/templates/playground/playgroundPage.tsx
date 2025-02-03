@@ -47,7 +47,6 @@ import { IslandContainer } from "@/components/ui/islandContainer";
 import { useTheme } from "next-themes";
 import { Slider } from "@/components/ui/slider";
 import { PlaygroundModel } from "./types";
-import { useHasAccess } from "../../../hooks/useHasAccess";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 

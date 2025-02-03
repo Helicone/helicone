@@ -6,7 +6,6 @@ import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import Experiment from "./experiment";
-import EvaluateSVG from "@/components/ui/evaluate";
 
 type ExperimentPricingPlanName =
   | "Experiments"

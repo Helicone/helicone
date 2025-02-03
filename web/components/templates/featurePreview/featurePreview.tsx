@@ -1,6 +1,6 @@
 import { XMarkIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import LogoBox from "./LogoBox";
 import FeaturePreviewSection, {
   FeaturePreviewSectionProps,
@@ -258,6 +258,7 @@ const FeaturePreview = <T extends string>({
               href="https://docs.helicone.ai"
               target="_blank"
               className="w-full"
+              rel="noreferrer"
             >
               <Button
                 className="w-full bg-transparent border-none rounded-xl hover:bg-slate-200 text-slate-700 text-lg font-semibold leading-normal tracking-tight hover:no-underline h-[52px] px-6 py-1.5"
