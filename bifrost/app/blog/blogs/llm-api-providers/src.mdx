@@ -45,7 +45,7 @@ Developers can access 200+ open-source models including Llama 3, RedPajama, and 
 
 Together AI is ideal for developers who wants access to a wide range of open-source models. With flexible pricing and high-performance infrastructure, it's a strong choice for companies that require custom LLMs and a scalable solution that is optimized for AI workloads.
 
-### Integrating LLM observability with Together AI
+### Adding LLM Observability to Together AI
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/together" target="_blank" rel="noopener">docs</a> for details.
 
@@ -55,6 +55,9 @@ https://api.together.xyz/v1/
 
 # switch to new endpoint with Helicone
 https://together.helicone.ai/v1/
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -81,7 +84,7 @@ All services are pay-as-you-go. Get started <a href="https://docs.fireworks.ai/g
 
 Fireworks is ideal for companies looking to scale their AI applications. Moreover, developers can <a href="https://docs.helicone.ai/getting-started/integration-method/fireworks" rel="noopener" target="_blank">integrate</a> Fireworks with Helicone to get production-grade LLM infrastructure with built-in observability and real-time cost and usage monitoring.
 
-### Integrating LLM observability with Fireworks AI
+### Adding LLM Observability to Fireworks AI
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/fireworks" target="_blank" rel="noopener">docs</a> for details.
 
@@ -91,6 +94,9 @@ https://api.fireworks.ai/inference/v1/chat/completions
 
 # switch to new endpoint with Helicone
 https://fireworks.helicone.ai/inference/v1/chat/completions
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -117,7 +123,7 @@ Pay-as-you-go and subscription <a href="https://openrouter.ai/models" target="_b
 
 OpenRouter is a great option for developers who want flexibility in switching between LLM providers. If you need to use different models without the hassle of integrating separate APIs, OpenRouter simplifies the process. However, you do have less control over exact model versions, which could be a limitation depending on your use case.
 
-### Integrating LLM Observability with OpenRouter
+### Adding LLM Observability to OpenRouter
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/openrouter" target="_blank" rel="noopener">docs</a> for details.
 
@@ -127,6 +133,9 @@ https://openrouter.ai/api/v1/chat/completions
 
 # switch to new endpoint with Helicone
 https://openrouter.helicone.ai/api/v1/chat/completions
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -153,7 +162,7 @@ The base plan is **<span style={{color: '#0ea5e9'}}>free to start</span>**, cate
 
 Hyperbolic's strength lies in providing inference and compute at a fraction of the cost, with one of the fastest times to support new models such as _Deepseek R1_ and _R1-Zero_ as they become available. For those looking to serve state-of-the-art models at a competitive price, Hyperbolic would be a suitable option.
 
-### Integrating LLM Observability with Hyperbolic
+### Adding LLM Observability to Hyperbolic
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/hyperbolic" target="_blank" rel="noopener">docs</a> for details.
 
@@ -163,6 +172,9 @@ https://api.hyperbolic.xyz/v1/
 
 # switch to new endpoint with Helicone
 https://hyperbolic.helicone.ai/v1/
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -189,7 +201,7 @@ Based on usage with a pay-per-inference model. Get started <a href="https://repl
 
 Replicate scales well for small to medium workloads but may need extra infrastructure for high-volume apps. It's a great choice for experimentation and for developers who need quick access to models without the setup and overhead.
 
-### Integrating LLM observability with Replicate
+### Adding LLM Observability to Replicate
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">gateway docs</a> for details.
 
@@ -230,7 +242,7 @@ Free for basic use; enterprise plans available. Get started <a href="https://hug
 
 HuggingFace has a strong emphasis on open-source development, so you may find inconsistency in documentation, or have trouble finding examples for complex use cases. However, HuggingFace is a great library of pre-trained models for fine-tuning and AI inferencing — which is useful for many NLP use cases.
 
-### Integrating LLM observability with HuggingFace
+### Adding LLM Observability to HuggingFace
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">gateway docs</a> for details.
 
@@ -271,7 +283,7 @@ Token-based <a href="https://groq.com/pricing/" target="_blank" rel="noopener">p
 
 If ultra-low latency and hardware-level optimization are critical for your application, using LPU can give you a significant advantage. However, you may need to adapt your existing AI workflows to leverage the LPU architecture.
 
-### Integrating LLM Observability with Groq
+### Adding LLM Observability to Groq
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/integrations/groq/javascript" target="_blank" rel="noopener">docs</a> for details.
 
@@ -281,6 +293,9 @@ https://api.groq.com/openai/v1
 
 # switch to new endpoint with Helicone
 https://groq.helicone.ai/openai/v1
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -307,7 +322,7 @@ Usage-based, billed by token or at execution time. Get started <a href="https://
 
 DeepInfra is a good option for projects that need to process large volumes of requests without compromising performance.
 
-### Integrating LLM Observability with DeepInfra
+### Adding LLM Observability to DeepInfra
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/deepinfra" target="_blank" rel="noopener">docs</a> for details.
 
@@ -317,6 +332,9 @@ https://api.deepinfra.com/v1/
 
 # switch to new endpoint with Helicone
 https://deepinfra.helicone.ai/v1/
+
+# add the following header
+"Helicone-Auth": "Bearer [HELICONE_API_KEY]"
 ```
 
 ---
@@ -343,7 +361,7 @@ Usage or subscription-based. Pro users receive a recurring $5 monthly pplx-api c
 
 Perplexity AI is suitable for developers looking to incorporate advanced search and Q&A capabilities into their applications. If improving information retrieval is a crucial aspect of your project, using Perplexity can be a good move.
 
-### Integrating LLM observability with Perplexity AI
+### Adding LLM Observability to Perplexity AI
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">gateway docs</a> for details.
 
@@ -384,7 +402,7 @@ Usage-based, enterprise <a href="https://www.anyscale.com/pricing" target="_blan
 
 Anyscale is ideal for developers building applications that require high scalability and performance. If your project uses Python and you are at the scaling stage, Anyscale can be a good option.
 
-### Integrating LLM Observability with Anyscale
+### Adding LLM Observability to Anyscale
 
 Create an <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> account, then change your baseurl. See <a href="https://docs.helicone.ai/getting-started/integration-method/anyscale" target="_blank" rel="noopener">docs</a> for details.
 
