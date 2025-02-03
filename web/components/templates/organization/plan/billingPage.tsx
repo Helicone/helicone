@@ -6,13 +6,21 @@ import { ProPlanCard } from "./proBillingPage";
 import { MigrateGrowthToPro } from "./MigrateGrowthToPro";
 import { UnknownTierCard } from "./UnknownTierCard";
 import { EnterprisePlanCard } from "./EnterprisePlanCard";
+import { TeamPlanCard } from "./teamBillingPage";
 
 interface OrgPlanPageProps {}
 
 const BillingPlanPage = (props: OrgPlanPageProps) => {
   const org = useOrg();
 
-  const knownTiers = ["free", "pro-20240913", "growth", "enterprise"];
+  const knownTiers = [
+    "free",
+    "pro-20240913",
+    "pro-20250202",
+    "growth",
+    "enterprise",
+    "team-20250130",
+  ];
 
   return (
     <>
@@ -23,6 +31,8 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
         {org?.currentOrg?.tier === "growth" && <MigrateGrowthToPro />}
         {org?.currentOrg?.tier === "free" && <FreePlanCard />}
         {org?.currentOrg?.tier === "pro-20240913" && <ProPlanCard />}
+        {org?.currentOrg?.tier === "pro-20250202" && <ProPlanCard />}
+        {org?.currentOrg?.tier === "team-20250130" && <TeamPlanCard />}
         {org?.currentOrg?.tier &&
           !knownTiers.includes(org?.currentOrg?.tier) && (
             <UnknownTierCard tier={org?.currentOrg?.tier} />

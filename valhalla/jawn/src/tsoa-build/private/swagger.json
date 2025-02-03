@@ -3209,6 +3209,12 @@
 				"properties": {
 					"addons": {
 						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
 							"prompts": {
 								"type": "boolean"
 							},
@@ -8254,6 +8260,60 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/subscription/cost-for-evals": {
+			"get": {
+				"operationId": "GetCostForEvals",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/cost-for-experiments": {
+			"get": {
+				"operationId": "GetCostForExperiments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/subscription/free/usage": {
 			"get": {
 				"operationId": "GetFreeUsage",
@@ -8353,6 +8413,58 @@
 				}
 			}
 		},
+		"/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
+			"post": {
+				"operationId": "UpgradeToTeamBundle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
+			"post": {
+				"operationId": "UpgradeExistingCustomerToTeamBundle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/subscription/manage-subscription": {
 			"post": {
 				"operationId": "ManageSubscription",
@@ -8445,7 +8557,9 @@
 							"type": "string",
 							"enum": [
 								"alerts",
-								"prompts"
+								"prompts",
+								"experiments",
+								"evals"
 							]
 						}
 					}
@@ -8486,7 +8600,9 @@
 							"type": "string",
 							"enum": [
 								"alerts",
-								"prompts"
+								"prompts",
+								"experiments",
+								"evals"
 							]
 						}
 					}
