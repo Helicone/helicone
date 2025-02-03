@@ -58,7 +58,6 @@ export function costOfPrompt({
   promptCacheReadTokens,
   completionTokens,
   images = 1,
-
   perCall = 1,
 }: {
   provider: string;
@@ -77,12 +76,8 @@ export function costOfPrompt({
 
   let totalCost = 0;
 
-  // Add cost for regular prompt tokens (Calculated excluding cache tokens)
-  const regularPromptTokens = Math.max(
-    0,
-    promptTokens - (promptCacheWriteTokens + promptCacheReadTokens)
-  );
-  totalCost += regularPromptTokens * cost.prompt_token;
+  // Add cost for regular prompt tokens (these are the fresh, uncached tokens)
+  totalCost += promptTokens * cost.prompt_token;
 
   // Add cost for cache write tokens if applicable
   if (cost.prompt_cache_write_token && promptCacheWriteTokens > 0) {
@@ -101,7 +96,7 @@ export function costOfPrompt({
   // Add cost for completion tokens
   totalCost += completionTokens * cost.completion_token;
 
-  // Add cost for images
+  // Add cost for images and per-call fees
   const imageCost = images * (cost.per_image ?? 0);
   const perCallCost = perCall * (cost.per_call ?? 0);
   totalCost += imageCost + perCallCost;
