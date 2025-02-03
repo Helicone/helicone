@@ -114,7 +114,6 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
-  const org = useOrg();
   const hasAccess = useHasAccess("prompts");
   const hasLimitedAccess = useMemo(() => {
     return !hasAccess && (prompts?.length ?? 0) > 0;

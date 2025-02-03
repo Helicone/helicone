@@ -1,7 +1,7 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 
-const ADDON_FEATURES = ["evals", "experiments", "prompts", "alerts"] as const;
+const ADDON_FEATURES = ["evals", "experiments", "prompts"] as const;
 const NON_FREE_FEATURES = ["sessions"] as const;
 
 export const useHasAccess = (
@@ -31,8 +31,14 @@ export const useHasAccess = (
       return true;
     }
 
-    // Handle pro-20240913 tier with addons (ONLY addon features reach here)
     if (tier === "pro-20240913" || tier === "pro-20250202") {
+      // Grandfather in evals and experiments only for old pro tier if they have prompts access
+      if (
+        tier === "pro-20240913" &&
+        (feature === "evals" || feature === "experiments")
+      ) {
+        return stripeMetadata?.addons?.["prompts"] ?? false;
+      }
       return (
         stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
         false
