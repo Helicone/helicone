@@ -23,7 +23,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { CalendarIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { useCallback } from "react";

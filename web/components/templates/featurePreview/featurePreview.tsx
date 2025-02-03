@@ -163,7 +163,7 @@ const FeaturePreview = <T extends string>({
                 </div>
                 <div>
                   <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
-                    You won't be charged during your trial period
+                    You won&apos;t be charged during your trial period
                   </span>
                 </div>
               </div>
