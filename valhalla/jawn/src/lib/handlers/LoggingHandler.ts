@@ -443,6 +443,8 @@ export class LoggingHandler extends AbstractLogHandler {
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),

@@ -103,6 +103,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.usage.totalTokens = usage.totalTokens;
       context.usage.heliconeCalculated = usage.heliconeCalculated;
       context.usage.cost = usage.cost;
+      context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
+      context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
 
       return await super.handle(context);
     } catch (error: any) {
