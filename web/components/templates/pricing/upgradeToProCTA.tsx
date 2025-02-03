@@ -47,7 +47,10 @@ export const UpgradeToProCTA = ({
   });
 
   const isPro = useMemo(() => {
-    return org?.currentOrg?.tier === "pro-20240913";
+    return (
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202"
+    );
   }, [org?.currentOrg?.tier]);
 
   const costForPrompts = useCostForPrompts();

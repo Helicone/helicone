@@ -33,6 +33,7 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
     return (
       enabled &&
       (org?.currentOrg?.tier === "pro-20240913" ||
+        org?.currentOrg?.tier === "pro-20250202" ||
         org?.currentOrg?.tier === "growth" ||
         org?.currentOrg?.tier === "pro" ||
         org?.currentOrg?.tier === "enterprise" ||
@@ -49,7 +50,10 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
   const title = useMemo(() => titles[featureName], [featureName]);
 
   const isPro = useMemo(() => {
-    return org?.currentOrg?.tier === "pro-20240913";
+    return (
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202"
+    );
   }, [org?.currentOrg?.tier]);
 
   return {
