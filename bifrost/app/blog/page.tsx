@@ -216,12 +216,7 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "prompt-thinking-models",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "switch-to-deepseek",
+      folderName: "open-webui-alternatives",
     },
   },
   {
@@ -442,11 +437,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {
