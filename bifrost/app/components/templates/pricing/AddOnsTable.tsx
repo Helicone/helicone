@@ -109,7 +109,7 @@ export default function AddOnsTable() {
         <h4 className="text-[24px] font-bold text-slate-900">Add-ons</h4>
         <p className="text-slate-700">
           Specialized features are now available as add-ons, so you never pay
-          for what you don't need.
+          for what you don&apos;t need.
         </p>
       </Col>
       <PlansTable rows={rows} />
