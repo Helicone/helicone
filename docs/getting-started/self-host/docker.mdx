@@ -17,14 +17,45 @@ docker compose up
 <Note>
   - To create a user go to http://localhost:54323/project/default/auth/users and
   add your account. You can use this account to sign into Helicone at
-  localhost:3000 via your browser.
-  - Also update `ENABLE_EMAIL_AUTOCONFIRM` to `true` in `./docker/.env` to allow user addition without confirmation.
+  localhost:3000 via your browser. - Also update `ENABLE_EMAIL_AUTOCONFIRM` to
+  `true` in `./docker/.env` to allow user addition without confirmation.
 </Note>
 
 **Default URLs:**
 
 - Helicone Webpage: localhost:3000
-- Helicone Worker: localhost:8787
+- Helicone Worker: localhost:8787 (See known issues below)
+
+## KNOWN ISSUES
+
+The worker container is not very stable. For now we recommend using the proxy built into JAWN, some features are not implemented in the JAWN proxy yet like cache and rate limiting. Basic logging and prompts do work.
+
+Example
+
+```python
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+openai_client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url="http://127.0.0.1:8585/v1/gateway/oai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+    }
+)
+
+response = openai_client.completions.create(
+    model="gpt-3.5-turbo-instruct",
+    prompt="Count to 5",
+    stream=False,
+)
+assert response.choices[0].text is not None
+
+```
 
 ## Maintaining your instance
 
