@@ -1,4 +1,3 @@
-import { unsupportedImage } from "../../utils/helpers";
 import {
   calculateModel,
   getModelFromResponse,
@@ -146,10 +145,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           imageModelParser.processResponseBody(responseBody);
       }
     }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
 
     return imageModelParsingResponse;
   }

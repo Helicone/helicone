@@ -1,11 +1,11 @@
-import { tryParse, unsupportedImage } from "../../utils/helpers";
+import { tryParse } from "../../utils/helpers";
 import {
   getModelFromRequest,
   isRequestImageModel,
 } from "../../utils/modelMapper";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getRequestImageModelParser } from "../shared/imageParsers/parserMapper";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -146,10 +146,6 @@ export class RequestBodyHandler extends AbstractLogHandler {
           imageModelParser.processRequestBody(requestBody);
       }
     }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
 
     if (imageModelParsingResponse.assets.size > MAX_ASSETS) {
       imageModelParsingResponse.assets = truncMap(
