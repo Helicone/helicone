@@ -77,35 +77,33 @@ export function costOfPrompt({
 
   let totalCost = 0;
 
-  // Calculate regular prompt tokens (excluding cache tokens)
+  // Add cost for regular prompt tokens (Calculated excluding cache tokens)
   const regularPromptTokens = Math.max(
     0,
     promptTokens - (promptCacheWriteTokens + promptCacheReadTokens)
   );
-
-  // Add cost for regular prompt tokens
-  totalCost += cost.prompt_token * regularPromptTokens;
+  totalCost += regularPromptTokens * cost.prompt_token;
 
   // Add cost for cache write tokens if applicable
   if (cost.prompt_cache_write_token && promptCacheWriteTokens > 0) {
-    totalCost += cost.prompt_cache_write_token * promptCacheWriteTokens;
+    totalCost += promptCacheWriteTokens * cost.prompt_cache_write_token;
   } else if (promptCacheWriteTokens > 0) {
-    totalCost += cost.prompt_token * promptCacheWriteTokens;
+    totalCost += promptCacheWriteTokens * cost.prompt_token;
   }
 
   // Add cost for cache read tokens if applicable
   if (cost.prompt_cache_read_token && promptCacheReadTokens > 0) {
-    totalCost += cost.prompt_cache_read_token * promptCacheReadTokens;
+    totalCost += promptCacheReadTokens * cost.prompt_cache_read_token;
   } else if (promptCacheReadTokens > 0) {
-    totalCost += cost.prompt_token * promptCacheReadTokens;
+    totalCost += promptCacheReadTokens * cost.prompt_token;
   }
 
   // Add cost for completion tokens
-  totalCost += cost.completion_token * completionTokens;
+  totalCost += completionTokens * cost.completion_token;
 
   // Add cost for images
-  const imageCost = (cost.per_image ?? 0) * images;
-  const perCallCost = (cost.per_call ?? 0) * perCall;
+  const imageCost = images * (cost.per_image ?? 0);
+  const perCallCost = perCall * (cost.per_call ?? 0);
   totalCost += imageCost + perCallCost;
 
   return totalCost;
