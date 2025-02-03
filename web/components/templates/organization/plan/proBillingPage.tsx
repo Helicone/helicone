@@ -35,10 +35,12 @@ import {
 
 export const ProPlanCard = () => {
   const org = useOrg();
-  const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
   const [isPromptsDialogOpen, setIsPromptsDialogOpen] = useState(false);
   const [isEvalsDialogOpen, setIsEvalsDialogOpen] = useState(false);
   const [isExperimentsDialogOpen, setIsExperimentsDialogOpen] = useState(false);
+  const costForPrompts = useCostForPrompts();
+  const costForEvals = useCostForEvals();
+  const costForExperiments = useCostForExperiments();
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -117,9 +119,6 @@ export const ProPlanCard = () => {
 
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
 
-  const hasAlerts = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Alerts" && item.quantity > 0
-  );
   const hasPrompts = subscription.data?.data?.items?.some(
     (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0
   );
@@ -133,10 +132,6 @@ export const ProPlanCard = () => {
     (item: any) => item.price.product?.name === "Evals" && item.quantity > 0
   );
 
-  const handleAlertsToggle = () => {
-    setIsAlertsDialogOpen(true);
-  };
-
   const handlePromptsToggle = () => {
     setIsPromptsDialogOpen(true);
   };
@@ -147,17 +142,6 @@ export const ProPlanCard = () => {
 
   const handleExperimentsToggle = () => {
     setIsExperimentsDialogOpen(true);
-  };
-
-  const confirmAlertsChange = async () => {
-    if (!hasAlerts) {
-      await addProductToSubscription.mutateAsync("alerts");
-    } else {
-      await deleteProductFromSubscription.mutateAsync("alerts");
-    }
-    setIsAlertsDialogOpen(false);
-
-    subscription.refetch();
   };
 
   const confirmPromptsChange = async () => {
@@ -222,9 +206,6 @@ export const ProPlanCard = () => {
     },
     [isTrialActive]
   );
-  const costForPrompts = useCostForPrompts();
-  const costForEvals = useCostForEvals();
-  const costForExperiments = useCostForExperiments();
 
   return (
     <div className="flex gap-6 lg:flex-row flex-col">
@@ -279,21 +260,6 @@ export const ProPlanCard = () => {
             {getBillingCycleDates()}
           </div>
           <Col className="gap-4">
-            <div className="flex flex-col">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="alerts-toggle">Alerts ($15/mo)</Label>
-                <Switch
-                  id="alerts-toggle"
-                  checked={hasAlerts}
-                  onCheckedChange={handleAlertsToggle}
-                />
-              </div>
-              {isTrialActive && (
-                <span className="text-xs text-muted-foreground mt-1 text-slate-500">
-                  Included in trial (enable to start using)
-                </span>
-              )}
-            </div>
             <div className="flex flex-col">
               <div className="flex items-center justify-between">
                 <Label htmlFor="prompts-toggle">
@@ -409,30 +375,6 @@ export const ProPlanCard = () => {
         />
       </div>
 
-      <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {!hasAlerts ? "Enable Alerts" : "Disable Alerts"}
-            </DialogTitle>
-            <DialogDescription>
-              {getDialogDescription(!hasAlerts, "Alerts", "$15")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAlertsDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmAlertsChange}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={isPromptsDialogOpen} onOpenChange={setIsPromptsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -468,7 +410,11 @@ export const ProPlanCard = () => {
               {!hasEvals ? "Enable Evals" : "Disable Evals"}
             </DialogTitle>
             <DialogDescription>
-              {getDialogDescription(!hasEvals, "Evals", "$15")}
+              {getDialogDescription(
+                !hasEvals,
+                "Evals",
+                `$${costForEvals.data?.data ?? "loading..."}`
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -495,7 +441,11 @@ export const ProPlanCard = () => {
               {!hasExperiments ? "Enable Experiments" : "Disable Experiments"}
             </DialogTitle>
             <DialogDescription>
-              {getDialogDescription(!hasExperiments, "Experiments", "$15")}
+              {getDialogDescription(
+                !hasExperiments,
+                "Experiments",
+                `$${costForExperiments.data?.data ?? "loading..."}`
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

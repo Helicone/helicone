@@ -119,31 +119,26 @@ const paidPlan: PricingPlan<ExperimentPricingPlanName>[] = [
 
 const ExperimentsPreview = () => {
   const org = useOrg();
-  const pricingPlan: PricingPlan<ExperimentPricingPlanName>[] = useMemo(() => {
-    if (
-      org?.currentOrg?.tier === "free" ||
-      org?.currentOrg?.tier === "growth"
-    ) {
-      return freePlan;
-    } else if (
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro-20240913" ||
-      org?.currentOrg?.tier === "team-20250130"
-    ) {
-      return paidPlan;
-    }
-    return [];
-  }, [org]);
-
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const { handleConfirmTrial, proRequired } = useFeatureTrial(
-    "experiments",
-    "Experiments"
-  );
-  const [selectedPlan, setSelectedPlan] = useState<string>();
+  const { handleConfirmTrial } = useFeatureTrial("experiments", "Experiments");
+  const [selectedPlan, setSelectedPlan] = useState<ExperimentPricingPlanName>();
 
-  const handleStartTrial = async (selectedPlan?: string) => {
+  const isPaidPlan = useMemo(
+    () =>
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202" ||
+      org?.currentOrg?.tier === "team-20250130",
+    [org?.currentOrg?.tier]
+  );
+
+  const pricingPlan = useMemo(
+    () => (isPaidPlan ? paidPlan : freePlan),
+    [isPaidPlan]
+  );
+
+  const handleStartTrial = async (selectedPlan?: ExperimentPricingPlanName) => {
     if (!selectedPlan) {
       notification.setNotification("Please select a plan to continue", "error");
       return;
@@ -161,14 +156,16 @@ const ExperimentsPreview = () => {
     return null;
   }
 
+  console.log(`Requires upgrade: ${isPaidPlan}`);
+
   return (
     <>
       <FeaturePreview
         title="Prompt Experimentation"
         subtitle="in a Spreadsheet-Like Environment"
         pricingPlans={pricingPlan}
-        proRequired={proRequired}
         onStartTrial={handleStartTrial}
+        isOnFreeTier={!isPaidPlan}
         featureSectionProps={{
           pageTitle: "Tune and Test Prompts at Scale",
           features: experimentFeatures,
@@ -186,6 +183,7 @@ const ExperimentsPreview = () => {
         isOpen={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
         onConfirm={confirmExperimentsChange}
+        isUpgrade={isPaidPlan}
       />
     </>
   );

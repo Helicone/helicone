@@ -415,13 +415,13 @@ WHERE (${builtFilter.filter})`,
       cancel_url: `${origin}/dashboard`,
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "pro-20240913",
+        tier: "pro-20250202",
       },
       subscription_data: {
-        trial_period_days: isNewCustomer ? 7 : undefined,
+        trial_period_days: 7,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         },
       },
     };
@@ -582,10 +582,14 @@ WHERE (${builtFilter.filter})`,
         return sessionUrl;
       }
 
-      await this.stripe.subscriptions.update(subscription.id, {
-        cancel_at_period_end: false,
-        proration_behavior: "create_prorations",
-      });
+      // Cancels after they pay for the new subscription
+      // await this.stripe.subscriptions.update(subscription.id, {
+      //   cancel_at_period_end: true,
+      //   proration_behavior: "create_prorations",
+      //   cancellation_details: {
+      //     comment: "Upgrading to team bundle at the end of the billing period",
+      //   },
+      // });
 
       const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
         returnUrl,
@@ -974,7 +978,7 @@ WHERE (${builtFilter.filter})`,
         items: missingProducts.map((productId) => ({ price: productId })),
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         },
         proration_behavior: "none",
       };
@@ -988,7 +992,7 @@ WHERE (${builtFilter.filter})`,
       await supabaseServer.client
         .from("organization")
         .update({
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         })
         .eq("id", this.authParams.organizationId);
 
@@ -1001,7 +1005,7 @@ WHERE (${builtFilter.filter})`,
         await supabaseServer.client
           .from("organization")
           .update({
-            tier: "pro-20240913",
+            tier: "pro-20250202",
           })
           .eq("id", this.authParams.organizationId);
       }

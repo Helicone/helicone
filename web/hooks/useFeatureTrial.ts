@@ -27,7 +27,9 @@ export const useFeatureTrial = (
       // Handle Team Bundle selection
       if (isTeamBundle) {
         const endpoint =
-          subscription.data?.data?.status === "canceled"
+          subscription.data?.data?.status === "canceled" ||
+          org?.currentOrg?.tier === "pro-20240913" ||
+          org?.currentOrg?.tier === "pro-20250202"
             ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
             : "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle";
 

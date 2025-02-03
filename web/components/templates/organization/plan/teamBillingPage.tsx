@@ -68,22 +68,6 @@ export const TeamPlanCard = () => {
 
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
 
-  const getBillingCycleDates = () => {
-    if (
-      subscription.data?.data?.current_period_start &&
-      subscription.data?.data?.current_period_end
-    ) {
-      const startDate = new Date(
-        subscription.data.data.current_period_start * 1000
-      );
-      const endDate = new Date(
-        subscription.data.data.current_period_end * 1000
-      );
-      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-    }
-    return "N/A";
-  };
-
   return (
     <div className="flex gap-6 lg:flex-row flex-col">
       <Card className="max-w-3xl w-full h-fit">
@@ -139,9 +123,9 @@ export const TeamPlanCard = () => {
               "Unlimited seats",
               "All Pro features",
               "Prompt Management",
-              "Experiments & Evals",
-              "Priority Support",
-              "Team Analytics",
+              "Experiments",
+              "Evaluators",
+              "Priority Support via Slack (email cole@helicone.ai for access)",
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-2 text-sm">
                 <CheckIcon className="w-4 h-4 text-green-500" />

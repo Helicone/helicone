@@ -132,7 +132,29 @@ const TeamVersion20250130 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await getSupabaseServer()
+    // Get the existing subscription from the organization
+    const { data: orgData } = await getSupabaseServer()
+      .from("organization")
+      .select("stripe_subscription_id")
+      .eq("id", orgId || "")
+      .single();
+
+    // Cancel old subscription if it exists
+    console.log("Subscription ID", subscriptionId);
+    if (orgData?.stripe_subscription_id) {
+      try {
+        console.log("Cancelling old subscription");
+        await stripe.subscriptions.cancel(orgData.stripe_subscription_id, {
+          invoice_now: true,
+          prorate: true,
+        });
+      } catch (e) {
+        console.error("Error canceling old subscription:", e);
+      }
+    }
+
+    // Update to new subscription
+    const { error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
@@ -144,6 +166,10 @@ const TeamVersion20250130 = {
         },
       })
       .eq("id", orgId || "");
+
+    if (error) {
+      console.error("Failed to update organization:", error);
+    }
   },
 
   handleUpdate: async (event: Stripe.Event) => {
@@ -213,7 +239,7 @@ const PricingVersion20240913 = {
         subscription_status: "active",
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId,
-        tier: "pro-20240913",
+        tier: "pro-20250202",
         stripe_metadata: {
           addons: addons,
         },
@@ -408,7 +434,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       | Stripe.Checkout.Session;
 
     const pricingFunctions =
-      stripeObject.metadata?.["tier"] === "pro-20240913"
+      stripeObject.metadata?.["tier"] === "pro-20240913" ||
+      stripeObject.metadata?.["tier"] === "pro-20250202"
         ? PricingVersion20240913
         : stripeObject.metadata?.["tier"] === "team-20250130"
         ? TeamVersion20250130

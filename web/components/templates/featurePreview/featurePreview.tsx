@@ -6,13 +6,16 @@ import FeaturePreviewSection, {
   FeaturePreviewSectionProps,
 } from "./featurePreviewSection";
 import { Button } from "@/components/ui/button";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 interface FeaturePreviewProps<T extends string> {
   title: string;
   subtitle: string;
   pricingPlans: PricingPlan<T>[];
   featureSectionProps: FeaturePreviewSectionProps;
-  proRequired?: boolean;
+  isOnFreeTier?: boolean;
   onStartTrial?: (selectedPlan: T) => Promise<void>;
 }
 
@@ -35,9 +38,28 @@ const FeaturePreview = <T extends string>({
   subtitle,
   pricingPlans,
   featureSectionProps,
-  proRequired = false,
+  isOnFreeTier = false,
   onStartTrial,
 }: FeaturePreviewProps<T>) => {
+  const org = useOrg();
+
+  const subscription = useQuery({
+    queryKey: ["subscription", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
+      const subscription = await jawn.GET("/v1/stripe/subscription");
+      return subscription;
+    },
+  });
+
+  const isTrialActive =
+    subscription.data?.data?.trial_end &&
+    new Date(subscription.data.data.trial_end * 1000) > new Date() &&
+    (!subscription.data?.data?.current_period_start ||
+      new Date(subscription.data.data.trial_end * 1000) >
+        new Date(subscription.data.data.current_period_start * 1000));
+
   const [selectedPlan, setSelectedPlan] = useState<T>(() => {
     const defaultPlan = pricingPlans.find((plan) => plan.isSelected);
     return defaultPlan?.name ?? pricingPlans[0]?.name ?? ("" as T);
@@ -117,7 +139,7 @@ const FeaturePreview = <T extends string>({
           </div>
 
           <div className="max-h-[367px] flex-col justify-start items-start inline-flex gap-6">
-            {proRequired && (
+            {isOnFreeTier ? (
               <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
                 <div className="w-[18px] h-[18px] relative overflow-hidden">
                   <LightBulbIcon className="w-full h-full text-sky-500" />
@@ -134,7 +156,18 @@ const FeaturePreview = <T extends string>({
                   </span>
                 </div>
               </div>
-            )}
+            ) : isTrialActive ? (
+              <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
+                <div className="w-[18px] h-[18px] relative overflow-hidden">
+                  <LightBulbIcon className="w-full h-full text-sky-500" />
+                </div>
+                <div>
+                  <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
+                    You won't be charged during your trial period
+                  </span>
+                </div>
+              </div>
+            ) : null}
 
             <div className="justify-center items-center gap-6 inline-flex">
               {pricingPlans.map((plan) => (
@@ -197,9 +230,7 @@ const FeaturePreview = <T extends string>({
                               )}
                             </div>
                             <div className="grow shrink basis-0 text-slate-700 text-base font-[16px] leading-tight">
-                              {feature.name}
-                              {feature.additionalCost &&
-                                ` (${feature.additionalCost})`}
+                              {feature.name} {feature.additionalCost}
                             </div>
                           </div>
                           {index < plan.features.length - 1 && (
@@ -220,7 +251,7 @@ const FeaturePreview = <T extends string>({
               className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
               variant="action"
             >
-              Start 7-day free trial
+              {isOnFreeTier ? "Start 7-day free trial" : "Upgrade now"}
             </Button>
 
             <a

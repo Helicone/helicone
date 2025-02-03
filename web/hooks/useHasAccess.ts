@@ -32,7 +32,7 @@ export const useHasAccess = (
     }
 
     // Handle pro-20240913 tier with addons (ONLY addon features reach here)
-    if (tier === "pro-20240913") {
+    if (tier === "pro-20240913" || tier === "pro-20250202") {
       return (
         stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
         false

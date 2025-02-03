@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
 import useNotification from "@/components/shared/notification/useNotification";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 
@@ -141,6 +141,20 @@ const PromptsPreview = () => {
   );
   const [selectedPlan, setSelectedPlan] = useState<PromptPricingPlanName>();
 
+  const isPaidPlan = useMemo(
+    () =>
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202" ||
+      org?.currentOrg?.tier === "team-20250130",
+    [org?.currentOrg?.tier]
+  );
+
+  const pricingPlan = useMemo(
+    () => (isPaidPlan ? paidPlan : freePlan),
+    [isPaidPlan]
+  );
+
   const handleStartTrial = async (selectedPlan?: PromptPricingPlanName) => {
     if (!selectedPlan) {
       notification.setNotification("Please select a plan to continue", "error");
@@ -155,24 +169,12 @@ const PromptsPreview = () => {
     if (success) setIsConfirmDialogOpen(false);
   };
 
-  let pricingPlan: PricingPlan<PromptPricingPlanName>[] = [];
-  if (org?.currentOrg?.tier === "free" || org?.currentOrg?.tier === "growth") {
-    pricingPlan = freePlan;
-  } else if (
-    org?.currentOrg?.tier === "enterprise" ||
-    org?.currentOrg?.tier === "pro-20240913" ||
-    org?.currentOrg?.tier === "team-20250130"
-  ) {
-    pricingPlan = paidPlan;
-  }
-
   return (
     <>
       <FeaturePreview
         title="Prompt Management"
         subtitle="in a Shared Workspace"
         pricingPlans={pricingPlan}
-        proRequired={proRequired}
         onStartTrial={handleStartTrial}
         featureSectionProps={{
           pageTitle: "Create, Version and Test Prompts Collaboratively",
@@ -184,12 +186,14 @@ const PromptsPreview = () => {
             suffix: "",
           },
         }}
+        isOnFreeTier={!isPaidPlan}
       />
       <TrialConfirmationDialog
         featureName="Prompts"
         isOpen={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
         onConfirm={confirmPromptsChange}
+        isUpgrade={isPaidPlan}
       />
     </>
   );

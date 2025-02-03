@@ -112,8 +112,22 @@ const EvalsPreview = () => {
   const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const { handleConfirmTrial, proRequired } = useFeatureTrial("evals", "Evals");
+  const { handleConfirmTrial } = useFeatureTrial("evals", "Evals");
   const [selectedPlan, setSelectedPlan] = useState<EvalsPricingPlanName>();
+
+  const isPaidPlan = useMemo(
+    () =>
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202" ||
+      org?.currentOrg?.tier === "team-20250130",
+    [org?.currentOrg?.tier]
+  );
+
+  const pricingPlan = useMemo(
+    () => (isPaidPlan ? paidPlan : freePlan),
+    [isPaidPlan]
+  );
 
   const handleStartTrial = async (selectedPlan?: EvalsPricingPlanName) => {
     if (!selectedPlan) {
@@ -129,30 +143,14 @@ const EvalsPreview = () => {
     if (success) setIsConfirmDialogOpen(false);
   };
 
-  const pricingPlan: PricingPlan<EvalsPricingPlanName>[] = useMemo(() => {
-    if (
-      org?.currentOrg?.tier === "free" ||
-      org?.currentOrg?.tier === "growth"
-    ) {
-      return freePlan;
-    } else if (
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro-20240913" ||
-      org?.currentOrg?.tier === "team-20250130"
-    ) {
-      return paidPlan;
-    }
-    return [];
-  }, [org]);
-
   return (
     <>
       <FeaturePreview
         title="LLM Evaluation Suite"
         subtitle="for Performance Optimization"
         pricingPlans={pricingPlan}
-        proRequired={proRequired}
         onStartTrial={handleStartTrial}
+        isOnFreeTier={!isPaidPlan}
         featureSectionProps={{
           pageTitle: "Evaluate Pre-Deployment and Monitor Production",
           features: evalFeatures,
@@ -170,6 +168,7 @@ const EvalsPreview = () => {
         isOpen={isConfirmDialogOpen}
         onOpenChange={setIsConfirmDialogOpen}
         onConfirm={confirmEvalsChange}
+        isUpgrade={isPaidPlan}
       />
     </>
   );

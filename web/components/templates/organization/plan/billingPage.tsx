@@ -16,6 +16,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
   const knownTiers = [
     "free",
     "pro-20240913",
+    "pro-20250202",
     "growth",
     "enterprise",
     "team-20250130",
@@ -30,6 +31,7 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
         {org?.currentOrg?.tier === "growth" && <MigrateGrowthToPro />}
         {org?.currentOrg?.tier === "free" && <FreePlanCard />}
         {org?.currentOrg?.tier === "pro-20240913" && <ProPlanCard />}
+        {org?.currentOrg?.tier === "pro-20250202" && <ProPlanCard />}
         {org?.currentOrg?.tier === "team-20250130" && <TeamPlanCard />}
         {org?.currentOrg?.tier &&
           !knownTiers.includes(org?.currentOrg?.tier) && (

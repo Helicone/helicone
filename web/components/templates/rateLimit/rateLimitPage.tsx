@@ -42,6 +42,7 @@ const RateLimitPage = (props: {}) => {
   const org = useOrg();
   const isPro =
     org?.currentOrg?.tier === "pro-20240913" ||
+    org?.currentOrg?.tier === "pro-20250202" ||
     org?.currentOrg?.tier === "growth" ||
     org?.currentOrg?.tier === "pro" ||
     org?.currentOrg?.tier === "enterprise";
