@@ -221,16 +221,6 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-thinking-models",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "switch-to-deepseek",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },

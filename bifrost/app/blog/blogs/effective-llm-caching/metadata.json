@@ -2,7 +2,7 @@
   "title": "How to Implement Effective LLM Caching",
   "title1": "How to Implement Effective LLM Caching",
   "title2": "How to Implement Effective LLM Caching",
-  "description": "A hands-on deep-dive into implementing effective LLM Caching.",
+  "description": "A deep dive into effective caching strategies for building scalable and cost-efficient LLM applications, covering exact key vs. semantic caching, architectural patterns, and practical implementation tips.",
   "images": "/static/blog/effective-llm-caching/cover.webp",
   "time": "8 minute read",
   "author": "Lina Lam",
