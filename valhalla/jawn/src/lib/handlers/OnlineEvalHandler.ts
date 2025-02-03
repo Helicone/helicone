@@ -99,8 +99,8 @@ export class OnlineEvalHandler extends AbstractLogHandler {
           },
           inputRecord,
           request_id: context.message.log.request.id,
-          requestBody: JSON.stringify(context.processedLog.request.body),
-          responseBody: JSON.stringify(context.processedLog.response.body),
+          requestBody: context.processedLog.request.body,
+          responseBody: context.processedLog.response.body,
           heliconeRequest: toHeliconeRequest(context),
         });
 
