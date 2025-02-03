@@ -34,6 +34,7 @@ export interface BASE_Env {
   TOKENIZER_COUNT_API: string;
   TOKEN_COUNT_URL: string;
   RATE_LIMIT_KV: KVNamespace;
+  KV_PROMPT_FORMATTER: KVNamespace;
   CACHE_KV: KVNamespace;
   REQUEST_AND_RESPONSE_QUEUE_KV: KVNamespace;
   UTILITY_KV: KVNamespace;
@@ -45,7 +46,8 @@ export interface BASE_Env {
     | "ANTHROPIC_PROXY"
     | "HELICONE_API"
     | "GATEWAY_API"
-    | "CUSTOMER_GATEWAY";
+    | "CUSTOMER_GATEWAY"
+    | "PROMPT_FORMATTER";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -134,8 +136,14 @@ async function modifyEnvBasedOnPath(
     (host.includes("hconeai") || host.includes("helicone.ai")) &&
     hostParts.length >= 3
   ) {
+    if (hostParts[0].includes("format")) {
+      return {
+        ...env,
+        WORKER_TYPE: "PROMPT_FORMATTER",
+      };
+    }
     // helicone.ai requests
-    if (hostParts[0].includes("gateway")) {
+    else if (hostParts[0].includes("gateway")) {
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
@@ -375,6 +383,13 @@ async function modifyEnvBasedOnPath(
   throw new Error("Could not determine worker type");
 }
 
+async function injectPromptGateway(request: RequestWrapper, env: Env) {
+  return {
+    ...env,
+    WORKER_TYPE: "PROMPT_FORMATTER",
+  };
+}
+
 export default {
   async fetch(
     request: Request,
@@ -390,6 +405,10 @@ export default {
 
       if (env.WORKER_DEFINED_REDIRECT_URL) {
         return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
+      }
+
+      if (env.WORKER_TYPE === "PROMPT_FORMATTER") {
+        env = await injectPromptGateway(requestWrapper, env);
       }
 
       const router = buildRouter(

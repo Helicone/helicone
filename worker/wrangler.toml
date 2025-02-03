@@ -44,6 +44,8 @@ crons = ["* * * * *", "0 * * * *", "0 10 * * mon"]
 [env.production]
 name = "helicone-worker-prod"
 routes = [
+	{ pattern = "format.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+
 	{ pattern = "oai.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "groq.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
@@ -108,6 +110,7 @@ durable_objects.bindings = [
 ]
 
 kv_namespaces = [
+	{ binding = "KV_PROMPT_FORMATTER" },
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
