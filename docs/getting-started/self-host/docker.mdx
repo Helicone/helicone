@@ -10,7 +10,15 @@ At Helicone we believe that open-source software makes the world a better place.
 ## Running locally
 
 ```
+# Clone repository
+git clone https://github.com/Helicone/helicone.git --depth 1
+cd helicone/docker
+
+# Copy environment variables
+# See below for details: https://supabase.com/docs/guides/self-hosting/docker
 cp .env.example .env
+
+# Startup service
 docker compose up
 ```
 
