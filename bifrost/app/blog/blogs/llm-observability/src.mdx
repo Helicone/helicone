@@ -115,7 +115,7 @@ You should experiment with different variations of your prompt, switch models or
 
 <CallToAction
   title="Get Started with Helicone"
-  description="Start monitoring your LLM applications with Helicone with just 2 lines of code."
+  description="Start monitoring your LLM applications with Helicone with just 1 line of code."
   buttonText="Get Started"
   buttonLink="https://us.helicone.ai/signup?demo=true"
 >
@@ -124,10 +124,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
 });
 ```
 </CallToAction>
