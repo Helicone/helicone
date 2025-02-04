@@ -60,8 +60,6 @@ const responseColumns = new pgp.helpers.ColumnSet(
     { name: "prompt_tokens", def: null },
     { name: "status", def: null },
     { name: "time_to_first_token", def: null },
-    { name: "prompt_cache_write_tokens", def: null },
-    { name: "prompt_cache_read_tokens", def: null },
   ],
   { table: "response" }
 );
