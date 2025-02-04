@@ -446,6 +446,59 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async createExperimentTableRowBatchFromDataset(
+    experimentId: string,
+    datasetId: string
+  ): Promise<
+    Result<
+      {
+        autoInputs: Record<string, any>;
+        inputs: Record<string, string>;
+        inputRecordId: string;
+      }[],
+      string
+    >
+  > {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    const inputManager = new InputsManager(this.authParams);
+    const inputRecords =
+      await inputManager.getInputsFromPromptVersionAndDataset(
+        experiment.original_prompt_version ?? "",
+        datasetId
+      );
+
+    if (!inputRecords.data) {
+      return err("No input records found");
+    }
+
+    try {
+      await Promise.all(
+        (inputRecords.data ?? []).map(async (row) => {
+          await this.createExperimentTableRow(
+            experimentId,
+            row.id,
+            row.inputs,
+            row.auto_prompt_inputs
+          );
+        })
+      );
+
+      return ok(
+        inputRecords.data.map((row) => ({
+          autoInputs: row.auto_prompt_inputs,
+          inputs: row.inputs,
+          inputRecordId: row.id,
+        }))
+      );
+    } catch (e) {
+      return err("Failed to create experiment table row with cells batch");
+    }
+  }
+
   async createExperimentTableRow(
     experimentId: string,
     inputRecordId: string,

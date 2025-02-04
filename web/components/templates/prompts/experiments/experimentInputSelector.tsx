@@ -131,6 +131,8 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
     }
   };
 
+  console.log(inputRecords.map((request) => request.autoInputs));
+
   return (
     <ThemedDrawer open={open} setOpen={setOpen}>
       <div className="h-full flex flex-col space-y-4 justify-between w-full">

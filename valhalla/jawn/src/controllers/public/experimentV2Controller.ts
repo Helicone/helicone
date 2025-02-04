@@ -349,6 +349,35 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Post("/{experimentId}/row/insert/dataset/{datasetId}")
+  public async createExperimentTableRowFromDataset(
+    @Path() experimentId: string,
+    @Path() datasetId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        autoInputs: Record<string, any>;
+        inputs: Record<string, string>;
+        inputRecordId: string;
+      }[],
+      string
+    >
+  > {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result =
+      await experimentManager.createExperimentTableRowBatchFromDataset(
+        experimentId,
+        datasetId
+      );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("/{experimentId}/row/update")
   public async updateExperimentTableRow(
     @Path() experimentId: string,

@@ -198,6 +198,56 @@ export class InputsManager extends BaseManager {
     });
   }
 
+  async getInputsFromPromptVersionAndDataset(
+    promptVersion: string,
+    datasetId: string
+  ): Promise<Result<PromptInputRecord[], string>> {
+    console.log(this.authParams.organizationId, promptVersion, datasetId);
+    const result = await dbExecute<PromptInputRecord>(
+      `
+      SELECT
+        prompt_input_record.id as id,
+        prompt_input_record.inputs as inputs,
+        prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
+        prompt_input_record.source_request as source_request,
+        prompt_input_record.prompt_version as prompt_version,
+        prompt_input_record.created_at as created_at,
+        response.body as response_body
+      FROM prompt_input_record
+      left join request on prompt_input_record.source_request = request.id
+      left join response on response.request = request.id
+      left join helicone_dataset_row hdr on hdr.origin_request_id = prompt_input_record.source_request
+      WHERE  request.helicone_org_id = $1 AND
+      prompt_input_record.prompt_version = $2 AND
+      hdr.dataset_id = $3
+      `,
+      [this.authParams.organizationId, promptVersion, datasetId]
+    );
+    console.log("result", result);
+    const bodyStore = new RequestResponseBodyStore(
+      this.authParams.organizationId
+    );
+
+    return promiseResultMap(result, async (data) => {
+      return Promise.all(
+        data.map(async (record) => {
+          const requestResponseBody = await bodyStore.getRequestResponseBody(
+            record.source_request
+          );
+          return {
+            ...record,
+            response_body: requestResponseBody.data?.response ?? {},
+            request_body: requestResponseBody.data?.request ?? {},
+            inputs: await getAllSignedURLsFromInputs(
+              record.inputs,
+              this.authParams.organizationId,
+              record.source_request
+            ),
+          };
+        })
+      );
+    });
+  }
   async getInputs(
     limit: number,
     promptVersion: string,

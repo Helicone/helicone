@@ -2,6 +2,7 @@ import { Kafka } from "@upstash/kafka";
 import { HeliconeScoresMessage, Message } from "../handlers/HandlerContext";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { LogManager } from "../../managers/LogManager";
+import { log } from "console";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -35,6 +36,7 @@ export class KafkaProducer {
 
   async sendMessageHttp(msg: Message) {
     try {
+      console.log("Sending message via REST", msg);
       const logManager = new LogManager();
 
       await logManager.processLogEntry({

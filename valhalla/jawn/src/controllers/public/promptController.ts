@@ -365,6 +365,33 @@ export class PromptController extends Controller {
     return result;
   }
 
+  // @Post("version/{promptVersionId}/dataset/{datasetId}/query")
+  // public async getInputsFromDataset(
+  //   @Body()
+  //   requestBody: {
+  //     limit: number;
+  //     random?: boolean;
+  //   },
+  //   @Request() request: JawnAuthenticatedRequest,
+  //   @Path() promptVersionId: string,
+  //   @Path() datasetId: string
+  // ): Promise<Result<PromptInputRecord[], string>> {
+  //   const inputManager = new InputsManager(request.authParams);
+
+  //   const result = await inputManager.getInputs(
+  //     requestBody.limit,
+  //     promptVersionId,
+  //     requestBody.random
+  //   );
+  //   if (result.error || !result.data) {
+  //     console.log(result.error);
+  //     this.setStatus(500);
+  //   } else {
+  //     this.setStatus(201); // set return status 201
+  //   }
+  //   return result;
+  // }
+
   @Get("{promptId}/experiments")
   public async getPromptExperiments(
     @Request() request: JawnAuthenticatedRequest,
