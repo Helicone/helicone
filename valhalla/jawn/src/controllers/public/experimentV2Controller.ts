@@ -354,16 +354,7 @@ export class ExperimentV2Controller extends Controller {
     @Path() experimentId: string,
     @Path() datasetId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<
-    Result<
-      {
-        autoInputs: Record<string, any>;
-        inputs: Record<string, string>;
-        inputRecordId: string;
-      }[],
-      string
-    >
-  > {
+  ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result =
       await experimentManager.createExperimentTableRowBatchFromDataset(

@@ -449,16 +449,7 @@ export class ExperimentV2Manager extends BaseManager {
   async createExperimentTableRowBatchFromDataset(
     experimentId: string,
     datasetId: string
-  ): Promise<
-    Result<
-      {
-        autoInputs: Record<string, any>;
-        inputs: Record<string, string>;
-        inputRecordId: string;
-      }[],
-      string
-    >
-  > {
+  ): Promise<Result<null, string>> {
     const experiment = await this.getExperimentById(experimentId);
     if (!experiment) {
       return err("Experiment not found");
@@ -487,13 +478,7 @@ export class ExperimentV2Manager extends BaseManager {
         })
       );
 
-      return ok(
-        inputRecords.data.map((row) => ({
-          autoInputs: row.auto_prompt_inputs,
-          inputs: row.inputs,
-          inputRecordId: row.id,
-        }))
-      );
+      return ok(null);
     } catch (e) {
       return err("Failed to create experiment table row with cells batch");
     }

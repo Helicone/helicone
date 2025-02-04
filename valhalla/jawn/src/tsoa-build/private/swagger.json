@@ -1013,55 +1013,6 @@
 					}
 				]
 			},
-			"ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"inputRecordId": {
-									"type": "string"
-								},
-								"inputs": {
-									"$ref": "#/components/schemas/Record_string.string_"
-								},
-								"autoInputs": {
-									"$ref": "#/components/schemas/Record_string.any_"
-								}
-							},
-							"required": [
-								"inputRecordId",
-								"inputs",
-								"autoInputs"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess_boolean_": {
 				"properties": {
 					"data": {
@@ -6487,7 +6438,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_"
+									"$ref": "#/components/schemas/Result_null.string_"
 								}
 							}
 						}
