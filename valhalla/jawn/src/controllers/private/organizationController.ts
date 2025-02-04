@@ -124,7 +124,10 @@ export class OrganizationController extends Controller {
 
     if (org.data.tier === "enterprise") {
       // Enterprise tier: Proceed to add member without additional checks
-    } else if (org.data.tier === "pro-20240913") {
+    } else if (
+      org.data.tier === "pro-20240913" ||
+      org.data.tier === "pro-20250202"
+    ) {
       // Pro tier: Update Stripe user count before adding member
       const memberCount = await organizationManager.getMemberCount(true);
       if (

@@ -222,6 +222,7 @@ export class DBWrapper {
           tier === "enterprise" ||
           tier === "pro" ||
           tier === "pro-20240913" ||
+          tier === "pro-20250202" ||
           tier === "growth",
       },
     });

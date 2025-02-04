@@ -228,6 +228,12 @@ export interface paths {
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
+  "/v1/stripe/subscription/cost-for-evals": {
+    get: operations["GetCostForEvals"];
+  };
+  "/v1/stripe/subscription/cost-for-experiments": {
+    get: operations["GetCostForExperiments"];
+  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
@@ -236,6 +242,12 @@ export interface paths {
   };
   "/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
     post: operations["UpgradeExistingCustomer"];
+  };
+  "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
+    post: operations["UpgradeToTeamBundle"];
+  };
+  "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
+    post: operations["UpgradeExistingCustomerToTeamBundle"];
   };
   "/v1/stripe/subscription/manage-subscription": {
     post: operations["ManageSubscription"];
@@ -1633,6 +1645,8 @@ Json: JsonObject;
     };
     UpgradeToProRequest: {
       addons?: {
+        evals?: boolean;
+        experiments?: boolean;
         prompts?: boolean;
         alerts?: boolean;
       };
@@ -3752,6 +3766,26 @@ export interface operations {
       };
     };
   };
+  GetCostForEvals: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
+  GetCostForExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
   GetFreeUsage: {
     responses: {
       /** @description Ok */
@@ -3792,6 +3826,26 @@ export interface operations {
       };
     };
   };
+  UpgradeToTeamBundle: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  UpgradeExistingCustomerToTeamBundle: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   ManageSubscription: {
     responses: {
       /** @description Ok */
@@ -3815,7 +3869,7 @@ export interface operations {
   AddOns: {
     parameters: {
       path: {
-        productType: "alerts" | "prompts";
+        productType: "alerts" | "prompts" | "experiments" | "evals";
       };
     };
     responses: {
@@ -3830,7 +3884,7 @@ export interface operations {
   DeleteAddOns: {
     parameters: {
       path: {
-        productType: "alerts" | "prompts";
+        productType: "alerts" | "prompts" | "experiments" | "evals";
       };
     };
     responses: {

@@ -64,6 +64,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
             onClick={async () => {
               if (
                 orgContext?.currentOrg?.tier === "pro-20240913" ||
+                orgContext?.currentOrg?.tier === "pro-20250202" ||
                 orgContext?.currentOrg?.tier === "growth"
               ) {
                 setNotification(
