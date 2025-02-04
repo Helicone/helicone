@@ -10,8 +10,15 @@ export type Message = {
   content?: string;
   tool_calls?: FunctionCall[];
   tool_call_id?: string;
-  _type: "function" | "functionCall" | "image" | "message" | "autoInput";
+  _type:
+    | "function"
+    | "functionCall"
+    | "image"
+    | "message"
+    | "autoInput"
+    | "contentArray";
   image_url?: string;
+  contentArray?: Message[];
 };
 
 export type PromptMessage = Message | string;

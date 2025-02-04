@@ -197,4 +197,91 @@ describe("mapAnthropicRequest", () => {
       id: expect.any(String),
     });
   });
+
+  it("should handle content arrays with mixed text and images", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Page 1",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: "data:image/1",
+                },
+              },
+              {
+                type: "text",
+                text: "Page 2",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: "data:image/2",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      response: {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: "I see two pages",
+          },
+        ],
+      },
+      statusCode: 200,
+      model: "claude-3-sonnet",
+    });
+
+    // Check request message structure
+    const requestMessage = result.schema.request.messages![0];
+    expect(requestMessage.content).toBe("Page 1 Page 2");
+    expect(requestMessage._type).toBe("contentArray");
+    expect(requestMessage.image_url).toBeUndefined();
+
+    expect(requestMessage.contentArray).toHaveLength(4);
+
+    // Verify content array items
+    const contentArray = requestMessage.contentArray!;
+    expect(contentArray[0]).toEqual({
+      content: "Page 1",
+      role: "user",
+      _type: "message",
+    });
+    expect(contentArray[1]).toEqual({
+      content: "",
+      role: "user",
+      _type: "image",
+      image_url: "data:image/1",
+    });
+    expect(contentArray[2]).toEqual({
+      content: "Page 2",
+      role: "user",
+      _type: "message",
+    });
+    expect(contentArray[3]).toEqual({
+      content: "",
+      role: "user",
+      _type: "image",
+      image_url: "data:image/2",
+    });
+
+    // Check response message
+    expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
+      content: "I see two pages",
+      _type: "message",
+      id: expect.any(String),
+    });
+  });
 });
