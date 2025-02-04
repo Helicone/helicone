@@ -140,6 +140,10 @@ test("cost calc snapshot test", () => {
         "provider": "OPENAI"
     },
     {
+        "name": "gpt-4o-2024-11-20",
+        "provider": "OPENAI"
+    },
+    {
         "name": "o1-preview",
         "provider": "OPENAI"
     },
@@ -153,6 +157,14 @@ test("cost calc snapshot test", () => {
     },
     {
         "name": "o1-mini-2024-09-12",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "o3-mini",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "o3-mini-2025-01-31",
         "provider": "OPENAI"
     },
     {
@@ -284,6 +296,10 @@ test("cost calc snapshot test", () => {
         "provider": "AZURE"
     },
     {
+        "name": "gpt-4o-2024-11-20",
+        "provider": "AZURE"
+    },
+    {
         "name": "o1-preview",
         "provider": "AZURE"
     },
@@ -297,6 +313,14 @@ test("cost calc snapshot test", () => {
     },
     {
         "name": "o1-mini-2024-09-12",
+        "provider": "AZURE"
+    },
+    {
+        "name": "o3-mini",
+        "provider": "AZURE"
+    },
+    {
+        "name": "o3-mini-2025-01-31",
         "provider": "AZURE"
     }
 ]"
@@ -381,10 +405,13 @@ WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * requ
 WHEN (request_response_rmt.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-11-20') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-preview') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )
@@ -892,10 +919,13 @@ WHEN (request_response_rmt.model ILIKE 'text-embedding-3-large') THEN 130 * requ
 WHEN (request_response_rmt.model ILIKE 'gpt-4-vision-preview') THEN 10000 * request_response_rmt.prompt_tokens + 30000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-35-turbo-16k-0613') THEN 3000 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-08-06') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'gpt-4o-2024-11-20') THEN 2500 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-preview') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-mini-2024-07-18:%') THEN 300 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-2024-08-06:%') THEN 3750 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
