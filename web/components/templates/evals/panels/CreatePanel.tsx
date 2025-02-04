@@ -66,7 +66,8 @@ export const CreatePanel = ({
               Python <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
             <TabsTrigger value="lastmile">
-              LastMile.Dev <span className="text-xs text-gray-500 px-3"></span>
+              LastMile AutoEval{" "}
+              <span className="text-xs text-gray-500 px-3"></span>
             </TabsTrigger>
             <TabsTrigger value="typescript" disabled>
               Typescript{" "}
