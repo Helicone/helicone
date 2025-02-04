@@ -1,8 +1,6 @@
 import type { IRequest, RouterType } from "itty-router";
-import { Env, Provider } from "..";
+import { Env } from "..";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
-import { formatPrompt } from "@helicone/prompts";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
 import { gatewayForwarder } from "./gatewayRouter";
