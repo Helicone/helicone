@@ -2641,6 +2641,12 @@
 			},
 			"Message": {
 				"properties": {
+					"contentArray": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -2651,7 +2657,8 @@
 							"functionCall",
 							"image",
 							"message",
-							"autoInput"
+							"autoInput",
+							"contentArray"
 						]
 					},
 					"tool_call_id": {
