@@ -37,6 +37,8 @@ export interface ModelRow {
     completion_token: number;
     per_image?: number;
     per_call?: number;
+    prompt_cache_write_token?: number;
+    prompt_cache_read_token?: number;
   };
   showInPlayground?: boolean;
   targetUrl?: string;
