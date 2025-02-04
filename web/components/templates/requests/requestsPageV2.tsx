@@ -265,6 +265,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedAdvancedFilter]);
+
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
