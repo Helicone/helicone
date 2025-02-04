@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TextCursorInputIcon, TriangleAlertIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import {
   AlertDialog,
@@ -43,6 +43,7 @@ const EditInputsPanel = ({
   const { updateExperimentTableRow } = useExperimentTable(experimentId);
   const [inputKV, setInputKV] = useState(inputRecord?.inputKV ?? {});
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const accordionRef = useRef<HTMLDivElement | null>(null);
 
   const hasUnsavedChanges = Object.entries(inputKV).some(
     ([key, value]) => value !== inputRecord?.inputKV[key]
@@ -75,6 +76,12 @@ const EditInputsPanel = ({
   };
 
   const [openAccordions, setOpenAccordions] = useState<string[]>(inputKeys);
+
+  const handleAccordionToggle = () => {
+    if (accordionRef.current) {
+      accordionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-neutral-950 flex flex-col relative h-full overflow-y-auto ">
@@ -117,6 +124,8 @@ const EditInputsPanel = ({
               key={inputKey}
               value={inputKey}
               className="border-b-0"
+              ref={accordionRef}
+              onToggle={handleAccordionToggle}
             >
               <AccordionTrigger
                 iconPosition="start"

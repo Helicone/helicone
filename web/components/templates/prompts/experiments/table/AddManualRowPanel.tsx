@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TextCursorInputIcon, TriangleAlertIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import {
   AlertDialog,
@@ -38,6 +38,7 @@ const AddManualRowPanel = ({
     Object.fromEntries(inputKeys.map((key) => [key, ""]))
   );
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const accordionRef = useRef(null);
 
   const hasUnsavedChanges = Object.entries(inputKV).some(
     ([key, value]) => value !== ""
@@ -62,6 +63,12 @@ const AddManualRowPanel = ({
       inputs: inputKV,
     });
     onClose();
+  };
+
+  const handleAccordionToggle = () => {
+    if (accordionRef.current) {
+      accordionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -92,6 +99,8 @@ const AddManualRowPanel = ({
             <AccordionItem
               key={inputKey}
               value={inputKey}
+              ref={accordionRef}
+              onToggle={handleAccordionToggle}
               className="border-b border-slate-200 dark:border-slate-800"
             >
               <AccordionTrigger
