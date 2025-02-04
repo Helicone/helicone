@@ -216,12 +216,82 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "claude-3.5-sonnet-vs-openai-o1",
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "effective-llm-caching",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "preventing-prompt-injection",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "deepseek-v3",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-evaluation-frameworks",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-o3",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "tree-of-thought-prompting",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-structured-outputs",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "text-classification-with-llms",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "chain-of-thought-prompting",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "rag-chunking-strategies",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gemini-2.0-flash",
     },
   },
   {
     dynmaicEntry: {
       folderName: "crewai-vs-dify-ai",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
     },
   },
   {
@@ -251,12 +321,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-autogen",
+      folderName: "prompt-evaluation-for-llms",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-evaluation-for-llms",
+      folderName: "crewai-vs-autogen",
     },
   },
   {
@@ -267,11 +337,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-api-providers",
     },
   },
   {

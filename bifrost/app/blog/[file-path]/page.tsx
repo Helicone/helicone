@@ -80,7 +80,7 @@ export default async function Home({
               </div>
               <Link href="https://us.helicone.ai/signin" className="block">
                 <Button className="w-full bg-[#0DA5E8] hover:bg-[#0C94D1] text-white font-medium">
-                  Log in
+                  Get started for free
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>

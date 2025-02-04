@@ -6,10 +6,10 @@ import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
 
-import { useOrg } from "../org/organizationContext";
 import {
   ArchiveIcon,
   BellIcon,
+  ChartLineIcon,
   DatabaseIcon,
   FlaskConicalIcon,
   Home,
@@ -18,12 +18,12 @@ import {
   NotepadText,
   SheetIcon,
   ShieldCheckIcon,
-  SparklesIcon,
   TagIcon,
   TestTube2,
   UsersIcon,
   Webhook,
 } from "lucide-react";
+import { useOrg } from "../org/organizationContext";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -102,17 +102,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: FlaskConicalIcon,
             current: pathname.includes("/experiments"),
           },
-          ...(!user?.email?.includes("@helicone.ai") ||
-          !!user?.email?.includes("@greptile")
-            ? []
-            : [
-                {
-                  name: "Evaluators",
-                  href: "/evaluators",
-                  icon: SparklesIcon,
-                  current: pathname.includes("/evaluators"),
-                },
-              ]),
+          {
+            name: "Evaluators",
+            href: "/evaluators",
+            icon: ChartLineIcon,
+            current: pathname.includes("/evaluators"),
+          },
           {
             name: "Datasets",
             href: "/datasets",

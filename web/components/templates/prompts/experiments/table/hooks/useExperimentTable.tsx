@@ -191,6 +191,11 @@ export const useExperimentTable = (experimentTableId: string) => {
         body: { inputs },
       });
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
   });
 
   const addExperimentTableRowInsertBatch = useMutation({

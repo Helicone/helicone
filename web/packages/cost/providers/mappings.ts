@@ -15,6 +15,11 @@ import { costs as qstashCosts } from "./qstash";
 import { openAIProvider } from "./openai";
 import { anthropicProvider } from "./anthropic";
 import { costs as awsBedrockCosts } from "./awsBedrock";
+import { costs as deepseekCosts } from "./deepseek";
+import { costs as xCosts } from "./x";
+import { costs as avianCosts } from "./avian";
+import { costs as nebiusCosts } from "./nebius";
+import { costs as perplexityCosts } from "./perplexity";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -49,7 +54,14 @@ const qstash = /^https:\/\/qstash\.upstash\.io/;
 const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
 const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+// https://api.deepseek.com
+const deepseek = /^https:\/\/api\.deepseek\.com/;
+// https://api.x.ai
+const x = /^https:\/\/api\.x\.ai/;
+const avianPattern = /^https:\/\/api\.avian\.io/;
 
+//https://api.studio.nebius.ai
+const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -74,6 +86,10 @@ export const providersNames = [
   "QSTASH",
   "FIRECRAWL",
   "AWS",
+  "DEEPSEEK",
+  "X",
+  "AVIAN",
+  "NEBIUS",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -104,6 +120,11 @@ export const providers: {
     costs: [...azureCosts, ...openAIProvider.costs],
   },
   {
+    pattern: nebius,
+    provider: "NEBIUS",
+    costs: nebiusCosts,
+  },
+  {
     pattern: localProxyPattern,
     provider: "LOCAL",
   },
@@ -122,6 +143,11 @@ export const providers: {
   {
     pattern: cloudflareAiGatewayPattern,
     provider: "CLOUDFLARE",
+  },
+  {
+    pattern: x,
+    provider: "X",
+    costs: xCosts,
   },
   {
     pattern: twoYFV,
@@ -149,6 +175,7 @@ export const providers: {
   {
     pattern: perplexity,
     provider: "PERPLEXITY",
+    costs: perplexityCosts,
   },
   {
     pattern: googleapis,
@@ -196,6 +223,16 @@ export const providers: {
     pattern: awsBedrock,
     provider: "AWS",
     costs: awsBedrockCosts,
+  },
+  {
+    pattern: deepseek,
+    provider: "DEEPSEEK",
+    costs: deepseekCosts,
+  },
+  {
+    pattern: avianPattern,
+    provider: "AVIAN",
+    costs: avianCosts,
   },
 ];
 

@@ -17,19 +17,31 @@ import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
+  EvaluatorConfig,
   OnlineEvalStore,
   OnlineEvaluatorByEvaluatorId,
 } from "../../lib/stores/OnlineEvalStore";
+import {
+  LLMAsAJudge,
+  EvaluatorScoreResult,
+} from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
+import { OPENAI_KEY } from "../../lib/clients/constant";
+import { LastMileConfigForm } from "../../managers/evaluator/types";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
-  llm_template: any;
+  llm_template?: any;
   name: string;
+  code_template?: any;
+  last_mile_config?: any;
 }
 
 export interface UpdateEvaluatorParams {
   scoring_type?: string;
   llm_template?: any;
+  code_template?: any;
+  name?: string;
+  last_mile_config?: any;
 }
 
 export interface EvaluatorResult {
@@ -40,6 +52,8 @@ export interface EvaluatorResult {
   organization_id: string;
   updated_at: string;
   name: string;
+  code_template: any;
+  last_mile_config: any;
 }
 
 type EvaluatorExperiment = {
@@ -50,6 +64,17 @@ type EvaluatorExperiment = {
 
 type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
+};
+
+export type TestInput = {
+  inputBody: string;
+  outputBody: string;
+
+  inputs: {
+    inputs: Record<string, string>;
+    autoInputs?: Record<string, string>;
+  };
+  promptTemplate?: string;
 };
 
 @Route("v1/evaluator")
@@ -251,6 +276,101 @@ export class EvaluatorController extends Controller {
     } else {
       this.setStatus(204);
       return ok(null);
+    }
+  }
+
+  @Post("/python/test")
+  public async testPythonEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      code: string;
+      testInput: TestInput;
+    }
+  ): Promise<
+    Result<
+      {
+        output: string;
+        traces: string[];
+        statusCode?: number;
+      },
+      string
+    >
+  > {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.testPythonEvaluator({
+      code: requestBody.code,
+      requestBodyString: requestBody.testInput.inputBody,
+      responseString: requestBody.testInput.outputBody,
+    });
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error || "Failed to test python evaluator");
+    } else {
+      this.setStatus(200);
+      return ok(result.data);
+    }
+  }
+
+  @Post("/llm/test")
+  public async testLLMEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      evaluatorConfig: EvaluatorConfig;
+      testInput: TestInput;
+      evaluatorName: string;
+    }
+  ): Promise<EvaluatorScoreResult> {
+    const llmAsAJudge = new LLMAsAJudge({
+      scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
+        | "LLM-CHOICE"
+        | "LLM-BOOLEAN"
+        | "LLM-RANGE",
+      llmTemplate: JSON.parse(
+        requestBody.evaluatorConfig.evaluator_llm_template ?? "{}"
+      ),
+      inputRecord: requestBody.testInput.inputs,
+      outputBody: requestBody.testInput.outputBody,
+      inputBody: requestBody.testInput.inputBody,
+      promptTemplate: requestBody.testInput.promptTemplate ?? "",
+      evaluatorName: requestBody.evaluatorName,
+      organizationId: request.authParams.organizationId,
+    });
+    const result = await llmAsAJudge.evaluate();
+    if (result.error) {
+      this.setStatus(500);
+    }
+    return result;
+  }
+
+  @Post("/lastmile/test")
+  public async testLastMileEvaluator(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    requestBody: {
+      config: LastMileConfigForm;
+      testInput: TestInput;
+    }
+  ): Promise<
+    Result<
+      {
+        score: number;
+        input: string;
+        output: string;
+        ground_truth?: string;
+      },
+      string
+    >
+  > {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.testLastMileEvaluator(requestBody);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error || "Failed to test last mile evaluator");
+    } else {
+      this.setStatus(200);
+      return ok(result.data!);
     }
   }
 }

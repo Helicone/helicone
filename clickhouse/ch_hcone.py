@@ -6,6 +6,8 @@ import time
 import re
 import getpass
 import tabulate
+from yarl import URL
+
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = os.path.join(file_dir, 'migrations')
@@ -30,15 +32,19 @@ def get_host(host: str):
 
 
 def run_curl_command(query, host, port, user=None, password=None, migration_file=None):
+    base_url = f"{get_host(host)}:{port}/"
+    auth = f"--user '{user}:{password}'" if user and password else ""
 
     if not query:
-        curl_cmd = f"cat \"{migration_file}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
-        if user and password:
-            curl_cmd = f"cat \"{migration_file}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = (
+            f"cat \"{migration_file}\" | "
+            f"curl {auth} '{base_url}' --data-binary @-"
+        ).strip()
     else:
-        curl_cmd = f"echo \"{query}\" | curl '{get_host(host)}:{port}/' --data-binary @-"
-        if user and password:
-            curl_cmd = f"echo \"{query}\" | curl --user '{user}:{password}' '{get_host(host)}:{port}/' --data-binary @-"
+        curl_cmd = (
+            f"echo \"{query}\" | "
+            f"curl {auth} '{base_url}' --data-binary @-"
+        ).strip()
 
     result = subprocess.run(curl_cmd, shell=True,
                             capture_output=True, text=True)
@@ -131,6 +137,14 @@ def main():
     parser = argparse.ArgumentParser(
         description='Helicone CLI tool to manage migrations and start services'
     )
+
+    envhost = os.getenv('CLICKHOUSE_HOST')
+    envport = os.getenv('CLICKHOUSE_PORT')
+    if envhost:
+        url = URL(envhost)
+        envhost = str(url.host)
+        envport = str(url.port) if url.port else envport
+
     parser.add_argument('--version', action='version',
                         version='%(prog)s 0.1.0')
     parser.add_argument('--migrate', action='store_true',
@@ -141,18 +155,22 @@ def main():
                         help='Restart services')
     parser.add_argument('--upgrade', action='store_true',
                         help='Apply all migrations')
-    parser.add_argument('--host', default="localhost",
+    parser.add_argument('--host', default=envhost or "localhost",
                         help='ClickHouse server host')
-    parser.add_argument('--port', default='18123',
+    parser.add_argument('--port', default=envport or "18123",
                         help='ClickHouse server port')
-    parser.add_argument('--user', help='ClickHouse server user')
+    parser.add_argument('--user', default=os.getenv('CLICKHOUSE_USER') or "default",
+                        help='ClickHouse server user')
     parser.add_argument('--list-migrations', action='store_true',
                         help='List applied migrations')
+    parser.add_argument('--no-password', action='store_true',
+                        help='Do not prompt for password')
 
     args = parser.parse_args()
 
-    password = None
-    if args.user:
+    password = os.getenv('CLICKHOUSE_PASSWORD')
+
+    if args.user and not password and not args.no_password:
         password = getpass.getpass(
             prompt='Enter password for ClickHouse server user: ')
 

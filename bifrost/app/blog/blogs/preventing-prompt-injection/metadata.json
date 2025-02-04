@@ -1,0 +1,12 @@
+{
+    "title": "A Developer's Guide to Preventing Prompt Injection",
+    "title1": "A Developer's Guide to Preventing Prompt Injection",
+    "title2": "A Developer's Guide to Preventing Prompt Injection",
+    "description": "A comprehensive guide on preventing prompt injection in large language models (LLMs), where we cover practical strategies to protect and safeguard your AI applications.",
+    "images": "/static/blog/preventing-prompt-injection/prompt-injection-cover.webp",
+    "time": "10 minute read",
+    "author": "Lina Lam",
+    "date": "January 23, 2025", 
+    "badge": "news"
+  }
+  

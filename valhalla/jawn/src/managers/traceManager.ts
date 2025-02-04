@@ -1,4 +1,4 @@
-import type { Log, Message } from "../lib/handlers/HandlerContext";
+import type { Log, KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
 import { AuthParams } from "../lib/db/supabase";
 import { S3Client } from "../lib/shared/db/s3Client";
@@ -157,7 +157,7 @@ export class TraceManager {
     };
   }
 
-  private async sendLogToKafka(kafkaMessage: Message) {
+  private async sendLogToKafka(kafkaMessage: KafkaMessageContents) {
     const kafkaProducer = new KafkaProducer();
     await kafkaProducer.sendMessages(
       [kafkaMessage],
@@ -258,7 +258,7 @@ export class TraceManager {
         userId
       );
 
-      const kafkaMessage: Message = {
+      const kafkaMessage: KafkaMessageContents = {
         authorization: heliconeAuthorization,
         heliconeMeta: {
           modelOverride: undefined,

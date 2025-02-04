@@ -16,3 +16,33 @@
     --chart-10: 0.588 0.158 241.966; /* oklch(0.588 0.158 241.966) */
   }
 }
+
+.glass {
+  @apply backdrop-blur-md bg-white/[.3333] dark:bg-slate-950/[.3333];
+}
+
+.interactive {
+  @apply transition-transform hover:shadow-md active:scale-95;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply cursor-grab rounded-full border-2 border-solid border-slate-200 bg-white hover:shadow-md;
+}
+
+.text-primary {
+  @apply text-black dark:text-white;
+}
+
+.text-secondary {
+  @apply text-slate-700 dark:text-slate-300;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.text-tertiary {
+  @apply text-slate-400 dark:text-slate-600;
+}

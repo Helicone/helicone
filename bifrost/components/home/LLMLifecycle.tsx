@@ -2412,7 +2412,7 @@ const LLMLifecycle = () => {
             Designed for the{" "}
             <span className="text-brand">entire LLM lifecycle</span>
           </h2>
-          <p className="text-lg sm:text-xl max-w-[400px] leading-relaxed text-wrap">
+          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
             The CI workflow to take your LLM application from MVP to production,
             and from production to perfection.
           </p>

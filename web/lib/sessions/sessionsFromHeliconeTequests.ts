@@ -1,4 +1,4 @@
-import getNormalizedRequest from "../../components/templates/requestsV2/builder/requestBuilder";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { modelCost } from "../api/metrics/costCalc";
 import { HeliconeRequest } from "../api/request/request";
 import { Session, Trace } from "./sessionTypes";
@@ -38,6 +38,8 @@ export function sessionFromHeliconeRequests(
           provider: r.provider,
           sum_completion_tokens: r.completion_tokens ?? 0,
           sum_prompt_tokens: r.prompt_tokens ?? 0,
+          prompt_cache_write_tokens: r.prompt_cache_write_tokens ?? 0,
+          prompt_cache_read_tokens: r.prompt_cache_read_tokens ?? 0,
           sum_tokens: r.completion_tokens ?? 0 + (r.prompt_tokens ?? 0),
         })
       )
@@ -61,7 +63,7 @@ export function sessionFromHeliconeRequests(
             (request.request_properties?.["Helicone-Session-Path"] as string) ??
             "/",
           request_id: request.request_id,
-          request: getNormalizedRequest(request),
+          request: heliconeRequestToMappedContent(request),
         };
         return x;
       })

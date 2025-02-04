@@ -5,11 +5,14 @@ import { Switch } from "@/components/ui/switch";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useCostForPrompts } from "./hooks";
+import { ContactCTA } from "./contactCTA";
 
 export const UpgradeToProCTA = ({
   defaultPrompts = false,
   defaultAlerts = false,
   showAddons = false,
+  showContactCTA = false,
 }) => {
   const org = useOrg();
   const subscription = useQuery({
@@ -44,8 +47,13 @@ export const UpgradeToProCTA = ({
   });
 
   const isPro = useMemo(() => {
-    return org?.currentOrg?.tier === "pro-20240913";
+    return (
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202"
+    );
   }, [org?.currentOrg?.tier]);
+
+  const costForPrompts = useCostForPrompts();
 
   return (
     <div>
@@ -64,10 +72,10 @@ export const UpgradeToProCTA = ({
                   htmlFor="unlimited-prompts"
                   className="whitespace-nowrap"
                 >
-                  Unlimited Prompts
+                  Prompts & Experiments
                 </Label>
                 <p className="text-sm text-muted-foreground whitespace-nowrap text-slate-500">
-                  + $30/mo
+                  + ${costForPrompts.data?.data ?? "loading..."}/mo
                 </p>
               </div>
             </div>
@@ -89,7 +97,7 @@ export const UpgradeToProCTA = ({
           </div>
         </div>
       )}
-
+      {showContactCTA && <ContactCTA />}
       <Button
         onClick={async () => {
           if (isPro) {
@@ -110,7 +118,7 @@ export const UpgradeToProCTA = ({
           ? "Loading..."
           : isPro
           ? "Upgrade"
-          : "Start 14-day free trial"}
+          : "Start 7-day free trial"}
       </Button>
     </div>
   );

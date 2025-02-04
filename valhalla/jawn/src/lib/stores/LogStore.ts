@@ -9,17 +9,7 @@ import { shouldBumpVersion } from "@helicone/prompts";
 import { sanitizeObject } from "../../utils/sanitize";
 import { mapScores } from "../../managers/score/ScoreManager";
 
-const pgp = pgPromise();
-const db = pgp({
-  connectionString: process.env.SUPABASE_DATABASE_URL,
-  ssl:
-    process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "development"
-      ? {
-          rejectUnauthorized: true,
-          ca: process.env.SUPABASE_SSL_CERT_CONTENTS?.split("\\n").join("\n"),
-        }
-      : undefined,
-});
+import { HELICONE_PGP as pgp, HELICONE_DB as db } from "../shared/db/pgpClient";
 
 process.on("exit", () => {
   pgp.end();
@@ -70,6 +60,8 @@ const responseColumns = new pgp.helpers.ColumnSet(
     { name: "prompt_tokens", def: null },
     { name: "status", def: null },
     { name: "time_to_first_token", def: null },
+    { name: "prompt_cache_write_tokens", def: null },
+    { name: "prompt_cache_read_tokens", def: null },
   ],
   { table: "response" }
 );
@@ -216,6 +208,7 @@ export class LogStore {
     newPromptRecord: PromptRecord,
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
+    const INVALID_TEMPLATE_ERROR = "Invalid template";
     const { promptId, orgId, requestId, heliconeTemplate, model } =
       newPromptRecord;
 
@@ -225,7 +218,7 @@ export class LogStore {
 
     if (typeof heliconeTemplate.template === "string") {
       heliconeTemplate.template = {
-        error: "Invalid template",
+        error: INVALID_TEMPLATE_ERROR,
         template: heliconeTemplate.template,
       };
     }
@@ -326,7 +319,13 @@ export class LogStore {
         console.error("Error updating and inserting prompt version", error);
         throw error;
       }
-    } else if (shouldBump.shouldUpdateNotBump) {
+    } else if (
+      shouldBump.shouldUpdateNotBump &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
+      )
+    ) {
       try {
         const updateQuery = `
         UPDATE prompts_versions

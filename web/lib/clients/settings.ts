@@ -1,7 +1,7 @@
-import { supabaseServer } from "../supabaseServer";
+import { getSupabaseServer } from "../supabaseServer";
 
 export async function getOpenAIKeyFromAdmin(): Promise<string | undefined> {
-  const { data } = await supabaseServer
+  const { data } = await getSupabaseServer()
     .from("helicone_settings")
     .select("*")
     .eq("name", "openai:apiKey");
@@ -10,7 +10,7 @@ export async function getOpenAIKeyFromAdmin(): Promise<string | undefined> {
 }
 
 export async function getAnthropicKeyFromAdmin(): Promise<string | undefined> {
-  const { data } = await supabaseServer
+  const { data } = await getSupabaseServer()
     .from("helicone_settings")
     .select("*")
     .eq("name", "anthropic:apiKey");

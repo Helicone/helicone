@@ -20,7 +20,7 @@ import { buildFilterPostgres } from "../../lib/shared/filters/filters";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
-import { ExperimentV2Manager } from "../experiment/ExperimentV2Manager";
+
 
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
@@ -126,7 +126,7 @@ export class PromptManager extends BaseManager {
       FROM prompts_versions 
       WHERE id = $8
     )
-    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version)
+    INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version, updated_at)
     SELECT
         ppv.prompt_v2,
         $2, 
@@ -156,9 +156,13 @@ export class PromptManager extends BaseManager {
             LIMIT 1
           )
         END,
-        $6,
-        $7,
-        ppv.id
+        $6::jsonb,
+        $7::uuid,
+        ppv.id,
+        CASE 
+          WHEN $7::uuid IS NOT NULL THEN ppv.created_at
+          ELSE NOW()
+        END
     FROM parent_prompt_version ppv
     RETURNING 
         id,
@@ -167,6 +171,7 @@ export class PromptManager extends BaseManager {
         helicone_template,
         prompt_v2,
         model,
+        metadata,
         experiment_id;
     `,
       [
@@ -181,7 +186,7 @@ export class PromptManager extends BaseManager {
       ]
     );
 
-    return resultMap(result, (data) => data[0]);
+    return resultMap(result, data => data[0]);
   }
 
   async editPromptVersionTemplate(
@@ -215,7 +220,7 @@ export class PromptManager extends BaseManager {
           ? params.heliconeTemplate
           : JSON.stringify(params.heliconeTemplate)
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
-      ).map((match) => match[1]);
+      ).map(match => match[1]);
 
       const existingExperimentInputKeys = await supabaseServer.client
         .from("experiment_v3")
@@ -244,7 +249,7 @@ export class PromptManager extends BaseManager {
         ),
       ]);
 
-      if (res.some((r) => r.error)) {
+      if (res.some(r => r.error)) {
         return err("Failed to update experiment input keys");
       }
 
@@ -283,7 +288,7 @@ export class PromptManager extends BaseManager {
       [params.label, promptVersionId, this.authParams.organizationId]
     );
 
-    return resultMap(result, (data) => data[0]);
+    return resultMap(result, data => data[0]);
   }
 
   async promotePromptVersionToProduction(
@@ -526,11 +531,12 @@ export class PromptManager extends BaseManager {
     }
 
     const lastVersion = result.data[result.data.length - 1];
-    const filledTemplate = this.fillTemplate(
-      lastVersion.helicone_template,
-      inputs
-    );
-
+    const filledTemplate = autoFillInputs({
+      inputs: inputs,
+      autoInputs: lastVersion.auto_prompt_inputs,
+      template: lastVersion.helicone_template,
+    });
+    
     return ok({
       id: lastVersion.id,
       minor_version: lastVersion.minor_version,
@@ -539,48 +545,6 @@ export class PromptManager extends BaseManager {
       model: lastVersion.model,
       filled_helicone_template: filledTemplate,
     });
-  }
-
-  private fillTemplate(
-    template: string | object,
-    inputs: Record<string, string>
-  ): string {
-    let jsonTemplate: object;
-    if (typeof template === "string") {
-      try {
-        jsonTemplate = JSON.parse(template);
-      } catch (error) {
-        console.error("Error parsing template:", error);
-        return "";
-      }
-    } else {
-      jsonTemplate = template;
-    }
-
-    const fillObject = (obj: any): any => {
-      if (typeof obj === "string") {
-        return obj.replace(
-          /<helicone-prompt-input key="(\w+)" \/>/g,
-          (match, key) => {
-            const value = inputs[key] || "";
-            return `<helicone-prompt-input key="${key}">${value}</helicone-prompt-input>`;
-          }
-        );
-      }
-      if (Array.isArray(obj)) {
-        return obj.map(fillObject);
-      }
-      if (typeof obj === "object" && obj !== null) {
-        const newObj: any = {};
-        for (const [key, value] of Object.entries(obj)) {
-          newObj[key] = fillObject(value);
-        }
-        return newObj;
-      }
-      return obj;
-    };
-
-    return fillObject(jsonTemplate);
   }
 
   async getPrompts(
@@ -673,7 +637,7 @@ export class PromptManager extends BaseManager {
       [this.authParams.organizationId, promptId]
     );
 
-    return resultMap(result, (data) => data[0]);
+    return resultMap(result, data => data[0]);
   }
 
   async getPromptVersion(params: {
@@ -803,6 +767,46 @@ export class PromptManager extends BaseManager {
     return ok(null);
   }
 
+  async updatePromptUserDefinedId(
+    promptId: string,
+    newUserDefinedId: string
+  ): Promise<Result<null, string>> {
+    // First check if the new ID already exists
+    const existingPrompt = await dbExecute<{
+      id: string;
+    }>(
+      `
+    SELECT id FROM prompt_v2 
+    WHERE user_defined_id = $1 
+    AND organization = $2
+    AND soft_delete = false
+    `,
+      [newUserDefinedId, this.authParams.organizationId]
+    );
+
+    if (existingPrompt.data && existingPrompt.data.length > 0) {
+      return err(`Prompt with name ${newUserDefinedId} already exists`);
+    }
+
+    // Update the prompt's user_defined_id
+    const result = await dbExecute(
+      `
+    UPDATE prompt_v2
+    SET user_defined_id = $1
+    WHERE id = $2
+    AND organization = $3
+    AND soft_delete = false
+    `,
+      [newUserDefinedId, promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(`Failed to update prompt user_defined_id: ${result.error}`);
+    }
+
+    return ok(null);
+  }
+
   public getHeliconeTemplateKeys(template: string | object): string[] {
     try {
       // Convert to string if it's an object
@@ -816,7 +820,7 @@ export class PromptManager extends BaseManager {
         const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
         const matches = str.match(regex);
         return matches
-          ? matches.map((match) =>
+          ? matches.map(match =>
               match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
             )
           : [];
@@ -830,7 +834,7 @@ export class PromptManager extends BaseManager {
             if (typeof value === "string") {
               keys.push(...findKeys(value));
             } else if (Array.isArray(value)) {
-              value.forEach((item) => {
+              value.forEach(item => {
                 if (typeof item === "string") {
                   keys.push(...findKeys(item));
                 } else if (typeof item === "object") {

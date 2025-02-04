@@ -1,30 +1,28 @@
-import { useExperimentTable } from "./hooks/useExperimentTable";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { generateOpenAITemplate } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
+import { Button } from "@/components/ui/button";
 import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import AddColumnHeader from "./AddColumnHeader";
-import {
-  ExperimentTableHeader,
-  IndexColumnCell,
-  InputCell,
-  InputsHeaderComponent,
-  PromptColumnHeader,
-} from "./components/tableElementsRenderer";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
+import { IslandContainer } from "@/components/ui/islandContainer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ListIcon, PlusIcon, PlayIcon } from "lucide-react";
-import { AddRowPopover } from "./components/addRowPopover";
-import ExperimentInputSelector from "../experimentInputSelector";
-import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
-import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -33,28 +31,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import clsx from "clsx";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import AddColumnDialog from "./AddColumnDialog";
-import EditInputsPanel from "./EditInputsPanel";
-import AddManualRowPanel from "./AddManualRowPanel";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
-import { Switch } from "@/components/ui/switch";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import clsx from "clsx";
+import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ExperimentInputSelector from "../experimentInputSelector";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import AddColumnDialog from "./AddColumnDialog";
+import AddColumnHeader from "./AddColumnHeader";
+import AddManualRowPanel from "./AddManualRowPanel";
+import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
+import { AddRowPopover } from "./components/addRowPopover";
+import {
+  ExperimentTableHeader,
+  IndexColumnCell,
+  InputCell,
+  InputsHeaderComponent,
+  PromptColumnHeader,
+} from "./components/tableElementsRenderer";
+import EditInputsPanel from "./EditInputsPanel";
+import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { cn } from "@/lib/utils";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { generateOpenAITemplate } from "@/components/shared/CreateNewEvaluator/evaluatorHelpers";
 
 type TableDataType = {
   index: number;
@@ -118,27 +124,58 @@ export function ExperimentTable({
             <span className="group-hover:invisible transition-opacity duration-200">
               <ListIcon className="w-4 h-4" />
             </span>
-            <Button
-              variant="ghost"
-              className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              onClick={async () => {
-                await Promise.all(
-                  (promptVersionsData ?? []).map(async (pv) => {
-                    const rows = table.getRowModel().rows;
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  onSelect={async () => {
                     await Promise.all(
-                      rows.map(async (row) => {
-                        const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                        if (cellRef) {
-                          await cellRef.runHypothesis();
-                        }
+                      (promptVersionsData ?? []).map(async (pv) => {
+                        const rows = table.getRowModel().rows;
+                        await Promise.all(
+                          rows.map(async (row) => {
+                            const cellRef =
+                              cellRefs.current[`${row.id}-${pv.id}`];
+                            if (cellRef) {
+                              await cellRef.runHypothesis();
+                            }
+                          })
+                        );
                       })
                     );
-                  })
-                );
-              }}
-            >
-              <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            </Button>
+                  }}
+                >
+                  Run all cells
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={async () => {
+                    await Promise.all(
+                      (promptVersionsData ?? []).map(async (pv) => {
+                        const rows = table.getRowModel().rows;
+                        await Promise.all(
+                          rows.map(async (row) => {
+                            const cellRef =
+                              cellRefs.current[`${row.id}-${pv.id}`];
+                            if (cellRef) {
+                              await cellRef.runHypothesisIfRequired();
+                            }
+                          })
+                        );
+                      })
+                    );
+                  }}
+                >
+                  Run unexecuted cells
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ),
         columns: [
@@ -495,7 +532,7 @@ export function ExperimentTable({
       jawn.POST("/v1/evaluator", {
         body: {
           llm_template: openAIFunction,
-          scoring_type: `LLM-CHOICE`,
+          scoring_type: "LLM-CHOICE",
           name: "Humor",
         },
       });
@@ -572,7 +609,7 @@ export function ExperimentTable({
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
-            <div className="flex flex-col overflow-x-auto w-full">
+            <div className="flex flex-col w-full">
               {showScores && (
                 <div className="flex flex-col w-full bg-white dark:bg-neutral-950 border-y border-r border-slate-200 dark:border-slate-800">
                   {promptVersionsData && (
@@ -591,15 +628,17 @@ export function ExperimentTable({
               )}
               <div
                 className={clsx(
-                  "h-[calc(100vh-90px)] bg-white dark:bg-neutral-950 w-full",
-                  showScores && "h-[calc(100vh-90px-300px-80px)]"
+                  "bg-white dark:bg-neutral-950 w-full overflow-x-auto",
+                  showScores
+                    ? "h-[calc(100vh-90px-300px-50px)]"
+                    : "h-[calc(100vh-90px)]"
                 )}
               >
                 <div
-                  className="h-full bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max"
+                  className="bg-white dark:bg-black rounded-sm inline-block min-w-0 w-max h-auto"
                   // style={{ width: "fit-content" }}
                 >
-                  <Table className="border-collapse border-t border-slate-200 dark:border-slate-800">
+                  <Table className="border-collapse border-t border-r border-b border-slate-200 dark:border-slate-800 h-[1px]">
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup, i) => (
                         <TableRow
@@ -688,30 +727,29 @@ export function ExperimentTable({
                     </TableBody>
                   </Table>
                 </div>
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Add row
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full px-2 py-2">
+                    <AddRowPopover
+                      setPopoverOpen={setPopoverOpen}
+                      setShowAddManualRow={() => setRightPanel("add_manual")}
+                      setShowExperimentInputSelector={
+                        setShowExperimentInputSelector
+                      }
+                      setShowRandomInputSelector={setShowRandomInputSelector}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-
-              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="self-start flex flex-row space-x-2 text-slate-800 mt-0 shadow-none"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add row
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full px-2 py-2">
-                  <AddRowPopover
-                    setPopoverOpen={setPopoverOpen}
-                    setShowAddManualRow={() => setRightPanel("add_manual")}
-                    setShowExperimentInputSelector={
-                      setShowExperimentInputSelector
-                    }
-                    setShowRandomInputSelector={setShowRandomInputSelector}
-                  />
-                </PopoverContent>
-              </Popover>
 
               <ExperimentRandomInputSelector
                 open={showRandomInputSelector}

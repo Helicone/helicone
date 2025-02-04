@@ -1,15 +1,21 @@
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, PromiseGenericResult } from "../shared/result";
+import { err, ok, PromiseGenericResult, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
+
+export type EvaluatorConfig = {
+  evaluator_scoring_type: string;
+  evaluator_llm_template?: string;
+  evaluator_code_template?: string;
+};
 
 export type OnlineEvaluatorByOrgId = {
   id: string;
   evaluator_id: string;
-  evaluator_scoring_type: string;
   evaluator_name: string;
-  evaluator_llm_template: string;
+  evaluator_created_at: string;
   config: any;
-};
+  last_mile_config: any;
+} & EvaluatorConfig;
 
 export type OnlineEvaluatorByEvaluatorId = {
   id: string;
@@ -19,6 +25,20 @@ export type OnlineEvaluatorByEvaluatorId = {
 export class OnlineEvalStore extends BaseStore {
   constructor(organizationId: string) {
     super(organizationId);
+  }
+  public async hasOnlineEvals(orgId: string): Promise<Result<boolean, string>> {
+    const { data, error } = await dbExecute<{
+      count: number;
+    }>(
+      `SELECT COUNT(*) as count FROM online_evaluators WHERE organization = $1`,
+      [orgId]
+    );
+
+    if (error) {
+      return ok(false);
+    }
+
+    return ok((data?.[0]?.count ?? 0) > 0);
   }
 
   public async getOnlineEvalsByOrgId(
@@ -31,7 +51,10 @@ export class OnlineEvalStore extends BaseStore {
         evaluator.scoring_type as evaluator_scoring_type,
         evaluator.name as evaluator_name,
         evaluator.llm_template as evaluator_llm_template,
-        online_evaluators.config
+        evaluator.code_template as evaluator_code_template,
+        evaluator.created_at as evaluator_created_at,
+        online_evaluators.config,
+        evaluator.last_mile_config as last_mile_config
       FROM online_evaluators 
       JOIN evaluator ON online_evaluators.evaluator = evaluator.id 
       WHERE online_evaluators.organization = $1`,

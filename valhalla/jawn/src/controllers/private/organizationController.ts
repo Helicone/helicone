@@ -1,18 +1,18 @@
 import {
-  Route,
-  Tags,
-  Security,
-  Controller,
   Body,
-  Post,
-  Request,
-  Path,
+  Controller,
   Delete,
   Get,
+  Path,
+  Post,
   Query,
+  Request,
+  Route,
+  Security,
+  Tags,
 } from "tsoa";
+import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   NewOrganizationParams,
   OrganizationFilter,
@@ -22,8 +22,8 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
-import { supabaseServer } from "../../lib/db/supabase";
 import { StripeManager } from "../../managers/stripe/StripeManager";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -124,7 +124,10 @@ export class OrganizationController extends Controller {
 
     if (org.data.tier === "enterprise") {
       // Enterprise tier: Proceed to add member without additional checks
-    } else if (org.data.tier === "pro-20240913") {
+    } else if (
+      org.data.tier === "pro-20240913" ||
+      org.data.tier === "pro-20250202"
+    ) {
       // Pro tier: Update Stripe user count before adding member
       const memberCount = await organizationManager.getMemberCount(true);
       if (

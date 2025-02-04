@@ -288,8 +288,10 @@ export type Database = {
       }
       evaluator: {
         Row: {
+          code_template: Json | null
           created_at: string
           id: string
+          last_mile_config: Json | null
           llm_template: Json | null
           name: string
           organization_id: string
@@ -297,8 +299,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          code_template?: Json | null
           created_at?: string
           id?: string
+          last_mile_config?: Json | null
           llm_template?: Json | null
           name: string
           organization_id: string
@@ -306,8 +310,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          code_template?: Json | null
           created_at?: string
           id?: string
+          last_mile_config?: Json | null
           llm_template?: Json | null
           name?: string
           organization_id?: string
@@ -1013,30 +1019,36 @@ export type Database = {
           api_key_hash: string
           api_key_name: string
           created_at: string
+          governance: boolean
           id: number
           key_permissions: string | null
           organization_id: string
           soft_delete: boolean
+          temp_key: boolean
           user_id: string
         }
         Insert: {
           api_key_hash: string
           api_key_name: string
           created_at?: string
+          governance?: boolean
           id?: number
           key_permissions?: string | null
           organization_id: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id: string
         }
         Update: {
           api_key_hash?: string
           api_key_name?: string
           created_at?: string
+          governance?: boolean
           id?: number
           key_permissions?: string | null
           organization_id?: string
           soft_delete?: boolean
+          temp_key?: boolean
           user_id?: string
         }
         Relationships: [
@@ -1521,6 +1533,45 @@ export type Database = {
           },
         ]
       }
+      online_evaluators: {
+        Row: {
+          config: Json | null
+          created_at: string
+          evaluator: string
+          id: number
+          organization: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          evaluator: string
+          id?: number
+          organization: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          evaluator?: string
+          id?: number
+          organization?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_online_evaluators_evaluator_fkey"
+            columns: ["evaluator"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_online_evaluators_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_rate_limit_tracker: {
         Row: {
           created_at: string | null
@@ -1555,6 +1606,7 @@ export type Database = {
           color: string
           created_at: string | null
           domain: string | null
+          governance_settings: Json | null
           has_onboarded: boolean
           icon: string
           id: string
@@ -1582,6 +1634,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1609,6 +1662,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           domain?: string | null
+          governance_settings?: Json | null
           has_onboarded?: boolean
           icon?: string
           id?: string
@@ -1705,18 +1759,21 @@ export type Database = {
       organization_member: {
         Row: {
           created_at: string | null
+          governance_limits: Json | null
           member: string
           org_role: string
           organization: string
         }
         Insert: {
           created_at?: string | null
+          governance_limits?: Json | null
           member: string
           org_role?: string
           organization: string
         }
         Update: {
           created_at?: string | null
+          governance_limits?: Json | null
           member?: string
           org_role?: string
           organization?: string
@@ -2403,6 +2460,8 @@ export type Database = {
           request: string
           status: number | null
           time_to_first_token: number | null
+          prompt_cache_write_tokens: number | null
+          prompt_cache_read_tokens: number | null
         }
         Insert: {
           body: Json
@@ -2417,6 +2476,8 @@ export type Database = {
           request: string
           status?: number | null
           time_to_first_token?: number | null
+          prompt_cache_write_tokens?: number | null
+          prompt_cache_read_tokens?: number | null
         }
         Update: {
           body?: Json
@@ -2431,6 +2492,8 @@ export type Database = {
           request?: string
           status?: number | null
           time_to_first_token?: number | null
+          prompt_cache_write_tokens?: number | null
+          prompt_cache_read_tokens?: number | null
         }
         Relationships: []
       }
@@ -2482,6 +2545,7 @@ export type Database = {
       score_attribute: {
         Row: {
           created_at: string | null
+          evaluator_id: string | null
           id: string
           organization: string
           score_key: string
@@ -2489,6 +2553,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization: string
           score_key: string
@@ -2496,6 +2561,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          evaluator_id?: string | null
           id?: string
           organization?: string
           score_key?: string
@@ -2507,6 +2573,13 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_score_attribute_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "evaluator"
             referencedColumns: ["id"]
           },
         ]

@@ -1,25 +1,60 @@
-import { BaseManager } from "../BaseManager";
-import { AuthParams } from "../../lib/db/supabase";
-import { supabaseServer } from "../../lib/db/supabase";
 import Stripe from "stripe";
-import { Result, ok, err } from "../../lib/shared/result";
-import { ENVIRONMENT } from "../..";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import {
-  ExperimentUsage,
+  LLMUsage,
   UpgradeToProRequest,
 } from "../../controllers/public/stripeController";
-import { OrganizationManager } from "../organization/OrganizationManager";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { Result, err, ok } from "../../lib/shared/result";
 import { costOf } from "../../packages/cost";
+import { BaseManager } from "../BaseManager";
+import { OrganizationManager } from "../organization/OrganizationManager";
+import { Database } from "../../lib/db/database.types";
 
-const proProductPrices = {
+const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
   "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
   prompts: process.env.PRICE_PROD_PROMPTS_ID!,
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
+  experiments: process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!,
+  evals: process.env.PRICE_PROD_EVALS_ID!,
+  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
+} as const;
+
+const getProProductPrices = async (): Promise<
+  typeof DEFAULT_PRODUCT_PRICES
+> => {
+  const db = await supabaseServer.client.from("helicone_settings").select("*");
+
+  return Object.entries(DEFAULT_PRODUCT_PRICES)
+    .map(([productId, defaultPriceId]) => {
+      const setting = db.data?.find(
+        (setting) => setting.name === `price:${productId}`
+      );
+      if (setting) {
+        return { [productId]: setting.settings as string };
+      } else {
+        // Populate with default prices
+        if (!db.error) {
+          supabaseServer.client.from("helicone_settings").insert({
+            name: `price:${productId}`,
+            settings: defaultPriceId,
+          });
+        }
+      }
+      return { [productId]: defaultPriceId };
+    })
+    .reduce(
+      (acc, curr) => ({ ...acc, ...curr }),
+      {}
+    ) as typeof DEFAULT_PRODUCT_PRICES;
 };
+
+const COST_OF_PROMPTS = 50;
+const COST_OF_EVALS = 100;
+const COST_OF_EXPERIMENTS = 50;
 
 const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
@@ -31,6 +66,96 @@ export class StripeManager extends BaseManager {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2024-06-20",
     });
+  }
+
+  public async getCostForPrompts(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_PROMPTS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["prompts"]
+      )
+    ) {
+      const priceTheyArePayingForPrompts = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["prompts"]
+      );
+      if (
+        priceTheyArePayingForPrompts &&
+        priceTheyArePayingForPrompts.price.unit_amount &&
+        priceTheyArePayingForPrompts?.quantity &&
+        priceTheyArePayingForPrompts.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_PROMPTS);
+  }
+
+  public async getCostForEvals(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_EVALS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["evals"]
+      )
+    ) {
+      const priceTheyArePayingForEvals = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["evals"]
+      );
+      if (
+        priceTheyArePayingForEvals &&
+        priceTheyArePayingForEvals.price.unit_amount &&
+        priceTheyArePayingForEvals?.quantity &&
+        priceTheyArePayingForEvals.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForEvals.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_EVALS);
+  }
+
+  public async getCostForExperiments(): Promise<Result<number, string>> {
+    const subscriptionResult = await this.getSubscription();
+    const proProductPrices = await getProProductPrices();
+    if (!subscriptionResult.data) {
+      return ok(COST_OF_EXPERIMENTS);
+    }
+
+    const subscription = subscriptionResult.data;
+
+    if (
+      subscription.items.data.some(
+        (item) => item.price.id === proProductPrices["experiments"]
+      )
+    ) {
+      const priceTheyArePayingForExperiments = subscription.items.data.find(
+        (item) => item.price.id === proProductPrices["experiments"]
+      );
+      if (
+        priceTheyArePayingForExperiments &&
+        priceTheyArePayingForExperiments.price.unit_amount &&
+        priceTheyArePayingForExperiments?.quantity &&
+        priceTheyArePayingForExperiments.quantity > 0
+      ) {
+        return ok(priceTheyArePayingForExperiments.price.unit_amount / 100);
+      }
+    }
+
+    return ok(COST_OF_EXPERIMENTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
@@ -238,6 +363,8 @@ WHERE (${builtFilter.filter})`,
     isNewCustomer: boolean,
     body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
+    const proProductPrices = await getProProductPrices();
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
@@ -266,19 +393,35 @@ WHERE (${builtFilter.filter})`,
               },
             ]
           : []),
+        ...(body?.addons?.experiments
+          ? [
+              {
+                price: proProductPrices["experiments"],
+                quantity: 1,
+              },
+            ]
+          : []),
+        ...(body?.addons?.evals
+          ? [
+              {
+                price: proProductPrices["evals"],
+                quantity: 1,
+              },
+            ]
+          : []),
       ],
       mode: "subscription",
       success_url: `${origin}/dashboard`,
       cancel_url: `${origin}/dashboard`,
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "pro-20240913",
+        tier: "pro-20250202",
       },
       subscription_data: {
-        trial_period_days: isNewCustomer ? 14 : undefined,
+        trial_period_days: 7,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         },
       },
     };
@@ -334,32 +477,137 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  private async verifyProSubscriptionWithStripe(): Promise<
-    Result<Stripe.Subscription, string>
-  > {
-    const subscriptionResult = await this.getSubscription();
-    if (!subscriptionResult.data) {
-      return err("No existing subscription found");
+  private async portalLinkUpgradeToTeamBundle(
+    origin: string,
+    customerId: string,
+    isNewCustomer: boolean
+  ): Promise<Result<string, string>> {
+    const proProductPrices = await getProProductPrices();
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      customer: customerId,
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: proProductPrices["request-volume"],
+        },
+        {
+          price: proProductPrices["team_bundle"],
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${origin}/dashboard`,
+      cancel_url: `${origin}/dashboard`,
+      metadata: {
+        orgId: this.authParams.organizationId,
+        tier: "team-20250130",
+      },
+      subscription_data: {
+        trial_period_days: isNewCustomer ? 7 : undefined,
+        metadata: {
+          orgId: this.authParams.organizationId,
+          tier: "team-20250130",
+        },
+      },
+    };
+
+    const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
+    if (isWaterlooEmail) {
+      sessionParams.discounts = [
+        {
+          coupon: "WATERLOO2025",
+        },
+      ];
+    } else {
+      sessionParams.allow_promotion_codes = true;
     }
 
-    const subscription = subscriptionResult.data;
+    const session = await this.stripe.checkout.sessions.create(sessionParams);
 
-    const existingProducts = subscription.items.data.map(
-      (item) => (item.price.product as Stripe.Product).id
-    );
-
-    if (!existingProducts.includes(proProductPrices["pro-users"])) {
-      return err("User does not have a pro subscription");
-    }
-
-    return ok(subscription);
+    return ok(session.url!);
   }
 
-  private async getExperimentsUsage({
+  async upgradeToTeamBundleLink(
+    returnUrl: string
+  ): Promise<Result<string, string>> {
+    try {
+      const subscriptionResult = await this.getSubscription();
+      if (subscriptionResult.data) {
+        return err("User already has a pro subscription");
+      }
+
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+
+      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+        returnUrl,
+        customerId.data,
+        true
+      );
+
+      return sessionUrl;
+    } catch (error: any) {
+      return err(`Error upgrading to team bundle: ${error.message}`);
+    }
+  }
+
+  async upgradeToTeamBundleExistingCustomer(
+    returnUrl: string
+  ): Promise<Result<string, string>> {
+    try {
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No existing subscription found");
+      }
+
+      const customerId = await this.getOrCreateStripeCustomer();
+      if (customerId.error || !customerId.data) {
+        return err("Error getting or creating stripe customer");
+      }
+
+      const subscription = subscriptionResult.data;
+
+      if (
+        subscription.cancel_at_period_end ||
+        subscription.status === "canceled"
+      ) {
+        const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+          returnUrl,
+          customerId.data,
+          false
+        );
+        return sessionUrl;
+      }
+
+      // Cancels after they pay for the new subscription
+      // await this.stripe.subscriptions.update(subscription.id, {
+      //   cancel_at_period_end: true,
+      //   proration_behavior: "create_prorations",
+      //   cancellation_details: {
+      //     comment: "Upgrading to team bundle at the end of the billing period",
+      //   },
+      // });
+
+      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+        returnUrl,
+        customerId.data,
+        false
+      );
+
+      return sessionUrl;
+    } catch (error: any) {
+      return err(`Error upgrading to team bundle: ${error.message}`);
+    }
+  }
+
+  private async getEvaluatorsUsage({
     startTime,
   }: {
     startTime: Date;
-  }): Promise<Result<ExperimentUsage[], string>> {
+  }): Promise<Result<LLMUsage[], string>> {
     const orgId = this.authParams.organizationId;
 
     const query = `
@@ -372,17 +620,14 @@ WHERE (${builtFilter.filter})`,
     FROM request_response_rmt
     WHERE organization_id = {val_0: String}
       AND request_created_at >= {val_1: DateTime}
-      AND properties['Helicone-Experiment-Id'] IS NOT NULL
-      AND properties['Helicone-Experiment-Id'] != ''
+      AND properties['Helicone-Evaluator'] IS NOT NULL
+      AND properties['Helicone-Evaluator'] != ''
       AND status >= 200
       AND status < 300
     GROUP BY model, provider
   `;
 
-    const result = await dbQueryClickhouse<ExperimentUsage>(query, [
-      orgId,
-      startTime,
-    ]);
+    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
 
     return ok(
       result.data
@@ -414,14 +659,75 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is ExperimentUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? []
+    );
+  }
+
+  private async getExperimentsUsage({
+    startTime,
+  }: {
+    startTime: Date;
+  }): Promise<Result<LLMUsage[], string>> {
+    const orgId = this.authParams.organizationId;
+
+    const query = `
+    SELECT 
+      model,
+      provider,
+      sum(prompt_tokens) as prompt_tokens,
+      sum(completion_tokens) as completion_tokens,
+      count(*) as total_count
+    FROM request_response_rmt
+    WHERE organization_id = {val_0: String}
+      AND request_created_at >= {val_1: DateTime}
+      AND properties['Helicone-Experiment-Id'] IS NOT NULL
+      AND properties['Helicone-Experiment-Id'] != ''
+      AND status >= 200
+      AND status < 300
+    GROUP BY model, provider
+  `;
+
+    const result = await dbQueryClickhouse<LLMUsage>(query, [orgId, startTime]);
+
+    return ok(
+      result.data
+        ?.map((model) => {
+          const totalCost = costOf({
+            model: model.model,
+            provider: model.provider.toUpperCase(),
+          });
+
+          if (!model || !totalCost) return null;
+
+          return {
+            amount:
+              (totalCost.completion_token * model.completion_tokens +
+                totalCost.prompt_token * model.prompt_tokens) *
+              100,
+            description: `${model.completion_tokens.toLocaleString()} completion tokens, ${model.prompt_tokens.toLocaleString()} prompt tokens, at $${(
+              (totalCost.completion_token * 1_000_000) /
+              100
+            ).toPrecision(6)}/million completion tokens, $${(
+              (totalCost.prompt_token * 1_000_000) /
+              100
+            ).toPrecision(6)}/million prompt tokens`,
+            totalCost: totalCost,
+            model: model.model,
+            provider: model.provider,
+            prompt_tokens: model.prompt_tokens,
+            completion_tokens: model.completion_tokens,
+            total_count: model.total_count,
+          };
+        })
+        .filter((item): item is LLMUsage => item !== null) ?? []
     );
   }
 
   public async getUpcomingInvoice(): Promise<
     Result<
       Stripe.Response<Stripe.UpcomingInvoice> & {
-        experiments_usage: ExperimentUsage[];
+        experiments_usage: LLMUsage[];
+        evaluators_usage: LLMUsage[];
       },
       string
     >
@@ -444,9 +750,14 @@ WHERE (${builtFilter.filter})`,
         startTime: new Date(upcomingInvoice.period_start * 1000),
       });
 
+      const evaluatorsUsage = await this.getEvaluatorsUsage({
+        startTime: new Date(upcomingInvoice.period_start * 1000),
+      });
+
       return ok({
         ...upcomingInvoice,
         experiments_usage: experimentsUsage.data ?? [],
+        evaluators_usage: evaluatorsUsage.data ?? [],
       });
     } catch (error: any) {
       return err(`Error retrieving upcoming invoice: ${error.message}`);
@@ -454,8 +765,9 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async addProductToStripe(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -512,7 +824,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async addProductToSubscription(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const stripeAddResult = await this.addProductToStripe(productType);
     if (stripeAddResult.error) {
@@ -524,16 +836,23 @@ WHERE (${builtFilter.filter})`,
       return err(currentOrgStripeMetadata.error);
     }
 
-    const currentMetadata = currentOrgStripeMetadata.data;
+    const orgData = await this.getOrganization();
+    if (orgData.error) {
+      return err(orgData.error);
+    }
+
+    const existingMetadata =
+      (orgData.data?.stripe_metadata as Record<string, any>) || {};
+    const existingAddons =
+      (existingMetadata.addons as Record<string, boolean>) || {};
 
     await supabaseServer.client
       .from("organization")
       .update({
         stripe_metadata: {
+          ...existingMetadata,
           addons: {
-            ...(typeof currentMetadata?.addons === "object"
-              ? currentMetadata?.addons
-              : {}),
+            ...existingAddons,
             [productType]: true,
           },
         },
@@ -554,8 +873,9 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async deleteProductFromStripe(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -598,28 +918,31 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async deleteProductFromSubscription(
-    productType: "alerts" | "prompts"
+    productType: "alerts" | "prompts" | "experiments" | "evals"
   ): Promise<Result<null, string>> {
     const stripeDeleteResult = await this.deleteProductFromStripe(productType);
     if (stripeDeleteResult.error) {
       return err(stripeDeleteResult.error);
     }
 
-    const currentOrgStripeMetadata = await this.getStripeMetadata();
-    if (currentOrgStripeMetadata.error) {
-      return err(currentOrgStripeMetadata.error);
+    const orgData = await this.getOrganization();
+
+    if (orgData.error) {
+      return err("Failed to get organization data");
     }
 
-    const currentMetadata = currentOrgStripeMetadata.data;
+    const existingMetadata =
+      (orgData.data?.stripe_metadata as Record<string, any>) || {};
+    const existingAddons =
+      (existingMetadata.addons as Record<string, boolean>) || {};
 
     await supabaseServer.client
       .from("organization")
       .update({
         stripe_metadata: {
+          ...existingMetadata,
           addons: {
-            ...(typeof currentMetadata?.addons === "object"
-              ? currentMetadata?.addons
-              : {}),
+            ...existingAddons,
             [productType]: false,
           },
         },
@@ -631,6 +954,7 @@ WHERE (${builtFilter.filter})`,
 
   // Takes the existing subscription and adds any missing products
   public async migrateToPro(): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
@@ -654,7 +978,7 @@ WHERE (${builtFilter.filter})`,
         items: missingProducts.map((productId) => ({ price: productId })),
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         },
         proration_behavior: "none",
       };
@@ -668,7 +992,7 @@ WHERE (${builtFilter.filter})`,
       await supabaseServer.client
         .from("organization")
         .update({
-          tier: "pro-20240913",
+          tier: "pro-20250202",
         })
         .eq("id", this.authParams.organizationId);
 
@@ -681,7 +1005,7 @@ WHERE (${builtFilter.filter})`,
         await supabaseServer.client
           .from("organization")
           .update({
-            tier: "pro-20240913",
+            tier: "pro-20250202",
           })
           .eq("id", this.authParams.organizationId);
       }
@@ -689,13 +1013,29 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
+  public async getOrganization(): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"], string>
+  > {
+    const organization = await supabaseServer.client
+      .from("organization")
+      .select("*")
+      .eq("id", this.authParams.organizationId)
+      .single();
+
+    if (!organization.data) {
+      return err("No organization found");
+    }
+
+    return ok(organization.data);
+  }
+
   public async getSubscription(): Promise<Result<Stripe.Subscription, string>> {
     try {
-      const organization = await supabaseServer.client
-        .from("organization")
-        .select("*")
-        .eq("id", this.authParams.organizationId)
-        .single();
+      const organization = await this.getOrganization();
+
+      if (organization.error) {
+        return err(organization.error);
+      }
 
       if (!organization.data?.stripe_subscription_id) {
         return err("No subscription found for this organization");
@@ -782,6 +1122,7 @@ WHERE (${builtFilter.filter})`,
   public async updateProUserCount(
     count: number
   ): Promise<Result<null, string>> {
+    const proProductPrices = await getProProductPrices();
     try {
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {

@@ -1,12 +1,15 @@
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { err, ok, PromiseGenericResult } from "../shared/result";
-import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
-import { sanitizeObject } from "../../utils/sanitize";
+import {
+  EvaluatorManager,
+  getEvaluatorScoreName,
+} from "../../managers/evaluator/EvaluatorManager";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { KVCache } from "../cache/kvCache";
+import { err, PromiseGenericResult } from "../shared/result";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
-import { LLMAsAJudge } from "../clients/LLMAsAJudge/LLMAsAJudge";
-import { OPENAI_KEY } from "../clients/constant";
-import { getEvaluatorScoreName } from "../../managers/evaluator/EvaluatorManager";
+import { AbstractLogHandler } from "./AbstractLogHandler";
+import { HandlerContext, toHeliconeRequest } from "./HandlerContext";
+
+const kvCache = new KVCache(60); // 1 minutes
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -16,6 +19,16 @@ export class OnlineEvalHandler extends AbstractLogHandler {
     }
 
     const onlineEvalStore = new OnlineEvalStore(orgId);
+    const hasOnlineEvals = await cacheResultCustom(
+      "has-online-evals-" + orgId,
+      async () => await onlineEvalStore.hasOnlineEvals(orgId),
+      kvCache
+    );
+
+    if (hasOnlineEvals.data === false) {
+      return await super.handle(context);
+    }
+
     const onlineEvals = await onlineEvalStore.getOnlineEvalsByOrgId(orgId);
 
     if (onlineEvals.error) {
@@ -27,13 +40,16 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );
 
+      const properties = Object.keys(
+        context.processedLog.request.properties ?? {}
+      ).map((property) => property.toLowerCase());
       if (
         isNaN(sampleRate) ||
         sampleRate < 0 ||
         sampleRate > 100 ||
         Math.random() * 100 > sampleRate ||
-        (context.processedLog.request.properties &&
-          "Helicone-Experiment-Id" in context.processedLog.request.properties)
+        properties.includes("helicone-experiment-id") ||
+        properties.includes("helicone-evaluator")
       ) {
         continue;
       }
@@ -64,28 +80,43 @@ export class OnlineEvalHandler extends AbstractLogHandler {
         autoInputs?: Record<string, string>;
       };
 
-      const llmAsAJudge = new LLMAsAJudge({
-        openAIApiKey: OPENAI_KEY!,
-        scoringType: onlineEval.evaluator_scoring_type as
-          | "LLM-CHOICE"
-          | "LLM-BOOLEAN"
-          | "LLM-RANGE",
-        llmTemplate: onlineEval.evaluator_llm_template,
-        inputRecord,
-        output: JSON.stringify(context.processedLog.response.body),
-        evaluatorName: onlineEval.evaluator_name,
+      const evaluatorManager = new EvaluatorManager({
+        organizationId: context.authParams?.organizationId ?? "",
       });
 
       try {
-        const result = await llmAsAJudge.evaluate();
+        const result = await evaluatorManager.runLLMEvaluatorScore({
+          evaluator: {
+            code_template: onlineEval.evaluator_code_template,
+            created_at: onlineEval.evaluator_created_at,
+            id: onlineEval.evaluator_id,
+            llm_template: onlineEval.evaluator_llm_template,
+            name: onlineEval.evaluator_name,
+            organization_id: context.authParams?.organizationId ?? "",
+            scoring_type: onlineEval.evaluator_scoring_type,
+            updated_at: "n/a",
+            last_mile_config: onlineEval.last_mile_config,
+          },
+          inputRecord,
+          request_id: context.message.log.request.id,
+          requestBody: context.processedLog.request.body,
+          responseBody: context.processedLog.response.body,
+          heliconeRequest: toHeliconeRequest(context),
+        });
+
+        if (result.error) {
+          console.error(result.error);
+          continue;
+        }
 
         const scoreName =
           getEvaluatorScoreName(onlineEval.evaluator_name) +
-          (typeof result.score === "boolean" ? "-hcone-bool" : "");
+          (typeof result.data?.score === "boolean" ? "-hcone-bool" : "");
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};
-        context.processedLog.request.scores[scoreName] = result.score ?? 0;
+        context.processedLog.request.scores[scoreName] =
+          result.data?.score ?? 0;
         context.processedLog.request.scores_evaluatorIds =
           context.processedLog.request.scores_evaluatorIds ?? {};
         context.processedLog.request.scores_evaluatorIds[scoreName] =

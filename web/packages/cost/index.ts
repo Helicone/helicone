@@ -30,10 +30,10 @@ export function costOf({
     return null;
   }
 
-  // We need to concat allCosts because we need to check the provider costs first and if it is not founder thn fall back to make the best guess.
+  // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
   // This is because we did not backfill the provider on supabase yet, and we do not plan to
   // This is really for legacy
-  // TODO after 07/2024 we can probably remove this
+  // TODO: after 07/2024 we can probably remove this
   const costs = providerCost.costs.concat(allCosts);
 
   const cost = costs.find((cost) => {
@@ -51,23 +51,57 @@ export function costOf({
 }
 
 export function costOfPrompt({
+  provider,
   model,
   promptTokens,
+  promptCacheWriteTokens,
+  promptCacheReadTokens,
   completionTokens,
-  provider: provider,
+  images = 1,
+  perCall = 1,
 }: {
+  provider: string;
   model: string;
   promptTokens: number;
+  promptCacheWriteTokens: number;
+  promptCacheReadTokens: number;
   completionTokens: number;
-  provider: string;
+  images?: number;
+  perCall?: number;
 }) {
   const cost = costOf({ model, provider });
   if (!cost) {
     return null;
   }
-  return (
-    cost.prompt_token * promptTokens + cost.completion_token * completionTokens
-  );
+
+  let totalCost = 0;
+
+  // Add cost for regular prompt tokens (these are the fresh, uncached tokens)
+  totalCost += promptTokens * cost.prompt_token;
+
+  // Add cost for cache write tokens if applicable
+  if (cost.prompt_cache_write_token && promptCacheWriteTokens > 0) {
+    totalCost += promptCacheWriteTokens * cost.prompt_cache_write_token;
+  } else if (promptCacheWriteTokens > 0) {
+    totalCost += promptCacheWriteTokens * cost.prompt_token;
+  }
+
+  // Add cost for cache read tokens if applicable
+  if (cost.prompt_cache_read_token && promptCacheReadTokens > 0) {
+    totalCost += promptCacheReadTokens * cost.prompt_cache_read_token;
+  } else if (promptCacheReadTokens > 0) {
+    totalCost += promptCacheReadTokens * cost.prompt_token;
+  }
+
+  // Add cost for completion tokens
+  totalCost += completionTokens * cost.completion_token;
+
+  // Add cost for images and per-call fees
+  const imageCost = images * (cost.per_image ?? 0);
+  const perCallCost = perCall * (cost.per_call ?? 0);
+  totalCost += imageCost + perCallCost;
+
+  return totalCost;
 }
 
 function caseForCost(costs: ModelRow[], table: string, multiple: number) {
@@ -78,16 +112,39 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       const costPerMultiple = {
         prompt: Math.round(cost.cost.prompt_token * multiple),
         completion: Math.round(cost.cost.completion_token * multiple),
+        image: Math.round((cost.cost.per_image ?? 0) * multiple),
+        per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
       };
 
-      if (cost.model.operator === "equals") {
-        return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
-      } else if (cost.model.operator === "startsWith") {
-        return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
-      } else if (cost.model.operator === "includes") {
-        return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costPerMultiple.prompt} * ${table}.prompt_tokens + ${costPerMultiple.completion} * ${table}.completion_tokens`;
+      const costs = [];
+      if (costPerMultiple.prompt > 0) {
+        costs.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
+      }
+      if (costPerMultiple.completion > 0) {
+        costs.push(
+          `${costPerMultiple.completion} * ${table}.completion_tokens`
+        );
+      }
+      if (costPerMultiple.image > 0) {
+        costs.push(`${costPerMultiple.image}`);
+      }
+      if (costPerMultiple.per_call > 0) {
+        costs.push(`${costPerMultiple.per_call}`);
+      }
+
+      if (costs.length > 0) {
+        const costString = costs.join(" + ");
+        if (cost.model.operator === "equals") {
+          return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costString}`;
+        } else if (cost.model.operator === "startsWith") {
+          return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
+        } else if (cost.model.operator === "includes") {
+          return `WHEN (${table}.model ILIKE '%${cost.model.value}%') THEN ${costString}`;
+        } else {
+          throw new Error("Unknown operator");
+        }
       } else {
-        throw new Error("Unknown operator");
+        return ``;
       }
     })
     .join("\n")}

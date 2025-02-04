@@ -22,13 +22,7 @@ const TotalCost = () => {
   const { apiKey } = useHeliconeLogin();
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
   const router = useRouter();
-
   const jawn = useJawnClient(apiKey.data ?? "");
-
-  const totalRequests = useQuery({
-    queryKey: ["total-requests", apiKey.data],
-    queryFn: () => jawn.POST("/v1/pi/total_requests"),
-  });
 
   const costsOverTime = useQuery({
     queryKey: ["costs-over-time", apiKey.data],

@@ -10,7 +10,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Col } from "@/components/layout/common";
 import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import RequestsPageV2 from "../../requestsV2/requestsPageV2";
+import RequestsPageV2 from "../../requests/requestsPageV2";
 
 type EvaluatorMetric = {
   // Define your EvaluatorMetric type here

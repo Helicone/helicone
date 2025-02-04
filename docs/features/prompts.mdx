@@ -50,6 +50,11 @@ As you modify your prompt in code, Helicone automatically tracks the new version
 <Tabs>
   <Tab title="Typescript / Javascript">
     <Steps> 
+      <Step title="Install the package">
+        ```bash
+        npm install @helicone/prompts
+        ```
+      </Step>
       <Step title="Import hpf">
         ```tsx
         import { hpf } from "@helicone/prompts";
@@ -109,6 +114,75 @@ As you modify your prompt in code, Helicone automatically tracks the new version
     </Steps>
 
   </Tab> 
+  <Tab title="Python">
+    <Steps>
+      <Step title="Install the package">
+        ```bash
+        pip install helicone_prompts
+        ```
+      </Step>
+      <Step title="Import hpf">
+        ```python
+        from helicone_prompts import hpf, hpstatic
+        ```
+      </Step>
+      <Step title="Add `hpf` and identify input variables">
+      By prefixing your prompt with `hpf` and providing your input variables as keyword arguments, it allows Helicone to easily detect your prompt and inputs. We've designed for minimum code change to keep it as easy as possible to use Prompts.
+
+      ```python
+      location = "space"
+      character = "two brothers"
+      prompt_input = hpf(
+          "Compose a movie scene involving {character}, set in {location}",
+          character=character,
+          location=location
+      )
+      ```
+
+      #### Static Prompts with hpstatic
+
+      In addition to `hpf`, Helicone provides `hpstatic` for creating static prompts that don't change between requests. This is useful for system prompts or other constant text that you don't want to be treated as variable input.
+
+      To use `hpstatic`, import it along with `hpf`:
+
+      ```python
+      from helicone_prompts import hpf, hpstatic
+      ```
+
+      Then, you can use it like this:
+
+      ```python
+      system_prompt = hpstatic("You are a helpful assistant.")
+      user_prompt = hpf("Write a story about {character}", character=character)
+      ```
+
+      The `hpstatic` function wraps the entire text in `<helicone-prompt-static>` tags, indicating to Helicone that this part of the prompt should not be treated as variable input.
+
+      #### Change input name
+      To rename your input or have a custom input, use a different keyword argument name:
+
+      ```python
+      content = hpf(
+          "Write a story about {my_magical_input}",
+          my_magical_input=character
+      )
+      ```
+      </Step>
+
+      <Step title="Assign an id to your prompt">
+        Assign a `Helicone-Prompt-Id` header to your LLM request.
+
+        Assigning an id allows us to associate your prompt with future versions of your prompt, and **automatically manage versions on your behalf.**
+
+        ```python
+        headers = {
+            "Helicone-Prompt-Id": "prompt_story"
+        }
+        ```
+      </Step>
+    </Steps>
+
+  </Tab>
   <Tab title="Packageless (cURL)">
     Currently, we only support packages for TypeScript and JavaScript for easy integration. For other users, we recommend manually implementing input variables as follows:
     <Steps>
@@ -172,7 +246,7 @@ Let's say we have an app that generates a short story, where users are able to i
 <Tabs>
   <Tab title="Typescript / Javascript example">
     ``` tsx
-    // 1. Add these lines
+    // 1. Add imports
     import { hpf, hpstatic } from "@helicone/prompts";
 
     const chatCompletion = await openai.chat.completions.create(
@@ -192,12 +266,40 @@ Let's say we have an app that generates a short story, where users are able to i
         model: "gpt-3.5-turbo",
       },
       {
-        // 3. Add Prompt Id Header
+        // 4. Add Prompt Id Header
         headers: {
           "Helicone-Prompt-Id": "prompt_story",
         },
       }
     );
+    ```
+
+  </Tab>
+
+  <Tab title="Python example">
+    ```python
+    # 1. Add imports
+    from helicone_prompts import hpf, hpstatic
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                # 2. Use hpstatic for static prompts
+                "content": hpstatic("You are a creative storyteller.")
+            },
+            {
+                "role": "user",
+                # 3. Call hpf with a string and provide variables as keyword arguments
+                "content": hpf("Write a story about {character}", character="a secret agent")
+            }
+        ],
+        # 4. Add Prompt Id Header
+        headers={
+          "Helicone-Prompt-Id": "prompt_story",
+        }
+    )
     ```
 
   </Tab>
@@ -249,53 +351,92 @@ In Helicone, you can create a prompt without touching the codebase for better co
 
 If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
 
-```javascript
-export async function getPrompt(
-  id: string,
-  variables: Record<string, any>
-): Promise<any> {
-  const getHeliconePrompt = async (id: string) => {
-    const res = await fetch(
-      `https://api.helicone.ai/v1/prompt/${id}/template`,
-      {
-        headers: {
-          Authorization: `Bearer ${YOUR_HELICONE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
-          inputs: variables,
-        }),
+<Tabs>
+  <Tab title="Typescript / Javascript">
+    ```javascript
+    export async function getPrompt(
+      id: string,
+      variables: Record<string, any>
+    ): Promise<any> {
+      const getHeliconePrompt = async (id: string) => {
+        const res = await fetch(
+          `https://api.helicone.ai/v1/prompt/${id}/template`,
+          {
+            headers: {
+              Authorization: `Bearer ${YOUR_HELICONE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+            body: JSON.stringify({
+              inputs: variables,
+            }),
+          }
+        );
+
+        return (await res.json()) as Result<PromptVersionCompiled, any>;
+      };
+
+      const heliconePrompt = await getHeliconePrompt(id);
+      if (heliconePrompt.error) {
+        throw new Error(heliconePrompt.error);
       }
-    );
+      return heliconePrompt.data?.filled_helicone_template;
+    }
 
-    return (await res.json()) as Result<PromptVersionCompiled, any>;
-  };
+    async function pullPromptAndRunCompletion() {
+      const prompt = await getPrompt("my-prompt-id", {
+        color: "red",
+      });
+      console.log(prompt);
 
-  const heliconePrompt = await getHeliconePrompt(id);
-  if (heliconePrompt.error) {
-    throw new Error(heliconePrompt.error);
-  }
-  return heliconePrompt.data?.filled_helicone_template;
-}
+      const openai = new OpenAI({
+        apiKey: "YOUR_OPENAI_API_KEY",
+        baseURL: `https://oai.helicone.ai/v1/${YOUR_HELICONE_API_KEY}`,
+      });
+      const response = await openai.chat.completions.create(
+        prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
+      );
+      console.log(response);
+    }
+    ```
 
-async function pullPromptAndRunCompletion() {
-  const prompt = await getPrompt("my-prompt-id", {
-    color: "red",
-  });
-  console.log(prompt);
+  </Tab>
+  <Tab title="Python">
+    ```python
+    async def get_prompt(id: str, variables: dict) -> Any:
+        async def get_helicone_prompt(id: str):
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"https://api.helicone.ai/v1/prompt/{id}/template",
+                    headers={
+                        "Authorization": f"Bearer {YOUR_HELICONE_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={"inputs": variables},
+                ) as response:
+                    return await response.json()
 
-  const openai = new OpenAI({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    baseURL: `https://oai.helicone.ai/v1/${YOUR_HELICONE_API_KEY}`,
-  });
-  const response = await openai.chat.completions.create(
-    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
-  );
-  console.log(response);
-}
+        helicone_prompt = await get_helicone_prompt(id)
+        if "error" in helicone_prompt:
+            raise Exception(helicone_prompt["error"])
+        return helicone_prompt.get("data", {}).get("filled_helicone_template")
 
-```
+    async def pull_prompt_and_run_completion():
+        prompt = await get_prompt("my-prompt-id", {
+            "color": "red"
+        })
+        print(prompt)
+
+        client = OpenAI(
+            api_key="YOUR_OPENAI_API_KEY",
+            base_url=f"https://oai.helicone.ai/v1/{YOUR_HELICONE_API_KEY}"
+        )
+        response = await client.chat.completions.create(**prompt)
+        print(response)
+    ```
+
+  </Tab>
+</Tabs>
 
 ## Run experiments
 
@@ -305,18 +446,33 @@ Once you've set up prompt management, you can use Helicone's [Experiments featur
 
 Many times in development, you may want to test your prompt locally before deploying it to production and you don't want Helicone to track new prompt versions.
 
-To do this, you can set the `Helicone-Prompt-Mode` header to `testing` in your LLM request. This will prevent Helicone from tracking new prompt versions.
+<Tabs>
+  <Tab title="Typescript / Javascript">
+    To do this, you can set the `Helicone-Prompt-Mode` header to `testing` in your LLM request. This will prevent Helicone from tracking new prompt versions.
 
-```tsx
-headers: {
-  "Helicone-Prompt-Mode": "testing",
-},
-```
+    ```tsx
+    headers: {
+      "Helicone-Prompt-Mode": "testing",
+    },
+    ```
+
+  </Tab>
+  <Tab title="Python">
+    To do this, you can set the `Helicone-Prompt-Mode` header to `testing` in your LLM request. This will prevent Helicone from tracking new prompt versions.
+
+    ```python
+    headers={
+            "Helicone-Prompt-Mode": "testing"
+        },
+    ```
+
+  </Tab>
+</Tabs>
 
 ## FAQ
 
 <AccordionGroup>
-  <Accordion title="How can I improve my LLM app’s performance?">
+  <Accordion title="How can I improve my LLM app's performance?">
      Improving your LLM app primarily revolves around sophisticated prompt engineering. Here are some key techniques to optimize your prompt:
 
       1.  Be specific and clear.

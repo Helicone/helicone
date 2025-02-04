@@ -4,12 +4,17 @@ import { clsx } from "../../shared/clsx";
 import RoleButton from "./new/roleButton";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import ModelPill from "../requestsV2/modelPill";
-import { Message } from "../requests/chatComponent/types";
+import ModelPill from "../requests/modelPill";
+import { Message } from "@/packages/llm-mapper/types";
+
+// Extend Message type to include model property
+type ExtendedMessage = Message & {
+  model?: string;
+};
 
 interface ModelResponseGroupProps {
-  modelMessage: Message[];
-  setCurrentChat: React.Dispatch<React.SetStateAction<Message[]>>;
+  modelMessage: ExtendedMessage[];
+  setCurrentChat: React.Dispatch<React.SetStateAction<ExtendedMessage[]>>;
 }
 
 const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
@@ -61,14 +66,6 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
             </div>
             <div className="p-4 text-gray-900 dark:text-gray-100">
               <p>{message.content}</p>
-            </div>
-            <div className="flex w-full justify-end pt-4 text-xs text-gray-900 dark:text-gray-100">
-              <p
-                className={clsx(
-                  "bg-gray-50 text-gray-700 ring-gray-200",
-                  `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
-                )}
-              >{`${message.latency} ms`}</p>
             </div>
           </div>
         ))}

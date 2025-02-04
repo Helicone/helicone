@@ -1,10 +1,27 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../../lib/supabaseServer";
 import { Database } from "../../../../supabase/database.types";
-import { getExperimentUsage } from "@/lib/api/stripe/experimentUsage";
+import {
+  getEvaluatorUsage,
+  getExperimentUsage,
+} from "@/lib/api/stripe/llmUsage";
 import { costOf } from "@/packages/cost";
+
+const ADDON_PRICES: Record<string, keyof Addons> = {
+  [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
+  [process.env.PRICE_PROD_PROMPTS_ID!]: "prompts",
+  [process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!]: "experiments",
+  [process.env.PRICE_PROD_EVALS_ID!]: "evals",
+};
+
+type Addons = {
+  alerts?: boolean;
+  prompts?: boolean;
+  experiments?: boolean;
+  evals?: boolean;
+};
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -18,13 +35,14 @@ const PricingVersionOld = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
         tier: "growth",
+        stripe_metadata: {},
       })
       .eq("id", orgId || "");
   },
@@ -62,7 +80,7 @@ const PricingVersionOld = {
       updateFields.tier = "pro";
     }
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update(updateFields)
       .eq("stripe_customer_id", subscriptionUpdated.customer);
@@ -78,7 +96,7 @@ const PricingVersionOld = {
     // Subscription has been deleted, either due to non-payment or being manually canceled.
     const subscriptionDeleted = event.data.object as Stripe.Subscription;
 
-    await supabaseServer
+    await getSupabaseServer()
       .from("organization")
       .update({
         tier: "free",
@@ -95,7 +113,7 @@ const PricingVersionOld = {
     const orgId = checkoutCompleted.metadata?.orgId;
     const tier = checkoutCompleted.metadata?.tier;
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
@@ -106,7 +124,7 @@ const PricingVersionOld = {
   },
 };
 
-const PricingVersion20240913 = {
+const TeamVersion20250130 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
     // subscription.metadata?.["helcionePricingVersion"] !==
@@ -114,15 +132,116 @@ const PricingVersion20240913 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await supabaseServer
+    // Get the existing subscription from the organization
+    const { data: orgData } = await getSupabaseServer()
+      .from("organization")
+      .select("stripe_subscription_id")
+      .eq("id", orgId || "")
+      .single();
+
+    // Cancel old subscription if it exists
+    console.log("Subscription ID", subscriptionId);
+    if (orgData?.stripe_subscription_id) {
+      try {
+        console.log("Cancelling old subscription");
+        await stripe.subscriptions.cancel(orgData.stripe_subscription_id, {
+          invoice_now: true,
+          prorate: true,
+        });
+      } catch (e) {
+        console.error("Error canceling old subscription:", e);
+      }
+    }
+
+    // Update to new subscription
+    const { error } = await getSupabaseServer()
       .from("organization")
       .update({
         subscription_status: "active",
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
-        tier: "pro-20240913",
+        tier: "team-20250130",
         stripe_metadata: {
           addons: {},
+        },
+      })
+      .eq("id", orgId || "");
+
+    if (error) {
+      console.error("Failed to update organization:", error);
+    }
+  },
+
+  handleUpdate: async (event: Stripe.Event) => {
+    // We don't need to do anything here because the subscription is already active
+    // All update states are handled in the jawn StripeManager
+    return;
+  },
+  handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
+    // We don't need to do anything here because the subscription is already active
+    // All update states are handled in the jawn StripeManager
+    return;
+  },
+  handleDelete: PricingVersionOld.handleDelete,
+};
+
+const PricingVersion20240913 = {
+  async handleCreate(event: Stripe.Event) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const subscriptionId = subscription.id;
+    const subscriptionItemId = subscription?.items.data[0].id;
+    const orgId = subscription.metadata?.orgId;
+    const addons: Addons = {};
+
+    subscription.items.data.forEach((item) => {
+      console.log(`Price ID: ${item.price.id}`);
+      const addonKey = ADDON_PRICES[item.price.id];
+      if (addonKey) {
+        addons[addonKey] =
+          item.quantity !== undefined ? item.quantity > 0 : false;
+      }
+    });
+
+    console.log(`Subscription JSON: ${JSON.stringify(subscription)}`);
+    console.log(`Addons: ${JSON.stringify(addons)}`);
+
+    // const subscription = await this.stripe.subscriptions.retrieve(
+    //   organization.data.stripe_subscription_id,
+    //   {
+    //     expand: ["items.data.price.product"],
+    //   }
+    // );
+
+    // const currentOrgStripeMetadata = await this.getStripeMetadata();
+    // if (currentOrgStripeMetadata.error) {
+    //   return err(currentOrgStripeMetadata.error);
+    // }
+
+    // const currentMetadata = currentOrgStripeMetadata.data;
+
+    // await supabaseServer.client
+    //   .from("organization")
+    //   .update({
+    //     stripe_metadata: {
+    //       addons: {
+    //         ...(typeof currentMetadata?.addons === "object"
+    //           ? currentMetadata?.addons
+    //           : {}),
+    //         [productType]: false,
+    //       },
+    //     },
+
+    // subscription.
+
+    const { data, error } = await getSupabaseServer()
+      .from("organization")
+      .update({
+        subscription_status: "active",
+        stripe_subscription_id: subscriptionId,
+        stripe_subscription_item_id: subscriptionItemId,
+        tier: "pro-20250202",
+        stripe_metadata: {
+          addons: addons,
         },
       })
       .eq("id", orgId || "");
@@ -180,11 +299,23 @@ const InvoiceHandlers = {
           subscriptionStartDate,
           subscriptionEndDate
         );
+
         if (experimentUsage.error || !experimentUsage.data) {
           console.error(
             "Error getting experiment usage:",
             experimentUsage.error
           );
+          return;
+        }
+
+        const evaluatorUsage = await getEvaluatorUsage(
+          orgId,
+          subscriptionStartDate,
+          subscriptionEndDate
+        );
+
+        if (evaluatorUsage.error || !evaluatorUsage.data) {
+          console.error("Error getting evaluator usage:", evaluatorUsage.error);
           return;
         }
 
@@ -209,7 +340,39 @@ const InvoiceHandlers = {
                   totalCost.prompt_token * usage.prompt_tokens) *
                   100
               ),
-              description: `${usage.provider}/${
+              description: `Experiment: ${usage.provider}/${
+                usage.model
+              }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
+                totalCost.completion_token * 1000
+              ).toPrecision(6)}/1K completion tokens, $${+(
+                totalCost.prompt_token * 1000
+              ).toPrecision(6)}/1K prompt tokens`,
+            });
+          }
+        }
+
+        if (evaluatorUsage.data.length !== 0) {
+          for (const usage of evaluatorUsage.data) {
+            const totalCost = costOf({
+              model: usage.model,
+              provider: usage.provider.toUpperCase(),
+            });
+
+            if (!totalCost) {
+              console.error("No cost found for", usage.model, usage.provider);
+              continue;
+            }
+
+            await stripe.invoiceItems.create({
+              customer: customerID,
+              invoice: invoice.id,
+              currency: "usd",
+              amount: Math.ceil(
+                (totalCost.completion_token * usage.completion_tokens +
+                  totalCost.prompt_token * usage.prompt_tokens) *
+                  100
+              ),
+              description: `Evaluator: ${usage.provider}/${
                 usage.model
               }: ${usage.completion_tokens.toLocaleString()} completion tokens, ${usage.prompt_tokens.toLocaleString()} prompt tokens, at $${+(
                 totalCost.completion_token * 1000
@@ -269,9 +432,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const stripeObject = event.data.object as
       | Stripe.Subscription
       | Stripe.Checkout.Session;
+
     const pricingFunctions =
-      stripeObject.metadata?.["tier"] === "pro-20240913"
+      stripeObject.metadata?.["tier"] === "pro-20240913" ||
+      stripeObject.metadata?.["tier"] === "pro-20250202"
         ? PricingVersion20240913
+        : stripeObject.metadata?.["tier"] === "team-20250130"
+        ? TeamVersion20250130
         : PricingVersionOld;
 
     if (event.type === "test_helpers.test_clock.advancing") {

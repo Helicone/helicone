@@ -2,45 +2,147 @@
 title: "Crew AI Integration"
 sidebarTitle: "Crew AI"
 description: "Integrate Helicone with Crew AI, a multi-agent framework for automating complex workflows. Monitor AI-driven tasks and agent interactions for real use cases."
-"twitter:title": "Crew AI Integration - Helicone OSS LLM Observability"
+twitter:title: "Crew AI Integration - Helicone OSS LLM Observability"
 icon: "cubes"
 iconType: "solid"
 ---
 
 ## Introduction
 
-Crew AI is a multi-agent framework that simplifies the automation of complex workflows.
+[Crew AI](https://github.com/joaomdmoura/crewAI) is a multi-agent framework for automating complex workflows with multiple agents. By integrating [Helicone](https://www.helicone.ai) as a proxy endpoint, you can track, observe, and optimize your AI model usage through a unified dashboard.
 
-Integrating Helicone with Crew AI allows you to monitor AI-driven tasks and agent interactions effectively.
+Below are the primary steps to get your Helicone + Crew AI integration up and running quickly.
 
 ## Integration Steps
 
+Once you’ve walked through these steps, you can customize or extend as needed.
+
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+
+  <Step title="Create an Account & Generate an API Key">
+    1. Log into [Helicone](https://www.helicone.ai) (or create a new account).
+    2. Generate a [write-only API key](https://docs.helicone.ai/helicone-headers/helicone-auth).
 
     <Note>
-      Make sure to generate a [write only API key](helicone-headers/helicone-auth).
+      Store your Helicone API key securely (e.g., in environment variables).
     </Note>
 
   </Step>
-  <Step title="Set OPENAI_BASE_URL as an environment variable">
 
-  <CodeGroup>
+  <Step title="Set OPENAI_BASE_URL">
+    Configure your environment to route API calls through Helicone. For example:
 
-```python example.py
-import os
+    ```python
+    import os
 
-os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
-```
+    os.environ["OPENAI_BASE_URL"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
+    ```
 
-</CodeGroup>
+    This points OpenAI API requests to Helicone’s proxy endpoint.
+
+  </Step>
+
+  <Step title="Integrate Helicone & Crew AI in Code (Additional)">
+    Below is a sample crew definition illustrating how to configure a Helicone-enabled LLM and attach it to agents. Replace the placeholder keys with valid credentials.
+
+    ```python crew.py
+    from crewai import Agent, Crew, Process, Task, LLM
+    from crewai.project import CrewBase, agent, crew, task
+    import os
+
+    # Example environment variable usage
+    helicone_api_key = os.environ.get("HELICONE_API_KEY", "dummy_helicone_key")
+    openai_api_key = os.environ.get("OPENAI_API_KEY", "dummy_openai_key")
+
+    # Create a Helicone-integrated LLM
+    helicone_llm = LLM(
+        model="gpt-4o-mini",          # Replace with your desired model
+        temperature=0.7,
+        base_url="https://oai.helicone.ai/v1",
+        api_key=openai_api_key,       # Your LLM provider API key
+        extra_headers={
+            "Helicone-Auth": f"Bearer {helicone_api_key}",      # Helicone Auth
+            "Helicone-Cache-Enabled": "true",                   # Enable caching if desired
+            # ... add additional headers as needed
+        },
+    )
+
+    @CrewBase
+    class LatestAiDevelopment():
+        """LatestAiDevelopment crew"""
+
+        tasks_config = 'config/tasks.yaml'
+
+        @agent
+        def researcher(self) -> Agent:
+            var_prompt_1 = "topic"
+            var_value_1  = "advanced AI breakthroughs"
+
+            return Agent(
+                role="Senior Data Researcher",
+                goal=f"Uncover cutting-edge developments in <helicone-prompt-input key=\"{var_prompt_1}\">{var_value_1}</helicone-prompt-input>",
+                backstory=(
+                    "You are a seasoned researcher with a knack for uncovering "
+                    "the latest developments in AI. Known for your ability to find "
+                    "the most relevant information and present it clearly."
+                ),
+                llm=helicone_llm,
+                verbose=True
+            )
+
+        @agent
+        def reporting_analyst(self) -> Agent:
+            return Agent(
+                config=self.agents_config['reporting_analyst'],
+                verbose=True,
+                llm=helicone_llm
+            )
+
+        @task
+        def research_task(self) -> Task:
+            return Task(
+                config=self.tasks_config['research_task'],
+            )
+
+        @task
+        def reporting_task(self) -> Task:
+            return Task(
+                config=self.tasks_config['reporting_task'],
+                output_file='report.md'
+            )
+
+        @crew
+        def crew(self) -> Crew:
+            """Creates the LatestAiDevelopment crew"""
+            return Crew(
+                agents=self.agents,   # From @agent decorators
+                tasks=self.tasks,     # From @task decorators
+                process=Process.sequential,
+                verbose=True,
+            )
+    ```
+
+    **Additional Resources**
+    - View all available headers in the [Helicone Header Directory](https://docs.helicone.ai/helicone-headers/header-directory).
+    - For full examples, visit the [Crew AI Examples Repository](https://github.com/crewAIInc/crewAI-examples).
+
+  </Step>
+
+  <Step title="Test & Verify in Helicone">
+    1. **Run your Crew AI agents**.
+    2. **Open Helicone Dashboard** to confirm requests are logged.
+    3. If you use **Prompt Templates**, be sure to send the corresponding variables at the prompt
+
+    <Note>
+      If your requests do not appear in Helicone, double-check your headers and API key. Also verify the endpoint is set to <code>https://oai.helicone.ai/v1</code>.
+    </Note>
 
   </Step>
 
 </Steps>
 
-## Additional Information
+## Additional Resources
 
-Check out the [Crew AI GitHub repository](https://github.com/joaomdmoura/crewAI) for more information and examples on how to leverage Crew AI for your projects.
+- [Crew AI GitHub](https://github.com/joaomdmoura/crewAI) – Official repository and examples.
+- [Helicone Prompt Management Docs](https://docs.helicone.ai/features/prompts) – Learn how to track and version your prompts.
+- [Crew AI Examples Repository](https://github.com/crewAIInc/crewAI-examples) – Explore full implementation examples.

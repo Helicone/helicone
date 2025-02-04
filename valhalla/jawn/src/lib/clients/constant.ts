@@ -25,3 +25,5 @@ export const getKey = (key: string) => {
 export const OPENROUTER_KEY = getKey("OPENROUTER_API_KEY");
 
 export const OPENROUTER_WORKER_URL = getKey("OPENROUTER_WORKER_URL");
+export const ENVIRONMENT: "production" | "development" = (process.env
+  .VERCEL_ENV ?? "development") as any;

@@ -1,10 +1,13 @@
 import { EvalQueryParams } from "../../controllers/public/evalController";
+import { KVCache } from "../../lib/cache/kvCache";
 import { AuthParams } from "../../lib/db/supabase";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
+import { getXOverTime } from "../helpers/getXOverTime";
 
 export type TimeIncrement = "min" | "hour" | "day" | "week" | "month" | "year";
 
@@ -12,17 +15,7 @@ function convertDbIncrement(dbIncrement: TimeIncrement): string {
   return dbIncrement === "min" ? "MINUTE" : dbIncrement;
 }
 
-function buildDateTrunc(
-  dbIncrement: TimeIncrement,
-  timeZoneDifference: number,
-  column: string
-): string {
-  return `DATE_TRUNC('${convertDbIncrement(dbIncrement)}', ${column} ${
-    timeZoneDifference > 0
-      ? `- INTERVAL '${Math.abs(timeZoneDifference)} minute'`
-      : `+ INTERVAL '${timeZoneDifference} minute'`
-  }, 'UTC')`;
-}
+const kvCache = new KVCache(60 * 1000); // 1 minutes
 
 export interface Eval {
   name: string;
@@ -47,95 +40,82 @@ export class EvalManager extends BaseManager {
   public async getEvals(
     evalQueryParams: EvalQueryParams
   ): Promise<Result<Eval[], string>> {
-    const timeFilter: FilterNode = {
-      left: {
-        request_response_rmt: {
-          request_created_at: {
-            gte: new Date(evalQueryParams.timeFilter.start),
-          },
-        },
-      },
-      operator: "and",
-      right: {
-        request_response_rmt: {
-          request_created_at: {
-            lt: new Date(evalQueryParams.timeFilter.end),
-          },
-        },
-      },
-    };
-
-    const builtFilter = await buildFilterWithAuthClickHouse({
-      org_id: this.authParams.organizationId,
-      argsAcc: [],
-      filter: {
-        left: evalQueryParams.filter,
-        operator: "and",
-        right: timeFilter,
-      },
-    });
-
-    const query = `
-      SELECT
-        avgMap(scores) AS average_score,
-        minMap(scores) AS min_score,
-        maxMap(scores) AS max_score,
-        countMap(scores) AS count_score,
-        ${buildDateTrunc("hour", 0, "request_created_at")} as created_at_trunc
-      FROM request_response_rmt
-      WHERE (
-        ${builtFilter.filter}
-      )
-      GROUP BY created_at_trunc
-      ORDER BY created_at_trunc ASC
-    `;
-
-    const result = await dbQueryClickhouse<{
+    const result = await getXOverTime<{
       average_score: Record<string, number>;
       min_score: Record<string, number>;
       max_score: Record<string, number>;
       count_score: Record<string, number>;
-      created_at_trunc: string;
-    }>(query, builtFilter.argsAcc);
+    }>(
+      {
+        timeFilter: evalQueryParams.timeFilter,
+        dbIncrement: "hour",
+        timeZoneDifference: evalQueryParams.timeZoneDifference ?? 0,
+        userFilter: evalQueryParams.filter,
+      },
+      {
+        countColumns: [
+          "avgMap(scores) AS average_score",
+          "minMap(scores) AS min_score",
+          "maxMap(scores) AS max_score",
+          "countMap(scores) AS count_score",
+        ],
+        orgId: this.authParams.organizationId,
+      }
+    );
+
+    const scoreNames = await cacheResultCustom(
+      "v1/evals/scores" + this.authParams.organizationId,
+      async () => await this.getEvalScores(),
+      kvCache
+    );
+
+    if (scoreNames.error) {
+      return err(scoreNames.error);
+    }
+
+    const evalMap = new Map<string, Eval>();
+
+    scoreNames.data!.forEach((scoreName) => {
+      evalMap.set(scoreName, {
+        name: scoreName,
+        averageScore: 0,
+        minScore: Infinity,
+        maxScore: -Infinity,
+        count: 0,
+        overTime: [],
+        averageOverTime: [],
+      });
+    });
 
     return resultMap(result, (rows) => {
-      const evalMap = new Map<string, Eval>();
-
       rows.forEach((row) => {
-        Object.keys(row.average_score).forEach((scoreName) => {
-          if (!evalMap.has(scoreName)) {
-            evalMap.set(scoreName, {
-              name: scoreName,
-              averageScore: 0,
-              minScore: Infinity,
-              maxScore: -Infinity,
-              count: 0,
-              overTime: [],
-              averageOverTime: [],
-            });
-          }
-
+        scoreNames.data!.forEach((scoreName) => {
           const evalItem = evalMap.get(scoreName)!;
-          evalItem.averageScore = row.average_score[scoreName];
+
           evalItem.minScore = Math.min(
             evalItem.minScore,
-            row.min_score[scoreName]
+            +(row.min_score?.[scoreName] ?? 0)
           );
           evalItem.maxScore = Math.max(
             evalItem.maxScore,
-            row.max_score[scoreName]
+            +(row.max_score?.[scoreName] ?? 0)
           );
-          evalItem.count += +row.count_score[scoreName];
+          evalItem.count += +(row.count_score?.[scoreName] ?? 0);
           evalItem.overTime.push({
             date: row.created_at_trunc,
-            count: row.count_score[scoreName],
+            count: +(row.count_score?.[scoreName] ?? 0),
           });
           evalItem.averageOverTime.push({
             date: row.created_at_trunc,
-            value: row.average_score[scoreName],
+            value: +(row.average_score?.[scoreName] ?? 0),
           });
         });
       });
+      for (const evalItem of evalMap.values()) {
+        evalItem.averageScore =
+          evalItem.averageOverTime.reduce((a, b) => a + b.value, 0) /
+          evalItem.count;
+      }
 
       return Array.from(evalMap.values());
     });

@@ -2,17 +2,19 @@
 
 Rendering large amounts of data in web applications can be challenging. At Helicone, we recently improved the performance of our requests page, which handles substantial amounts of data. This post outlines the steps we took to optimize data loading, resulting in faster render times and improved usability.
 
-### Background
+## Background
 
 Helicone acts as a proxy between our customers' applications and various LLM providers like OpenAI and Anthropic. We log these requests for monitoring, fine-tuning, and prompt experiments. Our requests page displays this data in a giant table.
 
-### The Challenge
+## The Challenge
 
 Our data architecture splits the storage of logs like so:
+
 1. Metadata (timestamp, model, provider, path, etc.) is stored in a SQL database (Supabase).
 2. Message bodies (request and response content) are stored in AWS S3 for efficiency.
 
 Initially, our rendering process was as follows:
+
 1. User navigates to /requests, triggering request to the backend.
 2. Backend fetches metadata from the database.
 3. Frontend receives this data and generates the signed URLs for S3.
@@ -21,7 +23,7 @@ Initially, our rendering process was as follows:
 
 This process resulted in a noticeable delay, with initial render times around 1.5 seconds.
 
-# The Solution: Asynchronous Loading and Optimistic Rendering
+## The Solution: Asynchronous Loading and Optimistic Rendering
 
 To improve performance, we implemented an asynchronous loading strategy with optimistic rendering:
 
@@ -33,11 +35,11 @@ To improve performance, we implemented an asynchronous loading strategy with opt
 
 This approach reduced initial render time to approximately 0.25 seconds, a 6x improvement.
 
-# Implementation Challenges
+## Implementation Challenges
 
 While implementing this solution, we encountered several challenges:
 
-## React Hook Errors and Unintended State Mutations
+### React Hook Errors and Unintended State Mutations
 
 One of the most subtle and problematic issues we faced was related to unintended state mutations within our React hooks. Here's an example of the problematic code:
 
@@ -87,14 +89,14 @@ To fix this, we needed to create new objects instead of mutating existing ones:
 
 ```typescript
 // ...
-const r = {...request};
+const r = { ...request };
 r.request_body = content.request;
 r.response_body = content.response;
 // ...
 return r;
 ```
 
-## Data Shape Transformation
+### Data Shape Transformation
 
 The shift to asynchronous loading also introduced a mismatch between the data types used by different parts of our system. This required careful handling of data transformations.
 
@@ -125,5 +127,8 @@ const builders: {
 
 At the core of the transformation logic is a builders object that maps different builder types to their corresponding classes. These builders allows us to convert `HeliconeRequest` objects into `NormalizedRequest` objects, which are more suitable for our table component. A `getRequestBuilder` function determines the appropriate builder based on the request, and the `getNormalizedRequest` function uses this builder to create a normalized version of the request.
 
-# Conclusion
+## Conclusion
+
 The adoption of asynchronous loading and optimistic rendering has significantly enhanced the performance and user experience of Helicone's requests page. By rendering metadata immediately and fetching message bodies in the background, we achieved a 6x improvement in initial render times, reducing them from 1.5 seconds to 0.25 seconds. This optimization not only improved responsiveness but also helped us identify and address challenges related to React state management and data shape transformations. These improvements make handling large amounts of data more efficient and user-friendly.
+
+<Questions />

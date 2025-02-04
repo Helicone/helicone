@@ -32,11 +32,22 @@ export const usePromptVersions = (promptId: string) => {
     refetchOnWindowFocus: false,
   });
 
+  const sortedVersions = data?.data?.data
+    ? [...data.data.data]
+        .sort((a, b) => {
+          if (b.major_version !== a.major_version) {
+            return b.major_version - a.major_version;
+          }
+          return b.minor_version - a.minor_version;
+        })
+        .filter((v) => v.minor_version === 0)
+    : undefined;
+
   return {
     isLoading,
     refetch,
     isRefetching,
-    prompts: data?.data?.data,
+    prompts: sortedVersions,
   };
 };
 

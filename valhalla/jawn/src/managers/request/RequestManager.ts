@@ -8,7 +8,6 @@ import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
-  HeliconeRequest,
   HeliconeRequestAsset,
   getRequestAsset,
   getRequests,
@@ -16,12 +15,29 @@ import {
   getRequestsCachedClickhouse,
   getRequestsClickhouse,
 } from "../../lib/stores/request/request";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { costOfPrompt } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../../lib/cache/kvCache";
+export const getModelFromPath = (path: string) => {
+  const regex1 = /\/engines\/([^/]+)/;
+  const regex2 = /models\/([^/:]+)/;
+
+  let match = path.match(regex1);
+
+  if (!match) {
+    match = path.match(regex2);
+  }
+
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+};
 
 const deltaTime = (date: Date, minutes: number) => {
   return new Date(date.getTime() + minutes * 60000);
@@ -81,8 +97,12 @@ export class RequestManager extends BaseManager {
       if (!bodyResponse.ok) {
         return err("Error fetching request body");
       }
-      const bodyData = (await bodyResponse.json())?.["request"];
-      return ok({ ...request.data, request_body: bodyData });
+      const bodyData = await bodyResponse.json();
+      return ok({
+        ...request.data,
+        request_body: bodyData?.["request"],
+        response_body: bodyData?.["response"],
+      });
     } catch (e) {
       return err("Error fetching request body");
     }
@@ -403,11 +423,13 @@ export class RequestManager extends BaseManager {
 
     return resultMap(requests, (req) => {
       return req.map((r) => {
+        const model =
+          r.model_override ?? r.response_model ?? r.request_model ?? "";
         return {
           ...r,
+          model: model,
           costUSD: costOfPrompt({
-            model:
-              r.model_override ?? r.response_model ?? r.request_model ?? "",
+            model: model,
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,
@@ -477,6 +499,12 @@ export class RequestManager extends BaseManager {
               completionTokens: r.completion_tokens ?? 0,
               promptTokens: r.prompt_tokens ?? 0,
             }),
+            model:
+              r.model_override ??
+              r.request_model ??
+              r.response_model ??
+              getModelFromPath(r.target_url) ??
+              "unknown",
           };
         })
         .filter((r) => {

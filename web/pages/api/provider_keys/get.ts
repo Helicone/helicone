@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Role } from "../../../services/lib/user";
 import { getDecryptedProviderKeysByOrgId } from "../../../services/lib/keys";
@@ -18,7 +18,7 @@ async function handler({
   }
 
   const { data: keys, error } = await getDecryptedProviderKeysByOrgId(
-    supabaseServer,
+    getSupabaseServer(),
     userData.orgId
   );
 

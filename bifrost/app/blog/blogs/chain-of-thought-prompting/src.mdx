@@ -1,0 +1,347 @@
+![Chain-of-Thought Prompting - Helicone](/static/blog/chain-of-thought/chain-of-thought-cover.webp)
+
+Chain-of-Thought (CoT) prompting is a powerful technique that helps LLMs break down complex problems into logical steps, leading to more accurate and transparent results. In this comprehensive guide, we'll explore CoT prompting techniques, implementation strategies, and best practices to improve your LLM's reasoning capabilities and overall performance.
+
+## What You'll Learn
+
+- What is Chain-of-Thought Prompting?
+- How Chain-of-Thought Prompting works?
+- Key Techniques (Zero-Shot, Few-Shot, Auto-CoT, Multimodal, Self-Consistency)
+- Benefits of Chain-of-Thought Prompting
+- Chain-of-Thought Prompting vs. Other Methods
+- Additional Resources
+
+## What is Chain-of-Thought Prompting?
+
+Chain-of-Thought (CoT) prompting is a prompt engineering method that breaks down bigger and more complex tasks into smaller, logical steps in order to find a solution. This approach mirrors how we think—tackling one step at a time to reach a clear answer. By following this structured process, LLMs can handle complicated problems more effectively and get accurate results.
+
+## How Chain-of-Thought Prompting Works
+
+Chain-of-Thought (CoT) prompting was first introduced in the <a href="https://arxiv.org/abs/2201.11903" target="_blank">paper</a> _“Chain of Thought Prompting Elicits Reasoning in Large Language Models”_ by Google researchers. The paper demonstrated that breaking problems into smaller reasoning steps significantly improves performance on complex tasks like solving math problems, logical reasoning, and answering multi-step questions.
+
+![how-chain-of-thought-works](/static/blog/chain-of-thought/how-chain-of-thought-works.webp)
+
+_Image source: How Chain-of-Thought works (Wei et al.)_
+
+Newer models like <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank">OpenAI’s o1</a> and Google’s PaLM naturally excel at CoT. For example, when asked to solve a classic brain teaser, o1 carefully maps out each move step-by-step until the puzzle is solved. Similarly, Google’s PaLM handles multi-step math problems by explicitly explaining its reasoning, resulting in more accurate and interpretable answers.
+
+Chain-of-thought prompting works well because it leverages the strengths of language models, such as generating fluent and coherent responses, while mimicking human problem-solving through planning and logical step-by-step reasoning.
+
+<CallToAction
+  title="Start monitoring your prompt with 1-line of code ⚡️"
+  description="Track your CoT prompt performance with Helicone's analytics dashboard."
+  primaryButtonText="Quick Start"
+  primaryButtonLink="https://docs.helicone.ai/getting-started/quick-start"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+## Key Techniques in Chain-of-Thought Prompting
+
+Let's walk through some CoT prompting techniques that you can implement in your LLM application. We will cover **Zero-Shot, Few-Shot, Automatic, Multimodal CoT, and Self-Consistency Sampling**. We will illustrate code examples with OpenAI’s `gpt-3.5-turbo` or `gpt-4` models, but the principles apply to other LLMs like Anthropic’s Claude or Google’s PaLM.
+
+## 1. Zero-Shot Chain-of-Thought
+
+**<a href="https://arxiv.org/abs/2205.11916" target="_blank">Zero-Shot Chain-of-Thought (CoT)</a>** works by prompting the language model to perform tasks **without specific training or examples**. When given a zero-shot prompt, the model relies on its pre-existing knowledge based on its training data and its natural language capabilities to understand the prompt before generating results.
+
+![Zero-Shot Chain-of-Thought Example](/static/blog/chain-of-thought/zero-shot-example.webp)
+
+_Image source: Zero-Shot CoT (Kojima et al.)_
+
+There are two main steps:
+
+1. **Reasoning extraction**: The model is first asked to "think step by step" about the question to break the problem into logical steps.
+
+2. **Answer extraction**: Once the reasoning is ready, the model combines the steps to clearly provide the final answer.
+
+![Zero-Shot Chain-of-Thought](/static/blog/chain-of-thought/zero-shot-cot.webp)
+
+_Image source: Full Zero-Shot CoT Process (Kojima et al.)_
+
+Unlike regular zero-shot methods that simply ask for the answer, zero-shot Chain-of-Thought (CoT) prompts the model to explain its reasoning step by step, thereby often outperforming other methods in reasoning tests.
+
+### How to Implement Zero-Shot CoT (Example)
+
+Let’s try a simple prompt using OpenAI’s python library:
+
+```python
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+prompt = """You are a helpful AI that reasons step by step.
+Question: If a train travels at 60 miles per hour for 2.5 hours, how far does it go? Let's approach this systematically.
+
+1. Identify the given information.
+2. Determine the formula needed.
+3. Plug in the values and calculate.
+4. State the final answer.
+Explain your reasoning for each step.
+"""
+
+response = openai.ChatCompletion.create(
+  model="gpt-3.5-turbo",
+  messages=prompt,
+  max_tokens=150,
+  temperature=0.0
+)
+
+print(response.choices[0].message['content'])
+```
+
+You can explicitly say `Let’s think step by step`. Alternatively, you can give a general outline or provide systematic instructions (e.g., “List the facts, determine the formula, then compute the answer”), which nudges the model to explain its reasoning.
+
+Notice when the model responds, it often includes the intermediate reasoning steps. You can parse or remove those steps before showing the final answer to your users.
+
+## 2. Few-Shot Chain-of-Thought
+
+Few-Shot CoT is a prompting technique where developers **provide a small number of examples** within the prompt while asking the model to perform a specific task. This method allows the model to learn from and adapt to the given examples and the desired outputs, in order to improve its performance to align closer with expectations.
+
+To make the model even better, Few-shot CoT prompting can be paired with techniques like retrieval-augmented generation or interactive querying. These methods let the model use external knowledge, like databases or information systems, to provide accurate and up-to-date answers, improving its reasoning and reliability.
+
+### How to Implement Few-Shot CoT (Example)
+
+Here’s an example of few-shot CoT using OpenAI’s python library:
+
+```python
+few_shot_cot_prompt = """Solve the following math problems step by step:
+
+Example 1:
+Problem: If a train travels at 60 miles per hour for 2.5 hours, how far does it go?
+Solution:
+1. Identify the given information:
+   - Speed of the train: 60 miles per hour
+   - Time of travel: 2.5 hours
+2. Use the formula: Distance = Speed × Time
+3. Plug in the values:
+   Distance = 60 miles/hour × 2.5 hours
+4. Calculate:
+   Distance = 150 miles
+Therefore, the train travels 150 miles.
+
+Problem: A bakery sold 136 cakes last week. This week, they sold 25% more. How many cakes did they sell this week?
+Solution:
+1. Identify the given information:
+   - Last week's sales: 136 cakes
+   - Increase: 25%
+2. Calculate the increase:
+   25% of 136 = 0.25 × 136 = 34 cakes
+3. Add the increase to last week's sales:
+   This week's sales = 136 + 34 = 170 cakes
+Therefore, the bakery sold 170 cakes this week.
+
+Here is a new question:
+Problem: If a rectangle has a length of 15 meters and a width of 8 meters, what is its area?
+Solution:
+"""
+response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful math tutor."},
+        {"role": "user", "content": few_shot_cot_prompt}
+    ]
+)
+
+print(response.choices[0].message['content'])
+```
+
+This few-shot approach demonstrates the reasoning steps before giving the final answer. The model will often emulate this structure in its new answer.
+
+### Tips for Few-Shot CoT
+
+- Use a diverse range of examples to cover different aspects of the task
+- Include both positive and negative examples to help the model learn what constitutes a good or bad output
+- Randomly order the examples to prevent biases
+- Make sure the format is consistent across all your examples
+
+## 3. Automatic Chain-of-Thought
+
+**<a href="https://arxiv.org/abs/2210.03493" target="_blank">Automatic Chain of Thought (Auto-CoT)</a>** uses LLMs to generate and choose chain-of-thought prompts without needing manual
+generation like the few-shot technique. Auto-CoT uses language models to produce structured examples and solutions, which then serve as guiding demonstrations for LLM tasks.
+
+### How Automatic Chain-of-Thought Works
+
+Auto-CoT generates reasoning chains for CoT demonstrations in two stages:
+
+1. **Question Clustering**: The system using Sentence-BERT embeddings to cluster questions based on semantic similarity.
+2. **Demonstration Sampling**: It selects a representative question from each cluster and generates a reasoning chain using Zero-Shot CoT. This creates diverse and effective demonstrations without manual intervention.
+
+![Automatic Chain-of-Thought](/static/blog/chain-of-thought/automatic-cot.webp)
+
+_Image source: Automatic Chain-of-Thought (Zhang et al.)_
+
+For example, given the problem "If a train travels 120 miles in 2 hours, what is its average speed?" Auto-CoT can break it down into steps like:
+
+1. Start with distance traveled of 120 miles and 2 hours of time taken
+2. Recall the formula of `Average Speed = Total Distance / Total Time`
+3. Plug in the values: `Average Speed = 120 miles / 2 hours`
+4. Perform the calculation: `Average Speed = 60 miles / hour`
+5. Conclude “The train's average speed is 60 miles per hour. ”
+
+The system would use this approach for similar problems within the same cluster, ensuring consistent reasoning patterns for related questions.
+
+## 4. Multimodal Chain-of-Thought
+
+**<a href="https://arxiv.org/abs/2302.00923" target="_blank">Multimodal Chain-of-Thought (CoT)</a>** method lets models process and integrate multiple types of information, such as images and text for advanced reasoning.
+
+![Multimodal Chain-of-Thought](/static/blog/chain-of-thought/multimodal-cot.webp)
+
+_Image source: Multimodal Chain-of-Thought (Zhang et al.)_
+
+For example, when analyzing a beach photograph to determine its popularity, a model using multimodal CoT would first identify visual elements (crowded shoreline, full parking lots, numerous umbrellas), then combine these observations with contextual knowledge about seasonal tourism patterns to reach a well-reasoned conclusion.
+
+By making each step of the reasoning process explicit, multimodal CoT not only improves the accuracy of AI systems but also makes their decision-making process more transparent and interpretable.
+
+## Advanced Technique: Self-Consistency Sampling
+
+**<a href="https://arxiv.org/abs/2203.11171" target="_blank">Self-consistency</a>** with few-shot prompting is an advanced technique that combines the benefits of few-shot learning and multiple reasoning paths to improve the accuracy of AI model outputs. It has been show to improve performance on various tasks, for example, on the GSM8K test, self-consistency improved results by `17.9%`, on the SVAMP test by `11%`, and on the AQuA test by `12.2%`.
+
+Here's how it works:
+
+1. The model is provided with a small number of examples (typically 2-5) to guide its understanding of the task (few-shot).
+2. The same prompt is run multiple times, generating multiple reasoning paths and outputs.
+3. The model compares the outputs to identify the most consistent or frequently occurring answer.
+4. Final selection: The most consistent result is chosen as the final output.
+
+### How to Implement Self-Consistency Sampling (Example)
+
+Self-consistency helps your model cross-check multiple reasoning paths. Here’s a simplified example:
+
+```python
+import openai
+import statistics
+
+openai.api_key = "YOUR_API_KEY"
+
+prompt = """You are a helpful AI that reasons step by step.
+
+Q: A person has 20 candies. They give away 7 candies. How many remain?
+Let's think step by step.
+"""
+
+# Generate multiple responses
+answers = []
+n_samples = 5
+for _ in range(n_samples):
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo",
+        messages=prompt,
+        temperature=0.7,  # slightly higher temperature for variety
+        max_tokens=150
+    )
+
+  # Extract the assistant's reply text
+    text = response.choices[0].message['content']
+
+    # Simple parse: look for 'The answer is X'
+    # In production, you'd probably need a more robust parsing strategy
+    if "The answer is" in text:
+
+# Get the part after "The answer is"
+after_answer_is = text.split("The answer is")[-1].strip()
+
+# Split on whitespace and take the first token as the numeric answer
+# e.g., "13." -> "13." -> remove trailing punctuation if needed
+raw_answer = after_answer_is.split()[0].rstrip(".!?")
+answers.append(raw_answer)
+
+# Determine the most common final answer
+if answers:
+final_answer = statistics.mode(answers)
+print("Collected Answers:", answers)
+print("Final Answer (most common):", final_answer)
+else:
+print("No answers found in the responses.")
+```
+
+By sampling multiple completions and voting on the final answer, you reduce the chance of a single chain-of-thought error. This is especially valuable in critical applications like finance or healthcare.
+
+<CallToAction
+  title="Want to track multiple reasoning paths? ⚡️"
+  description="Helicone helps you monitor and compare Chain-of-Thought prompt variations."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
+
+## Benefits of Chain-of-Thought Prompting
+
+### Improved Accuracy
+
+By breaking a problem into smaller steps, CoT prompting makes it easier for the model to spot errors and refine each stage of the solution. This is especially useful for multi-step tasks, such as math problems or logical puzzles, where each step serves as a checkpoint to ensure accuracy.
+
+### Greater Transparency
+
+When a LLM outlines its reasoning step by step, users can see exactly how it arrives at its conclusions. This transparency builds trust in the model’s responses and makes it simpler to identify and correct mistakes when something goes wrong.
+
+### Improved Creativity and Symbolic Reasoning
+
+CoT significantly improves a model’s ability to think abstractly and solve complex problems that require symbolic or logical reasoning. For instance:
+
+- **Symbolic Reasoning**: Splitting an equation like `2+3=5` into discrete components—numbers, addition, result—helps the model process and verify each part.
+- **Logical Reasoning**: Drawing conclusions based on facts, like knowing all birds can fly and assuming a penguin is a bird. The model would then conclude that a penguin can fly, even though this is not true in reality. CoT helps models improve in both symbolic and logical reasoning, making them better at solving more complex problems.
+
+Because of the underlying transformer architecture, CoT can now generate more creative and sophisticated solution paths, broadening its applications in both research and real-world scenarios.
+
+## Chain-of-Thought Prompting vs. Other Methods
+
+### CoT vs. Standard Prompting
+
+Standard prompting methods mainly focus on getting the right answer from the LLM. They may give some context or reword the question, but they usually don’t ask the LLM to explain how it reached its answer.
+
+### CoT vs. Few-Shot Prompting
+
+Both techniques use examples, but they differ in an important way. <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank">Few-shot prompting</a> gives the model just a few examples that are similar to what you want it to do. For instance, it might show a few solutions to problems that are alike.
+
+### CoT vs. Tree-of-Thought Prompting
+
+Both Chain-of-Thought (CoT) and <a href="https://www.helicone.ai/blog/tree-of-thought-prompting" target="_blank">Tree-of-Thought (ToT)</a> are prompting strategies that can be applied to large language models to improve their reasoning capabilities. CoT follows a linear approach where each step builds directly on previous reasoning. ToT uses a tree-like structure where multiple reasoning paths can be explored simultaneously.
+
+While both enhance problem-solving, they differ in complexity. CoT uses straightforward sequential reasoning, while ToT employs search algorithms like breadth-first search (BFS) and depth-first search (DFS) to systematically explore multiple solution paths. This makes ToT more computationally intensive but potentially more thorough for complex problems.
+
+Both techniques can be applied to various language models, with ToT being particularly useful for tasks requiring exploration of multiple possibilities or extended reasoning chains.
+
+## Difference Between Prompt Chaining and Chain of Thought
+
+Prompt chaining and Chain of Thought are distinct techniques for working with large language models. Prompt chaining breaks complex tasks into sequential subtasks, where the output of one prompt becomes input for the next. Chain of Thought focuses on making reasoning explicit within a single prompt by showing step-by-step logic.
+
+**Example of prompt chaining for analyzing a book:**
+
+- First prompt: get plot summary
+- Second prompt: analyze themes using that summary
+- Third prompt: generate review using both outputs
+
+**Example of Chain of Thought for the same task:**
+
+"Let's analyze this book step by step:
+
+- The plot centers on...
+- This suggests the main theme is...
+- Therefore, my analysis is..."
+
+## Conclusion
+
+Chain-of-Thought prompting fundamentally changes how we interact with LLMs. By breaking down complex reasoning into visible steps, we can achieve more reliable, traceable outputs. To implement effectively:
+
+- Choose appropriate CoT techniques for your use case (i.e. zero-shot CoT for simple tasks, few-shot for complex problems)
+- Build systematic validation processes (i.e. validate with human or through self-consistency checks)
+- Optimize prompts through systematic testing and user feedback
+- Use analytics tools to track prompt performance and optimization. <a href="https://www.helicone.ai/" target="_blank">Helicone</a> is a great option to start.
+
+<CallToAction
+  title="Ready to optimize your prompts? 💡"
+  description="Join 10,000 developers who use Helicone to monitor performance, trace reasoning paths and optimize their prompts."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+### You might find these useful:
+
+- **<a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank">Prompt Engineering Tools & Techniques</a>**
+- **<a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank">How to Test Your LLM Prompts</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-management" target="_blank">What is Prompt Management?</a>**
+
+<Questions />

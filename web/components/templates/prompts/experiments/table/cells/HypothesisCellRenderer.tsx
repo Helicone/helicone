@@ -159,8 +159,18 @@ export const HypothesisCellRenderer = forwardRef<
           requestsData.responseBody.response.choices[0].message.content
         );
         setRunning(false);
+      } else if (
+        // if the initial model is claude
+        requestsData?.responseBody?.response?.content &&
+        requestsData?.responseBody?.response?.content?.length > 0
+      ) {
+        setContent(requestsData.responseBody.response.content[0].text);
+        setRunning(false);
       }
-    }, [requestsData?.responseBody?.response?.choices]);
+    }, [
+      requestsData?.responseBody?.response?.choices,
+      requestsData?.responseBody?.response?.content,
+    ]);
 
     useEffect(() => {
       if (content || (promptTemplate?.helicone_template as any)?.messages) {
@@ -168,10 +178,12 @@ export const HypothesisCellRenderer = forwardRef<
           model: initialModel,
           messages: [
             ...((promptTemplate?.helicone_template as any)?.messages ?? []),
-            {
-              role: "assistant",
-              content: content,
-            },
+            content
+              ? {
+                  role: "assistant",
+                  content: content,
+                }
+              : null,
           ],
         });
       }
@@ -191,8 +203,16 @@ export const HypothesisCellRenderer = forwardRef<
       setRunning(false);
     };
 
+    const handleRunHypothesisIfRequired = async (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      if (!content) {
+        await handleRunHypothesis(e);
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       runHypothesis: () => handleRunHypothesis(),
+      runHypothesisIfRequired: () => handleRunHypothesisIfRequired(),
     }));
 
     if (running) {
@@ -271,7 +291,7 @@ export const HypothesisCellRenderer = forwardRef<
                     </TooltipTrigger>
                     <TooltipContent
                       side="left"
-                      className="text-[11px] p-0 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50/80 dark:bg-yellow-950/50"
+                      className="text-[11px] py-px px-1 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50 dark:bg-yellow-950"
                     >
                       Prompt has changed since this cell was last run
                     </TooltipContent>
@@ -281,7 +301,10 @@ export const HypothesisCellRenderer = forwardRef<
             </div>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[800px] max-h-[80vh] overflow-y-auto p-0"
+            className="w-[800px] overflow-y-auto p-0"
+            style={{
+              maxHeight: "var(--radix-popover-content-available-height)",
+            }}
             alignOffset={10}
             side="bottom"
             align="start"
@@ -306,7 +329,7 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <Button
           variant="ghost"
-          className="w-6 h-6 m-2 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-1 right-1"
+          className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-2 right-2"
           onClick={handleRunHypothesis}
         >
           <PlayIcon className="w-4 h-4" />

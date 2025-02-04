@@ -11,12 +11,8 @@ import { useState } from "react";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { InfoIcon } from "lucide-react";
+
+import { LLMUsageItem } from "./InvoiceSheetLLMUsage";
 
 export const InvoiceSheet: React.FC = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -114,58 +110,39 @@ export const InvoiceSheet: React.FC = () => {
                           },
                           index: number
                         ) => (
-                          <div
+                          <LLMUsageItem
+                            item={item}
+                            formatCurrency={formatCurrency}
                             key={index}
-                            className="flex justify-between items-center text-sm"
-                          >
-                            <div className="flex gap-1 items-center">
-                              <span>{item.model}</span>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <InfoIcon className="w-3 h-3 text-slate-500" />
-                                </TooltipTrigger>
-                                <TooltipContent className="flex flex-col gap-2 w-full">
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Completion Tokens:
-                                    </span>
-                                    <span>
-                                      {item.completion_tokens.toLocaleString()}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Prompt Tokens:
-                                    </span>
-                                    <span>
-                                      {item.prompt_tokens.toLocaleString()}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Cost/1K Completion Tokens:
-                                    </span>
-                                    <span>
-                                      {formatCurrency(
-                                        item.totalCost.completion_token * 1000
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium mr-3">
-                                      Cost/1K Prompt Tokens:
-                                    </span>
-                                    <span>
-                                      {formatCurrency(
-                                        item.totalCost.prompt_token * 1000
-                                      )}
-                                    </span>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <span>{formatCurrency(item.amount)}</span>
-                          </div>
+                          />
+                        )
+                      )}
+                    </>
+                  )}
+                  {upcomingInvoice.data.data.evaluators_usage.length > 0 && (
+                    <>
+                      <h4 className="font-medium">Evaluators</h4>
+                      {upcomingInvoice.data.data.evaluators_usage.map(
+                        (
+                          item: {
+                            amount: number;
+                            description: string;
+                            model: string;
+                            provider: string;
+                            prompt_tokens: number;
+                            completion_tokens: number;
+                            totalCost: {
+                              completion_token: number;
+                              prompt_token: number;
+                            };
+                          },
+                          index: number
+                        ) => (
+                          <LLMUsageItem
+                            item={item}
+                            formatCurrency={formatCurrency}
+                            key={index}
+                          />
                         )
                       )}
                     </>

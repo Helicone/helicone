@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { Result } from "../../../lib/result";
-import { getStripeCustomerFromNext } from "../../../utlis/stripeHelpers";
+import { getStripeCustomerFromNext } from "../../../utils/stripeHelpers";
 
 export async function getSubscriptions(
   req: NextApiRequest,

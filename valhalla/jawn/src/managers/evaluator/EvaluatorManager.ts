@@ -1,23 +1,24 @@
 import {
   CreateEvaluatorParams,
   EvaluatorResult,
+  TestInput,
   UpdateEvaluatorParams,
 } from "../../controllers/public/evaluatorController";
-import { OPENAI_KEY } from "../../lib/clients/constant";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import {
-  Experiment,
-  ExperimentDatasetRow,
-} from "../../lib/stores/experimentStore";
-import { BaseManager } from "../BaseManager";
-import {
   ExperimentOutputForScores,
   ExperimentV2Manager,
 } from "../../managers/experiment/ExperimentV2Manager";
-import { ScoreManager } from "../score/ScoreManager";
+import { HeliconeRequest, LlmSchema } from "../../packages/llm-mapper/types";
+import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
+import { ScoreManager } from "../score/ScoreManager";
+import { convertTestInputToHeliconeRequest } from "./convert";
+import { runLastMileEvaluator } from "./lastmile/run";
+import { pythonEvaluator } from "./pythonEvaluator";
+import { LastMileConfigForm } from "./types";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -53,6 +54,36 @@ export function getEvaluatorScoreName(evaluatorName: string) {
 }
 
 export class EvaluatorManager extends BaseManager {
+  testLastMileEvaluator({
+    config,
+    testInput,
+  }: {
+    config: LastMileConfigForm;
+    testInput: TestInput;
+  }) {
+    return runLastMileEvaluator(
+      convertTestInputToHeliconeRequest(testInput),
+      config,
+      testInput.inputs
+    );
+  }
+  testPythonEvaluator({
+    code,
+    requestBodyString,
+    responseString,
+  }: {
+    code: string;
+    requestBodyString: string;
+    responseString: string;
+  }) {
+    return pythonEvaluator({
+      code,
+      requestBodyString,
+      responseString,
+      orgId: this.authParams.organizationId,
+      uniqueId: "0",
+    });
+  }
   async getExperiments(evaluatorId: string) {
     const result = await dbExecute<{
       experiment_id: string;
@@ -72,22 +103,87 @@ export class EvaluatorManager extends BaseManager {
     );
     return result;
   }
-  private async runLLMEvaluator({
-    scoringType,
+
+  async runLLMEvaluatorScore({
     evaluator,
     inputRecord,
-    run,
+    request_id,
+    requestBody,
+    responseBody,
+    heliconeRequest,
   }: {
-    scoringType: "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE";
     evaluator: EvaluatorResult;
     inputRecord: {
       inputs: Record<string, string>;
       autoInputs?: Record<string, string>;
     };
-    run: ExperimentOutputForScores;
-  }): Promise<Result<null, string>> {
+    request_id: string;
+    requestBody: LlmSchema;
+    responseBody: LlmSchema;
+    heliconeRequest: HeliconeRequest;
+  }): Promise<Result<{ score: number | boolean }, string>> {
+    if (evaluator.last_mile_config) {
+      return runLastMileEvaluator(heliconeRequest, evaluator.last_mile_config, {
+        inputs: inputRecord.inputs,
+        autoInputs: inputRecord.autoInputs,
+      });
+    } else if (evaluator.llm_template) {
+      const llmAsAJudge = new LLMAsAJudge({
+        scoringType: evaluator.scoring_type as
+          | "LLM-CHOICE"
+          | "LLM-BOOLEAN"
+          | "LLM-RANGE",
+        llmTemplate: evaluator.llm_template,
+        inputRecord,
+        outputBody: JSON.stringify(responseBody),
+        inputBody: JSON.stringify(requestBody),
+        promptTemplate: evaluator.llm_template.promptTemplate,
+        evaluatorName: evaluator.name,
+        organizationId: this.authParams.organizationId,
+      });
+      const result = await llmAsAJudge.evaluate();
+      if (result.error) {
+        return err(result.error);
+      }
+      return ok({ score: result.data!.score });
+    } else if (evaluator.code_template) {
+      const codeResult = await pythonEvaluator({
+        code: evaluator.code_template,
+        requestBodyString: JSON.stringify(requestBody),
+        responseString: JSON.stringify(responseBody),
+        uniqueId: request_id,
+        orgId: this.authParams.organizationId,
+      });
+      if (codeResult.error) {
+        return err(codeResult.error);
+      }
+      if (codeResult.data?.output == undefined) {
+        return err("Score is undefined");
+      }
+      if (codeResult.data?.output.toLowerCase() === "true") {
+        return ok({ score: true });
+      } else if (codeResult.data?.output.toLowerCase() === "false") {
+        return ok({ score: false });
+      } else {
+        return ok({ score: +codeResult.data?.output });
+      }
+    } else {
+      return err("Evaluator type not supported");
+    }
+  }
+
+  private async getContent(requestId: string): Promise<
+    Result<
+      {
+        requestBody: string;
+        responseBody: string;
+      },
+      string
+    >
+  > {
     const reqManager = new RequestManager(this.authParams);
-    const request = await reqManager.getRequestById(run.request_id);
+    const request = await reqManager.uncachedGetRequestByIdWithBody(requestId);
+
     if (request.error) {
       return err(request.error);
     }
@@ -96,51 +192,125 @@ export class EvaluatorManager extends BaseManager {
       return err("Request response not found");
     }
 
-    const contentResponse = await fetch(request.data.signed_body_url);
-    if (contentResponse.ok) {
-      const text = await contentResponse.text();
-      let content = JSON.parse(text);
-      if (
-        request.data.asset_urls &&
-        Object.keys(request.data.asset_urls).length > 0
-      ) {
-        content = placeAssetIdValues(request.data.asset_urls, content);
-      }
-
-      const llmAsAJudge = new LLMAsAJudge({
-        openAIApiKey: OPENAI_KEY!,
-        scoringType,
-        llmTemplate: evaluator.llm_template,
-        inputRecord,
-        output: JSON.stringify(content),
-        evaluatorName: evaluator.name,
-      });
-      try {
-        const result = await llmAsAJudge.evaluate();
-
-        const scoreName = getEvaluatorScoreName(evaluator.name);
-
-        const scoreManager = new ScoreManager(this.authParams);
-        if (result.score == undefined || result.score == null) {
-          return err("Score is undefined");
-        }
-        const requestFeedback = await scoreManager.addScores(
-          run.request_id,
-          {
-            [scoreName]: result.score,
-          },
-          0,
-          evaluator.id
-        );
-
-        return ok(null);
-      } catch (e) {
-        console.error("error evaluating", e);
-        return err("Error evaluating");
-      }
+    if (
+      request.data.asset_urls &&
+      Object.keys(request.data.asset_urls).length > 0
+    ) {
+      request.data.request_body = placeAssetIdValues(
+        request.data.asset_urls,
+        request.data.request_body
+      );
     }
+    return ok({
+      requestBody: request.data.request_body,
+      responseBody: request.data.response_body,
+    });
+  }
 
-    return err("Failed to get request response");
+  private async runEvaluatorAndPostScore({
+    evaluator,
+    inputRecord,
+    run,
+    requestBody,
+    responseBody,
+  }: {
+    evaluator: EvaluatorResult;
+    inputRecord: {
+      inputs: Record<string, string>;
+      autoInputs?: Record<string, string>;
+    };
+    run: ExperimentOutputForScores;
+    requestBody: any;
+    responseBody: any;
+  }): Promise<Result<null, string>> {
+    try {
+      const scoreResult = await this.runLLMEvaluatorScore({
+        evaluator,
+        inputRecord,
+        request_id: run.request_id,
+        requestBody,
+        responseBody,
+        heliconeRequest: {
+          request_id: run.request_id,
+          request_created_at: new Date().toISOString(),
+          request_body: requestBody,
+          request_path: "",
+          request_user_id: null,
+          request_properties: null,
+          request_model: null,
+          model_override: null,
+          response_id: null,
+          response_created_at: null,
+          response_status: 200,
+          response_model: null,
+          helicone_user: null,
+          provider: "OPENAI",
+          delay_ms: null,
+          time_to_first_token: null,
+          total_tokens: null,
+          prompt_tokens: null,
+          completion_tokens: null,
+          prompt_id: null,
+          llmSchema: null,
+          country_code: null,
+          asset_ids: null,
+          asset_urls: null,
+          response_body: responseBody,
+          scores: {},
+          properties: {},
+          assets: [],
+          target_url: "",
+          model: "gpt-3.5-turbo",
+        },
+      });
+      if (scoreResult.error) {
+        return err(scoreResult.error);
+      }
+
+      const scoreName = getEvaluatorScoreName(evaluator.name);
+
+      const scoreManager = new ScoreManager(this.authParams);
+      if (
+        scoreResult.data?.score == undefined ||
+        scoreResult.data?.score == null
+      ) {
+        return err("Score is undefined");
+      }
+      const requestFeedback = await scoreManager.addScores(
+        run.request_id,
+        {
+          [scoreName]: scoreResult.data?.score,
+        },
+        0,
+        evaluator.id
+      );
+
+      return ok(null);
+    } catch (e) {
+      console.error("error evaluating", e);
+      return err("Error evaluating" + JSON.stringify(e));
+    }
+  }
+
+  async runEvaluator(
+    evaluator: EvaluatorResult,
+    inputRecord: {
+      inputs: Record<string, string>;
+      autoInputs?: Record<string, string>;
+    },
+    run: ExperimentOutputForScores
+  ) {
+    const content = await this.getContent(run.request_id);
+    if (content.error) {
+      return err(content.error);
+    }
+    return this.runEvaluatorAndPostScore({
+      evaluator,
+      inputRecord,
+      run,
+      requestBody: content.data?.requestBody ?? "",
+      responseBody: content.data?.responseBody ?? "",
+    });
   }
 
   async runExperimentEvaluators(
@@ -166,23 +336,23 @@ export class EvaluatorManager extends BaseManager {
 
     const x = await Promise.all(
       experimentData.data?.map(async (request) => {
-        const evaluationPromises = [];
+        const content = await this.getContent(request.request_id);
+        if (content.error) {
+          return err(content.error);
+        }
+        const evaluationPromises: Promise<Result<null, string>>[] = [];
         for (const evaluator of evaluators.data ?? []) {
           const scoreName = getEvaluatorScoreName(evaluator.name);
           if (!(request.scores && scoreName in request.scores)) {
-            if (evaluator.scoring_type.startsWith("LLM")) {
-              evaluationPromises.push(
-                this.runLLMEvaluator({
-                  scoringType: evaluator.scoring_type as
-                    | "LLM-CHOICE"
-                    | "LLM-BOOLEAN"
-                    | "LLM-RANGE",
-                  evaluator,
-                  inputRecord: request.input_record,
-                  run: request,
-                })
-              );
-            }
+            evaluationPromises.push(
+              this.runEvaluatorAndPostScore({
+                evaluator,
+                inputRecord: request.input_record,
+                run: request,
+                requestBody: content.data?.requestBody ?? "",
+                responseBody: content.data?.responseBody ?? "",
+              })
+            );
           }
         }
         return Promise.all(evaluationPromises);
@@ -271,7 +441,9 @@ export class EvaluatorManager extends BaseManager {
         evaluator.llm_template,
         evaluator.organization_id,
         evaluator.updated_at,
-        evaluator.name
+        evaluator.name,
+        evaluator.code_template,
+        evaluator.last_mile_config
       FROM evaluator_experiments_v3
       left join evaluator on evaluator_experiments_v3.evaluator = evaluator.id
       WHERE evaluator_experiments_v3.experiment = $1
@@ -329,15 +501,17 @@ export class EvaluatorManager extends BaseManager {
 
     const result = await dbExecute<EvaluatorResult>(
       `
-      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name
+      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name, last_mile_config
       `,
       [
         params.scoring_type,
         params.llm_template,
         this.authParams.organizationId,
         params.name,
+        params.code_template,
+        params.last_mile_config,
       ]
     );
 
@@ -349,7 +523,7 @@ export class EvaluatorManager extends BaseManager {
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
       FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
@@ -362,7 +536,7 @@ export class EvaluatorManager extends BaseManager {
   async queryEvaluators(): Promise<Result<EvaluatorResult[], string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template, last_mile_config
       FROM evaluator
       WHERE organization_id = $1
       ORDER BY created_at DESC
@@ -391,6 +565,16 @@ export class EvaluatorManager extends BaseManager {
       updateValues.push(params.llm_template);
     }
 
+    if (params.code_template !== undefined) {
+      updateFields.push(`code_template = $${paramIndex++}`);
+      updateValues.push(params.code_template);
+    }
+
+    if (params.last_mile_config !== undefined) {
+      updateFields.push(`last_mile_config = $${paramIndex++}`);
+      updateValues.push(params.last_mile_config);
+    }
+
     if (updateFields.length === 0) {
       return err("No fields to update");
     }
@@ -400,7 +584,7 @@ export class EvaluatorManager extends BaseManager {
       UPDATE evaluator
       SET ${updateFields.join(", ")}
       WHERE id = $${paramIndex++} AND organization_id = $${paramIndex++}
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
       `,
       [...updateValues, evaluatorId, this.authParams.organizationId]
     );

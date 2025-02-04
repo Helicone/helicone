@@ -1,5 +1,5 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
 import { ReactElement, ReactNode, useState } from "react";
@@ -21,6 +21,7 @@ import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
+import { env } from "next-runtime-env";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,11 +54,42 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
 
+export function SupabaseProvider({
+  children,
+  initialSession,
+}: {
+  children: React.ReactNode;
+  initialSession?: Session | null;
+}) {
+  const [supabaseClient] = useState(() => {
+    if (
+      env("NEXT_PUBLIC_SUPABASE_URL") &&
+      env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    ) {
+      return createBrowserSupabaseClient({
+        supabaseUrl: env("NEXT_PUBLIC_SUPABASE_URL"),
+        supabaseKey: env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+      });
+    }
+    return null;
+  });
+
+  if (!supabaseClient) {
+    return <>{children}</>;
+  }
+
+  return (
+    <SessionContextProvider
+      supabaseClient={supabaseClient}
+      initialSession={initialSession}
+    >
+      {children}
+    </SessionContextProvider>
+  );
+}
+
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const queryClient = new QueryClient();
-
-  // Create a new supabase browser client on every first render.
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
 
@@ -66,10 +98,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <>
       <PHProvider>
-        <SessionContextProvider
-          supabaseClient={supabaseClient}
-          initialSession={pageProps.initialSession}
-        >
+        <SupabaseProvider>
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
@@ -86,7 +115,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               </DndProvider>
             </NotificationProvider>
           </QueryClientProvider>
-        </SessionContextProvider>
+        </SupabaseProvider>
       </PHProvider>
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
@@ -102,6 +131,14 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           id="pylon-snippet"
           dangerouslySetInnerHTML={{
             __html: `(function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/f766dfd3-28f8-40a8-872f-351274cbd306");var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();`,
+          }}
+        />
+      )}
+      {trackingEnabled && (
+        <Script
+          id="rb2b-snippet"
+          dangerouslySetInnerHTML={{
+            __html: `!function(){var reb2b=window.reb2b=window.reb2b||[];if(reb2b.invoked)return;reb2b.invoked=true;reb2b.methods=["identify","collect"];reb2b.factory=function(method){return function(){var args=Array.prototype.slice.call(arguments);args.unshift(method);reb2b.push(args);return reb2b;}};for(var i=0;i<reb2b.methods.length;i++){var key=reb2b.methods[i];reb2b[key]=reb2b.factory(key);}reb2b.load=function(key){var script=document.createElement("script");script.type="text/javascript";script.async=true;script.src="https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"+key+"/LNKLDHM4VMOJ.js.gz";var first=document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script,first);};reb2b.SNIPPET_VERSION="1.0.1";reb2b.load("LNKLDHM4VMOJ");}();`,
           }}
         />
       )}

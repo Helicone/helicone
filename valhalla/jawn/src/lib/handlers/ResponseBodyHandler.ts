@@ -1,4 +1,3 @@
-import { unsupportedImage } from "../../utils/helpers";
 import {
   calculateModel,
   getModelFromResponse,
@@ -104,6 +103,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.usage.totalTokens = usage.totalTokens;
       context.usage.heliconeCalculated = usage.heliconeCalculated;
       context.usage.cost = usage.cost;
+      context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
+      context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
 
       return await super.handle(context);
     } catch (error: any) {
@@ -146,10 +147,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           imageModelParser.processResponseBody(responseBody);
       }
     }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
 
     return imageModelParsingResponse;
   }
@@ -223,7 +220,13 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         log.response.status,
         responseBody
       );
-      const parser = this.getBodyProcessor(isStream, provider, responseBody);
+      const model = context.processedLog.model;
+      const parser = this.getBodyProcessor(
+        isStream,
+        provider,
+        responseBody,
+        model
+      );
       return await parser.parse({
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
@@ -298,13 +301,17 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   getBodyProcessor(
     isStream: boolean,
     provider: string,
-    responseBody: any
+    responseBody: any,
+    model?: string
   ): IBodyProcessor {
     if (!isStream && provider === "ANTHROPIC" && responseBody) {
       return new AnthropicBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
       return new GoogleBodyProcessor();
-    } else if (isStream && provider === "ANTHROPIC") {
+    } else if (
+      isStream &&
+      (provider === "ANTHROPIC" || model?.includes("claude"))
+    ) {
       return new AnthropicStreamBodyProcessor();
     } else if (isStream && provider === "GOOGLE") {
       return new GoogleStreamBodyProcessor();

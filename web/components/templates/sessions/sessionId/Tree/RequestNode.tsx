@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
-import StatusBadge from "../../../requestsV2/statusBadge";
+import StatusBadge from "../../../requests/statusBadge";
 import { clsx } from "../../../../shared/clsx";
 import {
   Tooltip,
@@ -23,7 +23,7 @@ const bgColor = {
 const NAME_FOR = {
   tool: (node: TreeNodeData) => node.trace?.request.model.split(":")[1],
   vector_db: (node: TreeNodeData) =>
-    (node.trace?.request.requestBody as any).operation ??
+    (node.trace?.request.raw.request as any).operation ??
     node.trace?.request.model,
   LLM: (node: TreeNodeData) => node.trace?.request.model,
 };
@@ -54,10 +54,10 @@ export function RequestNode(props: {
   } = props;
 
   const promptId = useMemo(() => {
-    return node.trace?.request.customProperties?.["Helicone-Prompt-Id"] as
-      | string
-      | undefined;
-  }, [node.trace?.request.customProperties]);
+    return node.trace?.request.heliconeMetadata?.customProperties?.[
+      "Helicone-Prompt-Id"
+    ] as string | undefined;
+  }, [node.trace?.request.heliconeMetadata.customProperties]);
 
   const router = useRouter();
 
@@ -142,10 +142,12 @@ export function RequestNode(props: {
           </span>
         </Row>
         <Row className="flex-shrink-0 items-center gap-2">
-          {node.trace?.request.status && (
+          {node.trace?.request.heliconeMetadata?.status && (
             <StatusBadge
-              statusType={node.trace?.request.status.statusType}
-              errorCode={node.trace?.request.status.code}
+              statusType={
+                node.trace?.request.heliconeMetadata.status.statusType
+              }
+              errorCode={node.trace?.request.heliconeMetadata.status.code}
             />
           )}
         </Row>

@@ -864,7 +864,8 @@ nfig,
 
   if (
     org?.currentOrg?.tier !== "enterprise" &&
-    org?.currentOrg?.tier !== "pro-20240913"
+    org?.currentOrg?.tier !== "pro-20240913" &&
+    org?.currentOrg?.tier !== "pro-20250202"
   ) {
     return (
       <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
@@ -1095,7 +1096,7 @@ export default WebhooksPage;
                 {tier.name === "Free" && (
                   <div className="h-32 border-t border-b border-gray-100 flex items-center w-full justify-center">
                     <p className="text-center font-medium text-gray-500 px-4">
-                      Free for up to 100k requests per month
+                      Free for up to 10k requests per month
                     </p>
                   </div>
                 )}
