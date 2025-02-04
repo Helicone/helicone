@@ -9,6 +9,8 @@ import base64
 import pytest
 from dotenv import load_dotenv
 import pathlib
+import json
+import subprocess
 
 # Load environment variables from .env file
 load_dotenv()
@@ -358,6 +360,87 @@ class TestHeliconeIntegrations:
             },
         )
         assert message.content[0].text is not None
+
+    def test_generate_basic(self):
+        """Test basic prompt generation without variables"""
+        cmd = [
+            "curl",
+            "-X",
+            "POST",
+            os.getenv("HELICONE_GENERATE_BASE_URL"),
+            "-H",
+            f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps(
+                {
+                    "promptId": "test-prompt-id",
+                    "userId": "test-user",
+                    "sessionId": SESSION_ID,
+                }
+            ),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response is not None
+
+    def test_generate_with_variables(self):
+        """Test prompt generation with variables"""
+        cmd = [
+            "curl",
+            "-X",
+            "POST",
+            os.getenv("HELICONE_GENERATE_BASE_URL"),
+            "-H",
+            f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps(
+                {
+                    "promptId": "test-prompt-id",
+                    "variables": {"location": "Portugal", "time": "2:43"},
+                    "userId": "test-user",
+                    "sessionId": SESSION_ID,
+                }
+            ),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response is not None
+
+    def test_generate_with_chat(self):
+        """Test prompt generation with chat history"""
+        cmd = [
+            "curl",
+            "-X",
+            "POST",
+            os.getenv("HELICONE_GENERATE_BASE_URL"),
+            "-H",
+            f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps(
+                {
+                    "promptId": "test-prompt-id",
+                    "chat": [
+                        "User: Can you help me with my homework?",
+                        "Assistant: Of course! What subject are you working on?",
+                        "User: Math, I need help with algebra.",
+                    ],
+                    "userId": "test-user",
+                    "sessionId": SESSION_ID,
+                }
+            ),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        assert result.returncode == 0
+        response = json.loads(result.stdout)
+        assert response is not None
 
 
 if __name__ == "__main__":
