@@ -363,19 +363,28 @@ class TestHeliconeIntegrations:
 
     def test_generate_basic(self):
         """Test basic prompt generation without variables"""
+        generate_url = os.getenv("HELICONE_GENERATE_BASE_URL")
+        if not generate_url:
+            pytest.skip("HELICONE_GENERATE_BASE_URL not set in environment")
+
         cmd = [
             "curl",
+            "--compressed",
             "-X",
             "POST",
-            os.getenv("HELICONE_GENERATE_BASE_URL"),
+            generate_url,
             "-H",
             f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
             "-H",
+            f"Authorization: Bearer {os.getenv('OPENAI_API_KEY')}",
+            "-H",
             "Content-Type: application/json",
+            "-H",
+            "Helicone-Property-Test: Generate Basic",
             "-d",
             json.dumps(
                 {
-                    "promptId": "test-prompt-id",
+                    "promptId": "helicone-classifier",
                     "userId": "test-user",
                     "sessionId": SESSION_ID,
                 }
@@ -390,13 +399,18 @@ class TestHeliconeIntegrations:
         """Test prompt generation with variables"""
         cmd = [
             "curl",
+            "--compressed",
             "-X",
             "POST",
             os.getenv("HELICONE_GENERATE_BASE_URL"),
             "-H",
             f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
             "-H",
+            f"Authorization: Bearer {os.getenv('OPENAI_API_KEY')}",
+            "-H",
             "Content-Type: application/json",
+            "-H",
+            "Helicone-Property-Test: Generate With Variables",
             "-d",
             json.dumps(
                 {
@@ -416,13 +430,18 @@ class TestHeliconeIntegrations:
         """Test prompt generation with chat history"""
         cmd = [
             "curl",
+            "--compressed",
             "-X",
             "POST",
             os.getenv("HELICONE_GENERATE_BASE_URL"),
             "-H",
             f"Helicone-Auth: Bearer {os.getenv('HELICONE_API_KEY')}",
             "-H",
+            f"Authorization: Bearer {os.getenv('OPENAI_API_KEY')}",
+            "-H",
             "Content-Type: application/json",
+            "-H",
+            "Helicone-Property-Test: Generate With Chat",
             "-d",
             json.dumps(
                 {

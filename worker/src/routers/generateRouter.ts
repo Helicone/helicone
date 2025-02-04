@@ -5,6 +5,7 @@ import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { formatPrompt } from "@helicone/prompts";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
+import { gatewayForwarder } from "./gatewayRouter";
 
 // Handler for generate route
 const generateHandler = async (
@@ -18,7 +19,7 @@ const generateHandler = async (
     try {
       requestData = await requestWrapper.getJson();
     } catch (err) {
-      // If JSON parsing fails, fallback to plain text (assume promptId)
+      // Fallback if JSON parsing fails (assume promptId)
       const text = await requestWrapper.getText();
       requestData = { promptId: text.trim() };
     }
@@ -27,20 +28,29 @@ const generateHandler = async (
       return new Response("Missing promptId", { status: 400 });
     }
 
+    console.log("promptId", promptId);
+
     // Query production prompt version from Supabase using promptId
-    // TODO: Select for isProduction + allow for version selection
     const supabaseClient = createClient<Database>(
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY
     );
     const { data: prodPrompt, error } = await supabaseClient
       .from("prompts_versions")
-      .select("*")
-      .eq("prompt_v2", promptId)
+      .select(
+        `
+        *,
+        prompt_v2!inner (
+          user_defined_id
+        )
+      `
+      )
+      .eq("prompt_v2.user_defined_id", promptId)
       .order("major_version", { ascending: false })
       .order("minor_version", { ascending: false })
       .limit(1)
       .single();
+
     if (error || !prodPrompt) {
       return new Response("Production prompt version not found", {
         status: 404,
@@ -53,55 +63,68 @@ const generateHandler = async (
         ? (prodPrompt.metadata as Record<string, any>)
         : {};
 
-    const providerKey: string | undefined = metadata.providerKey;
+    const providerKey: string | undefined =
+      metadata.providerKey || metadata.provider;
     let targetUrl: string | undefined = metadata.target_url;
     // Fallback mapping for provider target URLs
     const providerTargetMap: { [key: string]: string } = {
-      OPENAI: "https://api.openai.com",
-      ANTHROPIC: "https://api.anthropic.com",
+      OPENAI: "https://api.openai.com/v1/chat/completions",
+      ANTHROPIC: "https://api.anthropic.com/v1/messages",
     };
-    if (!targetUrl && providerKey && providerTargetMap[providerKey]) {
-      targetUrl = providerTargetMap[providerKey];
+    if (!targetUrl && providerKey) {
+      targetUrl = providerTargetMap[providerKey.toUpperCase()];
     }
     if (!targetUrl) {
       return new Response("No target URL found for provider", { status: 500 });
     }
+    console.log("targetUrl", targetUrl);
 
-    // Process helicone_template if available
-    let heliconeTemplate = "";
-    if (prodPrompt.helicone_template) {
-      heliconeTemplate =
-        typeof prodPrompt.helicone_template === "string"
-          ? prodPrompt.helicone_template
-          : JSON.stringify(prodPrompt.helicone_template);
+    // Create the request body using the template
+    let requestBody: any;
+    if (typeof prodPrompt.helicone_template === "object") {
+      requestBody = prodPrompt.helicone_template;
+    } else if (typeof prodPrompt.helicone_template === "string") {
+      requestBody = { prompt: prodPrompt.helicone_template };
     } else {
-      // Fallback: use promptId as default prompt text
-      heliconeTemplate = promptId;
+      requestBody = { prompt: promptId };
     }
 
-    let finalPrompt = heliconeTemplate;
-    if (requestData.variables) {
-      finalPrompt = formatPrompt(heliconeTemplate, requestData.variables);
-    }
-    if (requestData.chat && Array.isArray(requestData.chat)) {
-      // Prepend chat conversation if provided
-      // TODO: Do this correctly
-      finalPrompt = requestData.chat.join("\n") + "\n" + finalPrompt;
+    // Prepare headers: copy existing headers and inject provider key if needed
+    const headers = new Headers(requestWrapper.getHeaders());
+    if (providerKey && !headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${providerKey}`);
     }
 
-    // Override the request body with the final prompt
-    requestData.prompt = finalPrompt;
-    requestWrapper.setBodyKeyOverride(requestData);
+    // Build a new request with the modified body and headers
+    const newRequest = new Request(targetUrl, {
+      method: requestWrapper.getMethod(),
+      headers,
+      body: JSON.stringify(requestBody),
+    });
 
-    // Set the base URL override for forwarding
-    requestWrapper.setBaseURLOverride(targetUrl);
+    // Create a new RequestWrapper from the modified request
+    const newWrapperResult = await RequestWrapper.create(newRequest, env);
+    if (newWrapperResult.error || !newWrapperResult.data) {
+      return new Response(
+        "Failed to create request wrapper: " +
+          (newWrapperResult.error || "No wrapper created"),
+        { status: 500 }
+      );
+    }
+    const newWrapper = newWrapperResult.data;
+    // Set base URL override on the new wrapper
+    newWrapper.setBaseURLOverride(targetUrl);
 
-    // Cast providerKey to Provider; default to 'CUSTOM' if not provided
-    const provider: Provider = providerKey
-      ? (providerKey as Provider)
-      : "CUSTOM";
-    const response = await proxyForwarder(requestWrapper, env, ctx, provider);
-    return response;
+    // Delegate forwarding to the common gateway forwarder
+    return await gatewayForwarder(
+      {
+        targetBaseUrl: targetUrl,
+        setBaseURLOverride: newWrapper.setBaseURLOverride.bind(newWrapper),
+      },
+      newWrapper,
+      env,
+      ctx
+    );
   } catch (e: any) {
     console.error("Error in generate route:", e);
     return new Response("Error in generate route: " + e.message, {
