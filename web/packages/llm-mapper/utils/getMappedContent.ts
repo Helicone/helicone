@@ -171,8 +171,8 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request.slice(0, 10),
-      response: mappedContent.preview.response.slice(0, 1),
+      request: mappedContent.preview.request.slice(0, 30),
+      response: mappedContent.preview.response.slice(0, 30),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
     },
