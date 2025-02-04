@@ -196,8 +196,6 @@ export default function ModelPriceCalculator({
             model: modelCost.model.value,
             provider: prov.provider,
             promptTokens: inputTokensNum,
-            promptCacheWriteTokens: 0,
-            promptCacheReadTokens: 0,
             completionTokens: outputTokensNum,
           });
 
