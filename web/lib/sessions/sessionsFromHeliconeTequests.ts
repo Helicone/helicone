@@ -38,6 +38,8 @@ export function sessionFromHeliconeRequests(
           provider: r.provider,
           sum_completion_tokens: r.completion_tokens ?? 0,
           sum_prompt_tokens: r.prompt_tokens ?? 0,
+          prompt_cache_write_tokens: r.prompt_cache_write_tokens ?? 0,
+          prompt_cache_read_tokens: r.prompt_cache_read_tokens ?? 0,
           sum_tokens: r.completion_tokens ?? 0 + (r.prompt_tokens ?? 0),
         })
       )
