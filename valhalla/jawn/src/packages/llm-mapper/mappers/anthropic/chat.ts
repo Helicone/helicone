@@ -44,7 +44,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -61,7 +62,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -208,7 +210,9 @@ const anthropicContentToMessage = (
   if (content.type === "text") {
     return {
       id: content.id || randomId(),
-      content: content.text || JSON.stringify(content, null, 2),
+      content: (content.text || JSON.stringify(content, null, 2))
+        .replace(/undefined/g, "")
+        .trim(),
       _type: "message",
       role,
     };
@@ -260,16 +264,30 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
   } else {
     const messages: Message[] = [];
 
-    // Handle new Claude 3 format
-    if (response?.type === "message" && response?.content) {
+    // Handle new Claude 3 format and message_stop type
+    if (
+      (response?.type === "message" || response?.type === "message_stop") &&
+      response?.content
+    ) {
       if (Array.isArray(response.content)) {
         for (const content of response.content) {
-          messages.push(anthropicContentToMessage(content, response.role));
+          const message = anthropicContentToMessage(content, response.role);
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       } else {
-        messages.push(
-          anthropicContentToMessage(response.content, response.role)
+        const message = anthropicContentToMessage(
+          response.content,
+          response.role
         );
+        // Clean up any undefined strings in the content
+        if (typeof message.content === "string") {
+          message.content = message.content.replace(/undefined/g, "").trim();
+        }
+        messages.push(message);
       }
     }
     // Handle old format with choices
@@ -277,10 +295,25 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
       for (const choice of response?.choices) {
         if (Array.isArray(choice.content)) {
           for (const content of choice.content) {
-            messages.push(anthropicContentToMessage(content, choice.role));
+            const message = anthropicContentToMessage(content, choice.role);
+            // Clean up any undefined strings in the content
+            if (typeof message.content === "string") {
+              message.content = message.content
+                .replace(/undefined/g, "")
+                .trim();
+            }
+            messages.push(message);
           }
         } else {
-          messages.push(anthropicContentToMessage(choice.content, choice.role));
+          const message = anthropicContentToMessage(
+            choice.content,
+            choice.role
+          );
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       }
     }
