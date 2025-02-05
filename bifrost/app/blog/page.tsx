@@ -48,59 +48,27 @@ function metaDataToBlogStructure(
   metadata: UnPromise<ReturnType<typeof getMetadata>>
 ): ManualBlogStructure {
   if (!metadata) {
-    console.error(`[Blog] Failed to load metadata for folder: ${folderName}`);
-    // Return a default structure instead of throwing
-    return {
-      authors: [
-        {
-          name: "Helicone Team",
-          imageUrl: "/static/blog/helicone-team.webp",
-        },
-      ],
-      title: "Blog Post Unavailable",
-      description:
-        "This blog post is currently unavailable. Please check back later.",
-      badgeText: "insight",
-      date: "",
-      href: `/blog/${folderName}`,
-      imageUrl: "/static/blog/default.webp",
-      time: "",
-    };
+    throw new Error("Metadata is null");
   }
-
-  // Add null checks for author/authors
-  const authorData =
-    metadata.authors && metadata.authors.length > 0
-      ? metadata.authors.map((author) => ({
-          name: author,
-          imageUrl:
-            HEADSHOTS[author as keyof typeof HEADSHOTS] ||
-            "/static/blog/helicone-team.webp",
-        }))
-      : metadata.author
-      ? [
-          {
-            name: metadata.author,
-            imageUrl:
-              HEADSHOTS[metadata.author as keyof typeof HEADSHOTS] ||
-              "/static/blog/helicone-team.webp",
-          },
-        ]
-      : [
-          {
-            name: "Helicone Team",
-            imageUrl: "/static/blog/helicone-team.webp",
-          },
-        ];
-
   return {
-    authors: authorData,
-    title: metadata.title || "Untitled Post",
-    description: metadata.description || "",
+    authors:
+      metadata.authors && metadata.authors.length > 0
+        ? metadata.authors.map((author) => ({
+            name: author,
+            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+          }))
+        : [
+            {
+              name: metadata.author || "",
+              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+            },
+          ],
+    title: metadata.title,
+    description: metadata.description,
     badgeText: metadata.badge || "insight",
     date: metadata?.date ?? "",
     href: `/blog/${folderName}`,
-    imageUrl: metadata?.images ?? "/static/blog/default.webp",
+    imageUrl: metadata?.images ?? "",
     time: metadata?.time ?? "",
   };
 }
@@ -303,6 +271,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "rag-chunking-strategies",
     },
   },
@@ -469,11 +442,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {
