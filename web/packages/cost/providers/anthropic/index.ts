@@ -65,8 +65,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000015,
-      prompt_cache_write_token: 0.000015 * 1.25,
-      prompt_cache_read_token: 0.000015 * 0.1,
       completion_token: 0.000075,
     },
     showInPlayground: true,
@@ -78,8 +76,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
       completion_token: 0.000015,
     },
     showInPlayground: true,
@@ -91,8 +87,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
       completion_token: 0.000015,
     },
     showInPlayground: true,
@@ -104,8 +98,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.000003,
-      prompt_cache_write_token: 0.000003 * 1.25,
-      prompt_cache_read_token: 0.000003 * 0.1,
       completion_token: 0.000015,
     },
     showInPlayground: true,
@@ -117,8 +109,6 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00000025,
-      prompt_cache_write_token: 0.00000025 * 1.25,
-      prompt_cache_read_token: 0.00000025 * 0.1,
       completion_token: 0.00000125,
     },
     showInPlayground: true,
@@ -129,10 +119,8 @@ export const costs: ModelRow[] = [
       value: "claude-3-5-haiku-20241022",
     },
     cost: {
-      prompt_token: 0.0000008,
-      prompt_cache_write_token: 0.0000008 * 1.25,
-      prompt_cache_read_token: 0.0000008 * 0.1,
-      completion_token: 0.000004,
+      prompt_token: 0.000001,
+      completion_token: 0.000005,
     },
     showInPlayground: true,
   },
