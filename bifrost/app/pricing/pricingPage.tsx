@@ -9,7 +9,6 @@ import ScaleCard from "../components/templates/pricing/ScaleCard";
 import ProductComparisonTable from "../components/templates/pricing/ProductComparisonTable";
 
 import { Col } from "@/components/common/col";
-import { Row } from "@/components/common/row";
 import { Button } from "@/components/ui/button";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import {
@@ -18,15 +17,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import PricingComparisonTableV2 from "../components/templates/pricing/PricingComparisonTableV2";
-import AddOnsTable from "../components/templates/pricing/AddOnsTable";
+import PricingComparisonTable from "../components/templates/pricing/PricingComparisonTable";
+import TeamCard from "../components/templates/pricing/TeamCard";
+import CustomerHighlights from "../components/templates/pricing/CustomerHighlights";
+import AvailableDiscounts from "../components/templates/pricing/AvailableDiscounts";
 
 export default function PricingPage() {
   return (
     <div className="bg-white text-slate-700">
       <div className=" mx-auto px-4 antialiased">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex">
-          <Col className="items-center">
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-24">
+          <Col className="items-center gap-4">
             <span className="block sm:hidden">
               <Image
                 src={"/static/pricing/bouncing-cube.webp"}
@@ -44,171 +45,26 @@ export default function PricingPage() {
               />
             </span>
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl pt-8 text-center text-slate-900">
-              Find a plan that accelerates your business
+              Simple, predictable pricing
             </h1>
             <p className="mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center">
-              Pricing that scales with you. Only pay for what you use.
+              Start for free, then choose a plan that grows with you
             </p>
           </Col>
 
           <div
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6 py-16 max-w-[500px] lg:max-w-none lg:w-full items-center"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full"
             id="plans"
           >
             <FreeCard />
             <ScaleCard />
+            <TeamCard />
             <EnterpriseCard />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 max-w-[500px] lg:max-w-none lg:w-full items-center">
-            <div className=" h-[250px] w-full border lg:border-r-0 rounded-tl-xl rounded-tr-xl rounded-bl-none lg:rounded-tr-none lg:rounded-bl-xl border-slate-200">
-              <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-around h-full">
-                  <p>
-                    <b>2+ critical LLM production issues</b> caught and resolved
-                  </p>
-                  <div className="h-[43px] w-[175px]">
-                    <Image
-                      src={"/static/other-logos/sunrun.webp"}
-                      alt={"sunrun"}
-                      width={1000}
-                      height={50}
-                    />
-                  </div>
-                </Col>
-                <Row className="w-full h-[72px] px-[24px] items-center justify-between border-t text-slate-900 font-medium border-slate-200">
-                  <span>Free</span>
-                  <Button variant={"outline"} asChild>
-                    <Link href="https://us.helicone.ai/signin">
-                      Start for Free
-                    </Link>
-                  </Button>
-                </Row>
-              </Col>
-            </div>
-            <div className="h-[280px] w-full rounded-none lg:rounded-xl border-brand border-2">
-              <Col className="h-full">
-                <Col className="py-[36px] px-[24px] justify-around h-full">
-                  <h1 className="text-lg">
-                    <b>Critical bug detected</b>, saved agent runtime by 30%.
-                  </h1>
-                  <div className="h-[43px] w-[175px]">
-                    <Image
-                      src={"/static/qawolf.webp"}
-                      alt={"greptile ai"}
-                      width={1000}
-                      height={50}
-                    />
-                  </div>
-                </Col>
-                <Row className="w-full h-[97px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
-                  <span>Pro</span>
-                  <Button className="bg-brand text-white font-bold" asChild>
-                    <Link href="https://us.helicone.ai/settings/billing">
-                      Upgrade now
-                    </Link>
-                  </Button>
-                </Row>
-              </Col>
-            </div>
-            <div className="h-[250px] w-full border border-slate-200 lg:border-l-0 rounded-bl-xl rounded-br-xl rounded-tr-none lg:rounded-tr-xl lg:rounded-br-xl lg:rounded-bl-none">
-              <Col className="h-full">
-                <Col className=" py-[36px] px-[24px] justify-around h-full">
-                  <h1>
-                    <b>5+ projects with</b> detailed cost accounting
-                  </h1>
-                  <div className="h-[43px] w-[175px]">
-                    <Image
-                      src={"/static/filevine.webp"}
-                      alt={"greptile ai"}
-                      width={1000}
-                      height={50}
-                    />
-                  </div>
-                </Col>
-                <Row className=" w-full h-[72px] px-[24px] items-center justify-between border-t border-slate-200 text-slate-900 font-medium">
-                  <span>Enterprise</span>
-                  <Button variant={"outline"} asChild>
-                    <Link href="/contact">Contact Sales</Link>
-                  </Button>
-                </Row>
-              </Col>
-            </div>
-          </div>
-          <PricingComparisonTableV2 />
-          <AddOnsTable />
+          <CustomerHighlights />
+          <PricingComparisonTable />
           <ProductComparisonTable />
-
-          <div className="py-10 sm:p-8 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
-            <Col className="col-span-5">
-              <span className="text-[36px] font-bold text-slate-900">
-                Available <br />
-                discounts
-              </span>
-              <Button
-                asChild
-                variant={"outline"}
-                className="w-fit mt-4 text-slate-900 border-slate-200 shadow-none"
-              >
-                <Link href="/contact">Apply here</Link>
-              </Button>
-            </Col>
-            <div className="py-[24px] col-span-7 ">
-              <div className="grid grid-cols-1 sm:grid-cols-2 border divide-y divide-slate-200 rounded-lg divide-x border-slate-200">
-                <div className="rounded-t-lg sm:rounded-tr-none p-[24px] flex flex-col border-t border-l border-r sm:border-r-0 border-slate-200">
-                  <h3 className="text-sm font-medium bg-[#F1F5F9] w-fit px-[16px] py-[8px] rounded-[3px] text-slate-900">
-                    Startups
-                  </h3>
-                  <p className="text-3xl font-bold mt-[32px] text-slate-900">
-                    50%
-                    <span className="text-sm font-normal text-slate-500">
-                      {" "}
-                      off first year
-                    </span>
-                  </p>
-                  <p className="text-sm text-slate-500 mt-2">
-                    For most startups under 2 years old.
-                  </p>
-                </div>
-                <div className="p-4 flex flex-col !border-r sm:rounded-tr-lg border-slate-200">
-                  <h3 className="text-sm font-medium bg-[#F1F5F9] w-fit px-[16px] py-[8px] rounded-[3px] text-slate-900">
-                    Non-profits
-                  </h3>
-                  <p className="text-3xl font-bold mt-[32px] text-slate-900">
-                    Discounts
-                  </p>
-                  <p className="text-sm text-slate-500 mt-2">
-                    Depending on your org size.
-                  </p>
-                </div>
-                <div className="p-4 flex flex-col !border-b-0 !border-r sm:!border-b sm:!border-r-0 sm:rounded-bl-lg border-slate-200">
-                  <h3 className="text-sm font-medium bg-[#F1F5F9] w-fit px-[16px] py-[8px] rounded-[3px] text-slate-900">
-                    Open-source companies
-                  </h3>
-                  <p className="text-3xl font-bold mt-[32px] text-slate-900">
-                    $100
-                    <span className="text-sm font-normal text-slate-500">
-                      {" "}
-                      credit
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    For the first year.
-                  </p>
-                </div>
-                <div className="p-4 flex flex-col !border-b !border-r rounded-b-lg sm:rounded-bl-none border-slate-200">
-                  <h3 className="text-sm font-medium bg-[#F1F5F9] w-fit px-[16px] py-[8px] rounded-[3px] text-slate-900">
-                    Students
-                  </h3>
-                  <p className="text-3xl font-bold mt-[32px] text-slate-900">
-                    Free
-                  </p>
-                  <p className="text-sm text-slate-500 mt-2">
-                    For most students and educators.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AvailableDiscounts />
 
           <div className="py-16 sm:p-8 flex flex-col sm:flex-row sm:justify-between">
             <div className="w-full sm:w-1/2">

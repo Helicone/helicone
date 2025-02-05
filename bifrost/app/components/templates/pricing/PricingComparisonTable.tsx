@@ -9,6 +9,16 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface FeatureRowProps {
   title: string;
@@ -99,149 +109,459 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
   </>
 );
 
+interface PricingTier {
+  name: string;
+  ctaText: string;
+  ctaHref: string;
+  isPrimary?: boolean;
+}
+
+interface Feature {
+  name: string;
+  hobby: string | boolean;
+  pro: string | boolean;
+  team: string | boolean;
+  enterprise: string | boolean;
+}
+
+interface FeatureGroup {
+  title: string;
+  features: Feature[];
+}
+
+const tiers: PricingTier[] = [
+  {
+    name: "Hobby",
+    ctaText: "Get started",
+    ctaHref: "#",
+  },
+  {
+    name: "Pro",
+    ctaText: "Try for free",
+    ctaHref: "#",
+    isPrimary: true,
+  },
+  {
+    name: "Team",
+    ctaText: "Try for free",
+    ctaHref: "#",
+  },
+  {
+    name: "Enterprise",
+    ctaText: "Contact sales",
+    ctaHref: "#",
+  },
+];
+
+const featureGroups: FeatureGroup[] = [
+  {
+    title: "Workspace & collaboration",
+    features: [
+      {
+        name: "Seats",
+        hobby: "1",
+        pro: "$20/seat",
+        team: "Unlimited",
+        enterprise: "Unlimited",
+      },
+      {
+        name: "Organization",
+        hobby: "1",
+        pro: "1",
+        team: "5",
+        enterprise: "Unlimited",
+      },
+      {
+        name: "Key vault",
+        hobby: false,
+        pro: false,
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Gateway",
+    features: [
+      {
+        name: "Unified proxy",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Gateway fallbacks",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Retries",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Caching",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Rate limits",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "LLM guardrails",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "LLM moderation",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Monitoring",
+    features: [
+      {
+        name: "Logs",
+        hobby: "10,000 logs/mo",
+        pro: "10,000 logs/mo",
+        team: "10,000 logs/mo",
+        enterprise: "Unlimited",
+      },
+      {
+        name: "Additional logs",
+        hobby: false,
+        pro: "Usage-based",
+        team: "Usage-based",
+        enterprise: "Volume discount",
+      },
+      {
+        name: "Multi-modal",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Metrics dashboard",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Sessions",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "User analytics",
+        hobby: false,
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
+      },
+      {
+        name: "Custom properties",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Alerts",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "LLM security",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Webhooks",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Data",
+    features: [
+      {
+        name: "Retention",
+        hobby: "1 month",
+        pro: "3 months",
+        team: "3 months",
+        enterprise: "Forever",
+      },
+      {
+        name: "API access",
+        hobby: false,
+        pro: "60 calls/min",
+        team: "60 calls/min",
+        enterprise: "1,000 calls/min",
+      },
+      {
+        name: "Data export",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Ingestion",
+        hobby: "###",
+        pro: "###",
+        team: "###",
+        enterprise: "###",
+      },
+    ],
+  },
+  {
+    title: "Support",
+    features: [
+      {
+        name: "Community (GitHub, Discord)",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Chat & email",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Private Slack channel",
+        hobby: false,
+        pro: false,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Dedicated support engineer",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+      {
+        name: "SLAs",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Security",
+    features: [
+      {
+        name: "Data region",
+        hobby: "US/EU",
+        pro: "US/EU",
+        team: "US/EU",
+        enterprise: "US/EU",
+      },
+      {
+        name: "SAML SSO",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+      {
+        name: "RBAC",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Omit logs",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Compliance",
+    features: [
+      {
+        name: "GDPR",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "HIPPA",
+        hobby: false,
+        pro: false,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "SOC-2 Type II",
+        hobby: false,
+        pro: false,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "InfoSec reviews",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+      {
+        name: "Customized contracts",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+    ],
+  },
+];
+
 export default function PricingComparisonTable() {
   return (
-    <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
-      <h3 className="text-[36px] font-bold">Compare plans</h3>
-      <div className="w-full overflow-x-auto">
-        <div className="min-w-[800px]">
-          <Col className="rounded-lg border">
-            <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
-              <h1 className="text-2xl font-bold">Developer plan</h1>
-              <div className="text-2xl font-bold text-black">Free</div>
-            </Row>
-            <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t divide-slate-200">
-              <FeatureRow
-                title="Dashboard"
-                description="Visualize your LLM analytics, and watch your AI app improve."
-                isAvailable={true}
-              />
-              <FeatureRow
-                title="Requests"
-                description="First 10,000 requests free - every month!"
-                isAvailable={true}
-                amount="10k"
-                unit="/mo"
-                additionalInfo="$0.001 per request"
-              />
-              <FeatureRow
-                title="Prompts"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={false}
-                fullAccess={true}
-                amount="3"
-                unit="/mo"
-                additionalInfo="$0.001 per prompt"
-              />
-              <FeatureRow
-                title="Exported requests"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={false}
-                fullAccess={true}
-                amount="5k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-              <FeatureRow
-                title="Evals"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={false}
-                fullAccess={true}
-                amount="1k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-              <FeatureRow
-                title="Datasets"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={false}
-                fullAccess={true}
-                amount="1k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-            </div>
-          </Col>
-        </div>
-      </div>
-      <div className="w-full overflow-x-auto bg-white">
-        <div className="min-w-[800px]">
-          <Col className="rounded-lg border">
-            <Row className="justify-between p-[24px] bg-[#F9F9F9] items-center">
-              <h1 className="text-2xl font-bold">Team plan</h1>
-              <Row className="items-center gap-[8px]">
-                <Row className="text-[18px] text-black font-semibold line-through">
-                  $50/mo
-                </Row>
-                <Row className="text-[36px] font-extrabold items-center">
-                  <Row>
-                    <span
-                      className="text-[24px] pt-[4px]"
-                      style={{ color: "black" }}
+    <div className="flex flex-col gap-6">
+      <h2 className="text-black text-4xl font-bold">Compare plans</h2>
+      <div className="rounded-xl">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-slate-50 hover:bg-slate-50 border-none">
+              <TableHead className="w-[318px] p-6 bg-white rounded-tl-xl">
+                <div className="text-slate-900 text-lg font-semibold">
+                  {/* Empty header cell */}
+                </div>
+              </TableHead>
+              {tiers.map((tier, index) => (
+                <TableHead
+                  key={tier.name}
+                  className={`p-3 ${tier.isPrimary ? "bg-sky-50" : "bg-white"} 
+                    ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
+                >
+                  <div className="flex flex-col gap-4">
+                    <div className="text-slate-900 text-lg font-semibold">
+                      {tier.name}
+                    </div>
+                    <Link href={tier.ctaHref}>
+                      <Button
+                        variant={tier.isPrimary ? "default" : "secondary"}
+                        className={`w-full text-base ${
+                          tier.isPrimary ? "bg-brand text-white" : ""
+                        }`}
+                      >
+                        {tier.ctaText}
+                      </Button>
+                    </Link>
+                  </div>
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+
+          {featureGroups.map((group, index) => (
+            <TableBody key={group.title} className="relative">
+              {index !== 0 && (
+                <TableRow className="h-12 bg-white hover:bg-white border-none">
+                  <TableCell colSpan={2} />
+                  <TableCell colSpan={1} className="bg-sky-50" />
+                  <TableCell colSpan={2} />
+                </TableRow>
+              )}
+
+              <TableRow className="hover:bg-white">
+                <TableCell
+                  colSpan={2}
+                  className="bg-white border-b h-11 px-6 py-3"
+                >
+                  <div className="text-slate-700 text-sm font-medium">
+                    {group.title}
+                  </div>
+                </TableCell>
+                <TableCell colSpan={1} className="bg-sky-50" />
+                <TableCell colSpan={2} />
+              </TableRow>
+
+              {group.features.map((feature, featureIndex) => (
+                <TableRow key={feature.name} className="hover:bg-white">
+                  <TableCell
+                    className={`w-[318px] px-6 py-3 ${
+                      featureIndex === group.features.length - 1
+                        ? "border-b"
+                        : ""
+                    }`}
+                  >
+                    <div className="text-slate-500 text-sm font-medium">
+                      {feature.name}
+                    </div>
+                  </TableCell>
+                  {[
+                    feature.hobby,
+                    feature.pro,
+                    feature.team,
+                    feature.enterprise,
+                  ].map((value, index) => (
+                    <TableCell
+                      key={index}
+                      className={`px-6 py-3 ${
+                        index === 1 ? "bg-[#0ca5ea]/5" : ""
+                      } ${
+                        featureIndex === group.features.length - 1
+                          ? "border-b"
+                          : ""
+                      }`}
                     >
-                      $
-                    </span>
-                    <span style={{ color: "black" }}>{"50"}</span>
-                  </Row>
-                  <span className="text-[18px]" style={{ color: "black" }}>
-                    /mo
-                  </span>
-                </Row>
-              </Row>
-            </Row>
-            <div className="grid grid-cols-[1fr,auto] divide-x divide-y border-t divide-slate-200">
-              <FeatureRow
-                title="Dashboard"
-                description="Visualize your LLM analytics, and watch your AI app improve."
-                isAvailable={true}
-              />
-              <FeatureRow
-                title="Requests"
-                description="First 10,000 requests free - every month!"
-                isAvailable={true}
-                amount="10k"
-                unit="/mo"
-                additionalInfo="$0.65 per 10k requests"
-              />
-              <FeatureRow
-                title="Prompts"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={true}
-                fullAccess={true}
-                amount="3"
-                unit="/mo"
-                additionalInfo="$0.001 per prompt"
-              />
-              <FeatureRow
-                title="Exported requests"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={true}
-                fullAccess={true}
-                amount="5k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-              <FeatureRow
-                title="Evals"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={true}
-                fullAccess={true}
-                amount="1k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-              <FeatureRow
-                title="Datasets"
-                description="Requests individual requests logged within the Helicone platform. Blah blah blah this."
-                isAvailable={true}
-                fullAccess={true}
-                amount="1k"
-                unit="/mo"
-                additionalInfo="$0.001 per requests"
-              />
-            </div>
-          </Col>
-        </div>
+                      {typeof value === "string" ? (
+                        <div className="text-slate-500 text-sm font-medium">
+                          {value}
+                        </div>
+                      ) : value === true ? (
+                        <CheckIcon className="w-5 h-5 text-slate-500" />
+                      ) : null}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          ))}
+        </Table>
       </div>
     </div>
   );

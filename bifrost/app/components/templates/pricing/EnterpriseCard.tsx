@@ -4,38 +4,48 @@ import { Row } from "@/components/common/row";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { FeatureItem } from "./FeaturedItem";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const EnterpriseCard: React.FC = () => {
   return (
-    <Card className="p-[24px] bg-slate-50 h-[500px] border-none shadow-none">
-      <Col className="h-full justify-between">
-        <Col className="gap-[24px]">
-          <div className="px-[12px] py-[6px] border-2 border-slate-200 text-slate-900 w-fit rounded-[4px] font-medium">
+    <Card className="w-full h-full p-6 bg-white rounded-xl border-none shadow-none mx-auto">
+      <Col className="h-full justify-between gap-4">
+        <Col className="gap-3">
+          <div className="text-slate-900 text-sm font-medium leading-tight">
             Enterprise
           </div>
-          <Col className="gap-[8px]">
-            <h3 className="text-[36px] font-bold text-slate-900">Contact us</h3>
-            <Col>
-              <h4 className="text-[16px] text-slate-700 font-light">
-                For companies{" "}
-                <span className="font-semibold">looking to scale.</span>
-              </h4>
-              <h4 className="text-[14px] text-slate-700">
-                Everything in Pro, plus:
-              </h4>
-            </Col>
+
+          <Col className="h-full gap-2">
+            <div className="text-slate-900 text-3xl font-bold">Contact us</div>
+            <div className="text-slate-700 text-sm font-normal">
+              Custom-built packages.
+            </div>
+          </Col>
+
+          <Col>
+            {[
+              "Everything in Team",
+              "Custom MSA",
+              "SAML SSO",
+              "On-prem deployment",
+              "Bulk cloud discounts",
+            ].map((feature, index) => (
+              <div key={index} className="px-2 py-1.5 flex items-start gap-2">
+                <div className="w-5 h-5 relative overflow-hidden">
+                  <CheckIcon className="w-full h-full" />
+                </div>
+                <div className="text-slate-700 text-sm font-medium">
+                  {feature}
+                </div>
+              </div>
+            ))}
           </Col>
         </Col>
-        <Col className="gap-[16px]">
-          <FeatureItem title="SOC-2 Compliance" />
-          <FeatureItem title="SSO (Single Sign-On)" />
-          <FeatureItem title="Dedicated SLAs" />
-        </Col>
-        <Link
-          href="/contact"
-          className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px] text-center"
-        >
-          Contact sales
+
+        <Link href="https://us.helicone.ai/signin">
+          <Button variant="secondary" className="w-full text-base py-6">
+            Get started
+          </Button>
         </Link>
       </Col>
     </Card>
