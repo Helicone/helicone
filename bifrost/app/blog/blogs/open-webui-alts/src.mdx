@@ -1,49 +1,56 @@
-<a href="https://openwebui.com/" target="_blank" rel="noopener">Open WebUI</a> is a popular web-based interface for running local large language models (LLMs), providing an easy-to-use front end for interacting with various AI models. 
+Open WebUI is a web interface for running local large language models (LLMs), providing an easy way to interact with AI models. It's a popular choice for privacy-conscious users who want a lightweight self-hosted solution without incurring cloud costs or sending data to external services.
 
-It’s designed for enthusiasts, developers, and researchers who want a lightweight, flexible, self-hosted solution.
+![Open WebUI Alternatives](/static/blog/open-webui-alternatives/cover.webp)
 
-## Who Uses Open WebUI?
+While Open WebUI is a great option for some users, others may need more customization or better integrations. We have curated a list of top Open WebUI alternatives and instructions for quickly setting them up.
 
-Open WebUI is a popular choice for users who want to harness the power of local LLMs without dealing with complex command-line interfaces.
+Let's get into it!
 
-- **Developers** use it to test and integrate AI models into applications.
+## Overview of Open WebUI Alternatives
 
-- **Researchers** rely on it for experimentation without incurring cloud costs.
+1. HuggingChat
+2. AnythingLLM
+3. LibreChat
+4. Lobe Chat
+5. Chatbot UI
+6. Text Generation WebUI
+7. Msty
+8. Hollama
+9. Chatbox
+10. Ollama UI
 
-- **Privacy-conscious users** prefer it to avoid sending data to external services.
+## Prerequisites
 
-While Open WebUI is a great choice for most, you might need more customization, better integrations, or different performance characteristics—so let's take a look at some alternatives.
-
-## Alternatives to Open WebUI
-
-We'll be taking a look at some alternatives to Open WebUI and how to quickly set them up, so make sure you have the following:
-
-### Prerequisites
-
-- <a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">Docker</a> installed and running on your machine.
-- <a href="https://nodejs.org/en" target="_blank" rel="noopener">NodeJS</a> and `npm` or `yarn` installed on your machine.
+- **<a href="https://www.docker.com/products/docker-desktop" target="_blank" rel="noopener">Docker</a>** installed and running on your machine.
+- **<a href="https://nodejs.org/en" target="_blank" rel="noopener">NodeJS</a>** and `npm` or `yarn` installed on your machine.
 - Access to an LLM running locally.
 
-### 1. HuggingChat
+## 1. <a href="https://huggingchat.com/" target="_blank" rel="noopener">HuggingChat</a>
 
-HuggingChat is an open-source chat interface developed by Hugging Face. It provides seamless access to a variety of language models and integrates well with Hugging Face’s ecosystem.
+![Open WebUI Alternatives: HuggingChat](/static/blog/open-webui-alternatives/hugging-chat.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/huggingface/chat-ui.svg?style=social)](https://github.com/huggingface/chat-ui)
+
+HuggingChat is an open-source chat interface developed by Hugging Face. It provides seamless access to a variety of language models and integrates well with Hugging Face's ecosystem.
+
+If you love tinkering with models on Hugging Face, you might be interested in this one due to its native integrations with Hugging Face’s Model Hub and API endpoints.
 
 **Strengths:**
 
-- Built on Hugging Face's ecosystem, making integration seamless.
-- Supports a variety of models from Hugging Face’s Model Hub.
-- Web-based with an easy-to-use interface.
+- Built into Hugging Face's ecosystem, making integration seamless
+- Supports a variety of models from Hugging Face's Model Hub
+- Web-based with an easy-to-use interface
 
 **Limitations:**
 
 - Fairly involved local setup process.
 - Limited customization options compared to some alternatives.
 
-**Getting Started:**
+### Getting Started with HuggingChat
 
-HuggingChat can be quickly deployed using Docker. 
+HuggingChat can be quickly deployed using Docker.
 
-First, <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">obtain your Hugging Face token</a>.
+First, <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">obtain</a> your Hugging Face token.
 
 ```bash
 docker run -p 3000 -e HF_TOKEN=hf_*** -v db:/data ghcr.io/huggingface/chat-ui-db:latest
@@ -51,36 +58,47 @@ docker run -p 3000 -e HF_TOKEN=hf_*** -v db:/data ghcr.io/huggingface/chat-ui-db
 
 HuggingChat supports endpoints for OpenAI API-compatible local services as well as third-party providers like Anthropic, Cloudflare, and Google Vertex AI.
 
-### 2. AnythingLLM
+For the most up-to-date setup instructions, please visit Huggingchat's <a href="https://github.com/huggingface/chat-ui?tab=readme-ov-file" target="_blank" rel="noopener">official documentation</a>.
 
-<a href="https://anythingllm.com/" target="_blank" rel="noopener">AnythingLLM</a> is a powerful full-stack application designed for users who need a locally deployable AI solution with extensive logging, observability, and customization capabilities.
+## 2. <a href="https://anythingllm.com/" target="_blank" rel="noopener">AnythingLLM</a>
 
-It allows users to interact with LLMs efficiently while maintaining full control over their data and configurations.
+![Open WebUI Alternatives: AnythingLLM](/static/blog/open-webui-alternatives/anything-llm.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/Mintplex-Labs/anything-llm.svg?style=social)](https://github.com/Mintplex-Labs/anything-llm)
+
+AnythingLLM is an open-source framework designed for users who want to do more than just chat with an LLM locally. 
+
+It provides local AI agents that can interact with files, databases, and web data—all while running privately on your machine. 
+
+Unlike simple chat interfaces, AnythingLLM brings agentic workflows to local models, enabling them to process structured data, search documents, generate reports, and even automate tasks.
 
 **Strengths:**
 
-- Fully self-hosted and configurable, ensuring privacy and security.
-- Supports various LLMs and vector databases, providing flexibility in deployments.
-- Includes built-in observability and logging for tracking AI interactions.
-- Features multi-user support and role-based access control for team use.
+- Supports the use of local AI agents
+- Comes with prebuilt Agent Skills ready for use
+- Well-optimized for Consumer GPUs
+- Fully self-hosted and configurable
+- Supports various LLMs and vector databases
+- Includes built-in observability and logging for tracking AI interactions
+- Features multi-user support and role-based access control for team use
 
 **Limitations:**
 
-- AnythingLLM suffers from overly restrictive and ineffective chat and query modes, failing to retrieve relevant document-based information. 
-- Data retrieval is inaccurate despite supporting various file formats like PDFs, DOCX, and spreadsheets. 
-- Prioritizes aesthetics over functionality, leading to a frustrating user experience.
+- Can be overly restrictive and have ineffective chat/query modes
+- Supports various file formats (i.e. PDFs, DOCX, spreadsheets), but data retrieval isn't always accurate
+- Some design choices prioritize aesthetics over functionality
 
-**Getting Started:**
+### Getting Started with AnythingLLM
 
-Use the Dockerized version of AnythingLLM for a much faster and complete startup of AnythingLLM.
+We recommend using the Dockerized version for a faster setup.
 
-**Pull the latest image:**
+1. **Pull the latest image:**
 
 ```shell
 docker pull mintplexlabs/anythingllm
 ```
 
-**Run with Docker:**
+2. **Run with Docker:**
 
 For Mac/Linux:
 
@@ -110,18 +128,28 @@ docker run -d -p 3001:3001 `
 mintplexlabs/anythingllm;
 ```
 
-Go to `http://localhost:3001` to access the interface.
+3. **Go to `http://localhost:3001` to access the interface.**
 
-### 3. LibreChat
+For the most up-to-date setup instructions, please visit AnythingLLM's <a href="https://docs.anythingllm.com/" target="_blank" rel="noopener">official documentation</a>.
 
-<a href="https://www.librechat.ai/" target="_blank" rel="noopener">LibreChat</a> is an advanced self-hosted chat interface designed for users who want full control over their AI interactions. It supports multiple AI models, customizable endpoints, and a rich set of features for both casual and power users.
+## 3. <a href="https://www.librechat.ai/" target="_blank" rel="noopener">LibreChat</a>
+
+`Open-source and self-hosted`
+
+![Open WebUI Alternatives: LibreChat](/static/blog/open-webui-alternatives/librechat.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/danny-avila/LibreChat.svg?style=social)](https://github.com/danny-avila/LibreChat)
+
+LibreChat is an open-source AI chatbot platform that integrates multiple LLMs, plugins, and AI tools into a single, free interface. It mimics ChatGPT's design and functionality while adding powerful features such as multimodal support, plugin integration, and conversation customization.
+
+It also offers Code Artifacts, an experimental feature that renders React code, raw HTML, and mermaid diagrams directly in the browser.
 
 **Strengths:**
 
-- Fully open-source and self-hosted, ensuring data privacy and security.
-- Supports various AI models, including OpenAI, Anthropic, AWS Bedrock, and custom endpoints.
-- Offers advanced features like AI Agents, multimodal support, code execution, and custom presets.
-- Multilingual UI with extensive customization options.
+- Supports various models (OpenAI, Anthropic, AWS Bedrock, and custom endpoints).
+- Offers AI Agents, multimodal support, code execution, custom presets and more.
+- Allows the rendering of React code and HTML in browser.
+- Offers multilingual UI with extensive customization options.
 - Seamless file and conversation management with export/import capabilities.
 
 **Limitations:**
@@ -129,47 +157,54 @@ Go to `http://localhost:3001` to access the interface.
 - Can be resource-intensive when running multiple models simultaneously.
 - Advanced features may have a learning curve for new users.
 
-**Getting Started:**
+### Getting Started with LibreChat
 
-1. **Download the Project**  
-   - **Manual:** Visit [the GitHub Repo](https://github.com/danny-avila/LibreChat), download the ZIP, and extract it.  
-   - **Using Git:** Run:  
+1. **Download the Project**
+
+   - **Manual:** Visit [the GitHub Repo](https://github.com/danny-avila/LibreChat), download the ZIP, and extract it.
+   - **Using Git:** Run:
      ```bash
      git clone https://github.com/danny-avila/LibreChat.git
      ```
 
-2. **Run the App**  
-   - Navigate to the project directory.  
-   - Create a `.env` file by copying `.env.example` and [configuring](https://www.librechat.ai/docs/configuration/dotenv) values as needed.  
-   - Start the app with:  
+2. **Run the App**
+   - Navigate to the project directory.
+   - Create a `.env` file by copying `.env.example` and [configuring](https://www.librechat.ai/docs/configuration/dotenv) values as needed.
+   - Start the app with:
      ```bash
      docker compose up -d
      ```
 
-LibreChat should now be running locally and ready for <a href="https://www.librechat.ai/docs/configuration/pre_configured_ai" target="_blank" rel="noopener">use</a> with your preferred AI provider.
+LibreChat should now be running locally. See detailed documentation <a href="https://www.librechat.ai/docs/configuration/pre_configured_ai" target="_blank" rel="noopener">here</a>.
 
-### 4. Lobe Chat
+## 4. <a href="https://lobechat.com/" target="_blank" rel="noopener">Lobe Chat</a>
 
-<a href="https://lobechat.com/" target="_blank" rel="noopener">Lobe Chat</a> is a lightweight and extensible UI framework designed for interacting with various LLMs, both locally and remotely. It prioritizes user experience with a modern design and offers progressive web app (PWA) support.
+`Open-source`
+
+![Open WebUI Alternatives: Lobe Chat](/static/blog/open-webui-alternatives/lobechat.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/lobehub/lobe-chat.svg?style=social)](https://github.com/lobehub/lobe-chat)
+
+Lobe Chat is a lightweight and extensible UI framework designed for interacting with various LLMs, both locally and remotely. It prioritizes user experience with a modern design and offers progressive web app (PWA) support.
+
+It integrates multiple AI models and supports features like image generation, text-to-speech, speech-to-text, as well as plugins to extend its functionality.
 
 **Strengths:**
 
-- Clean and intuitive UI with a focus on usability.
-- Supports multiple AI model providers, including OpenAI, Ollama, Anthropic, and Groq.
-- Offers local LLM support with Docker-based deployment.
 - Built-in TTS and STT voice conversation capabilities.
+- Comes with prebuilt AI agents and allows users to download agents.
 - Supports text-to-image generation using DALL-E 3 and other tools.
 - Plugin system for extended functionality and integration with external services.
-- Custom themes and mobile-friendly design.
+- Clean, intuitive and mobile-friendly UI, with custom themes.
 
 **Limitations:**
 
 - Smaller community compared to larger open-source projects.
 - Some advanced features require additional configuration.
 
-**Getting Started:**
+### Getting Started with Lobe Chat
 
-Run
+Run Lobe Chat with Docker:
 
 ```bash
 $ docker run -d -p 3210:3210 -e OLLAMA_PROXY_URL=http://host.docker.internal:11434 lobehub/lobe-chat
@@ -177,17 +212,26 @@ $ docker run -d -p 3210:3210 -e OLLAMA_PROXY_URL=http://host.docker.internal:114
 
 Assuming you have already started an Ollama service locally on port 11434, the above command will run Lobe Chat and connect to your local service.
 
-### 5. Chatbot UI
+For the most up-to-date setup instructions, please visit Lobe Chat's <a href="https://lobehub.com/docs/" target="_blank" rel="noopener">official documentation</a>.
 
-<a href="https://www.chatbotui.com/" target="_blank" rel="noopener">Chatbot UI</a> is an open-source, customizable chat interface designed for interacting with Large Language Models (LLMs). It provides a sleek and intuitive user experience, making it accessible for both casual users and developers looking to integrate AI into their workflows.
+## 5. <a href="https://www.chatbotui.com/" target="_blank" rel="noopener">Chatbot UI</a>
+
+`Open-source`
+![Open WebUI Alternatives: Chatbot UI](/static/blog/open-webui-alternatives/chatbot-ui.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/mckaywrigley/chatbot-ui.svg?style=social)](https://github.com/mckaywrigley/chatbot-ui)
+
+Chatbot UI 2 is an open-source, self-hosted chatbot interface that allows users to run local or cloud-based AI models with a database-backed storage system. 
+
+It provides a sleek and intuitive user experience, making it accessible for both casual users and developers looking to integrate AI into their workflows.
 
 **Strengths:**
 
-- User-friendly and modern UI optimized for AI chat interactions.
-- Supports multiple AI model providers, including OpenAI and local LLMs.
+- User-friendly and modern UI across desktop and mobile.
+- Database-backed, which prevents API key leaks and supports larger storage.
+- Handles text, images, files, audio, and video.
 - Easy deployment via Docker, Supabase, and Vercel.
 - Built-in authentication and storage support using Supabase.
-- Works seamlessly across desktop and mobile with a responsive design.
 - Offers flexibility with environment variables for custom configurations.
 - Active development and community support.
 
@@ -197,9 +241,11 @@ Assuming you have already started an Ollama service locally on port 11434, the a
 - Depends on third-party services like Supabase.
 - Customization may require minor code modifications.
 
-**Getting Started:**
+### Getting Started with Chatbot UI
 
-To <a href="https://www.youtube.com/watch?v=9Qq3-7-HNgw" target="_blank" rel="noopener">quickly deploy</a> Chatbot UI, clone the repository and install dependencies:
+To <a href="https://www.youtube.com/watch?v=9Qq3-7-HNgw" target="_blank" rel="noopener">quickly deploy</a> Chatbot UI, follow these steps:
+
+**1. Clone the Repository & Install Dependencies**
 
 ```bash
 git clone https://github.com/mckaywrigley/chatbot-ui.git
@@ -207,229 +253,265 @@ cd chatbot-ui
 npm install
 ```
 
-Getting Started:
-
-**1. Clone the Repository & Install Dependencies**  
-
-```bash
-git clone https://github.com/mckaywrigley/chatbot-ui.git  
-cd chatbot-ui  
-npm install  
-```
-
-**2. Install Supabase & Start Locally**  
+**2. Install Supabase & Start Locally**
 
 Ensure Docker is installed then run the following to install the Supabase CLI:
 
-- **macOS/Linux:** `brew install supabase/tap/supabase`  
-- **Windows:**  
-    ```bash
-    scoop bucket add supabase https://github.com/supabase/scoop-bucket.git  
-    scoop install supabase  
-    ```
+- **macOS/Linux:** `brew install supabase/tap/supabase`
+- **Windows:**
+  ```bash
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-**Start Supabase**  
+**Start Supabase and set environment variables**
 
-```bash
-supabase start  
-```
-
-**Set Environment Variables**  
+In your terminal at the root of your local Chatbot UI repository, run:
 
 ```bash
-cp .env.local.example .env.local  
-supabase status  
+supabase start
+cp .env.local.example .env.local
+supabase status
 ```
 
 This creates a `.env.local` file in your project directory. Populate it with your running Supabase server details.
 
-**3. Run Chatbot UI**  
+**3. Run Chatbot UI**
 
 ```bash
-npm run chat  
+npm run chat
 ```
 
 Access UI at **`http://localhost:3000`**  
-Admin panel: **`http://localhost:54323/project/default/editor`**  
+Admin panel: **`http://localhost:54323/project/default/editor`**
 
-### 6. Text Generation Web UI
+For more detailed instructions, visit the official <a href="https://github.com/mckaywrigley/chatbot-ui/blob/main/README.md" target="_blank" rel="noopener">GitHub repository</a>.
 
-<a href="https://github.com/oobabooga/text-generation-webui" target="_blank" rel="noopener">Text Generation Web UI</a> is a versatile web-based interface for running large language models (LLMs).
+## 6. <a href="https://github.com/oobabooga/text-generation-webui" target="_blank" rel="noopener">Text Generation WebUI</a>
 
-It supports multiple backends, including Transformers, llama.cpp, ExLlamaV2, and TensorRT-LLM. Inspired by AUTOMATIC1111’s Stable Diffusion Web UI, it aims to provide an easy-to-use and feature-rich experience for text generation.
+![Open WebUI Alternatives: Text Generation WebUI](/static/blog/open-webui-alternatives/text-gen-web-ui.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/oobabooga/text-generation-webui.svg?style=social)](https://github.com/oobabooga/text-generation-webui)
+
+Text Generation WebUI is a versatile web-based interface for running large language models (LLMs).
+
+It supports multiple backends, including Transformers, llama.cpp, ExLlamaV2, and TensorRT-LLM. 
+
+Inspired by AUTOMATIC1111's Stable Diffusion Web UI, it aims to provide an easy-to-use and feature-rich experience for text generation.
 
 **Strengths:**
 
 - Supports a wide range of local models.
 - Offers extensive model customization.
-- GPU acceleration for high performance.
+- GPU acceleration for high performance but runs on CPU too.
+- Supports multimodal functionality.
 
 **Limitations:**
 
 - Requires a capable local machine.
 - Setup can be complex for beginners.
 
-**Getting Started:**  
+### Getting Started with Text Generation WebUI
 
-**1. Clone & Install**  
+**1. Clone & Install**
 
 ```bash
-git clone https://github.com/oobabooga/text-generation-webui.git  
-cd text-generation-webui  
+git clone https://github.com/oobabooga/text-generation-webui.git
+cd text-generation-webui
 ```
 
-Run the installation script for your OS:  
-- **Linux/macOS:** `./start_linux.sh` or `./start_macos.sh`  
-- **Windows:** `start_windows.bat`  
-- **WSL:** `start_wsl.bat`  
+Run the installation script for your OS:
+
+- **Linux/macOS:** `./start_linux.sh` or `./start_macos.sh`
+- **Windows:** `start_windows.bat`
+- **WSL:** `start_wsl.bat`
 
 Select your **GPU vendor** when prompted.
 
-**2. Start the Web UI**  
+**2. Start the Web UI**
 
-Once installation is complete, start the UI by running:  
+Once installation is complete, start the UI by running:
 
 ```bash
 ./start_linux.sh  # (or the script for your OS)
 ```
+
 Access the interface at **`http://localhost:7860`**.
 
-**3. Download Models**  
+For more detailed instructions, visit the official <a href="https://github.com/oobabooga/text-generation-webui/wiki" target="_blank" rel="noopener">GitHub repository</a>.
 
-Place models in the `text-generation-webui/models` folder or download them via the UI. You can also fetch models from Hugging Face using:  
+**3. Download Models**
+
+Place models in the `text-generation-webui/models` folder or download them via the UI. You can also fetch models from Hugging Face using:
+
 ```bash
 python download-model.py organization/model
 ```
 
-### 7. Msty 
+## 7. <a href="https://msty.app/" target="_blank" rel="noopener">Msty</a>
 
-<a href="https://msty.app/" target="_blank" rel="noopener">Msty</a> is an intuitive, offline-first AI assistant designed to simplify local and online AI model interactions. 
+![Open WebUI Alternatives: Msty](/static/blog/open-webui-alternatives/msty.webp)
 
-Unlike other AI tools that require complex setups, Docker, or command-line expertise, Msty provides a streamlined, one-click installation with a user-friendly interface. 
+Msty is an intuitive, offline-first AI assistant designed to simplify local and online AI model interactions.
 
-It supports a wide range of models, including OpenAI, Claude, Gemini, Mistral, LLaVa, Qwen, Deepseek, and more.
+Unlike other AI tools that require complex setups, Docker, or command-line expertise, Msty provides a streamlined, one-click installation with a user-friendly interface.
 
-**Strengths**  
-- **One-Click Setup** No need for Docker, command-line tools, or complex configurations.  
-- **Offline & Private** Runs locally with no data leaving your device.  
-- **Unified Model Access** Use models from Hugging Face, Ollama, OpenRouter, and more.  
+It supports a wide range of models, and has lots of advanced features such as "knowledge stacks," split chats, and chat branching, and Deep Research Mode.
 
-**Limitations**  
-- **Limited Customization:** While setup is easy, certain customizations may be impossible or require significant additional effort.  
+**Strengths**
 
-**Getting Started:**
+- Does not require Docker, command-line tools, or complex configurations.
+- Knowledge Stacks (RAG) allow users to train AI with custom datasets (PDFs, docs, YouTube links).
+- Split Chat & Model Comparisons let users run multiple AI models side-by-side.
+- Dwell (Deep Research Mode) lets users select text and ask follow-up questions instantly.
+- Offers Chat Branching to let users explore different response paths without starting a new chat.
+- Use models from Hugging Face, Ollama, OpenRouter, and more.
 
-- <a href="https://msty.ai" target="_blank" rel="noopener">Download</a> Msty from the official site.
+**Limitations**
+
+- **Limited Customization:** While setup is easy, certain customizations may be impossible or require significant additional effort.
+
+### Getting Started with Msty
+
+- **<a href="https://msty.ai" target="_blank" rel="noopener">Download</a>** Msty from the official site.
 - Run the installer and follow the setup instructions. No terminal or Docker required.
-- Start chatting with local models or enter an API key to chat with online models.  
+- Start chatting with local models or enter an API key to chat with online models.
 
-### **8. Hollama**  
+For more detailed instructions, visit the official <a href="https://docs.msty.app/" target="_blank" rel="noopener">documentation</a>.
 
-<a href="https://hollama.fernando.is/" target="_blank" rel="noopener">Hollama</a> is a minimal yet powerful web UI designed for interacting with Ollama servers.
+## 8. <a href="https://hollama.fernando.is/" target="_blank" rel="noopener">Hollama</a>
 
-It provides a clean, user-friendly interface that supports both local and remote AI models, including OpenAI and reasoning models. 
+![Open WebUI Alternatives: Hollama](/static/blog/open-webui-alternatives/hollama.webp)
 
-With a focus on simplicity, customization, and performance, Hollama is an excellent choice for those looking to run AI chat models with minimal setup.  
+[![GitHub Repo Stars](https://img.shields.io/github/stars/fmaclen/hollama.svg?style=social)](https://github.com/fmaclen/hollama)
 
-**Strengths:**  
+Hollama is a minimal yet powerful web UI designed for interacting with Ollama servers.
 
-- **Minimal & Lightweight:** Designed for speed and efficiency.  
-- **Supports Ollama & OpenAI Models:** – Easily switch between providers.  
-- **Multi-Server Support:** – Connect to multiple Ollama servers.  
-- **Advanced Prompting Features:** – Custom system prompts & advanced parameters.  
+It provides a clean, user-friendly interface that supports both local and remote AI models, including OpenAI and reasoning models.
 
-**Limitations:**  
+With a focus on simplicity, customization, and performance, Hollama is an excellent choice for those looking to run AI chat models with minimal setup.
 
-- **Limited Feature Set** Minimalist design means fewer advanced AI tools.  
-- **Requires Ollama Server** Cannot function standalone without an Ollama instance.  
+**Strengths:**
 
-**Getting Started:**
+- Designed for speed and efficiency.
+- Supports Ollama & OpenAI Models.
+- Can connect to multiple Ollama servers.
+- Set Custom System Prompts.
+- Create multiple chat sessions, edit messages, and adjust responses.
+- Modify temperature, context size, and system prompts directly from the UI to tune models to your taste.
+- Available in English, Spanish, Japanese, and Turkish.
 
-**1. Download & Install Locally**  
+**Limitations:**
 
-- Get an Hollama installer for macOS, Windows, and Linux from the <a href="https://github.com/fmaclen/hollama/releases" target="_blank" rel="noopener">GitHub page</a>.  
+- Cannot function standalone without an Ollama instance.
+- Lacks advanced features like web search, RAG, or plugins,
 
-**2. Self-Host with Docker (Recommended for Servers)**  
+### Getting Started with Hollama
 
-To deploy your own Hollama server, run:  
+**1. Download & Install Locally**
+
+- Get an Hollama installer for macOS, Windows, and Linux from the <a href="https://github.com/fmaclen/hollama/releases" target="_blank" rel="noopener">GitHub page</a>.
+
+**2. Self-Host with Docker (Recommended for Servers)**
+
+To deploy your own Hollama server, run:
 
 ```bash
 docker run --rm -d -p 4173:4173 --name hollama ghcr.io/fmaclen/hollama:latest
 ```
 
-Then, open **`http://localhost:4173`** in your browser where you can connect to your Ollama server. 
+Then, open **`http://localhost:4173`** in your browser where you can connect to your Ollama server.
 
 You can even download Ollama via the UI.
 
-### 9. Chatbox
+For more detailed instructions, visit the official <a href="https://github.com/fmaclen/hollama" target="_blank" rel="noopener">GitHub repository</a>.
 
-<a href="https://web.chatboxai.app/" target="_blank" rel="noopener">Chatbox</a> is a powerful and user-friendly AI chat client that supports multiple language models, including ChatGPT, Claude, Gemini Pro, Ollama, and ChatGLM-6B. 
+## 9. <a href="https://web.chatboxai.app/" target="_blank" rel="noopener">Chatbox</a>
+
+![Open WebUI Alternatives: Chatbox](/static/blog/open-webui-alternatives/chatbox-ai.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/Bin-Huang/chatbox.svg?style=social)](https://github.com/Bin-Huang/chatbox)
+
+Chatbox is a powerful and user-friendly AI chat client that supports multiple language models online and offline, including ChatGPT, Claude, Gemini Pro, Ollama, and DeepSeek.
 
 It is available as a desktop application for Windows, macOS, and Linux, as well as mobile apps for iOS and Android.
 
-**Strengths:**  
+**Strengths:**
 
-- **Multi-Model Support:** Works with OpenAI, Azure, Claude, Gemini, and local models via Ollama.  
-- **Local Storage:** Ensures your data remains private and secure on your device.  
-- **Cross-Platform:** Runs on Windows, macOS, Linux, iOS, and Android.  
-- **No-Deployment Setup:** Simple installation with no technical setup required.  
-- **Image Generation:** Supports DALL-E 3 for AI-generated images.  
+- Works with OpenAI, Azure, Claude, Gemini, and local models such as DeepSeek via Ollama.
+- Ensures your data remains private and secure on your device.
+- Runs on Windows, macOS, Linux, iOS, and Android.
+- Simple installation with no technical setup required.
+- Allows for model tuning within UI. 
+- Comes with pre-built Prompt Templates.
 
 **Limitations:**
 
-- **Closed-Source Official Edition:** While free, the Official Edition is not open-source.  
-- **Limited Local Customization:** Compared to some self-hosted LLM solutions, out-of-the-box customization is limited.  
-- **Some Features Require API Keys:** Users need OpenAI API keys for certain models.  
+- While free, the Official Edition is not open-source.
+- Compared to some self-hosted LLM solutions, out-of-the-box customization is limited.
 
-**Getting Started:**
+### Getting Started with Chatbox
 
-**1. Download Chatbox Installer**  
+**1. Download Chatbox Installer**
 
-| **Platform** | **Download Link** |
-|-------------|------------------|
-| **Windows**  | <a href="https://chatboxai.app/?c=download-windows" target="_blank" rel="noopener">Installer</a> |
-| **macOS (Intel)** | <a href="https://chatboxai.app/?c=download-mac-intel" target="_blank" rel="noopener">Installer</a> |
-| **macOS (M1/M2)** | <a href="https://chatboxai.app/?c=download-mac-aarch" target="_blank" rel="noopener">Installer</a> |
-| **Linux** | <a href="https://chatboxai.app/?c=download-linux" target="_blank" rel="noopener">AppImage</a> |
-| **Android** | <a href="https://apps.apple.com/app/chatbox-ai/id6471368056" target="_blank" rel="noopener">Installer</a> |
-| **iOS** | <a href="https://play.google.com/store/apps/details?id=xyz.chatboxapp.chatbox" target="_blank" rel="noopener">Installer</a> |
+| **Platform**      | **Download Link**                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Windows**       | <a href="https://chatboxai.app/?c=download-windows" target="_blank" rel="noopener">Installer</a>                            |
+| **macOS (Intel)** | <a href="https://chatboxai.app/?c=download-mac-intel" target="_blank" rel="noopener">Installer</a>                          |
+| **macOS (M1/M2)** | <a href="https://chatboxai.app/?c=download-mac-aarch" target="_blank" rel="noopener">Installer</a>                          |
+| **Linux**         | <a href="https://chatboxai.app/?c=download-linux" target="_blank" rel="noopener">AppImage</a>                               |
+| **Android**       | <a href="https://apps.apple.com/app/chatbox-ai/id6471368056" target="_blank" rel="noopener">Installer</a>                   |
+| **iOS**           | <a href="https://play.google.com/store/apps/details?id=xyz.chatboxapp.chatbox" target="_blank" rel="noopener">Installer</a> |
 
-**2. Build from Source (Community Edition)**  
+**2. Build from Source (Community Edition)**
 
-To run the **open-source Community Edition** locally, follow these steps:  
+To run the **open-source Community Edition** locally, follow these steps:
 
-**Step 1: Clone the Repository**  
+**Step 1: Clone the Repository**
 
 ```bash
 git clone https://github.com/Bin-Huang/chatbox.git
 cd chatbox
 ```
-**Step 2: Install Dependencies**  
+
+**Step 2: Install Dependencies**
 
 ```bash
 npm install
 ```
-**Step 3: Run**  
+
+**Step 3: Run**
+
 ```bash
 npm start
 ```
 
-### **10. Ollama UI**  
+## 10. <a href="https://ollama-ui.github.io/ollama-ui/" target="_blank" rel="noopener">Ollama UI</a>
 
-<a href="https://ollama-ui.github.io/ollama-ui/" target="_blank" rel="noopener">Ollama UI</a> is a lightweight, browser-based interface for interacting with Ollama, providing a simple yet effective way to engage with local AI models.
+![Open WebUI Alternatives: Ollama UI](/static/blog/open-webui-alternatives/ollama-ui.webp)
+
+[![GitHub Repo Stars](https://img.shields.io/github/stars/ollama-ui/ollama-ui.svg?style=social)](https://github.com/ollama-ui/ollama-ui)
+
+Open Web UI is a powerful, open-source frontend that provides a ChatGPT-like experience for local AI models. 
+
+It works seamlessly with Ollama, allowing users to run LLMs on their own machines with zero cloud dependencies.
 
 It offers a minimal and intuitive design for users who prefer a straightforward, no-frills experience.
 
 **Strengths:**
-- **Simple & Lightweight:** No unnecessary bloat—just a clean UI for seamless interactions.
-- **Easy Setup:** Get started with a few simple commands—no complex configurations.
-- **Chrome Extension Available:** Easily use Ollama UI directly in Chrome.
+
+- No unnecessary bloat—just a clean UI for seamless interactions.
+- Can be set up with a few simple commands—no complex configurations.
+- Available as a Chrome extension.
+- Can load several AI models simultaneously.
+- Allows users to upload PDFs or text files for AI-powered search.
 
 **Limitations:**
-- **Limited Features:** Focused solely on basic chat interactions; lacks advanced customization.
-- **No Built-in Multi-Model Support:** Designed primarily for direct Ollama usage.
 
-**Getting Started:**
+- Focused mainly on basic chat interactions; lacks some advanced customization options.
+- Designed primarily for Ollama usage.
+
+### Getting Started with Ollama UI
 
 Follow these steps to set up Ollama UI on your local machine:
 
@@ -441,9 +523,19 @@ make
 open http://localhost:8000  # Open in your browser
 ```
 
-You can also use the <a href="https://chrome.google.com/webstore/detail/ollama-ui/cmgdpmlhgjhoadnonobjeekmfcehffco" target="_blank" rel="noopener">Chrome Extension</a> for a hassle-free experience:  
+You can also use the <a href="https://chrome.google.com/webstore/detail/ollama-ui/cmgdpmlhgjhoadnonobjeekmfcehffco" target="_blank" rel="noopener">Chrome Extension</a> for a hassle-free experience.
 
 Once installed, you can start chatting with your Ollama models right from your browser.
+
+For more detailed instructions, visit the official <a href="https://ollama-ui.github.io/ollama-ui/" target="_blank" rel="noopener">GitHub repository</a>.
+
+---
+
+## Bottom Line
+
+While Open WebUI is a solid choice for running local LLMs, there are plenty of alternatives that offer different strengths. Whether you need an easy-to-configure tool like Chatbox, a full-featured UI like Text Generation WebUI, or a Hugging Face-integrated solution like HuggingChat, there's an option that will fit your needs.
+
+We recommend exploring these alternatives to find the best match for your workflow and computing environment.
 
 <CallToAction
   title="Monitor your LLM apps with Helicone"
@@ -454,18 +546,10 @@ Once installed, you can start chatting with your Ollama models right from your b
   secondaryButtonLink="https://helicone.ai/contact"
 />
 
-## Conclusion
-
-While Open WebUI is a solid choice for running local LLMs, there are plenty of alternatives that offer different strengths. 
-
-Whether you need an easy-to-configure tool like chatbox, a full-featured UI like text-generation-webui, or a Hugging Face-integrated solution like HuggingChat, there's an option for you. 
-
-Explore these alternatives to find the best fit for your workflow and computing environment.
-
 ### You might find these useful:
 
 - **<a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">What is LLM Observability & Monitoring?</a>**
 - **<a href="https://www.helicone.ai/blog/best-langsmith-alternatives" target="_blank" rel="noopener">Compare: The Best LangSmith Alternatives & Competitors</a>**
 - **<a href="https://www.helicone.ai/blog/open-source-monitoring-for-openai" target="_blank" rel="noopener">Helicone: The Next Evolution in OpenAI Monitoring and Optimization</a>**
 
-<Questions />                   
+<Questions />{" "}
