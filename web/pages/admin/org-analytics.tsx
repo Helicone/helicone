@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import OrgAnalytics from "../../components/templates/admin/colesCave";
+import OrgAnalytics from "../../components/templates/admin/orgAnalytics";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import { getSupabaseServer } from "../../lib/supabaseServer";
 
