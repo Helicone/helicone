@@ -25,8 +25,6 @@ export interface ValhallaResponse {
   model: string | null; // text, nullable
   promptTokens: number | null; // integer, nullable
   heliconeOrgID?: string; // uuid, nullable
-  promptCacheWriteTokens: number | null; // integer, nullable
-  promptCacheReadTokens: number | null; // integer, nullable
 }
 
 export interface ValhallaCacheHits {
