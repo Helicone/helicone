@@ -1,5 +1,8 @@
 import { useState } from "react";
-import Lottie from "react-lottie";
+import dynamic from "next/dynamic";
+
+const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
+
 import * as guesswho from "../../../../public/lottie/guesswho.json";
 import * as notebook from "../../../../public/lottie/notebook.json";
 import GuessWhoGame from "./guessWho";
