@@ -5,14 +5,14 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const rows: FeatureRowProps[] = [
   {
-    title: "Prompts + Experiments",
+    title: "Prompts Management",
     description:
-      "Version prompts, create templates, and run experiments to improve LLM outputs.",
+      "Version prompts, create templates, and manage prompts collaboratively.",
     free: (
       <>
         <XMarkIcon className="w-6 h-6 text-red-500" />
         <p className="text-center text-sm font-light text-slate-500">
-          Upgrade to Pro to enable Prompts + Experiments.
+          Upgrade to Pro to enable Prompts.
         </p>
       </>
     ),
@@ -23,7 +23,7 @@ const rows: FeatureRowProps[] = [
           <p className="text-slate-500">/mo</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
-          Prompts + Experiments + Evals
+          Prompt management
         </p>
       </>
     ),
@@ -31,31 +31,31 @@ const rows: FeatureRowProps[] = [
       <>
         <h3 className="font-bold text-xl">Included</h3>
         <p className="text-center text-sm font-light text-slate-500">
-          Prompts and versions.
+          Prompt management
         </p>
       </>
     ),
   },
   {
-    title: "Alerts (Slack + Email)",
+    title: "Experiments",
     description:
-      "Receive real-time alerts to Slack or email and stay on top of critical issues.",
+      "Test different prompts, models, and parameters side-by-side to improve LLM outputs.",
     free: (
       <>
         <XMarkIcon className="w-6 h-6 text-red-500" />
         <p className="text-center text-sm font-light text-slate-500">
-          Upgrade to Pro to enable Alerts.
+          Upgrade to Pro to enable Experiments.
         </p>
       </>
     ),
     pro: (
       <>
         <Row className="items-center gap-[4px]">
-          <h3 className="font-bold text-xl">$15</h3>
+          <h3 className="font-bold text-xl">$50</h3>
           <p className="text-slate-500">/mo</p>
         </Row>
         <p className="text-center text-sm font-light text-slate-500">
-          Unlimited alerts.
+          Full experimentation suite
         </p>
       </>
     ),
@@ -63,7 +63,39 @@ const rows: FeatureRowProps[] = [
       <>
         <h3 className="font-bold text-xl">Included</h3>
         <p className="text-center text-sm font-light text-slate-500">
-          Unlimited alerts.
+          Advanced experimentation
+        </p>
+      </>
+    ),
+  },
+  {
+    title: "Evaluations",
+    description:
+      "Evaluate LLM outputs with automated testing and catch regressions pre-deployment.",
+    free: (
+      <>
+        <XMarkIcon className="w-6 h-6 text-red-500" />
+        <p className="text-center text-sm font-light text-slate-500">
+          Upgrade to Pro to enable Evaluations.
+        </p>
+      </>
+    ),
+    pro: (
+      <>
+        <Row className="items-center gap-[4px]">
+          <h3 className="font-bold text-xl">$100</h3>
+          <p className="text-slate-500">/mo</p>
+        </Row>
+        <p className="text-center text-sm font-light text-slate-500">
+          Complete evaluation suite
+        </p>
+      </>
+    ),
+    enterprise: (
+      <>
+        <h3 className="font-bold text-xl">Included</h3>
+        <p className="text-center text-sm font-light text-slate-500">
+          Advanced evaluations
         </p>
       </>
     ),
@@ -77,7 +109,7 @@ export default function AddOnsTable() {
         <h4 className="text-[24px] font-bold text-slate-900">Add-ons</h4>
         <p className="text-slate-700">
           Specialized features are now available as add-ons, so you never pay
-          what you don’t need.
+          for what you don&apos;t need.
         </p>
       </Col>
       <PlansTable rows={rows} />

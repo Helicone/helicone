@@ -1,6 +1,7 @@
 import { Col } from "@/components/common/col";
 import { Card } from "@/components/ui/card";
 import { clsx } from "@/utils/clsx";
+import { useState } from "react";
 
 export interface FeatureRowProps {
   title: string;
@@ -53,10 +54,18 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
 export default function PlansTable({
   rows,
   isMain = false,
+  collapsible = false,
+  initialVisibleCount = 5,
 }: {
   rows: FeatureRowProps[];
   isMain?: boolean;
+  collapsible?: boolean;
+  initialVisibleCount?: number;
 }) {
+  const [showAll, setShowAll] = useState(false);
+  const visibleRows =
+    collapsible && !showAll ? rows.slice(0, initialVisibleCount) : rows;
+
   return (
     <div className="w-full pt-10 overflow-x-auto">
       <div className="w-full overflow-visible">
@@ -79,10 +88,25 @@ export default function PlansTable({
             <div className="p-[24px] bg-slate-50 font-semibold text-xl text-center rounded-tr-lg">
               Enterprise
             </div>
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <FeatureRow key={row.title} {...row} />
             ))}
           </div>
+          {collapsible && !showAll && (
+            <>
+              <div className="relative">
+                <div className="absolute bottom-[100%] left-0 right-0 h-[100px] bg-gradient-to-b from-transparent to-white pointer-events-none" />
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="text-brand hover:text-brand/80 font-medium"
+                >
+                  See all features
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
