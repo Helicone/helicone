@@ -384,7 +384,7 @@ class TestHeliconeIntegrations:
             "-d",
             json.dumps(
                 {
-                    "promptId": "helicone-classifier",
+                    "promptId": "new-prompt",
                     "userId": "test-user",
                     "sessionId": SESSION_ID,
                 }
