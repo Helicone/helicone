@@ -71,7 +71,7 @@ const ScaleCard: React.FC = () => {
           href="https://us.helicone.ai/settings/billing"
           className="bg-brand text-white py-[12px] rounded-[4px] mt-[8px] text-[16px] font-semibold text-center"
         >
-          Upgrade Now
+          Start 7-day free trial
         </Link>
       </Col>
     </Card>
