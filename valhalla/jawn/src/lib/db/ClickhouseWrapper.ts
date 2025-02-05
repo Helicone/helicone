@@ -174,8 +174,6 @@ export interface InsertRequestResponseVersioned {
   status: number;
   completion_tokens: Nullable<number>;
   prompt_tokens: Nullable<number>;
-  prompt_cache_write_tokens: Nullable<number>;
-  prompt_cache_read_tokens: Nullable<number>;
   model: string;
   request_id: string;
   request_created_at: string;
@@ -207,8 +205,6 @@ export interface RequestResponseRMT {
   status: number;
   completion_tokens: number;
   prompt_tokens: number;
-  prompt_cache_write_tokens: number;
-  prompt_cache_read_tokens: number;
   model: string;
   request_id: string;
   request_created_at: string;

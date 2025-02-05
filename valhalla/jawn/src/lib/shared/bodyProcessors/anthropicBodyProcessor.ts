@@ -27,11 +27,9 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
           processedBody: parsedResponseBody,
           usage: {
             totalTokens:
-              parsedResponseBody?.usage?.input_tokens +
-              parsedResponseBody?.usage?.output_tokens,
+              parsedResponseBody?.usage?.output_tokens +
+              parsedResponseBody?.usage?.input_tokens,
             promptTokens: parsedResponseBody?.usage?.input_tokens,
-            promptCacheWriteTokens: parsedResponseBody?.usage?.cache_creation_input_tokens,
-            promptCacheReadTokens: parsedResponseBody?.usage?.cache_read_input_tokens,
             completionTokens: parsedResponseBody?.usage?.output_tokens,
             heliconeCalculated: true,
           },
