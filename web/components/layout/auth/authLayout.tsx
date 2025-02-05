@@ -33,7 +33,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const { alertBanners } = useAlertBanners();
   const org = useOrg();
-  const { setShowEndOnboardingConfirmation } = useOnboardingStore();
+  const { setShowCreateOrg } = useOnboardingStore();
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
@@ -56,15 +56,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
         ),
         title: "Welcome to Your Demo",
         active: true,
-        onClick: () => setShowEndOnboardingConfirmation(true),
+        onClick: () => setShowCreateOrg(true),
       } as BannerType;
     }
     return null;
-  }, [
-    alertBanners?.data,
-    org?.currentOrg?.tier,
-    setShowEndOnboardingConfirmation,
-  ]);
+  }, [alertBanners?.data, org?.currentOrg?.tier, setShowCreateOrg]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 
