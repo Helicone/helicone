@@ -2,6 +2,7 @@
   "name": "prompts",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "start": "ts-node index.ts",

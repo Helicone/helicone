@@ -1,16 +1,17 @@
-require("dotenv").config({
-  path: ".env",
-});
+import { config } from "dotenv";
 import { OpenAI } from "openai";
 // import { hprompt, HeliconeAPIClient } from "@helicone/helicone";
 import { v4 as uuid } from "uuid";
 import { hpf } from "@helicone/prompts";
-import { examples } from "./examples";
+import { examples } from "./examples.js";
+
+config({ path: ".env" });
 
 const sessionId = uuid();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "http://localhost:8787/v1",
+  // baseURL: "http://localhost:8787/v1",
+  baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
   },
@@ -52,7 +53,7 @@ async function analyzePageStructure(example: (typeof examples)[0]) {
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/structure-analysis`,
       },
-    },
+    }
   );
 
   try {
@@ -106,7 +107,7 @@ async function identifyInteractiveElements(example: (typeof examples)[0]) {
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/interactive-elements`,
       },
-    },
+    }
   );
 
   try {
@@ -120,7 +121,7 @@ async function identifyInteractiveElements(example: (typeof examples)[0]) {
 async function generateTestCases(
   pageStructure: any,
   interactiveElements: any,
-  example: (typeof examples)[0],
+  example: (typeof examples)[0]
 ) {
   const prompt = hpf`
   As a QA engineer, generate test cases for the following page structure and interactive elements:
@@ -164,7 +165,7 @@ async function generateTestCases(
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/generate-test-cases`,
       },
-    },
+    }
   );
 
   try {
@@ -177,7 +178,7 @@ async function generateTestCases(
 
 async function simulateTestExecution(
   testCases: any,
-  example: (typeof examples)[0],
+  example: (typeof examples)[0]
 ) {
   const prompt = hpf`
   As a QA engineer, simulate the execution of the following test cases:
@@ -216,7 +217,7 @@ async function simulateTestExecution(
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/simulate-test-execution`,
       },
-    },
+    }
   );
 
   try {
@@ -241,7 +242,7 @@ async function processExample(example: (typeof examples)[0]) {
   const testCases = await generateTestCases(
     pageStructure,
     interactiveElements,
-    example,
+    example
   );
   console.log("Generated Test Cases:", testCases);
 
@@ -255,7 +256,7 @@ async function main() {
   await Promise.all(
     examples.map(async (example) => {
       processExample(example);
-    }),
+    })
   );
 }
 
