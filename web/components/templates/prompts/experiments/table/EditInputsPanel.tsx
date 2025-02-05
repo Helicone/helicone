@@ -79,7 +79,10 @@ const EditInputsPanel = ({
 
   const handleAccordionToggle = () => {
     if (accordionRef.current) {
-      accordionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      (accordionRef.current as HTMLElement).scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 

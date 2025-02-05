@@ -99,7 +99,7 @@ const OrgAnalytics = () => {
   return (
     <div className="flex flex-col space-y-8 text-gray-200 bg-gray-800 p-6 rounded-lg max-w-7xl mx-auto">
       <header className="border-b border-gray-700 pb-4">
-        <h1 className="text-3xl font-bold">Cole's Cave</h1>
+        <h1 className="text-3xl font-bold">Org Analytics</h1>
         <p className="text-gray-400 mt-2">
           Organization analytics and administration
         </p>
@@ -145,7 +145,7 @@ const OrgAnalytics = () => {
               No data loaded
             </h3>
             <p className="text-gray-500 mt-2">
-              Click "Refresh List" to load organizations
+              Click &quot;Refresh List&quot; to load organizations
             </p>
           </div>
         ) : topOrgsLoading ? (
