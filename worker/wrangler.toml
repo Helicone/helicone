@@ -63,6 +63,8 @@ routes = [
 	{ pattern = "bedrock.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "deepseek.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "x.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "nebius.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "perplexity.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },

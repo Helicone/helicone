@@ -507,6 +507,28 @@ const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "equals",
+      value: "o3-mini",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o3-mini-2025-01-31",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
+    },
+    showInPlayground: true,
+  },
 ];
 
 const modelDetails: ModelDetailsMap = {

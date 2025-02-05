@@ -40,16 +40,23 @@ copy_cost() {
 copy_llm_mapper() {
     echo "Copying llm-mapper package..."
     
-    # Define destination
-    dest="../web/packages/llm-mapper"
+    # Define destinations
+    destinations=(
+        "../web/packages/llm-mapper"
+        "../valhalla/jawn/src/packages/llm-mapper"
+    )
     
-    # Remove and recreate directory
-    rm -rf "$dest"
-    mkdir -p "$dest"
+    # Remove and recreate directories
+    for dest in "${destinations[@]}"; do
+        rm -rf "$dest"
+        mkdir -p "$dest"
+    done
     
-    # Copy files
-    cp -r llm-mapper/* "$dest"
-    echo "Copied to $dest"
+    # Copy files to all destinations
+    for dest in "${destinations[@]}"; do
+        cp -r llm-mapper/* "$dest"
+        echo "Copied to $dest"
+    done
 }
 
 # Parse command line arguments

@@ -36,12 +36,9 @@ const AlertsPage = (props: AlertsPageProps) => {
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
   const isAlertsEnabled = () => {
-    const metadata = orgContext?.currentOrg?.stripe_metadata as {
-      addons?: { alerts?: boolean };
-    };
     return (
-      (metadata?.addons?.alerts &&
-        orgContext?.currentOrg?.tier === "pro-20240913") ||
+      orgContext?.currentOrg?.tier === "pro-20240913" ||
+      orgContext?.currentOrg?.tier === "pro-20250202" ||
       orgContext?.currentOrg?.tier === "enterprise" ||
       orgContext?.currentOrg?.tier === "growth" ||
       orgContext?.currentOrg?.tier === "pro"

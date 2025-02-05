@@ -9,15 +9,16 @@ export type Message = {
   role?: string;
   content?: string;
   tool_calls?: FunctionCall[];
+  tool_call_id?: string;
   _type: "function" | "functionCall" | "image" | "message" | "autoInput";
   image_url?: string;
 };
 
 export type PromptMessage = Message | string;
 
-interface FunctionCall {
-  name?: string;
-  arguments?: object;
+export interface FunctionCall {
+  name: string;
+  arguments: Record<string, any>;
 }
 
 interface LLMRequestBody {

@@ -178,6 +178,8 @@
         },
         "getting-started/integration-method/fireworks",
         "getting-started/integration-method/deepseek",
+        "getting-started/integration-method/perplexity",
+        "getting-started/integration-method/nebius",
         "getting-started/integration-method/x",
         {
           "group": "Vector DB",

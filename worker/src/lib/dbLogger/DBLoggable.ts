@@ -672,6 +672,7 @@ export class DBLoggable {
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
+    // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
 
     const model =
@@ -825,54 +826,6 @@ export class DBLoggable {
       : body;
   }
 
-  processRequestBodyImages(
-    model: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requestBody: any
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: requestBody,
-      assets: new Map<string, string>(),
-    };
-    if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processRequestBody(requestBody);
-      }
-    }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
-
-    return imageModelParsingResponse;
-  }
-
-  processResponseBodyImages(
-    model: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseBody: any
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: responseBody,
-      assets: new Map<string, string>(),
-    };
-    if (model && isResponseImageModel(model)) {
-      const imageModelParser = getResponseImageModelParser(model);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processResponseBody(responseBody);
-      }
-    }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
-
-    return imageModelParsingResponse;
-  }
-
   calculateModel(
     requestModel: string | null,
     responseModel: string | null,
@@ -900,47 +853,6 @@ export class DBLoggable {
       }) ?? 0
     );
   }
-}
-
-// Replaces all the image_url that is not a url or not { url: url }  with
-// { unsupported_image: true }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function unsupportedImage(body: any): any {
-  if (typeof body !== "object" || body === null) {
-    return body;
-  }
-  if (Array.isArray(body)) {
-    return body.map((item) => unsupportedImage(item));
-  }
-  const notSupportMessage = {
-    helicone_message:
-      "Storing images as bytes is currently not supported within Helicone.",
-  };
-  if (body["image_url"] !== undefined) {
-    const imageUrl = body["image_url"];
-    if (
-      typeof imageUrl === "string" &&
-      !imageUrl.startsWith("http") &&
-      !imageUrl.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-    if (
-      typeof imageUrl === "object" &&
-      imageUrl.url !== undefined &&
-      typeof imageUrl.url === "string" &&
-      !imageUrl.url.startsWith("http") &&
-      !imageUrl.url.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = {};
-  for (const key in body) {
-    result[key] = unsupportedImage(body[key]);
-  }
-  return result;
 }
 
 export async function logRequest(
@@ -1033,13 +945,11 @@ export async function logRequest(
       }
     }
 
-    const reqBody = unsupportedImage(imageModelParsingResponse.body);
-
     const createdAt = request.startTime ?? new Date();
     const requestData = {
       id: request.requestId,
       path: request.path,
-      body: reqBody, // TODO: Remove in favor of S3 storage
+      body: imageModelParsingResponse.body, // TODO: Remove in favor of S3 storage
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id:

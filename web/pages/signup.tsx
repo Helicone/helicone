@@ -42,6 +42,10 @@ const SignUp = () => {
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
+          posthog.capture("user_signed_up", {
+            method: "email",
+            email: email,
+          });
 
           const { data, error } = await supabase.auth.signUp({
             email: email,
@@ -61,14 +65,12 @@ const SignUp = () => {
             return;
           }
 
-          posthog.capture("user_signed_up", {
-            method: "email",
-            email: email,
-          });
-
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
+          posthog.capture("user_signed_up", {
+            method: "google",
+          });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
           });
@@ -80,12 +82,11 @@ const SignUp = () => {
             console.error(error);
             return;
           }
-
-          posthog.capture("user_signed_up", {
-            method: "google",
-          });
         }}
         handleGithubSubmit={async () => {
+          posthog.capture("user_signed_up", {
+            method: "github",
+          });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "github",
           });
@@ -97,10 +98,6 @@ const SignUp = () => {
             console.error(error);
             return;
           }
-
-          posthog.capture("user_signed_up", {
-            method: "github",
-          });
         }}
         authFormType={"signup"}
       />
