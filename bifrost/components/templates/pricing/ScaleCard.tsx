@@ -17,7 +17,7 @@ const ScaleCard = () => {
           <span>Scale</span>
           <Button className="bg-brand text-white" asChild>
             <Link href="https://us.helicone.ai/settings/billing">
-              Upgrade now
+              Start 7-day free trial
             </Link>
           </Button>
         </Row>
