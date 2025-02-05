@@ -130,6 +130,43 @@ A travel chatbot assists users through flights, hotels bookings and car rentals.
 
 Sessions gives you a complete trace of the booking interaction, where you can pinpoint exactly where users encountered problems. For example, if your users report missing flight confirmations frequently, looking at each session traces can reveal whether the issue came from input parsing errors or glitches with airline APIs.
 
+#### Debugging Example
+
+While developing a chatbot similar to the one described above, an issue was discovered where the LLM occasionally provided incorrect parameters to the flight search API, leading to incorrect bookings.
+
+**How to Debug Using Helicone Sessions**
+
+1. **Open the Sessions dashboard**
+    
+    To examine what's causing the error, visit the Sessions dashboard and examine the requests related to the action(s) where the error occured. 
+    
+    In this case it's the `search-flights` API call.
+
+    ![Errors in Search Flights Step](/static/blog/debug-agents-with-sessions/search-flights.webp)
+
+2. **Observe the Request**
+
+    Next, click on the request to inspect its details. In this case, it was observed that the LLM sometimes misinterprets capitalized words as airline abbreviations..
+   
+    For example, given the user input: 
+    
+    "I've just arrived at **JFK**, where can I go to **reLAX**?" 
+
+    The LLM mistakenly assumes the user wants to book a flight from JFK (New York) to LAX (Los Angeles).
+
+3. **Fix bug in Playground**
+
+    To fix this, we click the **Playground** button above the request details to experiment with different prompt variations.
+
+Through testing, it was observed that converting the entire string to lowercase before passing it to the LLM allowed it to correctly parse airport codes while ignoring unrelated capitalized words.
+
+```text
+Unfortunately, there are no flights available from JFK at the moment that match your search for relaxation destinations. 
+You might want to consider checking for flights at different times or days, or you could explore relaxing spots within the airport such as lounges or nearby hotels.
+```
+
+With this fix applied, the chatbot now accurately interprets user intent and returns the correct departure and arrival airports, leading to more reliable flight search results.
+
 ### Health & Fitness: Personalize Responses to Match User Intent
 
 **Challenge**
@@ -141,6 +178,34 @@ A health and fitness chatbot needs to accurately interpret your user's asks in o
 ![Case Study: Understanding User Intent for Personalization Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-fitness.webp)
 
 Traces labelled `LLM` in a Session can show you your user's preferences, so you can adjust the chatbot responses by altering the prompts. If your users ask about strength training over cardio often, you can tweak the prompt to focus on strength training programs.
+
+#### Debugging Example
+
+Users report that a health & fitness chatbot that works similarly to the one shown above is generating inconsistent dietary recommendations over multiple interactions. 
+
+For example, a user who previously selected a high-protein diet for muscle gain might later receive a low-calorie meal plan designed for weight loss, creating confusion and dissatisfaction.
+
+**How to Debug Using Helicone Sessions**
+
+1. **Open the Sessions Dashboard**  
+
+   Identify recent session logs for users who reported unexpected diet plan changes.  
+
+   ![Medical Records Traces](/static/blog/debug-agents-with-sessions/fitness-bot.webp)
+    
+   Verifying that users' medical records are being correctly analyzed seems like a good first step.
+
+2. **Analyze the Medical History Retrieval Step**  
+
+   In the `medical-history` trace, check if the chatbot is correctly retrieving users' medical history data from the vector database by viewing the trace's details.  
+   
+   In this case, it was discovered that the LLM was failing to properly lookup relevant user data from the vector database, causing inconsistencies in retrieved dietary preferences.
+
+3. **Fix bug in code**  
+   
+    Upon reviewing the code, a bug was found in the data embedding process, leading to incorrect storage and retrieval of user data.
+    
+    After fixing the issue, tests in the **Playground** confirmed that the chatbot now consistently provides diet plans that align with user goals.
 
 ### Education: Ensuring Quality and Consistency with Generated Content
 
