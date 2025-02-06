@@ -1166,4 +1166,22 @@ WHERE (${builtFilter.filter})`,
       );
     }
   }
+
+  public async getPurchasedSeatCount(): Promise<Result<number, string>> {
+    try {
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return ok(0); // No subscription means 0 purchased seats
+      }
+
+      const proProductPrices = await getProProductPrices();
+      const proUsersItem = subscriptionResult.data.items.data.find(
+        (item) => item.price.id === proProductPrices["pro-users"]
+      );
+
+      return ok(proUsersItem?.quantity ?? 0);
+    } catch (error: any) {
+      return err(`Error retrieving purchased seats: ${error.message}`);
+    }
+  }
 }
