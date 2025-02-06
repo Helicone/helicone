@@ -63,7 +63,7 @@ export default function ProductComparisonTable() {
   };
 
   return (
-    <div className="flex flex-col max-w-6xl mx-auto space-y-8 py-16 w-full">
+    <div className="flex flex-col max-w-6xl mx-auto space-y-8 w-full">
       <h3 className="text-[36px] font-bold text-slate-900">
         Compare to similar products
       </h3>
