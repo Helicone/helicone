@@ -2,9 +2,9 @@
   "title": "Debugging RAG Chatbots and AI Agents with Sessions",
   "title1": "Debugging RAG Chatbots and AI Agents with Sessions",
   "title2": "Debugging RAG Chatbots and AI Agents with Sessions",
-  "description": "Have you ever wondered at which stage in the multi-step process does your AI model start hallucinating? Perhaps you've noticed consistent issues with a specific part of your AI agent workflow?",
+  "description": "Debugging AI agents can be difficult, but it doesn't have to be. In this guide, we explore common AI agent pitfalls, how to debug multi-step processes using Helicone's Sessions, and the best tools for building reliable, production-ready AI agents.", 
   "images": "/static/blog/sessions-ui.webp",
-  "time": "6 minute read",
+  "time": "8 minute read",
   "author": "Lina Lam",
   "date": "October 17, 2024",   
   "badge": "how-to"
