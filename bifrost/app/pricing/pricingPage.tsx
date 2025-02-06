@@ -48,7 +48,7 @@ export default function PricingPage() {
               Simple, predictable pricing
             </h1>
             <p className="mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center">
-              Start for free, then choose a plan that grows with you
+              Built to scale with you. Only pay for what you use.
             </p>
           </Col>
 
