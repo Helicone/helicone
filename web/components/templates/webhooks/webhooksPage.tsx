@@ -1,5 +1,4 @@
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import {
   ClipboardIcon,
   EyeIcon,
