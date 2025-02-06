@@ -4,75 +4,58 @@ When does your AI agent start hallucinating in the multi-step process? Have you 
 
 These are common questions we faced when building our own <a href="https://www.helicone.ai/blog/pdf-chatbot-tutorial" rel="noopener" target="_blank">RAG-powered chatbots</a> and AI agents. Getting reliable responses and minimizing errors like hallucination was incredibly challenging, without visibility into how our users interacted with our large language models.
 
-In this blog, we will delve into examples of how to maintain context, reduce errors, and improve the overall performance of your LLM apps, and share a list of tools to help you create more robust and reliable AI agents.
+In this guide, we explore common AI agent pitfalls, how to debug multi-step processes using Helicone's Sessions, and the best tools for building reliable, production-ready AI agents.
 
 ## What you will learn:
 
-- AI agents vs. traditional software
+- AI agents vs. traditional chatbots
 - Components of an AI agent
-- Challenges we faced while debugging AI agents
-- Effective debugging tools
-- How different industries debug AI agents using <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Sessions</a>
+- Challenges of debugging AI agents
+- How to debug AI agents using <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Sessions</a>
+- 6 Popular agent debugging tools
 
----
+## AI Agents vs. Traditional Chatbots
 
-## How are AI agents different from traditional chatbots?
-
-Unlike traditional chatbots or software which follow explicit instructions or rules, AI agents can autonomously perform specific tasks with advanced decision-making abilities. They interact with their environment by collecting data, processing it, and deciding on the best actions to achieve a predefined goal.
+Unlike traditional chatbots, which follow explicit instructions or rules, AI agents can autonomously perform specific tasks with advanced decision-making abilities. They interact with their environment by collecting data, processing it, and deciding on the best actions to achieve a predefined goal.
 
 ### Examples of AI Agents
 
-#### Copilots
+|                     | What it does                                                                                              | Example                                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Copilots            | Help users by **providing suggestions** and recommendations                                               | Suggest code snippets, highlight potential bugs, and offer optimization tips. Developer decides whether to implement suggestions.                                                             |
+| Autonomous Agents   | Perform tasks **independently** without human intervention                                                | Handle customer inquiries by identifying issues, accessing account info, processing refunds, updating account details, and responding to customers. Can escalate to human agents when needed. |
+| Multi-Agent Systems | Involve interactions and **collaboration** between multiple autonomous agents to achieve collective goals | Leverage advantages like dynamic reasoning, distributed task handling, and improved memory retention for information.                                                                         |
 
-Copilots help users by **<span style={{color: '#0ea5e9'}}>providing suggestions and recommendations</span>**. For example, when writing code, a copilot might suggest code snippets, highlight potential bugs or offer optimization tips, but the developer decides whether to implement these suggestions.
+### Use of RAG to Improve Functionality
 
-#### Autonomous Agents
-
-Autonomous agents perform tasks **<span style={{color: '#0ea5e9'}}>independently without human intervention</span>**. For example, it can handle customer inquiries by identify issues, access account information, perform necessary actions (like processing refunds or updating account details), and respond to the customer. They can also escalate to a human agent if they encounter problems beyond their current capabilities.
-
-#### Multi-Agent Systems
-
-Multi-agent systems involve **<span style={{color: '#0ea5e9'}}>interactions and collaboration between multiple autonomous agents</span>** to achieve a collective goal. These systems have advantages like dynamic reasoning, the ability to distribute tasks, and better memory for retaining information.
-
-## Using Retrieval-Augmented Generation to Improve Functionality
-
-**Retrieval-Augmented Generation (RAG)** is an advanced framework that allowed the agent to **<span style={{color: '#0ea5e9'}}>incorporate information from external knowledge bases</span>** (e.g., databases, documents, articles) into the response.
+Retrieval-Augmented Generation (RAG) is an advanced method that allows the agent to **<span style={{color: '#0ea5e9'}}>incorporate information from external knowledge bases</span>** (e.g., databases, documents, articles) into the response.
 
 RAG significantly improved the response outcome as the agent now have access to the most recent data based on keywords, semantic similarity, or other advanced search techniques, and used it to generate more accurate, personalized, and context-specific responses.
 
-## Components of AI Agents
+## Core Components of AI Agents
 
 Typically, AI agents consists of four core components:
 
-1. **Planning**
-2. **Tool / Vector Database Calls**
-3. **Perception**
-4. **Memory**
+1. **Planning**: When you define a goal, agents will plan, sequence actions and formulate strategies.
+
+2. **Tool / Vector DB Calls**: Advanced AI Agents can interact with external tools, APIs, and services through <a href="https://platform.openai.com/docs/guides/function-calling" rel="noopener" target="_blank">function calls</a> in order to handle more complicated tasks.
+
+   For example:
+
+   - Fetching real-time weather data or stock prices.
+   - Using translation services.
+   - Performing image recognition or editing using specialized libraries.
+   - Running custom scripts to automate workflow.
+
+3. **Perception**: AI agents can also process information from their environment, making them more interactive and context-aware.
+
+   This sensory information can include visual, auditory, or other types of data, to help the agents respond appropriately to environmental cues.
+
+4. **Memory**: AI agents are able to remember past interactions, including tools previously used and its planning decisions. These context are stored to help agents self-reflect and inform future actions.
 
 ![How AI Agents work](/static/blog/how-agents-work.webp)
 
-### Planning
-
-When you define a goal, AI agents have the ability to plan and sequence actions due to their integration with LLMs that allows them to formulate better strategies.
-
-### Tool / Vector Database Calls
-
-Advanced AI Agents can interact with external tools, APIs, and services through function calls in order to handle more complicated operations such as:
-
-- Fetching real-time information from APIs (e.g., weather data, stock prices).
-- Using translation services to convert text between languages.
-- Performing tasks like image recognition or manipulation using specialized libraries.
-- Running custom scripts to automate a specific workflow.
-
-### Perception
-
-AI agents can also perceive and process information from their environment, making them more interactive and context-aware. This sensory information can include visual, auditory, and other types of data to help the agents respond appropriately to environmental cues.
-
-### Memory
-
-AI agents are able to remember past interactions, including tools previously used and its planning decisions. These experiences are stored to help agents self-reflect and inform future actions.
-
-## Challenges We Faced While Debugging AI agents
+## Challenges of Debugging AI Agents
 
 **⚠️ Their decision making process is complicated.**
 
@@ -86,9 +69,96 @@ AI agents function as "black boxes” and understanding how they transform input
 
 Agents can often make multiple dependent vector database calls within a single session, adding some complexity in tracing the data flow. They can also operate over a longer sessions, where **<span style={{color: '#0ea5e9'}}>an early error can have cascading effects</span>**, so it's difficult to identify their original source without proper session tracking.
 
-## Tools for Debugging AI Agents
+## Scenario 1: Debugging errors in a travel chatbot
 
-One way we try to debug agents is by understanding the internal workings of the model. We also realized that traditional logging methods often lack the granular data to effectively debug complex behaviors. However, there are tools to help streamline the debugging process:
+A travel chatbot assists users in booking flights, hotels and rent cars. There are often issues with data parsing or third-party integrations. Users are frustrated with incomplete bookings.
+
+![Case Study: Resolving Errors in Multi-Step Processes Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-travel.webp)
+
+### Issue
+
+While building this chatbot, we noticed that the LLM occasionally provided incorrect parameters to the flight search API, leading to **<span style={{color: '#0ea5e9'}}>incorrect bookings</span>**.
+
+### How to debug using Helicone's Sessions
+
+1. **Go to the `Sessions` tab, find related requests**
+
+   To examine what's causing the error, go to `Sessions`. Check out the requests that relates to the action where the error occured.
+
+   In this case it's the `search-flights` API call.
+
+   ![Errors in Search Flights Step](/static/blog/debug-agents-with-sessions/search-flights.webp)
+
+2. **Take a closer look at the request**
+
+   Next, click on the request to inspect its details.
+
+   For example, the user input says: `I've just arrived at JFK, where can I go to reLAX?`
+
+   In this case, the LLM misinterpreted capitalized words as airline abbreviations, mistakenly assuming the user wants to book a flight from `JFK` (New York) to `LAX` (Los Angeles).
+
+3. **Fix the bug in Playground**
+
+   To fix this, we go to `Playground` and improve the prompt to ignore capitalized words.
+
+   We discovered that by converting the entire string to lowercase before passing it to the LLM, the LLM was able to correctly parse airport codes while ignoring unrelated capitalized words.
+
+   > Unfortunately, there are no flights available from JFK at the moment that match your search for relaxation destinations.
+   > You might want to consider checking for flights at different times or days, or you could explore relaxing spots within the airport such as lounges or nearby hotels.
+
+   The chatbot now accurately interprets user intent and returns the correct departure and arrival airports, leading to more reliable flight search results.
+
+## Scenario 2: Personalize responses to match user intent
+
+A health and fitness chatbot that takes the user's goal to create a personalized workout and dietary plans.
+
+![Case Study: Understanding User Intent for Personalization Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-fitness.webp)
+
+### Issue
+
+Users report that the chatbot is generating **<span style={{color: '#0ea5e9'}}>inconsistent dietary recommendations</span>** when prompted a few times.
+
+In this example, the user who previously selected a high-protein diet for muscle gain might later receive a low-calorie meal plan designed for weight loss.
+
+### How to debug using Helicone's Sessions
+
+1. **Go to the `Sessions` tab**
+
+   Identify recent session logs for users who reported unexpected diet plan changes.
+
+   ![Medical Records Traces](/static/blog/debug-agents-with-sessions/fitness-bot.webp)
+
+   As a first step, verify that users' medical records are being correctly analyzed.
+
+2. **Analyze the "Medical History" retrieval step**
+
+   In the `medical-history` trace, check if the chatbot is correctly retrieving users' medical history data from the vector database.
+
+   In this case, we found that the LLM failed to lookup relevant user data from the vector DB, causing inconsistencies in retrieved dietary preferences.
+
+3. **Fix bug in code**
+
+   Upon reviewing the code, a bug was found in the data embedding process, leading to incorrect storage and retrieval of user data.
+
+   After fixing the issue, tests in the `Playground` confirmed that the chatbot now consistently provides diet plans that align with user goals.
+
+## Scenario 3: Create custom learning materials
+
+An AI tutoring service built an AI agent that creates customized learning materials. It's important that the agent generates both accurate and comprehensive lessons.
+
+![Case Study: Generating Educational Content Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-course-gen.webp)
+
+### How to debug using Helicone's Sessions
+
+The `Session` view will outline the structure of the generated course. Each trace in a Session shows you how the agent interpreted your requests and the corresponding content.
+
+Skimming through, wherever the agent misunderstood topics or failed to cover key concepts, you can then fine-tune that specific prompt using the `Playground` or `Experiments`. The goal here is to generate a more thorough content while making sure it is appropriate for the student’s learning level.
+
+## 6 Popular Agent Debugging Tools
+
+One way we try to debug agents is by understanding the internal workings of the model. We also realized that traditional logging methods often lack the granular data to effectively debug complex behaviors.
+
+However, there are tools to help streamline the debugging process:
 
 ### 1. Helicone `open-source`
 
@@ -114,57 +184,17 @@ Braintrust is a good choice for those focusing on evaluating AI models. It’s a
 
 Portkey is designed for developers looking for the latest tools to track and debug AI agents. It introduces new features quickly, great for teams needing the newest suite of features and willing to face the occasional reliability and stability issues.
 
----
-
-## Debugging AI Agents Using Sessions Across Industries
-
-### Travel: Finding Errors in a Multi-Step Workflow
-
-**Challenge**
-
-A travel chatbot assists users through flights, hotels bookings and car rentals. Errors can easily happen due to data parsing issues or integration problems with third-party services. Users are often left frustrated or have incomplete bookings.
-
-**Solution**
-
-![Case Study: Resolving Errors in Multi-Step Processes Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-travel.webp)
-
-Sessions gives you a complete trace of the booking interaction, where you can pinpoint exactly where users encountered problems. For example, if your users report missing flight confirmations frequently, looking at each session traces can reveal whether the issue came from input parsing errors or glitches with airline APIs.
-
-### Health & Fitness: Personalize Responses to Match User Intent
-
-**Challenge**
-
-A health and fitness chatbot needs to accurately interpret your user's asks in order to offer personalized workout and dietary plans. A misinterpretation of the ask can lead to generic suggestions and unhappy users who will abandon the chatbot instantly.
-
-**Solution**
-
-![Case Study: Understanding User Intent for Personalization Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-fitness.webp)
-
-Traces labelled `LLM` in a Session can show you your user's preferences, so you can adjust the chatbot responses by altering the prompts. If your users ask about strength training over cardio often, you can tweak the prompt to focus on strength training programs.
-
-### Education: Ensuring Quality and Consistency with Generated Content
-
-**Challenge**
-
-An AI agent that creates customized learning materials needs to generate both accurate and comprehensive lessons. Errors or incomplete information directly affect your users as they experience poor learning outcomes.
-
-**Solution**
-
-![Case Study: Generating Educational Content Using Helicone's Sessions](/static/blog/debug-agents-with-sessions/example-course-gen.webp)
-
-A Session outlines the structure of the generated course. Each trace in a Session shows you how the agent interpreted your requests and the corresponding content. Skimming through, wherever the agent misunderstood topics or failed to cover key concepts, you can then fine-tune that specific prompt to generate a more thorough content while making sure it is appropriate for the student’s learning level.
-
 ## Building Production-Ready AI Agents
 
 We're already seeing AI agents in action across various fields like customer service, travel, health and fitness, as well as education. However, for AI agents to be truly production-ready and widely adopted, we need to continue to improve their reliability and accuracy.
 
 This requires us to actively monitor their decision-making processes and get a deep understanding of how inputs influence outputs. The most effective way is by using monitoring tools that provide you the insights to make sure your AI agents consistently deliver the results you want.
 
-### If you want to give Helicone a try, here are some resources we recommend:
+### Additional Resources
 
-- Doc: <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Setting up Helicone's Sessions</a>
-- Resource: <a href="https://www.helicone.ai/blog/ai-agent-builders" rel="noopener" target="_blank">6 Open-Source Frameworks for Building AI Agents</a>
-- Doc: <a href="https://docs.helicone.ai/integrations/vectordb/javascript#vector-db-javascript-sdk-integration" rel="noopener" target="_blank">How to log Vector DB interactions using Helicone's Javascript SDK</a>
-- Guide: <a href="https://www.helicone.ai/blog/replaying-llm-sessions" rel="noopener" target="_blank">How to Optimize AI Agents by Replaying LLM Sessions</a>
+- **<a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">How to set up Sessions</a>**
+- **<a href="https://docs.helicone.ai/integrations/vectordb/javascript#vector-db-javascript-sdk-integration" rel="noopener" target="_blank">How to log Vector DB calls with Helicone's Javascript SDK</a>**
+- **<a href="https://www.helicone.ai/blog/replaying-llm-sessions" rel="noopener" target="_blank">How to Optimize AI Agents by Replaying LLM Sessions</a>**
+- **<a href="https://www.helicone.ai/blog/ai-agent-builders" rel="noopener" target="_blank">6 open-source frameworks for building AI agents</a>**
 
 <Questions />
