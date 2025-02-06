@@ -45,14 +45,11 @@ export const RenderMappedRequest = (
     } else {
       return (
         <div className="w-full flex flex-col text-left space-y-8 text-sm">
-          <p className="font-semibold text-gray-900 text-sm">Request</p>
-          <pre className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-            {mapperContent?.schema.request?.messages &&
-              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
-          </pre>
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-gray-900 text-sm">Error</p>
-            <pre className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            <p className="font-semibold text-sm">
+              Response <span className="text-red-500 text-xs">(Error)</span>
+            </p>
+            <pre className="p-2 border  rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
               {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
               "string"
                 ? mapperContent?.schema.response?.error?.heliconeMessage
@@ -63,6 +60,12 @@ export const RenderMappedRequest = (
                   )}
             </pre>
           </div>
+          <p className="font-semibold text-sm">Request</p>
+
+          <pre className="p-2 border  rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            {mapperContent?.schema.request?.messages &&
+              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
+          </pre>
         </div>
       );
     }
@@ -79,8 +82,10 @@ export const RenderMappedRequest = (
       return (
         <div className="w-full flex flex-col text-left space-y-8 text-sm">
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-gray-900 text-sm">Error</p>
-            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            <p className="font-semibold  text-sm">
+              Response <span className="text-red-500 text-xs">(Error)</span>
+            </p>
+            <p className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
               {mapperContent?.schema.response?.error?.heliconeMessage ||
                 "An unknown error occurred."}
             </p>
