@@ -343,7 +343,7 @@ export function ThemedTimeFilterShadCN({
       <UpgradeProDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        reason="time_filter"
+        featureName="time_filter"
       />
     </div>
   );
