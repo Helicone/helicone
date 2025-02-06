@@ -43,6 +43,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             infoBoxText="Organize your requests into datasets for evals or fine-tuning."
             videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
             documentationLink="https://docs.helicone.ai/features/sessions"
+            featureName="Datasets"
           />
         </div>
       ) : datasets?.length === 0 ? (
@@ -54,6 +55,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
             documentationLink="https://docs.helicone.ai/features/sessions"
             tier={org?.currentOrg?.tier ?? "free"}
+            featureName="Datasets"
           />
         </div>
       ) : (

@@ -200,6 +200,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             infoBoxText="Test and iterate on your LLM prompts with our interactive playground environment."
             documentationLink="https://docs.helicone.ai/features/playground"
             tier={org?.currentOrg?.tier ?? "free"}
+            featureName="Playground"
           />
         </div>
       ) : (

@@ -18,9 +18,10 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { FeatureName } from "@/hooks/useProFeature";
 
 export type Addons = {
   pro: boolean;
@@ -67,15 +68,36 @@ const ADDONS: PricingAddon[] = [
 
 const TEAM_BUNDLE_PRICE = 200;
 
+const FEATURE_MESSAGES: Record<string, string> = {
+  time_filter: "Extended time filters require Pro plan.",
+  users: "Track per-user metrics and usage patterns with Pro.",
+  datasets: "Advanced dataset management requires Pro upgrade.",
+  prompts: "Version and manage production prompts with Pro.",
+  invite: "Team member management requires Pro subscription.",
+  alerts: "Real-time alert configuration needs Pro plan.",
+  ratelimit: "Custom rate limits by request count or cost with Pro.",
+  sessions: "Track multi-step LLM interactions with Pro.",
+  properties: "Add custom metadata tags for request analysis.",
+  vault: "Secure secret management requires Pro plan.",
+  webhooks: "Automate workflows with LLM event webhooks.",
+  playground: "Prompt testing sandbox available in Pro.",
+  evaluators: "LLM performance evaluation tools with Pro.",
+  experiments: "A/B test prompts at scale with Pro.",
+  default:
+    "Select add-ons or Team Bundle to unlock features. 7-day free trial included.",
+};
+
+interface UpgradeProDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  featureName?: FeatureName;
+}
+
 export const UpgradeProDialog = ({
   open,
   onOpenChange,
-  subscription,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  subscription: any;
-}) => {
+  featureName,
+}: UpgradeProDialogProps) => {
   const org = useOrg();
   const [activeTab, setActiveTab] = useState("addons");
   const [selectedAddons, setSelectedAddons] = useState<Addons>({
@@ -86,11 +108,22 @@ export const UpgradeProDialog = ({
   });
   const [seats, setSeats] = useState(1);
 
+  const subscription = useQuery({
+    queryKey: ["subscription", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1] as string;
+      const jawn = getJawnClient(orgId);
+      const subscription = await jawn.GET("/v1/stripe/subscription");
+      return subscription;
+    },
+    enabled: !!org?.currentOrg?.id,
+  });
+
   const upgradeToPro = useMutation({
     mutationFn: async (variables: { addons: Addons; seats?: number }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const endpoint =
-        subscription?.data?.status === "canceled"
+        subscription.data?.data?.status === "canceled"
           ? "/v1/stripe/subscription/existing-customer/upgrade-to-pro"
           : "/v1/stripe/subscription/new-customer/upgrade-to-pro";
       const result = await jawn.POST(endpoint, {
@@ -111,7 +144,7 @@ export const UpgradeProDialog = ({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const endpoint =
-        subscription?.data?.status === "canceled"
+        subscription.data?.data?.status === "canceled"
           ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
           : "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle";
       const result = await jawn.POST(endpoint, {});
@@ -149,6 +182,11 @@ export const UpgradeProDialog = ({
     return percentage > 0 ? percentage : 0;
   }, [seats]);
 
+  // Get description text with case insensitivity
+  const descriptionText = featureName
+    ? FEATURE_MESSAGES[featureName.toLowerCase()] || FEATURE_MESSAGES.default
+    : FEATURE_MESSAGES.default;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl gap-6">
@@ -157,8 +195,7 @@ export const UpgradeProDialog = ({
             Upgrade to Pro
           </DialogTitle>
           <DialogDescription className="text-slate-600">
-            Choose your add-ons or select the Team Bundle to unlock all
-            features. Start with a 7-day free trial, cancel anytime.
+            {descriptionText}
           </DialogDescription>
         </DialogHeader>
 

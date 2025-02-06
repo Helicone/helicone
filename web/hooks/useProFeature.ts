@@ -12,7 +12,24 @@ export const descriptions = {
     "The Free plan does not allow you to invite members to your organization. Upgrade to Pro to invite your team members.",
   RateLimit:
     "The Free plan does not allow you to set custom rate limits. Upgrade to Pro to set custom rate limits.",
-  Prompts: undefined,
+  Properties:
+    "The Free plan does not allow you to set custom properties. Upgrade to Pro to set custom properties.",
+  Prompts:
+    "The Free plan does not allow you to use prompt management. Upgrade to Pro to use prompt management.",
+  cache:
+    "The Free plan does not allow you to use cache. Upgrade to Pro to use cache.",
+  Evaluators:
+    "The Free plan does not allow you to set custom evaluators. Upgrade to Pro to set custom evaluators.",
+  Playground:
+    "The Free plan does not allow you to use the Playground. Upgrade to Pro to use the Playground.",
+  Sessions:
+    "The Free plan does not allow you to use the Sessions. Upgrade to Pro to use the Sessions.",
+  Vault:
+    "The Free plan does not allow you to use the Vault. Upgrade to Pro to use the Vault.",
+  Webhooks:
+    "The Free plan does not allow you to use the Webhooks. Upgrade to Pro to use the Webhooks.",
+  Users:
+    "The Free plan does not allow you to use the Users. Upgrade to Pro to use the Users.",
 };
 
 export type FeatureName = keyof typeof descriptions;
@@ -23,7 +40,15 @@ export const titles: Record<FeatureName, string> = {
   time_filter: "Unlock Time Filter",
   invite: "Unlock Invite",
   RateLimit: "Unlock Rate Limits",
-  Prompts: "",
+  Properties: "Unlock Properties",
+  Prompts: "Unlock Prompts",
+  cache: "Unlock Cache",
+  Evaluators: "Unlock Evaluators",
+  Playground: "Unlock Playground",
+  Sessions: "Unlock Sessions",
+  Vault: "Unlock Vault",
+  Webhooks: "Unlock Webhooks",
+  Users: "Unlock Users",
 };
 
 export function useProFeature(featureName: FeatureName, enabled = true) {

@@ -279,6 +279,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           description="The Free plan does not include the BETA webhooks feature, but getting access is easy."
           infoBoxText="Add webhooks to easily subscribe to API requests that come into Helicone."
           documentationLink="https://docs.helicone.ai/features/sessions"
+          featureName="Webhooks"
         />
       </div>
     );

@@ -18,12 +18,7 @@ import {
   Check,
 } from "lucide-react";
 import { useState } from "react";
-import {
-  useCostForPrompts,
-  useCostForEvals,
-  useCostForExperiments,
-} from "../../pricing/hooks";
-import { Addons, UpgradeProDialog } from "./upgradeProDialog";
+import { UpgradeProDialog } from "./upgradeProDialog";
 import Link from "next/link";
 import {
   Collapsible,
@@ -311,7 +306,6 @@ export const FreePlanCard = () => {
       <UpgradeProDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        subscription={subscription.data}
       />
     </div>
   );
