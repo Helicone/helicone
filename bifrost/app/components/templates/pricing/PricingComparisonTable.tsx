@@ -46,23 +46,23 @@ const tiers: PricingTier[] = [
   {
     name: "Hobby",
     ctaText: "Get started",
-    ctaHref: "#",
+    ctaHref: "https://us.helicone.ai/signup",
   },
   {
     name: "Pro",
-    ctaText: "Try for free",
-    ctaHref: "#",
+    ctaText: "7-day free trial",
+    ctaHref: "https://us.helicone.ai/settings/billing",
     isPrimary: true,
   },
   {
     name: "Team",
-    ctaText: "Try for free",
-    ctaHref: "#",
+    ctaText: "7-day free trial",
+    ctaHref: "https://us.helicone.ai/settings/billing",
   },
   {
     name: "Enterprise",
     ctaText: "Contact sales",
-    ctaHref: "#",
+    ctaHref: "https://us.helicone.ai/settings/billing",
   },
 ];
 

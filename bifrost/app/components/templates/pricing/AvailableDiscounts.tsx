@@ -5,7 +5,7 @@ import { Col } from "@/components/common/col";
 export default function AvailableDiscounts() {
   return (
     <div className="py-10 sm:p-8 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
-      <Col className="col-span-5">
+      <Col className="col-span-5 py-[24px]">
         <span className="text-[36px] font-bold text-slate-900">
           Available <br />
           discounts
@@ -32,7 +32,7 @@ export default function AvailableDiscounts() {
               </span>
             </p>
             <p className="text-sm text-slate-500 mt-2">
-              For most startups under 2 years old.
+              For startups under 2 years old and $5M in funding.
             </p>
           </div>
           <div className="p-4 flex flex-col !border-r sm:rounded-tr-lg border-slate-200">

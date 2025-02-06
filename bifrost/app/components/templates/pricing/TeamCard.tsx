@@ -54,9 +54,9 @@ const TeamCard: React.FC = () => {
           </Col>
         </Col>
 
-        <Link href="https://us.helicone.ai/signin">
+        <Link href="https://us.helicone.ai/settings/billing">
           <Button variant="secondary" className="w-full text-base py-6">
-            Get started
+            7-day free trial
           </Button>
         </Link>
       </Col>

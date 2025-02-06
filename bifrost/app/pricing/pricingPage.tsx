@@ -26,7 +26,7 @@ export default function PricingPage() {
   return (
     <div className="bg-white text-slate-700">
       <div className=" mx-auto px-4 antialiased">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-24">
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-20">
           <Col className="items-center gap-4">
             <span className="block sm:hidden">
               <Image
@@ -63,8 +63,8 @@ export default function PricingPage() {
           </div>
           <CustomerHighlights />
           <PricingComparisonTable />
-          <ProductComparisonTable />
           <AvailableDiscounts />
+          <ProductComparisonTable />
 
           <div className="py-16 sm:p-8 flex flex-col sm:flex-row sm:justify-between">
             <div className="w-full sm:w-1/2">

@@ -24,7 +24,7 @@ const highlights: CustomerHighlight[] = [
     tier: {
       name: "Free",
       ctaText: "Get started",
-      ctaHref: "https://us.helicone.ai/signin",
+      ctaHref: "https://us.helicone.ai/signup",
     },
   },
   {
@@ -34,7 +34,7 @@ const highlights: CustomerHighlight[] = [
     logoAlt: "qawolf",
     tier: {
       name: "Pro",
-      ctaText: "Try for free",
+      ctaText: "7-day free trial",
       ctaHref: "https://us.helicone.ai/settings/billing",
       isPrimary: true,
     },

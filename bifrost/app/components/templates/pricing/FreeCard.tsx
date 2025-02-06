@@ -38,7 +38,7 @@ const FreeCard: React.FC = () => {
           </Col>
         </Col>
 
-        <Link href="https://us.helicone.ai/signin">
+        <Link href="https://us.helicone.ai/signup">
           <Button variant="secondary" className="w-full text-base py-6">
             Get started
           </Button>
