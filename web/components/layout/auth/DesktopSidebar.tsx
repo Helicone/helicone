@@ -18,11 +18,12 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
 import OnboardingNavItems from "./OnboardingNavItems";
 import useOnboardingContext from "../onboardingContext";
-import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useOnboardingStore } from "@/store/onboardingStore";
+import { Rocket } from "lucide-react";
 
 export interface NavigationItem {
   name: string;
@@ -183,9 +184,8 @@ const DesktopSidebar = ({
   };
 
   const { isOnboardingVisible } = useOnboardingContext();
-  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
-    useState(false);
-  const [showCreateOrg, setShowCreateOrg] = useState(false);
+
+  const { showCreateOrg, setShowCreateOrg } = useOnboardingStore();
 
   return (
     <>
@@ -312,25 +312,22 @@ const DesktopSidebar = ({
                           deep={0}
                         />
                       ))}
+
+                    {org?.currentOrg?.tier === "demo" && (
+                      <Button
+                        onClick={() => {
+                          setShowCreateOrg(true);
+                        }}
+                        className="mt-10 gap-1 w-full text-white text-large font-medium leading-normal text-white tracking-normal h-[46px] px-6 md:px-4 bg-sky-500 hover:bg-sky-600 transition-colors"
+                        variant="action"
+                      >
+                        {!isCollapsed && <span>Ready to integrate</span>}
+                        <Rocket className="h-6 w-6" />
+                      </Button>
+                    )}
                   </nav>
                 </div>
               </div>
-
-              {org?.currentOrg?.tier === "demo" &&
-                org.allOrgs.filter(
-                  (org) => org.tier !== "demo" && org.owner === user?.id
-                ).length === 0 && (
-                  <Button
-                    variant="secondary"
-                    size={"lg"}
-                    className="w-full px-2"
-                    onClick={() => {
-                      setShowEndOnboardingConfirmation(true);
-                    }}
-                  >
-                    Ready to Integrate 🚀
-                  </Button>
-                )}
 
               {/* InfoBox */}
               {canShowInfoBox &&
@@ -367,14 +364,6 @@ const DesktopSidebar = ({
         open={modalOpen}
         setOpen={handleModalOpen}
         changelog={changelogToView}
-      />
-      <EndOnboardingConfirmation
-        open={showEndOnboardingConfirmation}
-        setOpen={setShowEndOnboardingConfirmation}
-        onEnd={() => {
-          setShowEndOnboardingConfirmation(false);
-          setShowCreateOrg(true);
-        }}
       />
       <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
         <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">

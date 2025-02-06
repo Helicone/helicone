@@ -38,7 +38,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   return (
-    <Card className="max-w-2xl">
+    <Card className="max-w-2xl mt-10">
       <CardHeader>
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
         <p className="text-sm text-muted-foreground text-slate-400">

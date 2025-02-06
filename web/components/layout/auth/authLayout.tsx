@@ -8,10 +8,12 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
-import MainContent from "./MainContent";
+import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
 import { useOrg } from "../org/organizationContext";
+import { useOnboardingStore } from "@/store/onboardingStore";
+import { Rocket } from "lucide-react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -29,34 +31,36 @@ const AuthLayout = (props: AuthLayoutProps) => {
     return path.charAt(0).toUpperCase() + path.slice(1);
   }, [pathname]);
 
-  const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
+  const { alertBanners } = useAlertBanners();
   const org = useOrg();
+  const { setShowCreateOrg } = useOnboardingStore();
 
-  const banner = useMemo(() => {
+  const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
     if (activeBanner) {
       return {
         message: activeBanner.message,
-        title: activeBanner.title,
+        title: activeBanner.title || "",
         active: activeBanner.active,
         created_at: activeBanner.created_at,
-        id: activeBanner.id,
+        id: activeBanner.id.toString(),
         updated_at: activeBanner.updated_at,
-      };
+      } as BannerType;
     }
     if (org?.currentOrg?.tier === "demo") {
       return {
         message: (
-          <>
-            Click <span className="font-semibold">Ready to Integrate</span> on
-            the bottom left to get started.
-          </>
+          <div className="flex items-center gap-2">
+            Click here to start integrating <Rocket className="h-6 w-6" />
+          </div>
         ),
-        title: "Demo Organization",
+        title: "Welcome to Your Demo",
         active: true,
-      };
+        onClick: () => setShowCreateOrg(true),
+      } as BannerType;
     }
-  }, [alertBanners?.data, org?.currentOrg?.tier]);
+    return null;
+  }, [alertBanners?.data, org?.currentOrg?.tier, setShowCreateOrg]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 
