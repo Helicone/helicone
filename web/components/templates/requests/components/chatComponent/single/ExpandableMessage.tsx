@@ -59,7 +59,6 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
     return !expanded && showButton;
   }, [expanded, showButton]);
 
-  const [showOriginalText, setShowOriginalText] = useState(true);
   const { isTextJson, formattedText } = useMemo(() => {
     try {
       const parsedText = JSON.parse(formattedMessageContent);
@@ -92,38 +91,20 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
         <div className="h-full" ref={contentRef}>
           {mode === "Pretty" ? (
             <RenderWithPrettyInputKeys
-              text={
-                isTextJson && showOriginalText
-                  ? formattedText
-                  : formattedMessageContent
-              }
+              text={isTextJson ? formattedText : formattedMessageContent}
               selectedProperties={selectedProperties}
             />
           ) : (
             <MarkdownEditor
               language="markdown"
-              text={
-                isTextJson && showOriginalText
-                  ? formattedText
-                  : formattedMessageContent
-              }
+              text={isTextJson ? formattedText : formattedMessageContent}
               setText={() => {}}
               className=""
             />
           )}
         </div>
       </div>
-      {isTextJson && (
-        <div className="flex items-center gap-2 mb-2 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-md p-2">
-          <span>JSON detected - showing formatted view</span>
-          <button
-            onClick={() => setShowOriginalText(!showOriginalText)}
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            {showOriginalText ? "Show raw" : "Show formatted"}
-          </button>
-        </div>
-      )}
+
       {showButton && (
         <div className="w-full flex justify-center items-center pt-2 pr-24">
           <button onClick={handleToggle}>
