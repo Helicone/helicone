@@ -21,7 +21,7 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 #yarn workspace jawn serve
 ENV PORT=8585
 
-RUN yarn build
+RUN yarn && yarn build
 
 ENV DLQ_MESSAGES_PER_MINI_BATCH=1
 ENV DLQ_WORKER_COUNT=1

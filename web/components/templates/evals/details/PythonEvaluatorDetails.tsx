@@ -6,7 +6,7 @@ import { ExperimentsForEvaluator } from "./Experiments";
 import { useEvaluatorDetails } from "./hooks";
 import { OnlineEvaluatorsSection } from "./OnlineEvaluatorsSection";
 import { Evaluator } from "./types";
-import { PythonEvaluatorConfigForm } from "@/components/shared/CreateNewEvaluator/PythonEvaluatorConfigForm";
+import { PythonEvaluatorConfigForm } from "@/components/templates/evals/CreateNewEvaluator/PythonEvaluatorConfigForm";
 
 interface PythonEvaluatorDetailsProps {
   evaluator: Evaluator;

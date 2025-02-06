@@ -36,6 +36,9 @@ export interface paths {
   "/v1/evaluator/llm/test": {
     post: operations["TestLLMEvaluator"];
   };
+  "/v1/evaluator/lastmile/test": {
+    post: operations["TestLastMileEvaluator"];
+  };
   "/v2/experiment/create/empty": {
     post: operations["CreateEmptyExperiment"];
   };
@@ -167,6 +170,12 @@ export interface paths {
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
+  "/v1/stripe/subscription/cost-for-evals": {
+    get: operations["GetCostForEvals"];
+  };
+  "/v1/stripe/subscription/cost-for-experiments": {
+    get: operations["GetCostForExperiments"];
+  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
@@ -175,6 +184,12 @@ export interface paths {
   };
   "/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
     post: operations["UpgradeExistingCustomer"];
+  };
+  "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
+    post: operations["UpgradeToTeamBundle"];
+  };
+  "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
+    post: operations["UpgradeExistingCustomerToTeamBundle"];
   };
   "/v1/stripe/subscription/manage-subscription": {
     post: operations["ManageSubscription"];
@@ -348,6 +363,7 @@ export interface components {
       updated_at: string;
       name: string;
       code_template: unknown;
+      last_mile_config: unknown;
     };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
@@ -365,6 +381,7 @@ export interface components {
       llm_template?: unknown;
       name: string;
       code_template?: unknown;
+      last_mile_config?: unknown;
     };
     "ResultSuccess_EvaluatorResult-Array_": {
       data: components["schemas"]["EvaluatorResult"][];
@@ -377,6 +394,7 @@ export interface components {
       llm_template?: unknown;
       code_template?: unknown;
       name?: string;
+      last_mile_config?: unknown;
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -452,6 +470,49 @@ export interface components {
       evaluator_llm_template?: string;
       evaluator_scoring_type: string;
     };
+    "ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
+      data: {
+        ground_truth?: string;
+        output: string;
+        input: string;
+        /** Format: double */
+        score: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": components["schemas"]["ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"] | components["schemas"]["ResultError_string_"];
+    DataEntry: {
+      /** @enum {string} */
+      _type: "system-prompt";
+    } | {
+      inputKey: string;
+      /** @enum {string} */
+      _type: "prompt-input";
+    } | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "input-body";
+    }) | ({
+      /** @enum {string} */
+      content: "jsonify" | "message";
+      /** @enum {string} */
+      _type: "output-body";
+    });
+    BaseLastMileConfigForm: {
+      output: components["schemas"]["DataEntry"];
+      input: components["schemas"]["DataEntry"];
+      name: string;
+    };
+    LastMileConfigForm: components["schemas"]["BaseLastMileConfigForm"] & (({
+      /** @enum {string} */
+      _type: "relevance" | "context_relevance";
+    }) | {
+      groundTruth: components["schemas"]["DataEntry"];
+      /** @enum {string} */
+      _type: "faithfulness";
+    });
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -598,74 +659,64 @@ Json: JsonObject;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN";
-    Provider: components["schemas"]["ProviderName"] | string | "CUSTOM";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS";
+    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
-      name?: string;
-      arguments?: Record<string, never>;
+      name: string;
+      arguments: components["schemas"]["Record_string.any_"];
     };
-    ChatMessage: {
-      role?: string;
+    Message: {
+      contentArray?: components["schemas"]["Message"][];
+      image_url?: string;
+      /** @enum {string} */
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
-      function_call?: components["schemas"]["FunctionCall"];
+      role?: string;
+      id?: string;
     };
-    Request: {
+    LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       model?: string;
       provider?: string;
       prompt?: string | null;
+      input?: string | string[];
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
       temperature?: number | null;
       /** Format: double */
       top_p?: number | null;
-      /** Format: double */
-      n?: number | null;
       stream?: boolean | null;
-      stop?: string | null;
       /** Format: double */
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
       /** Format: double */
-      logprobs?: number | null;
-      /** Format: double */
-      best_of?: number | null;
-      logit_bias?: Record<string, unknown> | null;
-      user?: string | null;
-      messages?: components["schemas"]["ChatMessage"][] | null;
-      tooLarge?: boolean;
-      heliconeMessage?: string;
+      n?: number | null;
+      stop?: string[] | null;
+      messages?: components["schemas"]["Message"][] | null;
+      tool_choice?: unknown;
     };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_number.string_": {
-      [key: string]: string;
-    };
-    ErrorInfo: {
-      code?: string | null;
-      message?: string | null;
-    };
-    Response: {
-      completions?: components["schemas"]["Record_number.string_"] | null;
-      message?: components["schemas"]["ChatMessage"] | null;
-      error?: components["schemas"]["ErrorInfo"] | null;
+    LLMResponseBody: {
+      error?: {
+        heliconeMessage: unknown;
+      };
       model?: string | null;
-      tooLarge?: boolean;
-      heliconeMessage?: string;
+      messages?: components["schemas"]["Message"][] | null;
     };
     LlmSchema: {
-      request: components["schemas"]["Request"];
-      response?: components["schemas"]["Response"] | null;
+      request: components["schemas"]["LLMRequestBody"];
+      response?: components["schemas"]["LLMResponseBody"] | null;
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.number_": {
       [key: string]: number;
     };
     HeliconeRequest: {
-      /** @example Happy */
       response_id: string | null;
       response_created_at: string | null;
       response_body?: unknown;
@@ -707,7 +758,7 @@ Json: JsonObject;
       properties: components["schemas"]["Record_string.string_"];
       assets: string[];
       target_url: string;
-      model?: string;
+      model: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1118,6 +1169,8 @@ Json: JsonObject;
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
     UpgradeToProRequest: {
       addons?: {
+        evals?: boolean;
+        experiments?: boolean;
         prompts?: boolean;
         alerts?: boolean;
       };
@@ -1328,7 +1381,7 @@ Json: JsonObject;
         id: string;
       };
     };
-    Message: {
+    KafkaMessageContents: {
       log: components["schemas"]["Log"];
       heliconeMeta: components["schemas"]["HeliconeMeta"];
       authorization: string;
@@ -2250,6 +2303,24 @@ export interface operations {
       };
     };
   };
+  TestLastMileEvaluator: {
+    requestBody: {
+      content: {
+        "application/json": {
+          testInput: components["schemas"]["TestInput"];
+          config: components["schemas"]["LastMileConfigForm"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__score-number--input-string--output-string--ground_truth_63_-string_.string_"];
+        };
+      };
+    };
+  };
   CreateEmptyExperiment: {
     responses: {
       /** @description Ok */
@@ -2582,7 +2653,7 @@ export interface operations {
     /** @description Log message to log */
     requestBody: {
       content: {
-        "application/json": components["schemas"]["Message"];
+        "application/json": components["schemas"]["KafkaMessageContents"];
       };
     };
     responses: {
@@ -2623,6 +2694,9 @@ export interface operations {
   };
   GetRequestById: {
     parameters: {
+      query?: {
+        includeBody?: boolean;
+      };
       path: {
         requestId: string;
       };
@@ -3059,6 +3133,26 @@ export interface operations {
       };
     };
   };
+  GetCostForEvals: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
+  GetCostForExperiments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": number;
+        };
+      };
+    };
+  };
   GetFreeUsage: {
     responses: {
       /** @description Ok */
@@ -3099,6 +3193,26 @@ export interface operations {
       };
     };
   };
+  UpgradeToTeamBundle: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
+  UpgradeExistingCustomerToTeamBundle: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+  };
   ManageSubscription: {
     responses: {
       /** @description Ok */
@@ -3122,7 +3236,7 @@ export interface operations {
   AddOns: {
     parameters: {
       path: {
-        productType: "alerts" | "prompts";
+        productType: "alerts" | "prompts" | "experiments" | "evals";
       };
     };
     responses: {
@@ -3137,7 +3251,7 @@ export interface operations {
   DeleteAddOns: {
     parameters: {
       path: {
-        productType: "alerts" | "prompts";
+        productType: "alerts" | "prompts" | "experiments" | "evals";
       };
     };
     responses: {

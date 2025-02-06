@@ -54,5 +54,18 @@ export const MessageContent: React.FC<MessageContentProps> = ({
           formattedMessageContent={message.content ?? ""}
         />
       );
+    case "contentArray":
+      return (
+        <>
+          {message.contentArray?.map((content, index) => (
+            <MessageContent
+              key={index}
+              message={content}
+              expandedProps={expandedProps}
+              mode={mode}
+            />
+          ))}
+        </>
+      );
   }
 };

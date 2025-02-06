@@ -265,6 +265,10 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedAdvancedFilter]);
+
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
@@ -299,8 +303,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const requestWithoutStream = requests.find((r) => {
     return (
-      r.schema.request.stream &&
-      !r.raw.request?.stream_options?.include_usage &&
+      r.raw?.request?.stream &&
+      !r.raw?.request?.stream_options?.include_usage &&
       r.heliconeMetadata.provider === "OPENAI"
     );
   });

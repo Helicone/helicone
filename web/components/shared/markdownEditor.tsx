@@ -9,7 +9,7 @@ import Editor from "react-simple-code-editor";
 import { Editor as MonacoEditor } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const MAX_EDITOR_HEIGHT = 500;
 const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
@@ -76,9 +76,11 @@ interface MarkdownEditorProps {
 
 const LARGE_TEXT_THRESHOLD = 50;
 
+const LARGE_TEXT_THRESHOLD_CHARS = 10_000;
+
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
-    text,
+    text: noSafeText,
     setText,
     language,
     disabled = false,
@@ -86,6 +88,13 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     textareaClassName,
     monaco = false,
   } = props;
+
+  const text = useMemo(() => {
+    if (typeof noSafeText === "string") {
+      return noSafeText;
+    }
+    return JSON.stringify(noSafeText, null, 2);
+  }, [noSafeText]);
 
   const languageMap = {
     json: {
@@ -103,7 +112,12 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   };
 
   const { lang, ref } = languageMap[language];
-  if (text.split("\n").length > LARGE_TEXT_THRESHOLD || monaco) {
+
+  if (
+    text.split("\n").length > LARGE_TEXT_THRESHOLD ||
+    monaco ||
+    text.length > LARGE_TEXT_THRESHOLD_CHARS
+  ) {
     return <MonacoMarkdownEditor {...props} />;
   }
 

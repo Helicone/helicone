@@ -3,37 +3,28 @@ import { Headers } from "@cloudflare/workers-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Env, Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
+import { getTokenCount } from "../clients/TokenCounterClient";
+import { formatTimeStringDateTime } from "../db/ClickhouseStore";
+import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
-import { withTimeout } from "../util/helpers";
-import { Result, err, ok } from "../util/results";
+import { RequestResponseStore } from "../db/RequestResponseStore";
+import { RequestResponseManager } from "../managers/RequestResponseManager";
+import { AsyncLogModel } from "../models/AsyncLog";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
-import { AsyncLogModel } from "../models/AsyncLog";
-import { formatTimeStringDateTime } from "../db/ClickhouseStore";
-import { RequestResponseStore } from "../db/RequestResponseStore";
+import { withTimeout } from "../util/helpers";
+import { Result, err, ok } from "../util/results";
 import {
   anthropicAIStream,
   getModel,
 } from "./streamParsers/anthropicStreamParser";
 import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
-import { getTokenCount } from "../clients/TokenCounterClient";
-import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
-import { RequestResponseManager } from "../managers/RequestResponseManager";
-import {
-  isRequestImageModel,
-  isResponseImageModel,
-} from "../util/imageModelMapper";
-import {
-  getRequestImageModelParser,
-  getResponseImageModelParser,
-} from "./imageParsers/parserMapper";
 
-import { ImageModelParsingResponse } from "./imageParsers/core/parsingResponse";
+import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
-import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
 export interface DBLoggableProps {
   response: {
@@ -500,111 +491,6 @@ export class DBLoggable {
     }
   }
 
-  async sendToWebhook(
-    dbClient: SupabaseClient<Database>,
-    payload: {
-      request: UnPromise<ReturnType<typeof logRequest>>["data"];
-      response: Database["public"]["Tables"]["response"]["Insert"];
-    },
-    webhook: Database["public"]["Tables"]["webhooks"]["Row"]
-  ): Promise<Result<undefined, string>> {
-    // Check FF
-    const checkWebhookFF = await dbClient
-      .from("feature_flags")
-      .select("*")
-      .eq("feature", "webhook_beta")
-      .eq("org_id", payload.request?.request.helicone_org_id ?? "");
-    if (checkWebhookFF.error !== null || checkWebhookFF.data.length === 0) {
-      console.error(
-        "Error checking webhook ff or webhooks not enabled for user trying to use them",
-        checkWebhookFF.error
-      );
-      return {
-        data: undefined,
-        error: null,
-      };
-    }
-
-    const subscriptions =
-      (
-        await dbClient
-          .from("webhook_subscriptions")
-          .select("*")
-          .eq("webhook_id", webhook.id)
-      ).data ?? [];
-
-    const shouldSend =
-      webhook.destination.includes("helicone-scoring-webhook") ||
-      subscriptions
-        .map((subscription) => {
-          return subscription.event === "beta";
-        })
-        .filter((x) => x).length > 0;
-
-    if (shouldSend) {
-      console.log("SENDING", webhook.destination, payload.request?.request.id);
-      try {
-        await fetch(webhook.destination, {
-          method: "POST",
-          body: JSON.stringify({
-            request_id: payload.request?.request.id,
-            request_body: payload.request?.request.body,
-            response_body: payload.response.body,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.error("Error sending to webhook", error.message);
-      }
-    }
-
-    return {
-      data: undefined,
-      error: null,
-    };
-  }
-
-  async sendToWebhooks(
-    dbClient: SupabaseClient<Database>,
-    payload: {
-      request: UnPromise<ReturnType<typeof logRequest>>["data"];
-      response: Database["public"]["Tables"]["response"]["Insert"];
-    }
-  ): Promise<Result<undefined, string>> {
-    if (!payload.request?.request.helicone_org_id) {
-      return {
-        data: null,
-        error: "Org id undefined",
-      };
-    }
-
-    const webhooks = await dbClient
-      .from("webhooks")
-      .select("*")
-      .eq("org_id", payload.request?.request.helicone_org_id ?? "")
-      .eq("is_verified", true);
-    if (webhooks.error !== null) {
-      return {
-        data: null,
-        error: webhooks.error.message,
-      };
-    }
-    for (const webhook of webhooks.data ?? []) {
-      const res = await this.sendToWebhook(dbClient, payload, webhook);
-      if (res.error !== null) {
-        return res;
-      }
-    }
-
-    return {
-      data: undefined,
-      error: null,
-    };
-  }
-
   isSuccessResponse = (status: number | undefined | null): boolean =>
     status != null && status >= 200 && status <= 299;
 
@@ -672,6 +558,7 @@ export class DBLoggable {
 
     await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
 
+    // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
 
     const model =
@@ -825,54 +712,6 @@ export class DBLoggable {
       : body;
   }
 
-  processRequestBodyImages(
-    model: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requestBody: any
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: requestBody,
-      assets: new Map<string, string>(),
-    };
-    if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processRequestBody(requestBody);
-      }
-    }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
-
-    return imageModelParsingResponse;
-  }
-
-  processResponseBodyImages(
-    model: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseBody: any
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: responseBody,
-      assets: new Map<string, string>(),
-    };
-    if (model && isResponseImageModel(model)) {
-      const imageModelParser = getResponseImageModelParser(model);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processResponseBody(responseBody);
-      }
-    }
-
-    imageModelParsingResponse.body = unsupportedImage(
-      imageModelParsingResponse.body
-    );
-
-    return imageModelParsingResponse;
-  }
-
   calculateModel(
     requestModel: string | null,
     responseModel: string | null,
@@ -899,236 +738,5 @@ export class DBLoggable {
         provider: modelRow.provider,
       }) ?? 0
     );
-  }
-}
-
-// Replaces all the image_url that is not a url or not { url: url }  with
-// { unsupported_image: true }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function unsupportedImage(body: any): any {
-  if (typeof body !== "object" || body === null) {
-    return body;
-  }
-  if (Array.isArray(body)) {
-    return body.map((item) => unsupportedImage(item));
-  }
-  const notSupportMessage = {
-    helicone_message:
-      "Storing images as bytes is currently not supported within Helicone.",
-  };
-  if (body["image_url"] !== undefined) {
-    const imageUrl = body["image_url"];
-    if (
-      typeof imageUrl === "string" &&
-      !imageUrl.startsWith("http") &&
-      !imageUrl.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-    if (
-      typeof imageUrl === "object" &&
-      imageUrl.url !== undefined &&
-      typeof imageUrl.url === "string" &&
-      !imageUrl.url.startsWith("http") &&
-      !imageUrl.url.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = {};
-  for (const key in body) {
-    result[key] = unsupportedImage(body[key]);
-  }
-  return result;
-}
-
-export async function logRequest(
-  request: DBLoggableProps["request"],
-  responseId: string,
-  dbClient: SupabaseClient<Database>,
-  insertQueue: RequestResponseStore,
-  authParams: AuthParams
-): Promise<
-  Result<
-    {
-      request: Database["public"]["Tables"]["request"]["Row"];
-      properties: Database["public"]["Tables"]["properties"]["Insert"][];
-      node: {
-        id: string | null;
-        job: string | null;
-      };
-      body: string; // For S3 storage
-      requestAssets: Map<string, string>;
-    },
-    string
-  >
-> {
-  try {
-    if (!authParams.organizationId) {
-      return { data: null, error: "Helicone organization not found" };
-    }
-
-    let bodyText = request.bodyText ?? "{}";
-    bodyText = bodyText.replace(/\\u0000/g, ""); // Remove unsupported null character in JSONB
-
-    let requestBody = {
-      error: `error parsing request body: ${bodyText}`,
-    };
-    try {
-      requestBody = JSON.parse(bodyText ?? "{}");
-    } catch (e) {
-      console.error("Error parsing request body", e);
-    }
-
-    const jobNode = request.nodeId
-      ? await dbClient
-          .from("job_node")
-          .select("*")
-          .eq("id", request.nodeId)
-          .single()
-      : null;
-    if (jobNode && jobNode.error) {
-      return { data: null, error: `No task found for id ${request.nodeId}` };
-    }
-
-    const getModelFromRequest = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (requestBody && (requestBody as any).model) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (requestBody as any).model;
-      }
-
-      const modelFromPath = getModelFromPath(request.path);
-      if (modelFromPath) {
-        return modelFromPath;
-      }
-
-      return null;
-    };
-
-    const body = request.omitLog
-      ? {
-          model:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (requestBody as any).model !== "undefined"
-              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (requestBody as any).model
-              : null,
-        }
-      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (requestBody as any);
-
-    // eslint-disable-next-line prefer-const
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: body,
-      assets: new Map<string, string>(),
-    };
-    const model = getModelFromRequest();
-
-    if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model);
-      if (imageModelParser) {
-        imageModelParsingResponse = imageModelParser.processRequestBody(body);
-      }
-    }
-
-    const reqBody = unsupportedImage(imageModelParsingResponse.body);
-
-    const createdAt = request.startTime ?? new Date();
-    const requestData = {
-      id: request.requestId,
-      path: request.path,
-      body: reqBody, // TODO: Remove in favor of S3 storage
-      auth_hash: "",
-      user_id: request.userId ?? null,
-      prompt_id:
-        request.promptSettings.promptMode === "production"
-          ? request.promptSettings.promptId
-          : null,
-      properties: request.properties,
-      formatted_prompt_id: null,
-      prompt_values: null,
-      helicone_user: authParams.userId ?? null,
-      helicone_api_key_id: authParams.heliconeApiKeyId ?? null,
-      helicone_org_id: authParams.organizationId,
-      provider: request.provider,
-      helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
-      model: model,
-      model_override: request.modelOverride ?? null,
-      created_at: createdAt.toISOString(),
-      threat: request.threat ?? null,
-      target_url: request.targetUrl,
-      request_ip: null,
-      country_code: request.country_code,
-      version: 0,
-    };
-
-    const customPropertyRows = Object.entries(request.properties).map(
-      (entry) => ({
-        request_id: request.requestId,
-        auth_hash: null,
-        user_id: null,
-        key: entry[0],
-        value: entry[1],
-        created_at: createdAt.toISOString(),
-      })
-    );
-
-    const requestResult = await insertQueue.addRequest(
-      requestData,
-      customPropertyRows,
-      responseId
-    );
-
-    if (requestResult.error) {
-      return { data: null, error: requestResult.error };
-    }
-    if (jobNode && jobNode.data) {
-      const jobNodeResult = await insertQueue.addRequestNodeRelationship(
-        jobNode.data.job,
-        jobNode.data.id,
-        request.requestId
-      );
-      if (jobNodeResult.error) {
-        return {
-          data: null,
-          error: `Node Relationship error: ${jobNodeResult.error}`,
-        };
-      }
-    }
-
-    return {
-      data: {
-        request: requestData,
-        properties: customPropertyRows,
-        node: {
-          id: jobNode?.data.id ?? null,
-          job: jobNode?.data.job ?? null,
-        },
-        body: imageModelParsingResponse.body,
-        requestAssets: imageModelParsingResponse.assets,
-      },
-      error: null,
-    };
-  } catch (e) {
-    return { data: null, error: JSON.stringify(e) };
-  }
-
-  function getModelFromPath(path: string) {
-    const regex1 = /\/engines\/([^/]+)/;
-    const regex2 = /models\/([^/:]+)/;
-
-    let match = path.match(regex1);
-
-    if (!match) {
-      match = path.match(regex2);
-    }
-
-    if (match && match[1]) {
-      return match[1];
-    } else {
-      return undefined;
-    }
   }
 }

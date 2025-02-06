@@ -15,6 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 
 import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
+import { Input } from "@/components/ui/input";
 
 interface VariableItemProps {
   variable: Variable;
@@ -80,9 +81,9 @@ export default function VariablesPanel({
   const [openInputSelector, setOpenInputSelector] = useState(false);
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-700">Variables</h2>
-
+      {/* Header */}
+      <div className="h-8 flex items-center justify-between">
+        <h2 className="font-semibold text-secondary">Variables</h2>
         <div className="flex flex-row gap-2">
           <TooltipProvider delayDuration={0}>
             <Tooltip>
@@ -143,7 +144,7 @@ export default function VariablesPanel({
           value in a message and press ⌘ E.
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100">
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">
           {/* Variables */}
           {validVariablesWithIndices.map(({ variable, originalIndex }) => (
             <VariableItem
@@ -181,7 +182,7 @@ export default function VariablesPanel({
 
 const VariableItem = memo(
   ({ variable, originalIndex, onVariableChange }: VariableItemProps) => (
-    <div className="flex flex-col py-2 first:pt-0">
+    <div className="flex flex-col py-1 first:pt-0">
       <div className="flex flex-d items-center justify-between gap-2 text-sm">
         <div className="flex items-center gap-2">
           <div
@@ -193,7 +194,8 @@ const VariableItem = memo(
             <span>{variable.isMessage && <PiChatBold />}</span>
           </div>
         </div>
-        <input
+        <Input
+          variant="helicone"
           value={variable.value}
           disabled={variable.isMessage}
           onChange={(e) => onVariableChange(originalIndex, e.target.value)}
@@ -202,7 +204,7 @@ const VariableItem = memo(
               ? "Import variable value from production..."
               : `Enter default value for {{${variable.name}}}...`
           }
-          className="w-[32rem] border focus:ring-1 focus:ring-heliblue  rounded-md px-2 py-1 enabled:hover:shadow-md"
+          className="w-[32rem]"
         />
       </div>
     </div>

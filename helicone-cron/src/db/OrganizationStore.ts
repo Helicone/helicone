@@ -29,7 +29,7 @@ export class OrganizationStore {
       MAX(ou.end_date) as "latestEndTime"
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id
-      where (o.tier = 'growth' or o.tier = 'pro-20240913')
+      where (o.tier = 'growth' or o.tier = 'pro-20240913' or o.tier = 'pro-20250202')
       and o.subscription_status = 'active'
       and o.stripe_customer_id is not null
       and o.stripe_subscription_item_id is not null

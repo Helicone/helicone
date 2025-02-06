@@ -6,7 +6,9 @@ In this blog, we will cover key features, performance benchmarks, real world app
 
 ## Understanding Gemini-Exp-1206
 
-**Gemini-Exp-1206** is the newest large language model (LLM) in Google’s experimental Gemini series, designed to be **multilingual**, **handle multi-modal inputs like text, voice and images, and achieve top-tier performance** across diverse AI tasks. As part of Google's larger strategy to integrate advanced machine learning models into real-world applications, Gemini-Exp-1206 has quickly captured attention for its capabilities across creative, technical, and conversational domains.
+**Gemini-Exp-1206** is the newest large language model (LLM) in Google’s experimental Gemini series, designed to be **multilingual**, **handle multi-modal inputs like text, voice and images, and achieve top-tier performance** across diverse AI tasks.
+
+As part of Google's larger strategy to integrate advanced machine learning models into real-world applications, Gemini-Exp-1206 has quickly captured attention for its capabilities across creative, technical, and conversational domains.
 
 Despite being a prototype, Gemini-Exp-1206 has distinguished itself by excelling in challenging benchmarks. It represents the culmination of iterative improvements in the Gemini series, showcasing innovations in multi-tasking, contextual understanding, and creative problem-solving.
 
@@ -57,15 +59,6 @@ Gemini-Exp-1206 benefits from enhanced reinforcement learning (RL) processes. Th
 
 Google has made Gemini-exp-1206 freely available through Google AI Studio and the Gemini API. Some developers have turned away from `gpt-o1` and are using `gemini-exp-1206` instead of paying for the ChatGPT Pro subscription. This accessibility allows developers and researchers to experiment with and integrate cutting-edge AI capabilities without cost barriers.
 
-<CallToAction
-  title="Integrate your Gemini app in seconds ⚡️"
-  description="Start monitoring your Gemini app with Helicone."
-  primaryButtonText="Start for free"
-  primaryButtonLink="https://docs.helicone.ai/integrations/gemini/api/javascript"
-  secondaryButtonText="Check Gemini's model status"
-  secondaryButtonLink="https://www.helicone.ai/status/provider/Google"
-/>
-
 ## How Gemini-Exp-1206 Compares With Other Models
 
 ### 1. Gemini vs OpenAI’s GPT-4 and o1
@@ -80,7 +73,7 @@ Gemini-Exp-1206 outshines it in advanced reasoning and task generalization. Whil
 
 -> **<span style={{color: '#03A9F4'}}>Want to know how Gemini-Exp-1206 compares with other models?</span>** Check out our <a href="https://www.helicone.ai/comparison" target="_blank" rel="noopener">free model comparison tool</a>.
 
-## Applications Across Industries
+## Real-World Applications
 
 In **software development**, Gemini-Exp-1206’s advanced coding capabilities empower developers to streamline workflows, from automating repetitive tasks like generating boilerplate code to solving intricate debugging challenges.
 
@@ -90,7 +83,26 @@ For **content creation**, its mastery of style control enables writers, marketer
 
 In **research and analytics**, Gemini-Exp-1206 excels at synthesizing complex data and delivering actionable insights, proving invaluable for researchers and decision-makers alike.
 
-## Challenges and Limitations
+## Integrate Gemini-Exp-1206 with Helicone ⚡️
+
+Integrate LLM observability with a few lines of code. See <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">docs</a> for details.
+
+```javascript
+const model = genAI.getGenerativeModel(
+  {
+    model: "gemini-exp-1206",
+  },
+  requestOptions = {
+    customHeaders: new Headers({
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
+    }),
+    baseUrl: "https://gateway.helicone.ai",
+  } as RequestOptions
+);
+```
+
+## Limitations with Gemini-Exp-1206
 
 - As a developing model, it lacks comprehensive testing and reliability compared to established AI systems like GPT-4. The model may not be robust enough for enterprise-scale deployment or production-ready apps.
 - Gemini-Exp-1206 remains an experimental prototype with limitations. With limited testing data and fewer user votes raise concerns about reliability across real-world scenarios.
@@ -112,7 +124,7 @@ It's important to note that all AI models comes with strengths and limitations. 
     target="_blank"
     rel="noopener"
   >
-    O1 and ChatGPT Pro — here's everything you need to know
+    Here's everything you need to know about O1 and ChatGPT Pro
   </a>
 - <a
     href="https://www.helicone.ai/blog/openai-gpt-5"
@@ -126,7 +138,7 @@ It's important to note that all AI models comes with strengths and limitations. 
     target="_blank"
     rel="noopener"
   >
-    Llama 3.3 just dropped — is it better than GPT-4 or Claude-Sonnet-3.5?
+    Llama 3.3 vs. GPT-4 vs. Claude-Sonnet-3.5
   </a>
 
 <Questions />

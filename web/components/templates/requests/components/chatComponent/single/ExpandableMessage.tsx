@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "../../../../../shared/clsx";
 import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;
@@ -60,6 +59,18 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
     return !expanded && showButton;
   }, [expanded, showButton]);
 
+  const { isTextJson, formattedText } = useMemo(() => {
+    try {
+      const parsedText = JSON.parse(formattedMessageContent);
+      return {
+        isTextJson: true,
+        formattedText: JSON.stringify(parsedText, null, 2),
+      };
+    } catch (e) {
+      return { isTextJson: false, formattedText: formattedMessageContent };
+    }
+  }, [formattedMessageContent]);
+
   if (formattedMessageContent.length > 2_000_000) {
     return (
       <div className="text-red-500 font-normal">
@@ -80,23 +91,20 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
         <div className="h-full" ref={contentRef}>
           {mode === "Pretty" ? (
             <RenderWithPrettyInputKeys
-              text={
-                isJSON(formattedMessageContent)
-                  ? JSON.stringify(JSON.parse(formattedMessageContent), null, 2)
-                  : formattedMessageContent
-              }
+              text={isTextJson ? formattedText : formattedMessageContent}
               selectedProperties={selectedProperties}
             />
           ) : (
             <MarkdownEditor
               language="markdown"
-              text={formattedMessageContent}
+              text={isTextJson ? formattedText : formattedMessageContent}
               setText={() => {}}
               className=""
             />
           )}
         </div>
       </div>
+
       {showButton && (
         <div className="w-full flex justify-center items-center pt-2 pr-24">
           <button onClick={handleToggle}>

@@ -3,7 +3,7 @@ import {
   FineTuningJobEventsPage,
 } from "openai/resources/fine-tuning/jobs";
 import { OpenAIClient } from "../lib/clients/OpenAIClient";
-import { HeliconeRequest } from "../lib/stores/request/request";
+import { HeliconeRequest } from "../packages/llm-mapper/types";
 import { Result, err, ok } from "../lib/shared/result";
 import crypto from "crypto";
 import fs from "fs";

@@ -22,6 +22,17 @@ OpenAI has recently made two significant announcements: the **<span style={{colo
 
 O1 support will be available in the API, bringing a range of powerful new features. Developers can look forward to the addition of support for _function calling, enhanced messaging capabilities, image analysis, web browsing, and file upload_ in the coming months. Additionally, OpenAI is preparing to introduce Structured Outputs and vision capabilities in the near future.
 
+## Integrate OpenAI o1 with Helicone ⚡️
+
+Integrate LLM observability with a few lines of code. See <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">docs</a> for details.
+
+```js
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
+});
+```
+
 <CallToAction
   title="Save up to 70% on your OpenAI API cost ⚡️"
   description="Helicone users can cache their responses, optimize prompts, and more."
@@ -30,6 +41,8 @@ O1 support will be available in the API, bringing a range of powerful new featur
   secondaryButtonText="Calculate API costs"
   secondaryButtonLink="/llm-cost"
 />
+
+---
 
 ## New Plan: What is ChatGPT _Pro_?
 

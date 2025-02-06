@@ -10,7 +10,7 @@ type EvaluatorScore = {
 };
 export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
 
-const TIERS = ["pro-20240913", "enterprise", "demo"];
+const TIERS = ["pro-20240913", "pro-20250202", "enterprise", "demo"];
 
 export class LLMAsAJudge {
   constructor(

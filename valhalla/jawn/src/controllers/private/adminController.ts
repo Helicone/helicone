@@ -350,7 +350,7 @@ export class AdminController extends Controller {
       FROM organization o
       LEFT JOIN organization_member om ON o.id = om.organization
       LEFT JOIN auth.users u ON om.member = u.id
-      WHERE o.id = ANY($1)
+      WHERE o.id = ANY($1::uuid[])
       GROUP BY o.id
     `;
 
@@ -734,8 +734,20 @@ export class AdminController extends Controller {
       );
     }
 
-    // Fetch organization details
     let orgQuery = `
+      WITH matching_orgs AS (
+        SELECT DISTINCT o.id
+        FROM organization o
+        LEFT JOIN organization_member om ON o.id = om.organization
+        LEFT JOIN auth.users u ON om.member = u.id OR o.owner = u.id
+        WHERE ${
+          organizationId
+            ? "o.id = $1"
+            : userId
+            ? "om.member = $1"
+            : "u.email = $1"
+        }
+      )
       SELECT
         o.id, o.name, o.created_at, o.owner, o.tier,
         o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
@@ -751,23 +763,19 @@ export class AdminController extends Controller {
       FROM organization o
       LEFT JOIN organization_member om ON o.id = om.organization
       LEFT JOIN auth.users u ON om.member = u.id
-      WHERE 1=1
+      WHERE o.id IN (SELECT id FROM matching_orgs)
+      GROUP BY o.id
     `;
 
     const queryParams: any[] = [];
 
     if (organizationId) {
-      orgQuery += ` AND o.id = $1`;
       queryParams.push(organizationId);
     } else if (userId) {
-      orgQuery += ` AND om.member = $1`;
       queryParams.push(userId);
     } else if (email) {
-      orgQuery += ` AND u.email = $1`;
       queryParams.push(email);
     }
-
-    orgQuery += ` GROUP BY o.id`;
 
     const orgResult = await dbExecute<{
       id: string;
