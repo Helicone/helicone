@@ -6,34 +6,34 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CalendarIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+  CalendarIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  Check,
+} from "lucide-react";
+import { useState } from "react";
 import {
   useCostForPrompts,
   useCostForEvals,
   useCostForExperiments,
 } from "../../pricing/hooks";
 import { Addons, UpgradeProDialog } from "./upgradeProDialog";
+import Link from "next/link";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export const FreePlanCard = () => {
   const org = useOrg();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-
-  const costForPrompts = useCostForPrompts();
-  const costForEvals = useCostForEvals();
-  const costForExperiments = useCostForExperiments();
 
   const freeUsage = useQuery({
     queryKey: ["free-usage", org?.currentOrg?.id],
@@ -55,27 +55,6 @@ export const FreePlanCard = () => {
     },
   });
 
-  const upgradeToPro = useMutation({
-    mutationFn: async (variables: { addons: Addons; seats?: number }) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const endpoint =
-        subscription.data?.data?.status === "canceled"
-          ? "/v1/stripe/subscription/existing-customer/upgrade-to-pro"
-          : "/v1/stripe/subscription/new-customer/upgrade-to-pro";
-      const result = await jawn.POST(endpoint, {
-        body: {
-          addons: {
-            prompts: variables.addons.prompts,
-            experiments: variables.addons.experiments,
-            evals: variables.addons.evals,
-          },
-          seats: variables.seats,
-        },
-      });
-      return result;
-    },
-  });
-
   const upgradeToTeamBundle = useMutation({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
@@ -87,8 +66,6 @@ export const FreePlanCard = () => {
       return result;
     },
   });
-
-  const isOverUsage = freeUsage.data?.data && freeUsage.data?.data >= 100_000;
 
   const getBillingCycleDates = () => {
     const now = new Date();
@@ -110,169 +87,224 @@ export const FreePlanCard = () => {
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
 
   return (
-    <div className="flex gap-6 lg:flex-row flex-col">
-      <Card className="max-w-3xl w-full h-fit">
+    <div className="flex flex-col gap-6 w-full max-w-5xl px-4 pb-8">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-end">
-            Free{" "}
-            <span className="text-sm bg-[#DBE9FE] text-blue-700 px-2 py-1 rounded-md ml-2 font-medium">
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-xl font-medium">Free</CardTitle>
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
               Current plan
             </span>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="inline-flex items-center space-x-1.5 text-xs text-muted-foreground">
-            <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
+            <CalendarIcon className="h-4 w-4" />
             <span>Current billing period: {getBillingCycleDates()}</span>
           </div>
 
-          <div>
-            <div className="flex items-center gap-4 justify-between">
-              <div className="text-sm text-muted-foreground font-medium">
-                Requests used
-              </div>
-              <div className="text-slate-500">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>Requests used</span>
+              <span className="text-slate-500">
                 {freeUsage.data?.data?.toLocaleString()} / 10,000
-              </div>
+              </span>
             </div>
             <Progress
               value={((freeUsage.data?.data ?? 0) / 10_000) * 100}
-              className="w-full h-2 mt-2"
+              className="h-2"
             />
           </div>
 
-          <div className="border-t pt-6">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 border rounded-lg hover:border-blue-200 transition-colors flex flex-col">
-                <div>
-                  <div className="font-medium text-lg mb-1">Pro Plan</div>
-                  <div className="text-2xl font-bold mb-2">
-                    $20
-                    <span className="text-sm text-slate-500 font-normal">
-                      /seat/mo
-                    </span>
+          {/* Plan comparison */}
+          <div className="grid gap-6 md:grid-cols-2 lg:max-w-full">
+            <Card className="max-w-[500px] flex flex-col">
+              <CardHeader>
+                <CardTitle>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold">Pro Plan</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold">$20</span>
+                      <span className="text-sm text-muted-foreground">
+                        /seat/mo
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-sm text-slate-500 mb-4">
-                    + Optional add-ons starting at $50/mo
-                  </div>
-                  <ul className="space-y-2 mb-4">
-                    {proFeatures.slice(0, 4).map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm">
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-600 mr-2" />
-                        {feature.title}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-auto">
-                  <Button
-                    className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
-                    onClick={() => setShowUpgradeDialog(true)}
-                    variant="action"
-                  >
-                    Start 7-day free trial
-                  </Button>
-                </div>
-              </div>
-
-              <div className="p-4 border rounded-lg hover:border-blue-200 transition-colors flex flex-col">
-                <div>
-                  <div className="font-medium text-lg mb-1">Team Bundle</div>
-                  <div className="text-2xl font-bold mb-2">
-                    $200
-                    <span className="text-sm text-slate-500 font-normal">
-                      /mo
-                    </span>
-                  </div>
-                  <div className="text-sm text-slate-500 mb-4">
-                    Unlimited seats
-                  </div>
-                  <ul className="space-y-2 mb-4">
-                    {teamBundleFeatures.map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm">
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-600 mr-2" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-auto">
-                  <Button
-                    variant="action"
-                    className="w-full text-sky-600 text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-white hover:bg-blue-50 border-blue-200 rounded-xl justify-center items-center gap-2.5 inline-flex"
-                    onClick={async () => {
-                      const result = await upgradeToTeamBundle.mutateAsync();
-                      if (result.data) {
-                        window.open(result.data, "_blank");
-                      }
-                    }}
-                  >
-                    Start 7-day free trial
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {!isComparisonOpen && (
-              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
-            )}
-
-            <button
-              onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-              className="flex items-center text-blue-600 text-sm mt-4"
-            >
-              {isComparisonOpen ? "Show less" : "See all Pro features"}
-              {isComparisonOpen ? (
-                <ChevronUpIcon className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDownIcon className="h-4 w-4 ml-1" />
-              )}
-            </button>
-
-            {isComparisonOpen && (
-              <div className="mt-4 space-y-4">
-                <h4 className="font-medium text-sm text-slate-600">
-                  Additional Pro Features:
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {proFeatures.slice(4).map((feature, index) => (
-                    <ComparisonItem key={index + 4} {...feature} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 space-y-4">
+                <p className="text-sm text-slate-500">
+                  + Optional add-ons starting at $50/mo
+                </p>
+                <ul className="space-y-2.5">
+                  {proFeatures.slice(0, 4).map((feature) => (
+                    <li key={feature.title} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-sky-500" />
+                      <span className="text-sm">{feature.title}</span>
+                    </li>
                   ))}
-                </div>
-              </div>
-            )}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  size="lg"
+                  variant="action"
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white"
+                  onClick={() => setShowUpgradeDialog(true)}
+                >
+                  Start 7-day free trial
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="max-w-[500px] flex flex-col">
+              <CardHeader>
+                <CardTitle>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold">Team Bundle</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold">$200</span>
+                      <span className="text-sm text-muted-foreground">/mo</span>
+                    </div>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 space-y-4">
+                <p className="text-sm font-medium">Unlimited seats</p>
+                <ul className="space-y-2.5">
+                  {teamBundleFeatures.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-sky-500" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={async () => {
+                    const result = await upgradeToTeamBundle.mutateAsync();
+                    if (result.data) {
+                      window.open(result.data, "_blank");
+                    }
+                  }}
+                >
+                  Start 7-day free trial
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-6 w-full lg:w-[450px]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="whitespace-nowrap">
+      {/* Feature Comparison - Now placed outside the main card */}
+      <Collapsible
+        open={isComparisonOpen}
+        onOpenChange={setIsComparisonOpen}
+        className="w-full"
+      >
+        <CollapsibleContent className="space-y-4 transition-all">
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Pro Features</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg p-6 bg-background border">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {proFeatures.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-lg hover:bg-muted/5 transition-colors group"
+                    >
+                      <div className="flex gap-3">
+                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {feature.title}
+                          </h4>
+                          <p className="text-sm text-slate-500 mt-1">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+
+        <div className="flex justify-center mt-4">
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className="text-slate-500 hover:text-foreground"
+            >
+              {isComparisonOpen ? (
+                <>
+                  <ChevronUpIcon className="h-4 w-4 mr-2" />
+                  Show fewer features
+                </>
+              ) : (
+                <>
+                  <ChevronDownIcon className="h-4 w-4 mr-2" />
+                  See all Pro features
+                </>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+      </Collapsible>
+
+      {/* Additional Options */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="flex flex-col h-full">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
               Learn about our Enterprise plan
             </CardTitle>
-            <CardDescription>
+            <p className="text-sm text-muted-foreground">
               Built for companies looking to scale. Includes everything in Pro,
               plus unlimited requests, prompts, experiments and more.
-            </CardDescription>
+            </p>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline">Contact sales</Button>
-          </CardContent>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact sales
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="whitespace-nowrap">
+        <Card className="flex flex-col h-full">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
               Looking for something else?
             </CardTitle>
-            <CardDescription>
+            <p className="text-sm text-muted-foreground">
               Need support, have a unique use case or want to say hi?
-            </CardDescription>
+            </p>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline">Contact us</Button>
-          </CardContent>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact us
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
       </div>
 
@@ -284,22 +316,6 @@ export const FreePlanCard = () => {
     </div>
   );
 };
-const ComparisonItem = ({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) => (
-  <div className="flex items-start space-x-2">
-    <div>
-      <h4 className="font-medium">{title}</h4>
-      <p className="text-sm text-muted-foreground font-normal text-slate-500">
-        {description}
-      </p>
-    </div>
-  </div>
-);
 
 const proFeatures = [
   {
