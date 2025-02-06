@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "open-webui-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-api-providers",
     },
   },
