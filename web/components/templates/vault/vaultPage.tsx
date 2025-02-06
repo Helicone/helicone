@@ -120,6 +120,7 @@ const VaultPage = ({
           description="The Free plan does not include the Vault feature, but getting access is easy."
           infoBoxText="Use Vault to securely store and manage your API keys within Helicone."
           documentationLink="https://docs.helicone.ai/features/vault"
+          featureName="Vault"
         />
       </div>
     );

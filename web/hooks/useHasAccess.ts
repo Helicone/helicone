@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 
 const ADDON_FEATURES = ["evals", "experiments", "prompts"] as const;
-const NON_FREE_FEATURES = ["sessions"] as const;
+const NON_FREE_FEATURES = ["sessions", "properties", "users"] as const;
 
 export const useHasAccess = (
   feature: (typeof ADDON_FEATURES)[number] | (typeof NON_FREE_FEATURES)[number]

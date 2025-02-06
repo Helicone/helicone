@@ -102,6 +102,7 @@ const RateLimitPage = (props: {}) => {
             description="The Free plan does not include the Rate Limits feature, but getting access is easy."
             infoBoxText="Enforcing custom API usage restrictions with rate limits."
             documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
+            featureName="RateLimit"
           />
         </div>
       ) : (
