@@ -35,8 +35,6 @@ import React from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useQuery } from "@tanstack/react-query";
 import { IslandContainer } from "@/components/ui/islandContainer";
-
-import { useTheme } from "next-themes";
 import { Slider } from "@/components/ui/slider";
 import { PlaygroundModel } from "./types";
 import { useOrg } from "@/components/layout/org/organizationContext";
