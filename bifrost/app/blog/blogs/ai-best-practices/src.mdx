@@ -1,47 +1,31 @@
-Building an AI-powered application is one thing—deploying it to production is another. 
+Building an AI-powered application is one thing—deploying it to production is another. In production, you have to deal with unpredictable user inputs, unpredictable edge cases, and scaling challenges.
 
-In production, you have to deal with unpredictable user inputs, unpredictable edge cases, and scaling challenges. 
+![Best Practices for AI Developers: Full Guide to Optimize Large Language Model (LLM) Outputs and Costs.](/static/blog/ai-best-practices/cover.webp)
 
 Without proper monitoring, an AI app in production can quickly become slow or ineffective, expensive, or even unsafe.
 
-![Best Practices for AI Developers: Full Guide to Optimize Large Language Model (LLM) Outputs and Costs. ](/static/blog/ai-best-practices/cover.webp)
+This guide provides a step-by-step approach to getting an AI app into production while keeping your users happy, and costs low.
 
-Here are the key challenges developers typically face when getting AI apps into production:
+## Key Challenges of Building with AI
+
+First, let's expand on why building with AI is way more challenging than typical software development.
 
 - **Performance degradation over time:** LLMs don’t stay performant indefinitely. As user inputs diversify, outputs can drift in quality.
 - **High costs:** Token usage, API calls, and infrastructure costs can spiral out of control without tracking.
 - **Security risks from prompt injection & misuse:** AI models can be manipulated to generate harmful or misleading content if safeguards aren’t in place.
 
-This guide provides a step-by-step approach to getting an AI app into production while keeping users satisfied, and costs low.
-
-## Challenges of Building with AI
-
-First, let's expand on why building with AI is way more challenging than typical software development.
-
-### 🔺 Monitoring LLM Performance
-
-Building with AI without monitoring important metrics—like the latency, the volume of requests it can handle, and how often it makes mistakes (error rates)—_is like driving a car without a dashboard._ It's difficult to know if something's wrong until it's too late.
-
-### 🔺 Testing and Experimenting with Prompts
-
-Testing and tweaking prompts can be risky if done directly in a production environment, as it can affect the quality of responses and give your users a poor experience.
-
-### 🔺 Collecting Problem-Specific and High-Quality Datasets
-
-Finding datasets that are relevant to the specific problem space is challenging. Many domains lack publicly available datasets, especially those that are well-curated and labelled. High-quality datasets require accurate labelling of data points to improve model predictions or minimize biases.
-
 <CallToAction
-  title="A Mini Plug :)"
+  title="Monitor Your AI App with Helicone ⚡️"
   description="If you're building with AI, and are looking for a plug-and-play tool to improve your output and cost without installing any SDKs, let us show you an open-source, lightweight, and potentially cheaper alternative - Helicone."
-  primaryButtonText="Get Started for Free"
+  primaryButtonText="Try Helicone for Free"
   primaryButtonLink="https://helicone.ai/"
   secondaryButtonText="Read the doc"
   secondaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
 />
 
-## Best Practices
+## Best Practices in AI Development
 
-### 1. Define Key Performance Metrics
+### Define Key Performance Metrics
 
 To effectively monitor the performance of your AI app, it's crucial to define key performance metrics (KPIs) that align with your goals.
 
@@ -64,9 +48,7 @@ You can use observability tools to track and visualize these essential metrics s
 
 **<span style={{color: '#0ea5e9'}}>Tip:</span>** Make sure to look for a solution that provides a real-time dashboard to monitor key metrics and is capable of handling large data volumes.
 
----
-
-### 2. Implement Comprehensive Logging
+### Implement Comprehensive Logging
 
 Logging is a fundamental aspect of observability. It’s beneficial to implement detailed logging to capture critical events and data points throughout your app’s lifecycle. Key logging practices include:
 
@@ -86,9 +68,7 @@ Logging is a fundamental aspect of observability. It’s beneficial to implement
 
 Helicone provides advanced filtering and search capabilities, allowing you to quickly pinpoint and resolve issues. The platform also supports customizable properties you can attach to your requests to meet your specific needs.
 
----
-
-### 3. **Monitor Prompt Outputs**
+### Monitor Prompt Outputs
 
 As an AI app developer, it's vital to monitor the output every time you change a prompt. This requires a tool to validate that the new prompts not only perform better but also remain compatible with previous request inputs made by your users.
 
@@ -110,9 +90,7 @@ Without a proper monitoring tool to facilitate the regression testing so develop
 
 Helicone has a dedicated playground for prompt testing and experimentation without affecting production data. In the playground, you can test different configurations of models with your new prompts and datasets to check for improvements.
 
----
-
-### 4. **Implement Safety and Security Measures**
+### Implement Safety and Security Measures
 
 Generative AI is quickly changing the cybersecurity landscape. When building LLMs, it’s crucial to protect against **<span style={{color: '#0ea5e9'}}>harmful user requests</span>** and **<span style={{color: '#0ea5e9'}}>prompt attacks</span>** that could bypass the safety guardrails of your models. It's essential to understand the risks and safety issues involved with LLMs.
 
@@ -135,15 +113,17 @@ LLMs can be manipulated into convincing the user to input sensitive information,
 
 Helicone provides <a href="https://docs.helicone.ai/features/advanced-usage/moderations" target="_blank" rel="noopener">moderation</a> and <a href="https://docs.helicone.ai/features/advanced-usage/llm-security" target="_blank" rel="noopener">LLM security</a> features to help you check whether the user message is potentially harmful, and enhance OpenAI chat completions with automated security checks, which include user messages for threads, block injection threats and threat details back to you.
 
-## How to Take an AI App to Production
+---
 
-Once your AI application works in development, how do you ensure it thrives in production? 
+## From Prototype to Production
+
+Once your AI application works in development, how do you ensure it thrives in production?
 
 The key is observability—tracking every request, understanding model behavior, and quickly iterating to find the best improvements.
 
 Here are the important things to take note of when taking an AI app to production:
 
-### 1. Iterate on Prompts and Models Without Affecting Production
+### Prompt Iteration
 
 Deploying new prompts or fine-tuned models directly into production is risky. A change that improves one use case might break another.
 
@@ -155,15 +135,13 @@ The best tools allow you to:
 - A/B test prompts using a subset of real user queries before deploying changes—Helicone's Playground feature works great for this.
 - Log and compare results across different prompt versions.
 
-Read our <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">blog post</a> on prompt engineering and management to find out what the best tools are. 
+Read our <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">blog post</a> on prompt engineering and management to find out what the best tools are.
 
 (TL;DR: **Use Helicone**)
 
-### 2. Secure LLMs from Attacks and Misuse
+### Secure LLMs from Attacks and Misuse
 
-AI applications are vulnerable to prompt injection attacks, misuse, and bias exploitation. 
-
-Without proper safeguards, an attacker can manipulate the model into generating harmful outputs.
+AI applications are vulnerable to prompt injection attacks, misuse, and bias exploitation. Without proper safeguards, an attacker can manipulate the model into generating harmful outputs.
 
 Do these to secure your AI app in production:
 
@@ -174,7 +152,7 @@ Do these to secure your AI app in production:
 
 Helicone offers built-in moderation and security monitoring, powered by **Prompt Armor**, to automatically flag prompt injection attacks and other potential threats in real-time.
 
-### 3. Track and Optimize Costs
+### Track and Optimize Costs
 
 LLM costs can escalate quickly, especially for high-volume applications. Without observability, it’s hard to know where money is being wasted.
 
@@ -187,19 +165,17 @@ Be sure to:
 
 Helicone provides information-rich cost monitoring dashboards, caching, as well as a ton of other features to help teams reduce spending with data-driven optimizations.
 
-<a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">Read more</a> about ways to slash your AI app costs.
+**<a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">Read more</a> about ways to slash your AI app costs.**
 
-### 4. Gather Real-Time User Feedback for Model Improvement
+### Gather Real-Time User Feedback
 
-LLMs don’t get better on their own—continuous improvement depends on real user feedback. 
-
-Observability tools like Helicone help you track user interactions to guide model refinements.
+LLMs don’t get better on their own—continuous improvement depends on real user feedback. Observability tools like Helicone help you track user interactions to guide model refinements.
 
 With a good tool, you can:
 
 - Log user feedback on LLM responses to identify weak points.
 - Analyze misclassified responses to detect patterns of failure.
-- Use structured prompt evaluation techniques like <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" target="_blank" rel="noopener">random sampling</a> to evaluate prompts based on real user interaction. 
+- Use structured prompt evaluation techniques like <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" target="_blank" rel="noopener">random sampling</a> to evaluate prompts based on real user interaction.
 
 Helicone automates user feedback collection, lets you test prompt variations on real queries, and scores LLM outputs, enabling real-time feedback loops.
 
@@ -207,9 +183,9 @@ Read more on how to <a href="https://www.helicone.ai/blog/test-your-llm-prompts"
 
 ## Bottom Line
 
-Keeping your AI app reliable hinges on effective observability and performance monitoring. 
+Keeping your AI app reliable hinges on effective observability and performance monitoring.
 
-This means defining important performance metrics, setting up thorough logging, monitoring your outputs regularly, incorporating feedback, and ensuring safety and security measures are in place. 
+This means defining important performance metrics, setting up thorough logging, monitoring your outputs regularly, incorporating feedback, and ensuring safety and security measures are in place.
 
 By following these best practices, you can boost the performance and reliability of your LLM deployments and accelerate your AI development.
 
