@@ -29,8 +29,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
 
   return (
     <>
-      <AuthHeader title={"Datasets"} />
-
       {isLoading ? (
         <div className="flex flex-col space-y-2 w-full items-center">
           <Skeleton className="w-full h-full" />
@@ -57,53 +55,56 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           />
         </div>
       ) : (
-        <ThemedTable
-          isDatasetsPage={true}
-          defaultColumns={[
-            {
-              header: "Name",
-              accessorKey: "name",
-            },
-            {
-              header: "Created At",
-              accessorKey: "created_at",
-              minSize: 200,
-              accessorFn: (row) => {
-                return new Date(row.created_at ?? 0).toLocaleString();
+        <>
+          <AuthHeader title={"Datasets"} />
+          <ThemedTable
+            isDatasetsPage={true}
+            defaultColumns={[
+              {
+                header: "Name",
+                accessorKey: "name",
               },
-            },
-            {
-              header: "Dataset Type",
-              accessorKey: "dataset_type",
-              cell: ({ row }) => {
-                return row.original.dataset_type === "helicone" ? (
-                  <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 -my-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
-                    Helicone
-                  </span>
-                ) : row.original.dataset_type === "experiment" ? (
-                  <span className="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20">
-                    Experiment
-                  </span>
-                ) : (
-                  "Unknown"
-                );
+              {
+                header: "Created At",
+                accessorKey: "created_at",
+                minSize: 200,
+                accessorFn: (row) => {
+                  return new Date(row.created_at ?? 0).toLocaleString();
+                },
               },
-            },
-            {
-              header: "Rows",
-              accessorKey: "requests_count",
-              minSize: 200,
-            },
-          ]}
-          defaultData={datasets}
-          dataLoading={isLoading}
-          id="datasets"
-          skeletonLoading={false}
-          onRowSelect={(row) => {
-            router.push(`/datasets/${row.id}`);
-          }}
-          fullWidth={true}
-        />
+              {
+                header: "Dataset Type",
+                accessorKey: "dataset_type",
+                cell: ({ row }) => {
+                  return row.original.dataset_type === "helicone" ? (
+                    <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 -my-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
+                      Helicone
+                    </span>
+                  ) : row.original.dataset_type === "experiment" ? (
+                    <span className="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20">
+                      Experiment
+                    </span>
+                  ) : (
+                    "Unknown"
+                  );
+                },
+              },
+              {
+                header: "Rows",
+                accessorKey: "requests_count",
+                minSize: 200,
+              },
+            ]}
+            defaultData={datasets}
+            dataLoading={isLoading}
+            id="datasets"
+            skeletonLoading={false}
+            onRowSelect={(row) => {
+              router.push(`/datasets/${row.id}`);
+            }}
+            fullWidth={true}
+          />
+        </>
       )}
     </>
   );
