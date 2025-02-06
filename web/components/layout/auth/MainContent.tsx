@@ -4,8 +4,18 @@ import OrgContext, { useOrg } from "../org/organizationContext";
 
 interface MainContentProps {
   children: React.ReactNode;
-  banner: any; // Replace 'any' with the correct type for your banner
+  banner: BannerType | null;
   pathname: string;
+}
+
+export interface BannerType {
+  title: string;
+  message: React.ReactNode;
+  active: boolean;
+  created_at?: string;
+  id?: string;
+  updated_at?: string;
+  onClick?: () => void;
 }
 
 const MainContent = ({ children, banner, pathname }: MainContentProps) => {
@@ -15,8 +25,16 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
     <div className={clsx("flex flex-1 flex-col")}>
       <main className="flex-1">
         {banner && (
-          <div className="p-2">
-            <div className="w-full bg-sky-500 rounded-lg p-2 text-white flex items-center justify-center gap-2">
+          <div className="bg-slate-50">
+            <div
+              className={clsx(
+                "w-full bg-sky-500 p-2 text-white flex items-center justify-center gap-2",
+                banner.onClick &&
+                  "cursor-pointer hover:bg-sky-600 transition-colors"
+              )}
+              onClick={banner.onClick}
+              role={banner.onClick ? "button" : undefined}
+            >
               {banner.updated_at && (
                 <>
                   <span className="text-sky-100 text-xs font-normal">
@@ -26,7 +44,7 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
                 </>
               )}
 
-              <p className="text-sm font-semibold"> {banner.title}</p>
+              <p className="text-sm font-semibold">{banner.title}</p>
               <svg
                 viewBox="0 0 2 2"
                 className="inline h-0.5 w-0.5 fill-current"

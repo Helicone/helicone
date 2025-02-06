@@ -136,21 +136,6 @@ const CachePage = (props: CachePageProps) => {
 
   return (
     <IslandContainer>
-      <AuthHeader
-        isWithinIsland={true}
-        title={<div className="flex items-center gap-2">Cache</div>}
-        actions={
-          <Link
-            href="https://docs.helicone.ai/features/advanced-usage/caching"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-          </Link>
-        }
-      />
-
       {!isPro ? (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
           <FeatureUpgradeCard
@@ -162,10 +147,10 @@ const CachePage = (props: CachePageProps) => {
           />
         </div>
       ) : !hasCache ? (
-        <div className="flex flex-col w-full mt-16 justify-center items-center">
-          <div className="flex flex-col">
-            <div className="w-fit pt-2 pl-0.5 bg-white border border-gray-300 rounded-md">
-              <CircleStackIcon className="h-10 w-10 flex items-center justify-center ml-2 text-gray-500" />
+        <div className="flex flex-col w-full justify-center items-center">
+          <div className="flex flex-col mt-16">
+            <div className="w-fit p-4 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
+              <CircleStackIcon className="h-8 w-8 text-gray-500" />
             </div>
 
             <p className="text-xl text-black dark:text-white font-semibold mt-8">
@@ -231,125 +216,141 @@ openai.chat.completions.create(
           </div>
         </div>
       ) : (
-        <div className="flex flex-col">
-          <Tabs defaultValue={defaultIndex} className="w-full">
-            <TabsList className="font-semibold">
-              {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id.toString()}
-                  onClick={() => {
-                    router.push(
-                      {
-                        query: { ...router.query, tab: tab.id },
-                      },
-                      undefined,
-                      { shallow: true }
-                    );
-                  }}
-                >
-                  <tab.icon className="h-5 w-5 mr-2" />
-                  {tab.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <TabsContent value="0">
-              <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-                <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                  <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                    {metrics.map((metric, i) => (
-                      <li
-                        key={i}
-                        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                      >
-                        <metric.icon className="h-6 w-6 text-sky-500" />
-                        <div className="flex flex-col">
-                          <dt className="text-gray-500 text-sm">
-                            {metric.label}
-                          </dt>
-                          {metric.isLoading ? (
-                            <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                          ) : (
-                            <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                              {metric.value}
-                            </dd>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                      Caches last 30 days
-                    </h3>
-                    <div className="h-72 px-4 ">
-                      {isAnyLoading ? (
-                        <div className="h-full w-full flex-col flex p-8">
-                          <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                        </div>
-                      ) : (
-                        <div className="h-full w-full">
-                          <BarChart
-                            data={chartData}
-                            categories={["count"]}
-                            index={"date"}
-                            className="h-full -ml-4 pt-4"
-                            colors={["blue"]}
-                            showLegend={false}
-                          />
-                        </div>
-                      )}
+        <>
+          <AuthHeader
+            isWithinIsland={true}
+            title={<div className="flex items-center gap-2">Cache</div>}
+            actions={
+              <Link
+                href="https://docs.helicone.ai/features/advanced-usage/caching"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <BookOpenIcon className="h-4 w-4" />
+              </Link>
+            }
+          />
+          <div className="flex flex-col">
+            <Tabs defaultValue={defaultIndex} className="w-full">
+              <TabsList className="font-semibold">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id.toString()}
+                    onClick={() => {
+                      router.push(
+                        {
+                          query: { ...router.query, tab: tab.id },
+                        },
+                        undefined,
+                        { shallow: true }
+                      );
+                    }}
+                  >
+                    <tab.icon className="h-5 w-5 mr-2" />
+                    {tab.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <TabsContent value="0">
+                <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
+                  <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                    <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                      {metrics.map((metric, i) => (
+                        <li
+                          key={i}
+                          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
+                        >
+                          <metric.icon className="h-6 w-6 text-sky-500" />
+                          <div className="flex flex-col">
+                            <dt className="text-gray-500 text-sm">
+                              {metric.label}
+                            </dt>
+                            {metric.isLoading ? (
+                              <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+                            ) : (
+                              <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
+                                {metric.value}
+                              </dd>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                        Caches last 30 days
+                      </h3>
+                      <div className="h-72 px-4 ">
+                        {isAnyLoading ? (
+                          <div className="h-full w-full flex-col flex p-8">
+                            <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                          </div>
+                        ) : (
+                          <div className="h-full w-full">
+                            <BarChart
+                              data={chartData}
+                              categories={["count"]}
+                              index={"date"}
+                              className="h-full -ml-4 pt-4"
+                              colors={["blue"]}
+                              showLegend={false}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  className="flex flex-col w-full xl:w-1/2
+                  <div
+                    className="flex flex-col w-full xl:w-1/2
 space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                    Top Requests
-                  </h3>
-                  <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                    {chMetrics.topRequests.data?.data?.map(
-                      (request: any, i: any) => (
-                        <ThemedListItem
-                          key={i}
-                          onClickHandler={() => {
-                            setSelectedRequest(request);
-                            setOpen(true);
-                          }}
-                          title={request.prompt}
-                          subtitle={`Created: ${new Date(
-                            request.first_used
-                          ).toLocaleString()}`}
-                          icon={CircleStackIcon}
-                          value={request.count}
-                          pill={<ModelPill model={request.model} />}
-                          secondarySubtitle={`Recent: ${new Date(
-                            request.last_used
-                          ).toLocaleString()}`}
-                        />
-                      )
-                    )}
-                  </ul>
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                      Top Requests
+                    </h3>
+                    <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                      {chMetrics.topRequests.data?.data?.map(
+                        (request: any, i: any) => (
+                          <ThemedListItem
+                            key={i}
+                            onClickHandler={() => {
+                              setSelectedRequest(request);
+                              setOpen(true);
+                            }}
+                            title={request.prompt}
+                            subtitle={`Created: ${new Date(
+                              request.first_used
+                            ).toLocaleString()}`}
+                            icon={CircleStackIcon}
+                            value={request.count}
+                            pill={<ModelPill model={request.model} />}
+                            secondarySubtitle={`Recent: ${new Date(
+                              request.last_used
+                            ).toLocaleString()}`}
+                          />
+                        )
+                      )}
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="1">
-              <div className="py-4">
-                <RequestsPageV2
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  sort={sort}
-                  isCached={true}
-                  currentFilter={null}
-                  organizationLayout={null}
-                  organizationLayoutAvailable={false}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+              </TabsContent>
+              <TabsContent value="1">
+                <div className="py-4">
+                  <RequestsPageV2
+                    currentPage={currentPage}
+                    pageSize={pageSize}
+                    sort={sort}
+                    isCached={true}
+                    currentFilter={null}
+                    organizationLayout={null}
+                    organizationLayoutAvailable={false}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </>
       )}
 
       <ThemedDrawer open={open} setOpen={setOpen}>

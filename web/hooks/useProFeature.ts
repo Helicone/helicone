@@ -37,6 +37,7 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
         org?.currentOrg?.tier === "growth" ||
         org?.currentOrg?.tier === "pro" ||
         org?.currentOrg?.tier === "enterprise" ||
+        org?.currentOrg?.tier === "demo" ||
         (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
           ?.addons?.prompts)
     );
