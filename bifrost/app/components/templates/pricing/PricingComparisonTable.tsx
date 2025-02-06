@@ -1,14 +1,4 @@
-import { Col } from "@/components/common/col";
-import { Row } from "@/components/common/row";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { clsx } from "@/utils/clsx";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/20/solid";
-import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import {
   Table,
@@ -19,95 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
-interface FeatureRowProps {
-  title: string;
-  description: string;
-  isAvailable: boolean;
-  fullAccess?: boolean;
-  amount?: string;
-  unit?: string;
-  additionalInfo?: string;
-}
-
-const FeatureRow: React.FC<FeatureRowProps> = ({
-  title,
-  description,
-  isAvailable,
-  fullAccess = false,
-  amount,
-  unit,
-  additionalInfo,
-}) => (
-  <>
-    <Col
-      className={clsx("p-[24px] gap-[12px]", isAvailable ? "" : "bg-[#F9F9F9]")}
-    >
-      <Col className="gap-[4px]">
-        <Row className="text-xl gap-[12px] items-center">
-          <b>{title}</b>
-
-          {fullAccess &&
-            (isAvailable ? (
-              <>
-                <LockOpenIcon className="w-5 h-5" />
-                <div
-                  className={clsx(
-                    "px-[12px] py-[4px] rounded-[3px] text-[14px] font-medium",
-                    "bg-[#E7F6FD] text-brand"
-                  )}
-                >
-                  full access
-                </div>
-              </>
-            ) : (
-              <>
-                <LockClosedIcon className="w-5 h-5" />
-                <div
-                  className={clsx(
-                    "px-[12px] py-[4px] rounded-[3px] text-[14px] font-medium",
-                    "bg-[#F1F5F9] text-gray-600  "
-                  )}
-                >
-                  available for <b>Team</b>
-                </div>
-              </>
-            ))}
-        </Row>
-        <p className="text-slate-500">{description}</p>
-      </Col>
-      <Row className="items-center gap-[4px] text-brand">
-        <div>How we calculate this</div>
-        <ChevronDownIcon className="w-5 h-5" />
-      </Row>
-    </Col>
-    <div
-      className={clsx(
-        "p-[24px] max-w-[360px] items-end text-end justify-center flex flex-col gap-[12px]",
-        isAvailable ? "bg-white" : "bg-[#F9F9F9]"
-      )}
-    >
-      {isAvailable ? (
-        <CheckIcon className="w-6 h-6 text-[#6AA84F]" />
-      ) : (
-        <XMarkIcon className="w-6 h-6 text-red-500" />
-      )}
-      {amount && (
-        <div className="flex flex-col gap-[4px] text-slate-500">
-          <h3 className="text-[14px]">
-            <b className="text-[18px] text-black font-bold">{amount}</b> {unit}
-          </h3>
-          {additionalInfo && (
-            <p className="font-light">
-              then starting at <br />
-              {additionalInfo}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  </>
-);
+import { useState, Fragment } from "react";
 
 interface PricingTier {
   name: string;
@@ -122,12 +24,23 @@ interface Feature {
   pro: string | boolean;
   team: string | boolean;
   enterprise: string | boolean;
+  tooltip?: "usage";
 }
 
 interface FeatureGroup {
   title: string;
   features: Feature[];
 }
+
+const USAGE_PRICING_TIERS = [
+  { min: 0, max: 10_000, rate: 0.0 },
+  { min: 10_000, max: 25_000, rate: 0.0016 },
+  { min: 25_000, max: 50_000, rate: 0.0008 },
+  { min: 50_000, max: 100_000, rate: 0.00035 },
+  { min: 100_000, max: 2_000_000, rate: 0.0003 },
+  { min: 2_000_000, max: 15_000_000, rate: 0.000128 },
+  { min: 15_000_000, max: Infinity, rate: 0.000083 },
+];
 
 const tiers: PricingTier[] = [
   {
@@ -181,60 +94,6 @@ const featureGroups: FeatureGroup[] = [
     ],
   },
   {
-    title: "Gateway",
-    features: [
-      {
-        name: "Unified proxy",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Gateway fallbacks",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Retries",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Caching",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Rate limits",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "LLM guardrails",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "LLM moderation",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-    ],
-  },
-  {
     title: "Monitoring",
     features: [
       {
@@ -250,6 +109,7 @@ const featureGroups: FeatureGroup[] = [
         pro: "Usage-based",
         team: "Usage-based",
         enterprise: "Volume discount",
+        tooltip: "usage",
       },
       {
         name: "Multi-modal",
@@ -293,8 +153,102 @@ const featureGroups: FeatureGroup[] = [
         team: true,
         enterprise: true,
       },
+    ],
+  },
+  {
+    title: "Prompts & Experiments",
+    features: [
       {
-        name: "LLM security",
+        name: "Playground",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Prompt management ($50/mo add-on)",
+        hobby: false,
+        pro: "$50/mo add-on",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "• Collaborative workspace",
+        hobby: false,
+        pro: "Included",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "• Version history",
+        hobby: false,
+        pro: "Included",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Prompt experiments ($50/mo add-on)",
+        hobby: false,
+        pro: "$50/mo add-on",
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Evaluations",
+    features: [
+      {
+        name: "Evaluators ($100/mo add-on)",
+        hobby: false,
+        pro: "$100/mo add-on",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "• Online evaluations (real-time)",
+        hobby: false,
+        pro: "Included",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "• Offline evaluations (batch)",
+        hobby: false,
+        pro: "Included",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "• LLM-as-a-judge, Python, LastMile AI",
+        hobby: false,
+        pro: "Included",
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "User feedback",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Scores",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Fine-tuning",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Datasets",
         hobby: false,
         pro: true,
         team: true,
@@ -303,6 +257,60 @@ const featureGroups: FeatureGroup[] = [
       {
         name: "Webhooks",
         hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+    ],
+  },
+  {
+    title: "Gateway",
+    features: [
+      {
+        name: "One-line integration",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Caching",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Rate limits",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "LLM guardrails",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "LLM moderation",
+        hobby: false,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Gateway fallbacks",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
+      },
+      {
+        name: "Retries",
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
@@ -320,6 +328,13 @@ const featureGroups: FeatureGroup[] = [
         enterprise: "Forever",
       },
       {
+        name: "Ingestion",
+        hobby: "1,200 logs/min",
+        pro: "6,000 logs/min",
+        team: "15,000 logs/min",
+        enterprise: "30,000 logs/min",
+      },
+      {
         name: "API access",
         hobby: false,
         pro: "60 calls/min",
@@ -332,13 +347,6 @@ const featureGroups: FeatureGroup[] = [
         pro: true,
         team: true,
         enterprise: true,
-      },
-      {
-        name: "Ingestion",
-        hobby: "###",
-        pro: "###",
-        team: "###",
-        enterprise: "###",
       },
     ],
   },
@@ -400,6 +408,13 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
+        name: "Data encryption",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: "Optional",
+      },
+      {
         name: "RBAC",
         hobby: false,
         pro: true,
@@ -447,7 +462,14 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "Customized contracts",
+        name: "Customized MSAs",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+      {
+        name: "Custom DPAs",
         hobby: false,
         pro: false,
         team: false,
@@ -458,6 +480,8 @@ const featureGroups: FeatureGroup[] = [
 ];
 
 export default function PricingComparisonTable() {
+  const [showUsageTiers, setShowUsageTiers] = useState(false);
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
@@ -520,44 +544,96 @@ export default function PricingComparisonTable() {
               </TableRow>
 
               {group.features.map((feature, featureIndex) => (
-                <TableRow key={feature.name} className="hover:bg-white">
-                  <TableCell
-                    className={`w-[318px] px-6 py-3 ${
-                      featureIndex === group.features.length - 1
-                        ? "border-b"
-                        : ""
-                    }`}
-                  >
-                    <div className="text-slate-500 text-sm font-medium">
-                      {feature.name}
-                    </div>
-                  </TableCell>
-                  {[
-                    feature.hobby,
-                    feature.pro,
-                    feature.team,
-                    feature.enterprise,
-                  ].map((value, index) => (
+                <Fragment key={feature.name}>
+                  <TableRow className="hover:bg-white">
                     <TableCell
-                      key={index}
-                      className={`px-6 py-3 ${
-                        index === 1 ? "bg-[#0ca5ea]/5" : ""
-                      } ${
+                      className={`w-[318px] px-6 py-3 ${
                         featureIndex === group.features.length - 1
                           ? "border-b"
                           : ""
                       }`}
                     >
-                      {typeof value === "string" ? (
-                        <div className="text-slate-500 text-sm font-medium">
-                          {value}
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500 text-sm font-medium">
+                            {feature.name}
+                          </span>
+                          {feature.tooltip === "usage" && (
+                            <button
+                              onClick={() => setShowUsageTiers(!showUsageTiers)}
+                              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                              <ChevronDownIcon
+                                className={`w-4 h-4 text-slate-400 transition-transform ${
+                                  showUsageTiers ? "rotate-180" : ""
+                                }`}
+                              />
+                            </button>
+                          )}
                         </div>
-                      ) : value === true ? (
-                        <CheckIcon className="w-5 h-5 text-slate-500" />
-                      ) : null}
+                        {feature.tooltip === "usage" && showUsageTiers && (
+                          <div className="pl-8 pt-4">
+                            <Table className="w-full">
+                              <TableHeader>
+                                <TableRow className="hover:bg-transparent">
+                                  <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                    Logs per month
+                                  </TableHead>
+                                  <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                    Rate per log
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {USAGE_PRICING_TIERS.map((tier, i) => (
+                                  <TableRow
+                                    key={i}
+                                    className="hover:bg-transparent"
+                                  >
+                                    <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                      {tier.min.toLocaleString()} -{" "}
+                                      {tier.max === Infinity
+                                        ? "∞"
+                                        : tier.max.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                      ${tier.rate.toFixed(5)}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
-                  ))}
-                </TableRow>
+                    {[
+                      feature.hobby,
+                      feature.pro,
+                      feature.team,
+                      feature.enterprise,
+                    ].map((value, index) => (
+                      <TableCell
+                        key={index}
+                        className={`px-6 py-3 ${
+                          index === 1 ? "bg-[#0ca5ea]/5" : ""
+                        } ${
+                          featureIndex === group.features.length - 1
+                            ? "border-b"
+                            : ""
+                        }`}
+                      >
+                        {typeof value === "string" ? (
+                          <div className="text-slate-500 text-sm font-medium">
+                            {value}
+                          </div>
+                        ) : value === true ? (
+                          <CheckIcon className="w-5 h-5 text-slate-500" />
+                        ) : null}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </Fragment>
               ))}
             </TableBody>
           ))}
