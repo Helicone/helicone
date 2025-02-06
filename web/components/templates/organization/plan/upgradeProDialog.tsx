@@ -22,6 +22,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureName } from "@/hooks/useProFeature";
+import {
+  useCostForEvals,
+  useCostForExperiments,
+  useCostForPrompts,
+} from "../../pricing/hooks";
 
 export type Addons = {
   pro: boolean;
@@ -38,33 +43,6 @@ type PricingAddon = {
   price: number;
   description: string;
 };
-
-const ADDONS: PricingAddon[] = [
-  {
-    key: "pro",
-    name: "Pro Plan",
-    price: 20,
-    description: "No log limits, sessions, cache, user analytics, and more.",
-  },
-  {
-    key: "prompts",
-    name: "Prompts",
-    price: 50,
-    description: "Create, version and test prompts",
-  },
-  {
-    key: "evals",
-    name: "Evaluations",
-    price: 100,
-    description: "Evaluate prompt performance",
-  },
-  {
-    key: "experiments",
-    name: "Experiments",
-    price: 50,
-    description: "Run A/B tests on prompts",
-  },
-];
 
 const TEAM_BUNDLE_PRICE = 200;
 
@@ -107,6 +85,9 @@ export const UpgradeProDialog = ({
     evals: false,
   });
   const [seats, setSeats] = useState(1);
+  const promptsPrice = useCostForPrompts();
+  const evalsPrice = useCostForEvals();
+  const experimentsPrice = useCostForExperiments();
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -160,6 +141,37 @@ export const UpgradeProDialog = ({
   const handleSeatChange = (increment: number) => {
     setSeats((prev) => Math.max(1, prev + increment));
   };
+
+  const ADDONS: PricingAddon[] = useMemo(
+    () => [
+      {
+        key: "pro",
+        name: "Pro Plan",
+        price: 20,
+        description:
+          "No log limits, sessions, cache, user analytics, and more.",
+      },
+      {
+        key: "prompts",
+        name: "Prompts",
+        price: promptsPrice.data?.data || 50,
+        description: "Create, version and test prompts",
+      },
+      {
+        key: "evals",
+        name: "Evaluations",
+        price: evalsPrice.data?.data || 100,
+        description: "Evaluate prompt performance",
+      },
+      {
+        key: "experiments",
+        name: "Experiments",
+        price: experimentsPrice.data?.data || 50,
+        description: "Run A/B tests on prompts",
+      },
+    ],
+    [promptsPrice.data, evalsPrice.data, experimentsPrice.data]
+  );
 
   const proAddon = ADDONS.find((a) => a.key === "pro")!;
   const otherAddons = ADDONS.filter((a) => a.key !== "pro");
