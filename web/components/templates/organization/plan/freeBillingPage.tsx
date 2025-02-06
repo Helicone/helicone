@@ -25,15 +25,10 @@ import {
   useCostForEvals,
   useCostForExperiments,
 } from "../../pricing/hooks";
+import { Addons, UpgradeProDialog } from "./upgradeProDialog";
 
 export const FreePlanCard = () => {
   const org = useOrg();
-  const [selectedAddons, setSelectedAddons] = useState({
-    alerts: false,
-    prompts: false,
-    experiments: false,
-    evals: false,
-  });
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const costForPrompts = useCostForPrompts();
@@ -61,7 +56,7 @@ export const FreePlanCard = () => {
   });
 
   const upgradeToPro = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (variables: { addons: Addons; seats?: number }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const endpoint =
         subscription.data?.data?.status === "canceled"
@@ -70,11 +65,11 @@ export const FreePlanCard = () => {
       const result = await jawn.POST(endpoint, {
         body: {
           addons: {
-            alerts: selectedAddons.alerts,
-            prompts: selectedAddons.prompts,
-            experiments: selectedAddons.experiments,
-            evals: selectedAddons.evals,
+            prompts: variables.addons.prompts,
+            experiments: variables.addons.experiments,
+            evals: variables.addons.evals,
           },
+          seats: variables.seats,
         },
       });
       return result;
@@ -281,118 +276,14 @@ export const FreePlanCard = () => {
         </Card>
       </div>
 
-      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Start Your Free Trial
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            <div className="space-y-5">
-              <h3 className="font-semibold text-gray-700">Optional Add-ons</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-200 transition-colors">
-                  <Label
-                    htmlFor="prompts-addon"
-                    className="cursor-pointer flex-1"
-                  >
-                    <div className="font-medium">Prompts</div>
-                    <div className="text-sm text-muted-foreground">
-                      Manage and version your prompts
-                    </div>
-                    <div className="text-sm font-medium text-blue-600">
-                      ${costForPrompts.data?.data ?? "..."}/mo
-                    </div>
-                  </Label>
-                  <Switch
-                    id="prompts-addon"
-                    checked={selectedAddons.prompts}
-                    onCheckedChange={(checked) =>
-                      setSelectedAddons((prev) => ({
-                        ...prev,
-                        prompts: checked,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-200 transition-colors">
-                  <Label
-                    htmlFor="experiments-addon"
-                    className="cursor-pointer flex-1"
-                  >
-                    <div className="font-medium">Experiments</div>
-                    <div className="text-sm text-muted-foreground">
-                      Run and track experiments
-                    </div>
-                    <div className="text-sm font-medium text-blue-600">
-                      ${costForExperiments.data?.data ?? "..."}/mo
-                    </div>
-                  </Label>
-                  <Switch
-                    id="experiments-addon"
-                    checked={selectedAddons.experiments}
-                    onCheckedChange={(checked) =>
-                      setSelectedAddons((prev) => ({
-                        ...prev,
-                        experiments: checked,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-200 transition-colors">
-                  <Label
-                    htmlFor="evals-addon"
-                    className="cursor-pointer flex-1"
-                  >
-                    <div className="font-medium">Evals</div>
-                    <div className="text-sm text-muted-foreground">
-                      Evaluate model performance
-                    </div>
-                    <div className="text-sm font-medium text-blue-600">
-                      ${costForEvals.data?.data ?? "..."}/mo
-                    </div>
-                  </Label>
-                  <Switch
-                    id="evals-addon"
-                    checked={selectedAddons.evals}
-                    onCheckedChange={(checked) =>
-                      setSelectedAddons((prev) => ({ ...prev, evals: checked }))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <Button
-              variant="action"
-              onClick={async () => {
-                const result = await upgradeToPro.mutateAsync();
-                if (result.data) {
-                  window.open(result.data, "_blank");
-                }
-                setShowUpgradeDialog(false);
-              }}
-              disabled={upgradeToPro.isLoading}
-              className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
-            >
-              Start 7-day free trial
-            </Button>
-            <span className="text-slate-500 text-[12px] font-medium mt-2">
-              Cancel anytime during the trial
-            </span>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <UpgradeProDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        subscription={subscription.data}
+      />
     </div>
   );
 };
-
 const ComparisonItem = ({
   title,
   description,

@@ -4657,6 +4657,10 @@
 							}
 						},
 						"type": "object"
+					},
+					"seats": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",

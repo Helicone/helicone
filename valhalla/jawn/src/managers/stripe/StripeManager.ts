@@ -291,11 +291,12 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting organization member count");
       }
 
+      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
+
       const sessionUrl = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        orgMemberCount.data,
-        false,
+        seats,
         body
       );
 
@@ -360,7 +361,6 @@ WHERE (${builtFilter.filter})`,
     origin: string,
     customerId: string,
     orgMemberCount: number,
-    isNewCustomer: boolean,
     body: UpgradeToProRequest
   ): Promise<Result<string, string>> {
     const proProductPrices = await getProProductPrices();
@@ -463,11 +463,12 @@ WHERE (${builtFilter.filter})`,
       if (orgMemberCount.error || !orgMemberCount.data) {
         return err("Error getting organization member count");
       }
+
+      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
       const sessionUrl = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        orgMemberCount.data,
-        true,
+        seats,
         body
       );
 
