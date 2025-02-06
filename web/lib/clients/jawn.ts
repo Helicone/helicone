@@ -4,6 +4,7 @@ import { ORG_ID_COOKIE_KEY } from "../constants";
 import { getHeliconeCookie } from "../cookies";
 import type { paths as publicPaths } from "./jawnTypes/public";
 import type { paths as privatePaths } from "./jawnTypes/private";
+import { env } from "next-runtime-env";
 
 export type JawnFilterNode = any;
 
@@ -22,7 +23,7 @@ export function getJawnClient(orgId?: string | "none") {
       : {};
 
   return createClient<publicPaths & privatePaths>({
-    baseUrl: "http://localhost:8585",
+    baseUrl: env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"),
     headers,
   });
 }
