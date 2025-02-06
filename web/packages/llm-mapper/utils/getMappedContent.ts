@@ -157,6 +157,26 @@ const sanitizeMappedContent = (
     return messages?.map(sanitizeMessage);
   };
 
+  if (mappedContent.schema.response?.error?.heliconeMessage) {
+    try {
+      if (
+        typeof mappedContent.schema.response.error.heliconeMessage === "string"
+      ) {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          JSON.parse(mappedContent.schema.response.error.heliconeMessage),
+          null,
+          2
+        );
+      } else {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          mappedContent.schema.response.error.heliconeMessage,
+          null,
+          2
+        );
+      }
+    } catch (e) {}
+  }
+
   return {
     _type: mappedContent._type,
     id: mappedContent.id,
