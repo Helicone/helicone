@@ -1160,6 +1160,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "addons": {"dataType":"nestedObjectLiteral","nestedProperties":{"evals":{"dataType":"boolean"},"experiments":{"dataType":"boolean"},"prompts":{"dataType":"boolean"},"alerts":{"dataType":"boolean"}}},
+            "seats": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

@@ -1,5 +1,5 @@
 import React, { forwardRef, useCallback, useState } from "react";
-import { ProFeatureDialog } from "./ProFeatureDialog";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { FeatureName, useProFeature } from "@/hooks/useProFeature";
 
 interface ProFeatureWrapperProps {
@@ -38,9 +38,9 @@ export const ProFeatureWrapper = forwardRef<
           : children.props.className,
       })}
 
-      <ProFeatureDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+      <UpgradeProDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         featureName={featureName}
       />
     </>

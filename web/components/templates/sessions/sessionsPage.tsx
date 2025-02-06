@@ -183,6 +183,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
               documentationLink="https://docs.helicone.ai/features/sessions"
               tier={org?.currentOrg?.tier ?? "free"}
+              featureName="Sessions"
             />
           </div>
         ) : (
@@ -194,6 +195,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
               documentationLink="https://docs.helicone.ai/features/sessions"
               tier={org?.currentOrg?.tier ?? "free"}
+              featureName="Sessions"
             />
           </div>
         )}
