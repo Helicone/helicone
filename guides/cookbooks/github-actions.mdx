@@ -1,0 +1,66 @@
+---
+title: "Integrating Helicone with GitHub Actions"
+sidebarTitle: "GitHub Actions Integration"
+description: "Automate the monitoring and caching of LLM calls in your CI pipelines with Helicone."
+"twitter:title": "Integrating Helicone with GitHub Actions - Helicone OSS LLM Observability"
+---
+
+<Warning>
+<b>IMPORTANT SECURITY NOTICE</b>
+
+This integration uses Man-in-the-Middle (MITM) proxy software, which involves significant security and performance considerations. Before implementing this in your CI pipeline, please:
+
+1. Review the detailed information in [tools/mitm-proxy](/tools/mitm-proxy)
+2. Ensure you fully understand the security implications
+3. Test thoroughly in a non-production environment first
+
+</Warning>
+
+# Integration with GitHub Actions on Ubuntu/Debian
+
+You can maximize Helicone's capabilities by integrating it into your CI pipelines. This guide provides step-by-step instructions for incorporating Helicone into your GitHub Actions workflows.
+
+## Setup Steps
+
+Add the following configurations to your GitHub Actions workflow:
+
+1. Initialize the proxy in your workflow:
+
+```bash
+curl -s https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh | bash -s start
+```
+
+2. Configure the required environment variables:
+
+```yml
+OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+HELICONE_API_KEY: ${{ secrets.HELICONE_API_KEY }}
+REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+HELICONE_CACHE_ENABLED: "true"
+HELICONE_PROPERTY_<KEY>: <VALUE>
+```
+
+<Note>
+You can also set these variables within your test files. For additional configuration options, refer to the [MITM proxy documentation](/tools/mitm-proxy).
+</Note>
+
+## Workflow Example
+
+Here's a complete example of how to integrate Helicone in your GitHub Actions workflow:
+
+```yml
+# Your existing workflow configuration...
+tests:
+  steps:
+    - name: Execute OpenAI Tests with Helicone
+      run: |
+        curl -s https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh | bash -s start
+        # Add your test execution commands here
+
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        HELICONE_API_KEY: ${{ secrets.HELICONE_API_KEY }}
+        REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+        HELICONE_CACHE_ENABLED: "true"
+        HELICONE_PROPERTY_<KEY>: <VALUE>
+```

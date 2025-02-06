@@ -1,0 +1,108 @@
+---
+title: "MITM Proxy"
+description: "Automatically capture your logs without changing any code."
+---
+
+<Warning>
+
+## Important: Please Read This First
+
+This tool is a work in progress and may contain bugs or issues. Please report any problems you encounter.
+
+<b>This tool is NOT intended for production use.</b>
+
+The MITM Proxy is designed for testing and debugging purposes only.
+
+</Warning>
+
+## How It Works
+
+<Info>MITM (Man-in-the-Middle) Proxy</Info>
+
+The MITM Proxy operates as a simple HTTP server that listens on a specified port. It intercepts all traffic destined for `api.openai.com` and reroutes it to `oai.helicone.ai` with the correct headers and configurations. This approach enables you to integrate Helicone and its features without modifying your existing code.
+
+# Use Cases for the MITM Proxy
+
+- GitHub Actions:
+  - Continuous Integration/Continuous Deployment (CI/CD)
+  - Testing and debugging
+  - Cost savings (utilizing Bucket Cache)
+- Local Development:
+  - Debugging and testing
+  - Cost optimization (utilizing Bucket Cache)
+
+## Installation (Ubuntu/Debian)
+
+<Warning>Use this tool only in controlled testing environments.</Warning>
+
+We provide a script that automatically installs and configures the MITM Proxy.
+
+### Starting the Proxy
+
+```bash
+# Configure Cache
+export HELICONE_CACHE_ENABLED="true" # Enable caching
+
+# Configure Custom Properties
+# Note: Properties can be configured dynamically using the lock file
+export HELICONE_PROPERTY_<PROPERTY_NAME>="<PROPERTY_VALUE>" # Set custom properties
+
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s start
+echo "sk-<HELICONE_KEY>" > ~/.helicone/api_key # Alternative: export HELICONE_API_KEY before starting the proxy
+
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt # Required for HTTPS requests
+# Your Python script here...
+```
+
+### Stopping the Proxy
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s stop
+```
+
+### Viewing Logs
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy.sh)" -s tail
+```
+
+## Installation (macOS)
+
+<Warning>
+  We do not recommend installing the MITM Proxy on your local machine. Instead, use
+  a virtual environment or container. MITM Proxies can pose significant security
+  risks.
+</Warning>
+
+For macOS installation, follow the Ubuntu/Debian instructions but use the `mitmproxy_mac.sh` script available at: `https://raw.githubusercontent.com/Helicone/helicone/main/mitmproxy_mac.sh`
+
+## Configuring Dynamic Helicone Headers
+
+Configure custom properties using a lock file at `~/.helicone/custom_properties.json`. These properties apply to all requests:
+
+```json
+{
+  "<PROPERTY_NAME>": "<PROPERTY_VALUE>"
+}
+```
+
+For dynamic configuration, install our Python package:
+
+```bash
+pip install helicone
+```
+
+Use the following code to manage properties:
+
+```python
+from helicone.lock import HeliconeLockManager
+HeliconeLockManager.write_custom_property("job_id", "1")
+'''
+Available Methods:
+ - write_custom_property(property_name: str, value: str) # Write a custom property
+ - remove_custom_property(property_name: str) # Remove a custom property
+ - clear_all_properties() # Clear all properties
+'''
+```
+
+This dynamic configuration system allows you to modify properties during runtime, enhancing workflow flexibility and efficiency.

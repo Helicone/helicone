@@ -1,0 +1,123 @@
+---
+title: "Gateway Fallbacks for LLM Providers"
+sidebarTitle: "Gateway Fallbacks"
+description: "Access multiple LLM providers through Helicone's unified gateway. Ensure high availability with automatic fallback options across OpenAI, Anthropic, and other AI services."
+"twitter:title": "Gateway Fallbacks for LLM Providers - Helicone OSS LLM Observability"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+<Warning>
+  **This feature is currently in beta.** While you're welcome to try it out,
+  please know that our team is still working to refine it. Your feedback is
+  valuable to help us improve!
+</Warning>
+
+## Introduction
+
+Given the instability of some APIs and the multitude of similar providers, we have developed a unified gateway that acts as a single endpoint for accessing multiple APIs.
+
+### Why Gateway Fallbacks
+
+Instead of using the **`Helicone-Target-Url`** header to send requests to a specific API, you can use this unified gateway to:
+
+- Automatically switch to fallback options in case of an API failure or error response
+- Eliminate the need to modify your code when switching providers
+- Maintain high availability and reliability in critical applications that depend on external APIs
+
+## Getting Started
+
+To get started, add the header `Helicone-Fallbacks` to your request.
+
+This header should contain a JSON string dump of the fallbacks you wish to use. **The fallbacks are prioritized**, meaning the first one will be used if available. If it is not available, the system will attempt to use the next one, and so on.
+
+The header is structured as follows:
+
+```TypeScript
+export type HeliconeFallbackCode = number | { from: number; to: number };
+
+export type HeliconeFallback = {
+  "target-url": string;
+  headers: Record<string, string>;
+  onCodes: HeliconeFallbackCode[];
+  bodyKeyOverride?: object;
+};
+```
+
+### Extracting Fallbacks Response Header
+
+When fallbacks are enabled, you can capture the fallback index from the headers of the response returned:
+
+```ts
+Helicone-Fallback-Index: number // indicates the fallback used
+```
+
+### Example
+
+Using the OpenAI API with LemonFox API as a fallback, then extracting the header:
+
+<Tip>
+  For integration with other languages, please refer to the format in the [Header
+  Directory](/helicone-headers/header-directory).
+</Tip>
+
+```python Python (w/o package)
+url = "https://gateway.helicone.ai/v1/chat/completions"
+
+headers = {
+  "Content-Type": "application/json",
+  "Helicone-Auth": "Bearer <Helicone KEY>",
+  "Helicone-Fallbacks": json.dumps([ # add this new header
+      {   # this API will be used if available, otherwise, the system will use the next one
+          "target-url": "https://api.openai.com",
+          "headers": {
+            "Authorization": "Bearer <OpenAI Key>",
+          },
+          "onCodes": [{"from": 400, "to": 500}]
+      },
+      {   # set fallback to LemonFox API
+          "target-url": "https://api.lemonfox.ai",
+          "headers": {
+              "Authorization": "Bearer <LemonFox Key>",
+              "Content-Type": "application/json",
+          },
+          "onCodes": [401, 403],
+          "bodyKeyOverride": {
+              "model": "zephyr-chat",
+          }
+      },
+  ]),
+}
+payload = {
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the meaning of life?"
+    }
+  ],
+  "max_tokens": 300
+}
+
+response = requests.post(url, headers=headers, data=json.dumps(payload))
+print("Fallback index used: ", response.headers["helicone-fallback-index"])
+print(response.status_code)
+print(response.text)
+```
+
+## Limitations
+
+### Using Approved Domains
+
+Helicone supports integration with several approved domains for providers such as OpenAI, Anthropic, Together AI, OpenRouter, and Azure.
+
+Choosing from our [latest list of approved domains](https://github.com/Helicone/helicone/blob/360221606ddcfb871920f7a54379cf82a5d883a5/costs/src/providers/mappings.ts#L15) as fallbacks means you can send **unlimited requests** to the providers via Helicone.
+
+### Using Unapproved Domains
+
+You can also use unapproved domains as fallbacks. However, to protect our community from potential threats, we have implemented certain restrictions for unapproved domains:
+
+- 10,000 requests per day
+- 1 request per second
+
+<QuestionsSection />
