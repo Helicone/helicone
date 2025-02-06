@@ -24,6 +24,7 @@ import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { Rocket } from "lucide-react";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 export interface NavigationItem {
   name: string;
@@ -318,11 +319,18 @@ const DesktopSidebar = ({
                         onClick={() => {
                           setShowCreateOrg(true);
                         }}
-                        className="mt-10 gap-1 w-full text-white text-large font-medium leading-normal text-white tracking-normal h-[46px] px-6 md:px-4 bg-sky-500 hover:bg-sky-600 transition-colors"
+                        className={cn(
+                          "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          isCollapsed
+                            ? "h-8 w-8 px-2"
+                            : "h-[46px] w-full px-6 md:px-4"
+                        )}
                         variant="action"
                       >
                         {!isCollapsed && <span>Ready to integrate</span>}
-                        <Rocket className="h-6 w-6" />
+                        <Rocket
+                          className={isCollapsed ? "h-4 w-4" : "h-6 w-6"}
+                        />
                       </Button>
                     )}
                   </nav>
@@ -331,21 +339,39 @@ const DesktopSidebar = ({
 
               {/* InfoBox */}
               {canShowInfoBox &&
-                !isCollapsed &&
-                org?.currentOrg?.tier !== "demo" && (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
-                    <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
-                      ⚡ Experiments is here: a new way to perfect your prompt.{" "}
-                      <Link
-                        href="https://docs.helicone.ai/features/experiments"
-                        target="_blank"
-                        className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                org?.currentOrg?.tier === "free" &&
+                (isCollapsed ? (
+                  <div className="px-2 py-2">
+                    <ProFeatureWrapper featureName="pro" enabled={false}>
+                      <Button
+                        variant="action"
+                        size="icon"
+                        className="w-full h-8 bg-sky-500 hover:bg-sky-600 text-white"
                       >
-                        Check out the docs.
-                      </Link>{" "}
-                    </h1>
+                        <Rocket className="h-4 w-4" />
+                      </Button>
+                    </ProFeatureWrapper>
                   </div>
-                )}
+                ) : (
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                        Unlock more features with{" "}
+                        <span className="font-bold text-sky-500">Pro</span>. No
+                        usage limits, sessions, user analytics, custom
+                        properties and much more.
+                      </h1>
+                      <ProFeatureWrapper featureName="pro" enabled={false}>
+                        <Button
+                          variant="action"
+                          className="w-full text-xs h-8 bg-sky-500 hover:bg-sky-600 text-white"
+                        >
+                          Start Pro Free Trial
+                        </Button>
+                      </ProFeatureWrapper>
+                    </div>
+                  </div>
+                ))}
             </div>
 
             {/* Sticky help dropdown */}

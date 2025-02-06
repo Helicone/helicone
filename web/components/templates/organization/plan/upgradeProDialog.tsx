@@ -317,7 +317,7 @@ export const UpgradeProDialog = ({
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold">$200/mo</div>
-                  <div className="text-sm text-green-600 font-medium">
+                  <div className="text-sm text-sky-500 font-medium">
                     Save $100+/mo (33%)
                   </div>
                 </div>
