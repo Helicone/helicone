@@ -18,11 +18,6 @@ type AnthropicContent = {
   id?: string;
 };
 
-type AnthropicChoice = {
-  role: string;
-  content: AnthropicContent[] | AnthropicContent;
-};
-
 const getRequestText = (requestBody: any) => {
   const result = requestBody.tooLarge
     ? "Helicone Message: Input too large"
@@ -49,7 +44,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -66,7 +62,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -104,13 +101,33 @@ const getRequestMessages = (request: any) => {
     request.messages?.map((message: any) => {
       // Handle array content (for images + text, tool use, tool results)
       if (Array.isArray(message.content)) {
-        const hasImage = message.content.some((c: any) => c.type === "image");
         const hasToolUse = message.content.some(
           (c: any) => c.type === "tool_use"
         );
         const hasToolResult = message.content.some(
           (c: any) => c.type === "tool_result"
         );
+
+        // Create individual messages for each content item
+        const contentArray = message.content
+          .map((c: any) => {
+            if (c.type === "text") {
+              return {
+                content: c.text,
+                role: message.role,
+                _type: "message",
+              };
+            } else if (c.type === "image" || c.type === "image_url") {
+              return {
+                content: "",
+                role: message.role,
+                _type: "image",
+                image_url: c.image_url?.url || c.source?.data,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
 
         // Get text content from all text items
         const textContent = message.content
@@ -137,10 +154,7 @@ const getRequestMessages = (request: any) => {
         return {
           content: finalContent,
           role: message.role,
-          _type: hasImage ? "image" : "message",
-          image_url: hasImage
-            ? message.content.find((c: any) => c.type === "image")?.source?.data
-            : undefined,
+          _type: "contentArray",
           tool_calls: hasToolUse
             ? message.content
                 .filter((c: any) => c.type === "tool_use")
@@ -150,6 +164,7 @@ const getRequestMessages = (request: any) => {
                   arguments: c.input,
                 }))
             : undefined,
+          contentArray: contentArray.length > 0 ? contentArray : undefined,
         };
       }
 
@@ -195,7 +210,9 @@ const anthropicContentToMessage = (
   if (content.type === "text") {
     return {
       id: content.id || randomId(),
-      content: content.text || JSON.stringify(content, null, 2),
+      content: (content.text || JSON.stringify(content, null, 2))
+        .replace(/undefined/g, "")
+        .trim(),
       _type: "message",
       role,
     };
@@ -247,16 +264,30 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
   } else {
     const messages: Message[] = [];
 
-    // Handle new Claude 3 format
-    if (response?.type === "message" && response?.content) {
+    // Handle new Claude 3 format and message_stop type
+    if (
+      (response?.type === "message" || response?.type === "message_stop") &&
+      response?.content
+    ) {
       if (Array.isArray(response.content)) {
         for (const content of response.content) {
-          messages.push(anthropicContentToMessage(content, response.role));
+          const message = anthropicContentToMessage(content, response.role);
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       } else {
-        messages.push(
-          anthropicContentToMessage(response.content, response.role)
+        const message = anthropicContentToMessage(
+          response.content,
+          response.role
         );
+        // Clean up any undefined strings in the content
+        if (typeof message.content === "string") {
+          message.content = message.content.replace(/undefined/g, "").trim();
+        }
+        messages.push(message);
       }
     }
     // Handle old format with choices
@@ -264,10 +295,25 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
       for (const choice of response?.choices) {
         if (Array.isArray(choice.content)) {
           for (const content of choice.content) {
-            messages.push(anthropicContentToMessage(content, choice.role));
+            const message = anthropicContentToMessage(content, choice.role);
+            // Clean up any undefined strings in the content
+            if (typeof message.content === "string") {
+              message.content = message.content
+                .replace(/undefined/g, "")
+                .trim();
+            }
+            messages.push(message);
           }
         } else {
-          messages.push(anthropicContentToMessage(choice.content, choice.role));
+          const message = anthropicContentToMessage(
+            choice.content,
+            choice.role
+          );
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       }
     }

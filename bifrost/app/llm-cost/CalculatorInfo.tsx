@@ -338,7 +338,7 @@ const ContributingSection = () => (
         <li>
           Follow the instructions in the{" "}
           <a
-            href="https://github.com/Helicone/helicone/blob/main/costs/README.md"
+            href=" https://github.com/Helicone/helicone/blob/main/packages/README.md"
             className="underline"
             target="_blank"
             rel="noopener noreferrer"
@@ -357,7 +357,7 @@ const ContributingSection = () => (
     </p>
     <div className="mt-4">
       <a
-        href="https://github.com/Helicone/helicone/tree/main/costs"
+        href="https://github.com/Helicone/helicone/blob/main/packages/README.md"
         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
         target="_blank"
         rel="noopener noreferrer"

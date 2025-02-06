@@ -198,6 +198,16 @@ export const LastMileDevConfigForm: React.FC<{
 
   return (
     <Col className="h-full flex flex-col gap-2">
+      <div>
+        <a
+          href="https://docs.lastmileai.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:text-blue-600"
+        >
+          Lastmile AI Documentation
+        </a>
+      </div>
       <Label>Evaluator Name</Label>
       <Input
         placeholder="Name"

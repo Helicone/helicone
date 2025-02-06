@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import PricingComparisonTableV2 from "../components/templates/pricing/PricingComparisonTableV2";
 import AddOnsTable from "../components/templates/pricing/AddOnsTable";
+import BundlePromo from "../components/templates/pricing/BundlePricing";
 
 export default function PricingPage() {
   return (
@@ -104,7 +105,7 @@ export default function PricingPage() {
                   <span>Pro</span>
                   <Button className="bg-brand text-white font-bold" asChild>
                     <Link href="https://us.helicone.ai/settings/billing">
-                      Upgrade now
+                      Start 7-day free trial
                     </Link>
                   </Button>
                 </Row>
@@ -136,6 +137,7 @@ export default function PricingPage() {
           </div>
           <PricingComparisonTableV2 />
           <AddOnsTable />
+          <BundlePromo />
           <ProductComparisonTable />
 
           <div className="py-10 sm:p-8 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">

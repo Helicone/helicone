@@ -197,4 +197,260 @@ describe("mapAnthropicRequest", () => {
       id: expect.any(String),
     });
   });
+
+  it("should handle content arrays with mixed text and images", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Page 1",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: "data:image/1",
+                },
+              },
+              {
+                type: "text",
+                text: "Page 2",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: "data:image/2",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      response: {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: "I see two pages",
+          },
+        ],
+      },
+      statusCode: 200,
+      model: "claude-3-sonnet",
+    });
+
+    // Check request message structure
+    const requestMessage = result.schema.request.messages![0];
+    expect(requestMessage.content).toBe("Page 1 Page 2");
+    expect(requestMessage._type).toBe("contentArray");
+    expect(requestMessage.image_url).toBeUndefined();
+
+    expect(requestMessage.contentArray).toHaveLength(4);
+
+    // Verify content array items
+    const contentArray = requestMessage.contentArray!;
+    expect(contentArray[0]).toEqual({
+      content: "Page 1",
+      role: "user",
+      _type: "message",
+    });
+    expect(contentArray[1]).toEqual({
+      content: "",
+      role: "user",
+      _type: "image",
+      image_url: "data:image/1",
+    });
+    expect(contentArray[2]).toEqual({
+      content: "Page 2",
+      role: "user",
+      _type: "message",
+    });
+    expect(contentArray[3]).toEqual({
+      content: "",
+      role: "user",
+      _type: "image",
+      image_url: "data:image/2",
+    });
+
+    // Check response message
+    expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
+      content: "I see two pages",
+      _type: "message",
+      id: expect.any(String),
+    });
+  });
+
+  it("should handle streamed responses with undefined values", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        model: "claude-3-5-sonnet-latest",
+        max_tokens: 4096,
+        temperature: 0,
+        system: "[REDACTED SYSTEM PROMPT]",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "[REDACTED USER MESSAGE]",
+              },
+            ],
+          },
+        ],
+        tools: [
+          {
+            name: "[REDACTED TOOL NAME]",
+            description: "[REDACTED TOOL DESCRIPTION]",
+            input_schema: {
+              type: "object",
+              properties: {
+                topic: {
+                  type: "string",
+                  description: "[REDACTED PROPERTY DESCRIPTION]",
+                },
+              },
+              required: ["topic"],
+              additionalProperties: false,
+              $schema: "http://json-schema.org/draft-07/schema#",
+            },
+          },
+        ],
+        tool_choice: {
+          type: "auto",
+        },
+        stream: true,
+      },
+      response: {
+        id: "[REDACTED ID]",
+        type: "message_stop",
+        role: "assistant",
+        model: "claude-3-5-sonnet-20241022",
+        content: [
+          {
+            type: "text",
+            text: "[REDACTED RESPONSE]undefinedundefinedundefinedundefined",
+          },
+        ],
+        stop_reason: "tool_use",
+        stop_sequence: null,
+        usage: {
+          input_tokens: 100,
+          output_tokens: 20,
+        },
+      },
+      model: "claude-3-5-sonnet-20241022",
+      statusCode: 200,
+    });
+
+    // Check response message
+    const response = result.schema.response;
+    expect(response?.messages![0]?.content).toBe("[REDACTED RESPONSE]");
+
+    // Check preview
+    expect(result.preview.request).toBe("[REDACTED USER MESSAGE]");
+    expect(result.preview.response).toBe("[REDACTED RESPONSE]");
+  });
+
+  it("Anthropic Response with Streamed Data", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        model: "claude-3-5-sonnet-latest",
+        max_tokens: 4096,
+        temperature: 0,
+        system: [
+          {
+            type: "text",
+            text: "[REDACTED SYSTEM PROMPT]",
+          },
+        ],
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "[REDACTED USER MESSAGE 1]",
+              },
+            ],
+          },
+          {
+            role: "assistant",
+            content: [
+              {
+                type: "text",
+                text: "[REDACTED ASSISTANT MESSAGE]",
+              },
+            ],
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "[REDACTED USER MESSAGE 2]",
+              },
+            ],
+          },
+        ],
+        tools: [
+          {
+            name: "[REDACTED TOOL NAME]",
+            description: "[REDACTED TOOL DESCRIPTION]",
+            input_schema: {
+              type: "object",
+              properties: {
+                topic: {
+                  type: "string",
+                  description: "[REDACTED PROPERTY DESCRIPTION]",
+                },
+              },
+              required: ["topic"],
+              additionalProperties: false,
+              $schema: "http://json-schema.org/draft-07/schema#",
+            },
+          },
+        ],
+        tool_choice: {
+          type: "auto",
+        },
+        stream: true,
+      },
+      response: {
+        id: "[REDACTED ID]",
+        type: "message_stop",
+        role: "assistant",
+        model: "claude-3-5-sonnet-20241022",
+        content: [
+          {
+            type: "text",
+            text: "[REDACTED RESPONSE]undefinedundefinedundefinedundefinedundefinedundefinedundefined",
+          },
+        ],
+        stop_reason: "tool_use",
+        stop_sequence: null,
+        usage: {
+          input_tokens: 2664,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+          output_tokens: 86,
+        },
+      },
+      model: "claude-3-5-sonnet-20241022",
+      statusCode: 200,
+    });
+
+    // Check response message
+    const response = result.schema.response;
+    expect(response?.messages![0]?.content).toEqual("[REDACTED RESPONSE]");
+
+    // Check preview
+    expect(result.preview.request).toBe("[REDACTED USER MESSAGE 2]");
+    expect(result.preview.response).toBe("[REDACTED RESPONSE]");
+  });
 });
