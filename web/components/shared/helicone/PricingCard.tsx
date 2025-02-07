@@ -127,23 +127,18 @@ export const PricingCard = ({
           </div>
         )}
       </div>
-      <div className="flex w-full justify-between items-center">
-        <div className={cn("flex items-baseline", styles.price)}>
+      <div className="flex w-full flex-wrap gap-2 justify-between items-center">
+        <div className={cn("flex items-baseline flex-wrap", styles.price)}>
           <span className="text-2xl font-bold leading-normal">{price}</span>
           {priceSubtext && (
-            <span className="text-slate-400 text-base font-normal leading-normal">
+            <span className="text-slate-400 text-base font-normal leading-normal ml-1">
               {priceSubtext}
             </span>
           )}
         </div>
         {(isCurrentPlan || isPopular || isBestValue) && (
-          <div className={cn("px-3 py-1", styles.badge)}>
-            <div
-              className={cn(
-                "text-center text-sm",
-                isPopular ? "font-semibold" : "font-semibold"
-              )}
-            >
+          <div className={cn("px-3 shrink-0", styles.badge)}>
+            <div className="text-center text-sm font-normal whitespace-nowrap">
               {isBestValue
                 ? "BEST VALUE"
                 : isPopular
