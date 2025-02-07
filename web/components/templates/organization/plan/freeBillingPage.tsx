@@ -86,7 +86,7 @@ export const FreePlanCard = () => {
         <CardHeader>
           <div className="flex items-center gap-3">
             <CardTitle className="text-xl font-medium">Free</CardTitle>
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
+            <span className="rounded-full bg-sky-100 px-3 py-1 text-sm text-sky-800">
               Current plan
             </span>
           </div>

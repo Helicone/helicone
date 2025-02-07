@@ -121,7 +121,6 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                 ))}
               </TabsList>
             </Tabs>
-            <Separator />
           </div>
 
           <div className="flex-1 w-full">{children}</div>

@@ -24,9 +24,6 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
 
   return (
     <>
-      <AuthHeader
-        title={<div className="flex items-center gap-2">Billing</div>}
-      />
       <Col className="gap-4">
         {org?.currentOrg?.tier === "growth" && <MigrateGrowthToPro />}
         {org?.currentOrg?.tier === "free" && <FreePlanCard />}
@@ -38,16 +35,6 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
             <UnknownTierCard tier={org?.currentOrg?.tier} />
           )}
         {org?.currentOrg?.tier === "enterprise" && <EnterprisePlanCard />}
-        {/* <Card className="bg-[#F9F9F9] p-4 max-w-lg">
-          <div className="text-[#334155] font-medium">
-            Looking for something else?
-          </div>
-          <h1 className="text-[#000000] font-bold text-3xl mt-4">Contact us</h1>
-          <h2 className="text-[#334155] font-light text-md">
-            Observability needs, support, or just want to say hi?
-          </h2>
-          <Button className="mt-4">Contact us</Button>
-        </Card> */}
       </Col>
     </>
   );
