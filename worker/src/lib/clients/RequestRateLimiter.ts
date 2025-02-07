@@ -37,6 +37,10 @@ export class RateLimiter {
         maxCount: 30_000,
       },
     };
+
+    if (tier.includes("pro")) {
+      tier = "pro";
+    }
     tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
 
     return rateLimitParams[tier];
