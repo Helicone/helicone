@@ -181,8 +181,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               title="Sessions"
               description="Group, analyze and fix AI workflows"
               infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
-              pricingTiers={["hobby", "pro", "team"]}
-              featureImage="/static/featureUpgrade/session-view.webp"
+              featureImage="/static/featureUpgrade/sessions-graphic.webp"
               integrationImage="/integration-steps.png"
               documentationLink="/docs/sessions"
               headerTagline="Group, analyze and fix AI workflows"
@@ -201,8 +200,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               title="Sessions"
               description="Group, analyze and fix AI workflows"
               infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
-              pricingTiers={["hobby", "pro", "team"]}
-              featureImage="/static/featureUpgrade/sessionsView.webp"
+              featureImage="/static/featureUpgrade/sessions-graphic.webp"
               integrationImage="/integration-steps.png"
               documentationLink="/docs/sessions"
               proFeatures={[
