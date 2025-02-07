@@ -91,42 +91,49 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   }, [isGovernanceEnabled.data?.data?.data]);
 
   return (
-    <IslandContainer className="space-y-6 ">
-      <AuthHeader isWithinIsland={true} title={"Settings"} />
-      {org?.currentOrg?.tier !== "demo" && (
-        <div className="flex flex-col space-y-8 items-start">
-          <div className="flex flex-col space-y-2 items-start">
-            <Tabs
-              defaultValue={
-                tabs.find((tab) => tab.href === currentPath)?.id || "general"
-              }
-              className=""
-              orientation="vertical"
-            >
-              <TabsList className="flex flex-row h-full space-y-1">
-                {tabs.map((tab) => (
-                  <Link key={tab.id} href={tab.href} passHref>
-                    <TabsTrigger
-                      value={tab.id}
-                      className="w-full justify-start"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(tab.href);
-                      }}
+    <>
+      <IslandContainer>
+        <AuthHeader isWithinIsland={true} title={""} />
+        {org?.currentOrg?.tier !== "demo" && (
+          <div className="flex flex-col space-y-8 items-start">
+            <div className="flex flex-col space-y-2 items-start">
+              <Tabs
+                defaultValue={
+                  tabs.find((tab) => tab.href === currentPath)?.id || "general"
+                }
+                className=""
+                orientation="vertical"
+              >
+                <TabsList className="flex w-full overflow-x-auto">
+                  {tabs.map((tab) => (
+                    <Link
+                      key={tab.id}
+                      href={tab.href}
+                      passHref
+                      legacyBehavior
+                      className="hover:no-underline"
                     >
-                      <tab.icon className="h-5 w-5 mr-2" />
-                      {tab.title}
-                    </TabsTrigger>
-                  </Link>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
+                      <TabsTrigger
+                        value={tab.id}
+                        className="px-4 py-2 text-sm gap-2"
+                        asChild
+                      >
+                        <a href={tab.href} className="cursor-pointer">
+                          <tab.icon className="h-5 w-5" />
+                          {tab.title}
+                        </a>
+                      </TabsTrigger>
+                    </Link>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
 
-          <div className="flex-1 w-full">{children}</div>
-        </div>
-      )}
-    </IslandContainer>
+            <div className="flex-1 w-full">{children}</div>
+          </div>
+        )}
+      </IslandContainer>
+    </>
   );
 };
 
