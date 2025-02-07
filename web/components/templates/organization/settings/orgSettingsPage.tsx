@@ -101,8 +101,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               </div>
               <Progress
                 value={(currentUsage / totalUsage) * 100}
-                className="h-2 bg-blue-200 dark:bg-blue-800"
-                indicatorClassName={clsx(
+                className={clsx(
+                  "h-2",
                   isUnlimited
                     ? "bg-green-500"
                     : currentUsage / totalUsage > 0.9
