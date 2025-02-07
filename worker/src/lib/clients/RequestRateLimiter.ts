@@ -38,7 +38,7 @@ export class RateLimiter {
       },
     };
 
-    if (tier.includes("pro")) {
+    if (tier?.toLowerCase().includes("pro")) {
       tier = "pro";
     }
     tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
