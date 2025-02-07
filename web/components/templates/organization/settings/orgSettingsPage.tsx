@@ -7,6 +7,19 @@ import { clsx } from "../../../shared/clsx";
 import CreateOrgForm from "../createOrgForm";
 import { DeleteOrgModal } from "../deleteOrgModal";
 import { useIsGovernanceEnabled } from "../hooks";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { CopyIcon, TrashIcon } from "lucide-react";
+import useNotification from "@/components/shared/notification/useNotification";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -19,6 +32,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [, setOpenDemo] = useLocalStorage("openDemo", false);
   const [, setRemovedDemo] = useLocalStorage("removedDemo", false);
+  const { setNotification } = useNotification();
 
   const isGovernanceEnabled = useIsGovernanceEnabled();
 
@@ -44,51 +58,51 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
       ?.days as number;
   }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.days]);
 
+  const handleCopy = (text: string, message: string) => {
+    navigator.clipboard.writeText(text);
+    setNotification(message, "success");
+  };
+
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl">
+      <div className="py-4 flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl gap-8">
         {isGovernanceEnabled.data?.data?.data && (
-          <div className="space-y-4 p-6 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800  pb-10">
-            <div className="flex flex-col space-y-2">
-              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+          <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10">
+            <CardHeader>
+              <CardTitle className="text-blue-900 dark:text-blue-100 text-lg">
                 Organization Governance
-              </h3>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                This organization is governed by your system administrator with
-                a maximum monthly spend limit of $
+              </CardTitle>
+              <CardDescription className="text-blue-700 dark:text-blue-300">
+                Managed by system administrator with $
                 {totalUsage?.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                })}
-                .
-              </p>
-            </div>
-
-            <div className="flex justify-between text-sm text-blue-800 dark:text-blue-200">
-              <span>
-                Current Usage: $
-                {currentUsage.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-              {isUnlimited ? (
-                <span>Unlimited</span>
-              ) : (
+                })}{" "}
+                monthly spend limit
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between text-sm font-medium text-blue-800 dark:text-blue-200">
                 <span>
                   $
-                  {totalUsage.toLocaleString(undefined, {
+                  {currentUsage.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}{" "}
-                  limit
+                  })}
+                  <span className="text-xs text-blue-600/80 dark:text-blue-400/80 ml-1">
+                    used
+                  </span>
                 </span>
-              )}
-            </div>
-            <div className="w-full bg-blue-200 rounded-full h-2.5 dark:bg-blue-800">
-              <div
-                className={clsx(
-                  "h-2.5 rounded-full",
+                <span>
+                  {isUnlimited
+                    ? "Unlimited"
+                    : `$${totalUsage.toLocaleString()} limit`}
+                </span>
+              </div>
+              <Progress
+                value={(currentUsage / totalUsage) * 100}
+                className="h-2 bg-blue-200 dark:bg-blue-800"
+                indicatorClassName={clsx(
                   isUnlimited
                     ? "bg-green-500"
                     : currentUsage / totalUsage > 0.9
@@ -97,71 +111,77 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     ? "bg-yellow-500"
                     : "bg-green-500"
                 )}
-                style={{ width: `${(currentUsage / totalUsage) * 100}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400">
-              Usage resets every {days} days
-            </p>
-          </div>
+              />
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Usage resets every {days} days
+              </p>
+            </CardContent>
+          </Card>
         )}
-        <div className="text-sm pb-8 max-w-[450px] w-full flex flex-col space-y-1.5 mt-10">
-          <label
-            htmlFor="org-id"
-            className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-          >
-            Organization Id
-          </label>
-          <input
-            type="text"
-            name="org-id"
-            id="org-id"
-            value={org.id}
-            className={clsx(
-              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-sm p-2 text-sm"
-            )}
-            placeholder={"Your shiny new org name"}
-            disabled
-          />
-        </div>
 
-        <div className="max-w-[450px] w-full">
-          <CreateOrgForm
-            initialValues={{
-              id: org.id,
-              name: org.name,
-              color: org.color || "",
-              icon: org.icon || "",
-              limits: org.limits as any,
-              providerKey: "",
-            }}
-            variant={"organization"}
-          />
-          <Row className="w-full justify-end mt-10 ">
-            <button
-              className="bg-white rounded-lg px-5 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-              onClick={() => {
-                setOpenDemo(true);
-                setRemovedDemo(false);
-                window.location.reload();
-              }}
-            >
-              Launch Demo Widget (Reload) 🚀
-            </button>
-          </Row>
-        </div>
-        {isOwner && (
-          <div className="py-20 flex flex-col">
-            <div className="flex flex-row">
-              <button
-                type="button"
-                className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30"
-                onClick={() => setDeleteOpen(true)}
-              >
-                Delete Organization
-              </button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Organization Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Organization ID</Label>
+              <div className="flex gap-2">
+                <Input value={org.id} className="font-mono" readOnly />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    handleCopy(org.id, "Organization ID copied to clipboard")
+                  }
+                >
+                  <CopyIcon className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+              </div>
             </div>
-          </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Organization Name</Label>
+              <CreateOrgForm
+                initialValues={{
+                  id: org.id,
+                  name: org.name,
+                  color: org.color || "",
+                  icon: org.icon || "",
+                  limits: org.limits as any,
+                  providerKey: "",
+                }}
+                variant={"organization"}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {isOwner && (
+          <Card className="border-destructive/20">
+            <CardHeader>
+              <CardTitle className="text-destructive text-lg">
+                Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col space-y-4">
+                <div className="text-sm text-destructive/90">
+                  Deleting this organization will permanently remove all
+                  associated data.
+                </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => setDeleteOpen(true)}
+                  className="w-fit"
+                >
+                  <TrashIcon className="h-4 w-4 mr-2" />
+                  Delete Organization
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
       <DeleteOrgModal
