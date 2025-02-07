@@ -27,6 +27,7 @@ interface DiffHighlightProps {
   maxHeight?: boolean;
   textSize?: "sm" | "md" | "lg";
   className?: string;
+  marginTop?: boolean;
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
@@ -35,6 +36,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
     maxHeight = true,
     textSize = "md",
     className,
+    marginTop = true,
   } = props;
 
   const { setNotification } = useNotification();
@@ -55,8 +57,9 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 textSize === "md" && "text-xs md:text-sm",
                 textSize === "lg" && "text-md md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[300px]" : "",
-                "p-6 rounded-xl mt-3 overflow-auto relative space-y-0.5",
-                maxHeight ? "max-h-[240px]" : ""
+                "p-6 rounded-xl overflow-auto relative space-y-0.5",
+                maxHeight ? "max-h-[240px]" : "",
+                marginTop && "mt-3"
               )}
               style={style}
             >

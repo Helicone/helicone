@@ -123,7 +123,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       onValueChange={(value) => setCurrentTab(value)}
       className="w-full"
     >
-      <AuthHeader
+      {/* <AuthHeader
         isWithinIsland={true}
         title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
         actions={
@@ -139,7 +139,7 @@ const SessionsPage = (props: SessionsPageProps) => {
             ))}
           </TabsList>
         }
-      />
+      /> */}
 
       <div>
         {allNames.isLoading ? (
@@ -175,27 +175,42 @@ const SessionsPage = (props: SessionsPageProps) => {
             />
           </Row>
         ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard
-              title="Unlock Sessions"
-              description="The Free plan does not include the Sessions feature, but getting access is easy."
+              layoutType="featureShowcase"
+              title="Sessions"
+              description="Group, analyze and fix AI workflows"
               infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
-              videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
-              documentationLink="https://docs.helicone.ai/features/sessions"
-              tier={org?.currentOrg?.tier ?? "free"}
-              featureName="Sessions"
+              pricingTiers={["hobby", "pro", "team"]}
+              featureImage="/static/featureUpgrade/session-view.webp"
+              integrationImage="/integration-steps.png"
+              documentationLink="/docs/sessions"
+              headerTagline="Group, analyze and fix AI workflows"
+              proFeatures={[
+                "Unlimited session history",
+                "Advanced analytics",
+                "Collaboration tools",
+                "Priority support",
+              ]}
             />
           </div>
         ) : (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <FeatureUpgradeCard
-              title="Get Started with Sessions"
-              description="You have access to Sessions, but haven't created any yet. It's easy to get started!"
-              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers to your requests."
-              videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
-              documentationLink="https://docs.helicone.ai/features/sessions"
-              tier={org?.currentOrg?.tier ?? "free"}
-              featureName="Sessions"
+              layoutType="featureShowcase"
+              title="Sessions"
+              description="Group, analyze and fix AI workflows"
+              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
+              pricingTiers={["hobby", "pro", "team"]}
+              featureImage="/static/featureUpgrade/sessionsView.webp"
+              integrationImage="/integration-steps.png"
+              documentationLink="/docs/sessions"
+              proFeatures={[
+                "Unlimited session history",
+                "Advanced analytics",
+                "Collaboration tools",
+                "Priority support",
+              ]}
             />
           </div>
         )}
