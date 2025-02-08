@@ -224,8 +224,6 @@ const server = app.listen(
   }
 );
 
-const ws = require("ws");
-
 server.on("upgrade", async (req, socket, head) => {
   console.log("realtime");
 
@@ -270,21 +268,6 @@ server.on("upgrade", async (req, socket, head) => {
   }
   webSocketProxyForwarder(requestWrapper, socket, head);
 });
-
-// wsServer.on("connection", (ws: WebSocket, req: IncomingMessage) => {
-//   // Parse the URL to determine the route
-//   const url = new URL(req.url!, `http://${req.headers.host}`);
-//   ws.on("message", (message: Buffer) => {
-//     // Handle incoming messages
-//     console.log("Received:", message.toString());
-
-//     // Send a response back
-//     ws.send(JSON.stringify({ status: "received" }));
-//   });
-//   ws.on("close", () => {
-//     console.log("Client disconnected");
-//   });
-// });
 
 // ... existing code ...
 server.on("error", console.error);
