@@ -1,8 +1,8 @@
 {
-    "title": "How to safely switch your production apps to DeepSeek with Helicone",
-    "title1": "How to safely switch your production apps to DeepSeek with Helicone",
-    "title2": "How to safely switch your production apps to DeepSeek with Helicone",
-    "description": "Learn how to use Helicone's experiments feature to safely switch to DeepSeek. This guide covers regression testing, model comparison, and seamless transition using production data without impacting users.",
+    "title": "How to safely switch your production apps to DeepSeek",
+    "title1": "How to safely switch your production apps to DeepSeek",
+    "title2": "How to safely switch your production apps to DeepSeek",
+    "description": "In this guide, we cover how to perform regression testing, compare models, and transition to DeepSeek with real production data without impacting users.",
     "images": "/static/blog/switch-to-deepseek/cover.webp",
     "time": "8 minute read",
     "author": "Cole Gottdank",
