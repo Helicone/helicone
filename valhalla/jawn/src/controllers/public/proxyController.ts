@@ -79,35 +79,6 @@ proxyRouter.post(
 );
 
 /* -------------------------------------------------------------------------- */
-/*                             /:provider/realtime                            */
-/* -------------------------------------------------------------------------- */
-proxyRouter.get(
-  "/v1/gateway/:provider/realtime",
-  async (req: ExpressRequest, res: ExpressResponse) => {
-    const provider = req.params.provider.toUpperCase() as Provider;
-
-    const { data: requestWrapper, error: requestWrapperErr } =
-      await RequestWrapper.create(req);
-    if (requestWrapperErr || !requestWrapper) {
-      return res
-        .status(500)
-        .json({ message: "Error creating request wrapper" });
-    }
-    try {
-      await webSocketProxyForwarder(requestWrapper, provider);
-    } catch (error) {
-      console.error("WebSocket proxy error:", error);
-      if (!res.headersSent) {
-        res.status(500).json({
-          message: "WebSocket proxy error",
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-  }
-);
-
-/* -------------------------------------------------------------------------- */
 /*                                /* (Error)                                  */
 /* -------------------------------------------------------------------------- */
 proxyRouter.post(
