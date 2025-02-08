@@ -2,15 +2,23 @@ require("dotenv").config({
   path: "./.env",
 });
 
+import { Provider } from "@supabase/supabase-js";
 import bodyParser from "body-parser";
-import express, { NextFunction } from "express";
+import express, {
+  Request as ExpressRequest,
+  NextFunction,
+  Response as ExpressResponse,
+} from "express";
+import { IncomingMessage } from "http";
 import swaggerUi from "swagger-ui-express";
 import { proxyRouter } from "./controllers/public/proxyController";
+import { ENVIRONMENT } from "./lib/clients/constant";
 import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
@@ -22,7 +30,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { ENVIRONMENT } from "./lib/clients/constant";
+import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -216,6 +224,69 @@ const server = app.listen(
   }
 );
 
+const ws = require("ws");
+
+server.on("upgrade", async (req, socket, head) => {
+  console.log("realtime");
+
+  const expressRequest: ExpressRequest = {
+    url: req.url!,
+    method: req.method!,
+    headers: req.headers!,
+    body: "{}",
+    // Express Request interface implementation
+    get: function (this: { headers: any }, name: string) {
+      return this.headers[name];
+    },
+    header: function (this: { headers: any }, name: string) {
+      return this.headers[name];
+    },
+    is: function () {
+      return false;
+    },
+    protocol: "http",
+    secure: false,
+    ip: "::1",
+    ips: [],
+    subdomains: [],
+    hostname: "localhost",
+    host: "localhost",
+    fresh: false,
+    stale: true,
+    xhr: false,
+    cookies: {},
+    signedCookies: {},
+    query: {},
+    route: {},
+    originalUrl: req.url!,
+    baseUrl: "",
+    next: function () {},
+  } as unknown as ExpressRequest;
+  const { data: requestWrapper, error: requestWrapperErr } =
+    await RequestWrapper.create(expressRequest);
+
+  if (requestWrapperErr || !requestWrapper) {
+    throw new Error("Error creating request wrapper");
+  }
+  await webSocketProxyForwarder(requestWrapper, socket, head);
+});
+
+// wsServer.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+//   // Parse the URL to determine the route
+//   const url = new URL(req.url!, `http://${req.headers.host}`);
+//   ws.on("message", (message: Buffer) => {
+//     // Handle incoming messages
+//     console.log("Received:", message.toString());
+
+//     // Send a response back
+//     ws.send(JSON.stringify({ status: "received" }));
+//   });
+//   ws.on("close", () => {
+//     console.log("Client disconnected");
+//   });
+// });
+
+// ... existing code ...
 server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes

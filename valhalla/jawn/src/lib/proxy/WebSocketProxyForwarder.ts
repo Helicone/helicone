@@ -3,77 +3,33 @@ import { Headers } from "node-fetch";
 import { WebSocket, WebSocketServer } from "ws";
 import { Provider } from "../../packages/llm-mapper/types";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
-
+import internal from "stream";
+// Create a WebSocket server to handle the upgrade
+const wss = new WebSocketServer({ noServer: true });
 /* -------------------------------------------------------------------------- */
 // NOTE: "failed: Invalid frame header" is currently being experienced after first minute on local -> local connection causing client side drop
 // TODO: If this problem occurs in production, we will have to dig in further.
 /* -------------------------------------------------------------------------- */
 export async function webSocketProxyForwarder(
   requestWrapper: RequestWrapper,
-  provider: Provider
+  socket: internal.Duplex,
+  head: Buffer<ArrayBufferLike>
 ) {
-  if (provider !== "OPENAI") {
-    console.log("Provider", provider);
-    throw new Error("Only OpenAI WebSocket proxy is supported");
-  }
-
   const req = requestWrapper.getRequest();
-  const socket = req.socket;
-  const head = Buffer.alloc(0);
-
-  // Create a WebSocket server to handle the upgrade
-  const wss = new WebSocketServer({ noServer: true });
 
   return new Promise((resolve, reject) => {
     wss.handleUpgrade(req, socket, head, async (clientWs) => {
-      // 1. Extract API key from protocols
-      const protocols =
-        req.headers["sec-websocket-protocol"]
-          ?.split(",")
-          .map((p) => p.trim()) || [];
-      const apiKeyProtocol = protocols.find((p) =>
-        p.startsWith("openai-insecure-api-key.")
-      );
-      const heliconeAuthProtocol = protocols.find((p) =>
-        p.startsWith("Helicone-Auth.")
-      );
-      const apiKey = apiKeyProtocol?.split(".")[1];
-      const heliconeAuth = heliconeAuthProtocol?.split(".")[1];
-
-      if (!apiKey) {
-        clientWs.close(1002, "Missing API key");
-        reject(new Error("Missing API key"));
-        return;
-      }
-
-      if (!heliconeAuth) {
-        clientWs.close(1002, "Missing Helicone auth key");
-        reject(new Error("Missing Helicone auth key"));
-        return;
-      }
-
-      // Add Helicone auth to the request wrapper
-      requestWrapper.remapHeaders(
-        new Headers({
-          ...Object.fromEntries(requestWrapper.getHeaders()),
-        })
-      );
-
-      // Set up heliconeAuthV2 field
-      requestWrapper.heliconeHeaders.heliconeAuthV2 = {
-        token: `Bearer ${heliconeAuth}`,
-        _type: "bearer",
-      };
-
       // 2. Connect to OpenAI
+      console.log(await requestWrapper.getAuthorization());
       const targetUrl =
         "wss://api.openai.com/v1/realtime" + requestWrapper.url.search;
       const openaiWs = new WebSocket(
         targetUrl,
-        ["realtime", "openai-beta.realtime-v1"],
+
         {
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `${requestWrapper.getAuthorization()}`,
+            "OpenAI-Beta": "realtime=v1",
           },
         }
       );
@@ -144,7 +100,7 @@ export async function webSocketProxyForwarder(
             .length,
           path: requestWrapper.url.href,
           targetUrl,
-          provider,
+          provide: "OPENAI",
           modelOverride: requestWrapper.heliconeHeaders.modelOverride,
           properties: requestWrapper.heliconeHeaders.heliconeProperties,
         };

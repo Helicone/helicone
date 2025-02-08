@@ -81,9 +81,11 @@ proxyRouter.post(
 /* -------------------------------------------------------------------------- */
 /*                             /:provider/realtime                            */
 /* -------------------------------------------------------------------------- */
+
 proxyRouter.get(
   "/v1/gateway/:provider/realtime",
   async (req: ExpressRequest, res: ExpressResponse) => {
+    console.log("realtime");
     const provider = req.params.provider.toUpperCase() as Provider;
 
     const { data: requestWrapper, error: requestWrapperErr } =
