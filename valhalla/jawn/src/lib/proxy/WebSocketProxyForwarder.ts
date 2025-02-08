@@ -35,10 +35,7 @@ async function linkWebSocket({
   clientWs,
   on,
 }: WebSocketProxyForwarder) {
-<<<<<<< HEAD
-=======
   // ERORRS
->>>>>>> realtime-jawn-semi-working
   targetWs.on("error", (error) => {
     console.error("Target WebSocket error:", error);
     clientWs.close(1000, "Target connection error");
@@ -49,10 +46,7 @@ async function linkWebSocket({
     targetWs.close(1000, "Client connection error");
     on("error", "client", error);
   });
-<<<<<<< HEAD
-=======
 
->>>>>>> realtime-jawn-semi-working
   targetWs.on("close", () => {
     clientWs.close(1000, "Target connection closed");
     on("close", "target", "Target connection closed");
@@ -61,10 +55,7 @@ async function linkWebSocket({
     targetWs.close(1000, "Client connection closed");
     on("close", "client", "Client connection closed");
   });
-<<<<<<< HEAD
-=======
 
->>>>>>> realtime-jawn-semi-working
   clientWs.on("message", (data: ArrayBufferLike, isBinary: boolean) => {
     const dataCopy = Buffer.from(data);
 
@@ -72,10 +63,7 @@ async function linkWebSocket({
     const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
     on("message", "client", message.toString());
   });
-<<<<<<< HEAD
-=======
 
->>>>>>> realtime-jawn-semi-working
   targetWs.on("message", (data: ArrayBufferLike, isBinary: boolean) => {
     clientWs.send(data, { binary: isBinary });
     const dataCopy = Buffer.from(data);
