@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "prompt-thinking-models",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "open-webui-alternatives",
     },
   },
