@@ -10,23 +10,23 @@ Given its open-source nature and how cheap it is, you're not alone in considerin
 
 Using Helicone, you can test and transition to `DeepSeek V3` or `DeepSeek R1` safely without disrupting your users. This article will walk you through the process.
 
-## DeepSeek R1 vs. the Competition
+## Cost Comparison: DeepSeek R1 vs. Competition
 
-| Model                             | Input Cost (per 1M)         | Output Cost (per 1M)        | Max Context Tokens | Max Output Tokens | Performance                                            |
-| --------------------------------- | --------------------------- | --------------------------- | ------------------ | ----------------- | ------------------------------------------------------ |
-| **DeepSeek-R1**                   | $0.55                       | $2.19                       | 124,000            | 32,000            | Slightly outperforms ChatGPT-o1 Mini on benchmarks     |
-| **ChatGPT-o1 Mini**               | $3 - $5                     | $12 - $15                   | 124,000            | 65,500            | Comparable to DeepSeek-R1, but more expensive          |
-| **Grok (xAI)**                    | $5          | $15           | 128,000            | 4,096             | Slightly underperforms DeepSeek-R1 on benchmarks       |
-| **Google Gemini**                 | From $0.075      | From $0.3      | Up to 2,000,000    | Up to 8,192       | Similar to DeepSeek R1                                 |
-| **Nvidia Llama 3.1 Nemotron 70B** | $0.20 - $0.30 | $0.27 | 128,000            | 4,000             | Similar performance to DeepSeek R1, but less efficient |
+| Model                             | Input Cost (per 1M) | Output Cost (per 1M) | Max Context Tokens | Max Output Tokens | Performance                                            |
+| --------------------------------- | ------------------- | -------------------- | ------------------ | ----------------- | ------------------------------------------------------ |
+| **DeepSeek-R1**                   | $0.55               | $2.19                | 124,000            | 32,000            | Slightly outperforms ChatGPT-o1 Mini on benchmarks     |
+| **OpenAI o1-mini**                | $3-5                | $12-15               | 124,000            | 65,500            | Comparable to DeepSeek-R1, but more expensive          |
+| **Grok (xAI)**                    | $5                  | $15                  | 128,000            | 4,096             | Slightly underperforms DeepSeek-R1 on benchmarks       |
+| **Google Gemini**                 | From $0.075         | From $0.3            | Up to 2,000,000    | Up to 8,192       | Similar to DeepSeek R1                                 |
+| **Nvidia Llama 3.1 Nemotron 70B** | $0.20 - $0.30       | $0.27                | 128,000            | 4,000             | Similar performance to DeepSeek R1, but less efficient |
 
 ## Prerequisites
 
-- Have a Helicone account. Sign up for free <a href="https://us.helicone.ai/signup" target="_blank" rel="noopener">here</a>.
+- Have a Helicone account. You can <a href="https://us.helicone.ai/signup" target="_blank" rel="noopener">sign up for free</a>.
 - Have at least 10 logs in your Helicone project.
-- Set up your prompts in Helicone. Learn more <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">here</a>.
+- Set up your prompts in Helicone. Follow the <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">docs here</a>.
 
-## Steps
+## How to Safely Switch to DeepSeek R1
 
 We'll be using a simple Node.js project to manage `GPT-4o` prompts in Helicone (simulating a production setup) and compare them with `DeepSeek R1` and `V3`'s output in our Helicone dashboard.
 
@@ -35,11 +35,11 @@ We'll be using a simple Node.js project to manage `GPT-4o` prompts in Helicone (
   description="If you already have a live project with Helicone set up, you can skip to the third step and go directly to comparing model outputs."
 />
 
-### 1. Set up and log your first request with GPT-4o in Helicone
+### Step 1: Log your first request with GPT-4o in Helicone
 
 To begin logging prompts, We’ll set up a simple Node.js project to run **RapMaster**, a chatbot that provides cool rap lyrics.
 
-Let's get into it!
+This step works for any model of your choice. Let's get into it!
 
 #### Install dependencies
 
@@ -84,19 +84,10 @@ async function runRapMaster() {
           role: "assistant",
           content: "Great! What do you want me to rap about?",
         },
-        {
-          role: "user",
-          // Add hprompt to any string, and nest any variable in additional brackets `{}`
-          content: hprompt`Rap about ${{ thing }}`,
-        },
+        { role: "user", content: hprompt`Rap about ${{ thing }}` },
       ],
     },
-    // Add a Prompt Id Header
-    {
-      headers: {
-        "Helicone-Prompt-Id": "RapMaster",
-      },
-    }
+    { headers: { "Helicone-Prompt-Id": "RapMaster" } } // Add a Prompt Id Header
   );
   console.log(chatCompletion);
 }
@@ -104,53 +95,96 @@ async function runRapMaster() {
 runRapMaster();
 ```
 
-Run the script with:
+**Lastly, run the script with:**
 
 ```sh
 node index.js
 ```
 
-### 2. View Your Prompts in Helicone
+### Step 2: View your prompts in Helicone
 
-Go to your Helicone dashboard and navigate to the `/prompts` page.
+Go to Helicone and navigate to the <a href="https://us.helicone.ai/prompts" target="_blank" rel="noopener">Prompts</a> page.
 
-There you can easily manage and finetune your prompts. You should see your `GPT-4o` prompts logged there.
+Here, you can easily manage and test your prompts in a Playground. You should see your `GPT-4o` prompts logged there.
 
-![Visualize prompt in Helicone UI](/static/blog/experiments/prompt-page.webp)
+Click on the prompt to see it in the editor.
 
-### Step 3. Start a New Experiment with DeepSeek
+![Visualize prompt in Helicone](/static/blog/switch-to-deepseek/helicone-prompt-ui.webp)
 
-Use Helicone’s `Experiments` feature to test `DeepSeek R1` or `V3`'s output for the same prompts.
+### Step 3: Test your prompt in the editor
 
-- Select the dataset you want to test.
-- Choose a DeepSeek model.
-- Compare the responses side by side.
+Modify your prompt here to make sure it's working as expected.
 
-![Create a new experiment](/static/blog/experiments/new-experiment.webp)
+Notice how the version is automatically updated to `v2`when you click run.
 
-### Step 4. Analyze and Compare Outputs
+![Test prompt in Helicone playground](/static/blog/switch-to-deepseek/helicone-prompt-editor.webp)
 
-You can now view and compare responses side by side. Helicone even lets you score the responses based on your criteria.
+Here you can switch between models and test your prompt live.
 
-![Helicone experiment output](/static/blog/experiments/output.webp)
+Once you're happy with the prompt, you can save it and use it in your experiments.
+
+![Test your prompt on the DeepSeek model](/static/blog/switch-to-deepseek/choose-model.webp)
+
+### Step 4: Start a new experiment using DeepSeek models
+
+In Experiments, fork from your exisitng prompt.
+
+![Fork the prompt in Experiments](/static/blog/switch-to-deepseek/fork-prompt-ui.webp)
+
+Select `DeepSeek R1` or your preferred model.
+
+![Change the model to DeepSeek R1 in Experiments](/static/blog/switch-to-deepseek/change-model.webp)
+
+Select the inputs you want to test. This will be used with the prompt to generate responses.
+
+![Add input to the experiment](/static/blog/switch-to-deepseek/add-input-ui.webp)
+
+Here are the options:
+
+- `Manual input` - enter your input data maually. In this example, you can input any value for `thing`.
+- `Select an input set` - Select from your real-world request data.
+- `Random prod` - Select randomly from your request data.
+- `Select a dataset` - Select a pre-defined input set.
+
+### Step 4: Analyze and compare outputs
+
+Lastly, run the experiments. You can now view and compare responses side by side.
+
+In this example, we enter `thing = "AI"` and `thing = "relationships"` as inputs. Here's an example of what your experiment outputs might look like:
+
+![Helicone experiment output](/static/blog/switch-to-deepseek/experiments-ui.webp)
+
+You can add as many inputs as you need. Then you can decide whether the DeepSeek model is performing better than your current model on your inputs.
+
+(optional) Helicone also lets you score the responses based on your criteria using <a href="https://us.helicone.ai/evaluators" target="_blank" rel="noopener">Evaluators</a> like LLM-as-a-judge or custom evals.
 
 If DeepSeek meets your requirements, you’re ready to switch!
 
+![Helicone experiment output](/static/blog/switch-to-deepseek/run-evals.webp)
+
 <CallToAction
   title="Compare your model performance with Helicone"
-  description="Helicone supports DeepSeek and most other models. Get started today"
+  description="Helicone supports DeepSeek and all major providers. Get integrated in minutes."
   primaryButtonText="Get Started for Free"
-  primaryButtonLink="https://helicone.ai/signup"
-  secondaryButtonText="Contact Us"
-  secondaryButtonLink="https://helicone.ai/contact"
+  primaryButtonLink="https://helicone.ai/"
+  secondaryButtonText="See Docs"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/deepseek"
 />
 
-With this guide, you should now know how to use Helicone to:
+## Conclusion
+
+Now you're ready to switch to DeepSeek R1 or V3 safely with Helicone. You have also learned how to:
 
 - Benchmark and compare new models before production deployment.
 - Test different prompt strategies and optimize results.
 - Ensure a seamless transition between models with minimal downtime.
 
-Try Helicone's experiments feature today and see if DeepSeek's offerings are the right fit for you.
+Try Helicone's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Prompt Experiments feature</a> and see if DeepSeek models are right for you. Let us know what you think!
+
+### You might also like:
+
+- **<a href="https://docs.helicone.ai/getting-started/integration-method/deepseek" target="_blank" rel="noopener">Integrate LLM observability with DeepSeek</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-thinking-models" target="_blank" rel="noopener">How to Prompt Thinking Models like DeepSeek R1</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-evaluation-frameworks" target="_blank" rel="noopener">Top Prompt Evaluation Frameworks in 2025</a>**
 
 <Questions />
