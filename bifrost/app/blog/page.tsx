@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "switch-to-deepseek",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "open-webui-alternatives",
     },
   },
