@@ -75,15 +75,8 @@ async function runRapMaster() {
       model: "gpt-4o",
       max_tokens: 700,
       messages: [
-        {
-          role: "user",
-          content:
-            "You are a veteran rapper that can write entire rap verses on anything.",
-        },
-        {
-          role: "assistant",
-          content: "Great! What do you want me to rap about?",
-        },
+        { role: "user", content: "You are a veteran rapper that can write entire rap verses on anything." },
+        { role: "assistant", content: "Great! What do you want me to rap about?" },
         { role: "user", content: hprompt`Rap about ${{ thing }}` },
       ],
     },
