@@ -115,6 +115,7 @@ export const MainPanel = ({
           description="The Free plan does not include the Evaluators feature, but getting access is easy."
           infoBoxText="Evaluate your prompts and models to drive improvements."
           documentationLink="https://docs.helicone.ai/features/sessions"
+          featureName="Evaluators"
         />
       </div>
     );

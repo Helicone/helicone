@@ -1174,6 +1174,8 @@ Json: JsonObject;
         prompts?: boolean;
         alerts?: boolean;
       };
+      /** Format: double */
+      seats?: number;
     };
     LLMUsage: {
       model: string;

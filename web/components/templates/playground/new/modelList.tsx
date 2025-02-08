@@ -49,6 +49,16 @@ export const MODEL_LIST: {
     provider: "openai",
   },
   {
+    value: "o1-mini",
+    label: "o1-mini",
+    provider: "openai",
+  },
+  {
+    value: "o3-mini",
+    label: "o3-mini",
+    provider: "openai",
+  },
+  {
     value: "claude-3-5-sonnet-20241022",
     label: "claude-3-5-sonnet-20241022",
     provider: "anthropic",

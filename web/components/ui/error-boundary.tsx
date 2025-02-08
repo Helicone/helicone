@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { XCircleIcon } from "@heroicons/react/24/solid";
+import posthog from "posthog-js";
 
 interface Props {
   children?: ReactNode;
@@ -32,6 +33,13 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo, hasError: true, error });
     console.error("Uncaught error:", error, errorInfo);
+
+    // Add PostHog event
+    posthog.capture("error_boundary_triggered", {
+      error: error.toString(),
+      errorInfo: errorInfo.componentStack,
+      errorType: "class_component",
+    });
   }
 
   public render() {
@@ -85,6 +93,16 @@ export function ErrorBoundaryWithHandler({
   children: ReactNode;
 }) {
   const [error, setError] = React.useState<Error | null>(null);
+
+  React.useEffect(() => {
+    if (error) {
+      // Add PostHog event
+      posthog.capture("error_boundary_triggered", {
+        error: error.toString(),
+        errorType: "functional_component",
+      });
+    }
+  }, [error]);
 
   if (error) {
     return (

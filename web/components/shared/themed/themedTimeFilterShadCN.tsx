@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useProFeature } from "@/hooks/useProFeature";
-import { ProFeatureDialog } from "../ProBlockerComponents/ProFeatureDialog";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -340,9 +340,9 @@ export function ThemedTimeFilterShadCN({
           </div>
         </PopoverContent>
       </Popover>
-      <ProFeatureDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+      <UpgradeProDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         featureName="time_filter"
       />
     </div>
