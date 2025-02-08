@@ -1,13 +1,7 @@
 import { config } from "dotenv";
-config({ path: ".env" });
-import { OpenAI } from "openai";
-// import { hprompt, HeliconeAPIClient } from "@helicone/helicone";
-import { v4 as uuid } from "uuid";
-import { hpf } from "@helicone/prompts";
-import { examples } from "./examples";
-
-import WebSocket from "ws";
 import * as readline from "readline";
+import WebSocket from "ws";
+config({ path: ".env" });
 
 const url =
   "http://127.0.0.1:8585/v1/gateway/oai/realtime/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17";
