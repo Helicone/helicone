@@ -295,6 +295,42 @@ export class PromptController extends Controller {
     return result;
   }
 
+  @Post("version/{promptVersionId}/subversion-from-ui")
+  public async createSubversionFromUi(
+    @Body()
+    requestBody: PromptCreateSubversionParams,
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() promptVersionId: string
+  ): Promise<Result<PromptVersionResult, string>> {
+    const promptManager = new PromptManager(request.authParams);
+
+    const result = await promptManager.createNewPromptVersion(
+      promptVersionId,
+      requestBody
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      console.error(result.error);
+      return result;
+    }
+
+    const inputKeysResult = await promptManager.createPromptInputKeys(
+      result.data.id,
+      requestBody.newHeliconeTemplate
+    );
+
+    if (inputKeysResult.error) {
+      this.setStatus(500);
+      console.error(inputKeysResult.error);
+      return inputKeysResult;
+    }
+
+    console.log({ inputKeysResult });
+
+    return result;
+  }
+
   @Post("version/{promptVersionId}/subversion")
   public async createSubversion(
     @Body()

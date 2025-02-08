@@ -42,6 +42,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/edit-template": {
     post: operations["EditPromptVersionTemplate"];
   };
+  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+    post: operations["CreateSubversionFromUi"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -2618,6 +2621,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateSubversionFromUi: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
         };
       };
     };
