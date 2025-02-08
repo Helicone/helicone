@@ -268,7 +268,7 @@ server.on("upgrade", async (req, socket, head) => {
   if (requestWrapperErr || !requestWrapper) {
     throw new Error("Error creating request wrapper");
   }
-  await webSocketProxyForwarder(requestWrapper, socket, head);
+  webSocketProxyForwarder(requestWrapper, socket, head);
 });
 
 // wsServer.on("connection", (ws: WebSocket, req: IncomingMessage) => {
