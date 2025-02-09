@@ -201,12 +201,12 @@ export const UpgradeProDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl gap-6">
+      <DialogContent className="max-w-xl gap-4 my-2 max-h-[95vh] overflow-y-auto sm:my-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
+          <DialogTitle className="text-xl font-bold">
             Upgrade to Pro
           </DialogTitle>
-          <DialogDescription className="text-slate-600">
+          <DialogDescription className="text-slate-600 text-sm">
             {descriptionText}
           </DialogDescription>
         </DialogHeader>
@@ -216,7 +216,7 @@ export const UpgradeProDialog = ({
           value={activeTab}
           onValueChange={setActiveTab}
         >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="addons">Add-ons</TabsTrigger>
             <TabsTrigger value="team" className="flex items-center gap-2">
               Team Bundle
@@ -232,14 +232,14 @@ export const UpgradeProDialog = ({
           <TabsContent value="addons">
             <div className="space-y-4">
               {/* Pro Plan Card */}
-              <div className="p-4 rounded-lg border border-primary border-black bg-slate-100">
-                <div className="flex items-center justify-between mb-2">
+              <div className="p-3 rounded-lg border border-primary border-black bg-slate-100">
+                <div className="flex items-center justify-between mb-1">
                   <h3 className="font-semibold">Pro Plan</h3>
                   <span className="font-semibold">
                     ${proAddon.price * seats}/mo
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground mb-1">
                   {proAddon.description}
                 </p>
                 <div className="flex items-center justify-between">
@@ -268,25 +268,30 @@ export const UpgradeProDialog = ({
               {otherAddons.map((addon) => (
                 <div
                   key={addon.key}
-                  className={`p-4 rounded-lg border transition-colors cursor-pointer ${
+                  className={`p-3 rounded-lg border transition-colors cursor-pointer ${
                     selectedAddons[addon.key as keyof Addons]
                       ? "border-primary border-black bg-slate-100"
                       : "border-border hover:border-primary/50"
                   }`}
                   onClick={() => handleAddonToggle(addon.key as keyof Addons)}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <AddOnGraphic
                       type={addon.key as "prompts" | "evals" | "experiments"}
+                      className="scale-90"
                     />
                     <div className="flex-grow">
-                      <h3 className="font-semibold capitalize">{addon.name}</h3>
+                      <h3 className="font-semibold capitalize text-md">
+                        {addon.name}
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         {addon.description}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold">${addon.price}/mo</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-md">
+                        ${addon.price}/mo
+                      </span>
                       {selectedAddons[addon.key as keyof Addons] && (
                         <Check className="h-4 w-4 text-primary" />
                       )}
@@ -296,7 +301,7 @@ export const UpgradeProDialog = ({
               ))}
 
               {/* Total Price */}
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+              <div className="mt-4 p-2 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Total</span>
                   <span className="font-semibold">${totalPrice}/mo</span>
