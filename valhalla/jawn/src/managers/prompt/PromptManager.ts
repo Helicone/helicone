@@ -21,7 +21,6 @@ import { Result, err, ok, resultMap } from "../../lib/shared/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 
-
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
     requestId: string
@@ -186,7 +185,7 @@ export class PromptManager extends BaseManager {
       ]
     );
 
-    return resultMap(result, data => data[0]);
+    return resultMap(result, (data) => data[0]);
   }
 
   async editPromptVersionTemplate(
@@ -220,7 +219,7 @@ export class PromptManager extends BaseManager {
           ? params.heliconeTemplate
           : JSON.stringify(params.heliconeTemplate)
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
-      ).map(match => match[1]);
+      ).map((match) => match[1]);
 
       const existingExperimentInputKeys = await supabaseServer.client
         .from("experiment_v3")
@@ -249,7 +248,7 @@ export class PromptManager extends BaseManager {
         ),
       ]);
 
-      if (res.some(r => r.error)) {
+      if (res.some((r) => r.error)) {
         return err("Failed to update experiment input keys");
       }
 
@@ -288,7 +287,7 @@ export class PromptManager extends BaseManager {
       [params.label, promptVersionId, this.authParams.organizationId]
     );
 
-    return resultMap(result, data => data[0]);
+    return resultMap(result, (data) => data[0]);
   }
 
   async promotePromptVersionToProduction(
@@ -536,7 +535,7 @@ export class PromptManager extends BaseManager {
       autoInputs: lastVersion.auto_prompt_inputs,
       template: lastVersion.helicone_template,
     });
-    
+
     return ok({
       id: lastVersion.id,
       minor_version: lastVersion.minor_version,
@@ -637,7 +636,7 @@ export class PromptManager extends BaseManager {
       [this.authParams.organizationId, promptId]
     );
 
-    return resultMap(result, data => data[0]);
+    return resultMap(result, (data) => data[0]);
   }
 
   async getPromptVersion(params: {
@@ -820,7 +819,7 @@ export class PromptManager extends BaseManager {
         const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
         const matches = str.match(regex);
         return matches
-          ? matches.map(match =>
+          ? matches.map((match) =>
               match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
             )
           : [];
@@ -834,7 +833,7 @@ export class PromptManager extends BaseManager {
             if (typeof value === "string") {
               keys.push(...findKeys(value));
             } else if (Array.isArray(value)) {
-              value.forEach(item => {
+              value.forEach((item) => {
                 if (typeof item === "string") {
                   keys.push(...findKeys(item));
                 } else if (typeof item === "object") {
@@ -856,6 +855,27 @@ export class PromptManager extends BaseManager {
       // Log the error if needed
       console.error("Error in getHeliconeTemplateKeys:", error);
       return [];
+    }
+  }
+
+  async createPromptInputKeys(
+    promptVersionId: string,
+    heliconeTemplate: string
+  ): Promise<Result<null, string>> {
+    const newPromptVersionInputKeys =
+      this.getHeliconeTemplateKeys(heliconeTemplate);
+
+    try {
+      await dbExecute(
+        `INSERT INTO prompt_input_keys (key, prompt_version)
+       SELECT unnest($1::text[]), $2
+       ON CONFLICT (key, prompt_version) DO NOTHING`,
+        [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+      );
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to create prompt input keys: ${error}`);
     }
   }
 }
