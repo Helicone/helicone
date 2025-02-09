@@ -40,6 +40,7 @@ const AlertsPage = (props: AlertsPageProps) => {
     return (
       orgContext?.currentOrg?.tier === "pro-20240913" ||
       orgContext?.currentOrg?.tier === "pro-20250202" ||
+      orgContext?.currentOrg?.tier === "team-20250130" ||
       orgContext?.currentOrg?.tier === "enterprise" ||
       orgContext?.currentOrg?.tier === "growth" ||
       orgContext?.currentOrg?.tier === "pro"
