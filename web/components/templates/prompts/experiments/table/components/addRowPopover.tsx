@@ -11,6 +11,7 @@ interface AddRowPopoverProps {
   setShowAddManualRow: () => void;
   setShowExperimentInputSelector: (open: boolean) => void;
   setShowRandomInputSelector: (open: boolean) => void;
+  setShowExperimentDatasetSelector: (open: boolean) => void;
 }
 
 export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
@@ -18,6 +19,7 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
   setShowAddManualRow,
   setShowExperimentInputSelector,
   setShowRandomInputSelector,
+  setShowExperimentDatasetSelector,
 }) => {
   return (
     <div>
@@ -55,6 +57,10 @@ export const AddRowPopover: React.FC<AddRowPopoverProps> = ({
         Random prod
       </Button>
       <Button
+        onClick={() => {
+          setPopoverOpen(false);
+          setShowExperimentDatasetSelector(true);
+        }}
         className="w-full h-8 flex items-center justify-start"
         variant="ghost"
       >

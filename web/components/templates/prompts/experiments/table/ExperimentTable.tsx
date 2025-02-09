@@ -1,28 +1,9 @@
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { generateOpenAITemplate } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -31,9 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { cn } from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
+import { Switch } from "@/components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
@@ -42,7 +29,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 import AddColumnDialog from "./AddColumnDialog";
@@ -61,6 +48,15 @@ import EditInputsPanel from "./EditInputsPanel";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ExperimentDatasetSelector from "../experimentDatasetSelector";
 
 type TableDataType = {
   index: number;
@@ -85,6 +81,7 @@ export function ExperimentTable({
     promptVersionTemplateData,
     promptVersionsData,
     addExperimentTableRowInsertBatch,
+    addExperimentTableRowInsertFromDatasetBatch,
     inputKeysData,
     wrapText,
   } = useExperimentTable(experimentTableId);
@@ -93,6 +90,8 @@ export function ExperimentTable({
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
     useState(false);
   const [showRandomInputSelector, setShowRandomInputSelector] = useState(false);
+  const [showExperimentDatasetSelector, setShowExperimentDatasetSelector] =
+    useState(false);
   const [rightPanel, setRightPanel] = useState<
     "edit_inputs" | "add_manual" | null
   >(null);
@@ -421,6 +420,15 @@ export function ExperimentTable({
     [addExperimentTableRowInsertBatch]
   );
 
+  const handleAddRowInsertBatchFromDataset = useCallback(
+    (datasetId: string) => {
+      addExperimentTableRowInsertFromDatasetBatch.mutate({
+        datasetId,
+      });
+    },
+    [addExperimentTableRowInsertFromDatasetBatch]
+  );
+
   const queryClient = useQueryClient();
 
   const handleShowScoresChange = useCallback(
@@ -441,105 +449,6 @@ export function ExperimentTable({
     [queryClient, experimentTableId]
   );
 
-  const jawn = useJawnClient();
-  const {
-    isOnboardingVisible,
-    currentStep,
-    setOnClickElement,
-    onClickElement,
-    setCurrentStep,
-  } = useOnboardingContext();
-
-  // Fetch input records using useQuery
-  const {
-    data: inputRecordsData,
-    isLoading,
-    isError,
-  } = useQuery(
-    ["inputRecords", experimentTableQuery?.original_prompt_version],
-    async () => {
-      const res = await jawn.POST(
-        "/v1/prompt/version/{promptVersionId}/inputs/query",
-        {
-          params: {
-            path: {
-              promptVersionId:
-                experimentTableQuery?.original_prompt_version ?? "",
-            },
-          },
-          body: {
-            limit: 1000, // Adjust limit as needed
-          },
-        }
-      );
-      return res.data?.data ?? [];
-    },
-    {
-      enabled:
-        isOnboardingVisible &&
-        experimentTableQuery?.original_prompt_version !== undefined, // Fetch only when the drawer is open
-    }
-  );
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
-    ) {
-      setOnClickElement(() => () => {
-        setShowScores(!showScores);
-        setCurrentStep(currentStep + 1);
-      });
-
-      const keydownHandler = (e: KeyboardEvent) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-          e.preventDefault();
-          setShowScores(!showScores);
-          setCurrentStep(currentStep + 1);
-        }
-      };
-      window.addEventListener("keydown", keydownHandler);
-
-      const openAIFunction = generateOpenAITemplate({
-        name: "Humor",
-        description: "Check if the response is funny",
-        expectedValueType: "choice",
-        choiceScores: [
-          {
-            score: 1,
-            description: "Not Funny",
-          },
-          {
-            score: 2,
-            description: "Slightly Funny",
-          },
-          {
-            score: 3,
-            description: "Funny",
-          },
-          {
-            score: 4,
-            description: "Very Funny",
-          },
-          {
-            score: 5,
-            description: "Hilarious",
-          },
-        ],
-        model: "gpt-4o-mini",
-      });
-
-      jawn.POST("/v1/evaluator", {
-        body: {
-          llm_template: openAIFunction,
-          scoring_type: "LLM-CHOICE",
-          name: "Humor",
-        },
-      });
-      return () => window.removeEventListener("keydown", keydownHandler);
-    }
-  }, [isOnboardingVisible, currentStep, showScores]);
-
   return (
     <>
       <div className="flex justify-between items-center py-4 pr-4">
@@ -558,12 +467,7 @@ export function ExperimentTable({
           />
         </IslandContainer>
         <div className="flex items-center gap-5">
-          <div
-            className="flex gap-2 items-center relative"
-            data-onboarding-step={
-              ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber
-            }
-          >
+          <div className="flex gap-2 items-center relative">
             <Switch
               size="sm"
               checked={showScores}
@@ -575,19 +479,6 @@ export function ExperimentTable({
             <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
               Show scores
             </p>
-            {isOnboardingVisible &&
-              currentStep ===
-                ONBOARDING_STEPS.EXPERIMENTS_CLICK_SHOW_SCORES.stepNumber && (
-                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-                  </span>
-                </div>
-                // <div className="absolute right-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 animate-ping rounded-full">
-                //   <div className="w-full h-full bg-red-500 rounded-full"></div>
-                // </div>
-              )}
           </div>
           <div className="flex gap-2 items-center">
             <Switch
@@ -746,6 +637,9 @@ export function ExperimentTable({
                         setShowExperimentInputSelector
                       }
                       setShowRandomInputSelector={setShowRandomInputSelector}
+                      setShowExperimentDatasetSelector={
+                        setShowExperimentDatasetSelector
+                      }
                     />
                   </PopoverContent>
                 </Popover>
@@ -768,6 +662,17 @@ export function ExperimentTable({
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
                 handleAddRows={handleAddRowInsertBatch}
+                onSuccess={async (success) => {}}
+              />
+
+              <ExperimentDatasetSelector
+                open={showExperimentDatasetSelector}
+                setOpen={setShowExperimentDatasetSelector}
+                experimentId={experimentTableId}
+                promptVersionId={
+                  experimentTableQuery?.original_prompt_version ?? ""
+                }
+                handleAddRows={handleAddRowInsertBatchFromDataset}
                 onSuccess={async (success) => {}}
               />
             </div>
