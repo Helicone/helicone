@@ -1,30 +1,9 @@
-import { useExperimentTable } from "./hooks/useExperimentTable";
-import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import AddColumnHeader from "./AddColumnHeader";
-import {
-  ExperimentTableHeader,
-  IndexColumnCell,
-  InputCell,
-  InputsHeaderComponent,
-  PromptColumnHeader,
-} from "./components/tableElementsRenderer";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ListIcon, PlusIcon, PlayIcon } from "lucide-react";
-import { AddRowPopover } from "./components/addRowPopover";
-import ExperimentInputSelector from "../experimentInputSelector";
-import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
-import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
 import {
   Table,
   TableBody,
@@ -33,19 +12,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import clsx from "clsx";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import AddColumnDialog from "./AddColumnDialog";
-import EditInputsPanel from "./EditInputsPanel";
-import AddManualRowPanel from "./AddManualRowPanel";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
 import { Switch } from "@/components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import clsx from "clsx";
+import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import ExperimentInputSelector from "../experimentInputSelector";
+import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
+import AddColumnDialog from "./AddColumnDialog";
+import AddColumnHeader from "./AddColumnHeader";
+import AddManualRowPanel from "./AddManualRowPanel";
+import { HypothesisCellRenderer } from "./cells/HypothesisCellRenderer";
+import { AddRowPopover } from "./components/addRowPopover";
+import {
+  ExperimentTableHeader,
+  IndexColumnCell,
+  InputCell,
+  InputsHeaderComponent,
+  PromptColumnHeader,
+} from "./components/tableElementsRenderer";
+import EditInputsPanel from "./EditInputsPanel";
+import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
 import { useOrg } from "@/components/layout/org/organizationContext";

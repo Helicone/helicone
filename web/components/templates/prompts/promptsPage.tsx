@@ -1,4 +1,3 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import {
@@ -9,7 +8,6 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
@@ -21,20 +19,11 @@ import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { Button } from "../../ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
-
-// **Import PromptPlayground and PromptObject**
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -45,7 +34,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ActionButton from "@/components/shared/universal/ActionButton";
+import PromptsPreview from "../featurePreview/promptsPreview";
+import { useHasAccess } from "@/hooks/useHasAccess";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -122,19 +112,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
-  const org = useOrg();
-
-  const hasAccess = useMemo(() => {
-    return (
-      org?.currentOrg?.tier === "growth" ||
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro" ||
-      (org?.currentOrg?.tier === "pro-20240913" &&
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
-    );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata]);
-
+  const hasAccess = useHasAccess("prompts");
   const hasLimitedAccess = useMemo(() => {
     return !hasAccess && (prompts?.length ?? 0) > 0;
   }, [hasAccess, prompts?.length]);
@@ -144,38 +122,39 @@ const PromptsPage = (props: PromptsPageProps) => {
       <AuthHeader
         className="min-w-full"
         title={
-          <div className="flex items-center gap-2">
-            Prompts
-            {hasLimitedAccess && (
-              <InfoBox className="ml-4">
-                <p className="text-sm font-medium flex gap-2">
-                  <b>Need to create new prompts?</b>
-                  <ProFeatureWrapper featureName="Prompts">
-                    <button className="underline">
-                      Get unlimited prompts & more.
-                    </button>
-                  </ProFeatureWrapper>
-                </p>
-              </InfoBox>
-            )}
-          </div>
+          hasAccess || hasLimitedAccess ? (
+            <div className="flex items-center gap-2">
+              Prompts
+              {hasLimitedAccess && (
+                <InfoBox className="ml-4">
+                  <p className="text-sm font-medium flex gap-2">
+                    <b>Need to create new prompts?</b>
+                    <ProFeatureWrapper featureName="Prompts">
+                      <button className="underline">
+                        Get unlimited prompts & more.
+                      </button>
+                    </ProFeatureWrapper>
+                  </p>
+                </InfoBox>
+              )}
+            </div>
+          ) : null
         }
         actions={
           hasAccess ? (
             <>
-              <ActionButton
-                className="bg-heliblue hover:bg-heliblue/90 text-white"
-                label={isCreatingPrompt ? "Creating..." : "New Prompt"}
-                icon={
-                  isCreatingPrompt ? (
-                    <PiSpinnerGapBold className="animate-spin" />
-                  ) : (
-                    <PiPlusBold />
-                  )
-                }
+              <Button
+                variant="action"
                 onClick={handleCreatePrompt}
                 disabled={isCreatingPrompt}
-              />
+              >
+                {isCreatingPrompt ? (
+                  <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <PiPlusBold className="h-4 w-4 mr-2" />
+                )}
+                {isCreatingPrompt ? "Creating..." : "New Prompt"}
+              </Button>
 
               <Dialog>
                 <DialogTrigger asChild>
@@ -183,13 +162,15 @@ const PromptsPage = (props: PromptsPageProps) => {
                     Import from Code
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-full max-w-3xl bg-white">
+                <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
                   <DialogHeader>
                     <DialogTitle>Import from Code</DialogTitle>
                   </DialogHeader>
 
                   {/* TODO: Allow for Python tab as well */}
                   <DiffHighlight
+                    className="h-full"
+                    maxHeight={false}
                     code={`
 // 1. Add this line
 import { hprompt } from "@helicone/helicone";
@@ -212,7 +193,7 @@ const chatCompletion = await openai.chat.completions.create(
     },
   }
 );`}
-                    language="typescript"
+                    language="tsx"
                     newLines={[]}
                     oldLines={[]}
                     minHeight={false}
@@ -220,13 +201,7 @@ const chatCompletion = await openai.chat.completions.create(
                 </DialogContent>
               </Dialog>
             </>
-          ) : (
-            <ProFeatureWrapper featureName="Prompts" enabled={false}>
-              <Button variant="action" size="default">
-                <PiPlusBold /> New Prompt
-              </Button>
-            </ProFeatureWrapper>
-          )
+          ) : null
         }
       />
 
@@ -275,7 +250,7 @@ const chatCompletion = await openai.chat.completions.create(
               </div>
             )}
 
-            {filteredPrompts && (hasLimitedAccess || hasAccess) ? (
+            {filteredPrompts && (hasAccess || hasLimitedAccess) ? (
               searchParams.get("view") === "card" ? (
                 <ul
                   className={cn(
@@ -393,68 +368,7 @@ const chatCompletion = await openai.chat.completions.create(
               )
             ) : (
               <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-                <Card className="max-w-4xl">
-                  <CardHeader>
-                    <CardTitle>Get Started with Prompts</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      You haven&apos;t created any prompts yet. Let&apos;s get
-                      started!
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <InfoBox>
-                      <p className="text-sm font-medium">
-                        Version prompts, create prompt templates, and run
-                        experiments to improve prompt outputs.
-                      </p>
-                    </InfoBox>
-                    <div className="bg-muted p-4 rounded-lg">
-                      <div className="flex space-x-2 mb-2">
-                        <Button variant="outline" size="sm">
-                          Code Example
-                        </Button>
-                      </div>
-                      <DiffHighlight
-                        code={`
-  // 1. Add this line
-  import { hprompt } from "@helicone/helicone";
-  
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [
-        {
-          role: "user",
-          // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-          content: hprompt\`Write a story about \${{ scene }}\`,
-        },
-      ],
-      model: "gpt-3.5-turbo",
-    },
-    {
-      // 4. Add Prompt Id Header
-      headers: {
-        "Helicone-Prompt-Id": "prompt_story",
-      },
-    }
-  );
-                                `}
-                        language="typescript"
-                        newLines={[]}
-                        oldLines={[]}
-                        minHeight={false}
-                      />
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col items-start">
-                    <div className="space-x-2 mt-5">
-                      <Button variant="outline" asChild>
-                        <Link href="https://docs.helicone.ai/features/prompts">
-                          View documentation
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
+                <PromptsPreview />
               </div>
             )}
           </>

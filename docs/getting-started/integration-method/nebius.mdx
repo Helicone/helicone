@@ -1,0 +1,58 @@
+---
+title: "Nebius AI Integration"
+sidebarTitle: "Nebius AI"
+description: "Connect Helicone with Nebius AI, a platform that provides powerful image generation models including Flux and Stability AI's SDXL."
+"twitter:title": "Nebius AI Integration - Helicone OSS LLM Observability"
+---
+
+You can follow their documentation here: [https://api.studio.nebius.ai/docs](https://api.studio.nebius.ai/docs)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Nebius AI account">
+    Log into [Nebius AI](https://studio.nebius.ai) or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and NEBIUS_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+NEBIUS_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following Nebius AI URL with the Helicone Gateway URL:
+
+`https://api.studio.nebius.ai` -> `https://nebius.helicone.ai`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
+```
+
+</Step>
+</Steps>
+
+Now you can access all the models on Nebius AI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <NEBIUS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "stable-diffusion-xl",
+    "prompt": "A beautiful sunset over a mountain landscape"
+}' \
+  --url https://nebius.helicone.ai/v1/images/generations
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+And for more information on how to use Nebius AI, see [Nebius AI Docs](https://api.studio.nebius.ai/docs).

@@ -124,8 +124,11 @@ export class OrganizationController extends Controller {
 
     if (org.data.tier === "enterprise") {
       // Enterprise tier: Proceed to add member without additional checks
-    } else if (org.data.tier === "pro-20240913") {
-      // Pro tier: Update Stripe user count before adding member
+    } else if (
+      org.data.tier === "pro-20240913" ||
+      org.data.tier === "pro-20250202"
+    ) {
+      // Pro tier: Check seat availability before adding member
       const memberCount = await organizationManager.getMemberCount(true);
       if (
         memberCount.error ||
@@ -135,8 +138,24 @@ export class OrganizationController extends Controller {
         return err(memberCount.error ?? "Error getting member count");
       }
 
+      // Check purchased seats
       const stripeManager = new StripeManager(request.authParams);
+      const purchasedSeats = await stripeManager.getPurchasedSeatCount();
+      if (purchasedSeats.error || purchasedSeats.data == null) {
+        return err(purchasedSeats.error ?? "Error getting purchased seats");
+      }
 
+      // Automatically purchase more seats if needed
+      if (memberCount.data + 1 > purchasedSeats.data) {
+        const updateResult = await stripeManager.updateProUserCount(
+          memberCount.data + 1
+        );
+        if (updateResult.error) {
+          return err("Failed to purchase additional seats");
+        }
+      }
+
+      // Update Stripe user count
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data + 1
       );

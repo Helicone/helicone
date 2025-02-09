@@ -85,7 +85,7 @@ const rows: FeatureRowProps[] = [
   {
     title: "Playground",
     description:
-      "Tweak prompts and model parameters in Helicone and see how different models responds to the changes.",
+      "Test and compare model responses with different prompts and parameters",
     free: <XMarkIcon className="w-6 h-6 text-red-500" />,
     pro: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
     enterprise: <CheckIcon className="w-6 h-6 text-[#6AA84F]" />,
@@ -191,7 +191,7 @@ export default function PricingComparisonTableV2() {
       id="compare-plans"
     >
       <h3 className="text-[36px] font-bold text-slate-900">Compare plans</h3>
-      <PlansTable rows={rows} isMain />
+      <PlansTable rows={rows} isMain collapsible initialVisibleCount={5} />
     </div>
   );
 }

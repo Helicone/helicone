@@ -24,16 +24,23 @@ interface DiffHighlightProps {
   newLines: number[];
   oldLines: number[];
   minHeight?: boolean; // should this code block have a min height?
+  maxHeight?: boolean;
   textSize?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 export function DiffHighlight(props: DiffHighlightProps) {
-  const { minHeight = true, textSize = "md" } = props;
+  const {
+    minHeight = true,
+    maxHeight = true,
+    textSize = "md",
+    className,
+  } = props;
 
   const { setNotification } = useNotification();
 
   return (
-    <div className={clsx("ph-no-capture w-full overflow-auto")}>
+    <div className={clsx("ph-no-capture w-full overflow-auto", className)}>
       <Prism
         {...defaultProps}
         code={props.code.trim()}
@@ -49,7 +56,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 textSize === "lg" && "text-md md:text-lg",
                 minHeight ? "min-h-[300px] md:min-h-[300px]" : "",
                 "p-6 rounded-xl mt-3 overflow-auto relative space-y-0.5",
-                "max-h-[240px]"
+                maxHeight ? "max-h-[240px]" : ""
               )}
               style={style}
             >
@@ -76,7 +83,13 @@ export function DiffHighlight(props: DiffHighlightProps) {
                     <code className="flex-1">
                       {line.map((token, key) => {
                         const tokenProps = getTokenProps({ token, key });
-                        if (token.content === "=" || token.content === ":") {
+                        if (
+                          token.content === "=" ||
+                          token.content === ":" ||
+                          token.content === "<" ||
+                          token.content === ">" ||
+                          "=>"
+                        ) {
                           tokenProps.className = "";
                         }
                         return <span key={key} {...tokenProps} />;

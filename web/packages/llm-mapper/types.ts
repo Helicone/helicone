@@ -9,15 +9,23 @@ export type Message = {
   role?: string;
   content?: string;
   tool_calls?: FunctionCall[];
-  _type: "function" | "functionCall" | "image" | "message" | "autoInput";
+  tool_call_id?: string;
+  _type:
+    | "function"
+    | "functionCall"
+    | "image"
+    | "message"
+    | "autoInput"
+    | "contentArray";
   image_url?: string;
+  contentArray?: Message[];
 };
 
 export type PromptMessage = Message | string;
 
-interface FunctionCall {
-  name?: string;
-  arguments?: object;
+export interface FunctionCall {
+  name: string;
+  arguments: Record<string, any>;
 }
 
 interface LLMRequestBody {
@@ -67,6 +75,8 @@ export type MapperType =
   | "openai-moderation"
   | "openai-embedding"
   | "openai-instruct"
+  | "vector-db"
+  | "tool"
   | "unknown";
 
 type HeliconeMetadata = {

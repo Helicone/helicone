@@ -1,11 +1,10 @@
+import { Col, Row } from "@/components/layout/common";
+import { TestEvaluator } from "@/components/templates/evals/CreateNewEvaluator/components/TestEvaluator";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
-
-import { Col, Row } from "@/components/layout/common";
 import { PanelType } from "./types";
-import { TestEvaluator } from "@/components/shared/CreateNewEvaluator/components/TestEvaluator";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+
 export const TestPanel = ({
   setPanels,
   panels,
@@ -13,8 +12,6 @@ export const TestPanel = ({
   setPanels: Dispatch<SetStateAction<PanelType[]>>;
   panels: PanelType[];
 }) => {
-  const jawn = useJawnClient();
-
   return (
     <Col className="h-full">
       <Row className="justify-end">

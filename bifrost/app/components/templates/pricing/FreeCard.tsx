@@ -1,45 +1,47 @@
 import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
-import { Row } from "@/components/common/row";
 import { CheckIcon } from "@heroicons/react/24/outline";
-import { FeatureItem } from "./FeaturedItem";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const FreeCard: React.FC = () => {
   return (
-    <Card className="p-[24px] bg-slate-50 h-[500px] border-none shadow-none">
-      <Col className="h-full justify-between">
-        <Col className="gap-[24px]">
-          <div className="px-[12px] py-[6px] border-2 border-slate-200 w-fit rounded-[4px] bg-slate-50 text-slate-900 font-medium">
-            Free
+    <Card className="w-full h-full p-6 bg-white rounded-xl border-none shadow-none mx-auto">
+      <Col className="h-full justify-between gap-4">
+        <Col className="gap-3">
+          <div className="text-slate-900 text-sm font-medium leading-tight">
+            Hobby
           </div>
-          <Col className="gap-[8px]">
-            <h3 className="text-[36px] font-bold">Free</h3>
-            <h4 className="text-[16px] text-slate-700 font-light">
-              Everything to{" "}
-              <span className="font-semibold">kickstart your AI project</span>.
-            </h4>
+
+          <Col className="h-full gap-2">
+            <div className="text-slate-900 text-3xl font-bold">Free</div>
+            <div className="text-slate-700 text-sm font-normal">
+              Kickstart your AI project.
+            </div>
+          </Col>
+
+          <Col>
+            {[
+              "10,000 free requests",
+              "Requests and Dashboard",
+              "Free, truly.",
+            ].map((feature, index) => (
+              <div key={index} className="px-2 py-1.5 flex items-start gap-2">
+                <div className="w-5 h-5 relative overflow-hidden">
+                  <CheckIcon className="w-full h-full" />
+                </div>
+                <div className="text-slate-700 text-sm font-medium">
+                  {feature}
+                </div>
+              </div>
+            ))}
           </Col>
         </Col>
-        <Col className="gap-[16px] ">
-          <FeatureItem
-            title="Generous free monthly tier"
-            description="10k free requests per month."
-          />
-          <FeatureItem
-            title="Access to Requests & Dashboard"
-            description="Trace and monitor your app's performance."
-          />
-          <FeatureItem
-            title="Free forever"
-            description="No credit card required."
-          />
-        </Col>
-        <Link
-          className="bg-[#FFFFFF] text-slate-900 py-[12px] border border-slate-200 rounded-[4px] mt-[8px] text-[16px] text-center"
-          href="https://us.helicone.ai/signin"
-        >
-          Get started
+
+        <Link href="https://us.helicone.ai/signup">
+          <Button variant="secondary" className="w-full text-base py-6">
+            Get started
+          </Button>
         </Link>
       </Col>
     </Card>

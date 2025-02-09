@@ -49,8 +49,8 @@ export const ChatContent: React.FC<ChatContentProps> = ({
   if (mode === "JSON") {
     return (
       <JsonView
-        requestBody={mappedRequest.schema.request}
-        responseBody={mappedRequest.schema.response}
+        requestBody={mappedRequest.raw.request}
+        responseBody={mappedRequest.raw.response}
       />
     );
   }

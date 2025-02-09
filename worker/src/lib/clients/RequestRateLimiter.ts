@@ -28,11 +28,19 @@ export class RateLimiter {
         windowSizeSeconds: 60,
         maxCount: 6_000,
       },
+      team: {
+        windowSizeSeconds: 60,
+        maxCount: 15_000,
+      },
       enterprise: {
         windowSizeSeconds: 60,
         maxCount: 30_000,
       },
     };
+
+    if (tier?.toLowerCase().includes("pro")) {
+      tier = "pro";
+    }
     tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
 
     return rateLimitParams[tier];

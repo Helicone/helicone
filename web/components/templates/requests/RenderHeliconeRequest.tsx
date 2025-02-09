@@ -5,6 +5,9 @@ import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/ge
 import { useMemo } from "react";
 import { Chat } from "./components/chatComponent/chat";
 import { Completion } from "./components/completion";
+import { Assistant } from "./components/assistant/Assistant";
+import { VectorDB } from "./components/vector-db/VectorDB";
+import { Tool } from "./components/tool/Tool";
 
 type RenderMappedRequestProps = {
   selectedProperties?: Record<string, string>;
@@ -20,6 +23,7 @@ export const RenderMappedRequest = (
   props: RenderMappedRequestProps & { mapperContent: MappedLLMRequest }
 ) => {
   const { mapperContent } = props;
+
   if ([0, null].includes(mapperContent?.heliconeMetadata?.status?.code)) {
     return <p>Pending...</p>;
   } else if (
@@ -41,15 +45,27 @@ export const RenderMappedRequest = (
     } else {
       return (
         <div className="w-full flex flex-col text-left space-y-8 text-sm">
-          {mapperContent?.schema.request?.messages &&
-            JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-gray-900 text-sm">Error</p>
-            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {mapperContent?.schema.response?.error?.heliconeMessage ||
-                "An unknown error occurred."}
+            <p className="font-semibold text-sm">
+              Response <span className="text-red-500 text-xs">(Error)</span>
             </p>
+            <pre className="p-2 border  rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
+              "string"
+                ? mapperContent?.schema.response?.error?.heliconeMessage
+                : JSON.stringify(
+                    mapperContent?.schema.response?.error?.heliconeMessage,
+                    null,
+                    2
+                  )}
+            </pre>
           </div>
+          <p className="font-semibold text-sm">Request</p>
+
+          <pre className="p-2 border  rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            {mapperContent?.schema.request?.messages &&
+              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
+          </pre>
         </div>
       );
     }
@@ -66,8 +82,10 @@ export const RenderMappedRequest = (
       return (
         <div className="w-full flex flex-col text-left space-y-8 text-sm">
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-gray-900 text-sm">Error</p>
-            <p className="p-2 border border-gray-300 bg-gray-100 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+            <p className="font-semibold  text-sm">
+              Response <span className="text-red-500 text-xs">(Error)</span>
+            </p>
+            <p className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
               {mapperContent?.schema.response?.error?.heliconeMessage ||
                 "An unknown error occurred."}
             </p>
@@ -75,6 +93,12 @@ export const RenderMappedRequest = (
         </div>
       );
     }
+  } else if (mapperContent._type === "vector-db") {
+    return <VectorDB mappedRequest={mapperContent} />;
+  } else if (mapperContent._type === "tool") {
+    return <Tool mappedRequest={mapperContent} />;
+  } else if (mapperContent._type === "openai-assistant") {
+    return <Assistant mappedRequest={mapperContent} />;
   }
   return (
     <>

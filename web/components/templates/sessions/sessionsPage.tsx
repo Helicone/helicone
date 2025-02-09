@@ -1,4 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { useHasAccess } from "@/hooks/useHasAccess";
 
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -98,13 +99,15 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const org = useOrg();
 
+  const hasAccess = useHasAccess("sessions");
+
   const hasSomeSessions = useMemo(() => {
     return allNames.sessions.length > 0;
   }, [allNames.sessions.length]);
 
   const hasAccessToSessions = useMemo(() => {
     return (
-      org?.currentOrg?.tier !== "free" ||
+      hasAccess ||
       (hasSomeSessions &&
         new Date().getTime() < new Date("2024-09-27").getTime())
     );
@@ -143,8 +146,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <LoadingAnimation />
           </div>
-        ) : hasAccessToSessions &&
-          (hasSomeSessions || hasSomeSessions === null) ? (
+        ) : hasAccessToSessions ? (
           <Row className="border-t border-slate-200 dark:border-slate-800">
             <SessionNameSelection
               sessionNameSearch={sessionNameSearch}
@@ -181,6 +183,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
               documentationLink="https://docs.helicone.ai/features/sessions"
               tier={org?.currentOrg?.tier ?? "free"}
+              featureName="Sessions"
             />
           </div>
         ) : (
@@ -192,6 +195,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
               documentationLink="https://docs.helicone.ai/features/sessions"
               tier={org?.currentOrg?.tier ?? "free"}
+              featureName="Sessions"
             />
           </div>
         )}

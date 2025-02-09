@@ -4,6 +4,16 @@ export const MODEL_LIST: {
   provider: string;
 }[] = [
   {
+    value: "deepseek/deepseek-chat",
+    label: "deepseek-chat",
+    provider: "deepseek",
+  },
+  {
+    value: "deepseek/deepseek-r1",
+    label: "deepseek-r1",
+    provider: "deepseek",
+  },
+  {
     value: "gpt-4",
     label: "gpt-4",
     provider: "openai",
@@ -36,6 +46,16 @@ export const MODEL_LIST: {
   {
     value: "gpt-4-1106-preview",
     label: "gpt-4-1106-preview",
+    provider: "openai",
+  },
+  {
+    value: "o1-mini",
+    label: "o1-mini",
+    provider: "openai",
+  },
+  {
+    value: "o3-mini",
+    label: "o3-mini",
     provider: "openai",
   },
   {
@@ -328,4 +348,4 @@ export const MODEL_LIST: {
     label: "llama-2-13b-chat",
     provider: "meta-llama",
   },
-];
+].sort((a, b) => a.label.localeCompare(b.label));

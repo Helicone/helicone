@@ -54,47 +54,6 @@ export async function compressData(
   });
 }
 
-// Replaces all the image_url that is not a url or not { url: url }  with
-// { unsupported_image: true }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function unsupportedImage(body: any): any {
-  if (typeof body !== "object" || body === null) {
-    return body;
-  }
-  if (Array.isArray(body)) {
-    return body.map((item) => unsupportedImage(item));
-  }
-  const notSupportMessage = {
-    helicone_message:
-      "Storing images as bytes is currently not supported within Helicone.",
-  };
-  if (body["image_url"] !== undefined) {
-    const imageUrl = body["image_url"];
-    if (
-      typeof imageUrl === "string" &&
-      !imageUrl.startsWith("http") &&
-      !imageUrl.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-    if (
-      typeof imageUrl === "object" &&
-      imageUrl?.url !== undefined &&
-      typeof imageUrl?.url === "string" &&
-      !imageUrl.url.startsWith("http") &&
-      !imageUrl.url.startsWith("<helicone-asset-id")
-    ) {
-      body.image_url = notSupportMessage;
-    }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = {};
-  for (const key in body) {
-    result[key] = unsupportedImage(body[key]);
-  }
-  return result;
-}
-
 export function isValidTimeZoneDifference(timeZoneDifference: number): boolean {
   const minutesInDay = 24 * 60;
   return (

@@ -1,18 +1,24 @@
-import { HeliconeRequest } from "../types";
 import { mapAnthropicRequest } from "../mappers/anthropic/chat";
 import { mapGeminiPro } from "../mappers/gemini/chat";
 import { mapOpenAIRequest } from "../mappers/openai/chat";
 import { mapDalleRequest } from "../mappers/openai/dalle";
-import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
 import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
+import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
+import {
+  HeliconeRequest,
+  Message,
+  MappedLLMRequest,
+  MapperType,
+} from "../types";
 
-import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
-import { MappedLLMRequest, MapperType } from "../types";
 import { modelCost } from "../../cost/costCalc";
-import { MapperFn } from "../mappers/types";
 import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
 import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
+import { MapperFn } from "../mappers/types";
+import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapVectorDB } from "../mappers/vector-db";
+import { mapTool } from "../mappers/tool";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
@@ -24,6 +30,8 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-moderation": mapOpenAIModeration,
   "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
+  "vector-db": mapVectorDB,
+  tool: mapTool,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
@@ -81,7 +89,7 @@ const metaDataFromHeliconeRequest = (
   };
 };
 
-export const getMappedContent = ({
+const getUnsanitizedMappedContent = ({
   mapperType,
   heliconeRequest,
 }: {
@@ -92,16 +100,33 @@ export const getMappedContent = ({
   if (!mapper) {
     throw new Error(`Mapper not found: ${JSON.stringify(mapperType)}`);
   }
-  const result = mapper({
-    request: heliconeRequest.request_body,
-    response: heliconeRequest.response_body,
-    statusCode: heliconeRequest.response_status,
-    model: heliconeRequest.model,
-  });
+  let result: ReturnType<MapperFn<any, any>>;
+  try {
+    result = mapper({
+      request: heliconeRequest.request_body,
+      response: heliconeRequest.response_body,
+      statusCode: heliconeRequest.response_status,
+      model: heliconeRequest.model,
+    });
+  } catch (e) {
+    result = {
+      preview: {
+        concatenatedMessages: [],
+        request: JSON.stringify(heliconeRequest.request_body),
+        response: JSON.stringify(heliconeRequest.response_body),
+      },
+      schema: {
+        request: {
+          prompt: `Error: ${(e as Error).message}`,
+        },
+      },
+    };
+  }
 
   return {
     _type: mapperType,
-    ...result,
+    preview: result.preview,
+    schema: result.schema,
     model: heliconeRequest.model,
     id: heliconeRequest.request_id,
     raw: {
@@ -113,6 +138,82 @@ export const getMappedContent = ({
       heliconeRequest.model
     ),
   };
+};
+
+const sanitizeMappedContent = (
+  mappedContent: MappedLLMRequest
+): MappedLLMRequest => {
+  const sanitizeMessage = (message: Message): Message => ({
+    ...message,
+    content:
+      typeof message.content === "string"
+        ? message.content
+        : JSON.stringify(message.content),
+  });
+
+  const sanitizeMessages = (
+    messages: Message[] | undefined | null
+  ): Message[] | undefined | null => {
+    return messages?.map(sanitizeMessage);
+  };
+
+  if (mappedContent.schema.response?.error?.heliconeMessage) {
+    try {
+      if (
+        typeof mappedContent.schema.response.error.heliconeMessage === "string"
+      ) {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          JSON.parse(mappedContent.schema.response.error.heliconeMessage),
+          null,
+          2
+        );
+      } else {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          mappedContent.schema.response.error.heliconeMessage,
+          null,
+          2
+        );
+      }
+    } catch (e) {}
+  }
+
+  return {
+    _type: mappedContent._type,
+    id: mappedContent.id,
+    schema: {
+      request: {
+        ...mappedContent.schema.request,
+        messages: sanitizeMessages(mappedContent.schema.request.messages),
+      },
+      response: mappedContent.schema.response && {
+        ...mappedContent.schema.response,
+        messages: sanitizeMessages(mappedContent.schema.response.messages),
+      },
+    },
+    preview: {
+      request: mappedContent.preview.request?.slice(0, 30),
+      response: mappedContent.preview.response?.slice(0, 30),
+      concatenatedMessages:
+        sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
+    },
+    model: mappedContent.model,
+    raw: mappedContent.raw,
+    heliconeMetadata: mappedContent.heliconeMetadata,
+  };
+};
+
+export const getMappedContent = ({
+  mapperType,
+  heliconeRequest,
+}: {
+  mapperType: MapperType;
+  heliconeRequest: HeliconeRequest;
+}): MappedLLMRequest => {
+  const unsanitized = getUnsanitizedMappedContent({
+    mapperType,
+    heliconeRequest,
+  });
+  return sanitizeMappedContent(unsanitized);
 };
 
 export const heliconeRequestToMappedContent = (

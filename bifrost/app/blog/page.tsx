@@ -216,6 +216,31 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "switch-to-deepseek",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "prompt-thinking-models",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "open-webui-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-api-providers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "effective-llm-caching",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },
@@ -227,6 +252,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "prompt-evaluation-frameworks",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-o3",
     },
   },
   {
@@ -256,12 +286,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "rag-chunking-strategies",
+      folderName: "llm-api-providers",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "openai-o3",
+      folderName: "rag-chunking-strategies",
     },
   },
   {
@@ -271,12 +301,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "claude-3.5-sonnet-vs-openai-o1",
+      folderName: "crewai-vs-dify-ai",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-dify-ai",
+      folderName: "claude-3.5-sonnet-vs-openai-o1",
     },
   },
   {
@@ -306,12 +336,12 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "crewai-vs-autogen",
+      folderName: "prompt-evaluation-for-llms",
     },
   },
   {
     dynmaicEntry: {
-      folderName: "prompt-evaluation-for-llms",
+      folderName: "crewai-vs-autogen",
     },
   },
   {
@@ -322,11 +352,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llamaindex-vs-langchain",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-api-providers",
     },
   },
   {
