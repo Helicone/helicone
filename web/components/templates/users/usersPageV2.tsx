@@ -20,7 +20,6 @@ import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 
 interface UsersPageV2Props {
