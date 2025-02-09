@@ -24,10 +24,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 
 export const FreePlanCard = () => {
   const org = useOrg();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { handleUpgradeTeam, isLoading } = useUpgradePlan();
 
   const freeUsage = useQuery({
     queryKey: ["free-usage", org?.currentOrg?.id],
@@ -36,28 +38,6 @@ export const FreePlanCard = () => {
       const jawn = getJawnClient(orgId);
       const invoice = await jawn.GET("/v1/stripe/subscription/free/usage");
       return invoice;
-    },
-  });
-
-  const subscription = useQuery({
-    queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      return subscription;
-    },
-  });
-
-  const upgradeToTeamBundle = useMutation({
-    mutationFn: async () => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const endpoint =
-        subscription.data?.data?.status === "canceled"
-          ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
-          : "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle";
-      const result = await jawn.POST(endpoint, {});
-      return result;
     },
   });
 
@@ -179,12 +159,8 @@ export const FreePlanCard = () => {
                   variant="outline"
                   size="lg"
                   className="w-full"
-                  onClick={async () => {
-                    const result = await upgradeToTeamBundle.mutateAsync();
-                    if (result.data) {
-                      window.open(result.data, "_blank");
-                    }
-                  }}
+                  disabled={isLoading}
+                  onClick={() => handleUpgradeTeam()}
                 >
                   Start 7-day free trial
                 </Button>
