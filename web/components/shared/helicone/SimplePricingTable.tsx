@@ -190,7 +190,7 @@ export default function SimplePricingComparisonTable() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50 hover:bg-slate-50 border-none align-top">
-              <TableHead className="w-[200px] p-6 bg-white rounded-tl-xl" />
+              <TableHead className="min-w-[180px] p-6 bg-white rounded-tl-xl" />
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
@@ -199,11 +199,11 @@ export default function SimplePricingComparisonTable() {
                   } 
                     ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
-                  <div className="flex md:flex-col gap-5">
+                  <div className="flex md:flex-col flex-col gap-5">
                     <div className="text-slate-900 text-xl font-semibold">
                       {tier.name}
                     </div>
-                    <div className="flex justify-between items-center gap-12">
+                    <div className="flex md:justify-between md:items-center md:gap-12 gap-4 md:flex-row flex-col">
                       <div className={tier.priceDetail ? "w-[116px]" : ""}>
                         <span
                           className={`${
@@ -248,7 +248,7 @@ export default function SimplePricingComparisonTable() {
                 <Fragment key={feature.name}>
                   <TableRow className="hover:bg-white">
                     <TableCell
-                      className={`w-[318px] px-6 py-3 ${
+                      className={`w-[180px] px-6 py-3 ${
                         featureIndex === group.features.length - 1
                           ? "border-b"
                           : ""
@@ -273,7 +273,7 @@ export default function SimplePricingComparisonTable() {
                           )}
                         </div>
                         {feature.tooltip === "usage" && showUsageTiers && (
-                          <div className="pl-8 pt-4">
+                          <div className="pl-2 pt-4 w-full min-w-[250px]">
                             <Table className="w-full">
                               <TableHeader>
                                 <TableRow className="hover:bg-transparent">
