@@ -140,16 +140,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     [advancedFilters, onSetAdvancedFiltersHandler]
   );
 
-  const hasAccess = useHasAccess("users");
   const org = useOrg();
-
-  const hasAccessToUsers = useMemo(() => {
-    return (
-      hasAccess ||
-      (users.length > 0 &&
-        new Date().getTime() < new Date("2024-09-27").getTime())
-    );
-  }, [org?.currentOrg?.tier, users.length]);
 
   if (org?.currentOrg?.tier === "free") {
     return (
