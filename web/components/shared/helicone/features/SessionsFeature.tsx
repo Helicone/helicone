@@ -9,7 +9,7 @@ export const SessionsFeatureVisual = () => {
       <div className="w-full flex-[3] xl:flex-[1]">
         <div className="w-full flex flex-col gap-4">
           {/* Badge Groups */}
-          <div className="flex flex-wrap gap-4 justify-end">
+          <div className="flex flex-wrap gap-4 md:justify-end justify-start">
             <div className="px-3.5 py-1 bg-sky-200 rounded-lg flex items-center justify-center">
               <span className="text-sky-700 text-md font-medium">LLM</span>
             </div>
@@ -70,7 +70,7 @@ export const SessionsFeatureVisual = () => {
 // Text component
 export const SessionsFeatureText = () => {
   return (
-    <div className="w-full flex-col flex gap-8 max-w-xl flex-1">
+    <div className="w-full flex-col flex gap-4 md:gap-8 max-w-xl flex-1">
       <div className="h-full flex-col justify-start items-start gap-1 flex">
         <h3 className="text-slate-900 text-3xl font-semibold leading-normal">
           Start tracking with headers
@@ -80,7 +80,7 @@ export const SessionsFeatureText = () => {
         </p>
       </div>
 
-      <div className="flex flex-row gap-16">
+      <div className="flex flex-row gap-4 md:gap-16">
         <div className="flex-col w-full gap-4 flex">
           <div className="w-full flex-col gap-1 flex">
             <h4 className="text-slate-900 text-md font-medium leading-normal">

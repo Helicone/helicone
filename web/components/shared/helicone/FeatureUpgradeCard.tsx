@@ -13,12 +13,14 @@ import {
 } from "./features/SessionsFeature";
 import { WebhookVisual } from "./WebhookVisual";
 import SimplePricingTable from "./SimplePricingTable";
+import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 
 interface FeatureUpgradeCardProps {
   title: string;
   featureName?: FeatureName;
   featureImage?: string;
   headerTagline?: string;
+  icon?: React.ReactNode;
 }
 
 export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
@@ -26,8 +28,10 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   featureName,
   featureImage,
   headerTagline,
+  icon,
 }) => {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const { handleUpgradeTeam, isLoading } = useUpgradePlan();
 
   return (
     <div className="w-full max-w-7xl md:px-24 px-4 mx-auto py-10 bg-white flex flex-col gap-16">
@@ -36,7 +40,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         <div className="flex flex-col md:flex-row justify-between w-full">
           <div className="flex items-center gap-2.5">
             <div className="w-5 h-5 flex items-center justify-center">
-              <CircleHelpIcon className="w-4 h-4 text-slate-500" />
+              {icon || <CircleHelpIcon className="w-4 h-4 text-slate-500" />}
             </div>
             <div className="text-center text-slate-500 text-md font-medium leading-normal">
               {title}
@@ -83,6 +87,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
             priceSubtext="/seat/mo"
             isPopular={true}
             variant="highlighted"
+            onClick={() => setIsUpgradeDialogOpen(true)}
           />
           <PricingCard
             title="Team"
@@ -90,6 +95,8 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
             priceSubtext="/mo"
             isBestValue={true}
             variant="outlined"
+            onClick={handleUpgradeTeam}
+            isLoading={isLoading}
           />
         </div>
       </div>

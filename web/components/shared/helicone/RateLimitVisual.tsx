@@ -5,7 +5,7 @@ export const RateLimitVisual = () => {
   const code = `"Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user"`;
 
   return (
-    <div className="w-full md:w-[568.25px] h-[346.64px] relative rounded-[22.28px]">
+    <div className="w-full md:w-[568.25px] h-[346.64px] relative rounded-xl">
       {/* Background Image with floating elements */}
       <img
         src="/static/featureUpgrade/custom-rate-limit.webp"

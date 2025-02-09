@@ -24,6 +24,7 @@ interface PricingTier {
   badge: string;
   badgeClass: string;
   showCTA?: boolean;
+  onCtaClick?: () => void;
 }
 
 interface Feature {
@@ -48,41 +49,6 @@ const USAGE_PRICING_TIERS = [
   { min: 100_000, max: 2_000_000, rate: 0.0003 },
   { min: 2_000_000, max: 15_000_000, rate: 0.000128 },
   { min: 15_000_000, max: Infinity, rate: 0.000083 },
-];
-
-const tiers: PricingTier[] = [
-  {
-    name: "Hobby",
-    price: "Free",
-    ctaText: "Get started",
-    ctaHref: "https://us.helicone.ai/signup",
-    badge: "CURRENT PLAN",
-    badgeClass: "bg-slate-100 text-slate-500 px-2 py-1 font-normal text-sm",
-    showCTA: false,
-  },
-  {
-    name: "Pro",
-    price: "$20",
-    priceDetail: "/seat/mo",
-    ctaText: "Start 7-day trial",
-    ctaHref: "https://us.helicone.ai/settings/billing",
-    isPrimary: true,
-    badge: "POPULAR",
-    badgeClass:
-      "bg-[#0ca5ea] text-white border-2 border-[#0ca5ea] rounded-full",
-    showCTA: true,
-  },
-  {
-    name: "Team",
-    price: "$200",
-    priceDetail: "/mo",
-    ctaText: "Start 7-day trial",
-    ctaHref: "https://us.helicone.ai/settings/billing",
-    badge: "BEST VALUE",
-    badgeClass:
-      "bg-slate-200 text-slate-500 border-2 border-slate-200 rounded-full",
-    showCTA: true,
-  },
 ];
 
 const featureGroups: FeatureGroup[] = [
@@ -183,6 +149,43 @@ export default function SimplePricingComparisonTable() {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const { handleUpgradeTeam } = useUpgradePlan();
 
+  const tiers: PricingTier[] = [
+    {
+      name: "Hobby",
+      price: "Free",
+      ctaText: "Get started",
+      ctaHref: "https://us.helicone.ai/signup",
+      badge: "CURRENT PLAN",
+      badgeClass: "bg-slate-100 text-slate-500 px-2 py-1 font-normal text-sm",
+      showCTA: false,
+    },
+    {
+      name: "Pro",
+      price: "$20",
+      priceDetail: "/seat/mo",
+      ctaText: "Start 7-day trial",
+      ctaHref: "https://us.helicone.ai/settings/billing",
+      isPrimary: true,
+      badge: "POPULAR",
+      badgeClass:
+        "bg-[#0ca5ea] text-white border-2 border-[#0ca5ea] rounded-full",
+      showCTA: true,
+      onCtaClick: () => setIsUpgradeDialogOpen(true),
+    },
+    {
+      name: "Team",
+      price: "$200",
+      priceDetail: "/mo",
+      ctaText: "Start 7-day trial",
+      ctaHref: "https://us.helicone.ai/settings/billing",
+      badge: "BEST VALUE",
+      badgeClass:
+        "bg-slate-200 text-slate-500 border-2 border-slate-200 rounded-full",
+      showCTA: true,
+      onCtaClick: () => handleUpgradeTeam(),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
@@ -226,7 +229,7 @@ export default function SimplePricingComparisonTable() {
                     </div>
                     {tier.showCTA && tier.ctaHref && tier.ctaText && (
                       <Button
-                        onClick={() => handleUpgradeTeam()}
+                        onClick={tier.onCtaClick}
                         className={`w-full text-sm font-medium ${
                           tier.isPrimary
                             ? "bg-[#0ca5ea] text-white hover:bg-[#0ca5ea]/90"

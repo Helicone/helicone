@@ -19,9 +19,9 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
-import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
+import { ListTree } from "lucide-react";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -177,38 +177,19 @@ const SessionsPage = (props: SessionsPageProps) => {
         ) : org?.currentOrg?.tier === "free" ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard
-              layoutType="featureShowcase"
               title="Sessions"
-              description="Group, analyze and fix AI workflows"
-              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
               featureImage="/static/featureUpgrade/sessions-graphic.webp"
-              integrationImage="/integration-steps.png"
-              documentationLink="/docs/sessions"
               headerTagline="Group, analyze and fix AI workflows"
-              proFeatures={[
-                "Unlimited session history",
-                "Advanced analytics",
-                "Collaboration tools",
-                "Priority support",
-              ]}
+              icon={<ListTree className="w-4 h-4 text-sky-500" />}
             />
           </div>
         ) : (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <FeatureUpgradeCard
-              layoutType="featureShowcase"
               title="Sessions"
-              description="Group, analyze and fix AI workflows"
-              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
               featureImage="/static/featureUpgrade/sessions-graphic.webp"
-              integrationImage="/integration-steps.png"
-              documentationLink="/docs/sessions"
-              proFeatures={[
-                "Unlimited session history",
-                "Advanced analytics",
-                "Collaboration tools",
-                "Priority support",
-              ]}
+              headerTagline="Group, analyze and fix AI workflows"
+              icon={<ListTree className="w-4 h-4 text-sky-500" />}
             />
           </div>
         )}

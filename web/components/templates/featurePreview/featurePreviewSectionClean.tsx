@@ -76,7 +76,7 @@ export const FeaturePreviewSectionClean = ({
         {remainingFeatures.map((feature, index) => (
           <div
             key={index}
-            className="w-full flex xl:flex-row items-center gap-8 flex-col md:gap-8"
+            className="w-full flex xl:flex-row items-center gap-8 md:gap-8 flex-col md:gap-8"
           >
             <div
               className={`flex-1 order-1 ${

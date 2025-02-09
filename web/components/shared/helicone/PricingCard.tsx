@@ -10,6 +10,8 @@ interface PricingCardProps {
   variant?: "default" | "highlighted" | "outlined";
   iconSrc?: string;
   className?: string;
+  onClick?: () => void;
+  isLoading?: boolean;
 }
 
 export const PricingCard = ({
@@ -22,6 +24,8 @@ export const PricingCard = ({
   variant = "default",
   iconSrc,
   className,
+  onClick,
+  isLoading,
 }: PricingCardProps) => {
   const variants = {
     default: {
@@ -104,14 +108,18 @@ export const PricingCard = ({
       className={cn(
         "h-full w-full flex flex-col px-6 py-3 rounded-xl gap-2",
         styles.container,
+        onClick &&
+          "cursor-pointer hover:-translate-y-1 hover:shadow-lg transition-all duration-200",
         className
       )}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
     >
       <div className="flex w-full justify-between items-center">
         <div
           className={cn("text-xl font-semibold leading-normal", styles.title)}
         >
-          {title}
+          {isLoading ? "Loading..." : title}
         </div>
         {iconSrc ? (
           <div className="w-6 h-6 relative overflow-hidden">
