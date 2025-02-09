@@ -160,6 +160,14 @@ test("cost calc snapshot test", () => {
         "provider": "OPENAI"
     },
     {
+        "name": "o1-2024-12-17",
+        "provider": "OPENAI"
+    },
+    {
+        "name": "o1",
+        "provider": "OPENAI"
+    },
+    {
         "name": "o3-mini",
         "provider": "OPENAI"
     },
@@ -316,6 +324,14 @@ test("cost calc snapshot test", () => {
         "provider": "AZURE"
     },
     {
+        "name": "o1-2024-12-17",
+        "provider": "AZURE"
+    },
+    {
+        "name": "o1",
+        "provider": "AZURE"
+    },
+    {
         "name": "o3-mini",
         "provider": "AZURE"
     },
@@ -410,6 +426,8 @@ WHEN (request_response_rmt.model ILIKE 'o1-preview') THEN 15000 * request_respon
 WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o1-2024-12-17') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o1') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
   ELSE 0
@@ -924,6 +942,8 @@ WHEN (request_response_rmt.model ILIKE 'o1-preview') THEN 15000 * request_respon
 WHEN (request_response_rmt.model ILIKE 'o1-preview-2024-09-12') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o1-mini-2024-09-12') THEN 3000 * request_response_rmt.prompt_tokens + 12000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o1-2024-12-17') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'o1') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
