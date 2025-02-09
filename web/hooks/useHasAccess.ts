@@ -31,7 +31,11 @@ export const useHasAccess = (
       return true;
     }
 
-    if (tier === "pro-20240913" || tier === "pro-20250202") {
+    if (
+      tier === "pro-20240913" ||
+      tier === "pro-20250202" ||
+      tier === "team-20250130"
+    ) {
       // Grandfather in evals and experiments only for old pro tier if they have prompts access
       if (
         tier === "pro-20240913" &&

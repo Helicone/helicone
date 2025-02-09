@@ -266,7 +266,8 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       org?.currentOrg?.tier === "enterprise" ||
       org?.currentOrg?.tier === "pro-20240913" ||
       org?.currentOrg?.tier === "pro-20250202" ||
-      org?.currentOrg?.tier === "demo"
+      org?.currentOrg?.tier === "demo" ||
+      org?.currentOrg?.tier === "team-20250130"
     );
   };
 
