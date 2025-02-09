@@ -326,8 +326,6 @@ export class PromptController extends Controller {
       return inputKeysResult;
     }
 
-    console.log({ inputKeysResult });
-
     return result;
   }
 
