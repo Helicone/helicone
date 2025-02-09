@@ -10,6 +10,7 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { env } from "next-runtime-env";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const SignIn = ({
   customerPortal,
@@ -26,6 +27,7 @@ const SignIn = ({
   const router = useRouter();
   const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
+  const org = useOrg();
 
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
@@ -45,12 +47,35 @@ const SignIn = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unauthorized]);
 
+  useEffect(() => {
+    if (user) {
+      let isMounted = true;
+
+      const checkRedirect = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        if (isMounted && org?.allOrgs?.[0]?.id) {
+          const { pi_session, ...restQuery } = router.query;
+          router.push({
+            pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+            query: restQuery,
+          });
+        }
+      };
+
+      checkRedirect();
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [user, org, router]);
+
   if (user) {
-    const { pi_session, ...restQuery } = router.query;
-    router.push({
-      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-      query: router.query,
-    });
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <LoadingAnimation title="Loading organization context..." />
+      </div>
+    );
   }
 
   return (
@@ -61,53 +86,45 @@ const SignIn = ({
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <div>
-        {user ? (
-          <div className="flex items-center justify-center h-screen flex-col">
-            <LoadingAnimation />
-            <h1 className="text-4xl font-semibold">Getting your dashboard</h1>
-          </div>
-        ) : (
-          <AuthForm
-            handleEmailSubmit={async (email: string, password: string) => {
-              const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-              });
+        <AuthForm
+          handleEmailSubmit={async (email: string, password: string) => {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email: email,
+              password: password,
+            });
 
-              if (error) {
-                setNotification("Error logging in. Please try again.", "error");
-                console.error(error);
-                return;
-              }
-              setNotification("Success. Redirecting...", "success");
-              router.push("/dashboard");
-            }}
-            handleGoogleSubmit={async () => {
-              const { error } = await supabase.auth.signInWithOAuth({
-                provider: "google",
-              });
-              if (error) {
-                setNotification("Error logging in. Please try again.", "error");
-                console.error(error);
-                return;
-              }
-              setNotification("Successfully signed in.", "success");
-            }}
-            handleGithubSubmit={async () => {
-              const { error } = await supabase.auth.signInWithOAuth({
-                provider: "github",
-              });
-              if (error) {
-                setNotification("Error logging in. Please try again.", "error");
-                console.error(error);
-                return;
-              }
-              setNotification("Successfully signed in.", "success");
-            }}
-            authFormType={"signin"}
-            customerPortalContent={customerPortalContent}
-          />
-        )}
+            if (error) {
+              setNotification("Error logging in. Please try again.", "error");
+              console.error(error);
+              return;
+            }
+            setNotification("Success. Redirecting...", "success");
+          }}
+          handleGoogleSubmit={async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+            });
+            if (error) {
+              setNotification("Error logging in. Please try again.", "error");
+              console.error(error);
+              return;
+            }
+            setNotification("Successfully signed in.", "success");
+          }}
+          handleGithubSubmit={async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: "github",
+            });
+            if (error) {
+              setNotification("Error logging in. Please try again.", "error");
+              console.error(error);
+              return;
+            }
+            setNotification("Successfully signed in.", "success");
+          }}
+          authFormType={"signin"}
+          customerPortalContent={customerPortalContent}
+        />
       </div>
     </PublicMetaData>
   );
