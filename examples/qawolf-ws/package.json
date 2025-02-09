@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.12.11",
+    "@types/ws": "^8.5.14",
     "nodemon": "^3.1.7",
     "typescript": "^5.4.5"
   },

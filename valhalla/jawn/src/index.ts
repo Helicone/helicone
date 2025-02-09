@@ -2,14 +2,8 @@ require("dotenv").config({
   path: "./.env",
 });
 
-import { Provider } from "@supabase/supabase-js";
 import bodyParser from "body-parser";
-import express, {
-  Request as ExpressRequest,
-  NextFunction,
-  Response as ExpressResponse,
-} from "express";
-import { IncomingMessage } from "http";
+import express, { Request as ExpressRequest, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 import { proxyRouter } from "./controllers/public/proxyController";
 import { ENVIRONMENT } from "./lib/clients/constant";
@@ -18,6 +12,7 @@ import {
   NORMAL_WORKER_COUNT,
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
@@ -30,7 +25,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();

@@ -1,76 +1,20 @@
-import crypto from "crypto";
-import { Headers } from "node-fetch";
-import { WebSocket, WebSocketServer } from "ws";
-import { Provider } from "../../packages/llm-mapper/types";
-import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import internal from "stream";
-// Create a WebSocket server to handle the upgrade
-const wss = new WebSocketServer({ noServer: true });
+import { WebSocket, WebSocketServer } from "ws";
+import { SocketMessage } from "../../types/realtime";
+import { KafkaProducer } from "../clients/KafkaProducer";
+import { supabaseServer } from "../db/supabase";
+import { RequestWrapper } from "../requestWrapper/requestWrapper";
+import { S3Client } from "../shared/db/s3Client";
+import { S3Manager } from "./S3Manager";
+import { handleSocketSession } from "./WebSocketProxyRequestHandler";
+
 /* -------------------------------------------------------------------------- */
 // NOTE: "failed: Invalid frame header" is currently being experienced after first minute on local -> local connection causing client side drop
-// TODO: If this problem occurs in production, we will have to dig in further.
+// TODO: If this problem occurs in production, we will have to dig further.
 /* -------------------------------------------------------------------------- */
 
-const messageTypes = [
-  "open",
-  "message",
-  "close",
-  "error",
-  "ping",
-  "pong",
-  "unexpected-response",
-] as const;
-type WebSocketProxyForwarder = {
-  targetWs: WebSocket;
-  clientWs: WebSocket;
-  on: (
-    messageType: (typeof messageTypes)[number],
-    from: "client" | "target",
-    data: any
-  ) => Promise<void>;
-};
-
-async function linkWebSocket({
-  targetWs,
-  clientWs,
-  on,
-}: WebSocketProxyForwarder) {
-  // ERORRS
-  targetWs.on("error", (error) => {
-    console.error("Target WebSocket error:", error);
-    clientWs.close(1000, "Target connection error");
-    on("error", "target", error);
-  });
-  clientWs.on("error", (error) => {
-    console.error("Client WebSocket error:", error);
-    targetWs.close(1000, "Client connection error");
-    on("error", "client", error);
-  });
-
-  targetWs.on("close", () => {
-    clientWs.close(1000, "Target connection closed");
-    on("close", "target", "Target connection closed");
-  });
-  clientWs.on("close", () => {
-    targetWs.close(1000, "Client connection closed");
-    on("close", "client", "Client connection closed");
-  });
-
-  clientWs.on("message", (data: ArrayBufferLike, isBinary: boolean) => {
-    const dataCopy = Buffer.from(data);
-
-    targetWs.send(data, { binary: isBinary });
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    on("message", "client", message.toString());
-  });
-
-  targetWs.on("message", (data: ArrayBufferLike, isBinary: boolean) => {
-    clientWs.send(data, { binary: isBinary });
-    const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    on("message", "target", message.toString());
-  });
-}
+// Create a WebSocket server to handle the upgrade
+const wss = new WebSocketServer({ noServer: true });
 
 export function webSocketProxyForwarder(
   requestWrapper: RequestWrapper,
@@ -89,31 +33,89 @@ export function webSocketProxyForwarder(
       },
     });
 
-    const messages: {
-      type: string;
-      content: any;
-      timestamp: string;
-      from: "client" | "target";
-    }[] = [];
+    // Keep message events in memory
+    const messages: SocketMessage[] = [];
 
+    // Link the WebSocket connections, with a callback for events
     openaiWs.on("open", () => {
       linkWebSocket({
-        targetWs: openaiWs,
         clientWs,
+        targetWs: openaiWs,
         on: async (messageType, from, data) => {
+          /* -------------------------------------------------------------------------- */
+          /*                            Append Message Events                           */
+          /* -------------------------------------------------------------------------- */
           if (messageType === "message") {
+            const content = typeof data === "string" ? JSON.parse(data) : data;
             messages.push({
               type: messageType,
-              content: JSON.parse(data),
+              content,
               timestamp: new Date().toISOString(),
               from,
             });
+            /* -------------------------------------------------------------------------- */
+            /*                            Handle Closing Event                            */
+            /* -------------------------------------------------------------------------- */
           } else if (messageType === "close") {
-            console.log("Messages:", messages);
-            const stitchedMessages = stitchMessages(
-              messages.map((message) => message.content)
-            );
-            console.log("Stitched messages:", stitchedMessages);
+            try {
+              // 1. Handle the socket session with socket messages
+              const { loggable } = await handleSocketSession(
+                messages,
+                requestWrapper
+              );
+
+              // 2. Get the auth
+              const { data: auth, error: authError } =
+                await requestWrapper.auth();
+              if (authError !== null) {
+                console.error("Error getting auth", authError);
+                return;
+              }
+
+              // 3. Get the auth params
+              const { data: authParams, error: authParamsError } =
+                await supabaseServer.authenticate(auth);
+
+              if (authParamsError || !authParams) {
+                console.error("Error getting auth params", authParamsError);
+                return;
+              }
+
+              // 4. Get the org params
+              const { data: orgParams, error: orgParamsError } =
+                await supabaseServer.getOrganization(authParams);
+
+              if (orgParamsError || !orgParams) {
+                console.error("Error getting organization", orgParamsError);
+                return;
+              }
+
+              // 5. Log the session
+              const result = await loggable.log(
+                {
+                  s3Manager: new S3Manager(
+                    new S3Client(
+                      process.env.S3_ACCESS_KEY ?? "",
+                      process.env.S3_SECRET_KEY ?? "",
+                      process.env.S3_ENDPOINT ?? "",
+                      process.env.S3_BUCKET_NAME ?? "",
+                      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ??
+                        "us-west-2"
+                    )
+                  ),
+                  kafkaProducer: new KafkaProducer(),
+                },
+                authParams,
+                orgParams,
+                requestWrapper.heliconeHeaders
+              );
+
+              if (result.error) {
+                console.error("Error logging WebSocket session:", result.error);
+              }
+            } catch (error) {
+              console.error("Error handling socket session:", error);
+            }
           }
         },
       });
@@ -121,172 +123,65 @@ export function webSocketProxyForwarder(
   });
 }
 
-// HI TINO EVERYTHING BELOW HERE IS NOT WELL TESTED AND WAS CREATED BY CURSOR
-interface BaseMessage {
-  type: string;
-  event_id?: string;
-  timestamp: string;
-}
+/**
+ * Links two WebSocket connections (client and target) by forwarding messages and handling events.
+ * Sets up error handling, close events, and bidirectional message forwarding with event callbacks.
+ */
+async function linkWebSocket({
+  clientWs,
+  targetWs,
+  on,
+}: {
+  targetWs: WebSocket;
+  clientWs: WebSocket;
+  on: (
+    messageType:
+      | "open"
+      | "message"
+      | "close"
+      | "error"
+      | "ping"
+      | "pong"
+      | "unexpected-response",
+    from: "client" | "target",
+    data: any
+  ) => Promise<void>;
+}) {
+  // ERROR EVENTS
+  clientWs.on("error", (error) => {
+    console.error("Client WebSocket error:", error);
+    targetWs.close(1000, "Client connection error");
+    on("error", "client", error);
+  });
+  targetWs.on("error", (error) => {
+    console.error("Target WebSocket error:", error);
+    clientWs.close(1000, "Target connection error");
+    on("error", "target", error);
+  });
 
-interface SessionCreatedMessage extends BaseMessage {
-  type: "session.created";
-  session: {
-    id: string;
-    object: string;
-    model: string;
-    expires_at: number;
-    modalities: string[];
-    instructions: string;
-    voice: string;
-    turn_detection: any;
-    input_audio_format: string;
-    output_audio_format: string;
-    input_audio_transcription: any;
-    tool_choice: string;
-    temperature: number;
-    max_response_output_tokens: string;
-    client_secret: any;
-    tools: any[];
-  };
-}
+  // CLOSE EVENTS
+  clientWs.on("close", async () => {
+    targetWs.close(1000, "Client connection closed");
+    await on("close", "client", "Client connection closed");
+  });
+  targetWs.on("close", async () => {
+    clientWs.close(1000, "Target connection closed");
+    await on("close", "target", "Target connection closed");
+  });
 
-interface ResponseCreateMessage extends BaseMessage {
-  type: "response.create";
-  response: {
-    modalities: string[];
-    instructions: string;
-  };
-}
+  // MESSAGE EVENTS
+  clientWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
+    targetWs.send(data, { binary: isBinary });
 
-interface AudioTranscriptDeltaMessage extends BaseMessage {
-  type: "response.audio_transcript.delta";
-  response_id: string;
-  item_id: string;
-  output_index: number;
-  content_index: number;
-  delta: string;
-}
+    const dataCopy = Buffer.from(data);
+    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
+    await on("message", "client", message.toString());
+  });
+  targetWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
+    clientWs.send(data, { binary: isBinary });
 
-interface AudioTranscriptDoneMessage extends BaseMessage {
-  type: "response.audio_transcript.done";
-  response_id: string;
-  item_id: string;
-  output_index: number;
-  content_index: number;
-  transcript: string;
-}
-
-interface RateLimitsMessage extends BaseMessage {
-  type: "rate_limits.updated";
-  rate_limits: Array<{
-    name: string;
-    limit: number;
-    remaining: number;
-    reset_seconds: number;
-  }>;
-}
-
-interface ResponseDoneMessage extends BaseMessage {
-  type: "response.done";
-  response: {
-    object: string;
-    id: string;
-    status: string;
-    output: any[];
-    conversation_id: string;
-    modalities: string[];
-    voice: string;
-    output_audio_format: string;
-    temperature: number;
-    max_output_tokens: string;
-    usage: any;
-    metadata: any;
-  };
-}
-
-type WebSocketMessage =
-  | SessionCreatedMessage
-  | ResponseCreateMessage
-  | AudioTranscriptDeltaMessage
-  | AudioTranscriptDoneMessage
-  | RateLimitsMessage
-  | ResponseDoneMessage;
-
-function stitchMessages(messages: WebSocketMessage[]) {
-  const stitchedMessages: {
-    type: string;
-    content: any;
-    timestamp: string;
-    from: "client" | "target";
-  }[] = [];
-
-  let currentMessage: any = null;
-  let currentTranscript = "";
-
-  for (const message of messages) {
-    const type = message.type;
-
-    // Handle session creation
-    if (type === "session.created") {
-      stitchedMessages.push({
-        type: "session.created",
-        content: message.session,
-        timestamp: message.timestamp,
-        from: "target",
-      });
-      continue;
-    }
-
-    // Handle response creation
-    if (type === "response.create") {
-      currentMessage = {
-        type: "response",
-        content: message.response,
-        timestamp: message.timestamp,
-        from: "target",
-      };
-      continue;
-    }
-
-    // Handle audio transcript deltas
-    if (type === "response.audio_transcript.delta") {
-      currentTranscript += message.delta;
-      continue;
-    }
-
-    // Handle completed transcript
-    if (type === "response.audio_transcript.done") {
-      if (currentMessage) {
-        currentMessage.content.transcript = message.transcript;
-        stitchedMessages.push(currentMessage);
-        currentMessage = null;
-        currentTranscript = "";
-      }
-      continue;
-    }
-
-    // Handle rate limits
-    if (type === "rate_limits.updated") {
-      stitchedMessages.push({
-        type: "rate_limits",
-        content: message.rate_limits,
-        timestamp: message.timestamp,
-        from: "target",
-      });
-      continue;
-    }
-
-    // Handle response completion
-    if (type === "response.done") {
-      stitchedMessages.push({
-        type: "response.completed",
-        content: message.response,
-        timestamp: message.timestamp,
-        from: "target",
-      });
-      continue;
-    }
-  }
-
-  return stitchedMessages;
+    const dataCopy = Buffer.from(data);
+    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
+    await on("message", "target", message.toString());
+  });
 }
