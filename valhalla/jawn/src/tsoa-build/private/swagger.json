@@ -6676,6 +6676,49 @@
 				}
 			}
 		},
+		"/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
+			"post": {
+				"operationId": "CreateExperimentTableRowFromDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v2/experiment/{experimentId}/row/update": {
 			"post": {
 				"operationId": "UpdateExperimentTableRow",
