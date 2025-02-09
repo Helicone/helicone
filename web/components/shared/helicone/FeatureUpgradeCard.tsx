@@ -113,11 +113,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         features={[
           {
             title: "Track Your Sessions and Traces",
-            description: [
-              "Track your sessions and traces with 3 simple headers.",
-              "View detailed request and response data.",
-              "Analyze performance and identify issues.",
-            ],
+            description: ["", "", ""],
             media: {
               type: "component",
               component: SessionsFeatureVisual,
