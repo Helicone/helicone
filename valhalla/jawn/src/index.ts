@@ -219,10 +219,17 @@ const server = app.listen(
 );
 
 server.on("upgrade", async (req, socket, head) => {
-  console.log("realtime");
+  // Only handle websocket upgrades for /v1/gateway/oai
+  if (!req.url?.startsWith("/v1/gateway/oai")) {
+    socket.destroy();
+    return;
+  }
+
+  // Strip /v1/gateway/oai from the URL
+  const strippedUrl = req.url.replace("/v1/gateway/oai", "");
 
   const expressRequest: ExpressRequest = {
-    url: req.url!,
+    url: strippedUrl,
     method: req.method!,
     headers: req.headers!,
     body: "{}",
@@ -250,10 +257,11 @@ server.on("upgrade", async (req, socket, head) => {
     signedCookies: {},
     query: {},
     route: {},
-    originalUrl: req.url!,
+    originalUrl: strippedUrl,
     baseUrl: "",
     next: function () {},
   } as unknown as ExpressRequest;
+
   const { data: requestWrapper, error: requestWrapperErr } =
     await RequestWrapper.create(expressRequest);
 
