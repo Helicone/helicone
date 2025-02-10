@@ -2,8 +2,8 @@
 /*                               SOCKET MESSAGES                              */
 /* -------------------------------------------------------------------------- */
 export type SocketMessage = {
-  type: string;
-  content: any;
-  timestamp: string;
+  type: string; // "message" or "error"
+  timestamp: string; // ISO String
   from: "client" | "target";
+  content: any; // RealtimeMessage
 };
