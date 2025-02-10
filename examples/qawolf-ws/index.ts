@@ -13,6 +13,45 @@ const ws = new WebSocket(url, {
   },
 });
 
+const sessionUpdate = {
+  event_id: "event_123",
+  type: "session.update",
+  session: {
+    modalities: ["text", "audio"],
+    instructions: "You are a helpful assistant.",
+    voice: "sage",
+    input_audio_format: "pcm16",
+    output_audio_format: "pcm16",
+    input_audio_transcription: {
+      model: "whisper-1",
+    },
+    turn_detection: {
+      type: "server_vad",
+      threshold: 0.5,
+      prefix_padding_ms: 300,
+      silence_duration_ms: 500,
+      create_response: true,
+    },
+    tools: [
+      {
+        type: "function",
+        name: "get_weather",
+        description: "Get the current weather...",
+        parameters: {
+          type: "object",
+          properties: {
+            location: { type: "string" },
+          },
+          required: ["location"],
+        },
+      },
+    ],
+    tool_choice: "auto",
+    temperature: 0.8,
+    max_response_output_tokens: "inf",
+  },
+};
+
 // Create readline interface
 const rl = readline.createInterface({
   input: process.stdin,
@@ -40,16 +79,8 @@ ws.on("error", function error(err: Error) {
 });
 
 function startCliLoop() {
-  ws.send(
-    JSON.stringify({
-      type: "response.create",
-      response: {
-        modalities: ["text"],
-        instructions: "Give me a haiku about code.",
-      },
-    })
-  );
   rl.on("line", (input: string) => {
+    // If input is "quit"
     if (input.toLowerCase() === "quit") {
       console.log("Closing connection...");
       ws.close();
@@ -57,16 +88,24 @@ function startCliLoop() {
       process.exit(0);
     }
 
-    const event = {
-      type: "response.create",
-      response: {
-        modalities: ["audio", "text"],
-        instructions: input,
-      },
-    };
+    // If input is "update"
+    if (input.toLowerCase() === "update") {
+      ws.send(JSON.stringify(sessionUpdate));
+      console.log("Session update sent!");
+      return;
+    }
 
+    // Otherwise, send the message as a normal response
     try {
-      ws.send(JSON.stringify(event));
+      ws.send(
+        JSON.stringify({
+          type: "response.create",
+          response: {
+            modalities: ["text"],
+            instructions: input,
+          },
+        })
+      );
       console.log("Message sent:", input);
     } catch (error) {
       console.error("Error sending message:", error);
