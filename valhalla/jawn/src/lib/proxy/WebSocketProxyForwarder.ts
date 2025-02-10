@@ -147,16 +147,20 @@ async function linkWebSocket({
     data: any
   ) => Promise<void>;
 }) {
-  // ERROR EVENTS
-  clientWs.on("error", (error) => {
-    console.error("Client WebSocket error:", error);
-    targetWs.close(1000, "Client connection error");
-    on("error", "client", error);
+  // MESSAGE EVENTS
+  clientWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
+    targetWs.send(data, { binary: isBinary });
+
+    const dataCopy = Buffer.from(data);
+    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
+    await on("message", "client", message.toString());
   });
-  targetWs.on("error", (error) => {
-    console.error("Target WebSocket error:", error);
-    clientWs.close(1000, "Target connection error");
-    on("error", "target", error);
+  targetWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
+    clientWs.send(data, { binary: isBinary });
+
+    const dataCopy = Buffer.from(data);
+    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
+    await on("message", "target", message.toString());
   });
 
   // CLOSE EVENTS
@@ -177,19 +181,15 @@ async function linkWebSocket({
     clientWs.close(1000, "Target connection closed");
   });
 
-  // MESSAGE EVENTS
-  clientWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
-    targetWs.send(data, { binary: isBinary });
-
-    const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "client", message.toString());
+  // ERROR EVENTS
+  clientWs.on("error", (error) => {
+    console.error("Client WebSocket error:", error);
+    targetWs.close(1000, "Client connection error");
+    on("error", "client", error);
   });
-  targetWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
-    clientWs.send(data, { binary: isBinary });
-
-    const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "target", message.toString());
+  targetWs.on("error", (error) => {
+    console.error("Target WebSocket error:", error);
+    clientWs.close(1000, "Target connection error");
+    on("error", "target", error);
   });
 }
