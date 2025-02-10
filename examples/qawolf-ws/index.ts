@@ -20,7 +20,7 @@ const sessionUpdate = {
   session: {
     modalities: ["text", "audio"],
     instructions: "You are a helpful assistant.",
-    voice: "sage",
+    voice: "alloy",
     input_audio_format: "pcm16",
     output_audio_format: "pcm16",
     input_audio_transcription: {
