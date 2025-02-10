@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import * as readline from "readline";
+import { inspect } from "util";
 import WebSocket from "ws";
 config({ path: ".env" });
 
@@ -67,7 +68,10 @@ ws.on("open", function open() {
 ws.on("message", function incoming(message: WebSocket.RawData) {
   try {
     const response = JSON.parse(message.toString());
-    console.log("\nReceived:", response);
+    console.log(
+      "\nReceived:",
+      inspect(response, { colors: true, depth: null })
+    );
     console.log("\nEnter your message (or 'quit' to exit):");
   } catch (error) {
     console.error("Error parsing message:", error);
@@ -101,12 +105,11 @@ function startCliLoop() {
         JSON.stringify({
           type: "response.create",
           response: {
-            modalities: ["text"],
+            modalities: ["text", "audio"],
             instructions: input,
           },
         })
       );
-      console.log("Message sent:", input);
     } catch (error) {
       console.error("Error sending message:", error);
     }
