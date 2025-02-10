@@ -1,10 +1,6 @@
 import crypto from "crypto";
 import { Headers, Response } from "node-fetch";
-import {
-  realtimeToChatMessages,
-  SocketMessage,
-  socketToRealtimeMessages,
-} from "../../types/realtime";
+import { SocketMessage } from "../../types/realtime";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { DBLoggable } from "./DBLoggable";
 
@@ -17,6 +13,7 @@ export async function handleSocketSession(
 }> {
   const requestId = crypto.randomUUID();
   const responseId = crypto.randomUUID();
+
   const startTime = new Date(
     messages[0]?.timestamp ?? new Date().toISOString()
   );
@@ -24,22 +21,51 @@ export async function handleSocketSession(
     messages[messages.length - 1]?.timestamp ?? new Date().toISOString()
   );
 
-  // Convert raw messages to RealtimeMessage format
-  const realtimeMessages = socketToRealtimeMessages(messages);
-
-  // Convert RealtimeMessage format to OpenAI chat format
-  const openaiChatMessages = realtimeToChatMessages(realtimeMessages);
-
   const responseHeaders = new Headers();
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", requestId);
+
+  const clientMessages = messages.filter((msg) => msg.from === "client");
+  const targetMessages = messages.filter((msg) => msg.from === "target");
+
+  const startingSession = targetMessages[0]?.content?.session;
+
+  const requestBody = {
+    model: startingSession.model,
+    temperature: startingSession.temperature,
+    modalities: startingSession.modalities,
+    instructions: startingSession.instructions,
+    voice: startingSession.voice,
+    turn_detection: startingSession.turn_detection,
+    input_audio_format: startingSession.input_audio_format,
+    output_audio_format: startingSession.output_audio_format,
+    tool_choice: startingSession.tool_choice,
+    max_response_output_tokens: startingSession.max_response_output_tokens,
+    tools: startingSession.tools,
+
+    messages: clientMessages,
+  };
+
+  const responseBody = {
+    id: startingSession.id,
+    object: startingSession.object,
+    usage: {
+      // TODO: infer from all response.done messages
+      total_tokens: 0,
+      input_tokens: 0,
+      output_tokens: 0,
+      input_token_details: {},
+      output_token_details: {},
+    },
+
+    messages: targetMessages,
+  };
 
   return {
     loggable: new DBLoggable({
       request: {
         requestId,
         provider: "OPENAI",
-        modelOverride: "gpt-4o-realtime-preview-2024-12-17",
         promptSettings: { promptId: undefined, promptMode: "deactivated" },
         startTime,
         path: requestWrapper.url.pathname,
@@ -55,12 +81,12 @@ export async function handleSocketSession(
         country_code: null,
         experimentColumnId: null,
         experimentRowIndex: null,
-        bodyText: JSON.stringify(openaiChatMessages), // JSON.stringify(messages), // Store original messages for reference
+        bodyText: JSON.stringify(requestBody),
       },
       response: {
         responseId,
         getResponseBody: async () => ({
-          body: JSON.stringify(openaiChatMessages), // Store converted messages
+          body: JSON.stringify(responseBody),
           endTime,
         }),
         status: async () => 200,

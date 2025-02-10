@@ -6,19 +6,20 @@ import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
 import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
 import {
   HeliconeRequest,
-  Message,
   MappedLLMRequest,
   MapperType,
+  Message,
 } from "../types";
 
 import { modelCost } from "../../cost/costCalc";
 import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
 import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
-import { MapperFn } from "../mappers/types";
-import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
-import { mapVectorDB } from "../mappers/vector-db";
+import { mapRealtimeRequest } from "../mappers/openai/realtime";
 import { mapTool } from "../mappers/tool";
+import { MapperFn } from "../mappers/types";
+import { mapVectorDB } from "../mappers/vector-db";
+import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
@@ -30,6 +31,7 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-moderation": mapOpenAIModeration,
   "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
+  "openai-realtime": mapRealtimeRequest,
   "vector-db": mapVectorDB,
   tool: mapTool,
   unknown: mapOpenAIRequest,

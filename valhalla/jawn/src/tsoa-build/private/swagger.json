@@ -1435,16 +1435,8 @@
 					"image_url": {
 						"type": "string"
 					},
-					"_type": {
-						"type": "string",
-						"enum": [
-							"function",
-							"functionCall",
-							"image",
-							"message",
-							"autoInput",
-							"contentArray"
-						]
+					"timestamp": {
+						"type": "string"
 					},
 					"tool_call_id": {
 						"type": "string"
@@ -1463,6 +1455,17 @@
 					},
 					"id": {
 						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"function",
+							"functionCall",
+							"image",
+							"message",
+							"autoInput",
+							"contentArray"
+						]
 					}
 				},
 				"required": [
