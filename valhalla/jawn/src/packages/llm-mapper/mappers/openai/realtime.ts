@@ -4,8 +4,27 @@ import { MapperFn } from "../types";
 interface RealtimeMessage {
   type: string;
   content: {
-    type: string;
-    response?: any;
+    type: string; // "response.created", "response.done", "response.audio_transcript.delta", "session.update"
+    response?: {
+      object: string; // "ex: "realtime.response"
+      modalities?: string[]; // ex: ["text", "audio"]
+      instructions?: string;
+      output?: {
+        type: string; // "message" or "function_call"
+        id: string; // ex: "item_AzRaB38BlG1R3MJ1Ddevm"
+        object: string; // "ex: "realtime.item"
+        // Message specific items
+        content?: {
+          type: string; // "text" or "audio"
+          text?: string; // Text output
+          transcript?: string; // Audio output
+        }[];
+        // Function call specific items
+        call_id: string; // ex: "call_123"
+        name: string; // ex: "get_weather"
+        arguments: string; // ex: '{"location": "San Francisco"}'
+      }[];
+    };
     event_id?: string;
     output?: any[];
     delta?: string;
@@ -18,16 +37,24 @@ const getRequestMessages = (request: any): Message[] => {
   if (!request.messages?.length) return [];
 
   return request.messages.map((msg: RealtimeMessage) => {
-    const content =
-      msg.content?.response?.instructions ||
-      msg.content?.response?.output?.[0]?.content?.[0]?.transcript ||
-      JSON.stringify(msg.content);
+    let content;
+    if (msg.type === "session.update") {
+      content = JSON.stringify(msg);
+    } else {
+      content =
+        msg.content?.response?.instructions ||
+        msg.content?.response?.output?.[0]?.content?.[0]?.transcript ||
+        (Array.isArray(msg.content?.response?.output)
+          ? JSON.stringify(msg.content?.response?.output)
+          : JSON.stringify(msg.content));
+    }
 
     return {
       content,
       role: msg.from === "client" ? "user" : "assistant",
       _type: "message",
       timestamp: msg.timestamp,
+      modality: msg.content?.response?.modalities?.[0] || "text",
     };
   });
 };
@@ -135,13 +162,27 @@ const getLLMSchemaResponse = (response: any) => {
         hasFinalResponse = true;
 
         output.forEach((item: any) => {
-          messages.push({
-            content:
-              item.content?.[0]?.transcript || JSON.stringify(item.content),
-            role: "assistant",
-            _type: "message",
-            timestamp: msg.timestamp,
-          });
+          if (item.type === "function_call") {
+            messages.push({
+              role: "assistant",
+              _type: "functionCall",
+              tool_calls: [
+                {
+                  name: item.name,
+                  arguments: JSON.parse(item.arguments || "{}"),
+                },
+              ],
+              timestamp: msg.timestamp,
+            });
+          } else {
+            messages.push({
+              content: undefined,
+              contentArray: item.content,
+              role: "assistant",
+              _type: "contentArray",
+              timestamp: msg.timestamp,
+            });
+          }
         });
       }
     } else if (
