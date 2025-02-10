@@ -2,11 +2,12 @@ import express, {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
-import { RequestWrapper } from "../../lib/requestWrapper/requestWrapper";
-import { proxyForwarder } from "../../lib/proxy/ProxyForwarder";
-
-import { Readable as NodeReadableStream } from "stream";
 import fetch, { Response } from "node-fetch";
+import { Readable as NodeReadableStream } from "stream";
+import { proxyForwarder } from "../../lib/proxy/ProxyForwarder";
+import { webSocketProxyForwarder } from "../../lib/proxy/WebSocketProxyForwarder";
+import { RequestWrapper } from "../../lib/requestWrapper/requestWrapper";
+import { Provider } from "../../packages/llm-mapper/types";
 
 export const proxyRouter = express.Router();
 proxyRouter.use(express.json());
@@ -18,7 +19,9 @@ export interface ProxyRequestBody {
   body: string;
 }
 
-// For specific providers
+/* -------------------------------------------------------------------------- */
+/*                                /:provider/*                                */
+/* -------------------------------------------------------------------------- */
 proxyRouter.post(
   "/v1/gateway/:provider/*",
   async (req: ExpressRequest, res: ExpressResponse) => {
@@ -75,7 +78,9 @@ proxyRouter.post(
   }
 );
 
-// Just for gateway
+/* -------------------------------------------------------------------------- */
+/*                                /* (Error)                                  */
+/* -------------------------------------------------------------------------- */
 proxyRouter.post(
   "/v1/gateway/*",
   async (req: ExpressRequest, res: ExpressResponse) => {
@@ -99,6 +104,9 @@ proxyRouter.post(
   }
 );
 
+/* -------------------------------------------------------------------------- */
+/*                                   HELPERS                                  */
+/* -------------------------------------------------------------------------- */
 const handleAnthropicProxy = async (requestWrapper: RequestWrapper) => {
   return await proxyForwarder(requestWrapper, "ANTHROPIC");
 };

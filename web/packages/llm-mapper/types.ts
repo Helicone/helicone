@@ -5,11 +5,6 @@ export type Provider = ProviderName | "CUSTOM";
 export type LlmType = "chat" | "completion";
 
 export type Message = {
-  id?: string;
-  role?: string;
-  content?: string;
-  tool_calls?: FunctionCall[];
-  tool_call_id?: string;
   _type:
     | "function"
     | "functionCall"
@@ -17,6 +12,12 @@ export type Message = {
     | "message"
     | "autoInput"
     | "contentArray";
+  id?: string;
+  role?: string;
+  content?: string;
+  tool_calls?: FunctionCall[];
+  tool_call_id?: string;
+  timestamp?: string;
   image_url?: string;
   contentArray?: Message[];
 };
@@ -75,6 +76,7 @@ export type MapperType =
   | "openai-moderation"
   | "openai-embedding"
   | "openai-instruct"
+  | "openai-realtime"
   | "vector-db"
   | "tool"
   | "unknown";

@@ -1126,13 +1126,14 @@ Json: JsonObject;
     Message: {
       contentArray?: components["schemas"]["Message"][];
       image_url?: string;
-      /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       role?: string;
       id?: string;
+      /** @enum {string} */
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
