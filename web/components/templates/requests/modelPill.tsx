@@ -1,6 +1,6 @@
+import { MapperType } from "@/packages/llm-mapper/types";
 import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
-import { MapperType } from "@/packages/llm-mapper/types";
 
 interface ModelPillProps {
   model: string;
@@ -30,6 +30,8 @@ const ModelPill = (props: ModelPillProps) => {
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
     "openai-instruct":
       "bg-purple-50 text-purple-700 ring-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:ring-purple-800",
+    "openai-realtime":
+      "bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-900 dark:text-indigo-300 dark:ring-indigo-800",
     "vector-db":
       "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900 dark:text-green-300 dark:ring-green-800",
     tool: "bg-pink-50 text-pink-700 ring-pink-200 dark:bg-pink-900 dark:text-pink-300 dark:ring-pink-800",

@@ -54,7 +54,8 @@
     "typescript": "^5.2.2",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "ws": "8.17.1"
   },
   "devDependencies": {
     "@swc/core": "^1.7.26",

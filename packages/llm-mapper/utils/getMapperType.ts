@@ -12,6 +12,15 @@ const isAssistantRequest = (request: HeliconeRequest) => {
   );
 };
 
+const isRealtimeRequest = (request: HeliconeRequest) => {
+  return (
+    request.response_body?.object === "realtime.session" ||
+    request.response_body?.messages?.some(
+      (msg: any) => msg.content?.type === "session.created"
+    )
+  );
+};
+
 export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
@@ -31,6 +40,11 @@ export const getMapperTypeFromHeliconeRequest = (
     heliconeRequest.response_body?.thread_id
   ) {
     return "openai-assistant";
+  }
+
+  // Check for realtime responses
+  if (isRealtimeRequest(heliconeRequest)) {
+    return "openai-realtime";
   }
 
   return getMapperType({

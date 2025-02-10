@@ -5,17 +5,17 @@
 
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
-import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 import { supabaseServer } from "../db/supabase";
+import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
 
-import { usageLimitManager } from "../../managers/UsageLimitManager";
 import { Request } from "express";
+import { usageLimitManager } from "../../managers/UsageLimitManager";
 
-import { Readable as ReadableStream } from "stream";
+import { parseJSXObject } from "@helicone/prompts";
 import { Headers } from "node-fetch";
+import { Readable as ReadableStream } from "stream";
 import { getAndStoreInCache } from "../cache/staticMemCache";
 import { hashAuth } from "../db/hash";
-import { parseJSXObject } from "@helicone/prompts";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -409,6 +409,10 @@ export class RequestWrapper {
 
       async () => await getProviderKeyFromPortalKey(authKey)
     );
+  }
+
+  public getRequest(): Request {
+    return this.request;
   }
 }
 

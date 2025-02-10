@@ -3,14 +3,17 @@ require("dotenv").config({
 });
 
 import bodyParser from "body-parser";
-import express, { NextFunction } from "express";
+import express, { Request as ExpressRequest, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 import { proxyRouter } from "./controllers/public/proxyController";
+import { ENVIRONMENT } from "./lib/clients/constant";
 import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
+import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
+import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
@@ -22,7 +25,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import { ENVIRONMENT } from "./lib/clients/constant";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -216,6 +218,60 @@ const server = app.listen(
   }
 );
 
+server.on("upgrade", async (req, socket, head) => {
+  // Only handle websocket upgrades for /v1/gateway/oai
+  if (!req.url?.startsWith("/v1/gateway/oai")) {
+    socket.destroy();
+    return;
+  }
+
+  // Strip /v1/gateway/oai from the URL
+  const strippedUrl = req.url.replace("/v1/gateway/oai", "");
+
+  const expressRequest: ExpressRequest = {
+    url: strippedUrl,
+    method: req.method!,
+    headers: req.headers!,
+    body: "{}",
+    // Express Request interface implementation
+    get: function (this: { headers: any }, name: string) {
+      return this.headers[name];
+    },
+    header: function (this: { headers: any }, name: string) {
+      return this.headers[name];
+    },
+    is: function () {
+      return false;
+    },
+    protocol: "http",
+    secure: false,
+    ip: "::1",
+    ips: [],
+    subdomains: [],
+    hostname: "localhost",
+    host: "localhost",
+    fresh: false,
+    stale: true,
+    xhr: false,
+    cookies: {},
+    signedCookies: {},
+    query: {},
+    route: {},
+    originalUrl: strippedUrl,
+    baseUrl: "",
+    next: function () {},
+  } as unknown as ExpressRequest;
+
+  const { data: requestWrapper, error: requestWrapperErr } =
+    await RequestWrapper.create(expressRequest);
+
+  if (requestWrapperErr || !requestWrapper) {
+    throw new Error("Error creating request wrapper");
+  }
+  webSocketProxyForwarder(requestWrapper, socket, head);
+});
+
+// ... existing code ...
 server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes
