@@ -19,7 +19,7 @@ const wss = new WebSocketServer({ noServer: true });
 export function webSocketProxyForwarder(
   requestWrapper: RequestWrapper,
   socket: internal.Duplex,
-  head: Buffer<ArrayBufferLike>
+  head: Buffer
 ) {
   const req = requestWrapper.getRequest();
 
