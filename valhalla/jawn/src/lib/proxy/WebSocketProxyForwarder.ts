@@ -160,13 +160,21 @@ async function linkWebSocket({
   });
 
   // CLOSE EVENTS
+  let hasLogged = false; // Flag to prevent double logging\
+
   clientWs.on("close", async () => {
+    if (!hasLogged) {
+      hasLogged = true;
+      await on("close", "client", "Client connection closed");
+    }
     targetWs.close(1000, "Client connection closed");
-    await on("close", "client", "Client connection closed");
   });
   targetWs.on("close", async () => {
+    if (!hasLogged) {
+      hasLogged = true;
+      await on("close", "target", "Target connection closed");
+    }
     clientWs.close(1000, "Target connection closed");
-    await on("close", "target", "Target connection closed");
   });
 
   // MESSAGE EVENTS
