@@ -536,6 +536,36 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async deleteExperimentTableRows(
+    experimentId: string,
+    inputRecordIds: string[]
+  ): Promise<Result<null, string>> {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    if (inputRecordIds.length === 0) {
+      return err("No input record ids provided");
+    }
+
+    try {
+      const result = await supabaseServer.client
+        .from("prompt_input_record")
+        .delete()
+        .in("id", inputRecordIds)
+        .eq("experiment_id", experimentId);
+
+      if (result.error) {
+        return err("Failed to delete experiment table rows");
+      }
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to delete experiment table rows");
+    }
+  }
+
   async updateExperimentTableRow(
     experimentId: string,
     inputRecordId: string,

@@ -112,6 +112,8 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id ?? "";
 
+  const [rowSelection, setRowSelection] = useState({});
+
   const columnHelper = createColumnHelper<TableDataType>();
 
   const columnDef = useMemo(
@@ -182,6 +184,9 @@ export function ExperimentTable({
             header: () => <></>,
             cell: ({ row }) => (
               <IndexColumnCell
+                areSomeSelected={row.getIsSomeSelected()}
+                isSelected={row.getIsSelected()}
+                onSelectChange={row.getToggleSelectedHandler()}
                 index={row.original.index}
                 onRunRow={async () => {
                   await Promise.all(
@@ -195,7 +200,8 @@ export function ExperimentTable({
                 }}
               />
             ),
-            size: 20,
+            size: 80,
+            enableResizing: false,
           }),
         ],
       }),
@@ -382,6 +388,10 @@ export function ExperimentTable({
     () => ({
       data: tableData,
       columns: columnDef,
+      state: {
+        rowSelection,
+      },
+      onRowSelectionChange: setRowSelection,
       defaultColumn: {
         minSize: 50,
         maxSize: 1000,
@@ -390,9 +400,10 @@ export function ExperimentTable({
       },
       getCoreRowModel: getCoreRowModel(),
       enableColumnResizing: true,
+      enableRowSelection: true,
       columnResizeMode: "onChange" as const,
     }),
-    [tableData, columnDef]
+    [tableData, columnDef, rowSelection]
   );
 
   const table = useReactTable(tableConfig);
@@ -446,6 +457,7 @@ export function ExperimentTable({
       }
       setShowScores(checked);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [queryClient, experimentTableId]
   );
 
@@ -587,7 +599,7 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative",
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative group",
                                   "w-full max-w-0",
                                   cell.column.getIsLastColumn() && "border-r-0"
                                 )}

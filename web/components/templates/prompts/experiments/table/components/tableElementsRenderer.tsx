@@ -19,6 +19,7 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface InputEntry {
   key: string;
@@ -510,18 +511,44 @@ const PromptColumnHeader = ({
 const IndexColumnCell = ({
   index,
   onRunRow,
+  isSelected,
+  onSelectChange,
+  areSomeSelected,
 }: {
   index: number;
   onRunRow: () => void;
+  isSelected: boolean;
+  areSomeSelected: boolean;
+  onSelectChange: (e: unknown) => void;
 }) => {
+  console.log(areSomeSelected, isSelected);
   return (
-    <div className="group relative flex justify-center h-full w-full">
-      <span className="group-hover:invisible transition-opacity duration-200">
-        {index}
-      </span>
+    <div className="flex items-center justify-center gap-1 w-full">
+      <div className="relative flex items-center justify-center">
+        <p
+          className={cn(
+            "text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center",
+            (areSomeSelected || isSelected) && "hidden",
+            "group-hover:hidden"
+          )}
+        >
+          {index}
+        </p>
+        <Checkbox
+          className={cn(
+            "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-slate-900 dark:data-[state=checked]:border-slate-50",
+            !areSomeSelected && !isSelected && "invisible group-hover:visible"
+          )}
+          checked={isSelected}
+          onCheckedChange={onSelectChange}
+        />
+      </div>
       <Button
         variant="outline"
-        className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        className={cn(
+          "p-0 border rounded-md h-[22px] w-[24px] items-center justify-center shrink-0",
+          !areSomeSelected && !isSelected && "invisible group-hover:visible"
+        )}
         onClick={onRunRow}
       >
         <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />

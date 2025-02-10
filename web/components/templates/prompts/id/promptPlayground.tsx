@@ -153,6 +153,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     newContent: string,
     newRole: string
   ) => {
+    console.log("handleUpdateMessage", index, newContent, newRole);
     const updatedChat = [...currentChat];
     if (typeof updatedChat[index] === "string") {
       return;
@@ -224,6 +225,8 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentChat, selectedModel]);
+
+  console.log(currentChat);
 
   if (
     playgroundMode === "experiment-compact" ||
