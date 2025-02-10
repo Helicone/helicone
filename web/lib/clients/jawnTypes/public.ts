@@ -127,7 +127,7 @@ export interface paths {
   "/v2/experiment/{experimentId}/add-manual-row": {
     post: operations["AddManualRowToExperiment"];
   };
-  "/v2/experiment/{experimentId}/row": {
+  "/v2/experiment/{experimentId}/rows": {
     delete: operations["DeleteExperimentTableRows"];
   };
   "/v2/experiment/{experimentId}/row/insert/batch": {

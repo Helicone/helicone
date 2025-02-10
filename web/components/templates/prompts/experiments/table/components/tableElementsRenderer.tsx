@@ -20,6 +20,12 @@ import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 export interface InputEntry {
   key: string;
@@ -521,38 +527,39 @@ const IndexColumnCell = ({
   areSomeSelected: boolean;
   onSelectChange: (e: unknown) => void;
 }) => {
-  console.log(areSomeSelected, isSelected);
   return (
-    <div className="flex items-center justify-center gap-1 w-full">
-      <div className="relative flex items-center justify-center">
-        <p
+    <div className="absolute inset-0 flex justify-center items-start gap-1 py-2">
+      <div className="flex items-start gap-1">
+        <div className="relative flex justify-center items-center">
+          <p
+            className={cn(
+              "text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center",
+              (areSomeSelected || isSelected) && "hidden",
+              "group-hover:hidden"
+            )}
+          >
+            {index}
+          </p>
+          <Checkbox
+            className={cn(
+              "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-slate-900 dark:data-[state=checked]:border-slate-50 h-5 w-5 self-center",
+              !areSomeSelected && !isSelected && "invisible group-hover:visible"
+            )}
+            checked={isSelected}
+            onCheckedChange={onSelectChange}
+          />
+        </div>
+        <Button
+          variant="outline"
           className={cn(
-            "text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center",
-            (areSomeSelected || isSelected) && "hidden",
-            "group-hover:hidden"
-          )}
-        >
-          {index}
-        </p>
-        <Checkbox
-          className={cn(
-            "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-slate-900 dark:data-[state=checked]:border-slate-50",
+            "p-0 border rounded-md h-[22px] w-[24px] flex items-center justify-center shrink-0",
             !areSomeSelected && !isSelected && "invisible group-hover:visible"
           )}
-          checked={isSelected}
-          onCheckedChange={onSelectChange}
-        />
+          onClick={onRunRow}
+        >
+          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+        </Button>
       </div>
-      <Button
-        variant="outline"
-        className={cn(
-          "p-0 border rounded-md h-[22px] w-[24px] items-center justify-center shrink-0",
-          !areSomeSelected && !isSelected && "invisible group-hover:visible"
-        )}
-        onClick={onRunRow}
-      >
-        <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-      </Button>
     </div>
   );
 };
@@ -563,12 +570,16 @@ const InputCell = ({
   rowInputs,
   onClick,
   rowRecordId,
+  onRunRow,
+  onSelectChange,
 }: {
   experimentInputs: string[];
   experimentAutoInputs: any[];
   rowInputs: Record<string, string>;
   onClick: () => void;
   rowRecordId: string;
+  onRunRow: () => void;
+  onSelectChange: (e: unknown) => void;
 }) => {
   const inputs = useQuery({
     queryKey: ["inputs", rowRecordId],
@@ -576,34 +587,44 @@ const InputCell = ({
   });
 
   return (
-    <div
-      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
-      style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
-      onClick={onClick}
-    >
-      <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
-        {experimentInputs?.map((input) => (
-          <li
-            key={input}
-            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-          >
-            <span className="font-medium shrink-0">{input}</span>:&nbsp;
-            <span className="truncate">{inputs.data?.[input]?.toString()}</span>
-          </li>
-        ))}
-        {experimentAutoInputs.length > 0 &&
-          experimentAutoInputs?.map((input, index) => (
-            <li
-              key={index}
-              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-            >
-              <span className="font-medium shrink-0">Message {index}</span>
-              :&nbsp;
-              <span className="truncate">{JSON.stringify(input)}</span>
-            </li>
-          ))}
-      </ul>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
+          style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
+          onClick={onClick}
+        >
+          <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
+            {experimentInputs?.map((input) => (
+              <li
+                key={input}
+                className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+              >
+                <span className="font-medium shrink-0">{input}</span>:&nbsp;
+                <span className="truncate">
+                  {inputs.data?.[input]?.toString()}
+                </span>
+              </li>
+            ))}
+            {experimentAutoInputs.length > 0 &&
+              experimentAutoInputs?.map((input, index) => (
+                <li
+                  key={index}
+                  className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+                >
+                  <span className="font-medium shrink-0">Message {index}</span>
+                  :&nbsp;
+                  <span className="truncate">{JSON.stringify(input)}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={onRunRow}>Run Row</ContextMenuItem>
+        <ContextMenuItem onClick={onSelectChange}>Delete Row</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 

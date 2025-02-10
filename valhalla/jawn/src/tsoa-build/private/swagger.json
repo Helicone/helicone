@@ -6603,7 +6603,7 @@
 				}
 			}
 		},
-		"/v2/experiment/{experimentId}/row": {
+		"/v2/experiment/{experimentId}/rows": {
 			"delete": {
 				"operationId": "DeleteExperimentTableRows",
 				"responses": {

@@ -226,8 +226,6 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentChat, selectedModel]);
 
-  console.log(currentChat);
-
   if (
     playgroundMode === "experiment-compact" ||
     playgroundMode === "experiment"

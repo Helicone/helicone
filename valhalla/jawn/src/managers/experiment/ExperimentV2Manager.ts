@@ -552,7 +552,7 @@ export class ExperimentV2Manager extends BaseManager {
     try {
       const result = await supabaseServer.client
         .from("prompt_input_record")
-        .delete()
+        .update({ experiment_id: null })
         .in("id", inputRecordIds)
         .eq("experiment_id", experimentId);
 

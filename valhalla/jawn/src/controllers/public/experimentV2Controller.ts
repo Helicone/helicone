@@ -322,7 +322,7 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
-  @Delete("/{experimentId}/row")
+  @Delete("/{experimentId}/rows")
   public async deleteExperimentTableRows(
     @Path() experimentId: string,
     @Body() requestBody: { inputRecordIds: string[] },

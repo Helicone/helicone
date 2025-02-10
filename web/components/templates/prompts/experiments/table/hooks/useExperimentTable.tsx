@@ -299,6 +299,19 @@ export const useExperimentTable = (experimentTableId: string) => {
     enabled: !!experimentTableId,
   });
 
+  const deleteSelectedRows = useMutation({
+    mutationFn: async ({ inputRecordIds }: { inputRecordIds: string[] }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE("/v2/experiment/{experimentId}/rows", {
+        params: { path: { experimentId: experimentTableId } },
+        body: { inputRecordIds },
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -315,5 +328,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     addManualRow,
     wrapText,
     selectedScoreKey,
+    deleteSelectedRows,
   };
 };
