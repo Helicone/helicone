@@ -221,6 +221,23 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const addExperimentTableRowInsertFromDatasetBatch = useMutation({
+    mutationFn: async ({ datasetId }: { datasetId: string }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.POST(
+        "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}",
+        {
+          params: { path: { experimentId: experimentTableId, datasetId } },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   const updateExperimentTableRow = useMutation({
     mutationFn: async ({
       inputRecordId,
@@ -292,6 +309,7 @@ export const useExperimentTable = (experimentTableId: string) => {
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
     addExperimentTableRowInsertBatch,
+    addExperimentTableRowInsertFromDatasetBatch,
     updateExperimentTableRow,
     runHypothesis,
     addManualRow,

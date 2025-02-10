@@ -43,6 +43,7 @@ const RateLimitPage = (props: {}) => {
   const isPro =
     org?.currentOrg?.tier === "pro-20240913" ||
     org?.currentOrg?.tier === "pro-20250202" ||
+    org?.currentOrg?.tier === "team-20250130" ||
     org?.currentOrg?.tier === "growth" ||
     org?.currentOrg?.tier === "pro" ||
     org?.currentOrg?.tier === "enterprise";
@@ -102,6 +103,7 @@ const RateLimitPage = (props: {}) => {
             description="The Free plan does not include the Rate Limits feature, but getting access is easy."
             infoBoxText="Enforcing custom API usage restrictions with rate limits."
             documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
+            featureName="RateLimit"
           />
         </div>
       ) : (

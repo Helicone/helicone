@@ -467,7 +467,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       try {
         let result = await jawnClient.POST(
-          "/v1/prompt/version/{promptVersionId}/subversion",
+          "/v1/prompt/version/{promptVersionId}/subversion-from-ui",
           {
             params: { path: { promptVersionId: latestVersionId } },
             body: {

@@ -36,7 +36,7 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
   {
     accessorKey: "total_cost",
     header: "Cost",
-    cell: (info) => Number(info.getValue()).toLocaleString(),
+    cell: (info) => `$${Number(info.getValue()).toLocaleString()}`,
   },
   {
     accessorKey: "prompt_tokens",

@@ -266,7 +266,8 @@ const WebhooksPage = (props: WebhooksPageProps) => {
       org?.currentOrg?.tier === "enterprise" ||
       org?.currentOrg?.tier === "pro-20240913" ||
       org?.currentOrg?.tier === "pro-20250202" ||
-      org?.currentOrg?.tier === "demo"
+      org?.currentOrg?.tier === "demo" ||
+      org?.currentOrg?.tier === "team-20250130"
     );
   };
 
@@ -278,6 +279,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           description="The Free plan does not include the BETA webhooks feature, but getting access is easy."
           infoBoxText="Add webhooks to easily subscribe to API requests that come into Helicone."
           documentationLink="https://docs.helicone.ai/features/webhooks"
+          featureName="Webhooks"
         />
       </div>
     );

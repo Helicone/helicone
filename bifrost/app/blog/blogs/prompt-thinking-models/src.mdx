@@ -2,11 +2,16 @@ The release of DeepSeek R1 model, a new class of language models designed to rea
 
 These models effectively internalize the <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought</a> prompting process that was first popularized by Google researchers in a 2022 <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">paper</a>. Unlike traditional LLMs—which require CoT to "reason"—they handle reasoning natively, which often leads to better results.
 
-![How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1](/static/blog/prompt-thinking-models/cover.webp)
+![How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1 and o3](/static/blog/prompt-thinking-models/cover.webp)
 
 However, their reasoning ability also means you need to prompt them differently for the best results, and **most people get it wrong**.
 
-Here's how to do it.
+## Top Thinking Models in February 2025
+
+- DeepSeek R1
+- **<a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 & o1</a>**
+- **<a href="https://www.helicone.ai/blog/gemini-2.0-flash" target="_blank" rel="noopener">Google's Gemini 2.0 Flash Thinking</a>**
+- Meta's LLaMA 3.1
 
 ## Key Takeaways
 
@@ -21,19 +26,21 @@ Thinking models require a different approach compared to standard LLMs. Here’s
 
 ### ❌ DON’Ts
 
-- Avoid <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> and CoT prompting. Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
+- Avoid <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> and <a href="https://docs.helicone.ai/guides/prompt-engineering/use-chain-of-thought-prompting" target="_blank" rel="noopener">CoT prompting</a>. Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
 - Don’t use thinking models for structured outputs unless absolutely necessary. They perform worse with structured outputs than traditional models.
 - Avoid overloading the model with unnecessary details. More context isn’t always better.
 
 **Disclaimer:** The insights come from <a href="https://arxiv.org/pdf/2411.03590" target="_blank" rel="noopener">research carried out by OpenAI and Microsoft</a> and our own personal experience.
 
-Let's get into the details!
+Let's get into it!
 
 ## 1. Use Minimal Prompting
 
 Thinking models work best when given **concise, direct, and structured** prompts.
 
-Too much information can actually reduce accuracy. Unlike previous models where more context helped, thinking models already structure their reasoning internally. The best approach is to state the problem clearly and let the model figure out the steps.
+Too much information can actually reduce accuracy. Unlike previous models where more context helped, thinking models already structure their reasoning internally.
+
+The best approach is to state the problem clearly and let the model figure out the steps.
 
 ```
 ✅ What are the main differences between classical and operant conditioning?
@@ -83,13 +90,15 @@ A: Tokyo
 Now answer this: What is the capital of Canada?
 ```
 
-**Zero-shot prompts work better than few-shot prompts.**
+For thinking models, **zero-shot prompts worked better than few-shot prompts**.
 
 ## 4. Use Thinking Models for Complex Multi-Step Tasks
 
-Thinking models perform best on tasks that require **five or more steps**.
+Thinking models perform best on tasks that require five or more steps.
 
-When solving problems with three to five steps, they offer only a **slight improvement** over standard models. For simpler tasks (fewer than three steps), performance **may actually degrade** compared to traditional LLMs, because they "overthink."
+When solving problems with 3-5 steps, thinking models offered a **slight improvement** over standard models. For simpler tasks (fewer than 3 steps), performance may actually **degrade** compared to traditional LLMs, because they "overthink."
+
+If a task is highly structured or simple, a regular LLM like GPT-4 may be a better choice.
 
 ```
 ✅ Break down the process of solving a complex physics problem involving momentum conservation. Explain each step clearly and logically.
@@ -99,8 +108,6 @@ When solving problems with three to five steps, they offer only a **slight impro
 ❌ What is 2+2?
 ```
 
-If a task is highly structured or simple, a regular LLM like GPT-4 may be a better choice.
-
 <BottomLine
   title="Tip 💡"
   description="To check how many steps a problem requires, you can prompt the web version of a reasoning model to see how many reasoning steps it takes."
@@ -108,9 +115,9 @@ If a task is highly structured or simple, a regular LLM like GPT-4 may be a bett
 
 ## 5. Use Delimiters to Structure Prompts for Consistent Outputs
 
-Use delimiters like triple quotation marks, XML tags, or section titles to clearly define distinct sections of the input. This makes it easier for the model to interpret the information correctly.
+For regular LLMs, developers typically use delimiters like triple quotation marks, XML tags, or section titles to clearly define distinct sections of the input. This makes it easier for the model to interpret the information correctly.
 
-Thinking models, however, struggle with structured outputs but can be guided to maintain consistency. If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully. 
+Thinking models, however, struggle with structured outputs but can be guided to maintain consistency. If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully.
 
 ```
 ✅ [Task: Summarize the following text]
@@ -121,13 +128,13 @@ Text: The mitochondrion is the powerhouse of the cell. It produces ATP, the ener
 ❌ Summarize this: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
 ```
 
-If <a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">structured output</a> is critical, you’re better off using a standard LLM instead of a thinking model.
+If structured output is critical, you’re better off using a standard LLM instead of a thinking model.
 
 ## 6. Use Ensembling for Highly Complex Tasks
 
-For high-stakes or complex problems, <a href="https://www.promptlayer.com/glossary/prompt-ensembling" target="_blank" rel="noopener">ensembling</a> improves performance.
+For high-stakes or complex problems, <a href="https://learnprompting.org/docs/reliability/ensembling?srsltid=AfmBOoq6mZKnNKbpT0FaWFvGFOaY7NEFy8720oKFuc9ItxSE_zGOHV54" target="_blank" rel="noopener noreferrer">ensembling</a> improves performance.
 
-Ensembling involves **running multiple prompts** (either the same prompt multiple times or variations of the prompt) and aggregating the results. This approach increases accuracy but **raises costs** because multiple queries are required.
+Ensembling involves running multiple prompts (either the same prompt multiple times or variations of the prompt) and aggregating the results. This approach increases accuracy but **raises costs** because multiple queries are required.
 
 ```
 ✅ #Prompt 1:
@@ -135,7 +142,6 @@ What are the primary causes of climate change? Provide a well-reasoned answer.
 
 # Prompt 2:
 Explain the major contributors to climate change, focusing on human activities and natural factors.
- 
 # Prompt 3:
 Explain what causes climate change
 
@@ -151,30 +157,30 @@ Explain what causes climate change
 While ensembling boosts performance, it’s expensive and should only be used when high accuracy is critical.
 
 <CallToAction
-  title="Observe your Thinking Models with Helicone"
-  description="If you'd like full visibility into what your models have been thinking about, you need Helicone. Get started in as little as 5 minutes."
+  title="Observe your thinking models with Helicone 💡"
+  description="Get full visibility into your thinking models with Helicone. Get started in 5 minutes."
   primaryButtonText="Get Started for Free"
-  primaryButtonLink="https://helicone.ai/signup"
+  primaryButtonLink="https://helicone.ai/"
   secondaryButtonText="Contact Us"
   secondaryButtonLink="https://helicone.ai/contact"
 />
 
 ## Conclusion
 
-Prompting thinking models like DeepSeek R1 and OpenAI o1 requires a different mindset and approach.
+Prompting thinking models like DeepSeek R1 and OpenAI o1 and o3 requires a different mindset and approach. In summary:
 
-- Minimal, clear prompts work best, while forcing few-shot examples or step-by-step reasoning reduces effectiveness.
+- Minimal, clear prompts work best.
+- Forcing few-shot examples or step-by-step reasoning reduces effectiveness.
 - When you must get a structured output, use standard LLMs instead.
-- For even better responses, ensembling remains a powerful, though costly, technique.
+- For even better responses, ensembling is a powerful (though costly) technique.
 
-With these guidelines, you can optimize your interactions with thinking models and get the best possible responses.
-
-Enjoy!
+With these guidelines, you can optimize your interactions with thinking models and get the best possible responses. Enjoy!
 
 ### You might find these useful:
 
-- **<a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek-V3 Release: New Open-Source MoE Model</a>**
-- **<a href="https://www.helicone.ai/blog/prompt-evaluation-frameworks" target="_blank" rel="noopener">Top Prompt Evaluation Frameworks in 2025: Helicone, OpenAI Eval, and More</a>**
-- **<a href="https://www.helicone.ai/blog/tree-of-thought-prompting" target="_blank" rel="noopener">Tree-of-Thought Prompting: Key Techniques and Use Cases</a>**
+- **<a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek R1: New Open-Source MoE Model</a>**
+- **<a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
+- **<a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts</a>**
+- **<a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">Building a Simple Chatbot with OpenAI Structured Outputs</a>**
 
 <Questions />

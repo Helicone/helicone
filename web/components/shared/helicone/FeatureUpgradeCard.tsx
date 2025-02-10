@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from "lucide-react";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { FeatureName } from "@/hooks/useProFeature";
 
 interface FeatureUpgradeCardProps {
   title: string;
@@ -19,6 +21,7 @@ interface FeatureUpgradeCardProps {
   youtubeVideo?: string;
   documentationLink: string;
   tier?: string;
+  featureName?: FeatureName;
 }
 
 export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
@@ -29,8 +32,10 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   youtubeVideo,
   documentationLink,
   tier = "free",
+  featureName,
 }) => {
   const [isPlanComparisonVisible, setIsPlanComparisonVisible] = useState(false);
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   return (
     <Card className="max-w-2xl mt-10">
@@ -134,12 +139,21 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
             <Button variant="outline" asChild className="w-1/2">
               <Link href={documentationLink}>View documentation</Link>
             </Button>
-            <Button asChild className="w-1/2">
-              <Link href="/settings/billing">Start 7-day free trial</Link>
+            <Button
+              asChild
+              className="w-1/2"
+              onClick={() => setIsUpgradeDialogOpen(true)}
+            >
+              <div>Start 7-day free trial</div>
             </Button>
           </div>
         </CardFooter>
       )}
+      <UpgradeProDialog
+        open={isUpgradeDialogOpen}
+        onOpenChange={setIsUpgradeDialogOpen}
+        featureName={featureName}
+      />
     </Card>
   );
 };

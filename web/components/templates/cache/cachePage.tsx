@@ -144,6 +144,7 @@ const CachePage = (props: CachePageProps) => {
             infoBoxText="Optimize your LLM usage by caching responses and reducing redundant API calls."
             youtubeVideo="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
             documentationLink="https://docs.helicone.ai/features/advanced-usage/caching"
+            featureName="cache"
           />
         </div>
       ) : !hasCache ? (

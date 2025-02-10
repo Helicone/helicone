@@ -42,6 +42,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/edit-template": {
     post: operations["EditPromptVersionTemplate"];
   };
+  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+    post: operations["CreateSubversionFromUi"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -126,6 +129,9 @@ export interface paths {
   };
   "/v2/experiment/{experimentId}/row/insert/batch": {
     post: operations["CreateExperimentTableRowBatch"];
+  };
+  "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
+    post: operations["CreateExperimentTableRowFromDataset"];
   };
   "/v2/experiment/{experimentId}/row/update": {
     post: operations["UpdateExperimentTableRow"];
@@ -1071,6 +1077,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_": {
+      data: {
+          inputRecordId: string;
+          inputs: components["schemas"]["Record_string.string_"];
+          autoInputs: components["schemas"]["Record_string.any_"];
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_": components["schemas"]["ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_boolean_: {
       data: boolean;
       /** @enum {number|null} */
@@ -1651,6 +1667,8 @@ Json: JsonObject;
         prompts?: boolean;
         alerts?: boolean;
       };
+      /** Format: double */
+      seats?: number;
     };
     LLMUsage: {
       model: string;
@@ -2620,6 +2638,26 @@ export interface operations {
       };
     };
   };
+  CreateSubversionFromUi: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
   CreateSubversion: {
     parameters: {
       path: {
@@ -3154,6 +3192,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowFromDataset: {
+    parameters: {
+      path: {
+        experimentId: string;
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_"];
         };
       };
     };

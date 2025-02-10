@@ -328,39 +328,39 @@ export const useDashboardPage = ({
   const metrics = {
     totalCost: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/totalCost",
+      endpoint: "/api/metrics/totalCost/",
       isLive,
     }),
     totalRequests: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/totalRequests",
+      endpoint: "/api/metrics/totalRequests/",
       isLive,
     }),
     averageLatency: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/averageLatency",
+      endpoint: "/api/metrics/averageLatency/",
       isLive,
     }),
     averageTokensPerRequest: useBackendMetricCall<
       UnPromise<ReturnType<typeof getTokensPerRequest>>
     >({
       params,
-      endpoint: "/api/metrics/averageTokensPerRequest",
+      endpoint: "/api/metrics/averageTokensPerRequest/",
       isLive,
     }),
     activeUsers: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/activeUsers",
+      endpoint: "/api/metrics/activeUsers/",
       isLive,
     }),
     averageTimeToFirstToken: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/averageTimeToFirstToken",
+      endpoint: "/api/metrics/averageTimeToFirstToken/",
       isLive,
     }),
     totalThreats: useBackendMetricCall<Result<number, string>>({
       params,
-      endpoint: "/api/metrics/totalThreats",
+      endpoint: "/api/metrics/totalThreats/",
       isLive,
     }),
   };
