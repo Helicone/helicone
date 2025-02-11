@@ -61,20 +61,6 @@ export const FEATURED_SECTION_DESIGNS: Partial<Record<ProFeatureKey, Feature>> =
       },
       imageAlt: "User metrics dashboard",
     },
-    playground: {
-      variant: "bullets",
-      title: "Unlock Playground",
-      subtitles: [
-        "Test and iterate on your LLM prompts with our interactive playground environment.",
-        "Experiment with different models and parameters to see how they affect your chats.",
-        "Different experiments will use the same model.",
-      ],
-      media: {
-        type: "component",
-        component: () => CodeExample("properties"),
-      },
-      imageAlt: "Playground interface",
-    },
     datasets: {
       variant: "bullets-cta",
       title: "",

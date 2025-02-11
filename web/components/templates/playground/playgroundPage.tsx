@@ -146,9 +146,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         icon={<TestTubeDiagonal className="w-4 h-4 text-sky-500" />}
         featureImage={{
           type: "image",
-          content: "/static/featureUpgrade/prompt-editor-preview.webp",
+          content: "/static/featureUpgrade/playground-preview.webp",
         }}
-        highlightedFeature="playground"
       />
     </div>
   ) : (

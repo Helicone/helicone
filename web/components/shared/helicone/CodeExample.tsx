@@ -3,19 +3,19 @@ import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
 const CodeExamples = {
   webhook: {
-    code: `export async function POST(request: Request) {
-  // ... Custom logic
-  return Response.json({
-    scores: {
-      "Was Success": true,
-      "Impact": 8.6
-      }
-    }
-  }`,
+    code: `export default async function handler(req, res) {
+  const { request_id, request_body, response_body } = req.body;
+
+  // Do something with the data!
+  console.log("LLM Log: ", request_body, response_body);
+
+  // Your business logic here...
+  return res.status(200).json({ success: true });
+}`,
     language: "javascript",
     image: "/static/featureUpgrade/webhook.webp",
     alt: "Webhook",
-    offset: "mt-36",
+    offset: "mt-[135px]",
   },
   properties: {
     code: `"Helicone-Property-UserType": "premium",
