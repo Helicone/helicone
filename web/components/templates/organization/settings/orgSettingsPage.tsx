@@ -15,6 +15,8 @@ import { useIsGovernanceEnabled } from "../hooks";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
 import OrgMembersPage from "../members/orgMembersPage";
 import { Separator } from "@/components/ui/separator";
+import { CopyIcon } from "lucide-react";
+import useNotification from "@/components/shared/notification/useNotification";
 
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -57,6 +59,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const [debouncedOrgName, setDebouncedOrgName] = useState(org.name);
 
   useEffect(() => {
+    if (debouncedOrgName === org.name) return;
     const timeout = setTimeout(() => {
       updateOrgMutation.mutate({
         orgId: org.id,
@@ -70,6 +73,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedOrgName]);
+
+  const { setNotification } = useNotification();
 
   return (
     <>
@@ -136,12 +141,24 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="org-id">Organization Id</Label>
-            <Input
-              id="org-id"
-              value={org.id}
-              className="max-w-[450px]"
-              disabled
-            />
+            <div className="flex flex-row gap-2 items-center">
+              <Input
+                id="org-id"
+                value={org.id}
+                className="max-w-[450px] hover:cursor-pointer"
+                disabled
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(org.id);
+                  setNotification("Copied to clipboard", "success");
+                }}
+              >
+                <CopyIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">

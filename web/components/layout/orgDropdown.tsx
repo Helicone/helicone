@@ -28,6 +28,7 @@ import {
 } from "../templates/organization/orgConstants";
 import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
+import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 
 interface OrgDropdownProps {}
 
@@ -86,6 +87,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     signOut(supabaseClient).then(() => router.push("/"));
   }, [supabaseClient, router]);
 
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   return (
     <>
       <DropdownMenu modal={false}>
@@ -128,13 +130,22 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             />
             <DropdownMenuSeparator />
             {orgContext?.currentOrg?.tier !== "demo" && (
-              <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings">Invite members</Link>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs"
+                onClick={() => {
+                  if (orgContext?.currentOrg?.tier === "free") {
+                    setUpgradeOpen(true);
+                  } else {
+                    setAddOpen(true);
+                  }
+                }}
+              >
+                Invite members
               </DropdownMenuItem>
             )}
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings" className="flex flex-row gap-2 ">
+                <Link href="/settings/billing" className="flex flex-row gap-2 ">
                   <span>Billing</span>
                   {orgContext?.currentOrg?.tier === "free" ? (
                     <span className="text-xs text-sky-500 bg-sky-50 px-2 py-[2px] rounded-md font-semibold">
@@ -201,6 +212,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         orgOwnerId={org?.currentOrg?.owner || ""}
         open={addOpen}
         setOpen={setAddOpen}
+      />
+      <UpgradeProDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        featureName="invite"
       />
     </>
   );
