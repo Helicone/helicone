@@ -244,7 +244,7 @@ export const HypothesisCellRenderer = forwardRef<
             <div className="group relative w-full h-full flex flex-col">
               <Button
                 variant="outline"
-                className="absolute top-2 right-2 w-6 h-6 p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity z-[1] "
+                className="absolute top-2 right-2 w-[22px] h-[22px] p-0 border-slate-200 dark:border-slate-800 border rounded-md text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity z-[1] "
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRunHypothesis(e);
@@ -329,7 +329,7 @@ export const HypothesisCellRenderer = forwardRef<
       return (
         <Button
           variant="ghost"
-          className="w-6 h-6 p-0 border-slate-200 border rounded-md bg-slate-50 text-slate-500 absolute top-2 right-2"
+          className="p-0 border border-slate-200 dark:border-slate-800 rounded-md h-[22px] w-[22px] flex items-center justify-center shrink-0 absolute top-2 right-2 text-slate-500 bg-white dark:bg-transparent"
           onClick={handleRunHypothesis}
         >
           <PlayIcon className="w-4 h-4" />

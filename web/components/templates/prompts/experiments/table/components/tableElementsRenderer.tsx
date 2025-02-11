@@ -19,6 +19,13 @@ import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 export interface InputEntry {
   key: string;
@@ -510,22 +517,49 @@ const PromptColumnHeader = ({
 const IndexColumnCell = ({
   index,
   onRunRow,
+  isSelected,
+  onSelectChange,
+  areSomeSelected,
 }: {
   index: number;
   onRunRow: () => void;
+  isSelected: boolean;
+  areSomeSelected: boolean;
+  onSelectChange: (e: unknown) => void;
 }) => {
   return (
-    <div className="group relative flex justify-center h-full w-full">
-      <span className="group-hover:invisible transition-opacity duration-200">
-        {index}
-      </span>
-      <Button
-        variant="outline"
-        className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        onClick={onRunRow}
-      >
-        <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-      </Button>
+    <div className="absolute inset-0 flex justify-center items-start gap-1 py-2">
+      <div className="flex items-center gap-1">
+        <div className="relative flex justify-center items-center">
+          <p
+            className={cn(
+              "text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center",
+              (areSomeSelected || isSelected) && "hidden",
+              "group-hover:hidden"
+            )}
+          >
+            {index}
+          </p>
+          <Checkbox
+            className={cn(
+              "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-0 dark:data-[state=checked]:border-0 data-[state=checked]:bg-slate-800 dark:data-[state=checked]:bg-slate-300 h-4 w-4 rounded-sm self-center",
+              !areSomeSelected && !isSelected && "invisible group-hover:visible"
+            )}
+            checked={isSelected}
+            onCheckedChange={onSelectChange}
+          />
+        </div>
+        <Button
+          variant="outline"
+          className={cn(
+            "p-0 border rounded-md h-[22px] w-[24px] flex items-center justify-center shrink-0",
+            !areSomeSelected && !isSelected && "invisible group-hover:visible"
+          )}
+          onClick={onRunRow}
+        >
+          <PlayIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+        </Button>
+      </div>
     </div>
   );
 };
@@ -548,35 +582,39 @@ const InputCell = ({
     queryFn: () => rowInputs,
   });
 
+  const ref = useRef<HTMLInputElement>(null);
+
   return (
-    <div
-      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
-      style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
-      onClick={onClick}
-    >
-      <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
-        {experimentInputs?.map((input) => (
-          <li
-            key={input}
-            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-          >
-            <span className="font-medium shrink-0">{input}</span>:&nbsp;
-            <span className="truncate">{inputs.data?.[input]?.toString()}</span>
-          </li>
-        ))}
-        {experimentAutoInputs.length > 0 &&
-          experimentAutoInputs?.map((input, index) => (
-            <li
-              key={index}
-              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-            >
-              <span className="font-medium shrink-0">Message {index}</span>
-              :&nbsp;
-              <span className="truncate">{JSON.stringify(input)}</span>
-            </li>
-          ))}
-      </ul>
-    </div>
+        <div
+          className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
+          style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
+          onClick={onClick}
+        >
+          <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
+            {experimentInputs?.map((input) => (
+              <li
+                key={input}
+                className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+              >
+                <span className="font-medium shrink-0">{input}</span>:&nbsp;
+                <span className="truncate">
+                  {inputs.data?.[input]?.toString()}
+                </span>
+              </li>
+            ))}
+            {experimentAutoInputs.length > 0 &&
+              experimentAutoInputs?.map((input, index) => (
+                <li
+                  key={index}
+                  className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+                >
+                  <span className="font-medium shrink-0">Message {index}</span>
+                  :&nbsp;
+                  <span className="truncate">{JSON.stringify(input)}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
   );
 };
 

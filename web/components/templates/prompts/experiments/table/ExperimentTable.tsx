@@ -28,7 +28,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import { ListIcon, PlayIcon, PlusIcon } from "lucide-react";
+import { ListIcon, PlayIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -57,6 +57,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ExperimentDatasetSelector from "../experimentDatasetSelector";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type TableDataType = {
   index: number;
@@ -84,6 +95,7 @@ export function ExperimentTable({
     addExperimentTableRowInsertFromDatasetBatch,
     inputKeysData,
     wrapText,
+    deleteSelectedRows,
   } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -101,6 +113,8 @@ export function ExperimentTable({
     autoInputs: Record<string, any>;
   } | null>(null);
   const [showScores, setShowScores] = useState(false);
+  const [showDeleteRowsConfirmation, setShowDeleteRowsConfirmation] =
+    useState(false);
 
   const cellRefs = useRef<Record<string, any>>({});
   const [
@@ -112,76 +126,103 @@ export function ExperimentTable({
   const org = useOrg();
   const orgId = org?.currentOrg?.id ?? "";
 
+  const [rowSelection, setRowSelection] = useState({});
+
   const columnHelper = createColumnHelper<TableDataType>();
 
   const columnDef = useMemo(
     () => [
       columnHelper.group({
         id: "index__outer",
-        header: () => (
-          <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
-            <span className="group-hover:invisible transition-opacity duration-200">
-              <ListIcon className="w-4 h-4" />
-            </span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                >
-                  <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                  onSelect={async () => {
-                    await Promise.all(
-                      (promptVersionsData ?? []).map(async (pv) => {
-                        const rows = table.getRowModel().rows;
-                        await Promise.all(
-                          rows.map(async (row) => {
-                            const cellRef =
-                              cellRefs.current[`${row.id}-${pv.id}`];
-                            if (cellRef) {
-                              await cellRef.runHypothesis();
-                            }
-                          })
-                        );
-                      })
-                    );
-                  }}
-                >
-                  Run all cells
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={async () => {
-                    await Promise.all(
-                      (promptVersionsData ?? []).map(async (pv) => {
-                        const rows = table.getRowModel().rows;
-                        await Promise.all(
-                          rows.map(async (row) => {
-                            const cellRef =
-                              cellRefs.current[`${row.id}-${pv.id}`];
-                            if (cellRef) {
-                              await cellRef.runHypothesisIfRequired();
-                            }
-                          })
-                        );
-                      })
-                    );
-                  }}
-                >
-                  Run unexecuted cells
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ),
+        header: () =>
+          table.getIsSomeRowsSelected() || table.getIsAllRowsSelected() ? (
+            <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
+              <input
+                type="checkbox"
+                className="appearance-none relative peer shrink-0 border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 checked:bg-slate-800 dark:checked:bg-slate-300 checked:border-0 h-4 w-4 self-center rounded-sm text-white dark:text-slate-900 cursor-pointer"
+                checked={!!table.getIsAllRowsSelected()}
+                onChange={table.getToggleAllRowsSelectedHandler()}
+              />
+              <svg
+                className="absolute w-4 h-4  hidden peer-checked:block pointer-events-none text-white dark:text-slate-900"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          ) : (
+            <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
+              <span className="group-hover:invisible transition-opacity duration-200">
+                <ListIcon className="w-4 h-4" />
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="ml-2 p-0 border rounded-md h-[22px] w-[24px] items-center justify-center absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  >
+                    <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem
+                    onSelect={async () => {
+                      await Promise.all(
+                        (promptVersionsData ?? []).map(async (pv) => {
+                          const rows = table.getRowModel().rows;
+                          await Promise.all(
+                            rows.map(async (row) => {
+                              const cellRef =
+                                cellRefs.current[`${row.id}-${pv.id}`];
+                              if (cellRef) {
+                                await cellRef.runHypothesis();
+                              }
+                            })
+                          );
+                        })
+                      );
+                    }}
+                  >
+                    Run all cells
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={async () => {
+                      await Promise.all(
+                        (promptVersionsData ?? []).map(async (pv) => {
+                          const rows = table.getRowModel().rows;
+                          await Promise.all(
+                            rows.map(async (row) => {
+                              const cellRef =
+                                cellRefs.current[`${row.id}-${pv.id}`];
+                              if (cellRef) {
+                                await cellRef.runHypothesisIfRequired();
+                              }
+                            })
+                          );
+                        })
+                      );
+                    }}
+                  >
+                    Run unexecuted cells
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ),
         columns: [
           columnHelper.accessor("index", {
             header: () => <></>,
             cell: ({ row }) => (
               <IndexColumnCell
+                areSomeSelected={table.getIsSomeRowsSelected()}
+                isSelected={row.getIsSelected()}
+                onSelectChange={row.getToggleSelectedHandler()}
                 index={row.original.index}
                 onRunRow={async () => {
                   await Promise.all(
@@ -195,7 +236,8 @@ export function ExperimentTable({
                 }}
               />
             ),
-            size: 20,
+            size: 80,
+            enableResizing: false,
           }),
         ],
       }),
@@ -382,6 +424,10 @@ export function ExperimentTable({
     () => ({
       data: tableData,
       columns: columnDef,
+      state: {
+        rowSelection,
+      },
+      onRowSelectionChange: setRowSelection,
       defaultColumn: {
         minSize: 50,
         maxSize: 1000,
@@ -390,9 +436,10 @@ export function ExperimentTable({
       },
       getCoreRowModel: getCoreRowModel(),
       enableColumnResizing: true,
+      enableRowSelection: true,
       columnResizeMode: "onChange" as const,
     }),
-    [tableData, columnDef]
+    [tableData, columnDef, rowSelection]
   );
 
   const table = useReactTable(tableConfig);
@@ -446,6 +493,7 @@ export function ExperimentTable({
       }
       setShowScores(checked);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [queryClient, experimentTableId]
   );
 
@@ -467,34 +515,97 @@ export function ExperimentTable({
           />
         </IslandContainer>
         <div className="flex items-center gap-5">
-          <div className="flex gap-2 items-center relative">
-            <Switch
-              size="sm"
-              checked={showScores}
-              onCheckedChange={(checked) => {
-                handleShowScoresChange(checked);
-                setShowScores(checked);
-              }}
-            />
-            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-              Show scores
-            </p>
-          </div>
-          <div className="flex gap-2 items-center">
-            <Switch
-              size="sm"
-              checked={wrapText.data ?? false}
-              onCheckedChange={(checked) => {
-                queryClient.setQueryData(
-                  ["wrapText", experimentTableId],
-                  checked
-                );
-              }}
-            />
-            <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-              Wrap text
-            </p>
-          </div>
+          {!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) ? (
+            <>
+              <div className="flex gap-2 items-center relative">
+                <Switch
+                  size="sm"
+                  checked={showScores}
+                  onCheckedChange={(checked) => {
+                    handleShowScoresChange(checked);
+                    setShowScores(checked);
+                  }}
+                />
+                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                  Show scores
+                </p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <Switch
+                  size="sm"
+                  checked={wrapText.data ?? false}
+                  onCheckedChange={(checked) => {
+                    queryClient.setQueryData(
+                      ["wrapText", experimentTableId],
+                      checked
+                    );
+                  }}
+                />
+                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                  Wrap text
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  table.resetRowSelection();
+                }}
+              >
+                Deselect all
+              </Button>
+              <AlertDialog
+                open={showDeleteRowsConfirmation}
+                onOpenChange={setShowDeleteRowsConfirmation}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <Trash2Icon className="w-3.5 h-3.5" />
+                    Delete row
+                    {table.getFilteredSelectedRowModel().rows.length === 1
+                      ? ""
+                      : "s"}{" "}
+                    {table.getFilteredSelectedRowModel().rows.length > 1 &&
+                      `(${
+                        table.getFilteredSelectedRowModel().rows.length
+                      } selected)`}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete rows</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Once deleted, these rows cannot be recovered. Do you want
+                      to delete them?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="w-full items-stretch gap-2">
+                    <AlertDialogCancel>Go back</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        deleteSelectedRows.mutate({
+                          inputRecordIds: table
+                            .getFilteredSelectedRowModel()
+                            .rows.map((row) => row.original.rowRecordId),
+                        });
+                        setShowDeleteRowsConfirmation(false);
+                        table.resetRowSelection();
+                      }}
+                    >
+                      Yes, delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
         </div>
       </div>
       <div className="h-[calc(100vh-50px)]">
@@ -580,16 +691,44 @@ export function ExperimentTable({
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                           <TableRow
+                            onClick={(e) => {
+                              if (
+                                table.getIsSomeRowsSelected() ||
+                                table.getIsAllRowsSelected()
+                              ) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.nativeEvent.stopImmediatePropagation();
+                                row.getToggleSelectedHandler()(e);
+                              }
+                            }}
+                            onMouseDown={(e) => {
+                              if (
+                                table.getIsSomeRowsSelected() ||
+                                table.getIsAllRowsSelected()
+                              ) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }
+                            }}
                             key={row.id}
                             data-state={row.getIsSelected() && "selected"}
-                            className="border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950"
+                            className={cn(
+                              "border-b border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-neutral-950 dark:data-[state=selected]:bg-slate-900",
+                              (table.getIsSomeRowsSelected() ||
+                                table.getIsAllRowsSelected()) &&
+                                "cursor-pointer pointer-events-auto"
+                            )}
                           >
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative",
+                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative group",
                                   "w-full max-w-0",
-                                  cell.column.getIsLastColumn() && "border-r-0"
+                                  cell.column.getIsLastColumn() && "border-r-0",
+                                  (table.getIsSomeRowsSelected() ||
+                                    table.getIsAllRowsSelected()) &&
+                                    "[&_*]:pointer-events-none"
                                 )}
                                 style={{
                                   width: cell.column.getSize(),

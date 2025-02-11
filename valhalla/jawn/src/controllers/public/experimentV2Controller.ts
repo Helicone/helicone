@@ -322,6 +322,26 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Delete("/{experimentId}/rows")
+  public async deleteExperimentTableRows(
+    @Path() experimentId: string,
+    @Body() requestBody: { inputRecordIds: string[] },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deleteExperimentTableRows(
+      experimentId,
+      requestBody.inputRecordIds
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("/{experimentId}/row/insert/batch")
   public async createExperimentTableRowBatch(
     @Path() experimentId: string,

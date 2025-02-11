@@ -9490,6 +9490,62 @@
 				}
 			}
 		},
+		"/v2/experiment/{experimentId}/rows": {
+			"delete": {
+				"operationId": "DeleteExperimentTableRows",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputRecordIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputRecordIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v2/experiment/{experimentId}/row/insert/batch": {
 			"post": {
 				"operationId": "CreateExperimentTableRowBatch",
