@@ -228,7 +228,7 @@ export default function OrgMoreDropdown({
           <DropdownMenuContent
             side="right"
             align="start"
-            className="w-[15rem] ml-3 max-h-[90vh] flex flex-col"
+            className="w-[15rem] max-h-[90vh] flex flex-col"
           >
             {content}
           </DropdownMenuContent>
