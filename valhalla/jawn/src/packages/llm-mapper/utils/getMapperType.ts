@@ -102,7 +102,14 @@ export const getMapperType = ({
     model == "gpt-4-vision-preview" ||
     model == "gpt-4-1106-vision-preview"
   ) {
+    if (provider === "CUSTOM" && /^claude/.test(model)) {
+      return "anthropic-chat";
+    }
     return "openai-chat";
+  }
+
+  if (/^claude/.test(model) || provider === "ANTHROPIC") {
+    return "anthropic-chat";
   }
 
   if (isAssistant) {
@@ -123,10 +130,6 @@ export const getMapperType = ({
 
   if (/^text-embedding/.test(model)) {
     return "openai-embedding";
-  }
-
-  if (/^claude/.test(model) || provider === "ANTHROPIC") {
-    return "anthropic-chat";
   }
 
   return "openai-chat";
