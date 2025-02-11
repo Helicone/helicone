@@ -181,6 +181,8 @@ const useGetOrgs = () => {
       return data;
     },
     refetchOnWindowFocus: false,
+    refetchInterval: (data) => (data?.length === 0 ? 1_000 : false), // Refetch every 1 seconds if no orgs
+    refetchIntervalInBackground: true,
   });
 
   data &&
