@@ -1,4 +1,3 @@
-import { useTheme } from "next-themes";
 import { signOut } from "@/components/shared/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -7,29 +6,28 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { Database } from "@/supabase/database.types";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { LogOutIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
 import CreateOrgForm from "../templates/organization/createOrgForm";
-import { useOrg } from "./org/organizationContext";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
-import { LogOutIcon } from "lucide-react";
-import Link from "next/link";
+import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { PlusIcon } from "lucide-react";
 
 interface OrgDropdownProps {}
 
