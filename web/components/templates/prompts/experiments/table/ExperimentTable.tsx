@@ -130,7 +130,7 @@ export function ExperimentTable({
 
   const columnHelper = createColumnHelper<TableDataType>();
 
-  const columnDef = useMemo(
+  const columnDef: ReturnType<typeof columnHelper.group>[] = useMemo(
     () => [
       columnHelper.group({
         id: "index__outer",
