@@ -42,6 +42,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/edit-template": {
     post: operations["EditPromptVersionTemplate"];
   };
+  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+    post: operations["CreateSubversionFromUi"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -123,6 +126,9 @@ export interface paths {
   };
   "/v2/experiment/{experimentId}/add-manual-row": {
     post: operations["AddManualRowToExperiment"];
+  };
+  "/v2/experiment/{experimentId}/rows": {
+    delete: operations["DeleteExperimentTableRows"];
   };
   "/v2/experiment/{experimentId}/row/insert/batch": {
     post: operations["CreateExperimentTableRowBatch"];
@@ -1074,16 +1080,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_": {
-      data: {
-          inputRecordId: string;
-          inputs: components["schemas"]["Record_string.string_"];
-          autoInputs: components["schemas"]["Record_string.any_"];
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_": components["schemas"]["ResultSuccess__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_boolean_: {
       data: boolean;
       /** @enum {number|null} */
@@ -1126,13 +1122,14 @@ Json: JsonObject;
     Message: {
       contentArray?: components["schemas"]["Message"][];
       image_url?: string;
-      /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       role?: string;
       id?: string;
+      /** @enum {string} */
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
@@ -2635,6 +2632,26 @@ export interface operations {
       };
     };
   };
+  CreateSubversionFromUi: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
   CreateSubversion: {
     parameters: {
       path: {
@@ -3147,6 +3164,28 @@ export interface operations {
       };
     };
   };
+  DeleteExperimentTableRows: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   CreateExperimentTableRowBatch: {
     parameters: {
       path: {
@@ -3184,7 +3223,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__autoInputs-Record_string.any_--inputs-Record_string.string_--inputRecordId-string_-Array.string_"];
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

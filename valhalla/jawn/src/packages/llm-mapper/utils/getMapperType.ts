@@ -12,6 +12,15 @@ const isAssistantRequest = (request: HeliconeRequest) => {
   );
 };
 
+const isRealtimeRequest = (request: HeliconeRequest) => {
+  return (
+    request.response_body?.object === "realtime.session" ||
+    request.response_body?.messages?.some(
+      (msg: any) => msg.content?.type === "session.created"
+    )
+  );
+};
+
 export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
@@ -31,6 +40,11 @@ export const getMapperTypeFromHeliconeRequest = (
     heliconeRequest.response_body?.thread_id
   ) {
     return "openai-assistant";
+  }
+
+  // Check for realtime responses
+  if (isRealtimeRequest(heliconeRequest)) {
+    return "openai-realtime";
   }
 
   return getMapperType({
@@ -88,7 +102,14 @@ export const getMapperType = ({
     model == "gpt-4-vision-preview" ||
     model == "gpt-4-1106-vision-preview"
   ) {
+    if (provider === "CUSTOM" && /^claude/.test(model)) {
+      return "anthropic-chat";
+    }
     return "openai-chat";
+  }
+
+  if (/^claude/.test(model) || provider === "ANTHROPIC") {
+    return "anthropic-chat";
   }
 
   if (isAssistant) {
@@ -109,10 +130,6 @@ export const getMapperType = ({
 
   if (/^text-embedding/.test(model)) {
     return "openai-embedding";
-  }
-
-  if (/^claude/.test(model) || provider === "ANTHROPIC") {
-    return "anthropic-chat";
   }
 
   return "openai-chat";

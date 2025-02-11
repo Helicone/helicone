@@ -1,0 +1,25 @@
+{
+  "name": "prompts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "dev": "nodemon --exec ts-node index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "@types/ws": "^8.5.14",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@helicone/helicone": "^2.1.18",
+    "@helicone/prompts": "^1.0.10",
+    "dateformat": "^5.0.3",
+    "dotenv": "^16.4.5",
+    "openai": "^4.45.0",
+    "uuid": "^9.0.1",
+    "ws": "^8.18.0"
+  }
+}

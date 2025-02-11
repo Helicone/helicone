@@ -1435,16 +1435,8 @@
 					"image_url": {
 						"type": "string"
 					},
-					"_type": {
-						"type": "string",
-						"enum": [
-							"function",
-							"functionCall",
-							"image",
-							"message",
-							"autoInput",
-							"contentArray"
-						]
+					"timestamp": {
+						"type": "string"
 					},
 					"tool_call_id": {
 						"type": "string"
@@ -1463,6 +1455,17 @@
 					},
 					"id": {
 						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"function",
+							"functionCall",
+							"image",
+							"message",
+							"autoInput",
+							"contentArray"
+						]
 					}
 				},
 				"required": [
@@ -6595,6 +6598,62 @@
 								},
 								"required": [
 									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v2/experiment/{experimentId}/rows": {
+			"delete": {
+				"operationId": "DeleteExperimentTableRows",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputRecordIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputRecordIds"
 								],
 								"type": "object"
 							}

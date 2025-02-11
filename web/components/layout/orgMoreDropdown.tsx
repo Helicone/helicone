@@ -9,8 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from "lucide-react";
-import { ORGANIZATION_ICONS } from "../templates/organization/orgConstants";
+import {
+  ORGANIZATION_COLORS,
+  ORGANIZATION_ICONS,
+} from "../templates/organization/orgConstants";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMemo } from "react";
+import { useOrg } from "./org/organizationContext";
+import clsx from "clsx";
+import { useUser } from "@supabase/auth-helpers-react";
 
 type Organization = {
   id: string;
@@ -34,6 +41,22 @@ export default function OrgMoreDropdown({
   currentOrgId?: string;
   setCurrentOrg?: (orgId: string) => void;
 }) {
+  const user = useUser();
+  const orgContext = useOrg();
+  const currentIcon = useMemo(
+    () =>
+      ORGANIZATION_ICONS.find(
+        (icon) => icon.name === orgContext?.currentOrg?.icon
+      ),
+    [orgContext?.currentOrg?.icon]
+  );
+  const currentColor = useMemo(
+    () =>
+      ORGANIZATION_COLORS.find(
+        (icon) => icon.name === orgContext?.currentOrg?.color
+      ),
+    [orgContext?.currentOrg?.color]
+  );
   const content = (
     <>
       {ownedOrgs && ownedOrgs.length > 0 && (
@@ -172,21 +195,40 @@ export default function OrgMoreDropdown({
       <div className="sm:hidden">{content}</div>
 
       {/* Desktop view */}
-      <div className="hidden sm:block">
+      <div className="hidden sm:block w-full">
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="p-0 hover:bg-transparent m-0 w-auto h-auto outline-none focus-visible:outline-none"
+              className="p-2 hover:bg-slate-100 m-0 w-full h-auto outline-none focus-visible:outline-none flex justify-between items-center"
             >
+              <div className="flex gap-2">
+                {currentIcon && (
+                  <currentIcon.icon
+                    className={clsx(
+                      `text-${currentColor?.name}-500`,
+                      "mt-1 flex-shrink-0 h-4 w-4"
+                    )}
+                    aria-hidden="true"
+                  />
+                )}
+                <div className="flex flex-col gap-1 items-start">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                    {orgContext?.currentOrg?.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
+                    Switch Organization
+                  </p>
+                </div>
+              </div>
               <ChevronsUpDownIcon className="h-[18px] w-[18px] text-slate-900 dark:text-slate-50" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="right"
             align="start"
-            className="w-[15rem] ml-3 max-h-[90vh] flex flex-col"
+            className="w-[15rem] max-h-[90vh] flex flex-col"
           >
             {content}
           </DropdownMenuContent>
