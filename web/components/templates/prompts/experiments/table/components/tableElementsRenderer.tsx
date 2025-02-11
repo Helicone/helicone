@@ -570,25 +570,21 @@ const InputCell = ({
   rowInputs,
   onClick,
   rowRecordId,
-  onRunRow,
-  onSelectChange,
 }: {
   experimentInputs: string[];
   experimentAutoInputs: any[];
   rowInputs: Record<string, string>;
   onClick: () => void;
   rowRecordId: string;
-  onRunRow: () => void;
-  onSelectChange: (e: unknown) => void;
 }) => {
   const inputs = useQuery({
     queryKey: ["inputs", rowRecordId],
     queryFn: () => rowInputs,
   });
 
+  const ref = useRef<HTMLInputElement>(null);
+
   return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
         <div
           className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
           style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
@@ -619,12 +615,6 @@ const InputCell = ({
               ))}
           </ul>
         </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={onRunRow}>Run Row</ContextMenuItem>
-        <ContextMenuItem onClick={onSelectChange}>Delete Row</ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
   );
 };
 

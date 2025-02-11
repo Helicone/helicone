@@ -11,7 +11,6 @@ const Checkbox = React.forwardRef<
     variant?: "default" | "blue" | "ghost";
   }
 >(({ className, iconClassName, variant = "default", ...props }, ref) => {
-  console.log(props.checked);
   return (
     <CheckboxPrimitive.Root
       ref={ref}

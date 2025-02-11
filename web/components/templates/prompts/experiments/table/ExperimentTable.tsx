@@ -265,17 +265,6 @@ export function ExperimentTable({
                   });
                   setRightPanel("edit_inputs");
                 }}
-                onSelectChange={row.getToggleSelectedHandler()}
-                onRunRow={async () => {
-                  await Promise.all(
-                    (promptVersionsData ?? []).map((pv) => {
-                      const cellRef = cellRefs.current[`${row.id}-${pv.id}`];
-                      if (cellRef) {
-                        cellRef.runHypothesis();
-                      }
-                    })
-                  );
-                }}
               />
             ),
             size: 250,
