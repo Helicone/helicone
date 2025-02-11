@@ -20,12 +20,6 @@ import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 
 export interface InputEntry {
   key: string;
@@ -585,36 +579,34 @@ const InputCell = ({
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-        <div
-          className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
-          style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
-          onClick={onClick}
-        >
-          <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
-            {experimentInputs?.map((input) => (
-              <li
-                key={input}
-                className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-              >
-                <span className="font-medium shrink-0">{input}</span>:&nbsp;
-                <span className="truncate">
-                  {inputs.data?.[input]?.toString()}
-                </span>
-              </li>
-            ))}
-            {experimentAutoInputs.length > 0 &&
-              experimentAutoInputs?.map((input, index) => (
-                <li
-                  key={index}
-                  className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
-                >
-                  <span className="font-medium shrink-0">Message {index}</span>
-                  :&nbsp;
-                  <span className="truncate">{JSON.stringify(input)}</span>
-                </li>
-              ))}
-          </ul>
-        </div>
+    <div
+      className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 h-full w-full py-2 px-4 overflow-hidden"
+      style={{ cursor: "pointer", minWidth: 0 }} // Add minWidth: 0 to allow shrinking
+      onClick={onClick}
+    >
+      <ul className="w-full flex flex-col gap-y-1 overflow-hidden">
+        {experimentInputs?.map((input) => (
+          <li
+            key={input}
+            className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+          >
+            <span className="font-medium shrink-0">{input}</span>:&nbsp;
+            <span className="truncate">{inputs.data?.[input]?.toString()}</span>
+          </li>
+        ))}
+        {experimentAutoInputs.length > 0 &&
+          experimentAutoInputs?.map((input, index) => (
+            <li
+              key={index}
+              className="text-slate-700 dark:text-slate-300 leading-[130%] text-[13px] max-w-full overflow-hidden whitespace-nowrap truncate flex"
+            >
+              <span className="font-medium shrink-0">Message {index}</span>
+              :&nbsp;
+              <span className="truncate">{JSON.stringify(input)}</span>
+            </li>
+          ))}
+      </ul>
+    </div>
   );
 };
 
