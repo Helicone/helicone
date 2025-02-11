@@ -37,6 +37,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "github-slugger": "^2.0.0",
     "iso-3166-1": "^2.1.1",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.456.0",
@@ -53,10 +54,14 @@
     "react-simple-maps": "^3.0.0",
     "recharts": "^2.13.3",
     "rehype-highlight": "^7.0.1",
+    "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
     "rss": "^1.2.2",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",

@@ -8,11 +8,43 @@ import path from "path";
 import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import { visit } from "unist-util-visit";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import rehypeSlug from "rehype-slug";
+import GithubSlugger from "github-slugger";
 import "highlight.js/styles/atom-one-dark.css";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Twitter } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
+import TableOfContents from "../../../components/blog/TableOfContents";
+
+function extractHeadingsFromSource(source: string) {
+  const tree = unified().use(remarkParse).parse(source);
+  const slugger = new GithubSlugger();
+  const headings: { level: number; text: string; id: string }[] = [];
+
+  visit(tree, "heading", (node: any) => {
+    let text = "";
+    visit(node, (child: any) => {
+      if (child.type === "text" || child.type === "inlineCode") {
+        text += child.value;
+      }
+    });
+
+    if (text.includes("[toc-ignore]")) return;
+
+    text = text.trim();
+
+    if (text) {
+      const id = slugger.slug(text);
+      headings.push({ level: node.depth, text, id });
+    }
+  });
+
+  return headings;
+}
 
 export default async function Home({
   params,
@@ -32,10 +64,12 @@ export default async function Home({
 
   const source = await fs.readFile(changelogFolder, "utf8");
 
+  const headings = extractHeadingsFromSource(source);
+
   const mdxSource = await serialize(source, {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeHighlight],
+      rehypePlugins: [rehypeHighlight, rehypeSlug],
     },
   });
 
@@ -47,7 +81,7 @@ export default async function Home({
 
   return (
     <div className="w-full bg-white h-full antialiased relative">
-      <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-6">
+      <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-7xl py-16 px-4 md:py-24 relative gap-6">
         <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
           <Link href="/blog" className="flex items-center gap-1">
             <ChevronLeftIcon className="w-4 h-4" />
@@ -97,6 +131,7 @@ export default async function Home({
           </h1>
           <RemoteMdxPage mdxSource={mdxSource} />
         </article>
+        {headings.length > 0 && <TableOfContents headings={headings} />}
       </div>
     </div>
   );
