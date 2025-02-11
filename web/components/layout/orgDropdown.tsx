@@ -88,7 +88,6 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     signOut(supabaseClient).then(() => router.push("/"));
   }, [supabaseClient, router]);
 
-  
   return (
     <>
       <DropdownMenu modal={false}>
@@ -112,29 +111,24 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
-          <OrgMoreDropdown
-            ownedOrgs={ownedOrgs}
-            memberOrgs={memberOrgs}
-            customerOrgs={customerOrgs}
-            createNewOrgHandler={createNewOrgHandler}
-            currentOrgId={orgContext?.currentOrg?.id}
-            setCurrentOrg={orgContext?.setCurrentOrg}
-          />
-          <DropdownMenuItem
-            className="text-xs"
-            onClick={() => createNewOrgHandler()}
-          >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Invite Member
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
           <DropdownMenuGroup>
+            <OrgMoreDropdown
+              ownedOrgs={ownedOrgs}
+              memberOrgs={memberOrgs}
+              customerOrgs={customerOrgs}
+              createNewOrgHandler={createNewOrgHandler}
+              currentOrgId={orgContext?.currentOrg?.id}
+              setCurrentOrg={orgContext?.setCurrentOrg}
+            />
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
                 <Link href="/settings/members">Invite members</Link>
               </DropdownMenuItem>
             )}
+          </DropdownMenuGroup>
+
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
             <DropdownMenuItem
               className={cn("hover:bg-transparent cursor-default")}
               disableHover
@@ -160,6 +154,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </DropdownMenuItem>
             </Link>
           )}
+
+          <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
+            <LogOutIcon className="h-4 w-4 mr-2" />
+            Sign out
+          </DropdownMenuItem>
           <DropdownMenuLabel className="flex justify-between items-center">
             <div className="flex gap-2">
               <div className="flex flex-col gap-1">
@@ -169,10 +168,6 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
-            <LogOutIcon className="h-4 w-4 mr-2" />
-            Sign out
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
