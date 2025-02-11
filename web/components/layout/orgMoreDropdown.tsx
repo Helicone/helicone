@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMemo } from "react";
 import { useOrg } from "./org/organizationContext";
 import clsx from "clsx";
+import { useUser } from "@supabase/auth-helpers-react";
 
 type Organization = {
   id: string;
@@ -40,6 +41,7 @@ export default function OrgMoreDropdown({
   currentOrgId?: string;
   setCurrentOrg?: (orgId: string) => void;
 }) {
+  const user = useUser();
   const orgContext = useOrg();
   const currentIcon = useMemo(
     () =>
@@ -199,7 +201,7 @@ export default function OrgMoreDropdown({
             <Button
               variant="ghost"
               size="icon"
-              className="p-2 hover:bg-transparent m-0 w-full h-auto outline-none focus-visible:outline-none flex justify-between items-center"
+              className="p-2 hover:bg-slate-100 m-0 w-full h-auto outline-none focus-visible:outline-none flex justify-between items-center"
             >
               <div className="flex gap-2">
                 {currentIcon && (

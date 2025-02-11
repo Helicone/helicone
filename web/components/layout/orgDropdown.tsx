@@ -94,20 +94,28 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-1 w-full "
+            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full "
           >
-            {currentIcon && (
-              <currentIcon.icon
-                className={clsx(
-                  `text-${currentColor?.name}-500`,
-                  "flex-shrink-0 h-4 w-4"
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row gap-2 items-center">
+                {currentIcon && (
+                  <currentIcon.icon
+                    className={clsx(
+                      `text-${currentColor?.name}-500`,
+                      "flex-shrink-0 h-4 w-4"
+                    )}
+                    aria-hidden="true"
+                  />
                 )}
-                aria-hidden="true"
-              />
-            )}
-            <h3 className="text-xs font-medium text-left truncate max-w-24">
-              {orgContext?.currentOrg?.name}
-            </h3>
+                <h3 className="text-sm font-medium text-left truncate max-w-24">
+                  {orgContext?.currentOrg?.name}
+                </h3>
+              </div>
+
+              <p className="ml-6 text-xs text-slate-400 font-medium max-w-[6rem] truncate">
+                {user?.email}
+              </p>
+            </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
@@ -120,14 +128,30 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               currentOrgId={orgContext?.currentOrg?.id}
               setCurrentOrg={orgContext?.setCurrentOrg}
             />
+            <DropdownMenuSeparator />
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
                 <Link href="/settings/members">Invite members</Link>
               </DropdownMenuItem>
             )}
+            {orgContext?.currentOrg?.tier !== "demo" && (
+              <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                <Link href="/settings/members" className="flex flex-row gap-2 ">
+                  <span>Billing</span>
+                  {orgContext?.currentOrg?.tier === "free" ? (
+                    <span className="text-xs text-sky-500 bg-sky-50 px-2 py-[2px] rounded-md font-semibold">
+                      Upgrade
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-[2px] rounded-md font-semibold">
+                      Enterprise
+                    </span>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
 
-          <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
               className={cn("hover:bg-transparent cursor-default")}
@@ -159,15 +183,6 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out
           </DropdownMenuItem>
-          <DropdownMenuLabel className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <div className="flex flex-col gap-1">
-                <p className="text-xs text-slate-500 font-medium max-w-[12rem] truncate">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-          </DropdownMenuLabel>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

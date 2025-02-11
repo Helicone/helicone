@@ -8,8 +8,9 @@ import { useState } from "react";
 import OrgMemberItem from "../orgMemberItem";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
-import { clsx } from "../../../shared/clsx";
+import { cn } from "@/lib/utils";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { Button } from "@/components/ui/button";
 
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -68,25 +69,24 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
   return (
     <>
       <div
-        className={clsx(
-          wFull ? "w-full" : "max-w-2xl",
-          "flex flex-col text-gray-900 dark:text-gray-100 space-y-8"
+        className={cn(
+          "flex flex-col text-foreground space-y-8",
+          wFull ? "w-full" : "max-w-2xl"
         )}
       >
         <div className="flex flex-col h-full space-y-4 w-full mt-8">
           <div className="flex flex-row justify-between items-center">
-            <h3 className="text-lg font-semibold">Members</h3>
+            <h3 className="font-semibold">Members</h3>
 
             <div className="flex flex-row space-x-4">
               <ProFeatureWrapper featureName="invite">
-                <button
-                  onClick={() => {
-                    setAddOpen(true);
-                  }}
-                  className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                <Button
+                  onClick={() => setAddOpen(true)}
+                  variant="outline"
+                  size="sm_sleek"
                 >
-                  Invite Members
-                </button>
+                  invite +
+                </Button>
               </ProFeatureWrapper>
             </div>
           </div>
@@ -95,12 +95,12 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               {Array.from({ length: 3 }).map((_, index) => (
                 <li
                   key={index}
-                  className="h-6 flex flex-row justify-between gap-2 bg-gray-500 animate-pulse rounded-md"
+                  className="h-6 flex flex-row justify-between gap-2 bg-muted animate-pulse rounded-md"
                 ></li>
               ))}
             </ul>
           ) : (
-            <ul className="divide-y divide-gray-200 dark:divide-gray-800 border-t border-gray-200 dark:border-gray-800">
+            <ul className="divide-y divide-border border-t">
               {members.map((member, index) => (
                 <OrgMemberItem
                   key={index}
