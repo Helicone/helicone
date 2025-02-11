@@ -129,12 +129,12 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             <DropdownMenuSeparator />
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings/members">Invite members</Link>
+                <Link href="/settings">Invite members</Link>
               </DropdownMenuItem>
             )}
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings/members" className="flex flex-row gap-2 ">
+                <Link href="/settings" className="flex flex-row gap-2 ">
                   <span>Billing</span>
                   {orgContext?.currentOrg?.tier === "free" ? (
                     <span className="text-xs text-sky-500 bg-sky-50 px-2 py-[2px] rounded-md font-semibold">
