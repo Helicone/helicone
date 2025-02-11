@@ -29,6 +29,7 @@ import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import OrgMoreDropdown from "./orgMoreDropdown";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "lucide-react";
 
 interface OrgDropdownProps {}
 
@@ -87,6 +88,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     signOut(supabaseClient).then(() => router.push("/"));
   }, [supabaseClient, router]);
 
+  
   return (
     <>
       <DropdownMenu modal={false}>
@@ -110,49 +112,23 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
-          <DropdownMenuLabel className="flex justify-between items-center">
-            <div className="flex gap-2">
-              {currentIcon && (
-                <currentIcon.icon
-                  className={clsx(
-                    `text-${currentColor?.name}-500`,
-                    "mt-1 flex-shrink-0 h-4 w-4"
-                  )}
-                  aria-hidden="true"
-                />
-              )}
-              <div className="flex flex-col gap-1">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  {orgContext?.currentOrg?.name}
-                </h3>
-                <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <OrgMoreDropdown
-                ownedOrgs={ownedOrgs}
-                memberOrgs={memberOrgs}
-                customerOrgs={customerOrgs}
-                createNewOrgHandler={createNewOrgHandler}
-                currentOrgId={orgContext?.currentOrg?.id}
-                setCurrentOrg={orgContext?.setCurrentOrg}
-              />
-            </div>
-          </DropdownMenuLabel>
+          <OrgMoreDropdown
+            ownedOrgs={ownedOrgs}
+            memberOrgs={memberOrgs}
+            customerOrgs={customerOrgs}
+            createNewOrgHandler={createNewOrgHandler}
+            currentOrgId={orgContext?.currentOrg?.id}
+            setCurrentOrg={orgContext?.setCurrentOrg}
+          />
+          <DropdownMenuItem
+            className="text-xs"
+            onClick={() => createNewOrgHandler()}
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Invite Member
+          </DropdownMenuItem>
+
           <DropdownMenuSeparator />
-          <div className="block sm:hidden">
-            <OrgMoreDropdown
-              ownedOrgs={ownedOrgs}
-              memberOrgs={memberOrgs}
-              customerOrgs={customerOrgs}
-              createNewOrgHandler={createNewOrgHandler}
-              currentOrgId={orgContext?.currentOrg?.id}
-              setCurrentOrg={orgContext?.setCurrentOrg}
-            />
-            <DropdownMenuSeparator />
-          </div>
           <DropdownMenuGroup>
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
@@ -184,6 +160,15 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </DropdownMenuItem>
             </Link>
           )}
+          <DropdownMenuLabel className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-slate-500 font-medium max-w-[12rem] truncate">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+          </DropdownMenuLabel>
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out
