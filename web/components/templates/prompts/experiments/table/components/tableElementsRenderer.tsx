@@ -529,7 +529,7 @@ const IndexColumnCell = ({
 }) => {
   return (
     <div className="absolute inset-0 flex justify-center items-start gap-1 py-2">
-      <div className="flex items-start gap-1">
+      <div className="flex items-center gap-1">
         <div className="relative flex justify-center items-center">
           <p
             className={cn(
@@ -542,7 +542,7 @@ const IndexColumnCell = ({
           </p>
           <Checkbox
             className={cn(
-              "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-slate-900 dark:data-[state=checked]:border-slate-50 h-5 w-5 self-center",
+              "border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 data-[state=checked]:border-0 dark:data-[state=checked]:border-0 data-[state=checked]:bg-slate-800 dark:data-[state=checked]:bg-slate-300 h-4 w-4 rounded-sm self-center",
               !areSomeSelected && !isSelected && "invisible group-hover:visible"
             )}
             checked={isSelected}
@@ -557,7 +557,7 @@ const IndexColumnCell = ({
           )}
           onClick={onRunRow}
         >
-          <PlayIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          <PlayIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
         </Button>
       </div>
     </div>

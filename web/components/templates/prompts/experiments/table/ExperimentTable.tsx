@@ -139,7 +139,7 @@ export function ExperimentTable({
             <div className="flex justify-center items-center text-slate-400 dark:text-slate-600 group relative">
               <input
                 type="checkbox"
-                className="appearance-none relative peer shrink-0 border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 checked:bg-slate-900 dark:checked:bg-slate-50 checked:border-0 h-4 w-4 self-center rounded-sm text-white dark:text-slate-900 cursor-pointer"
+                className="appearance-none relative peer shrink-0 border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-800 checked:bg-slate-800 dark:checked:bg-slate-300 checked:border-0 h-4 w-4 self-center rounded-sm text-white dark:text-slate-900 cursor-pointer"
                 checked={!!table.getIsAllRowsSelected()}
                 onChange={table.getToggleAllRowsSelectedHandler()}
               />
@@ -579,24 +579,22 @@ export function ExperimentTable({
                     className="flex items-center gap-1"
                   >
                     <Trash2Icon className="w-3.5 h-3.5" />
-                    Delete selected rows (
-                    {table.getFilteredSelectedRowModel().rows.length} row
+                    Delete row
                     {table.getFilteredSelectedRowModel().rows.length === 1
                       ? ""
-                      : "s"}
-                    )
+                      : "s"}{" "}
+                    {table.getFilteredSelectedRowModel().rows.length > 1 &&
+                      `(${
+                        table.getFilteredSelectedRowModel().rows.length
+                      } selected)`}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete rows</AlertDialogTitle>
                     <AlertDialogDescription>
-                      You are about to delete{" "}
-                      {table.getFilteredSelectedRowModel().rows.length} row
-                      {table.getFilteredSelectedRowModel().rows.length === 1
-                        ? ""
-                        : "s"}
-                      . Do you want to proceed?
+                      Once deleted, these rows cannot be recovered. Do you want
+                      to delete them?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="w-full items-stretch gap-2">
