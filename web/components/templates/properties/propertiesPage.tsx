@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 
 import AuthHeader from "../../shared/authHeader";
 
-import { PlusIcon, TagIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TagIcon, UserIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { clsx } from "../../shared/clsx";
@@ -30,23 +30,26 @@ const PropertiesPage = (props: {}) => {
     );
   }, [org?.currentOrg?.tier, properties.length]);
 
+  if (!hasAccessToProperties) {
+    return (
+      <div className="flex justify-center items-center bg-white">
+        <FeatureUpgradeCard
+          title="Properties"
+          featureName="Properties"
+          headerTagline="Tag and analyze request metadata"
+          icon={<TagIcon className="w-4 h-4 text-sky-500" />}
+          highlightedFeature="properties"
+        />
+      </div>
+    );
+  }
+
   return (
     <IslandContainer>
       <AuthHeader isWithinIsland={true} title={"Properties"} />
       <div className="flex flex-col gap-4">
         {isPropertiesLoading ? (
           <LoadingAnimation title="Loading Properties" />
-        ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <FeatureUpgradeCard
-              title="Unlock Custom Properties"
-              description="The Free plan does not include Custom Properties, but getting access is easy."
-              infoBoxText="Enrich your requests with custom metadata by adding simple headers."
-              documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-properties"
-              tier={org?.currentOrg?.tier ?? "free"}
-              featureName="Properties"
-            />
-          </div>
         ) : properties.length === 0 ? (
           <div className="flex flex-col w-full h-96 justify-center items-center">
             <div className="flex flex-col w-2/5">

@@ -160,7 +160,10 @@ const SessionsPage = (props: SessionsPageProps) => {
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard
               title="Sessions"
-              featureImage="/static/featureUpgrade/sessions-graphic.webp"
+              featureImage={{
+                type: "image",
+                content: "/static/featureUpgrade/sessions-graphic.webp",
+              }}
               headerTagline="Group, analyze and fix AI workflows"
               icon={<ListTree className="w-4 h-4 text-sky-500" />}
               highlightedFeature="sessions"
@@ -170,7 +173,10 @@ const SessionsPage = (props: SessionsPageProps) => {
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <FeatureUpgradeCard
               title="Sessions"
-              featureImage="/static/featureUpgrade/sessions-graphic.webp"
+              featureImage={{
+                type: "image",
+                content: "/static/featureUpgrade/sessions-graphic.webp",
+              }}
               headerTagline="Group, analyze and fix AI workflows"
               icon={<ListTree className="w-4 h-4 text-sky-500" />}
               highlightedFeature="sessions"

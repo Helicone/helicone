@@ -21,7 +21,7 @@ import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { UserIcon } from "lucide-react";
+import { User, UserIcon } from "lucide-react";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -149,16 +149,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           title="Users"
           featureName="Users"
           headerTagline="Track user cost, usage, and more"
-          icon={<UserIcon className="w-4 h-4 text-sky-500" />}
+          icon={<UserGroupIcon className="w-4 h-4 text-sky-500" />}
           highlightedFeature="users"
-          featureOrder={[
-            "sessions",
-            "webhooks",
-            "datasets",
-            "cache",
-            "rate-limits",
-            "alerts",
-          ]}
         />
       </div>
     );

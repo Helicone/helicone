@@ -1,4 +1,4 @@
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -21,6 +21,7 @@ import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilt
 import { useOrg } from "@/components/layout/org/organizationContext";
 
 import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
+import { ShieldCheck } from "lucide-react";
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -96,13 +97,12 @@ const RateLimitPage = (props: {}) => {
   return (
     <>
       {!isPro && !properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
           <FeatureUpgradeCard
-            title="Unlock Rate Limits"
-            description="The Free plan does not include the Rate Limits feature, but getting access is easy."
-            infoBoxText="Enforcing custom API usage restrictions with rate limits."
-            documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
-            featureName="RateLimit"
+            title="Rate Limits"
+            headerTagline="Control API usage with custom limits"
+            icon={<ShieldCheck className="h-4 w-4 text-sky-500" />}
+            highlightedFeature="rate-limits"
           />
         </div>
       ) : (

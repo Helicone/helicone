@@ -272,13 +272,12 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
   if (!isWebhooksEnabled()) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex justify-center items-center bg-white">
         <FeatureUpgradeCard
-          title="Unlock Webhooks"
-          description="The Free plan does not include the BETA webhooks feature, but getting access is easy."
-          infoBoxText="Add webhooks to easily subscribe to API requests that come into Helicone."
-          documentationLink="https://docs.helicone.ai/features/webhooks"
-          featureName="Webhooks"
+          title="Webhooks"
+          headerTagline="Subscribe to API requests with webhooks"
+          icon={<PiWebhooksLogo className="h-4 w-4 text-sky-500" />}
+          highlightedFeature="webhooks"
         />
       </div>
     );

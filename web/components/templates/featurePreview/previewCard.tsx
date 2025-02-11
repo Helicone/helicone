@@ -35,6 +35,7 @@ interface BulletsCtaFeature extends BaseFeature {
   cta: {
     text: string;
     link: string;
+    variant?: "primary" | "outline";
   };
 }
 
@@ -138,6 +139,51 @@ const FeatureMedia = ({
   );
 };
 
+const CtaButton = ({
+  variant = "primary",
+  text,
+  link,
+}: {
+  variant?: "primary" | "outline";
+  text: string;
+  link: string;
+}) => {
+  const buttonStyles = {
+    primary:
+      "text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5",
+    outline: "gap-2 w-fit text-slate-500",
+  };
+
+  return (
+    <Link href={link} target="_blank" rel="noopener noreferrer">
+      <Button
+        className={buttonStyles[variant]}
+        variant={variant === "outline" ? "outline" : "action"}
+        size={variant === "outline" ? "sm" : "default"}
+      >
+        {variant === "outline" && (
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.83334 14.1667L14.1667 5.83334M14.1667 5.83334H7.50001M14.1667 5.83334V12.5"
+              stroke="currentColor"
+              strokeWidth="1.67"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
+        {text}
+      </Button>
+    </Link>
+  );
+};
+
 const FeatureText = ({
   feature,
   isHighlighted,
@@ -178,30 +224,11 @@ const FeatureText = ({
                   {section.description}
                 </p>
               </div>
-              <Link href={section.docsLink} target="_blank">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 w-fit text-slate-500"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.83334 14.1667L14.1667 5.83334M14.1667 5.83334H7.50001M14.1667 5.83334V12.5"
-                      stroke="currentColor"
-                      strokeWidth="1.67"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  View docs
-                </Button>
-              </Link>
+              <CtaButton
+                variant="outline"
+                text="View docs"
+                link={section.docsLink}
+              />
             </div>
           ))}
         </div>
@@ -233,14 +260,11 @@ const FeatureText = ({
       </div>
       {feature.variant === "bullets-cta" && (
         <div className="mt-auto">
-          <Link href={feature.cta.link}>
-            <Button
-              className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
-              variant="action"
-            >
-              {feature.cta.text}
-            </Button>
-          </Link>
+          <CtaButton
+            variant={feature.cta.variant}
+            text={feature.cta.text}
+            link={feature.cta.link}
+          />
         </div>
       )}
     </div>

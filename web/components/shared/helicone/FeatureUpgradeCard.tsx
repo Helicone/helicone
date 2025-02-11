@@ -8,7 +8,7 @@ import { FeaturePreviewSectionClean } from "@/components/templates/featurePrevie
 import { RateLimitVisual } from "./RateLimitVisual";
 import { DatasetVisual } from "./DatasetVisual";
 import { SessionsFeatureVisual } from "./features/SessionsFeature";
-import { WebhookVisual } from "./WebhookVisual";
+import { CodeExample } from "./CodeExample";
 import SimplePricingTable from "./SimplePricingTable";
 import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 import {
@@ -43,28 +43,102 @@ export const FEATURED_SECTION_DESIGNS: Partial<Record<ProFeatureKey, Feature>> =
       imageAlt: "Sessions and traces dashboard",
     },
     users: {
-      variant: "preview-sections",
-      title: "Track User Metrics",
-      subtitle:
+      variant: "bullets-cta",
+      title: "",
+      subtitles: [
         "Track per-user request volumes, costs, and usage patterns across your AI services.",
-      sections: [
-        {
-          title: "Gain detailed insights into individual user activity.",
-          description: "Improve performance and detect potential abuse.",
-          docsLink: "https://docs.helicone.ai/features/users",
-        },
-        {
-          title: "Improve performance and detect potential abuse.",
-          description:
-            "Track per-user request volumes, costs, and usage patterns across your AI services.",
-          docsLink: "https://docs.helicone.ai/features/users",
-        },
+        "Gain detailed insights into individual user activity.",
+        "Improve performance and detect potential abuse.",
       ],
+      cta: {
+        text: "View docs",
+        link: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
+        variant: "outline",
+      },
       media: {
         type: "image",
         src: "/static/featureUpgrade/user-metric.webp",
       },
       imageAlt: "User metrics dashboard",
+    },
+    playground: {
+      variant: "bullets",
+      title: "Unlock Playground",
+      subtitles: [
+        "Test and iterate on your LLM prompts with our interactive playground environment.",
+        "Experiment with different models and parameters to see how they affect your chats.",
+        "Different experiments will use the same model.",
+      ],
+      media: {
+        type: "component",
+        component: () => CodeExample("properties"),
+      },
+      imageAlt: "Playground interface",
+    },
+    datasets: {
+      variant: "bullets-cta",
+      title: "",
+      subtitles: [
+        "Curate datasets with your actual requests",
+        "Fine-tune your LLMs to improve performance on specific tasks.",
+        "Experiment with prompts to prevent regression.",
+      ],
+      media: {
+        type: "component",
+        component: DatasetVisual,
+      },
+      imageAlt: "Dataset curation interface",
+      cta: {
+        text: "View docs",
+        link: "https://docs.helicone.ai/features/fine-tuning",
+        variant: "outline",
+      },
+    },
+    properties: {
+      variant: "preview-sections",
+      title: "",
+      subtitle:
+        "Enhance your request analytics by adding custom metadata to track business metrics, user behaviors, and application-specific data points for deeper insights",
+      sections: [
+        {
+          title: "Add custom metadata",
+          description:
+            "Add custom metadata to your requests with simple headers.",
+          docsLink:
+            "https://docs.helicone.ai/features/advanced-usage/custom-properties",
+        },
+        {
+          title: "Analyze metadata",
+          description:
+            "Use this metadata to segment your data and analyze usage patterns.",
+          docsLink:
+            "https://docs.helicone.ai/features/advanced-usage/custom-properties",
+        },
+      ],
+      media: {
+        type: "component",
+        component: () => CodeExample("properties"),
+      },
+      imageAlt: "Properties dashboard",
+    },
+    cache: {
+      variant: "bullets-cta",
+      title: "",
+      subtitles: [
+        "Cut costs by minimizing the number of API calls.",
+        "Faster response times for common queries and reduce the load on backend resources.",
+        "Find the most common requests with your app and visualize on a dashboard.",
+      ],
+      media: {
+        type: "image",
+        src: "/static/featureUpgrade/caching.webp",
+      },
+      imageAlt: "Cache analytics dashboard",
+      cta: {
+        text: "View docs",
+        link: "https://docs.helicone.ai/features/advanced-usage/caching",
+        variant: "outline",
+      },
     },
   };
 
@@ -83,12 +157,13 @@ export const PRO_FEATURES: Record<string, Feature> = {
     },
     imageAlt: "Sessions and traces dashboard",
     cta: {
-      text: "Learn more",
+      text: "View docs",
       link: "https://docs.helicone.ai/features/sessions",
+      variant: "outline",
     },
   },
   cache: {
-    variant: "bullets",
+    variant: "bullets-cta",
     title: "Cache Common Responses",
     subtitles: [
       "Cut costs by minimizing the number of API calls.",
@@ -100,9 +175,14 @@ export const PRO_FEATURES: Record<string, Feature> = {
       src: "/static/featureUpgrade/caching.webp",
     },
     imageAlt: "Cache analytics dashboard",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/advanced-usage/caching",
+      variant: "outline",
+    },
   },
   "rate-limits": {
-    variant: "bullets",
+    variant: "bullets-cta",
     title: "Create Custom Rate Limits",
     subtitles: [
       "Set custom LLM rate limits for your model providers.",
@@ -114,9 +194,14 @@ export const PRO_FEATURES: Record<string, Feature> = {
       component: RateLimitVisual,
     },
     imageAlt: "Rate limits configuration interface",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/advanced-usage/custom-rate-limits",
+      variant: "outline",
+    },
   },
   users: {
-    variant: "bullets",
+    variant: "bullets-cta",
     title: "Track User Metrics",
     subtitles: [
       "Track per-user request volumes, costs, and usage patterns across your AI services.",
@@ -128,9 +213,14 @@ export const PRO_FEATURES: Record<string, Feature> = {
       src: "/static/featureUpgrade/user-metric.webp",
     },
     imageAlt: "User metrics dashboard",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
+      variant: "outline",
+    },
   },
   datasets: {
-    variant: "bullets",
+    variant: "bullets-cta",
     title: "Curate High-Quality Datasets",
     subtitles: [
       "Curate datasets with your actual requests",
@@ -142,9 +232,14 @@ export const PRO_FEATURES: Record<string, Feature> = {
       component: DatasetVisual,
     },
     imageAlt: "Dataset curation interface",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/fine-tuning",
+      variant: "outline",
+    },
   },
   webhooks: {
-    variant: "bullets",
+    variant: "bullets-cta",
     title: "Automate Your Workflow With Webhooks",
     subtitles: [
       "Instantly responding to events, triggering actions, and integrating with external tools.",
@@ -153,9 +248,14 @@ export const PRO_FEATURES: Record<string, Feature> = {
     ],
     media: {
       type: "component",
-      component: WebhookVisual,
+      component: () => CodeExample("webhook"),
     },
     imageAlt: "Webhook code example",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/webhooks",
+      variant: "outline",
+    },
   },
   alerts: {
     variant: "bullets",
@@ -177,11 +277,13 @@ export type ProFeatureKey = keyof typeof PRO_FEATURES;
 interface FeatureUpgradeCardProps {
   title: string;
   featureName?: FeatureName;
-  featureImage?: string;
+  featureImage?: {
+    type: "image" | "component";
+    content: string | React.ComponentType; // string for image URL, component for React component
+  };
   headerTagline?: string;
   icon?: React.ReactNode;
   highlightedFeature?: ProFeatureKey;
-  featureOrder?: ProFeatureKey[];
 }
 
 export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
@@ -191,19 +293,44 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   headerTagline,
   icon,
   highlightedFeature,
-  featureOrder,
 }) => {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const { handleUpgradeTeam, isLoading } = useUpgradePlan();
 
   const getFeatures = () => {
-    if (featureOrder) {
-      return Object.fromEntries(
-        featureOrder.map((key) => [key, PRO_FEATURES[key]])
-      );
+    let features = { ...PRO_FEATURES };
+
+    // Remove the highlighted feature from the general section
+    if (highlightedFeature && features[highlightedFeature]) {
+      const { [highlightedFeature]: _, ...remainingFeatures } = features;
+      features = remainingFeatures;
     }
-    return PRO_FEATURES;
+
+    return features;
   };
+
+  const pricingCards = (
+    <div className="w-full flex md:flex-row gap-6 flex-col">
+      <PricingCard title="Hobby" price="Free" isCurrentPlan={true} />
+      <PricingCard
+        title="Pro"
+        price="$20"
+        priceSubtext="/seat/mo"
+        isPopular={true}
+        variant="highlighted"
+        onClick={() => setIsUpgradeDialogOpen(true)}
+      />
+      <PricingCard
+        title="Team"
+        price="$200"
+        priceSubtext="/mo"
+        isBestValue={true}
+        variant="outlined"
+        onClick={handleUpgradeTeam}
+        isLoading={isLoading}
+      />
+    </div>
+  );
 
   return (
     <div className="w-full max-w-7xl md:px-24 px-4 mx-auto py-10 bg-white flex flex-col gap-16">
@@ -237,49 +364,34 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
           {headerTagline}
         </div>
 
-        <div className="w-full flex md:flex-row gap-6 flex-col">
-          <PricingCard title="Hobby" price="Free" isCurrentPlan={true} />
-          <PricingCard
-            title="Pro"
-            price="$20"
-            priceSubtext="/seat/mo"
-            isPopular={true}
-            variant="highlighted"
-            onClick={() => setIsUpgradeDialogOpen(true)}
-          />
-          <PricingCard
-            title="Team"
-            price="$200"
-            priceSubtext="/mo"
-            isBestValue={true}
-            variant="outlined"
-            onClick={handleUpgradeTeam}
-            isLoading={isLoading}
-          />
-        </div>
+        {pricingCards}
       </div>
 
-      {highlightedFeature && (
-        <>
-          {featureImage && (
+      {featureImage && (
+        <div className="w-full">
+          {featureImage.type === "image" ? (
+            <img
+              src={featureImage.content as string}
+              alt="Feature preview"
+              className="w-full h-auto"
+            />
+          ) : (
             <div className="w-full">
-              <img
-                src={featureImage}
-                alt="Feature preview"
-                className="w-full h-auto"
-              />
+              {React.createElement(featureImage.content as React.ComponentType)}
             </div>
           )}
+        </div>
+      )}
 
-          <PreviewCard
-            feature={
-              FEATURED_SECTION_DESIGNS[highlightedFeature] ??
-              PRO_FEATURES[highlightedFeature]
-            }
-            position="left"
-            isHighlighted={true}
-          />
-        </>
+      {highlightedFeature && (
+        <PreviewCard
+          feature={
+            FEATURED_SECTION_DESIGNS[highlightedFeature] ??
+            PRO_FEATURES[highlightedFeature]
+          }
+          position="left"
+          isHighlighted={true}
+        />
       )}
 
       <div className="w-full flex flex-col items-center gap-6">
