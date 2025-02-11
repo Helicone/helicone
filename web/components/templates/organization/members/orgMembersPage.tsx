@@ -82,10 +82,10 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               <ProFeatureWrapper featureName="invite">
                 <Button
                   onClick={() => setAddOpen(true)}
-                  variant="outline"
+                  variant="default"
                   size="sm_sleek"
                 >
-                  invite +
+                  add member +
                 </Button>
               </ProFeatureWrapper>
             </div>
