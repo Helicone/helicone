@@ -123,24 +123,6 @@ const SessionsPage = (props: SessionsPageProps) => {
       onValueChange={(value) => setCurrentTab(value)}
       className="w-full"
     >
-      {/* <AuthHeader
-        isWithinIsland={true}
-        title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
-        actions={
-          <TabsList className="grid w-full grid-cols-2 mr-8">
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        }
-      /> */}
-
       <div>
         {allNames.isLoading ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -181,6 +163,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               featureImage="/static/featureUpgrade/sessions-graphic.webp"
               headerTagline="Group, analyze and fix AI workflows"
               icon={<ListTree className="w-4 h-4 text-sky-500" />}
+              highlightedFeature="sessions"
             />
           </div>
         ) : (
@@ -190,6 +173,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               featureImage="/static/featureUpgrade/sessions-graphic.webp"
               headerTagline="Group, analyze and fix AI workflows"
               icon={<ListTree className="w-4 h-4 text-sky-500" />}
+              highlightedFeature="sessions"
             />
           </div>
         )}

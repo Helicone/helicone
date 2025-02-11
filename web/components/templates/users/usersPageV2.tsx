@@ -19,9 +19,9 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { UserIcon } from "lucide-react";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -141,26 +141,24 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   );
 
   const hasAccess = useHasAccess("users");
-  const org = useOrg();
 
-  const hasAccessToUsers = useMemo(() => {
+  if (!hasAccess) {
     return (
-      hasAccess ||
-      (users.length > 0 &&
-        new Date().getTime() < new Date("2024-09-27").getTime())
-    );
-  }, [org?.currentOrg?.tier, users.length]);
-
-  if (org?.currentOrg?.tier === "free") {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex justify-center items-center bg-white">
         <FeatureUpgradeCard
-          title="Unlock User Metrics"
-          description="The Free plan does not include User Tracking, but getting access is easy."
-          infoBoxText="Track individual user interactions and usage patterns with simple headers."
-          documentationLink="https://docs.helicone.ai/features/advanced-usage/user-metrics"
-          tier={org?.currentOrg?.tier ?? "free"}
+          title="Users"
           featureName="Users"
+          headerTagline="Track user cost, usage, and more"
+          icon={<UserIcon className="w-4 h-4 text-sky-500" />}
+          highlightedFeature="users"
+          featureOrder={[
+            "sessions",
+            "webhooks",
+            "datasets",
+            "cache",
+            "rate-limits",
+            "alerts",
+          ]}
         />
       </div>
     );
