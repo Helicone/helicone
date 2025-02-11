@@ -1,4 +1,3 @@
-import { useTheme } from "next-themes";
 import { signOut } from "@/components/shared/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -7,28 +6,28 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { Database } from "@/supabase/database.types";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { LogOutIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
 import CreateOrgForm from "../templates/organization/createOrgForm";
-import { useOrg } from "./org/organizationContext";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
-import { LogOutIcon } from "lucide-react";
-import Link from "next/link";
+import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 interface OrgDropdownProps {}
 
@@ -93,56 +92,32 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-1 w-full "
+            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full "
           >
-            {currentIcon && (
-              <currentIcon.icon
-                className={clsx(
-                  `text-${currentColor?.name}-500`,
-                  "flex-shrink-0 h-4 w-4"
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row gap-2 items-center">
+                {currentIcon && (
+                  <currentIcon.icon
+                    className={clsx(
+                      `text-${currentColor?.name}-500`,
+                      "flex-shrink-0 h-4 w-4"
+                    )}
+                    aria-hidden="true"
+                  />
                 )}
-                aria-hidden="true"
-              />
-            )}
-            <h3 className="text-xs font-medium text-left truncate max-w-24">
-              {orgContext?.currentOrg?.name}
-            </h3>
+                <h3 className="text-sm font-medium text-left truncate max-w-24">
+                  {orgContext?.currentOrg?.name}
+                </h3>
+              </div>
+
+              <p className="ml-6 text-xs text-slate-400 font-medium max-w-[6rem] truncate">
+                {user?.email}
+              </p>
+            </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
-          <DropdownMenuLabel className="flex justify-between items-center">
-            <div className="flex gap-2">
-              {currentIcon && (
-                <currentIcon.icon
-                  className={clsx(
-                    `text-${currentColor?.name}-500`,
-                    "mt-1 flex-shrink-0 h-4 w-4"
-                  )}
-                  aria-hidden="true"
-                />
-              )}
-              <div className="flex flex-col gap-1">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  {orgContext?.currentOrg?.name}
-                </h3>
-                <p className="text-xs text-slate-500 font-medium max-w-[10rem] truncate">
-                  {user?.email}
-                </p>
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <OrgMoreDropdown
-                ownedOrgs={ownedOrgs}
-                memberOrgs={memberOrgs}
-                customerOrgs={customerOrgs}
-                createNewOrgHandler={createNewOrgHandler}
-                currentOrgId={orgContext?.currentOrg?.id}
-                setCurrentOrg={orgContext?.setCurrentOrg}
-              />
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <div className="block sm:hidden">
+          <DropdownMenuGroup>
             <OrgMoreDropdown
               ownedOrgs={ownedOrgs}
               memberOrgs={memberOrgs}
@@ -152,13 +127,30 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               setCurrentOrg={orgContext?.setCurrentOrg}
             />
             <DropdownMenuSeparator />
-          </div>
-          <DropdownMenuGroup>
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
                 <Link href="/settings/members">Invite members</Link>
               </DropdownMenuItem>
             )}
+            {orgContext?.currentOrg?.tier !== "demo" && (
+              <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                <Link href="/settings/members" className="flex flex-row gap-2 ">
+                  <span>Billing</span>
+                  {orgContext?.currentOrg?.tier === "free" ? (
+                    <span className="text-xs text-sky-500 bg-sky-50 px-2 py-[2px] rounded-md font-semibold">
+                      Upgrade
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-[2px] rounded-md font-semibold">
+                      Enterprise
+                    </span>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+
+          <DropdownMenuGroup>
             <DropdownMenuItem
               className={cn("hover:bg-transparent cursor-default")}
               disableHover
@@ -184,6 +176,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </DropdownMenuItem>
             </Link>
           )}
+
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
             <LogOutIcon className="h-4 w-4 mr-2" />
             Sign out

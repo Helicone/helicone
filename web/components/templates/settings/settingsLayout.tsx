@@ -1,19 +1,17 @@
-import AuthHeader from "@/components/shared/authHeader";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BuildingOfficeIcon,
   CreditCardIcon,
   DocumentTextIcon,
   NoSymbolIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { Separator } from "@/components/ui/separator";
 import { FingerprintIcon, KeyIcon, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { useIsGovernanceEnabled } from "../organization/hooks";
 
 const DEFAULT_TABS = [
@@ -22,12 +20,6 @@ const DEFAULT_TABS = [
     title: "Organization",
     icon: BuildingOfficeIcon,
     href: "/settings",
-  },
-  {
-    id: "members",
-    title: "Members",
-    icon: UserGroupIcon,
-    href: "/settings/members",
   },
   {
     id: "billing",
@@ -91,8 +83,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   }, [isGovernanceEnabled.data?.data?.data]);
 
   return (
-    <IslandContainer className="space-y-6 ">
-      <AuthHeader isWithinIsland={true} title={"Settings"} />
+    <IslandContainer className="space-y-6 pt-10">
       {org?.currentOrg?.tier !== "demo" && (
         <div className="flex flex-col space-y-8 items-start">
           <div className="flex flex-col space-y-2 items-start">
