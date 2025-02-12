@@ -892,6 +892,46 @@ WHEN (request_response_rmt.model ILIKE 'Meta-Llama-3.1-8B-Instruct') THEN 100 * 
   ELSE 0
 END
 )
+WHEN (request_response_rmt.provider = 'NOVITA') THEN (
+  CASE
+  WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1') THEN 4000 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek_v3') THEN 890 * request_response_rmt.prompt_tokens + 890 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.3-70b-instruct') THEN 390 * request_response_rmt.prompt_tokens + 390 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1-distill-llama-70b') THEN 800 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-8b-instruct') THEN 50 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-70b-instruct') THEN 340 * request_response_rmt.prompt_tokens + 390 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-nemo') THEN 170 * request_response_rmt.prompt_tokens + 170 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1-distill-qwen-14b') THEN 150 * request_response_rmt.prompt_tokens + 150 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1-distill-qwen-32b') THEN 300 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'Sao10K/L3-8B-Stheno-v3.2') THEN 50 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'gryphe/mythomax-l2-13b') THEN 90 * request_response_rmt.prompt_tokens + 90 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'deepseek/deepseek-r1-distill-llama-8b') THEN 40 * request_response_rmt.prompt_tokens + 40 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2.5-72b-instruct') THEN 380 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-8b-instruct') THEN 40 * request_response_rmt.prompt_tokens + 40 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'microsoft/wizardlm-2-8x22b') THEN 620 * request_response_rmt.prompt_tokens + 620 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'google/gemma-2-9b-it') THEN 80 * request_response_rmt.prompt_tokens + 80 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'mistralai/mistral-7b-instruct') THEN 59 * request_response_rmt.prompt_tokens + 59 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3-70b-instruct') THEN 510 * request_response_rmt.prompt_tokens + 740 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'openchat/openchat-7b') THEN 60 * request_response_rmt.prompt_tokens + 60 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'nousresearch/hermes-2-pro-llama-3-8b') THEN 140 * request_response_rmt.prompt_tokens + 140 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'sao10k/l3-70b-euryale-v2.1') THEN 1480 * request_response_rmt.prompt_tokens + 1480 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'cognitivecomputations/dolphin-mixtral-8x22b') THEN 900 * request_response_rmt.prompt_tokens + 900 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'jondurbin/airoboros-l2-70b') THEN 500 * request_response_rmt.prompt_tokens + 500 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'nousresearch/nous-hermes-llama2-13b') THEN 170 * request_response_rmt.prompt_tokens + 170 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'teknium/openhermes-2.5-mistral-7b') THEN 170 * request_response_rmt.prompt_tokens + 170 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'sophosympatheia/midnight-rose-70b') THEN 800 * request_response_rmt.prompt_tokens + 800 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-8b-instruct-max') THEN 50 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'sao10k/l3-8b-lunaris') THEN 50 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-vl-72b-instruct') THEN 450 * request_response_rmt.prompt_tokens + 450 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-1b-instruct') THEN 20 * request_response_rmt.prompt_tokens + 20 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-11b-vision-instruct') THEN 60 * request_response_rmt.prompt_tokens + 60 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.2-3b-instruct') THEN 30 * request_response_rmt.prompt_tokens + 50 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'meta-llama/llama-3.1-8b-instruct-bf16') THEN 60 * request_response_rmt.prompt_tokens + 60 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'sao10k/l31-70b-euryale-v2.2') THEN 1480 * request_response_rmt.prompt_tokens + 1480 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'qwen/qwen-2-7b-instruct') THEN 54 * request_response_rmt.prompt_tokens + 54 * request_response_rmt.completion_tokens
+  ELSE 0
+END
+)
     ELSE 
   CASE
   WHEN (request_response_rmt.model ILIKE 'ada') THEN 400 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
