@@ -102,6 +102,12 @@ type RealtimeMessage = {
     }[];
   };
   session?: {}; // With session.created, session.update, session.updated
+  item?: {
+    // With converstaion.item.create
+    type: string; // "function_call_output"
+    call_id: string; // ex: "call_123"
+    output: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
+  };
 };
 const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   if (!messages?.length) return [];
@@ -109,6 +115,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   return messages
     .map((msg: SocketMessage) => {
       // Only process specific message types that we want to show
+      const output = msg.content?.response?.output?.[0];
+      const item = msg.content?.item;
+
       switch (msg.content.type) {
         case "response.create":
           // -> User: Text
@@ -130,8 +139,6 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
           };
 
         case "response.done":
-          const output = msg.content?.response?.output?.[0];
-
           if (output?.content?.[0]) {
             // -> Assistant: Text or Audio
             return {
@@ -158,17 +165,20 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               timestamp: msg.timestamp,
             };
           }
+          break;
 
-          if (output?.type === "function_call_output") {
+        case "conversation.item.create":
+          if (item?.type === "function_call_output") {
             // -> Assistant: Function call output
             return {
-              role: "assistant",
+              role: "user",
               _type: "function",
-              tool_call_id: output.output?.call_id,
-              content: JSON.stringify(output.output),
+              tool_call_id: item?.call_id,
+              content: item?.output,
               timestamp: msg.timestamp,
             };
           }
+          break;
 
         case "session.update":
           // -> User: Session update
@@ -186,7 +196,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     .filter((msg) => msg !== null)
     .sort(
       (a, b) =>
-        new Date(a.timestamp || 0).getTime() -
-        new Date(b.timestamp || 0).getTime()
+        new Date(a?.timestamp || 0).getTime() -
+        new Date(b?.timestamp || 0).getTime()
     ) as Message[];
 };
