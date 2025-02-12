@@ -1,4 +1,4 @@
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import {
   PiCodeBold,
   PiGearBold,
@@ -19,18 +19,57 @@ type MessageType =
 
 export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   // Get all messages sorted by timestamp
-  const getAllMessages = (): Message[] => {
-    const requestMessages = mappedRequest.schema.request?.messages || [];
-    const responseMessages = mappedRequest.schema.response?.messages || [];
-    const allMessages = [...requestMessages, ...responseMessages];
+  const sortedMessages = [
+    ...(mappedRequest.schema.request?.messages || []),
+    ...(mappedRequest.schema.response?.messages || []),
+  ].sort((a, b) => {
+    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return timeA - timeB;
+  });
 
-    return allMessages.sort((a, b) => {
-      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return timeA - timeB;
-    });
-  };
-  const sortedMessages = getAllMessages();
+  // Get session features from the latest session update or raw request
+  const sessionFeatures = (() => {
+    // Try to get from session update message first
+    const sessionMsg = sortedMessages.find(
+      (msg) =>
+        typeof msg.content === "string" &&
+        msg.content.includes("session.update")
+    );
+
+    let features = {};
+    if (sessionMsg?.content) {
+      try {
+        const { session } =
+          JSON.parse(sessionMsg.content).type === "session.update"
+            ? JSON.parse(sessionMsg.content)
+            : { session: null };
+        if (session) {
+          features = {
+            Modalities: session.modalities?.join(", "),
+            Voice: session.voice,
+            Instructions: session.instructions,
+            Tools: session.tools?.map((t: any) => t.name).join(", "),
+          };
+        }
+      } catch (e) {}
+    }
+
+    // Fallback to raw request
+    if (Object.keys(features).length === 0) {
+      const req = mappedRequest.raw.request || {};
+      features = {
+        Modalities: Array.isArray(req.modalities)
+          ? req.modalities.join(", ")
+          : req.modalities,
+        Voice: req.voice,
+        Instructions: req.instructions,
+        Tools: req.tools?.map((t: any) => t.function.name).join(", "),
+      };
+    }
+
+    return Object.entries(features).filter(([_, v]) => v) as [string, string][];
+  })();
 
   const getMessageType = (message: any): MessageType => {
     if (message._type === "functionCall") return "functionCall";
@@ -41,22 +80,35 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   };
 
   const ModailityIcon = ({ type }: { type: MessageType }) => {
-    switch (type) {
-      case "audio":
-        return <PiMicrophoneBold size={14} className="text-secondary" />;
-      case "functionCall":
-      case "functionOutput":
-        return <PiCodeBold size={14} className="text-secondary" />;
-      case "session":
-        return <PiGearBold size={14} className="text-secondary" />;
-      case "text":
-      default:
-        return <PiTextTBold size={14} className="text-secondary" />;
-    }
+    const icons = {
+      audio: <PiMicrophoneBold size={14} className="text-secondary" />,
+      functionCall: <PiCodeBold size={14} className="text-secondary" />,
+      functionOutput: <PiCodeBold size={14} className="text-secondary" />,
+      session: <PiGearBold size={14} className="text-secondary" />,
+      text: <PiTextTBold size={14} className="text-secondary" />,
+    };
+    return icons[type];
   };
 
   return (
     <div className="w-full">
+      {/* Header Section */}
+      {sessionFeatures.length > 0 && (
+        <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
+          <div className="text-xs text-secondary uppercase tracking-wider mb-2">
+            Realtime Session Features
+          </div>
+          <div className="flex flex-wrap gap-4">
+            {sessionFeatures.map(([label, value]) => (
+              <div key={label} className="flex gap-1.5">
+                <span className="font-medium">{label}:</span>
+                <span className="text-secondary">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Messages Section */}
       <div className="gap-4">
         {sortedMessages.map((message, idx) => {
@@ -138,7 +190,6 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 /* -------------------------------------------------------------------------- */
 /*                         Special Message Components                         */
 /* -------------------------------------------------------------------------- */
-
 interface SessionUpdateProps {
   content: string;
 }
