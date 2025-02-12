@@ -18,21 +18,11 @@ const sessionUpdate = {
   event_id: "event_123",
   type: "session.update",
   session: {
-    modalities: ["text", "audio"],
+    modalities: ["text"],
     instructions: "You are a helpful assistant.",
-    voice: "alloy",
+    voice: "sage",
     input_audio_format: "pcm16",
     output_audio_format: "pcm16",
-    input_audio_transcription: {
-      model: "whisper-1",
-    },
-    turn_detection: {
-      type: "server_vad",
-      threshold: 0.5,
-      prefix_padding_ms: 300,
-      silence_duration_ms: 500,
-      create_response: true,
-    },
     tools: [
       {
         type: "function",
@@ -61,6 +51,11 @@ const rl = readline.createInterface({
 
 ws.on("open", function open() {
   console.log("Connected to server.");
+
+  // Send session update immediately
+  console.log("Sending immediate session update...");
+  ws.send(JSON.stringify(sessionUpdate));
+
   console.log("Enter your message (or 'quit' to exit):");
   startCliLoop();
 });
