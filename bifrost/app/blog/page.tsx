@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "deepseek-janus-pro",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "switch-to-deepseek",
     },
   },
