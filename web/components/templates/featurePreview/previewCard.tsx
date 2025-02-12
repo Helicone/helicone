@@ -139,14 +139,34 @@ const FeatureMedia = ({
   );
 };
 
-const CtaButton = ({
+const DefaultIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M5.83334 14.1667L14.1667 5.83334M14.1667 5.83334H7.50001M14.1667 5.83334V12.5"
+      stroke="currentColor"
+      strokeWidth="1.67"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const CtaButton = ({
   variant = "primary",
   text,
   link,
+  icon: Icon,
 }: {
   variant?: "primary" | "outline";
   text: string;
   link: string;
+  icon?: React.ComponentType;
 }) => {
   const buttonStyles = {
     primary:
@@ -161,23 +181,7 @@ const CtaButton = ({
         variant={variant === "outline" ? "outline" : "action"}
         size={variant === "outline" ? "sm" : "default"}
       >
-        {variant === "outline" && (
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M5.83334 14.1667L14.1667 5.83334M14.1667 5.83334H7.50001M14.1667 5.83334V12.5"
-              stroke="currentColor"
-              strokeWidth="1.67"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {variant === "outline" && (Icon ? <Icon /> : <DefaultIcon />)}
         {text}
       </Button>
     </Link>

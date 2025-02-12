@@ -6,8 +6,8 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Database, ListTree } from "lucide-react";
-import { DatasetVisual } from "@/components/shared/helicone/DatasetVisual";
+import { Database } from "lucide-react";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -35,8 +35,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
         <div className="flex flex-col space-y-2 w-full items-center">
           <Skeleton className="w-full h-full" />
         </div>
-      ) : !isLoading &&
-        (org?.currentOrg?.tier === "free" || datasets?.length === 0) ? (
+      ) : !isLoading && org?.currentOrg?.tier === "free" ? (
         <div className="flex flex-col space-y-2 w-full items-center bg-white">
           <FeatureUpgradeCard
             title="Datasets"
@@ -45,6 +44,10 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             featureName="Datasets"
             highlightedFeature="datasets"
           />
+        </div>
+      ) : datasets?.length === 0 ? (
+        <div className="flex flex-col w-full min-h-screen items-center bg-white">
+          <EmptyStateCard feature="datasets" />
         </div>
       ) : (
         <>
