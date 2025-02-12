@@ -18,21 +18,11 @@ const sessionUpdate = {
   event_id: "event_123",
   type: "session.update",
   session: {
-    modalities: ["text", "audio"],
+    modalities: ["text"],
     instructions: "You are a helpful assistant.",
-    voice: "alloy",
+    voice: "sage",
     input_audio_format: "pcm16",
     output_audio_format: "pcm16",
-    input_audio_transcription: {
-      model: "whisper-1",
-    },
-    turn_detection: {
-      type: "server_vad",
-      threshold: 0.5,
-      prefix_padding_ms: 300,
-      silence_duration_ms: 500,
-      create_response: true,
-    },
     tools: [
       {
         type: "function",
@@ -61,6 +51,11 @@ const rl = readline.createInterface({
 
 ws.on("open", function open() {
   console.log("Connected to server.");
+
+  // Send session update immediately
+  console.log("Sending immediate session update...");
+  ws.send(JSON.stringify(sessionUpdate));
+
   console.log("Enter your message (or 'quit' to exit):");
   startCliLoop();
 });
@@ -72,11 +67,58 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
       "\nReceived:",
       inspect(response, { colors: true, depth: null })
     );
+
+    // Handle function calls
+    if (response.type === "response.done" && response.response.output) {
+      const functionCalls = response.response.output.filter(
+        (item: any) =>
+          item.type === "function_call" && item.status === "completed"
+      );
+
+      for (const functionCall of functionCalls) {
+        console.log("Function call:", functionCall);
+        handleFunctionCall(functionCall);
+      }
+    }
+
     console.log("\nEnter your message (or 'quit' to exit):");
   } catch (error) {
     console.error("Error parsing message:", error);
   }
 });
+
+// Function call handler
+function handleFunctionCall(functionCall: any) {
+  const { name, arguments: args } = functionCall;
+
+  if (name === "get_weather") {
+    const parsedArgs = JSON.parse(args);
+    const dummyResponse = {
+      type: "conversation.item.create",
+      item: {
+        type: "function_call_output",
+        call_id: functionCall.call_id,
+        output: JSON.stringify({
+          temperature: 72,
+          conditions: "sunny",
+          location: parsedArgs.location,
+        }),
+      },
+    };
+
+    console.log(
+      "\nSending function response:",
+      inspect(dummyResponse, { colors: true, depth: null })
+    );
+    ws.send(JSON.stringify(dummyResponse));
+    ws.send(
+      JSON.stringify({
+        type: "response.create",
+        response: {},
+      })
+    );
+  }
+}
 
 ws.on("error", function error(err: Error) {
   console.error("WebSocket error:", err);
