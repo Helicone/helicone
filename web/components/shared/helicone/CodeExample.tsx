@@ -36,6 +36,13 @@ const CodeExamples = {
     alt: "Properties",
     offset: "mt-[-50px]",
   },
+  users: {
+    code: `"Helicone-User-Id": "john@doe.com"`,
+    language: "javascript",
+    image: "/static/featureUpgrade/user-metric.webp",
+    alt: "Users",
+    offset: "mt-64",
+  },
 } as const satisfies Record<string, CodeExampleType>;
 
 export type CodeExampleKey = keyof typeof CodeExamples;

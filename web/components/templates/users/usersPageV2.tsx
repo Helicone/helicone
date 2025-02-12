@@ -21,7 +21,8 @@ import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { User, UserIcon } from "lucide-react";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -152,6 +153,22 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           icon={<UserGroupIcon className="w-4 h-4 text-sky-500" />}
           highlightedFeature="users"
         />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+        <EmptyStateCard feature="users" />
       </div>
     );
   }

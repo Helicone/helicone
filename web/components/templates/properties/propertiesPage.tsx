@@ -47,7 +47,7 @@ const PropertiesPage = (props: {}) => {
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col w-full min-h-screen items-center bg-white">
+      <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
         <EmptyStateCard feature="properties" />
       </div>
     );

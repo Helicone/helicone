@@ -4,6 +4,7 @@ import {
   CircleStackIcon,
   ClockIcon,
   TableCellsIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
 import { BarChart } from "@tremor/react";
@@ -188,86 +189,127 @@ const CachePage = (props: CachePageProps) => {
             ))}
           </TabsList>
           <TabsContent value="0">
-            <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-              <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                  {metrics.map((metric, i) => (
-                    <li
-                      key={i}
-                      className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                    >
-                      <metric.icon className="h-6 w-6 text-sky-500" />
-                      <div className="flex flex-col">
-                        <dt className="text-gray-500 text-sm">
-                          {metric.label}
-                        </dt>
-                        {metric.isLoading ? (
-                          <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                        ) : (
-                          <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                            {metric.value}
-                          </dd>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                    Caches last 30 days
-                  </h3>
-                  <div className="h-72 px-4 ">
-                    {isAnyLoading ? (
-                      <div className="h-full w-full flex-col flex p-8">
-                        <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                      </div>
-                    ) : (
-                      <div className="h-full w-full">
-                        <BarChart
-                          data={chartData}
-                          categories={["count"]}
-                          index={"date"}
-                          className="h-full -ml-4 pt-4"
-                          colors={["blue"]}
-                          showLegend={false}
-                        />
-                      </div>
-                    )}
+            {hasCache ? (
+              <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
+                <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                  <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                    {metrics.map((metric, i) => (
+                      <li
+                        key={i}
+                        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
+                      >
+                        <metric.icon className="h-6 w-6 text-sky-500" />
+                        <div className="flex flex-col">
+                          <dt className="text-gray-500 text-sm">
+                            {metric.label}
+                          </dt>
+                          {metric.isLoading ? (
+                            <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+                          ) : (
+                            <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
+                              {metric.value}
+                            </dd>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                      Caches last 30 days
+                    </h3>
+                    <div className="h-72 px-4 ">
+                      {isAnyLoading ? (
+                        <div className="h-full w-full flex-col flex p-8">
+                          <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="h-full w-full">
+                          <BarChart
+                            data={chartData}
+                            categories={["count"]}
+                            index={"date"}
+                            className="h-full -ml-4 pt-4"
+                            colors={["blue"]}
+                            showLegend={false}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className="flex flex-col w-full xl:w-1/2
+                <div
+                  className="flex flex-col w-full xl:w-1/2
 space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                  Top Requests
-                </h3>
-                <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                  {chMetrics.topRequests.data?.data?.map(
-                    (request: any, i: any) => (
-                      <ThemedListItem
-                        key={i}
-                        onClickHandler={() => {
-                          setSelectedRequest(request);
-                          setOpen(true);
-                        }}
-                        title={request.prompt}
-                        subtitle={`Created: ${new Date(
-                          request.first_used
-                        ).toLocaleString()}`}
-                        icon={CircleStackIcon}
-                        value={request.count}
-                        pill={<ModelPill model={request.model} />}
-                        secondarySubtitle={`Recent: ${new Date(
-                          request.last_used
-                        ).toLocaleString()}`}
-                      />
-                    )
-                  )}
-                </ul>
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                    Top Requests
+                  </h3>
+                  <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                    {chMetrics.topRequests.data?.data?.map(
+                      (request: any, i: any) => (
+                        <ThemedListItem
+                          key={i}
+                          onClickHandler={() => {
+                            setSelectedRequest(request);
+                            setOpen(true);
+                          }}
+                          title={request.prompt}
+                          subtitle={`Created: ${new Date(
+                            request.first_used
+                          ).toLocaleString()}`}
+                          icon={CircleStackIcon}
+                          value={request.count}
+                          pill={<ModelPill model={request.model} />}
+                          secondarySubtitle={`Recent: ${new Date(
+                            request.last_used
+                          ).toLocaleString()}`}
+                        />
+                      )
+                    )}
+                  </ul>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-6 px-4 text-center">
+                <div className="flex flex-col items-center gap-4 max-w-3xl">
+                  <CircleStackIcon className="h-16 w-16 text-gray-400" />
+                  <h3 className="text-2xl font-semibold">
+                    No Cache Activity Detected
+                  </h3>
+                  <p className="text-gray-500 text-lg">
+                    Enable caching to reduce API costs and improve response
+                    times. Choose from these parameters to control cache
+                    behavior:
+                  </p>
+
+                  <DiffHighlight
+                    code={`"Helicone-Cache-Enabled": "true",         // Required to enable caching
+"Cache-Control": "max-age=3600",          // Optional: Cache duration in seconds
+"Helicone-Cache-Bucket-Max-Size": "1000", // Optional: Max entries per cache bucket
+"Helicone-Cache-Seed": "user-123"         // Optional: Isolate cache by seed value`}
+                    language="javascript"
+                    newLines={[]}
+                    oldLines={[]}
+                    textSize="md"
+                    className="rounded-lg text-left"
+                    marginTop={false}
+                    minHeight={false}
+                    maxHeight={false}
+                  />
+
+                  <Link
+                    href="https://docs.helicone.ai/features/advanced-usage/caching"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 flex items-center gap-2 text-sky-600 hover:text-sky-700 font-medium"
+                  >
+                    View caching documentation
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="1">
             <div className="py-4">

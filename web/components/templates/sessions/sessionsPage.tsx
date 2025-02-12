@@ -13,7 +13,11 @@ import {
   getRootFilterNode,
 } from "@/services/lib/filters/uiFilterRowTree";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
-import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
+import {
+  ChartPieIcon,
+  ListBulletIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
@@ -23,6 +27,8 @@ import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { ListTree } from "lucide-react";
+import { DiffHighlight } from "../welcome/diffHighlight";
+import Link from "next/link";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -122,47 +128,38 @@ const SessionsPage = (props: SessionsPageProps) => {
     <Tabs
       value={currentTab}
       onValueChange={(value) => setCurrentTab(value)}
-      className="w-full"
+      className="w-full relative"
     >
-      <div>
+      {/* Always render main content structure */}
+      <div className={hasSomeSessions ? "" : "blur-sm"}>
         {allNames.isLoading ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <LoadingAnimation />
-          </div>
+          <LoadingAnimation />
         ) : hasAccessToSessions ? (
-          hasSomeSessions ? (
-            <Row className="border-t border-slate-200 dark:border-slate-800">
-              <SessionNameSelection
-                sessionNameSearch={sessionNameSearch}
-                selectedName={selectedName}
-                setSessionNameSearch={setSessionNameSearch}
-                setSelectedName={setSelectedName}
-                sessionNames={names.sessions}
-              />
-              <SessionDetails
-                currentTab={currentTab}
-                selectedSession={
-                  names.sessions.find(
-                    (session) => session.name === selectedName
-                  ) ?? null
-                }
-                sessionIdSearch={sessionIdSearch ?? ""}
-                setSessionIdSearch={setSessionIdSearch}
-                sessions={sessions}
-                isLoading={isLoading}
-                sort={sort}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                setInterval={() => {}}
-                advancedFilters={advancedFilters}
-                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
-              />
-            </Row>
-          ) : (
-            <div className="flex flex-col w-full min-h-screen items-center bg-white">
-              <EmptyStateCard feature="sessions" />
-            </div>
-          )
+          <Row className="border-t border-slate-200 dark:border-slate-800">
+            {/* Always render session components */}
+            <SessionNameSelection
+              sessionNameSearch={sessionNameSearch}
+              selectedName={selectedName}
+              setSessionNameSearch={setSessionNameSearch}
+              setSelectedName={setSelectedName}
+              sessionNames={names.sessions}
+            />
+            <SessionDetails
+              currentTab={currentTab}
+              selectedSession={
+                names.sessions.find((s) => s.name === selectedName) ?? null
+              }
+              sessionIdSearch={sessionIdSearch ?? ""}
+              setSessionIdSearch={setSessionIdSearch}
+              sessions={sessions}
+              isLoading={isLoading}
+              sort={sort}
+              timeFilter={timeFilter}
+              setTimeFilter={setTimeFilter}
+              advancedFilters={advancedFilters}
+              onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+            />
+          </Row>
         ) : org?.currentOrg?.tier === "free" ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard
@@ -191,6 +188,13 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         )}
       </div>
+
+      {/* Overlay when no sessions */}
+      {!hasSomeSessions && hasAccessToSessions && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <EmptyStateCard feature="sessions" />
+        </div>
+      )}
     </Tabs>
   );
 };

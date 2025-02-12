@@ -46,7 +46,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           />
         </div>
       ) : datasets?.length === 0 ? (
-        <div className="flex flex-col w-full min-h-screen items-center bg-white">
+        <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
           <EmptyStateCard feature="datasets" />
         </div>
       ) : (

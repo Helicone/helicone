@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
+import { CodeExample } from "./CodeExample";
+import { SessionsFeatureVisual } from "./features/SessionsFeature";
 
 interface EmptyStateFeature {
   title: string;
@@ -28,10 +30,24 @@ export const EMPTY_STATE_FEATURES: Record<string, EmptyStateFeature> = {
   sessions: {
     title: "No Sessions Data Yet",
     description:
-      "Start tracking your sessions and traces with 3 simple headers.",
+      "Group and visualize multi-step LLM interactions. Track request flows across multiple traces and gain insights into complex AI workflows by adding only 2 simple headers.",
     featureImage: {
-      type: "image",
-      content: "/static/featureUpgrade/sessions-graphic.webp",
+      type: "component",
+      content: () => (
+        <DiffHighlight
+          code={`"Helicone-Session-Id": "chat-123",       // Unique identifier for the session
+"Helicone-Session-Path": "/parent/child",  // Hierarchical path for trace relationships 
+"Helicone-Session-Name": "Customer Support Flow"  // Human-readable session name`}
+          language={"javascript"}
+          newLines={[]}
+          oldLines={[]}
+          minHeight={false}
+          maxHeight={false}
+          textSize="md"
+          className="rounded-lg"
+          marginTop={false}
+        />
+      ),
     },
     cta: {
       //   primary: {
@@ -84,16 +100,13 @@ export const EMPTY_STATE_FEATURES: Record<string, EmptyStateFeature> = {
   },
   users: {
     title: "No User Metrics Yet",
-    description: "Start tracking per-user request volumes and usage patterns.",
+    description:
+      "Start tracking per-user request volumes and usage patterns with a simple header.",
     featureImage: {
-      type: "image",
-      content: "/static/featureUpgrade/user-metric.webp",
+      type: "component",
+      content: () => CodeExample("users"),
     },
     cta: {
-      primary: {
-        text: "Get Started",
-        link: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
-      },
       secondary: {
         text: "View Docs",
         link: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
@@ -220,13 +233,13 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
       } as EmptyStateFeature);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center max-w-7xl md:px-24 px-4 mx-auto py-14 bg-white flex flex-col gap-16">
+    <div className="w-full h-full flex flex-col items-center justify-center max-w-7xl md:px-24 px-4 mx-auto py-14 flex flex-col gap-16">
       <div className="flex flex-col gap-6 items-center text-center">
         <div className="flex flex-col gap-2">
           <h3 className="text-2xl font-semibold text-slate-900">
             {featureDefaults?.title}
           </h3>
-          <p className="text-slate-500 text-lg">
+          <p className="text-slate-500 text-lg max-w-2xl">
             {featureDefaults?.description}
           </p>
         </div>

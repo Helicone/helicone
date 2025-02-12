@@ -1,6 +1,4 @@
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 // Main visual component
 export const SessionsFeatureVisual = () => {
