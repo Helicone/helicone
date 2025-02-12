@@ -368,12 +368,18 @@ class TestHeliconeIntegrations:
 
         payload = {
             "promptId": "new-prompt",
-            "userId": "test-user",
-            "sessionId": SESSION_ID,
+            # version: number or "production" (default)
+            # inputs: {}
+            "userId": "test-user",  # Helicone property
+            "sessionId": SESSION_ID,  # Helicone property
         }
         headers = {
             "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
-            "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
+            "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
+            "GOOGLE_API_KEY": os.getenv("GOOGLE_GENERATIVE_API_KEY"),
+            "COHERE_API_KEY": os.getenv("COHERE_API_KEY"),
+            "MISTRAL_API_KEY": os.getenv("MISTRAL_API_KEY"),
         }
         response = requests.post(generate_url, json=payload, headers=headers)
 
