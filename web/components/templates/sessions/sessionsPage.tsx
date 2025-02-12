@@ -158,6 +158,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               setTimeFilter={setTimeFilter}
               advancedFilters={advancedFilters}
               onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+              setInterval={() => {}}
             />
           </Row>
         ) : org?.currentOrg?.tier === "free" ? (
