@@ -1,9 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DatasetVisual } from "./DatasetVisual";
-import { CtaButton } from "@/components/templates/featurePreview/previewCard";
 import { SquareArrowOutUpRight } from "lucide-react";
+import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
 interface EmptyStateFeature {
   title: string;
@@ -12,12 +11,12 @@ interface EmptyStateFeature {
     type: "image" | "component" | "video";
     content: string | React.ComponentType;
   };
-  cta: {
-    primary: {
+  cta?: {
+    primary?: {
       text: string;
       link: string;
     };
-    secondary: {
+    secondary?: {
       text: string;
       link: string;
     };
@@ -25,20 +24,20 @@ interface EmptyStateFeature {
 }
 
 // Feature definitions
-export const EMPTY_STATE_FEATURES = {
+export const EMPTY_STATE_FEATURES: Record<string, EmptyStateFeature> = {
   sessions: {
     title: "No Sessions Data Yet",
     description:
       "Start tracking your sessions and traces with 3 simple headers.",
     featureImage: {
       type: "image",
-      content: "/static/featureUpgrade/sessions-small-grid.webp",
+      content: "/static/featureUpgrade/sessions-graphic.webp",
     },
     cta: {
-      primary: {
-        text: "Get Started",
-        link: "https://docs.helicone.ai/features/sessions",
-      },
+      //   primary: {
+      //     text: "Get Started",
+      //     link: "https://docs.helicone.ai/features/sessions",
+      //   },
       secondary: {
         text: "View Docs",
         link: "https://docs.helicone.ai/features/sessions",
@@ -98,6 +97,40 @@ export const EMPTY_STATE_FEATURES = {
       secondary: {
         text: "View Docs",
         link: "https://docs.helicone.ai/features/advanced-usage/user-metrics",
+      },
+    },
+  },
+  properties: {
+    title: "No properties created yet",
+    description: "Attach custom metadata to your requests with simple headers.",
+    featureImage: {
+      type: "component",
+      content: () => (
+        <DiffHighlight
+          code={`"Helicone-Property-UserType": "premium",
+"Helicone-Property-Feature": "content_generation",
+"Helicone-Property-Department": "marketing",
+"Helicone-Property-Region": "north_america",
+"Helicone-Property-UseCase": "email_campaign"`}
+          language={"javascript"}
+          newLines={[]}
+          oldLines={[]}
+          minHeight={false}
+          maxHeight={false}
+          textSize="md"
+          className="rounded-lg "
+          marginTop={false}
+        />
+      ),
+    },
+    cta: {
+      //   primary: {
+      //     text: "Go to requests",
+      //     link: "/requests",
+      //   },
+      secondary: {
+        text: "View Docs",
+        link: "https://docs.helicone.ai/features/advanced-usage/custom-properties",
       },
     },
   },
@@ -199,52 +232,57 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
         </div>
 
         <div className="flex flex-row gap-2">
-          <Link
-            href={featureDefaults?.cta?.primary?.link ?? ""}
-            target="_blank"
-          >
-            <Button variant="action" className="gap-2">
-              {featureDefaults?.cta?.primary?.text}
-              <SquareArrowOutUpRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link
-            href={featureDefaults?.cta?.secondary?.link ?? ""}
-            target="_blank"
-          >
-            <Button variant="outline" className="gap-2">
-              {featureDefaults?.cta?.secondary?.text}
-              <SquareArrowOutUpRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          {featureDefaults?.cta?.primary && (
+            <Link
+              href={featureDefaults?.cta?.primary?.link ?? ""}
+              target="_blank"
+            >
+              <Button variant="action" className="gap-2">
+                {featureDefaults?.cta?.primary?.text}
+                <SquareArrowOutUpRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
+          {featureDefaults?.cta?.secondary && (
+            <Link
+              href={featureDefaults?.cta?.secondary?.link ?? ""}
+              target="_blank"
+            >
+              <Button variant="outline" className="gap-2">
+                {featureDefaults?.cta?.secondary?.text}
+                <SquareArrowOutUpRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
-      {featureDefaults?.featureImage?.type === "video" ? (
-        <div className="max-w-6xl overflow-hidden relative border-2 border-slate-200 rounded-lg object-contain">
-          <video
-            className="w-full max-h-[500px] object-contain"
-            src={featureDefaults?.featureImage?.content as string}
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls
+      {featureDefaults?.featureImage &&
+        (featureDefaults.featureImage.type === "video" ? (
+          <div className="max-w-6xl overflow-hidden relative border-2 border-slate-200 rounded-lg object-contain">
+            <video
+              className="w-full max-h-[500px] object-contain"
+              src={featureDefaults.featureImage.content as string}
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
+            />
+          </div>
+        ) : featureDefaults.featureImage.type === "component" ? (
+          <div className="w-full max-w-2xl">
+            {React.createElement(
+              featureDefaults.featureImage.content as React.ComponentType
+            )}
+          </div>
+        ) : (
+          <img
+            src={featureDefaults.featureImage.content as string}
+            alt={featureDefaults.title}
+            className="w-full max-w-2xl  xl:max-w-6xl h-auto rounded-lg"
           />
-        </div>
-      ) : featureDefaults?.featureImage?.type === "component" ? (
-        <div className="w-full max-w-2xl">
-          {React.createElement(
-            featureDefaults?.featureImage?.content as React.ComponentType
-          )}
-        </div>
-      ) : (
-        <img
-          src={featureDefaults?.featureImage?.content as string}
-          alt={featureDefaults?.title}
-          className="w-full max-w-md h-auto rounded-lg"
-        />
-      )}
+        ))}
     </div>
   );
 };

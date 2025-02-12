@@ -73,7 +73,7 @@ export function DiffHighlight(props: DiffHighlightProps) {
                 <ClipboardIcon className="w-5 h-5 text-gray-500" />
               </button>
               {tokens.map((line, i) => {
-                const lineProps = getLineProps({ line, key: i });
+                const { key: _, ...lineProps } = getLineProps({ line, key: i });
                 const lineNumber = i;
                 const newLine = props.newLines.includes(lineNumber);
                 const oldLine = props.oldLines.includes(lineNumber);
@@ -85,7 +85,10 @@ export function DiffHighlight(props: DiffHighlightProps) {
                   <div key={i} {...lineProps} className={lineClasses}>
                     <code className="flex-1">
                       {line.map((token, key) => {
-                        const tokenProps = getTokenProps({ token, key });
+                        const { key: _, ...tokenProps } = getTokenProps({
+                          token,
+                          key,
+                        });
                         if (
                           token.content === "=" ||
                           token.content === ":" ||

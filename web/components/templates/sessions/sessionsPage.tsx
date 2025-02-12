@@ -2,8 +2,9 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useHasAccess } from "@/hooks/useHasAccess";
 
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
@@ -129,33 +130,39 @@ const SessionsPage = (props: SessionsPageProps) => {
             <LoadingAnimation />
           </div>
         ) : hasAccessToSessions ? (
-          <Row className="border-t border-slate-200 dark:border-slate-800">
-            <SessionNameSelection
-              sessionNameSearch={sessionNameSearch}
-              selectedName={selectedName}
-              setSessionNameSearch={setSessionNameSearch}
-              setSelectedName={setSelectedName}
-              sessionNames={names.sessions}
-            />
-            <SessionDetails
-              currentTab={currentTab}
-              selectedSession={
-                names.sessions.find(
-                  (session) => session.name === selectedName
-                ) ?? null
-              }
-              sessionIdSearch={sessionIdSearch ?? ""}
-              setSessionIdSearch={setSessionIdSearch}
-              sessions={sessions}
-              isLoading={isLoading}
-              sort={sort}
-              timeFilter={timeFilter}
-              setTimeFilter={setTimeFilter}
-              setInterval={() => {}}
-              advancedFilters={advancedFilters}
-              onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
-            />
-          </Row>
+          hasSomeSessions ? (
+            <Row className="border-t border-slate-200 dark:border-slate-800">
+              <SessionNameSelection
+                sessionNameSearch={sessionNameSearch}
+                selectedName={selectedName}
+                setSessionNameSearch={setSessionNameSearch}
+                setSelectedName={setSelectedName}
+                sessionNames={names.sessions}
+              />
+              <SessionDetails
+                currentTab={currentTab}
+                selectedSession={
+                  names.sessions.find(
+                    (session) => session.name === selectedName
+                  ) ?? null
+                }
+                sessionIdSearch={sessionIdSearch ?? ""}
+                setSessionIdSearch={setSessionIdSearch}
+                sessions={sessions}
+                isLoading={isLoading}
+                sort={sort}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                setInterval={() => {}}
+                advancedFilters={advancedFilters}
+                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+              />
+            </Row>
+          ) : (
+            <div className="flex flex-col w-full min-h-screen items-center bg-white">
+              <EmptyStateCard feature="sessions" />
+            </div>
+          )
         ) : org?.currentOrg?.tier === "free" ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard

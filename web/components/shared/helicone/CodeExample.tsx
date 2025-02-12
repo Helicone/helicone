@@ -1,6 +1,14 @@
 import React from "react";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 
+type CodeExampleType = {
+  code: string;
+  language: string;
+  image?: string;
+  alt: string;
+  offset?: string;
+};
+
 const CodeExamples = {
   webhook: {
     code: `export default async function handler(req, res) {
@@ -28,25 +36,29 @@ const CodeExamples = {
     alt: "Properties",
     offset: "mt-[-50px]",
   },
-} as const;
+} as const satisfies Record<string, CodeExampleType>;
 
 export type CodeExampleKey = keyof typeof CodeExamples;
 
 export const CodeExample = (codeExampleKey: CodeExampleKey) => {
-  const codeExample = CodeExamples[codeExampleKey];
+  const codeExample = CodeExamples[codeExampleKey] as CodeExampleType;
 
   return (
     <div className="w-full md:w-[568.25px] h-full relative rounded-lg overflow-hidden">
       {/* Background Image */}
-      <img
-        src={codeExample.image}
-        alt={codeExample.alt}
-        className="w-full h-full object-cover"
-      />
+      {codeExample.image && (
+        <img
+          src={codeExample.image}
+          alt={codeExample.alt}
+          className="w-full h-full object-cover"
+        />
+      )}
 
-      {/* Code Section with Transparent Background */}
+      {/* Code Section - Always render even without image */}
       <div
-        className={`absolute inset-0 flex items-center justify-center ${codeExample.offset}`}
+        className={`absolute inset-0 flex items-center justify-center ${
+          codeExample.offset ?? ""
+        }`}
       >
         <DiffHighlight
           code={codeExample.code}
