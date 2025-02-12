@@ -20,6 +20,7 @@ import { costs as xCosts } from "./x";
 import { costs as avianCosts } from "./avian";
 import { costs as nebiusCosts } from "./nebius";
 import { costs as perplexityCosts } from "./perplexity";
+import { costs as novitaCosts } from "./novita";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -62,6 +63,10 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+
+// https://api.novita.ai
+const novita = /^https:\/\/api\.novita\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -90,6 +95,7 @@ export const providersNames = [
   "X",
   "AVIAN",
   "NEBIUS",
+  "NOVITA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -233,6 +239,11 @@ export const providers: {
     pattern: avianPattern,
     provider: "AVIAN",
     costs: avianCosts,
+  },
+  {
+    pattern: novita,
+    provider: "NOVITA",
+    costs: novitaCosts,
   },
 ];
 

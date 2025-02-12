@@ -329,6 +329,12 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.studio.nebius.ai",
       };
+    } else if (hostParts[0] === "novita") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.novita.ai",
+      };
     } else if (hostParts[0].includes("firecrawl")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
