@@ -138,8 +138,7 @@ export async function proxyForwarder(
 
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
-    provider === "OPENAI" &&
-    env.PROMPTARMOR_API_KEY
+    provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
       parseLatestMessage(proxyRequest);
@@ -158,8 +157,10 @@ export async function proxyForwarder(
       const requestStartTime = new Date();
       const threat = await checkPromptSecurity(
         latestMsg.content,
-        provider,
-        env
+        env,
+        proxyRequest.requestWrapper.heliconeHeaders.promptSecurityAdvanced
+          ? true
+          : false
       );
 
       proxyRequest.threat = threat;
