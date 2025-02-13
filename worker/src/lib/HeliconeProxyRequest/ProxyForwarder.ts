@@ -159,6 +159,8 @@ export async function proxyForwarder(
         latestMsg.content,
         env,
         proxyRequest.requestWrapper.heliconeHeaders.promptSecurityAdvanced
+          ? true
+          : false
       );
 
       proxyRequest.threat = threat;
