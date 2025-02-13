@@ -6,6 +6,8 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Database } from "lucide-react";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -34,27 +36,18 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           <Skeleton className="w-full h-full" />
         </div>
       ) : !isLoading && org?.currentOrg?.tier === "free" ? (
-        <div className="flex flex-col space-y-2 w-full items-center">
+        <div className="flex flex-col space-y-2 w-full items-center bg-white">
           <FeatureUpgradeCard
-            title="Unlock Datasets"
-            description="The Free plan does not include the Datasets feature, but getting access is easy."
-            infoBoxText="Organize your requests into datasets for evals or fine-tuning."
-            videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
-            documentationLink="https://docs.helicone.ai/features/sessions"
+            title="Datasets"
+            headerTagline="Create datasets for evals and fine-tuning"
+            icon={<Database className="w-4 h-4 text-sky-500" />}
             featureName="Datasets"
+            highlightedFeature="datasets"
           />
         </div>
       ) : datasets?.length === 0 ? (
-        <div className="flex flex-col space-y-2 w-full items-center">
-          <FeatureUpgradeCard
-            title="Get Started with Datasets"
-            description="You have access to Datasets, but haven't created any yet. It's easy to get started!"
-            infoBoxText="Organize your requests into datasets for evals or fine-tuning."
-            videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/creating-dataset.mp4"
-            documentationLink="https://docs.helicone.ai/features/sessions"
-            tier={org?.currentOrg?.tier ?? "free"}
-            featureName="Datasets"
-          />
+        <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+          <EmptyStateCard feature="datasets" />
         </div>
       ) : (
         <>
