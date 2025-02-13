@@ -14,6 +14,7 @@ export type Message = {
     | "contentArray";
   id?: string;
   role?: string;
+  name?: string;
   content?: string;
   tool_calls?: FunctionCall[];
   tool_call_id?: string;
