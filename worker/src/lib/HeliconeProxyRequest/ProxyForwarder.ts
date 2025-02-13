@@ -155,7 +155,11 @@ export async function proxyForwarder(
       latestMsg?.role === "user"
     ) {
       const requestStartTime = new Date();
-      const threat = await checkPromptSecurity(latestMsg.content, env);
+      const threat = await checkPromptSecurity(
+        latestMsg.content,
+        env,
+        proxyRequest.requestWrapper.heliconeHeaders.promptSecurityAdvanced
+      );
 
       proxyRequest.threat = threat;
       if (threat === true) {

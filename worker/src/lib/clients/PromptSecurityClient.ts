@@ -1,8 +1,10 @@
 import { Env } from "../..";
+import { SentryManager } from "../managers/SentryManager";
 
 export async function checkPromptSecurity(
   message: string,
-  env: Env
+  env: Env,
+  advanced: boolean
 ): Promise<boolean | undefined> {
   const promptArmorRequest = JSON.stringify({
     text: message,
@@ -24,6 +26,7 @@ export async function checkPromptSecurity(
       error: string;
     };
     if (data.error) {
+      // new SentryManager(env).sendError(data.error, "Prompt Security Client");
       console.error("error", data.error);
       return undefined;
     }
