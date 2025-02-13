@@ -28,6 +28,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { Separator } from "@/components/ui/separator";
 import { Archive } from "lucide-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface CachePageProps {
   currentPage: number;
@@ -135,6 +136,14 @@ const CachePage = (props: CachePageProps) => {
 
   const org = useOrg();
   const isPro = org?.currentOrg?.tier !== "free";
+
+  if (isAnyLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <LoadingAnimation />
+      </div>
+    );
+  }
 
   if (!isPro) {
     return (
