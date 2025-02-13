@@ -1,3 +1,4 @@
+import { ExecutionContext } from "@cloudflare/workers-types";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { type IRequest, type RouterType } from "itty-router";
 import { Env } from "..";
