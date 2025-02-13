@@ -100,18 +100,41 @@ class PromptGuardModel(BaseSecurityModel):
         return self
 
     def get_class_probabilities(self, text: str, temperature: float = 1.0) -> torch.Tensor:
-        inputs = self.tokenizer(text, return_tensors="pt", padding=True,
-                                truncation=True, max_length=512).to(self.device)
-        with torch.no_grad():
-            logits = self.model(**inputs).logits
-        scaled_logits = logits / temperature
-        return softmax(scaled_logits, dim=-1)
+        # Split text into chunks of approximately equal size
+        max_chunk_length = 512
+        words = text.split()
+        n_chunks = min(
+            200, (len(words) + max_chunk_length - 1) // max_chunk_length)
+        chunk_size = (len(words) + n_chunks - 1) // n_chunks
+
+        chunks = [' '.join(words[i:i + chunk_size])
+                  for i in range(0, len(words), chunk_size)]
+        all_probabilities = []
+
+        for chunk in chunks:
+            print(f"Processing chunk: {chunk}")
+            inputs = self.tokenizer(chunk, return_tensors="pt", padding=True,
+                                    truncation=True, max_length=512).to(self.device)
+            with torch.no_grad():
+                logits = self.model(**inputs).logits
+            scaled_logits = logits / temperature
+            all_probabilities.append(softmax(scaled_logits, dim=-1))
+
+        # Aggregate probabilities by taking the maximum across all chunks
+        if all_probabilities:
+            stacked_probs = torch.stack(all_probabilities)
+            return torch.max(stacked_probs, dim=0)[0]
+        else:
+            # Handle empty text case
+            return self.get_class_probabilities("", temperature)
 
     def get_scores(self, text: str, temperature: float = 1.0) -> Dict[str, float]:
         probabilities = self.get_class_probabilities(text, temperature)
         return {
             "jailbreak_score": probabilities[0, 2].item(),
-            "indirect_injection_score": (probabilities[0, 1] + probabilities[0, 2]).item()
+            "indirect_injection_score": (probabilities[0, 1] + probabilities[0, 2]).item(),
+            # Include chunk info in response
+            "num_chunks": min(200, (len(text.split()) + 511) // 512)
         }
 
 
