@@ -1,27 +1,24 @@
+from abc import ABC, abstractmethod
+from typing import Dict
 import torch
-from torch.nn.functional import softmax
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForCausalLM
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from abc import ABC, abstractmethod
-import os
-from enum import Enum
-from typing import Dict, Any, Tuple
-import requests
+from torch.nn.functional import softmax
 from tqdm import tqdm
-
-
-S3_LINK_FOR_PROMPT_GUARD = os.getenv("S3_LINK_FOR_PROMPT_GUARD")
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 
 def download_prompt_guard_model():
-    import boto3
     import os
+    import boto3
+
     # Skip if file already exists
     if os.path.exists('prompt-guard-86m'):
+        print("Prompt-guard model already exists")
         return
 
     try:
+        print("Downloading prompt-guard model")
         s3 = boto3.client(
             's3',
             aws_access_key_id=os.getenv('S3_ACCESS_KEY'),
@@ -60,7 +57,10 @@ def download_prompt_guard_model():
         raise
 
 
-download_prompt_guard_model()
+try:
+    download_prompt_guard_model()
+except Exception as e:
+    print(f"Error downloading model: {str(e)}")
 
 # Initialize FastAPI app
 app = FastAPI(
