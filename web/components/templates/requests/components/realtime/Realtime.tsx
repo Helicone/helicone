@@ -120,7 +120,7 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 
           return (
             <div
-              key={`${idx}-${message.timestamp}-${message.content}`}
+              key={`${idx}-${message.timestamp}`}
               className={`flex flex-col ${
                 isUser ? "items-end" : "items-start"
               } mb-4 w-full`}
