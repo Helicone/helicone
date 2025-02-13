@@ -2,21 +2,9 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
-import {
-  PiCaretLeftBold,
-  PiCommandBold,
-  PiPlayBold,
-  PiRocketLaunchBold,
-  PiStopBold,
-  PiSpinnerGapBold,
-} from "react-icons/pi";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
-import { toKebabCase } from "@/utils/strings";
-import Link from "next/link";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import {
@@ -27,6 +15,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
 import {
@@ -35,23 +25,33 @@ import {
   isPrefillSupported,
   removeMessagePair,
 } from "@/utils/messages";
+import { toKebabCase } from "@/utils/strings";
 import {
   deduplicateVariables,
   extractVariables,
   isValidVariableName,
 } from "@/utils/variables";
 import { FlaskConicalIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
+import {
+  PiCaretLeftBold,
+  PiCommandBold,
+  PiPlayBold,
+  PiRocketLaunchBold,
+  PiSpinnerGapBold,
+  PiStopBold,
+} from "react-icons/pi";
 
+import { Button } from "@/components/ui/button";
+import { autoFillInputs } from "@helicone/prompts";
 import {
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../../welcome/diffHighlight";
-import { autoFillInputs } from "@helicone/prompts";
-import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
@@ -459,9 +459,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       };
 
       const metadata = {
+        provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
-        createdFromUi: true,
-        provider: state.parameters.provider,
         inputs: variableMap,
       };
 
