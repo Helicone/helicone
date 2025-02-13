@@ -20,7 +20,6 @@ import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
 import { useHasAccess } from "@/hooks/useHasAccess";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
