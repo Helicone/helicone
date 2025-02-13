@@ -26,7 +26,17 @@ const getRequestText = (requestBody: any): string => {
       return "";
     }
 
-    const lastMessageContent = messages.at(-1)?.content;
+    const lastMessage = messages.at(-1);
+    if (!lastMessage) return "";
+
+    // Handle function calls in request messages
+    if (lastMessage.function_call || lastMessage.tool_calls) {
+      return formatStreamingToolCalls(
+        lastMessage.tool_calls || [lastMessage.function_call]
+      );
+    }
+
+    const lastMessageContent = lastMessage.content;
 
     if (Array.isArray(lastMessageContent)) {
       return handleArrayContent(lastMessageContent);
@@ -124,6 +134,36 @@ export const getResponseText = (
 const getRequestMessages = (request: any): Message[] => {
   return (
     request.messages?.map((msg: any) => {
+      // Handle function calls first
+      if (msg.function_call || msg.tool_calls) {
+        const toolCallMsg = handleToolCalls(msg);
+        return {
+          ...toolCallMsg,
+          content: toolCallMsg.content || "",
+          _type: "functionCall",
+        };
+      }
+
+      // Handle tool responses
+      if (msg.role === "tool" || msg.role === "function") {
+        const toolResponseMsg = handleToolResponse(msg);
+        return {
+          ...toolResponseMsg,
+          content: toolResponseMsg.content || "",
+          _type: "function",
+          name: msg.name,
+          tool_calls: [
+            {
+              name: msg.name,
+              arguments: {
+                query_result: msg.content,
+              },
+            },
+          ],
+        };
+      }
+
+      // Handle array content (e.g. text + image)
       if (Array.isArray(msg.content)) {
         const textContent = msg.content.find(
           (item: any) => item.type === "text"
@@ -136,32 +176,26 @@ const getRequestMessages = (request: any): Message[] => {
           return {
             role: msg.role,
             _type: "image",
-            content: textContent.text,
+            content: textContent.text || "",
             image_url: imageContent.image_url.url,
           };
         }
       }
 
+      // Handle single image content
       if (msg.content?.type === "image_url") {
         return {
           role: msg.role,
           _type: "image",
-          content: msg.content.text,
+          content: msg.content.text || "",
           image_url: msg.content.image_url.url,
         };
       }
 
-      if (msg.tool_calls) {
-        return handleToolCalls(msg);
-      }
-
-      if (msg.role === "tool") {
-        return handleToolResponse(msg);
-      }
-
+      // Handle regular messages
       return {
-        content: getFormattedMessageContent(msg.content),
-        role: msg.role,
+        content: getFormattedMessageContent(msg.content) || "",
+        role: msg.role || "user",
         _type: getContentType(msg as any),
       };
     }) ?? []
@@ -186,12 +220,37 @@ const getLLMSchemaResponse = (response: any) => {
         const message = choice?.message;
         if (!message) return null;
 
+        // Handle function calls
         if (message.function_call || message.tool_calls) {
-          return handleToolCalls(message);
+          const toolCallMsg = handleToolCalls(message);
+          return {
+            ...toolCallMsg,
+            content: toolCallMsg.content || "",
+            _type: "functionCall",
+          };
         }
 
+        // Handle function/tool responses
+        if (message.role === "function" || message.role === "tool") {
+          return {
+            content: getFormattedMessageContent(message.content) || "",
+            role: message.role,
+            _type: "function",
+            name: message.name,
+            tool_calls: [
+              {
+                name: message.name,
+                arguments: {
+                  query_result: message.content,
+                },
+              },
+            ],
+          };
+        }
+
+        // Handle regular messages
         return {
-          content: getFormattedMessageContent(message.content ?? ""),
+          content: getFormattedMessageContent(message.content) || "",
           role: message.role ?? "",
           _type: getContentType(message),
         };

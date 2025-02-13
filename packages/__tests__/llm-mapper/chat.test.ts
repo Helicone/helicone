@@ -482,7 +482,7 @@ describe("OpenAI Chat Mapper", () => {
       expect(result.schema.request?.messages?.[2]).toMatchObject({
         content: "Reminder has been set!",
         role: "tool",
-        _type: "message",
+        _type: "function",
       });
 
       // Verify concatenated messages
