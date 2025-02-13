@@ -352,7 +352,11 @@ export class OrganizationController extends Controller {
       return err(org.error?.message ?? "Error getting organization");
     }
 
-    if (memberCount.data > 0 && org.data.tier != "free") {
+    if (
+      memberCount.data > 0 &&
+      org.data.tier != "free" &&
+      org.data.tier != "team-20250130"
+    ) {
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data - 1
       );
