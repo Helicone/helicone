@@ -4,6 +4,16 @@
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20
 
+
+WORKDIR /usr/src/app/valhalla/prompt_security
+
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update && apt-get install -y python3-venv python3
+RUN python3 -m venv venv
+
+COPY ./valhalla/prompt_security/requirements.txt ./
+RUN source venv/bin/activate && python3 -m pip install -r requirements.txt
+
 WORKDIR /usr/src/app/valhalla/jawn
 
 COPY ./valhalla/jawn/package.json ./valhalla/jawn/yarn.lock ./
@@ -15,6 +25,8 @@ COPY ./shared .
 
 WORKDIR /usr/src/app/valhalla/jawn
 COPY ./valhalla/jawn .
+COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
+
 
 RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 
@@ -28,4 +40,11 @@ ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
 
-CMD [ "yarn", "serve" ]
+# Install supervisor
+RUN apt-get update && apt-get install -y supervisor
+
+
+# Add supervisor configuration
+COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

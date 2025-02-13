@@ -1,37 +1,33 @@
-import { Env, Provider } from "../..";
-
-type PromptArmorResponse = {
-  detection: boolean;
-};
+import { Env } from "../..";
 
 export async function checkPromptSecurity(
   message: string,
-  provider: Provider,
   env: Env
 ): Promise<boolean | undefined> {
   const promptArmorRequest = JSON.stringify({
-    content: message,
-    source: provider,
+    text: message,
+    advanced: false,
   });
 
-  const response = await fetch(
-    `https://api.aidr.promptarmor.com/v1/analyze/input`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "PromptArmor-Auth": `Bearer ${env.PROMPTARMOR_API_KEY}`,
-        "PromptArmor-Session-ID": crypto.randomUUID(),
-      },
-      body: promptArmorRequest,
-    }
-  );
+  const response = await fetch(`${env.VALHALLA_URL}/v1/public/security`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `${env.HELICONE_MANUAL_ACCESS_KEY}`,
+    },
+    body: promptArmorRequest,
+  });
 
   if (response.ok) {
-    const data = (await response.json()) as PromptArmorResponse;
-    const detection = data.detection;
-
-    return detection;
+    const data = (await response.json()) as {
+      data: { unsafe: boolean };
+      error: string;
+    };
+    if (data.error) {
+      console.error("error", data.error);
+      return undefined;
+    }
+    return data.data.unsafe;
   }
 
   return undefined;
