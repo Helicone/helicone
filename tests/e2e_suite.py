@@ -367,14 +367,20 @@ class TestHeliconeIntegrations:
             pytest.skip("HELICONE_GENERATE_BASE_URL not set in environment")
 
         payload = {
+            # Prompt Info
             "promptId": "new-prompt",
-            # version: number or "production" (default)
-            # inputs: {}
-            "userId": "test-user",  # Helicone property
-            "sessionId": SESSION_ID,  # Helicone property
+            "version": "production",
+            "inputs": {
+                "num": "10",
+            },
+            # Helicone Properties
+            "userId": "test-user",
+            "sessionId": SESSION_ID,
         }
         headers = {
+            # Helicone Auth
             "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+            # Provider Keys
             "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
             "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
             "GOOGLE_API_KEY": os.getenv("GOOGLE_GENERATIVE_API_KEY"),
@@ -385,9 +391,6 @@ class TestHeliconeIntegrations:
 
         # Assert that the HTTP status code indicates success
         assert response.status_code == 200, f"Request failed: {response.text}"
-
-    def test_generate_with_variables(self):
-        return "not implemented"
 
     def test_generate_with_chat(self):
         return "not implemented"

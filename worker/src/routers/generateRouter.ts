@@ -1,18 +1,25 @@
 import { ExecutionContext } from "@cloudflare/workers-types";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { autoFillInputs } from "@helicone/prompts";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { type IRequest, type RouterType } from "itty-router";
 import { Env } from "..";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
+import { Result, err, ok } from "../lib/util/results";
 import { providersNames } from "../packages/cost/providers/mappings";
 import { gatewayForwarder } from "./gatewayRouter";
-
-// TODO: Specify inputs to autoFill using inputs: {}
 
 type GenerateParameters = {
   promptId: string;
   version?: number | "production";
+  inputs?: Record<string, string>;
+};
+
+type PromptVersion = Database["public"]["Tables"]["prompts_versions"]["Row"];
+type PromptMetadata = {
+  provider?: (typeof providersNames)[number];
+  [key: string]: any;
 };
 
 // Handler for generate route
@@ -38,41 +45,42 @@ const generateHandler = async (
       });
     }
 
-    // 2. GET REQUEST PARAMETERS
+    // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY
     const rawBody = await requestWrapper.getJson<GenerateParameters>();
     const parameters: GenerateParameters = {
       promptId: rawBody?.promptId || "",
       version: rawBody?.version || "production",
+      inputs: rawBody?.inputs || {},
     };
     if (!parameters.promptId) {
       return new Response("Missing promptId", { status: 400 });
     }
 
-    // 3. START SUPABASE CLIENT
-    const supabaseClient = createClient<Database>(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
-    // 4. GET PROMPT BASED ON REQUEST ID, VERSION, AND ORG ID
-    const prompt = await getPromptVersion(
-      supabaseClient,
-      parameters.promptId,
-      orgData.organizationId,
-      parameters.version
-    );
-    if (prompt instanceof Response) {
-      return prompt; // Return the response if it's an error
+    // 3. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
+    const promptResult = await getPromptVersion({
+      supabaseClient: db.getClient(),
+      orgId: orgData.organizationId,
+      promptId: parameters.promptId,
+      version: parameters.version,
+    });
+    if (promptResult.error || !promptResult.data) {
+      return new Response(promptResult.error || "Failed to get prompt", {
+        status: 404,
+      });
     }
 
-    // 5. GET PROVIDER AND BASE URL
-    const providerResult = getProviderInfo(prompt.metadata);
-    if (providerResult instanceof Response) {
-      return providerResult; // Return the response if it's an error
+    // 4. GET PROVIDER -> BASE URL
+    const metadata = promptResult.data.metadata as PromptMetadata;
+    const providerResult = getProviderInfo(metadata);
+    if (providerResult.error || !providerResult.data) {
+      return new Response(
+        providerResult.error || "Failed to get provider info",
+        { status: 400 }
+      );
     }
-    const { targetBaseUrl, provider } = providerResult;
+    const { targetBaseUrl, provider } = providerResult.data;
 
-    // Get the provider's API key from headers
+    // 5. BUILD REQUEST HEADERS
     const providerApiKey = requestWrapper
       .getHeaders()
       .get(`${provider}_API_KEY`);
@@ -81,60 +89,27 @@ const generateHandler = async (
         status: 400,
       });
     }
-
-    // 6. FORWARD TO PROVIDER
     const requestHeaders = new Headers(requestWrapper.getHeaders());
     requestHeaders.set("Content-Type", "application/json");
-    // Set the Authorization header with the provider's API key
     requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
-    // Request uncompressed response
     requestHeaders.set("Accept-Encoding", "identity");
-    console.log("requestHeaders", requestHeaders);
 
-    // Merge the template with any additional parameters from the request
-    const defaultTemplate = {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: "Hello" }],
-    };
-    const template =
-      typeof prompt.helicone_template === "object" &&
-      prompt.helicone_template !== null
-        ? (prompt.helicone_template as typeof defaultTemplate)
-        : defaultTemplate;
+    // 6. BUILD REQUEST TEMPLATE
+    const requestTemplate = autoFillInputs({
+      template: promptResult.data.helicone_template,
+      inputs: parameters.inputs || {},
+      autoInputs: [],
+    });
 
-    // Only use the template and valid OpenAI parameters
-    const validOpenAIParams = [
-      "model",
-      "messages",
-      "temperature",
-      "top_p",
-      "n",
-      "stream",
-      "stop",
-      "max_tokens",
-      "presence_penalty",
-      "frequency_penalty",
-      "logit_bias",
-      "user",
-      "response_format",
-    ] as const;
-
-    const mergedBody: Record<string, any> = {
-      ...template,
-      // Only include valid OpenAI parameters from the request
-      ...Object.fromEntries(
-        Object.entries(parameters).filter(([key]) =>
-          validOpenAIParams.includes(key as (typeof validOpenAIParams)[number])
-        )
-      ),
-    };
-
+    // 7. FORWARD TO PROVIDER
+    // TODO: Add reverse mapper for anthropic, and other api paths
+    // TODO: Add support for anthropic, and other api paths
+    // -- Use next-gen unified costs package + llm-mapper
     const newRequest = new Request(`${targetBaseUrl}/v1/chat/completions`, {
       method: "POST",
       headers: requestHeaders,
-      body: JSON.stringify(mergedBody),
+      body: JSON.stringify(requestTemplate),
     });
-
     const newWrapperResult = await RequestWrapper.create(newRequest, env);
     if (newWrapperResult.error || !newWrapperResult.data) {
       return new Response(
@@ -143,9 +118,7 @@ const generateHandler = async (
         { status: 500 }
       );
     }
-
-    // 7. Use gateway forwarder to handle the rest
-    const response = await gatewayForwarder(
+    return await gatewayForwarder(
       {
         targetBaseUrl,
         setBaseURLOverride: newWrapperResult.data.setBaseURLOverride.bind(
@@ -156,40 +129,6 @@ const generateHandler = async (
       env,
       ctx
     );
-
-    // 8. Verify the response is valid JSON and handle any compression
-    try {
-      const contentEncoding = response.headers.get("content-encoding");
-      const clonedResponse = response.clone();
-
-      // If the response is compressed, we'll return it as is since the browser/client
-      // will handle decompression. If we try to read it here, it might corrupt the stream.
-      if (contentEncoding && contentEncoding !== "identity") {
-        return response;
-      }
-
-      // For uncompressed responses, verify it's valid JSON
-      const responseText = await clonedResponse.text();
-      JSON.parse(responseText); // Test if response is valid JSON
-      return response;
-    } catch (e) {
-      return new Response(
-        JSON.stringify({
-          helicone_error: "error parsing response",
-          parse_response_error: `Error parsing body: ${e}`,
-          status: response.status,
-          statusText: response.statusText,
-          content_encoding: response.headers.get("content-encoding"),
-          content_type: response.headers.get("content-type"),
-        }),
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
   } catch (e: any) {
     console.error("Error in generate route:", e);
     return new Response(
@@ -214,20 +153,25 @@ export const getGenerateRouter = (router: RouterType): RouterType => {
 };
 
 /**
- * Fetch and validate a prompt version from the database.
+ * Fetches and validates a prompt version from the database.
  *
- * @param supabaseClient - The Supabase client instance
- * @param promptId - The user-defined ID of the prompt to fetch
- * @param orgId - The organization ID from auth
- * @param version - The version to fetch (either a number or "production")
- * @returns Either a Response with an error or the prompt version row
+ * @param {SupabaseClient<Database>} params.supabaseClient - The Supabase client instance
+ * @param {string} params.orgId - The organization ID to filter prompts by
+ * @param {string} params.promptId - The user-defined ID of the prompt to fetch
+ * @param {number | "production"} [params.version="production"] - The version to fetch. If "production", fetches the latest production version
+ * @returns {Promise<Result<PromptVersion, string>>} A Result containing either the prompt version or an error message
  */
-async function getPromptVersion(
-  supabaseClient: SupabaseClient<Database>,
-  promptId: string,
-  orgId: string,
-  version: number | "production" = "production"
-): Promise<Response | Database["public"]["Tables"]["prompts_versions"]["Row"]> {
+async function getPromptVersion({
+  supabaseClient,
+  orgId,
+  promptId,
+  version = "production",
+}: {
+  supabaseClient: SupabaseClient<Database>;
+  orgId: string;
+  promptId: string;
+  version?: number | "production";
+}): Promise<Result<PromptVersion, string>> {
   console.log("Query params:", { promptId, orgId, version });
 
   // Build an optimized single query with join
@@ -264,33 +208,31 @@ async function getPromptVersion(
 
   if (error) {
     console.error("Error fetching prompt version:", error);
-    return new Response("Error fetching prompt version", { status: 500 });
+    return err("Error fetching prompt version");
   }
 
   if (!data || data.length === 0) {
-    return new Response("No prompt version found", { status: 404 });
+    return err("No prompt version found");
   }
 
   // Extract the prompt version from the nested result
   const promptVersion = data[0].prompts_versions[0];
   if (!promptVersion) {
-    return new Response("No prompt version found", { status: 404 });
+    return err("No prompt version found");
   }
 
-  return promptVersion;
+  return ok(promptVersion);
 }
 
 /**
  * Extract and validate the provider from metadata, then get its base URL.
- *
- * @param metadata - The metadata object from the prompt version
- * @returns Either a Response with an error or an object containing the provider's base URL and name
  */
 function getProviderInfo(
-  metadata: any
-):
-  | Response
-  | { targetBaseUrl: string; provider: (typeof providersNames)[number] } {
+  metadata: PromptMetadata
+): Result<
+  { targetBaseUrl: string; provider: (typeof providersNames)[number] },
+  string
+> {
   const providerBaseUrls: Record<(typeof providersNames)[number], string> = {
     OPENAI: "https://api.openai.com",
     ANTHROPIC: "https://api.anthropic.com",
@@ -322,13 +264,14 @@ function getProviderInfo(
     NOVITA: "https://api.novita.ai",
   };
 
-  // Extract and validate provider
   const provider =
-    (metadata as { provider?: (typeof providersNames)[number] } | null)
-      ?.provider || "OPENAI";
-  if (!providersNames.includes(provider)) {
-    return new Response(`Invalid provider: ${provider}`, { status: 400 });
+    metadata.provider?.toUpperCase() as (typeof providersNames)[number];
+  if (!provider) {
+    return err("No provider specified in metadata");
+  }
+  if (!providerBaseUrls[provider]) {
+    return err(`Provider "${provider}" not supported`);
   }
 
-  return { targetBaseUrl: providerBaseUrls[provider], provider };
+  return ok({ targetBaseUrl: providerBaseUrls[provider], provider });
 }
