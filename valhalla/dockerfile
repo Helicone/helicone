@@ -4,9 +4,26 @@
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20
 
-WORKDIR /usr/src/app/valhalla/jawn
 
-COPY ./valhalla/jawn/package.json ./valhalla/jawn/yarn.lock ./
+WORKDIR /usr/src/app/valhalla/prompt_security
+
+SHELL ["/bin/bash", "-c"]
+RUN apt-get update && apt-get install -y python3-venv python3
+RUN python3 -m venv venv
+
+COPY ./valhalla/prompt_security/requirements.txt ./
+RUN . venv/bin/activate && \
+    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip3 install "transformers[torch]"
+
+RUN . venv/bin/activate && \
+    pip3 install tokenizers safetensors fastapi tqdm uvicorn boto3
+
+RUN . venv/bin/activate && \
+    pip3 install regex numpy packaging requests tqdm filelock typing-extensions
+
+
+WORKDIR /usr/src/app/valhalla/jawn
 
 RUN yarn install
 
@@ -16,16 +33,26 @@ COPY ./shared .
 WORKDIR /usr/src/app/valhalla/jawn
 COPY ./valhalla/jawn .
 
+
 RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 
 #yarn workspace jawn serve
 ENV PORT=8585
 
 RUN yarn && yarn build
+COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
+
 
 ENV DLQ_MESSAGES_PER_MINI_BATCH=1
 ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
 
-CMD [ "yarn", "serve" ]
+# Install supervisor
+RUN apt-get update && apt-get install -y supervisor
+
+
+# Add supervisor configuration
+COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

@@ -313,6 +313,9 @@ export interface paths {
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
+  "/v1/public/security": {
+    post: operations["GetSecurity"];
+  };
   "/v1/integration": {
     get: operations["GetIntegrations"];
     post: operations["CreateIntegration"];
@@ -1870,6 +1873,14 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    "ResultSuccess__unsafe-boolean__": {
+      data: {
+        unsafe: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__unsafe-boolean_.string_": components["schemas"]["ResultSuccess__unsafe-boolean__"] | components["schemas"]["ResultError_string_"];
     IntegrationCreateParams: {
       integration_name: string;
       settings?: components["schemas"]["Json"];
@@ -4199,6 +4210,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetSecurity: {
+    requestBody: {
+      content: {
+        "application/json": {
+          text: string;
+          advanced: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__unsafe-boolean_.string_"];
         };
       };
     };

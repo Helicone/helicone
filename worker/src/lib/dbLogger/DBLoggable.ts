@@ -129,8 +129,6 @@ function getResponseBodyFromJSON(json: Record<string, Json>): {
   return { body: [JSON.stringify(json)], endTime: new Date() };
 }
 
-type UnPromise<T> = T extends Promise<infer U> ? U : T;
-
 export async function dbLoggableRequestFromAsyncLogModel(
   props: DBLoggableRequestFromAsyncLogModelProps
 ): Promise<DBLoggable> {
