@@ -719,7 +719,7 @@ export class PromptManager extends BaseManager {
     }>(
       `
     INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true}'::jsonb)
+    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true, "provider": "OPENAI"}'::jsonb)
     RETURNING id
     `,
       [
