@@ -1,7 +1,6 @@
 import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { MapperFn } from "../types";
-import crypto from "crypto";
 
 const randomId = () => {
   return (
@@ -49,7 +48,30 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
       }
     }
 
-    // Handle old format
+    // Handle old format with choices
+    if (responseBody?.choices && Array.isArray(responseBody.choices)) {
+      const choice = responseBody.choices[0];
+      if (typeof choice?.message?.content === "string") {
+        try {
+          // Try to parse stringified JSON content
+          const parsedContent = JSON.parse(choice.message.content);
+          if (Array.isArray(parsedContent)) {
+            const textContent = parsedContent.find(
+              (item: any) => item.type === "text"
+            );
+            if (textContent) {
+              return (textContent.text || "").replace(/undefined/g, "").trim();
+            }
+          }
+          return JSON.stringify(parsedContent);
+        } catch (e) {
+          // If parsing fails, return the content as is
+          return choice.message.content;
+        }
+      }
+    }
+
+    // Handle old format with content array
     if (Array.isArray(responseBody?.content)) {
       const toolUse = responseBody.content.find(
         (item: any) => item.type === "tool_use"
@@ -293,9 +315,12 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
     // Handle old format with choices
     else if (response?.choices && Array.isArray(response?.choices)) {
       for (const choice of response?.choices) {
-        if (Array.isArray(choice.content)) {
-          for (const content of choice.content) {
-            const message = anthropicContentToMessage(content, choice.role);
+        if (Array.isArray(choice.message?.content)) {
+          for (const content of choice.message.content) {
+            const message = anthropicContentToMessage(
+              content,
+              choice.message.role
+            );
             // Clean up any undefined strings in the content
             if (typeof message.content === "string") {
               message.content = message.content
@@ -304,10 +329,55 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
             }
             messages.push(message);
           }
-        } else {
+        } else if (typeof choice.message?.content === "string") {
+          try {
+            // Try to parse the content as JSON if it's a string
+            const parsedContent = JSON.parse(choice.message.content);
+            if (Array.isArray(parsedContent)) {
+              for (const content of parsedContent) {
+                const message = anthropicContentToMessage(
+                  content,
+                  choice.message.role
+                );
+                // Clean up any undefined strings in the content
+                if (typeof message.content === "string") {
+                  message.content = message.content
+                    .replace(/undefined/g, "")
+                    .trim();
+                }
+                messages.push(message);
+              }
+            } else {
+              const message = anthropicContentToMessage(
+                parsedContent,
+                choice.message.role
+              );
+              // Clean up any undefined strings in the content
+              if (typeof message.content === "string") {
+                message.content = message.content
+                  .replace(/undefined/g, "")
+                  .trim();
+              }
+              messages.push(message);
+            }
+          } catch (e) {
+            // If parsing fails, treat it as regular text content
+            const message = anthropicContentToMessage(
+              { type: "text", text: choice.message.content },
+              choice.message.role
+            );
+            // Clean up any undefined strings in the content
+            if (typeof message.content === "string") {
+              message.content = message.content
+                .replace(/undefined/g, "")
+                .trim();
+            }
+            messages.push(message);
+          }
+        } else if (choice.message?.content) {
           const message = anthropicContentToMessage(
-            choice.content,
-            choice.role
+            choice.message.content,
+            choice.message.role
           );
           // Clean up any undefined strings in the content
           if (typeof message.content === "string") {

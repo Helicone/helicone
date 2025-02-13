@@ -453,4 +453,64 @@ describe("mapAnthropicRequest", () => {
     expect(result.preview.request).toBe("[REDACTED USER MESSAGE 2]");
     expect(result.preview.response).toBe("[REDACTED RESPONSE]");
   });
+
+  it("should handle stringified JSON content in message", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        messages: [
+          {
+            role: "user",
+            content: "hello",
+          },
+        ],
+        max_tokens: 50,
+        model: "claude-3-5-sonnet-20241022",
+      },
+      response: {
+        id: "[REDACTED ID]",
+        object: "chat",
+        created: "[REDACTED TIMESTAMP]",
+        model: "claude-3-5-sonnet-20241022",
+        choices: [
+          {
+            index: 0,
+            logprobs: null,
+            finish_reason: "end_turn",
+            message: {
+              role: "assistant",
+              content:
+                '[{"type":"text","text":"Hi! How can I help you today?"}]',
+            },
+          },
+        ],
+        usage: {
+          prompt_tokens: 8,
+          completion_tokens: 12,
+          total_tokens: 20,
+        },
+        system_fingerprint: null,
+      },
+      statusCode: 200,
+      model: "claude-3-5-sonnet-20241022",
+    });
+
+    // Check request message
+    expect(result.schema.request.messages![0]).toEqual({
+      role: "user",
+      content: "hello",
+      _type: "message",
+    });
+
+    // Check response message
+    expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
+      content: "Hi! How can I help you today?",
+      _type: "message",
+      id: expect.any(String),
+    });
+
+    // Check preview
+    expect(result.preview.request).toBe("hello");
+    expect(result.preview.response).toBe("Hi! How can I help you today?");
+  });
 });
