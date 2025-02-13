@@ -49,7 +49,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
     <>
       <li key={index} className="py-3 grid grid-cols-12 gap-2 items-center">
         <div className="col-span-8 flex flex-row justify-start items-center gap-2">
-          <p className="truncate overflow-ellipsis  text-xs">
+          <p className="truncate overflow-ellipsis text-sm">
             {orgMember.email}
           </p>
           {isUser && (

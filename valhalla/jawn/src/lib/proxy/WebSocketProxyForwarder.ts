@@ -24,6 +24,30 @@ export function webSocketProxyForwarder(
   const req = requestWrapper.getRequest();
 
   wss.handleUpgrade(req, socket, head, async (clientWs) => {
+    // Keep message events in memory for logging.
+    const messages: SocketMessage[] = [];
+
+    // Buffer to store early incoming messages from the client.
+    const messageBuffer: Array<{ data: ArrayBufferLike; isBinary: boolean }> =
+      [];
+
+    // Attach a temporary listener to capture messages until the target is ready.
+    const tempListener = (data: ArrayBufferLike, isBinary: boolean) => {
+      messageBuffer.push({ data, isBinary });
+      // Also log the message
+      const dataCopy = Buffer.from(data);
+      const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
+      const content =
+        typeof message === "string" ? JSON.parse(message) : message;
+      messages.push({
+        type: "message",
+        content,
+        timestamp: new Date().toISOString(),
+        from: "client",
+      });
+    };
+    clientWs.on("message", tempListener);
+
     const targetUrl =
       "wss://api.openai.com/v1/realtime" + requestWrapper.url.search;
     const openaiWs = new WebSocket(targetUrl, {
@@ -33,11 +57,14 @@ export function webSocketProxyForwarder(
       },
     });
 
-    // Keep message events in memory
-    const messages: SocketMessage[] = [];
-
-    // Link the WebSocket connections, with a callback for events
     openaiWs.on("open", () => {
+      // Remove the temporary listener and flush any buffered messages.
+      clientWs.off("message", tempListener);
+      messageBuffer.forEach(({ data, isBinary }) => {
+        openaiWs.send(data, { binary: isBinary });
+      });
+
+      // Link the WebSocket connections, with a callback for events.
       linkWebSocket({
         clientWs,
         targetWs: openaiWs,
@@ -164,7 +191,7 @@ async function linkWebSocket({
   });
 
   // CLOSE EVENTS
-  let hasLogged = false; // Flag to prevent double logging\
+  let hasLogged = false; // Flag to prevent double logging
 
   clientWs.on("close", async () => {
     if (!hasLogged) {

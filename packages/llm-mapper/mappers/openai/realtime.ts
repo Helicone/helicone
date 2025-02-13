@@ -1,235 +1,15 @@
 import { LlmSchema, Message } from "../../types";
 import { MapperFn } from "../types";
 
-interface RealtimeMessage {
-  type: string;
-  content: {
-    type: string; // "response.created", "response.done", "response.audio_transcript.delta", "session.update"
-    response?: {
-      object: string; // "ex: "realtime.response"
-      modalities?: string[]; // ex: ["text", "audio"]
-      instructions?: string;
-      output?: {
-        type: string; // "message" or "function_call"
-        id: string; // ex: "item_AzRaB38BlG1R3MJ1Ddevm"
-        object: string; // "ex: "realtime.item"
-        // Message specific items
-        content?: {
-          type: string; // "text" or "audio"
-          text?: string; // Text output
-          transcript?: string; // Audio output
-        }[];
-        // Function call specific items
-        call_id: string; // ex: "call_123"
-        name: string; // ex: "get_weather"
-        arguments: string; // ex: '{"location": "San Francisco"}'
-      }[];
-    };
-    event_id?: string;
-    output?: any[];
-    delta?: string;
-  };
-  timestamp: string;
-  from: "client" | "target";
-}
-
-const getRequestMessages = (request: any): Message[] => {
-  if (!request.messages?.length) return [];
-
-  return request.messages.map((msg: RealtimeMessage) => {
-    let content;
-    if (msg.type === "session.update") {
-      content = JSON.stringify(msg);
-    } else {
-      content =
-        msg.content?.response?.instructions ||
-        msg.content?.response?.output?.[0]?.content?.[0]?.transcript ||
-        (Array.isArray(msg.content?.response?.output)
-          ? JSON.stringify(msg.content?.response?.output)
-          : JSON.stringify(msg.content));
-    }
-
-    return {
-      content,
-      role: msg.from === "client" ? "user" : "assistant",
-      _type: "message",
-      timestamp: msg.timestamp,
-      modality: msg.content?.response?.modalities?.[0] || "text",
-    };
-  });
-};
-
-const getRequestText = (requestBody: any): string => {
-  try {
-    if (!requestBody?.messages?.length) return "";
-
-    // Get all user messages and their instructions
-    const userMessages = requestBody.messages
-      .filter((msg: RealtimeMessage) => msg.from === "client")
-      .map((msg: RealtimeMessage) => msg.content?.response?.instructions)
-      .filter(Boolean)
-      .join("\n");
-
-    return userMessages || "Realtime conversation";
-  } catch (error) {
-    console.error("Error parsing request text:", error);
-    return "error_parsing_request";
-  }
-};
-
-const getResponseText = (
-  responseBody: any,
-  statusCode: number = 200
-): string => {
-  if (!responseBody || statusCode === 0) return "";
-
-  if ("error" in responseBody) {
-    return (
-      responseBody.error?.heliconeMessage ||
-      responseBody.error?.message ||
-      "Error occurred"
-    );
-  }
-
-  try {
-    if (![200, 201, -3].includes(statusCode)) {
-      return responseBody?.error?.message || responseBody?.helicone_error || "";
-    }
-
-    // Find the last "response.done" message
-    const doneMessage = responseBody.messages?.findLast(
-      (msg: RealtimeMessage) => msg.content?.type === "response.done"
-    );
-
-    if (doneMessage) {
-      const output = doneMessage.content?.response?.output;
-      if (output?.length > 0) {
-        const transcripts = output
-          .map((item: any) =>
-            item.content
-              ?.filter((c: any) => c.type === "audio" || c.type === "text")
-              ?.map((c: any) => c.transcript || c.text)
-              .join(" ")
-          )
-          .filter(Boolean)
-          .join("\n");
-
-        return transcripts || JSON.stringify(output);
-      }
-    }
-
-    // Fallback to concatenating all assistant messages
-    const assistantMessages = responseBody.messages
-      ?.filter((msg: RealtimeMessage) => msg.from === "target")
-      ?.map((msg: RealtimeMessage) => {
-        if (msg.content?.type === "response.audio_transcript.delta") {
-          return msg.content.delta;
-        }
-        return null;
-      })
-      .filter(Boolean)
-      .join("");
-
-    return assistantMessages || JSON.stringify(responseBody);
-  } catch (error) {
-    console.error("Error parsing response text:", error);
-    return "error_parsing_response";
-  }
-};
-
-const getLLMSchemaResponse = (response: any) => {
-  if ("error" in response) {
-    return {
-      error: {
-        heliconeMessage:
-          response.error?.heliconeMessage ||
-          response.error?.message ||
-          "Error occurred",
-      },
-    };
-  }
-
-  const messages: Message[] = [];
-  let currentMessage: Partial<Message> = {};
-  let hasFinalResponse = false;
-
-  response.messages?.forEach((msg: RealtimeMessage) => {
-    if (msg.content?.type === "response.done") {
-      const output = msg.content.response?.output;
-      if (output?.length) {
-        // Clear any partial message since we have the final response
-        currentMessage = {};
-        hasFinalResponse = true;
-
-        output.forEach((item: any) => {
-          if (item.type === "function_call") {
-            messages.push({
-              role: "assistant",
-              _type: "functionCall",
-              tool_calls: [
-                {
-                  name: item.name,
-                  arguments: JSON.parse(item.arguments || "{}"),
-                },
-              ],
-              timestamp: msg.timestamp,
-            });
-          } else {
-            messages.push({
-              content: undefined,
-              contentArray: item.content,
-              role: "assistant",
-              _type: "contentArray",
-              timestamp: msg.timestamp,
-            });
-          }
-        });
-      }
-    } else if (
-      !hasFinalResponse &&
-      msg.content?.type === "response.audio_transcript.delta"
-    ) {
-      if (!currentMessage.content) {
-        currentMessage = {
-          content: msg.content.delta,
-          role: "assistant",
-          _type: "message",
-          timestamp: msg.timestamp,
-        };
-      } else {
-        currentMessage.content += msg.content.delta;
-      }
-    } else if (msg.content?.type === "response.created") {
-      if (currentMessage.content) {
-        messages.push(currentMessage as Message);
-        currentMessage = {};
-      }
-    }
-  });
-
-  // Only add the current message if we don't have a final response
-  if (!hasFinalResponse && currentMessage.content) {
-    messages.push(currentMessage as Message);
-  }
-
-  return {
-    messages: messages.sort(
-      (a, b) =>
-        new Date(a.timestamp || 0).getTime() -
-        new Date(b.timestamp || 0).getTime()
-    ),
-    model: response.model,
-  };
-};
-
 export const mapRealtimeRequest: MapperFn<any, any> = ({
   request,
   response,
   statusCode = 200,
   model,
 }) => {
-  const requestMessages = getRequestMessages(request);
-  const responseData = getLLMSchemaResponse(response);
+  const requestMessages = mapRealtimeMessages(request?.messages || []);
+  const responseMessages = mapRealtimeMessages(response?.messages || []);
+  const allMessages = [...requestMessages, ...responseMessages];
 
   const llmSchema: LlmSchema = {
     request: {
@@ -237,23 +17,186 @@ export const mapRealtimeRequest: MapperFn<any, any> = ({
       messages: requestMessages,
       stream: true,
     },
-    response: responseData?.error
-      ? responseData
-      : {
-          messages: responseData?.messages || [],
-          model: responseData?.model || model || request?.model,
-        },
+    response: {
+      messages: responseMessages,
+    },
   };
 
   return {
     schema: llmSchema,
     preview: {
-      request: getRequestText(request),
-      response: getResponseText(response, statusCode),
-      concatenatedMessages: [
-        ...requestMessages,
-        ...(responseData?.messages || []),
-      ],
+      request: requestMessages[0].content || "",
+      response: responseMessages[0].content || "",
+      concatenatedMessages: allMessages,
     },
   };
+};
+
+interface SocketMessage {
+  type: string; // "message" or "error"
+  from: "client" | "target"; // Origin of the message
+  timestamp: string; // ISO string
+  content: RealtimeMessage;
+}
+type RealtimeMessage = {
+  type: // client
+  | "session.update" // SHOW: Count as user message
+    | "input_audio_buffer.append"
+    | "input_audio_buffer.commit"
+    | "input_audio_buffer.clear"
+    | "conversation.item.create"
+    | "conversation.item.truncate"
+    | "conversation.item.delete"
+    | "response.create"
+    | "response.cancel"
+    // target
+    | "error"
+    | "session.created"
+    | "session.updated"
+    | "conversation.created"
+    | "conversation.item.created"
+    | "conversation.item.input_audio_transcription.failed"
+    | "conversation.item.input_audio_transcription.completed" // SHOW: Count as user message (audio)
+    | "conversation.item.truncated"
+    | "conversation.item.deleted"
+    | "input_audio_buffer.committed"
+    | "input_audio_buffer.cleared"
+    | "input_audio_buffer.speech_started"
+    | "input_audio_buffer.speech_stopped"
+    | "response.created" // SHOW: Count as user message (text)
+    | "response.done" // SHOW: Count as assistant message (audio or text depending on response.output.content type "text" or "audio")
+    | "response.output_item.added"
+    | "response.output_item.done"
+    | "response.content_part.added"
+    | "response.content_part.done"
+    | "response.text.delta"
+    | "response.text.done"
+    | "response.audio_transcript.delta"
+    | "response.audio_transcript.done"
+    | "response.audio.delta"
+    | "response.audio.done"
+    | "response.function_call_arguments.delta"
+    | "response.function_call_arguments.done"
+    | "rate_limits.updated";
+
+  response?: {
+    object: string; // "ex: "realtime.response"
+    modalities?: string[]; // ex: ["text", "audio"]
+    instructions?: string;
+    output?: {
+      type: string; // "message", "function_call", or "function_call_output"
+      id: string; // ex: "item_AzRaB38BlG1R3MJ1Ddevm"
+      object: string; // "ex: "realtime.item"
+      // Message specific items
+      content?: {
+        type: string; // "text" or "audio"
+        text?: string; // Text output
+        audio?: string; // Audio output in base64
+        transcript?: string; // Audio output in transcribed text
+      }[];
+      // Function call specific items
+      name?: string; // ex: "get_weather"
+      call_id?: string; // ex: "call_123"
+      arguments?: string; // ex: '{"location": "San Francisco"}'
+      output?: any;
+    }[];
+  };
+  session?: {}; // With session.created, session.update, session.updated
+  item?: {
+    // With converstaion.item.create
+    type: string; // "function_call_output"
+    call_id: string; // ex: "call_123"
+    output: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
+  };
+};
+const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
+  if (!messages?.length) return [];
+
+  return messages
+    .map((msg: SocketMessage) => {
+      // Only process specific message types that we want to show
+      const output = msg.content?.response?.output?.[0];
+      const item = msg.content?.item;
+
+      switch (msg.content.type) {
+        case "response.create":
+          // -> User: Text
+          return {
+            role: "user",
+            _type: "text",
+            content: msg.content?.response?.instructions,
+            timestamp: msg.timestamp,
+          };
+
+        case "conversation.item.input_audio_transcription.completed":
+          // -> User: Audio
+          return {
+            role: "user",
+            _type: "audio",
+            content:
+              msg.content.response?.output?.[0]?.content?.[0]?.transcript,
+            timestamp: msg.timestamp,
+          };
+
+        case "response.done":
+          if (output?.content?.[0]) {
+            // -> Assistant: Text or Audio
+            return {
+              role: "assistant",
+              _type: output?.content?.[0]?.text ? "text" : "audio",
+              content:
+                output?.content?.[0]?.text || output?.content?.[0]?.transcript,
+              timestamp: msg.timestamp,
+            };
+          }
+
+          if (output?.type === "function_call") {
+            // -> Assistant: Function call
+            return {
+              role: "assistant",
+              _type: "functionCall",
+              tool_call_id: output.output?.call_id,
+              tool_calls: [
+                {
+                  name: output.name,
+                  arguments: JSON.parse(output.arguments || "{}"),
+                },
+              ],
+              timestamp: msg.timestamp,
+            };
+          }
+          break;
+
+        case "conversation.item.create":
+          if (item?.type === "function_call_output") {
+            // -> Assistant: Function call output
+            return {
+              role: "user",
+              _type: "function",
+              tool_call_id: item?.call_id,
+              content: item?.output,
+              timestamp: msg.timestamp,
+            };
+          }
+          break;
+
+        case "session.update":
+          // -> User: Session update
+          return {
+            role: "user",
+            _type: "message",
+            content: JSON.stringify(msg.content),
+            timestamp: msg.timestamp,
+          };
+
+        default:
+          return null;
+      }
+    })
+    .filter((msg) => msg !== null)
+    .sort(
+      (a, b) =>
+        new Date(a?.timestamp || 0).getTime() -
+        new Date(b?.timestamp || 0).getTime()
+    ) as Message[];
 };

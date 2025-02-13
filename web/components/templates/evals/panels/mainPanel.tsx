@@ -1,6 +1,5 @@
 import AuthHeader from "@/components/shared/authHeader";
 import { TimeInterval, getTimeIntervalAgo } from "@/lib/timeCalculations/time";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useMemo } from "react";
 
@@ -20,6 +19,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
 import { PanelType } from "./types";
+import { PiPlusBold } from "react-icons/pi";
 
 export const MainPanel = ({
   setPanels,
@@ -112,10 +112,10 @@ export const MainPanel = ({
       <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
         <FeatureUpgradeCard
           title="Unlock Evaluators"
-          description="The Free plan does not include the Evaluators feature, but getting access is easy."
-          infoBoxText="Evaluate your prompts and models to drive improvements."
-          documentationLink="https://docs.helicone.ai/features/sessions"
           featureName="Evaluators"
+          headerTagline="Evaluate your prompts and models to drive improvements."
+          icon={<ChartLineIcon className="h-4 w-4" />}
+          highlightedFeature="Evaluators"
         />
       </div>
     );
@@ -142,11 +142,13 @@ export const MainPanel = ({
                 </Link>
               </Button>
               <Button
+                variant="action"
+                className="gap-2"
                 onClick={() => {
                   setPanels([{ _type: "main" }, { _type: "create" }]);
                 }}
               >
-                <PlusIcon className="h-4 w-4 mr-2" />
+                <PiPlusBold className="h-4 w-4 mr-2" />
                 Create Evaluator
               </Button>
             </div>
