@@ -30,6 +30,10 @@ const PropertiesPage = (props: {}) => {
     );
   }, [org?.currentOrg?.tier, properties.length]);
 
+  if (isPropertiesLoading) {
+    return <LoadingAnimation title="Loading Properties" />;
+  }
+
   if (!hasAccessToProperties) {
     return (
       <div className="flex justify-center items-center bg-white">
