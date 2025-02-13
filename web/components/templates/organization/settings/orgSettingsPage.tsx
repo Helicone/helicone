@@ -1,20 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
-import { useIsGovernanceEnabled } from "../hooks";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
 import OrgMembersPage from "../members/orgMembersPage";
 import { Separator } from "@/components/ui/separator";
+
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 
@@ -29,30 +27,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [, setOpenDemo] = useLocalStorage("openDemo", false);
   const [, setRemovedDemo] = useLocalStorage("removedDemo", false);
-
-  const isGovernanceEnabled = useIsGovernanceEnabled();
+  const { setNotification } = useNotification();
 
   const isOwner = org.owner === user?.id;
-
-  const currentUsage = 0;
-
-  const isUnlimited = useMemo(() => {
-    return (
-      isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD === 0
-    );
-  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD]);
-
-  const totalUsage = useMemo(() => {
-    return (
-      (isGovernanceEnabled.data?.data?.data?.governance_settings
-        ?.limitUSD as number) ?? 0
-    );
-  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.limitUSD]);
-
-  const days = useMemo(() => {
-    return isGovernanceEnabled.data?.data?.data?.governance_settings
-      ?.days as number;
-  }, [isGovernanceEnabled.data?.data?.data?.governance_settings?.days]);
 
   const updateOrgMutation = useUpdateOrgMutation();
 
@@ -74,70 +51,9 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedOrgName]);
 
-  const { setNotification } = useNotification();
-
   return (
     <>
-      <div className="py-4 flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl space-y-8">
-        {isGovernanceEnabled.data?.data?.data && (
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  Organization Governance
-                </h3>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  This organization is governed by your system administrator
-                  with a maximum monthly spend limit of $
-                  {totalUsage?.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                  .
-                </p>
-              </div>
-
-              <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
-                <span>
-                  Current Usage: $
-                  {currentUsage.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
-                {isUnlimited ? (
-                  <span>Unlimited</span>
-                ) : (
-                  <span>
-                    $
-                    {totalUsage.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}{" "}
-                    limit
-                  </span>
-                )}
-              </div>
-              <Progress
-                value={(currentUsage / totalUsage) * 100}
-                className={clsx(
-                  "h-2",
-                  isUnlimited
-                    ? "bg-green-500"
-                    : currentUsage / totalUsage > 0.9
-                    ? "bg-red-500"
-                    : currentUsage / totalUsage > 0.7
-                    ? "bg-yellow-500"
-                    : "bg-green-500"
-                )}
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Usage resets every {days} days
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
+      <div className="flex flex-col text-gray-900 dark:text-gray-100 w-full max-w-2xl space-y-8">
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="org-id">Organization Id</Label>
@@ -171,8 +87,8 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
             />
           </div>
 
-          <div className="space-y-6 max-w-[450px]">
-            <div className="space-y-4">
+          <div className="flex flex-col gap-8 max-w-[450px]">
+            <div className="flex flex-col gap-6">
               <Label>Choose a color</Label>
               <RadioGroup
                 defaultValue={org.color}
@@ -185,7 +101,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     variant: variant,
                   })
                 }
-                className="flex items-center justify-between px-8"
+                className="flex items-center justify-start"
               >
                 {ORGANIZATION_COLORS.map((color) => (
                   <div key={color.name} className="flex items-center space-x-2">
@@ -211,7 +127,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               </RadioGroup>
             </div>
 
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <Label>Choose an icon</Label>
               <RadioGroup
                 defaultValue={org.icon}
@@ -224,7 +140,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
                     variant: variant,
                   })
                 }
-                className="grid grid-cols-5 gap-4"
+                className="flex flex-wrap gap-6 items-start w-fit"
               >
                 {ORGANIZATION_ICONS.map((icon) => (
                   <div key={icon.name} className="flex items-center space-x-2">

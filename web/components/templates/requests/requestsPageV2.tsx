@@ -857,7 +857,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </ThemedTable>
             </div>
 
-            <div className="bg-white dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+            <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
               <TableFooter
                 currentPage={page}
                 pageSize={pageSize}

@@ -225,7 +225,7 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [isOnboardingVisible, currentStep]);
 
   return (
-    <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
+    <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
         <ThemedTableHeader
           search={search}
@@ -272,7 +272,7 @@ export default function ThemedTable<T extends { id?: string }>(
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {" "}
-          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
+          <div className="h-full overflow-x-auto bg-white dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (

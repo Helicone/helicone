@@ -4,6 +4,7 @@ import {
   CircleStackIcon,
   ClockIcon,
   TableCellsIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
 import { BarChart } from "@tremor/react";
@@ -25,7 +26,8 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Separator } from "@/components/ui/separator";
+import { Archive } from "lucide-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface CachePageProps {
   currentPage: number;
@@ -134,225 +136,204 @@ const CachePage = (props: CachePageProps) => {
   const org = useOrg();
   const isPro = org?.currentOrg?.tier !== "free";
 
+  if (isAnyLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <div className="flex justify-center items-center bg-white">
+        <FeatureUpgradeCard
+          title="Cache"
+          featureName="cache"
+          headerTagline="Cache responses to reduce API costs"
+          icon={<Archive className="h-4 w-4 text-sky-500" />}
+          highlightedFeature="cache"
+        />
+      </div>
+    );
+  }
+
   return (
     <IslandContainer>
-      {!isPro ? (
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <FeatureUpgradeCard
-            title="Unlock Cache"
-            description="The Free plan does not include the Cache feature, but getting access is easy."
-            infoBoxText="Optimize your LLM usage by caching responses and reducing redundant API calls."
-            youtubeVideo="https://www.youtube.com/embed/qIOq_NbeQ28?autoplay=1&mute=1"
-            documentationLink="https://docs.helicone.ai/features/advanced-usage/caching"
-            featureName="cache"
-          />
-        </div>
-      ) : !hasCache ? (
-        <div className="flex flex-col w-full justify-center items-center">
-          <div className="flex flex-col mt-16">
-            <div className="w-fit p-4 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-              <CircleStackIcon className="h-8 w-8 text-gray-500" />
-            </div>
-
-            <p className="text-xl text-black dark:text-white font-semibold mt-8">
-              {!isPro
-                ? "Upgrade to Pro to start using Cache"
-                : "No Cache Data Found"}
-            </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
-              View our documentation to learn how to use caching.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <Link
-                href="https://docs.helicone.ai/features/advanced-usage/caching"
-                className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      <AuthHeader
+        isWithinIsland={true}
+        title={<div className="flex items-center gap-2">Cache</div>}
+        actions={
+          <Link
+            href="https://docs.helicone.ai/features/advanced-usage/caching"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <BookOpenIcon className="h-4 w-4" />
+          </Link>
+        }
+      />
+      <div className="flex flex-col">
+        <Tabs defaultValue={defaultIndex} className="w-full">
+          <TabsList className="font-semibold">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id.toString()}
+                onClick={() => {
+                  router.push(
+                    {
+                      query: { ...router.query, tab: tab.id },
+                    },
+                    undefined,
+                    { shallow: true }
+                  );
+                }}
               >
-                <BookOpenIcon className="h-4 w-4" />
-                View Docs
-              </Link>
-            </div>
-
-            {isPro && (
-              <div>
-                <Separator>or</Separator>
-
-                <div className="mt-4">
-                  <h3 className="text-xl text-black dark:text-white font-semibold">
-                    TS/JS Quick Start
+                <tab.icon className="h-5 w-5 mr-2" />
+                {tab.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value="0">
+            {hasCache ? (
+              <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
+                <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                  <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                    {metrics.map((metric, i) => (
+                      <li
+                        key={i}
+                        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
+                      >
+                        <metric.icon className="h-6 w-6 text-sky-500" />
+                        <div className="flex flex-col">
+                          <dt className="text-gray-500 text-sm">
+                            {metric.label}
+                          </dt>
+                          {metric.isLoading ? (
+                            <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+                          ) : (
+                            <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
+                              {metric.value}
+                            </dd>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                      Caches last 30 days
+                    </h3>
+                    <div className="h-72 px-4 ">
+                      {isAnyLoading ? (
+                        <div className="h-full w-full flex-col flex p-8">
+                          <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                        </div>
+                      ) : (
+                        <div className="h-full w-full">
+                          <BarChart
+                            data={chartData}
+                            categories={["count"]}
+                            index={"date"}
+                            className="h-full -ml-4 pt-4"
+                            colors={["blue"]}
+                            showLegend={false}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="flex flex-col w-full xl:w-1/2
+space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                    Top Requests
                   </h3>
-                  <DiffHighlight
-                    code={`
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": \`Bearer ${process.env.HELICONE_API_KEY}\`,
-  },
-});
+                  <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                    {chMetrics.topRequests.data?.data?.map(
+                      (request: any, i: any) => (
+                        <ThemedListItem
+                          key={i}
+                          onClickHandler={() => {
+                            setSelectedRequest(request);
+                            setOpen(true);
+                          }}
+                          title={request.prompt}
+                          subtitle={`Created: ${new Date(
+                            request.first_used
+                          ).toLocaleString()}`}
+                          icon={CircleStackIcon}
+                          value={request.count}
+                          pill={<ModelPill model={request.model} />}
+                          secondarySubtitle={`Recent: ${new Date(
+                            request.last_used
+                          ).toLocaleString()}`}
+                        />
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-6 px-4 text-center">
+                <div className="flex flex-col items-center gap-4 max-w-3xl">
+                  <CircleStackIcon className="h-16 w-16 text-gray-400" />
+                  <h3 className="text-2xl font-semibold">
+                    No Cache Activity Detected
+                  </h3>
+                  <p className="text-gray-500 text-lg">
+                    Enable caching to reduce API costs and improve response
+                    times. Choose from these parameters to control cache
+                    behavior:
+                  </p>
 
-openai.chat.completions.create(
-  {
-    messages: [
-      {
-        role: "user",
-        content: "Generate an abstract for a course on space.",
-      },
-    ],
-    model: "gpt-4",
-  },
-  {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-    },
-  }
-);
-`}
-                    language="typescript"
+                  <DiffHighlight
+                    code={`"Helicone-Cache-Enabled": "true",         // Required to enable caching
+"Cache-Control": "max-age=3600",          // Optional: Cache duration in seconds
+"Helicone-Cache-Bucket-Max-Size": "1000", // Optional: Max entries per cache bucket
+"Helicone-Cache-Seed": "user-123"         // Optional: Isolate cache by seed value`}
+                    language="javascript"
                     newLines={[]}
                     oldLines={[]}
+                    textSize="md"
+                    className="rounded-lg text-left"
+                    marginTop={false}
+                    minHeight={false}
+                    maxHeight={false}
                   />
+
+                  <Link
+                    href="https://docs.helicone.ai/features/advanced-usage/caching"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 flex items-center gap-2 text-sky-600 hover:text-sky-700 font-medium"
+                  >
+                    View caching documentation
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <AuthHeader
-            isWithinIsland={true}
-            title={<div className="flex items-center gap-2">Cache</div>}
-            actions={
-              <Link
-                href="https://docs.helicone.ai/features/advanced-usage/caching"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                <BookOpenIcon className="h-4 w-4" />
-              </Link>
-            }
-          />
-          <div className="flex flex-col">
-            <Tabs defaultValue={defaultIndex} className="w-full">
-              <TabsList className="font-semibold">
-                {tabs.map((tab) => (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id.toString()}
-                    onClick={() => {
-                      router.push(
-                        {
-                          query: { ...router.query, tab: tab.id },
-                        },
-                        undefined,
-                        { shallow: true }
-                      );
-                    }}
-                  >
-                    <tab.icon className="h-5 w-5 mr-2" />
-                    {tab.title}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              <TabsContent value="0">
-                <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-                  <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                    <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                      {metrics.map((metric, i) => (
-                        <li
-                          key={i}
-                          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                        >
-                          <metric.icon className="h-6 w-6 text-sky-500" />
-                          <div className="flex flex-col">
-                            <dt className="text-gray-500 text-sm">
-                              {metric.label}
-                            </dt>
-                            {metric.isLoading ? (
-                              <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                            ) : (
-                              <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                                {metric.value}
-                              </dd>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                        Caches last 30 days
-                      </h3>
-                      <div className="h-72 px-4 ">
-                        {isAnyLoading ? (
-                          <div className="h-full w-full flex-col flex p-8">
-                            <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                          </div>
-                        ) : (
-                          <div className="h-full w-full">
-                            <BarChart
-                              data={chartData}
-                              categories={["count"]}
-                              index={"date"}
-                              className="h-full -ml-4 pt-4"
-                              colors={["blue"]}
-                              showLegend={false}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="flex flex-col w-full xl:w-1/2
-space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
-                  >
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                      Top Requests
-                    </h3>
-                    <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                      {chMetrics.topRequests.data?.data?.map(
-                        (request: any, i: any) => (
-                          <ThemedListItem
-                            key={i}
-                            onClickHandler={() => {
-                              setSelectedRequest(request);
-                              setOpen(true);
-                            }}
-                            title={request.prompt}
-                            subtitle={`Created: ${new Date(
-                              request.first_used
-                            ).toLocaleString()}`}
-                            icon={CircleStackIcon}
-                            value={request.count}
-                            pill={<ModelPill model={request.model} />}
-                            secondarySubtitle={`Recent: ${new Date(
-                              request.last_used
-                            ).toLocaleString()}`}
-                          />
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="1">
-                <div className="py-4">
-                  <RequestsPageV2
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    sort={sort}
-                    isCached={true}
-                    currentFilter={null}
-                    organizationLayout={null}
-                    organizationLayoutAvailable={false}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </>
-      )}
+          </TabsContent>
+          <TabsContent value="1">
+            <div className="py-4">
+              <RequestsPageV2
+                currentPage={currentPage}
+                pageSize={pageSize}
+                sort={sort}
+                isCached={true}
+                currentFilter={null}
+                organizationLayout={null}
+                organizationLayoutAvailable={false}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <ThemedDrawer open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-2">
