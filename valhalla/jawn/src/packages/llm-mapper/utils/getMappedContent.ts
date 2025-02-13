@@ -145,13 +145,23 @@ const getUnsanitizedMappedContent = ({
 const sanitizeMappedContent = (
   mappedContent: MappedLLMRequest
 ): MappedLLMRequest => {
-  const sanitizeMessage = (message: Message): Message => ({
-    ...message,
-    content:
-      typeof message.content === "string"
-        ? message.content
-        : JSON.stringify(message.content),
-  });
+  const sanitizeMessage = (message: Message): Message => {
+    if (!message) {
+      return {
+        role: "unknown",
+        content: "",
+        _type: "message",
+      };
+    }
+    return {
+      ...message,
+      content: message.content
+        ? typeof message.content === "string"
+          ? message.content
+          : JSON.stringify(message.content)
+        : "",
+    };
+  };
 
   const sanitizeMessages = (
     messages: Message[] | undefined | null
