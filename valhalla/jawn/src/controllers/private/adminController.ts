@@ -1045,6 +1045,7 @@ export class AdminController extends Controller {
       WHERE
         o.created_at > now() - INTERVAL '${body.timeFilter}'
         AND u.email NOT LIKE '%helicone.ai%'
+        AND o.tier != 'demo'
       GROUP BY day
       ORDER BY day ASC
 
