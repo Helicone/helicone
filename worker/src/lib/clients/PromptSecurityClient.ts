@@ -8,7 +8,7 @@ export async function checkPromptSecurity(
 ): Promise<boolean | undefined> {
   const promptArmorRequest = JSON.stringify({
     text: message,
-    advanced: false,
+    advanced,
   });
 
   const response = await fetch(`${env.VALHALLA_URL}/v1/public/security`, {
