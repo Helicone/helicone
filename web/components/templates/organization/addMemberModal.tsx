@@ -1,9 +1,15 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
-import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedModal from "../../shared/themed/themedModal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface AddMemberModalProps {
   orgId: string;
@@ -59,52 +65,47 @@ const AddMemberModal = (props: AddMemberModalProps) => {
   };
 
   return (
-    <ThemedModal open={open} setOpen={setOpen}>
-      <form
-        action="#"
-        method="POST"
-        onSubmit={onSubmitHandler}
-        className="flex flex-col gap-4 w-full"
-      >
-        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-          Add New Member
-        </p>
-        <div className="space-y-1.5 text-sm w-[400px]">
-          <label htmlFor="email" className="text-gray-900 dark:text-gray-100">
-            User Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            className={clsx(
-              "text-gray-900 dark:text-gray-100 block w-full rounded-md border border-gray-300 shadow-sm p-2 text-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-700"
-            )}
-            placeholder={"Enter user email"}
-          />
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-            }}
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            {isLoading && (
-              <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-            )}
-            Add Member
-          </button>
-        </div>
-      </form>
-    </ThemedModal>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Member</DialogTitle>
+        </DialogHeader>
+        <form
+          action="#"
+          method="POST"
+          onSubmit={onSubmitHandler}
+          className="flex flex-col gap-4 w-full"
+        >
+          <div className="space-y-1.5 text-sm w-full">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground"
+            >
+              User Email
+            </label>
+            <Input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Enter user email"
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Add Member
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

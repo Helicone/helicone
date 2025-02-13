@@ -2600,7 +2600,8 @@
 					"DEEPSEEK",
 					"X",
 					"AVIAN",
-					"NEBIUS"
+					"NEBIUS",
+					"NOVITA"
 				]
 			},
 			"Provider": {
@@ -2650,16 +2651,8 @@
 					"image_url": {
 						"type": "string"
 					},
-					"_type": {
-						"type": "string",
-						"enum": [
-							"function",
-							"functionCall",
-							"image",
-							"message",
-							"autoInput",
-							"contentArray"
-						]
+					"timestamp": {
+						"type": "string"
 					},
 					"tool_call_id": {
 						"type": "string"
@@ -2678,6 +2671,17 @@
 					},
 					"id": {
 						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"function",
+							"functionCall",
+							"image",
+							"message",
+							"autoInput",
+							"contentArray"
+						]
 					}
 				},
 				"required": [
@@ -8223,6 +8227,51 @@
 				}
 			}
 		},
+		"/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+			"post": {
+				"operationId": "CreateSubversionFromUi",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptCreateSubversionParams"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/version/{promptVersionId}/subversion": {
 			"post": {
 				"operationId": "CreateSubversion",
@@ -9442,6 +9491,62 @@
 				}
 			}
 		},
+		"/v2/experiment/{experimentId}/rows": {
+			"delete": {
+				"operationId": "DeleteExperimentTableRows",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputRecordIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputRecordIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v2/experiment/{experimentId}/row/insert/batch": {
 			"post": {
 				"operationId": "CreateExperimentTableRowBatch",
@@ -9513,6 +9618,49 @@
 						}
 					}
 				}
+			}
+		},
+		"/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
+			"post": {
+				"operationId": "CreateExperimentTableRowFromDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v2/experiment/{experimentId}/row/update": {

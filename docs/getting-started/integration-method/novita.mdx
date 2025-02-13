@@ -1,0 +1,63 @@
+---
+title: "Novita AI Integration"
+sidebarTitle: "Novita AI"
+description: "Connect Helicone with Novita AI, a platform that provides powerful LLM models including DeepSeek, Llama, Mistral, and more."
+"twitter:title": "Novita AI Integration - Helicone OSS LLM Observability"
+---
+
+You can follow their documentation here: [https://novita.ai/docs](https://novita.ai/docs)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Novita AI account">
+    Log into [Novita AI](https://novita.ai) or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and NOVITA_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+NOVITA_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following Novita AI URL with the Helicone Gateway URL:
+
+`https://api.novita.ai` -> `https://novita.helicone.ai`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
+```
+
+</Step>
+</Steps>
+
+Now you can access all the models on Novita AI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <NOVITA_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "deepseek/deepseek-r1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of France?"
+      }
+    ]
+}' \
+  --url https://novita.helicone.ai/v3/chat/completions
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+And for more information on how to use Novita AI, see [Novita AI Docs](https://novita.ai/docs).

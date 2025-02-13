@@ -70,11 +70,16 @@ OFFSET ${offset}
     await dbQueryClickhouse<UserMetric>(query, havingFilter.argsAcc),
     (data) => {
       return data.map((d) => {
-        console.log(d.first_active);
         return {
           ...d,
-          first_active: new Date(d.first_active),
-          last_active: new Date(d.last_active),
+          first_active: new Date(
+            new Date(d.first_active + "Z").getTime() +
+              timeZoneDifference * 60 * 1000
+          ).toISOString(),
+          last_active: new Date(
+            new Date(d.last_active + "Z").getTime() +
+              timeZoneDifference * 60 * 1000
+          ).toISOString(),
         };
       });
     }

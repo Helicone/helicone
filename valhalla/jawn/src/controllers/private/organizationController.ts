@@ -122,7 +122,7 @@ export class OrganizationController extends Controller {
       return err(`Error getting organization: ${org.error}`);
     }
 
-    if (org.data.tier === "enterprise") {
+    if (org.data.tier === "enterprise" || "team-20250130") {
       // Enterprise tier: Proceed to add member without additional checks
     } else if (
       org.data.tier === "pro-20240913" ||

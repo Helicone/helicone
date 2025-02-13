@@ -65,6 +65,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
               if (
                 orgContext?.currentOrg?.tier === "pro-20240913" ||
                 orgContext?.currentOrg?.tier === "pro-20250202" ||
+                orgContext?.currentOrg?.tier === "team-20250130" ||
                 orgContext?.currentOrg?.tier === "growth"
               ) {
                 setNotification(

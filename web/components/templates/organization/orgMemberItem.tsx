@@ -1,26 +1,16 @@
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { AcademicCapIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
+import { Button } from "@/components/ui/button";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import ThemedModal from "../../shared/themed/themedModal";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { useGovernanceLimits } from "./hooks";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface OrgMemberItemProps {
   index: number;
@@ -42,10 +32,6 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
   const { setNotification } = useNotification();
 
   const [openDelete, setOpenDelete] = useState(false);
-  const [openLimits, setOpenLimits] = useState(false);
-
-  const { memberLimits, changeMemberLimits, isGovernanceEnabled } =
-    useGovernanceLimits(orgMember.member ?? "");
 
   const user = useUser();
 
@@ -59,42 +45,22 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
 
   const isUser = orgMember.member === user?.id;
 
-  const [formLimits, setFormLimits] = useState({
-    limitUSD: 0,
-    days: 0,
-  });
-
-  useEffect(() => {
-    if (memberLimits.data?.data?.data?.governance_limits) {
-      setFormLimits({
-        limitUSD: memberLimits.data.data.data.governance_limits
-          .limitUSD as number,
-        days: memberLimits.data.data.data.governance_limits.days as number,
-      });
-    }
-  }, [memberLimits.data]);
-
   return (
     <>
       <li key={index} className="py-3 grid grid-cols-12 gap-2 items-center">
-        <p className="truncate overflow-ellipsis col-span-8 md:col-span-4">
-          {orgMember.email}
-        </p>
-        {isGovernanceEnabled?.data?.data?.data && (
-          <p className="truncate overflow-ellipsis col-span-8 md:col-span-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpenLimits(true)}
-            >
-              Limits:{" "}
-              {memberLimits.data?.data?.data?.governance_limits
-                ? `$${memberLimits.data.data.data.governance_limits.limitUSD} / ${memberLimits.data.data.data.governance_limits.days} days`
-                : "None"}
-            </Button>
+        <div className="col-span-8 flex flex-row justify-start items-center gap-2">
+          <p className="truncate overflow-ellipsis text-sm">
+            {orgMember.email}
           </p>
-        )}
-        <div className="col-span-4 md:col-span-2 w-fit md:min-w-[8rem]">
+          {isUser && (
+            <div className="flex justify-end gap-2">
+              <span className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/20 px-2 py-1 text-xs font-medium text-sky-700 dark:text-sky-300 ring-1 ring-inset ring-sky-700/10 dark:ring-sky-300/20">
+                Current User
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="col-span-2 w-fit md:min-w-[8rem]">
           {isUserAdmin ? (
             <ThemedDropdown
               options={[
@@ -152,7 +118,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             </Tooltip>
           )}
         </div>
-        <div className="col-span-4 md:col-span-2 flex justify-end gap-2">
+        <div className="col-span-2 flex justify-end gap-2">
           {orgMember.isOwner ? (
             <span className="inline-flex items-center rounded-full bg-white dark:bg-black px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">
               <AcademicCapIcon className="h-4 w-4 mr-1" />
@@ -204,67 +170,6 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
         </div>
       </li>
 
-      <Dialog open={openLimits} onOpenChange={setOpenLimits}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Configure Member Limits</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="maxKeys" className="text-right">
-                Limit USD
-              </Label>
-              <Input
-                id="limitUSD"
-                type="number"
-                value={formLimits.limitUSD}
-                onChange={(e) =>
-                  setFormLimits((prev) => ({
-                    ...prev,
-                    limitUSD: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="days" className="text-right">
-                Days
-              </Label>
-              <Input
-                id="days"
-                type="number"
-                value={formLimits.days}
-                onChange={(e) =>
-                  setFormLimits((prev) => ({
-                    ...prev,
-                    days: parseFloat(e.target.value) || 0,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <span className="text-sm text-muted-foreground">
-            Set to 0 for unlimited usage
-          </span>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenLimits(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                changeMemberLimits.mutate(formLimits);
-                setOpenLimits(false);
-              }}
-            >
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <ThemedModal open={openDelete} setOpen={setOpenDelete}>
         <div className="flex flex-col space-y-4 sm:space-y-8 min-w-[25rem]">
           <div className="flex flex-col space-y-2">

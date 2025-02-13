@@ -742,6 +742,8 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                       setCurrentMessage(newMessages);
                       if (fileObj instanceof File) {
                         handleCallback(replacedText, role, fileObj);
+                      } else {
+                        handleCallback(replacedText, role, null);
                       }
                       setPromptVariables(newVariables);
                     }}

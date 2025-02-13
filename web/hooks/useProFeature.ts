@@ -65,6 +65,7 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
         org?.currentOrg?.tier === "pro" ||
         org?.currentOrg?.tier === "enterprise" ||
         org?.currentOrg?.tier === "demo" ||
+        org?.currentOrg?.tier === "team-20250130" ||
         (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
           ?.addons?.prompts)
     );
@@ -80,7 +81,8 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
   const isPro = useMemo(() => {
     return (
       org?.currentOrg?.tier === "pro-20240913" ||
-      org?.currentOrg?.tier === "pro-20250202"
+      org?.currentOrg?.tier === "pro-20250202" ||
+      org?.currentOrg?.tier === "team-20250130"
     );
   }, [org?.currentOrg?.tier]);
 

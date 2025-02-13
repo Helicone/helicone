@@ -19,27 +19,6 @@ export function formatNumber(num: number, decimals: number = 4) {
   }
 }
 
-const convertToUSDateFormat = (date: string) => {
-  const dateObj = new Date(date);
-  const tzOffset = dateObj.getTimezoneOffset() * 60000;
-
-  const localDateObj = new Date(dateObj.getTime() - tzOffset);
-  const formattedDate =
-    [
-      ("0" + (localDateObj.getMonth() + 1)).slice(-2),
-      ("0" + localDateObj.getDate()).slice(-2),
-      localDateObj.getFullYear(),
-    ].join("/") +
-    " " +
-    [
-      ("0" + localDateObj.getHours()).slice(-2),
-      ("0" + localDateObj.getMinutes()).slice(-2),
-      ("0" + localDateObj.getSeconds()).slice(-2),
-    ].join(":");
-
-  return formattedDate;
-};
-
 export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "user_id",
@@ -70,8 +49,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "first_active",
     header: "First Active",
-    cell: (info) =>
-      getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
+    cell: (info) => getUSDateFromString(info.getValue() as string),
     meta: {
       sortKey: "first_active",
     },
@@ -80,8 +58,7 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
   {
     accessorKey: "last_active",
     header: "Last Active",
-    cell: (info) =>
-      getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
+    cell: (info) => getUSDateFromString(info.getValue() as string),
     meta: {
       sortKey: "last_active",
     },

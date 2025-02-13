@@ -221,6 +221,23 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const addExperimentTableRowInsertFromDatasetBatch = useMutation({
+    mutationFn: async ({ datasetId }: { datasetId: string }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.POST(
+        "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}",
+        {
+          params: { path: { experimentId: experimentTableId, datasetId } },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   const updateExperimentTableRow = useMutation({
     mutationFn: async ({
       inputRecordId,
@@ -282,6 +299,19 @@ export const useExperimentTable = (experimentTableId: string) => {
     enabled: !!experimentTableId,
   });
 
+  const deleteSelectedRows = useMutation({
+    mutationFn: async ({ inputRecordIds }: { inputRecordIds: string[] }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE("/v2/experiment/{experimentId}/rows", {
+        params: { path: { experimentId: experimentTableId } },
+        body: { inputRecordIds },
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+    },
+  });
+
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -292,10 +322,12 @@ export const useExperimentTable = (experimentTableId: string) => {
     promptVersionTemplateData,
     isPromptVersionTemplateLoading,
     addExperimentTableRowInsertBatch,
+    addExperimentTableRowInsertFromDatasetBatch,
     updateExperimentTableRow,
     runHypothesis,
     addManualRow,
     wrapText,
     selectedScoreKey,
+    deleteSelectedRows,
   };
 };

@@ -42,6 +42,9 @@ export interface paths {
   "/v1/prompt/version/{promptVersionId}/edit-template": {
     post: operations["EditPromptVersionTemplate"];
   };
+  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+    post: operations["CreateSubversionFromUi"];
+  };
   "/v1/prompt/version/{promptVersionId}/subversion": {
     post: operations["CreateSubversion"];
   };
@@ -124,8 +127,14 @@ export interface paths {
   "/v2/experiment/{experimentId}/add-manual-row": {
     post: operations["AddManualRowToExperiment"];
   };
+  "/v2/experiment/{experimentId}/rows": {
+    delete: operations["DeleteExperimentTableRows"];
+  };
   "/v2/experiment/{experimentId}/row/insert/batch": {
     post: operations["CreateExperimentTableRowBatch"];
+  };
+  "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
+    post: operations["CreateExperimentTableRowFromDataset"];
   };
   "/v2/experiment/{experimentId}/row/update": {
     post: operations["UpdateExperimentTableRow"];
@@ -1102,7 +1111,7 @@ Json: JsonObject;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1113,13 +1122,14 @@ Json: JsonObject;
     Message: {
       contentArray?: components["schemas"]["Message"][];
       image_url?: string;
-      /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       role?: string;
       id?: string;
+      /** @enum {string} */
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
@@ -2622,6 +2632,26 @@ export interface operations {
       };
     };
   };
+  CreateSubversionFromUi: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
   CreateSubversion: {
     parameters: {
       path: {
@@ -3134,6 +3164,28 @@ export interface operations {
       };
     };
   };
+  DeleteExperimentTableRows: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputRecordIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   CreateExperimentTableRowBatch: {
     parameters: {
       path: {
@@ -3149,6 +3201,22 @@ export interface operations {
               inputRecordId: string;
             }[];
         };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateExperimentTableRowFromDataset: {
+    parameters: {
+      path: {
+        experimentId: string;
+        datasetId: string;
       };
     };
     responses: {

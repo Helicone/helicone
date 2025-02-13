@@ -1,5 +1,5 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Database } from "../../supabase/database.types";
 import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -9,6 +9,7 @@ import { getJawnClient } from "../../lib/clients/jawn";
 import posthog from "posthog-js";
 import { getHeliconeCookie } from "@/lib/cookies";
 import { env } from "next-runtime-env";
+import useNotification from "@/components/shared/notification/useNotification";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -167,6 +168,7 @@ const useGetOrgs = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
+      console.log("useGetOrgs", user?.id);
       if (!user?.id) {
         return [];
       }
@@ -181,6 +183,8 @@ const useGetOrgs = () => {
       return data;
     },
     refetchOnWindowFocus: false,
+    refetchInterval: (data) => (data?.length === 0 ? 1_000 : false), // Refetch every 1 seconds if no orgs
+    refetchIntervalInBackground: true,
   });
 
   data &&
@@ -196,6 +200,66 @@ const useGetOrgs = () => {
     isLoading,
     refetch,
   };
+};
+
+export const useUpdateOrgMutation = () => {
+  const queryClient = useQueryClient();
+  const user = useUser();
+  const { setNotification } = useNotification();
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      name,
+      color,
+      icon,
+      variant,
+      orgProviderKey,
+      limits,
+      resellerId,
+      organizationType,
+    }: {
+      orgId: string;
+      name: string;
+      color: string;
+      icon: string;
+      variant: string;
+      orgProviderKey?: string;
+      limits?: any;
+      resellerId?: string;
+      organizationType?: string;
+    }) => {
+      const jawn = getJawnClient(orgId);
+      const { data, error } = await jawn.POST(
+        "/v1/organization/{organizationId}/update",
+        {
+          params: { path: { organizationId: orgId } },
+          body: {
+            name,
+            color,
+            icon,
+            variant,
+            ...(variant === "reseller" && {
+              org_provider_key: orgProviderKey,
+              limits,
+              reseller_id: resellerId,
+              organization_type: organizationType,
+            }),
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      setNotification("Organization updated", "success");
+      queryClient.invalidateQueries({
+        queryKey: ["Organizations", user?.id ?? ""],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["OrganizationsId"],
+        refetchType: "all",
+      });
+    },
+  });
 };
 
 const setOrgCookie = (orgId: string) => {

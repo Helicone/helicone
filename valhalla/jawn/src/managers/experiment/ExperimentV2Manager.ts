@@ -446,6 +446,44 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async createExperimentTableRowBatchFromDataset(
+    experimentId: string,
+    datasetId: string
+  ): Promise<Result<null, string>> {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    const inputManager = new InputsManager(this.authParams);
+    const inputRecords =
+      await inputManager.getInputsFromPromptVersionAndDataset(
+        experiment.original_prompt_version ?? "",
+        datasetId
+      );
+
+    if (!inputRecords.data) {
+      return err("No input records found");
+    }
+
+    try {
+      await Promise.all(
+        (inputRecords.data ?? []).map(async (row) => {
+          await this.createExperimentTableRow(
+            experimentId,
+            row.id,
+            row.inputs,
+            row.auto_prompt_inputs
+          );
+        })
+      );
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to create experiment table row with cells batch");
+    }
+  }
+
   async createExperimentTableRow(
     experimentId: string,
     inputRecordId: string,
@@ -495,6 +533,36 @@ export class ExperimentV2Manager extends BaseManager {
       return ok(null);
     } catch (e) {
       return err("Failed to create experiment table row");
+    }
+  }
+
+  async deleteExperimentTableRows(
+    experimentId: string,
+    inputRecordIds: string[]
+  ): Promise<Result<null, string>> {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    if (inputRecordIds.length === 0) {
+      return err("No input record ids provided");
+    }
+
+    try {
+      const result = await supabaseServer.client
+        .from("prompt_input_record")
+        .update({ experiment_id: null })
+        .in("id", inputRecordIds)
+        .eq("experiment_id", experimentId);
+
+      if (result.error) {
+        return err("Failed to delete experiment table rows");
+      }
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to delete experiment table rows");
     }
   }
 
