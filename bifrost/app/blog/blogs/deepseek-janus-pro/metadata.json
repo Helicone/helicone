@@ -1,10 +1,13 @@
 {
-  "title": "DeepSeek Janus Pro 7B: Complete guide to Deepseek's Unified Multimodal Model",
-  "title1": "DeepSeek Janus Pro 7B: Complete guide to Deepseek's Multimodal Model - Helicone",
-  "title2": "DeepSeek Janus Pro 7B: Multimodal DeepSeek Model",
-  "description": "A comprehensive guide to understanding and using DeepSeek's Janus Pro 7B for developers.",
-  "images": "/static/blog/ai-best-practices/cover.webp",
-  "time": "5 minute read",
-  "author": "Yusuf",
-  "date": "June 20, 2024"
+  "title": "Janus Pro Released: How to Access DeepSeek's Unified Multimodal Model",
+  "title1": "Janus Pro Released: How to Access DeepSeek's Unified Multimodal Model - Helicone",
+  "title2": "Janus Pro Released: How to Access DeepSeek's Unified Multimodal Model",
+  "description": "DeepSeek Janus Pro is a multimodal AI model designed for both text and image processing. In this guide, we will walk through the model's capabilities, benchmarks, and how to access it.",
+  "images": "/static/blog/deepseek-janus-pro/janus-pro-7b-cover.webp",
+  "time": "7 minute read",
+  "author": "Lina Lam",
+  "date": "February 13, 2025"
 }
+
+
+

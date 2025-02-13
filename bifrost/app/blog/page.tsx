@@ -465,11 +465,6 @@ const blogContent: BlogStructure[] = [
     },
   },
   {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
-    },
-  },
-  {
     title: "Compare: The Best LangSmith Alternatives & Competitors",
     description:
       "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",

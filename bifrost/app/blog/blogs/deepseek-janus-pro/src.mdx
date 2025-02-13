@@ -1,61 +1,65 @@
-Shortly after the release of the groundbreaking DeepSeek R1 model, the DeepSeek team is back at it again with a new multimodal challenger. 
+Shortly after the release of the groundbreaking DeepSeek R1 model, the DeepSeek team is back at it again with a new multimodal challenger.
 
-Their new **Deepseek Janus Pro** is a multimodal AI model designed for both text and image processing. It builds on the Deepseek Janus series by introducing better efficiency, enhanced generation capabilities, and a decoupled architecture for visual understanding and image creation.
+Their new **DeepSeek Janus Pro** is a multimodal AI model designed for both text and image processing. It builds on the DeepSeek Janus series by introducing better efficiency, enhanced generation capabilities, and a decoupled architecture for visual understanding and image creation.
 
-This guide covers everything you need to know about Deepseek Janus Pro 7B, including an overview of its capabilities, comparisons with similar models, and a step-by-step **setup guide**. 
+![DeepSeek Janus Pro](/static/blog/deepseek-janus-pro/janus-pro-7b-cover.webp)
 
-Let's explore what the game-changing DeepSeek team has to offer this time!
+This guide covers everything you need to know about DeepSeek Janus Pro 7B, including an overview of its capabilities, comparisons with similar models, and a step-by-step setup guide.
+
+Let's take a look at what DeepSeek has to offer this time.
+
+## What we will cover
+
+1. What is DeepSeek Janus Pro?
+2. Janus Pro Capabilities and Benchmarks
+3. Comparison with Similar Models
+4. Janus Pro 7B Architecture
+5. How to Use Janus Pro 7B
 
 ## What is DeepSeek Janus Pro?
 
-Janus Pro is Deepseek’s latest unified multimodal model, designed to handle both text and image-based tasks efficiently. 
+Janus Pro is DeepSeek’s latest unified multimodal model, designed to handle both text and image-based tasks efficiently.
 
-Unlike conventional models that separate language processing and image generation into different architectures, Janus Pro 7B adopts a decoupled visual encoding approach.
+Unlike conventional models that separate language processing and image generation into different architectures, Janus Pro 7B adopts a decoupled visual encoding approach. This allows it to excel in image understanding and text-to-image generation while maintaining high performance in text-based tasks.
 
-This allows it to excel in image understanding and text-to-image generation while maintaining high performance in text-based tasks.
+## Janus Pro Capabilities and Benchmarks
 
-## Janus Pro at a Glance
-- **Model Type**: Unified multimodal understanding and generation model
-- **Capabilities**:
-  - Text generation
-  - Image understanding
-  - Text-to-image generation
-- **Size Variants**: 1B and 7B parameters
-- **Improvements over Janus**:
-  - Expanded dataset
-  - Enhanced text-to-image stability
-  - Decoupled visual encoding for better performance
-- **Performance Benchmarks**:
-  - Outperforms DALL-E 3 and Stable Diffusion 3 Medium on benchmarks.
-- **Availability**:
-  - Open-source with a commercial use license (can be installed locally and commercialized)
-  - Available on **Hugging Face**
-- **Janus Pro Hardware Requirements/Specifications**:
-    - 1B model: Consumer-grade GPU
-    - 7B model: High-end GPU with sufficient VRAM (e.g NVIDIA A100) or Apple Silicon Mac with about 18GB of RAM 
-    
+| Aspects                     | Description                                                                                                                                                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model Type**              | Unified multimodal understanding and generation model                                                                                                                                                                         |
+| **Capabilities**            | • Text generation<br/>• Image understanding<br/>• Text-to-image generation                                                                                                                                                    |
+| **Size Variants**           | 1B and 7B parameters                                                                                                                                                                                                          |
+| **Improvements over Janus** | • Expanded dataset<br/>• Enhanced text-to-image stability<br/>• Decoupled visual encoding for better performance                                                                                                              |
+| **Performance Benchmarks**  | Outperforms DALL-E 3 and Stable Diffusion 3 Medium on benchmarks                                                                                                                                                              |
+| **Availability**            | • Open-source with a commercial use license (can be installed locally and commercialized)<br/>• Available on <a href="https://huggingface.co/spaces/deepseek-ai/Janus-Pro-7B" target="_blank" rel="noopener">Hugging Face</a> |
+| **Hardware Requirements**   | • 1B model: Consumer-grade GPU<br/>• 7B model: High-end GPU with sufficient VRAM (e.g NVIDIA A100) or Apple Silicon Mac with about 18GB of RAM                                                                                |
+
+![Janus Pro 7B Benchmark](/static/blog/deepseek-janus-pro/janus-pro-7b-benchmark.webp)
+
 ## Comparison with Similar Models
 
-Janus Pro 7B is positioned as a competitor to other multimodal models like OpenAI's DALL-E 3, Stable Diffusion 3 Medium, and Gemini 2.0 Flash. Here's how it stacks up:
+Janus Pro 7B is positioned as a competitor to other multimodal models like OpenAI's DALL-E 3, Stable Diffusion 3 Medium, and <a href="https://www.helicone.ai/blog/gemini-2.0-flash" target="_blank" rel="noopener">Gemini 2.0 Flash</a>.
 
-| Feature          | Janus Pro 7B | DALL-E 3 | Stable Diffusion 3 Medium |
-|------------------|-------------|----------|---------------------------|
-| **Text Generation** | ✅ | ❌ | ❌ |
-| **Image Understanding** | ✅ | ✅ | ✅ |
-| **Text-to-Image Generation** | ✅ | ✅ | ✅ |
-| **Decoupled Visual Encoding** | ✅ | ❌ | ❌ |
-| **Open-Source** | ✅ | ❌ | ✅ |
-| **Benchmark performance (GenEval)** | 80% | 67% | 74% |
-| **Benchmark performance (DPG-bench)** | 84.19 | 83.50 | 84.08 |
+Here's how it stacks up:
 
-### Key Takeaways:
+| Feature                               | Janus Pro 7B | DALL-E 3 | Stable Diffusion 3 Medium |
+| ------------------------------------- | ------------ | -------- | ------------------------- |
+| **Text Generation**                   | ✅           | ❌       | ❌                        |
+| **Image Understanding**               | ✅           | ✅       | ✅                        |
+| **Text-to-Image Generation**          | ✅           | ✅       | ✅                        |
+| **Decoupled Visual Encoding**         | ✅           | ❌       | ❌                        |
+| **Open-Source**                       | ✅           | ❌       | ✅                        |
+| **Benchmark performance (GenEval)**   | 80%          | 67%      | 74%                       |
+| **Benchmark performance (DPG-bench)** | 84.19        | 83.50    | 84.08                     |
+
+### TL;DR
 
 - Janus Pro 7B is a **true multimodal model** that excels at both image understanding and text generation.
 - It outperforms both DALL-E 3 and Stable Diffusion 3 Medium on GenEval (which tests **text-to-image generation** capabilities) and DPG (which tests a model’s ability to follow **complex image generation prompts**) benchmarks.
 
 ## Janus Pro 7B Architecture
 
-Janus Pro 7B separates visual encoding from generation, improving both performance and flexibility. 
+Janus Pro 7B separates visual encoding from generation, improving both performance and flexibility.
 
 Unlike traditional unified models that share a single visual encoder for both understanding and generation, Janus Pro 7B decouples these processes. This eliminates conflicts that typically degrade image generation quality.
 
@@ -65,15 +69,15 @@ Source: <a href="https://www.datacamp.com/blog/janus-pro" target="_blank" rel="n
 
 The model integrates rectified flow techniques for stable text-to-image conversion while maintaining autoregressive processing for textual tasks. This combination—dubbed <a href="https://arxiv.org/html/2411.07975" target="_blank" rel="noopener">Janusflow</a>—results in more coherent text outputs and higher-quality image generations.
 
-## How to Use Janus Pro 7B
+## How to Access Janus Pro 7B
 
-If you’re looking to use Deepseek Janus Pro 7B, you have two options: using the **Hugging Face demo**, or running it **locally**.
+If you’re looking to use DeepSeek Janus Pro 7B, you have two options: using the **Hugging Face demo**, or running it **locally**.
 
-### 1. Running Janus Pro 7B on Hugging Face
+### Option 1: Running Janus Pro 7B on Hugging Face
 
 Hugging Face provides an online demo, allowing you to use <a href="https://huggingface.co/spaces/deepseek-ai/Janus-Pro-7B" target="_blank" rel="noopener">Janus Pro 7B online</a> without any setup via Hugging Face Spaces.
 
-### 2. Installing Janus Pro 7B Locally
+### Option 2: Installing Janus Pro 7B Locally
 
 To run the model locally, follow these steps:
 
@@ -102,17 +106,25 @@ Once complete, access the **Gradio interface** to interact with Janus Pro 7B.
 
 Read the Janus Pro 7B <a href="https://github.com/deepseek-ai/Janus/blob/main/README.md" target="_blank" rel="noopener">official documentation</a> for more detailed instructions on installation and usage.
 
-<CallToAction title="Switch to DeepSeek Models with Helicone" description="Helicone can help you test DeepSeek's performance on your live apps with zero downtime. Switch and save costs today." primaryButtonText="Try Helicone for Free" primaryButtonLink="https://helicone.ai/" secondaryButtonText="Contact Us" secondaryButtonLink="https://helicone.ai/contact" />
+<CallToAction
+  title="Switch to DeepSeek Models with Helicone ⚡️"
+  description="Helicone can help you test DeepSeek's performance on your live apps with 0 downtime. Switch and save costs today."
+  primaryButtonText="Try Helicone for Free"
+  primaryButtonLink="https://helicone.ai/"
+  secondaryButtonText="Contact Us"
+  secondaryButtonLink="https://helicone.ai/contact"
+/>
 
----
+## Bottom Line
 
-Deepseek Janus Pro 7B is an impressive open-source multimodal AI model capable of **text generation, image understanding, and text-to-image synthesis**. 
+DeepSeek Janus Pro 7B is an impressive open-source multimodal AI model capable of text generation, image understanding, and text-to-image synthesis.
 
-With strong **benchmarks** and an **open licensing model**, it's a solid choice for developers exploring unified multimodal AI applications.
+With strong benchmarks and an open licensing model, it's a solid choice for developers exploring unified multimodal AI applications.
 
-### Related Articles:
+### You might find these useful:
+
 - **<a href="https://www.helicone.ai/blog/switch-to-deepseek" target="_blank" rel="noopener">How to safely switch your production apps to DeepSeek</a>**
 - **<a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek V3 Release: New Open-Source MoE Model</a>**
-- **<a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">Building a Simple Chatbot with OpenAI Structured Outputs</a>**
+- **<a href="https://www.helicone.ai/blog/llm-api-providers" target="_blank" rel="noopener">Top 10 LLM API Providers in 2025</a>**
 
 <Questions />
