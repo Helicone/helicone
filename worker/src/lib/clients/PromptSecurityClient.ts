@@ -1,5 +1,4 @@
 import { Env } from "../..";
-import { SentryManager } from "../managers/SentryManager";
 
 export async function checkPromptSecurity(
   message: string,

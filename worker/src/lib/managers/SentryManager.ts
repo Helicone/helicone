@@ -10,19 +10,16 @@ export class SentryManager {
 
   public async sendError(error: string, trace: string) {
     try {
-      const response = await fetch(
-        `https://sentry.io/api/${this.sentryProjectId}/issues/`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            error,
-            trace,
-          }),
-          headers: {
-            Authorization: `Bearer ${this.sentryAPIKey}`,
-          },
-        }
-      );
+      await fetch(`https://sentry.io/api/${this.sentryProjectId}/issues/`, {
+        method: "POST",
+        body: JSON.stringify({
+          error,
+          trace,
+        }),
+        headers: {
+          Authorization: `Bearer ${this.sentryAPIKey}`,
+        },
+      });
     } catch (error) {
       console.error(error);
     }
