@@ -43,6 +43,9 @@ RUN yarn && yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 
 
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONFAULTHANDLER=1
+
 ENV DLQ_MESSAGES_PER_MINI_BATCH=1
 ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
