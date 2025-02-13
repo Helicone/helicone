@@ -1,6 +1,7 @@
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import {
+  StickyTable,
   Table,
   TableBody,
   TableCell,
@@ -486,8 +487,8 @@ export default function PricingComparisonTable() {
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
       <div className="rounded-xl">
-        <Table>
-          <TableHeader>
+        <StickyTable>
+          <TableHeader className="sticky top-[var(--header-offset)] z-20 bg-slate-50">
             <TableRow className="bg-slate-50 hover:bg-slate-50 border-none">
               <TableHead className="w-[318px] p-6 bg-white rounded-tl-xl">
                 <div className="text-slate-900 text-lg font-semibold">
@@ -497,10 +498,12 @@ export default function PricingComparisonTable() {
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
-                  className={`p-3 ${tier.isPrimary ? "bg-sky-50" : "bg-white"} 
+                  className={`py-3 px-6 ${
+                    tier.isPrimary ? "bg-sky-50" : "bg-white"
+                  } 
                     ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
                     <div className="text-slate-900 text-lg font-semibold">
                       {tier.name}
                     </div>
@@ -637,7 +640,7 @@ export default function PricingComparisonTable() {
               ))}
             </TableBody>
           ))}
-        </Table>
+        </StickyTable>
       </div>
     </div>
   );

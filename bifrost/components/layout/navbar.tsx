@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpenIcon,
@@ -204,8 +204,23 @@ const MobileNav = () => {
 };
 
 const NavBar = (props: NavBarProps) => {
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      const height = headerRef.current.offsetHeight;
+      document.documentElement.style.setProperty(
+        "--header-offset",
+        `${height}px`
+      );
+    }
+  }, []);
+
   return (
-    <div className="bg-white top-0 sticky z-30 border-b border-gray-200">
+    <div
+      ref={headerRef}
+      className="bg-white top-0 sticky z-30 border-b border-gray-200"
+    >
       <MobileNav />
       <nav
         className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-3 hidden justify-between"
