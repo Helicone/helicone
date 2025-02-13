@@ -24,13 +24,8 @@ import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 
-import {
-  FeatureUpgradeCard,
-  PRO_FEATURES,
-} from "../../shared/helicone/FeatureUpgradeCard";
+import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
 import { ShieldCheck } from "lucide-react";
-import { RateLimitVisual } from "@/components/shared/helicone/RateLimitVisual";
-import { PreviewCard } from "../featurePreview/previewCard";
 import { DiffHighlight } from "../welcome/diffHighlight";
 
 const RateLimitPage = (props: {}) => {

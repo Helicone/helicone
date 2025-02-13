@@ -143,6 +143,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   );
 
   const hasAccess = useHasAccess("users");
+  const org = useOrg();
 
   if (!hasAccess) {
     return (
@@ -159,8 +160,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   }
 
   if (isLoading) {
-    const org = useOrg();
-
     if (org?.currentOrg?.tier === "free") {
       return (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">

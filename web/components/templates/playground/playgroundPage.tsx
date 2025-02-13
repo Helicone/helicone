@@ -39,7 +39,7 @@ import { Slider } from "@/components/ui/slider";
 import { PlaygroundModel } from "./types";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { TestTube, TestTubeDiagonal, UserIcon } from "lucide-react";
+import { TestTubeDiagonal } from "lucide-react";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;

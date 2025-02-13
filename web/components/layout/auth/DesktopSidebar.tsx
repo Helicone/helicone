@@ -6,7 +6,6 @@ import {
   ChevronRightIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useRef, useState } from "react";
 import { useOrg } from "../org/organizationContext";

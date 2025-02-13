@@ -1,26 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../supabase/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
-import { useIsGovernanceEnabled } from "../hooks";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
 import OrgMembersPage from "../members/orgMembersPage";
 import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 

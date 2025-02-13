@@ -2,8 +2,7 @@ import { useState, useMemo } from "react";
 
 import AuthHeader from "../../shared/authHeader";
 
-import { PlusIcon, TagIcon, UserIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { TagIcon } from "@heroicons/react/24/outline";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";

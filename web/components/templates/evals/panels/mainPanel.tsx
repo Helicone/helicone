@@ -1,6 +1,5 @@
 import AuthHeader from "@/components/shared/authHeader";
 import { TimeInterval, getTimeIntervalAgo } from "@/lib/timeCalculations/time";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useMemo } from "react";
 

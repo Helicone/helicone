@@ -1,6 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BuildingOfficeIcon,

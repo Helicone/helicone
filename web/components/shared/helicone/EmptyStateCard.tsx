@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { DiffHighlight } from "@/components/templates/welcome/diffHighlight";
 import { CodeExample } from "./CodeExample";
-import { SessionsFeatureVisual } from "./features/SessionsFeature";
 
 interface EmptyStateFeature {
   title: string;

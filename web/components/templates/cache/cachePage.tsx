@@ -26,7 +26,6 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Separator } from "@/components/ui/separator";
 import { Archive } from "lucide-react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 

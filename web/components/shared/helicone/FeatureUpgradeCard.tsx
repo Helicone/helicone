@@ -136,7 +136,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Track your sessions and traces with 3 simple headers",
       "Define parent-child relationships with simple path syntax",
       "Log any LLM, vector database and tool calls",
-    ],
+    ] as string[],
     media: {
       type: "image",
       src: "/static/featureUpgrade/sessions-small-grid.webp",
@@ -155,7 +155,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Cut costs by minimizing the number of API calls.",
       "Faster response times for common queries and reduce the load on backend resources.",
       "Find the most common requests with your app and visualize on a dashboard.",
-    ],
+    ] as string[],
     media: {
       type: "image",
       src: "/static/featureUpgrade/caching.webp",
@@ -174,7 +174,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Set custom LLM rate limits for your model providers.",
       "Prevent abuse of the API and excessive traffic to maintain availability for all users.",
       "Control cost and prevent unintended overuse.",
-    ],
+    ] as string[],
     media: {
       type: "component",
       component: RateLimitVisual,
@@ -193,7 +193,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Track per-user request volumes, costs, and usage patterns across your AI services.",
       "Gain detailed insights into individual user activity.",
       "Improve performance and detect potential abuse.",
-    ],
+    ] as string[],
     media: {
       type: "image",
       src: "/static/featureUpgrade/user-metric.webp",
@@ -212,7 +212,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Curate datasets with your actual requests",
       "Fine-tune your LLMs to improve performance on specific tasks.",
       "Experiment with prompts to prevent regression.",
-    ],
+    ] as string[],
     media: {
       type: "component",
       component: DatasetVisual,
@@ -231,7 +231,7 @@ export const PRO_FEATURES: Record<string, Feature> = {
       "Instantly responding to events, triggering actions, and integrating with external tools.",
       "Move data from one system to another.",
       "Score requests based on custom logic.",
-    ],
+    ] as string[],
     media: {
       type: "component",
       component: () => CodeExample("webhook"),
@@ -249,14 +249,33 @@ export const PRO_FEATURES: Record<string, Feature> = {
     subtitles: [
       "Receive real-time alerts in Slack or email.",
       "Stay on top of critical issues and resolve them faster.",
-    ],
+    ] as string[],
     media: {
       type: "image",
       src: "/static/featureUpgrade/alerts.webp",
     },
     imageAlt: "Alert notification interface",
   },
-} as const;
+  vault: {
+    variant: "bullets-cta",
+    title: "Secure Key Management",
+    subtitles: [
+      "Securely store and manage your API keys",
+      "Create proxy keys with custom rate limits",
+      "Centralized key management for your team",
+    ] as string[],
+    media: {
+      type: "image",
+      src: "/static/featureUpgrade/vault-preview.webp",
+    },
+    imageAlt: "Vault key management interface",
+    cta: {
+      text: "View docs",
+      link: "https://docs.helicone.ai/features/vault",
+      variant: "outline",
+    },
+  },
+} as const satisfies Record<string, Feature>;
 
 export type ProFeatureKey = keyof typeof PRO_FEATURES;
 
