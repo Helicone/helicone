@@ -20,6 +20,7 @@ import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import ExperimentsPreview from "@/components/templates/featurePreview/experimentsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import Link from "next/link";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -33,6 +34,10 @@ const ExperimentsPage = () => {
   const { setNotification } = useNotification();
   const [headerDropdownOpen, setHeaderDropdownOpen] = useState(false);
   const [emptyStateDropdownOpen, setEmptyStateDropdownOpen] = useState(false);
+
+  if (isLoading) {
+    return <LoadingAnimation title="Loading Experiments" />;
+  }
 
   return (
     <>
