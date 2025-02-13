@@ -117,6 +117,9 @@ export const getMapperType = ({
   }
 
   if (model && model.toLowerCase().includes("gemini")) {
+    if (provider === "OPENAI") {
+      return "openai-chat";
+    }
     return "gemini-chat";
   }
 
