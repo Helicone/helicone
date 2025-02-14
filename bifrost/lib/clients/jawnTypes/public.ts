@@ -1129,6 +1129,7 @@ Json: JsonObject;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
+      name?: string;
       role?: string;
       id?: string;
       /** @enum {string} */
