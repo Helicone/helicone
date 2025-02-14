@@ -324,88 +324,96 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               className="w-full text-sm px-2 py-1 rounded-lg border border-gray-300"
             />
           </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="temp"
-                className="font-medium text-sm text-gray-900 dark:text-gray-100"
-              >
-                Temperature
-              </label>
-              <Input
-                type="number"
-                id="temp"
-                name="temp"
-                value={temperature}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 0.01) {
-                    setTemperature(0.01);
-                    return;
-                  }
-                  if (value > 1.99) {
-                    setTemperature(1.99);
-                    return;
-                  }
-                  setTemperature(parseFloat(e.target.value));
+          {!selectedModels.some(
+            (model) => model.name.includes("o1") || model.name.includes("o3")
+          ) && (
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="temp"
+                  className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                >
+                  Temperature
+                </label>
+                <Input
+                  type="number"
+                  id="temp"
+                  name="temp"
+                  value={temperature}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (value < 0.01) {
+                      setTemperature(0.01);
+                      return;
+                    }
+                    if (value > 1.99) {
+                      setTemperature(1.99);
+                      return;
+                    }
+                    setTemperature(parseFloat(e.target.value));
+                  }}
+                  min={0.01}
+                  max={1.99}
+                  step={0.01}
+                  className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                />
+              </div>
+              <Slider
+                value={[temperature]}
+                onValueChange={(value) => {
+                  setTemperature(value[0]);
                 }}
                 min={0.01}
                 max={1.99}
                 step={0.01}
-                className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
               />
             </div>
-            <Slider
-              value={[temperature]}
-              onValueChange={(value) => {
-                setTemperature(value[0]);
-              }}
-              min={0.01}
-              max={1.99}
-              step={0.01}
-            />
-          </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="tokens"
-                className="font-medium text-sm text-gray-900 dark:text-gray-100"
-              >
-                Max Tokens
-              </label>
-              <Input
-                type="number"
-                id="tokens"
-                name="tokens"
-                value={maxTokens}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (value < 1) {
-                    setMaxTokens(1);
-                    return;
-                  }
-                  if (value > 2048) {
-                    setMaxTokens(2048);
-                    return;
-                  }
-                  setMaxTokens(parseFloat(e.target.value));
+          )}
+          {!selectedModels.some(
+            (model) => model.name.includes("o1") || model.name.includes("o3")
+          ) && (
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="tokens"
+                  className="font-medium text-sm text-gray-900 dark:text-gray-100"
+                >
+                  Max Tokens
+                </label>
+                <Input
+                  type="number"
+                  id="tokens"
+                  name="tokens"
+                  value={maxTokens}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (value < 1) {
+                      setMaxTokens(1);
+                      return;
+                    }
+                    if (value > 2048) {
+                      setMaxTokens(2048);
+                      return;
+                    }
+                    setMaxTokens(parseFloat(e.target.value));
+                  }}
+                  min={1}
+                  max={2048}
+                  step={1}
+                  className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
+                />
+              </div>
+              <Slider
+                value={[maxTokens]}
+                onValueChange={(value) => {
+                  setMaxTokens(value[0]);
                 }}
                 min={1}
                 max={2048}
                 step={1}
-                className="w-14 text-sm px-2 py-1 rounded-lg border border-gray-300"
               />
             </div>
-            <Slider
-              value={[maxTokens]}
-              onValueChange={(value) => {
-                setMaxTokens(value[0]);
-              }}
-              min={1}
-              max={2048}
-              step={1}
-            />
-          </div>
+          )}
           <div className="flex flex-col space-y-2 w-full">
             <div className="flex flex-row w-full space-x-1 items-center">
               <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
