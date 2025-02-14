@@ -57,4 +57,8 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "llama-3-8b-instruct:nitro": "meta-llama/llama-3-8b-instruct:nitro",
   "llama-3-8b-instruct:extended": "meta-llama/llama-3-8b-instruct:extended",
   "llama-2-13b-chat": "meta-llama/llama-2-13b-chat",
+  "deepseek/deepseek-chat": "deepseek/deepseek-chat",
+  "deepseek/deepseek-r1": "deepseek/deepseek-r1",
+  "o3-mini": "o3-mini",
+  "o1-mini": "o1-mini",
 };
