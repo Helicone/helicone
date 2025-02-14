@@ -1,6 +1,5 @@
-require("dotenv").config({
-  path: "./.env",
-});
+// Load env before anything else
+import "./lib/env";
 
 import bodyParser from "body-parser";
 import express, { Request as ExpressRequest, NextFunction } from "express";
