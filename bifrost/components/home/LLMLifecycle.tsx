@@ -1,6 +1,4 @@
-import { ISLAND_WIDTH } from "@/lib/utils";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
 const floatingAnimation = "floating 3s ease-in-out infinite";
 const arrowAnimation = "dash 3s ease-in-out infinite";
@@ -130,7 +128,7 @@ const SVG = () => (
         transform="matrix(-0.861967 0.506965 -0.870028 -0.493003 445 275.449)"
         fill="url(#paint1_linear_3292_13057)"
       />
-      <g clip-path="url(#clip0_3292_13057)">
+      <g clipPath="url(#clip0_3292_13057)">
         <path
           d="M379.987 298.088L381 298.673L382.012 298.088L434.405 267.839L435.417 267.254V266.085V237.698L452.011 228.117L453.847 227.058L452.705 225.273L435.098 197.746L434.832 197.33L434.405 197.083L382.012 166.834L380.999 166.25L379.987 166.834L327.594 197.083L327.166 197.33L326.9 197.746L309.294 225.273L308.152 227.058L309.987 228.117L326.581 237.698L326.581 266.085L326.581 267.254L327.594 267.839L379.987 298.088Z"
           fill="#474C59"
@@ -269,7 +267,7 @@ const SVG = () => (
       </g>
     </g>
     <g filter="url(#filter2_d_3292_13057)">
-      <g clip-path="url(#clip1_3292_13057)">
+      <g clipPath="url(#clip1_3292_13057)">
         <rect
           width="139"
           height="40"
@@ -326,8 +324,8 @@ const SVG = () => (
       fill="white"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M555.223 389.579C556.817 388.658 559.402 388.658 560.996 389.579L586.977 404.579C588.571 405.499 588.571 406.992 586.977 407.912L566.77 419.579C565.175 420.499 562.59 420.499 560.996 419.579L535.015 404.579C533.421 403.658 533.421 402.166 535.015 401.245L555.223 389.579ZM560.157 409.924C560.622 409.658 561.374 409.658 561.838 409.926C562.303 410.194 562.303 410.63 561.838 410.898C561.373 411.167 560.619 411.167 560.154 410.898C559.69 410.63 559.689 410.197 560.151 409.928C560.152 409.927 560.153 409.927 560.154 409.926C560.155 409.925 560.156 409.925 560.157 409.924ZM559.022 407.168C561.114 406.745 563.534 407.016 565.206 407.982C567.531 409.324 567.531 411.5 565.206 412.843C562.881 414.185 559.111 414.185 556.786 412.843C555.02 411.823 554.596 410.323 555.512 409.072C554.104 407.971 553.237 406.668 553.01 405.301L550.051 407.009C549.121 407.546 547.613 407.546 546.683 407.009C545.753 406.472 545.753 405.602 546.683 405.065L555.453 400.002C554.615 398.768 555.06 397.312 556.786 396.315C559.111 394.973 562.881 394.973 565.206 396.315C567.531 397.657 567.531 399.834 565.206 401.176C563.534 402.141 561.114 402.413 559.022 401.989C558.174 402.757 557.713 403.654 557.713 404.579C557.713 405.504 558.174 406.401 559.022 407.168ZM560.157 399.233C560.622 399.5 561.374 399.5 561.838 399.232C562.303 398.963 562.303 398.528 561.838 398.259C561.373 397.991 560.619 397.991 560.154 398.259C559.69 398.527 559.689 398.961 560.151 399.23C560.152 399.23 560.153 399.231 560.154 399.232C560.155 399.232 560.156 399.233 560.157 399.233Z"
       fill="#6E7CA5"
     />
@@ -370,8 +368,8 @@ const SVG = () => (
       fill="#474C59"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M529.058 37.2112C529.058 38.3157 528.282 38.7635 527.326 38.2112C526.369 37.6589 525.594 36.3157 525.594 35.2112C525.594 34.1066 526.369 33.6589 527.326 34.2112C528.282 34.7635 529.058 36.1066 529.058 37.2112ZM534.183 40.2112C534.183 41.3157 533.407 41.7635 532.451 41.2112C531.494 40.6589 530.719 39.3157 530.719 38.2112C530.719 37.1066 531.494 36.6589 532.451 37.2112C533.407 37.7635 534.183 39.1066 534.183 40.2112ZM537.513 44.2112C538.47 44.7635 539.245 44.3157 539.245 43.2112C539.245 42.1066 538.47 40.7635 537.513 40.2112C536.557 39.6589 535.781 40.1066 535.781 41.2112C535.781 42.3157 536.557 43.6589 537.513 44.2112Z"
       fill="#7587BA"
     />
@@ -864,13 +862,13 @@ const SVG = () => (
       fill="#474C59"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M128.152 292.211C128.152 293.316 127.376 293.763 126.42 293.211C125.463 292.659 124.688 291.316 124.688 290.211C124.688 289.107 125.463 288.659 126.42 289.211C127.376 289.763 128.152 291.107 128.152 292.211ZM133.277 295.211C133.277 296.316 132.501 296.763 131.545 296.211C130.588 295.659 129.812 294.316 129.812 293.211C129.812 292.107 130.588 291.659 131.545 292.211C132.501 292.763 133.277 294.107 133.277 295.211ZM136.607 299.211C137.564 299.763 138.339 299.316 138.339 298.211C138.339 297.107 137.564 295.763 136.607 295.211C135.65 294.659 134.875 295.107 134.875 296.211C134.875 297.316 135.65 298.659 136.607 299.211Z"
       fill="#7587BA"
     />
     <g opacity="0.8">
-      <g clip-path="url(#clip2_3292_13057)">
+      <g clipPath="url(#clip2_3292_13057)">
         <rect
           width="38.1051"
           height="26.5802"
@@ -881,26 +879,26 @@ const SVG = () => (
         <path
           d="M137.529 362.728C138.279 363.646 139.427 364.791 141 365.7L140.5 356.586L137.529 362.728Z"
           fill="#6E7CA5"
-          fill-opacity="0.8"
+          fillOpacity="0.8"
         />
         <path
           d="M148 360.927C148 358.659 147.4 356.228 146.389 354.101L140.5 356.586L144.471 366.736C145.253 366.683 145.886 366.369 146.389 365.893C147.4 364.933 148 363.195 148 360.927Z"
           fill="#6E7CA5"
-          fill-opacity="0.2"
+          fillOpacity="0.2"
         />
         <path
           d="M144.471 351.043C143.721 350.126 142.573 348.98 141 348.072L140.5 356.586L146.389 354.101C145.886 353.044 145.253 352 144.471 351.043Z"
           fill="#6E7CA5"
-          fill-opacity="0.5"
+          fillOpacity="0.5"
         />
         <path
           d="M141 365.7C142.573 366.608 143.721 366.787 144.471 366.736L140.5 356.586L141 365.7Z"
           fill="#6E7CA5"
-          fill-opacity="0.6"
+          fillOpacity="0.6"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M141 348.072C139.427 347.164 138.279 346.984 137.529 347.035C137.367 347.046 137.212 347.069 137.062 347.101L135.248 348.28C134.458 349.286 134 350.863 134 352.844C134 354.829 134.46 356.938 135.252 358.86L137.062 362.124L140.5 356.586L141 348.072Z"
           fill="#6E7CA5"
         />
@@ -909,8 +907,8 @@ const SVG = () => (
           fill="#ABB4CF"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.411 359.271L151.411 358.797L151.821 359.034L151.821 359.509L151.411 359.271Z"
           fill="#D0D6E7"
         />
@@ -919,14 +917,14 @@ const SVG = () => (
           fill="#D0D6E7"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.205 358.204L151.438 358.339L151.974 358.649L152.027 358.679C152.14 358.744 152.232 358.903 152.232 359.034L152.232 359.983C152.232 360.114 152.14 360.167 152.027 360.101L151.205 359.627C151.092 359.562 151 359.402 151 359.271L151 358.323C151 358.192 151.092 358.139 151.205 358.204ZM151.411 359.271L151.411 358.797L151.821 359.034L151.821 359.509L151.411 359.271Z"
           fill="#D0D6E7"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.411 362.271L151.411 361.797L151.821 362.034L151.821 362.509L151.411 362.271Z"
           fill="#9DA7C5"
         />
@@ -935,14 +933,14 @@ const SVG = () => (
           fill="#9DA7C5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.205 361.204L151.438 361.339L151.974 361.649L152.027 361.679C152.14 361.744 152.232 361.903 152.232 362.034L152.232 362.983C152.232 363.114 152.14 363.167 152.027 363.101L151.205 362.627C151.092 362.562 151 362.402 151 362.271L151 361.323C151 361.192 151.092 361.139 151.205 361.204ZM151.411 362.271L151.411 361.797L151.821 362.034L151.821 362.509L151.411 362.271Z"
           fill="#9DA7C5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.411 365.271L151.411 364.797L151.821 365.034L151.821 365.509L151.411 365.271Z"
           fill="#8692B5"
         />
@@ -951,14 +949,14 @@ const SVG = () => (
           fill="#8692B5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.205 364.204L151.438 364.339L151.974 364.649L152.027 364.679C152.14 364.744 152.232 364.903 152.232 365.034L152.232 365.983C152.232 366.114 152.14 366.167 152.027 366.101L151.205 365.627C151.092 365.562 151 365.402 151 365.271L151 364.323C151 364.192 151.092 364.139 151.205 364.204ZM151.411 365.271L151.411 364.797L151.821 365.034L151.821 365.509L151.411 365.271Z"
           fill="#8692B5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.411 368.271L151.411 367.797L151.821 368.034L151.821 368.509L151.411 368.271Z"
           fill="#6E7CA5"
         />
@@ -967,14 +965,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.205 367.204L151.438 367.339L151.974 367.649L152.027 367.679C152.14 367.744 152.232 367.903 152.232 368.034L152.232 368.983C152.232 369.114 152.14 369.167 152.027 369.101L151.205 368.627C151.092 368.562 151 368.402 151 368.271L151 367.323C151 367.192 151.092 367.139 151.205 367.204ZM151.411 368.271L151.411 367.797L151.821 368.034L151.821 368.509L151.411 368.271Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.411 356.238L151.411 355.764L151.821 356.001L151.821 356.475L151.411 356.238Z"
           fill="#ABB4CF"
         />
@@ -983,8 +981,8 @@ const SVG = () => (
           fill="#ABB4CF"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M151.205 355.171L151.438 355.306L151.974 355.615L152.027 355.646C152.14 355.711 152.232 355.87 152.232 356.001L152.232 356.95C152.232 357.081 152.14 357.134 152.027 357.068L151.205 356.594C151.092 356.528 151 356.369 151 356.238L151 355.29C151 355.159 151.092 355.106 151.205 355.171ZM151.411 356.238L151.411 355.764L151.821 356.001L151.821 356.475L151.411 356.238Z"
           fill="#ABB4CF"
         />
@@ -1021,7 +1019,7 @@ const SVG = () => (
       </g>
     </g>
     <g opacity="0.8">
-      <g clip-path="url(#clip3_3292_13057)">
+      <g clipPath="url(#clip3_3292_13057)">
         <rect
           width="38.1051"
           height="28.7306"
@@ -1030,8 +1028,8 @@ const SVG = () => (
           fill="url(#paint62_linear_3292_13057)"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M186.667 359.557L186.667 357.633L188.333 358.595L188.333 360.52L186.667 359.557Z"
           fill="#6E7CA5"
         />
@@ -1040,14 +1038,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M185.833 355.227L186.778 355.773L188.955 357.029L189.167 357.152C189.627 357.417 190 358.064 190 358.595L190 362.444C190 362.976 189.627 363.191 189.167 362.925L185.833 361.001C185.373 360.735 185 360.089 185 359.557L185 355.708C185 355.177 185.373 354.962 185.833 355.227ZM186.667 359.557L186.667 357.633L188.333 358.595L188.333 360.52L186.667 359.557Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M186.667 355.897L186.667 353.973L188.333 354.935L188.333 356.859L186.667 355.897Z"
           fill="#6E7CA5"
         />
@@ -1056,14 +1054,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M185.833 351.567L186.778 352.113L188.955 353.369L189.167 353.492C189.627 353.757 190 354.404 190 354.935L190 358.784C190 359.315 189.627 359.531 189.167 359.265L185.833 357.341C185.373 357.075 185 356.429 185 355.897L185 352.048C185 351.517 185.373 351.301 185.833 351.567ZM186.667 355.897L186.667 353.973L188.333 354.935L188.333 356.859L186.667 355.897Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M186.667 363.218L186.667 361.293L188.333 362.255L188.333 364.18L186.667 363.218Z"
           fill="#6E7CA5"
         />
@@ -1072,14 +1070,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M185.833 358.887L186.778 359.433L188.955 360.69L189.167 360.812C189.627 361.078 190 361.724 190 362.255L190 366.104C190 366.636 189.627 366.851 189.167 366.585L185.833 364.661C185.373 364.395 185 363.749 185 363.218L185 359.369C185 358.837 185.373 358.622 185.833 358.887ZM186.667 363.218L186.667 361.293L188.333 362.255L188.333 364.18L186.667 363.218Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M200.667 366.897L200.667 364.973L202.333 365.935L202.333 367.859L200.667 366.897Z"
           fill="#6E7CA5"
         />
@@ -1088,14 +1086,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M199.833 362.567L200.778 363.113L202.955 364.369L203.167 364.492C203.627 364.757 204 365.404 204 365.935L204 369.784C204 370.315 203.627 370.531 203.167 370.265L199.833 368.341C199.373 368.075 199 367.429 199 366.897L199 363.048C199 362.517 199.373 362.301 199.833 362.567ZM200.667 366.897L200.667 364.973L202.333 365.935L202.333 367.859L200.667 366.897Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M200.667 370.938L200.667 369.014L202.333 369.976L202.333 371.9L200.667 370.938Z"
           fill="#6E7CA5"
         />
@@ -1104,14 +1102,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M199.833 366.608L200.778 367.154L202.955 368.41L203.167 368.533C203.627 368.798 204 369.445 204 369.976L204 373.825C204 374.356 203.627 374.572 203.167 374.306L199.833 372.382C199.373 372.116 199 371.47 199 370.938L199 367.089C199 366.558 199.373 366.342 199.833 366.608ZM200.667 370.938L200.667 369.014L202.333 369.976L202.333 371.9L200.667 370.938Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M207.667 367.897L207.667 365.973L209.333 366.935L209.333 368.859L207.667 367.897Z"
           fill="#6E7CA5"
         />
@@ -1120,14 +1118,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M206.833 363.567L207.778 364.113L209.955 365.369L210.167 365.492C210.627 365.757 211 366.404 211 366.935L211 370.784C211 371.315 210.627 371.531 210.167 371.265L206.833 369.341C206.373 369.075 206 368.429 206 367.897L206 364.048C206 363.517 206.373 363.301 206.833 363.567ZM207.667 367.897L207.667 365.973L209.333 366.935L209.333 368.859L207.667 367.897Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M207.667 370.897L207.667 368.973L209.333 369.935L209.333 371.859L207.667 370.897Z"
           fill="#6E7CA5"
         />
@@ -1136,14 +1134,14 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M206.833 366.567L207.778 367.113L209.955 368.369L210.167 368.492C210.627 368.757 211 369.404 211 369.935L211 373.784C211 374.315 210.627 374.531 210.167 374.265L206.833 372.341C206.373 372.075 206 371.429 206 370.897L206 367.048C206 366.517 206.373 366.301 206.833 366.567ZM207.667 370.897L207.667 368.973L209.333 369.935L209.333 371.859L207.667 370.897Z"
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M207.667 374.938L207.667 373.014L209.333 373.976L209.333 375.9L207.667 374.938Z"
           fill="#6E7CA5"
         />
@@ -1152,8 +1150,8 @@ const SVG = () => (
           fill="#6E7CA5"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M206.833 370.608L207.778 371.154L209.955 372.41L210.167 372.533C210.627 372.798 211 373.445 211 373.976L211 377.825C211 378.356 210.627 378.572 210.167 378.306L206.833 376.382C206.373 376.116 206 375.47 206 374.938L206 371.089C206 370.558 206.373 370.342 206.833 370.608ZM207.667 374.938L207.667 373.014L209.333 373.976L209.333 375.9L207.667 374.938Z"
           fill="#6E7CA5"
         />
@@ -1223,8 +1221,8 @@ const SVG = () => (
       fill="url(#paint68_linear_3292_13057)"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M193.667 358.897L193.667 356.973L195.333 357.935L195.333 359.859L193.667 358.897Z"
       fill="#6E7CA5"
     />
@@ -1233,14 +1231,14 @@ const SVG = () => (
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M192.833 354.567L193.778 355.113L195.955 356.369L196.167 356.492C196.627 356.757 197 357.404 197 357.935L197 361.784C197 362.315 196.627 362.531 196.167 362.265L192.833 360.341C192.373 360.075 192 359.429 192 358.897L192 355.048C192 354.517 192.373 354.301 192.833 354.567ZM193.667 358.897L193.667 356.973L195.333 357.935L195.333 359.859L193.667 358.897Z"
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M193.667 354.897L193.667 352.973L195.333 353.935L195.333 355.859L193.667 354.897Z"
       fill="#6E7CA5"
     />
@@ -1249,14 +1247,14 @@ const SVG = () => (
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M192.833 350.567L193.778 351.113L195.955 352.369L196.167 352.492C196.627 352.757 197 353.404 197 353.935L197 357.784C197 358.315 196.627 358.531 196.167 358.265L192.833 356.341C192.373 356.075 192 355.429 192 354.897L192 351.048C192 350.517 192.373 350.301 192.833 350.567ZM193.667 354.897L193.667 352.973L195.333 353.935L195.333 355.859L193.667 354.897Z"
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M193.667 362.938L193.667 361.014L195.333 361.976L195.333 363.9L193.667 362.938Z"
       fill="#6E7CA5"
     />
@@ -1265,14 +1263,14 @@ const SVG = () => (
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M192.833 358.608L193.778 359.154L195.955 360.41L196.167 360.533C196.627 360.798 197 361.445 197 361.976L197 365.825C197 366.356 196.627 366.572 196.167 366.306L192.833 364.382C192.373 364.116 192 363.47 192 362.938L192 359.089C192 358.558 192.373 358.342 192.833 358.608ZM193.667 362.938L193.667 361.014L195.333 361.976L195.333 363.9L193.667 362.938Z"
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M193.667 366.98L193.667 365.056L195.333 366.018L195.333 367.942L193.667 366.98Z"
       fill="#6E7CA5"
     />
@@ -1281,12 +1279,12 @@ const SVG = () => (
       fill="#6E7CA5"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M192.833 362.65L193.778 363.196L195.955 364.452L196.167 364.575C196.627 364.84 197 365.487 197 366.018L197 369.867C197 370.398 196.627 370.614 196.167 370.348L192.833 368.424C192.373 368.158 192 367.512 192 366.98L192 363.131C192 362.6 192.373 362.384 192.833 362.65ZM193.667 366.98L193.667 365.056L195.333 366.018L195.333 367.942L193.667 366.98Z"
       fill="#6E7CA5"
     />
-    <g clip-path="url(#clip4_3292_13057)">
+    <g clipPath="url(#clip4_3292_13057)">
       <rect
         width="53.4103"
         height="8.19111"
@@ -1352,8 +1350,8 @@ const SVG = () => (
       fill="url(#paint77_linear_3292_13057)"
     />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M181 114.836C181 114.284 181.388 114.06 181.866 114.336L198.321 123.836C198.799 124.112 199.187 124.784 199.187 125.336V127.336C199.187 127.888 198.799 128.112 198.321 127.836L181.866 118.336C181.388 118.06 181 117.388 181 116.836V114.836ZM181 121.836C181 121.284 181.388 121.06 181.866 121.336L190.093 126.086C190.572 126.362 190.959 127.034 190.959 127.586V129.586C190.959 130.138 190.572 130.362 190.093 130.086L181.866 125.336C181.388 125.06 181 124.388 181 123.836V121.836ZM181.866 128.336C181.388 128.06 181 128.284 181 128.836V130.836C181 131.388 181.388 132.06 181.866 132.336L204.383 145.336C204.861 145.612 205.249 145.388 205.249 144.836V142.836C205.249 142.284 204.861 141.612 204.383 141.336L181.866 128.336Z"
       fill="#7587BA"
     />
@@ -1375,9 +1373,9 @@ const SVG = () => (
         width="122"
         height="66"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -1409,9 +1407,9 @@ const SVG = () => (
         width="16"
         height="7.58594"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -1443,9 +1441,9 @@ const SVG = () => (
         width="167.016"
         height="101.5"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -1478,8 +1476,8 @@ const SVG = () => (
         y2="451.942"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#BDCEF8" />
-        <stop offset="1" stop-color="#A4B5DE" />
+        <stop stopColor="#BDCEF8" />
+        <stop offset="1" stopColor="#A4B5DE" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_3292_13057"
@@ -1489,8 +1487,8 @@ const SVG = () => (
         y2="15.7499"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint2_linear_3292_13057"
@@ -1500,8 +1498,8 @@ const SVG = () => (
         y2="242.396"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint3_linear_3292_13057"
@@ -1511,8 +1509,8 @@ const SVG = () => (
         y2="49.0036"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint4_linear_3292_13057"
@@ -1522,8 +1520,8 @@ const SVG = () => (
         y2="239.034"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#9DA4B9" />
-        <stop offset="1" stop-color="#808BAB" />
+        <stop stopColor="#9DA4B9" />
+        <stop offset="1" stopColor="#808BAB" />
       </linearGradient>
       <linearGradient
         id="paint5_linear_3292_13057"
@@ -1533,8 +1531,8 @@ const SVG = () => (
         y2="9.3002"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint6_linear_3292_13057"
@@ -1544,8 +1542,8 @@ const SVG = () => (
         y2="188.971"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint7_linear_3292_13057"
@@ -1555,8 +1553,8 @@ const SVG = () => (
         y2="253.208"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#9DA4B9" />
-        <stop offset="1" stop-color="#808BAB" />
+        <stop stopColor="#9DA4B9" />
+        <stop offset="1" stopColor="#808BAB" />
       </linearGradient>
       <linearGradient
         id="paint8_linear_3292_13057"
@@ -1566,8 +1564,8 @@ const SVG = () => (
         y2="9.3002"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint9_linear_3292_13057"
@@ -1577,8 +1575,8 @@ const SVG = () => (
         y2="203.145"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint10_linear_3292_13057"
@@ -1588,8 +1586,8 @@ const SVG = () => (
         y2="216.08"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint11_linear_3292_13057"
@@ -1599,8 +1597,8 @@ const SVG = () => (
         y2="281.604"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint12_linear_3292_13057"
@@ -1610,8 +1608,8 @@ const SVG = () => (
         y2="230"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint13_linear_3292_13057"
@@ -1621,8 +1619,8 @@ const SVG = () => (
         y2="230"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint14_linear_3292_13057"
@@ -1632,10 +1630,10 @@ const SVG = () => (
         y2="238.994"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#82A2FF" />
-        <stop offset="0.398949" stop-color="#7C9EFF" />
-        <stop offset="0.607454" stop-color="#3E6BEC" />
-        <stop offset="1" stop-color="#6C93FF" />
+        <stop stopColor="#82A2FF" />
+        <stop offset="0.398949" stopColor="#7C9EFF" />
+        <stop offset="0.607454" stopColor="#3E6BEC" />
+        <stop offset="1" stopColor="#6C93FF" />
       </linearGradient>
       <linearGradient
         id="paint15_linear_3292_13057"
@@ -1645,10 +1643,10 @@ const SVG = () => (
         y2="214.494"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#82A2FF" />
-        <stop offset="0.398949" stop-color="#7C9EFF" />
-        <stop offset="0.607454" stop-color="#3E6BEC" />
-        <stop offset="1" stop-color="#6C93FF" />
+        <stop stopColor="#82A2FF" />
+        <stop offset="0.398949" stopColor="#7C9EFF" />
+        <stop offset="0.607454" stopColor="#3E6BEC" />
+        <stop offset="1" stopColor="#6C93FF" />
       </linearGradient>
       <linearGradient
         id="paint16_linear_3292_13057"
@@ -1658,8 +1656,8 @@ const SVG = () => (
         y2="214.48"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#88A7FF" />
-        <stop offset="1" stop-color="#A3BBFF" />
+        <stop stopColor="#88A7FF" />
+        <stop offset="1" stopColor="#A3BBFF" />
       </linearGradient>
       <linearGradient
         id="paint17_linear_3292_13057"
@@ -1669,8 +1667,8 @@ const SVG = () => (
         y2="204.158"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#618AFF" />
-        <stop offset="1" stop-color="#3261E4" />
+        <stop stopColor="#618AFF" />
+        <stop offset="1" stopColor="#3261E4" />
       </linearGradient>
       <linearGradient
         id="paint18_linear_3292_13057"
@@ -1680,8 +1678,8 @@ const SVG = () => (
         y2="259.124"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#7394F3" />
-        <stop offset="1" stop-color="#7D9EFC" />
+        <stop stopColor="#7394F3" />
+        <stop offset="1" stopColor="#7D9EFC" />
       </linearGradient>
       <linearGradient
         id="paint19_linear_3292_13057"
@@ -1691,8 +1689,8 @@ const SVG = () => (
         y2="230.205"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#88A7FF" />
-        <stop offset="1" stop-color="#A3BBFF" />
+        <stop stopColor="#88A7FF" />
+        <stop offset="1" stopColor="#A3BBFF" />
       </linearGradient>
       <linearGradient
         id="paint20_linear_3292_13057"
@@ -1702,8 +1700,8 @@ const SVG = () => (
         y2="230.205"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#88A7FF" />
-        <stop offset="1" stop-color="#A3BBFF" />
+        <stop stopColor="#88A7FF" />
+        <stop offset="1" stopColor="#A3BBFF" />
       </linearGradient>
       <linearGradient
         id="paint21_linear_3292_13057"
@@ -1713,8 +1711,8 @@ const SVG = () => (
         y2="142.578"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#DADADA" />
-        <stop offset="1" stop-color="#ECECEC" />
+        <stop stopColor="#DADADA" />
+        <stop offset="1" stopColor="#ECECEC" />
       </linearGradient>
       <linearGradient
         id="paint22_linear_3292_13057"
@@ -1724,8 +1722,8 @@ const SVG = () => (
         y2="7.8278"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint23_linear_3292_13057"
@@ -1735,10 +1733,10 @@ const SVG = () => (
         y2="408.132"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#D1D8EF" />
-        <stop offset="0.400167" stop-color="#D8E1FB" />
-        <stop offset="0.472975" stop-color="#B5BED9" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#D1D8EF" />
+        <stop offset="0.400167" stopColor="#D8E1FB" />
+        <stop offset="0.472975" stopColor="#B5BED9" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint24_linear_3292_13057"
@@ -1748,8 +1746,8 @@ const SVG = () => (
         y2="463.095"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint25_linear_3292_13057"
@@ -1759,8 +1757,8 @@ const SVG = () => (
         y2="71.0591"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint26_linear_3292_13057"
@@ -1770,8 +1768,8 @@ const SVG = () => (
         y2="88.0702"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint27_linear_3292_13057"
@@ -1781,8 +1779,8 @@ const SVG = () => (
         y2="27.0859"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint28_linear_3292_13057"
@@ -1792,8 +1790,8 @@ const SVG = () => (
         y2="62.3355"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint29_linear_3292_13057"
@@ -1803,8 +1801,8 @@ const SVG = () => (
         y2="0.0305225"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint30_linear_3292_13057"
@@ -1814,8 +1812,8 @@ const SVG = () => (
         y2="0.0305226"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint31_linear_3292_13057"
@@ -1825,8 +1823,8 @@ const SVG = () => (
         y2="0.0695066"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint32_linear_3292_13057"
@@ -1836,8 +1834,8 @@ const SVG = () => (
         y2="0.0557762"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint33_linear_3292_13057"
@@ -1847,8 +1845,8 @@ const SVG = () => (
         y2="0.0191577"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint34_linear_3292_13057"
@@ -1858,8 +1856,8 @@ const SVG = () => (
         y2="0.0695068"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint35_linear_3292_13057"
@@ -1869,8 +1867,8 @@ const SVG = () => (
         y2="0.0191576"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint36_linear_3292_13057"
@@ -1880,8 +1878,8 @@ const SVG = () => (
         y2="0.0305226"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint37_linear_3292_13057"
@@ -1891,8 +1889,8 @@ const SVG = () => (
         y2="0.0191576"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint38_linear_3292_13057"
@@ -1902,8 +1900,8 @@ const SVG = () => (
         y2="101.024"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint39_linear_3292_13057"
@@ -1913,8 +1911,8 @@ const SVG = () => (
         y2="40.04"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint40_linear_3292_13057"
@@ -1924,8 +1922,8 @@ const SVG = () => (
         y2="75.2896"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint41_linear_3292_13057"
@@ -1935,8 +1933,8 @@ const SVG = () => (
         y2="149.039"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#8495C7" />
-        <stop offset="1" stop-color="#92A2D0" />
+        <stop stopColor="#8495C7" />
+        <stop offset="1" stopColor="#92A2D0" />
       </linearGradient>
       <linearGradient
         id="paint42_linear_3292_13057"
@@ -1946,8 +1944,8 @@ const SVG = () => (
         y2="113.761"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint43_linear_3292_13057"
@@ -1957,8 +1955,8 @@ const SVG = () => (
         y2="52.7763"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint44_linear_3292_13057"
@@ -1968,8 +1966,8 @@ const SVG = () => (
         y2="88.0259"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint45_linear_3292_13057"
@@ -1979,8 +1977,8 @@ const SVG = () => (
         y2="4.37567"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint46_linear_3292_13057"
@@ -1990,8 +1988,8 @@ const SVG = () => (
         y2="4.37568"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint47_linear_3292_13057"
@@ -2001,8 +1999,8 @@ const SVG = () => (
         y2="4.37568"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint48_linear_3292_13057"
@@ -2012,8 +2010,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint49_linear_3292_13057"
@@ -2023,8 +2021,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint50_linear_3292_13057"
@@ -2034,8 +2032,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint51_linear_3292_13057"
@@ -2045,8 +2043,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint52_linear_3292_13057"
@@ -2056,8 +2054,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint53_linear_3292_13057"
@@ -2067,8 +2065,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint54_linear_3292_13057"
@@ -2078,8 +2076,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint55_linear_3292_13057"
@@ -2089,8 +2087,8 @@ const SVG = () => (
         y2="0.0565592"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint56_linear_3292_13057"
@@ -2100,8 +2098,8 @@ const SVG = () => (
         y2="387.141"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#ECECEC" />
-        <stop offset="1" stop-color="#DADADA" />
+        <stop stopColor="#ECECEC" />
+        <stop offset="1" stopColor="#DADADA" />
       </linearGradient>
       <linearGradient
         id="paint57_linear_3292_13057"
@@ -2111,8 +2109,8 @@ const SVG = () => (
         y2="120.286"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint58_linear_3292_13057"
@@ -2122,8 +2120,8 @@ const SVG = () => (
         y2="343.07"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint59_linear_3292_13057"
@@ -2133,8 +2131,8 @@ const SVG = () => (
         y2="282.086"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint60_linear_3292_13057"
@@ -2144,8 +2142,8 @@ const SVG = () => (
         y2="317.336"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint61_linear_3292_13057"
@@ -2155,8 +2153,8 @@ const SVG = () => (
         y2="29.2417"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint62_linear_3292_13057"
@@ -2166,8 +2164,8 @@ const SVG = () => (
         y2="31.5788"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint63_linear_3292_13057"
@@ -2177,8 +2175,8 @@ const SVG = () => (
         y2="9.2428"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint64_linear_3292_13057"
@@ -2188,8 +2186,8 @@ const SVG = () => (
         y2="0.0191576"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint65_linear_3292_13057"
@@ -2199,8 +2197,8 @@ const SVG = () => (
         y2="0.0305226"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint66_linear_3292_13057"
@@ -2210,8 +2208,8 @@ const SVG = () => (
         y2="0.104904"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint67_linear_3292_13057"
@@ -2221,8 +2219,8 @@ const SVG = () => (
         y2="0.104904"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint68_linear_3292_13057"
@@ -2232,8 +2230,8 @@ const SVG = () => (
         y2="0.0305226"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint69_linear_3292_13057"
@@ -2243,8 +2241,8 @@ const SVG = () => (
         y2="148.869"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#9DA4B9" />
-        <stop offset="1" stop-color="#808BAB" />
+        <stop stopColor="#9DA4B9" />
+        <stop offset="1" stopColor="#808BAB" />
       </linearGradient>
       <linearGradient
         id="paint70_linear_3292_13057"
@@ -2254,8 +2252,8 @@ const SVG = () => (
         y2="9.9678"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint71_linear_3292_13057"
@@ -2265,8 +2263,8 @@ const SVG = () => (
         y2="88.1817"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint72_linear_3292_13057"
@@ -2276,8 +2274,8 @@ const SVG = () => (
         y2="158.619"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#9DA4B9" />
-        <stop offset="1" stop-color="#808BAB" />
+        <stop stopColor="#9DA4B9" />
+        <stop offset="1" stopColor="#808BAB" />
       </linearGradient>
       <linearGradient
         id="paint73_linear_3292_13057"
@@ -2287,8 +2285,8 @@ const SVG = () => (
         y2="9.9678"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint74_linear_3292_13057"
@@ -2298,8 +2296,8 @@ const SVG = () => (
         y2="97.9317"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <linearGradient
         id="paint75_linear_3292_13057"
@@ -2309,8 +2307,8 @@ const SVG = () => (
         y2="117.115"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CAD1E7" />
-        <stop offset="1" stop-color="#B4BDD8" />
+        <stop stopColor="#CAD1E7" />
+        <stop offset="1" stopColor="#B4BDD8" />
       </linearGradient>
       <linearGradient
         id="paint76_linear_3292_13057"
@@ -2320,8 +2318,8 @@ const SVG = () => (
         y2="9.9678"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#CFD8EF" />
-        <stop offset="1" stop-color="#D5DAE9" />
+        <stop stopColor="#CFD8EF" />
+        <stop offset="1" stopColor="#D5DAE9" />
       </linearGradient>
       <linearGradient
         id="paint77_linear_3292_13057"
@@ -2331,8 +2329,8 @@ const SVG = () => (
         y2="107.682"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#EDF1FD" />
-        <stop offset="1" stop-color="#E1E5F1" />
+        <stop stopColor="#EDF1FD" />
+        <stop offset="1" stopColor="#E1E5F1" />
       </linearGradient>
       <clipPath id="clip0_3292_13057">
         <rect
