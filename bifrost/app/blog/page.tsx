@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "openai-deep-research",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "deepseek-janus-pro",
     },
   },
@@ -462,11 +467,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {

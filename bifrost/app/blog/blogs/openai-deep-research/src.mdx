@@ -1,6 +1,8 @@
-OpenAI’s release of Deep Research came just as the AI community was processing the impact of DeepSeek R1 and its advancements. 
+OpenAI’s release of Deep Research came just as the AI community was processing the impact of DeepSeek R1 and its advancements.
 
-This timing led many to view it as OpenAI’s response to the growing threat of open-source tools like DeepSeek. In an interesting turn of events, an open-source alternative to Deep Research appeared just 12 hours after its release to quite <a href="https://x.com/dzhng/status/1888299647845961909">positive reviews</a>.
+This timing led many to view it as OpenAI’s response to the growing threat of open-source tools like DeepSeek. In an interesting turn of events, an open-source alternative to Deep Research appeared just 12 hours after its release to quite <a href="https://x.com/dzhng/status/1888299647845961909" target="_blank" rel="noopener noreferrer">positive impression</a> from the developer community.
+
+![OpenAI Deep Research](/static/blog/openai-deep-research/deep-research-cover.webp)
 
 Despite the ongoing tug-of-war between open-source and "Open" AI, Deep Research has proven itself to be quite a powerful tool.
 
@@ -25,23 +27,20 @@ Deep Research is aimed at professionals in fields that require extensive informa
 
 ## How Deep Research Works
 
-Deep Research is built on an OpenAI o3 model optimized for web browsing, data analysis, and multi-step reasoning. 
+Deep Research is built on an OpenAI o3 model optimized for web browsing, data analysis, and multi-step reasoning.
 
-It employs **end-to-end reinforcement learning** for complex search and synthesis tasks, effectively combining LLM "reasoning" with real-time web browsing. 
+It employs **end-to-end reinforcement learning** for complex search and synthesis tasks, effectively combining LLM "reasoning" with real-time web browsing.
 
 Here is an overview of how it works:
 
 1. **Query Interpretation & Clarifications**
    - Deep Research first parses the user’s query and asks for clarifications if needed (e.g., location for price comparisons).
-   
-2. **Web Scraping & Data Extraction**: 
-    - Retrieves top-ranked search results and extracts relevant information.
-   
+2. **Web Scraping & Data Extraction**:
+   - Retrieves top-ranked search results and extracts relevant information.
 3. **Analysis & Synthesis**
    - Summarizes findings and identifies patterns.
    - Conducts multi-document summarization and citation tracking.
    - Analyzes and plots tabular data and figures using Python.
-   
 4. **Report Generation**
    - Outputs structured reports, complete with citations.
    - Embeds generated images, tables, and charts.
@@ -54,33 +53,36 @@ According to results released by OpenAI, Deep Research outperforms previous mode
 
 This tests accuracy on "Expert-Level" questions on over 100 subjects.
 
-| Model                  | Accuracy (%)  |
-|------------------------|--------------|
-| GPT-4o                | 3.3          |
-| Grok-2                | 3.8          |
-| Claude 3.5 Sonnet     | 4.3          |
-| Gemini Thinking       | 6.2          |
-| OpenAI o1             | 9.1          |
-| DeepSeek-R1*          | 9.4          |
-| OpenAI o3-mini (high) | 13.0         |
-| **OpenAI Deep Research** | **26.6** |
+| Model                    | Accuracy (%) |
+| ------------------------ | ------------ |
+| GPT-4o                   | 3.3          |
+| Grok-2                   | 3.8          |
+| Claude 3.5 Sonnet        | 4.3          |
+| Gemini Thinking          | 6.2          |
+| OpenAI o1                | 9.1          |
+| DeepSeek-R1\*            | 9.4          |
+| OpenAI o3-mini (high)    | 13.0         |
+| **OpenAI Deep Research** | **26.6**     |
 
-<a href="https://lastexam.ai/">Humanity’s Last Exam (HLE)</a> is a rigorous AI benchmark designed to test LLMs on a broad range of expert-level academic subjects.
+**<a href="https://lastexam.ai/" target="_blank" rel="noopener noreferrer">Humanity’s Last Exam (HLE)</a>** is a rigorous AI benchmark
+designed to test LLMs on a broad range of expert-level academic subjects.
 
 It spans disciplines including classics, ecology, law, and mathematics, and measures how well AI can handle questions that challenge even seasoned domain experts.
 
 ### **GAIA Benchmark**
 
-| Model Configuration | Level 1 | Level 2 | Level 3 | Avg. Accuracy |
-|---------------------|---------|---------|---------|---------------|
-| Previous Top Results      | 67.92   | 67.44   | 42.31   | 63.64         |
-| Deep Research | 78.66   | 73.21   | 58.03   | 72.57         |
+| Model Configuration  | Level 1 | Level 2 | Level 3 | Avg. Accuracy |
+| -------------------- | ------- | ------- | ------- | ------------- |
+| Previous Top Results | 67.92   | 67.44   | 42.31   | 63.64         |
+| Deep Research        | 78.66   | 73.21   | 58.03   | 72.57         |
 
-<a href="https://openreview.net/forum?id=fibxvahvs3">GAIA</a> (General AI Assistant Benchmark) is a benchmark designed to evaluate AI assistants on real-world problem-solving tasks.
+**<a href="https://openreview.net/forum?id=fibxvahvs3" target="_blank" rel="noopener noreferrer">GAIA</a>** (General AI Assistant
+Benchmark) is a benchmark designed to evaluate AI assistants on real-world problem-solving
+tasks.
 
 GAIA measures an AI system's ability to handle complex, human-like reasoning, multimodal inputs, web browsing, and tool-use proficiency.
 
-Unlike traditional AI benchmarks that focus on professional skill-based evaluations, GAIA challenges AI systems with tasks that are simple for humans but remain difficult for current models. 
+Unlike traditional AI benchmarks that focus on professional skill-based evaluations, GAIA challenges AI systems with tasks that are simple for humans but remain difficult for current models.
 
 For example, while GPT-4 equipped with plugins scores 15%, human respondents achieve 92%, highlighting a significant gap in AI performance on practical, reasoning-based tasks.
 
@@ -101,33 +103,38 @@ For example, while GPT-4 equipped with plugins scores 15%, human respondents ach
 
 ## OpenAI vs. Google’s Deep Research
 
-Let's compare OpenAI Deep Research with its older namesake from Google—<a href="https://blog.google/products/gemini/google-gemini-deep-research/">Gemini Deep Research</a>.
+Let's compare OpenAI Deep Research with its older namesake from Google—<a href="https://blog.google/products/gemini/google-gemini-deep-research/" target="_blank" rel="noopener">Gemini Deep Research</a>.
 
-| Feature              | OpenAI Deep Research         | Gemini Deep Research         |
-|----------------------|----------------------------|-----------------------------|
-| **Cost**             | $200/month                 | $20/month                   |
-| **Level of Detail**  | Highly detailed, long reports | More concise, less detailed reports |
-| **Search Behavior**  | Uses web sources and research papers | Primarily web sources |
-| **Accuracy**         | Reasonably accurate         | More prone to SEO bias & hallucination |
-| **Citation Reliability** | Mixed, some fake sources  | Sometimes references unrelated sources |
-| **Use Case Suitability** | Technical & academic research | General web-based research |
-| **Input Types**      | Text, images, PDFs, spreadsheets | Primarily text |
-| **Output**           | Reports with sources, summaries, and embedded visuals | Reports with key findings & sources |
-| **Transparency**     | Shows step-by-step reasoning process | Uses a pre-planned research path users can modify |
-| **Processing Time**  | 5–30 minutes per query     | Typically under 15 minutes |
+|                          | OpenAI Deep Research                                  | Gemini Deep Research                              |
+| ------------------------ | ----------------------------------------------------- | ------------------------------------------------- |
+| **Cost**                 | $200/month                                            | $20/month                                         |
+| **Level of Detail**      | Highly detailed, long reports                         | More concise, less detailed reports               |
+| **Search Behavior**      | Uses web sources and research papers                  | Primarily web sources                             |
+| **Accuracy**             | Reasonably accurate                                   | More prone to SEO bias & hallucination            |
+| **Citation Reliability** | Mixed, some fake sources                              | Sometimes references unrelated sources            |
+| **Use Case Suitability** | Technical & academic research                         | General web-based research                        |
+| **Input Types**          | Text, images, PDFs, spreadsheets                      | Primarily text                                    |
+| **Output**               | Reports with sources, summaries, and embedded visuals | Reports with key findings & sources               |
+| **Transparency**         | Shows step-by-step reasoning process                  | Uses a pre-planned research path users can modify |
+| **Processing Time**      | 5–30 minutes per query                                | Typically under 15 minutes                        |
 
-**Final Verdict**: OpenAI Deep Research is more **capable** and **feature-packed**, but both struggle with reliability.
+<BottomLine
+  title="💡 Bottom Line"
+  description="OpenAI Deep Research is more capable and feature-packed, but both struggle with reliability. OpenAI has promised to bring Deep Research to the Plus and Free tier users in the near future."
+/>
 
 ## Is Deep Research Worth $200/Month?
 
 Is Deep Research worth its high price tag? Well that depends on what you're looking for.
 
 ✅ **Recommended for:**
+
 - Researchers handling complex, niche topics.
 - Professionals requiring quick synthesis of scattered data.
 - Users needing extensive reports on a topic rather than short answers.
 
 🚫 **Not worth it for:**
+
 - Simple fact-based queries (standard GPT-4o suffices).
 - Financial, legal, or medical reports requiring absolute accuracy.
 
@@ -142,23 +149,17 @@ In any case, you must understand its limitations and be prepared to work with th
 
 For those unwilling to pay $200/month, an open-source alternative called **Open Deep Research** might be a good option.
 
-Open Deep Research is an AI-powered research assistant that performs iterative, deep research by leveraging search engines, web scraping, and large language models (LLMs). 
+Open Deep Research is an AI-powered research assistant that performs iterative, deep research by leveraging search engines, web scraping, and large language models (LLMs).
 
 Unlike OpenAI’s Deep Research, it is designed as a lightweight and highly customizable tool for developers who need full control over their research pipeline.
 
-Key Features:
-	- Iterative Research: Generates search queries, processes results, and refines research direction over time.
-	- Intelligent Query Generation: Uses LLMs to produce targeted search queries based on research goals.
-	- Depth & Breadth Control: Users can configure how deep (iterations) and broad (query diversity) the research expands.
-	- Smart Follow-ups: Dynamically generates follow-up questions to refine research insights.
-	- Comprehensive Reports: Produces structured markdown reports containing key findings and sources.
-	- Concurrent Processing: Handles multiple searches simultaneously for increased efficiency.
+Key Features: - Iterative Research: Generates search queries, processes results, and refines research direction over time. - Intelligent Query Generation: Uses LLMs to produce targeted search queries based on research goals. - Depth & Breadth Control: Users can configure how deep (iterations) and broad (query diversity) the research expands. - Smart Follow-ups: Dynamically generates follow-up questions to refine research insights. - Comprehensive Reports: Produces structured markdown reports containing key findings and sources. - Concurrent Processing: Handles multiple searches simultaneously for increased efficiency.
 
-Learn how to set up and use Open Deep Research via the <a href="https://github.com/dzhng/deep-research">official docs</a>.
+Learn how to set up and use Open Deep Research via the <a href="https://github.com/dzhng/deep-research" target="_blank" rel="noopener">official docs</a>.
 
 <CallToAction
   title="Track Research Models with Helicone"
-  description="While OpenAI and Gemini Deep Research are unavailable via API, Helicone can help you monitor and optimize other research models like Open Deep Research"
+  description="While OpenAI and Gemini Deep Research are unavailable via API, Helicone can help you monitor and optimize other research models like Open Deep Research. "
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/"
   secondaryButtonText="Read the doc"
@@ -171,30 +172,38 @@ OpenAI Deep Research is an ambitious step toward automated AI-driven research. H
 
 Nevertheless, many have reported it to be a powerful research assistant—so if that sounds exciting to you, go for it!
 
+### You might find these useful:
+
+- **<a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">O1 and ChatGPT Pro — here's everything you need to know</a>**
+- **<a href="https://helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
+- **<a href="https://www.helicone.ai/blog/deepseek-v3" target="_blank" rel="noopener">DeepSeek-V3 Release: New Open-Source MoE Model</a>**
+
 ## FAQs
 
 1. **How long does Deep Research take to generate a report?**
 
-    Deep Research typically takes 5–30 minutes per query, depending on the complexity of the topic and the amount of data it processes.
+   Deep Research typically takes 5–30 minutes per query, depending on the complexity of the topic and the amount of data it processes.
 
 2. **What kind of data can Deep Research access?**
 
-    It can browse the open web and analyze uploaded files but cannot access private, subscription-based, or internal resources yet, though that feature is in the works.
+   It can browse the open web and analyze uploaded files but cannot access private, subscription-based, or internal resources yet, though that feature is in the works.
 
 3. **When should I use Deep Research vs. Search?**
-	- Use Search for quick facts, news, weather, or summaries (instant results).
-	- Use Deep Research for in-depth analysis, requiring multiple sources and structured reports (longer processing time).
+
+   - Use Search for quick facts, news, weather, or summaries (instant results).
+   - Use Deep Research for in-depth analysis, requiring multiple sources and structured reports (longer processing time).
 
 4. **How do I use Deep Research?**
-	- In ChatGPT, select ‘Deep Research’ and enter your query.
-	- Attach files, images, or spreadsheets for more context.
-	- Deep Research may ask follow-up questions for clarity.
-	- It runs in the background, analyzing data and compiling a structured report.
+
+   - In ChatGPT, select ‘Deep Research’ and enter your query.
+   - Attach files, images, or spreadsheets for more context.
+   - Deep Research may ask follow-up questions for clarity.
+   - It runs in the background, analyzing data and compiling a structured report.
 
 5. **Can I use Helicone to track Deep Research usage?**
 
-    Currently, OpenAI’s Deep Research does not have an API, so **no**. 
-    
-    However, Helicone can be used to track other AI-powered research models like Open Deep Research, OpenAI’s API-based models, and self-hosted LLMs.
+   Currently, OpenAI’s Deep Research does not have an API, so **no**.
+
+   However, Helicone can be used to track other AI-powered research models like Open Deep Research, OpenAI’s API-based models, and self-hosted LLMs.
 
 <Questions />
