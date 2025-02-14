@@ -72,7 +72,7 @@ export async function handleSocketSession(
         heliconeProxyKeyId: requestWrapper.heliconeProxyKeyId,
         isStream: true,
         targetUrl: requestWrapper.url.toString(),
-        properties: {},
+        properties: requestWrapper.heliconeHeaders.heliconeProperties,
         omitLog: false,
         nodeId: null,
         threat: null,

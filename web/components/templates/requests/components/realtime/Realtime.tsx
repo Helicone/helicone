@@ -1,14 +1,14 @@
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import React, { useState } from "react";
 import {
+  PiCaretDownBold,
   PiCodeBold,
   PiGearBold,
   PiMicrophoneBold,
+  PiSpeakerHighBold,
   PiTextTBold,
 } from "react-icons/pi";
-
-interface RealtimeProps {
-  mappedRequest: MappedLLMRequest;
-}
+import ReactMarkdown from "react-markdown";
 
 type MessageType =
   | "text"
@@ -17,6 +17,9 @@ type MessageType =
   | "functionOutput"
   | "session";
 
+interface RealtimeProps {
+  mappedRequest: MappedLLMRequest;
+}
 export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   // Get all messages sorted by timestamp
   const sortedMessages = [
@@ -28,48 +31,8 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
     return timeA - timeB;
   });
 
-  // Get session features from the latest session update or raw request
-  const sessionFeatures = (() => {
-    // Try to get from session update message first
-    const sessionMsg = sortedMessages.find(
-      (msg) =>
-        typeof msg.content === "string" &&
-        msg.content.includes("session.update")
-    );
-
-    let features = {};
-    if (sessionMsg?.content) {
-      try {
-        const { session } =
-          JSON.parse(sessionMsg.content).type === "session.update"
-            ? JSON.parse(sessionMsg.content)
-            : { session: null };
-        if (session) {
-          features = {
-            Modalities: session.modalities?.join(", "),
-            Voice: session.voice,
-            Instructions: session.instructions,
-            Tools: session.tools?.map((t: any) => t.name).join(", "),
-          };
-        }
-      } catch (e) {}
-    }
-
-    // Fallback to raw request
-    if (Object.keys(features).length === 0) {
-      const req = mappedRequest.raw.request || {};
-      features = {
-        Modalities: Array.isArray(req.modalities)
-          ? req.modalities.join(", ")
-          : req.modalities,
-        Voice: req.voice,
-        Instructions: req.instructions,
-        Tools: req.tools?.map((t: any) => t.function.name).join(", "),
-      };
-    }
-
-    return Object.entries(features).filter(([_, v]) => v) as [string, string][];
-  })();
+  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
+  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
 
   const getMessageType = (message: any): MessageType => {
     if (message._type === "functionCall") return "functionCall";
@@ -91,23 +54,9 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col gap-4">
       {/* Header Section */}
-      {sessionFeatures.length > 0 && (
-        <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
-          <div className="text-xs text-secondary uppercase tracking-wider mb-2">
-            Realtime Session Features
-          </div>
-          <div className="flex flex-wrap gap-4">
-            {sessionFeatures.map(([label, value]) => (
-              <div key={label} className="flex gap-1.5">
-                <span className="font-medium">{label}:</span>
-                <span className="text-secondary">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {lastSessionUpdate && <SessionHeader sessionData={lastSessionUpdate} />}
 
       {/* Messages Section */}
       <div className="gap-4">
@@ -120,7 +69,7 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 
           return (
             <div
-              key={`${idx}-${message.timestamp}-${message.content}`}
+              key={`${idx}-${message.timestamp}`}
               className={`flex flex-col ${
                 isUser ? "items-end" : "items-start"
               } mb-4 w-full`}
@@ -188,45 +137,215 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 };
 
 /* -------------------------------------------------------------------------- */
+/*                           Session Features Header                          */
+/* -------------------------------------------------------------------------- */
+const getPillStyle = (type: string, label?: string) => {
+  // Special handling for modalities
+  if (type === "modality") {
+    const modalityStyle = {
+      className:
+        "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300",
+    };
+
+    switch (label) {
+      case "audio":
+        return {
+          icon: <PiMicrophoneBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+      case "text":
+        return {
+          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+      default:
+        return {
+          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+    }
+  }
+
+  // Other types
+  switch (type) {
+    case "voice":
+      return {
+        icon: <PiSpeakerHighBold className="w-3.5 h-3.5" />,
+        className:
+          "bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
+      };
+    case "tool":
+      return {
+        icon: <PiCodeBold className="w-3.5 h-3.5" />,
+        className:
+          "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
+      };
+    default:
+      return {
+        icon: null,
+        className:
+          "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300",
+      };
+  }
+};
+
+type SessionUpdateData = {
+  modalities?: string[];
+  voice?: string;
+  tools?: Array<{ name: string }>;
+  instructions?: string;
+};
+const parseSessionUpdate = (
+  content: string | undefined
+): SessionUpdateData | null => {
+  if (!content) return null;
+  try {
+    const parsed = JSON.parse(content)?.session;
+    if (!parsed) return null;
+    return parsed as SessionUpdateData;
+  } catch {
+    return null;
+  }
+};
+
+interface SessionHeaderProps {
+  sessionData: SessionUpdateData;
+}
+
+type Pill = {
+  type: string;
+  label: string;
+  modality?: string;
+};
+
+const SessionHeader: React.FC<SessionHeaderProps> = ({ sessionData }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const pills: Pill[] = [
+    ...(sessionData.modalities?.map((m) => ({
+      type: "modality",
+      label: m,
+    })) || []),
+    ...(sessionData.voice ? [{ type: "voice", label: sessionData.voice }] : []),
+    ...(sessionData.tools?.map((t) => ({ type: "tool", label: t.name })) || []),
+  ];
+
+  return (
+    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex flex-col gap-4">
+      <div className="text-xs text-secondary uppercase tracking-wider">
+        Realtime Session Features
+      </div>
+
+      {/* Pills Section */}
+      {pills.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {pills.map(({ type, label }, idx) => {
+            const style = getPillStyle(type, label);
+            return (
+              <span
+                key={`${type}-${idx}`}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 ${style.className}`}
+              >
+                {style.icon}
+                {label}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Instructions Section */}
+      {sessionData.instructions && (
+        <div className="flex flex-col gap-2">
+          <div
+            className="flex items-center gap-2 cursor-pointer select-none hover:underline"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <span className="font-medium text-sm">Instructions</span>
+            <PiCaretDownBold
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+          <div
+            className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
+              isExpanded ? "max-h-96 opacity-100" : "max-h-6 opacity-70"
+            }`}
+          >
+            <ReactMarkdown className="prose dark:prose-invert prose-sm text-secondary">
+              {sessionData.instructions}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
 /*                         Special Message Components                         */
 /* -------------------------------------------------------------------------- */
 interface SessionUpdateProps {
   content: string;
 }
 const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
-  try {
-    const sessionData = JSON.parse(content);
-    if (sessionData.type === "session.update" && sessionData.session) {
-      const { modalities, voice, instructions, tools } = sessionData.session;
-      const items = [
-        {
-          label: "Modalities",
-          value: Array.isArray(modalities) ? modalities.join(", ") : null,
-        },
-        { label: "Voice", value: voice || null },
-        { label: "Instructions", value: instructions || null },
-        {
-          label: "Available Tools",
-          value: tools?.map((t: any) => t.name).join(", ") || null,
-        },
-      ].filter((item) => item.value);
+  const sessionData = parseSessionUpdate(content);
+  if (!sessionData) {
+    return <div className="whitespace-pre-wrap break-words">{content}</div>;
+  }
 
-      return (
-        <div className="flex flex-col gap-1.5">
-          {items.map(
-            ({ label, value }) =>
-              value && (
-                <div key={label}>
-                  <span className="font-medium">{label}:</span>{" "}
-                  <span className="text-slate-300">{value}</span>
-                </div>
-              )
+  const items = [
+    {
+      label: "Modalities",
+      pills:
+        sessionData.modalities?.map((m) => ({ type: "modality", label: m })) ||
+        [],
+    },
+    {
+      label: "Voice",
+      pills: sessionData.voice
+        ? [{ type: "voice", label: sessionData.voice }]
+        : [],
+    },
+    {
+      label: "Available Tools",
+      pills:
+        sessionData.tools?.map((t) => ({ type: "tool", label: t.name })) || [],
+    },
+    {
+      label: "Instructions",
+      value: sessionData.instructions || null,
+    },
+  ].filter((item) => (item.pills && item.pills.length > 0) || item.value);
+
+  return (
+    <div className="flex flex-col divide-y divide-slate-300">
+      {items.map(({ label, pills, value }) => (
+        <div key={label} className="flex flex-row justify-between gap-4 py-2">
+          <span className="font-medium">{label}:</span>
+          {pills ? (
+            <div className="flex flex-wrap gap-1.5 justify-end">
+              {pills.map(({ type, label }, idx) => {
+                const { icon, className } = getPillStyle(type, label);
+                return (
+                  <span
+                    key={`${type}-${idx}`}
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${className}`}
+                  >
+                    {icon}
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-slate-300 truncate max-w-[16rem]">{value}</p>
           )}
         </div>
-      );
-    }
-  } catch (e) {}
-  return <div className="whitespace-pre-wrap break-words">{content}</div>;
+      ))}
+    </div>
+  );
 };
 
 interface FunctionCallContentProps {

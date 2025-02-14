@@ -79,6 +79,7 @@ type RealtimeMessage = {
     | "response.function_call_arguments.done"
     | "rate_limits.updated";
 
+  // With "response.create"
   response?: {
     object: string; // "ex: "realtime.response"
     modalities?: string[]; // ex: ["text", "audio"]
@@ -101,13 +102,16 @@ type RealtimeMessage = {
       output?: any;
     }[];
   };
-  session?: {}; // With session.created, session.update, session.updated
+  // With "session.created", "session.update", "session.updated"
+  session?: {};
+  // With "conversation.item.create"
   item?: {
-    // With converstaion.item.create
     type: string; // "function_call_output"
     call_id: string; // ex: "call_123"
     output: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
   };
+  // With "conversation.item.input_audio_transcription.completed"
+  transcript?: string; // ex: "Hello, how are you?"
 };
 const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   if (!messages?.length) return [];
@@ -121,73 +125,92 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
       switch (msg.content.type) {
         case "response.create":
           // -> User: Text
-          return {
-            role: "user",
-            _type: "text",
-            content: msg.content?.response?.instructions,
-            timestamp: msg.timestamp,
-          };
+          return msg.content?.response?.instructions
+            ? {
+                role: "user",
+                _type: "text",
+                content: msg.content.response.instructions,
+                timestamp: msg.timestamp,
+              }
+            : null;
 
         case "conversation.item.input_audio_transcription.completed":
           // -> User: Audio
-          return {
-            role: "user",
-            _type: "audio",
-            content:
-              msg.content.response?.output?.[0]?.content?.[0]?.transcript,
-            timestamp: msg.timestamp,
-          };
+          return msg.content?.transcript
+            ? {
+                role: "user",
+                _type: "audio",
+                content: msg.content.transcript,
+                timestamp: msg.timestamp,
+              }
+            : null;
 
         case "response.done":
           if (output?.content?.[0]) {
             // -> Assistant: Text or Audio
+            const content = output.content[0];
+            if (!content.text && !content.transcript) return null;
+
             return {
               role: "assistant",
-              _type: output?.content?.[0]?.text ? "text" : "audio",
-              content:
-                output?.content?.[0]?.text || output?.content?.[0]?.transcript,
+              _type: content.text ? "text" : "audio",
+              content: content.text || content.transcript || "",
               timestamp: msg.timestamp,
             };
           }
 
-          if (output?.type === "function_call") {
+          if (
+            output?.type === "function_call" &&
+            output.name &&
+            output.arguments
+          ) {
             // -> Assistant: Function call
-            return {
-              role: "assistant",
-              _type: "functionCall",
-              tool_call_id: output.output?.call_id,
-              tool_calls: [
-                {
-                  name: output.name,
-                  arguments: JSON.parse(output.arguments || "{}"),
-                },
-              ],
-              timestamp: msg.timestamp,
-            };
+            try {
+              return {
+                role: "assistant",
+                _type: "functionCall",
+                tool_call_id: output.call_id,
+                tool_calls: [
+                  {
+                    name: output.name,
+                    arguments: JSON.parse(output.arguments),
+                  },
+                ],
+                timestamp: msg.timestamp,
+              };
+            } catch (e) {
+              return null;
+            }
           }
-          break;
+          return null;
 
         case "conversation.item.create":
-          if (item?.type === "function_call_output") {
+          if (
+            item?.type === "function_call_output" &&
+            item.call_id &&
+            item.output
+          ) {
             // -> Assistant: Function call output
             return {
               role: "user",
               _type: "function",
-              tool_call_id: item?.call_id,
-              content: item?.output,
+              tool_call_id: item.call_id,
+              content: item.output,
               timestamp: msg.timestamp,
             };
           }
-          break;
+          return null;
 
         case "session.update":
           // -> User: Session update
-          return {
-            role: "user",
-            _type: "message",
-            content: JSON.stringify(msg.content),
-            timestamp: msg.timestamp,
-          };
+          return msg.content
+            ? {
+                role: "user",
+                _type: "message",
+                content: JSON.stringify(msg.content),
+                timestamp: msg.timestamp,
+              }
+            : null;
 
         default:
           return null;

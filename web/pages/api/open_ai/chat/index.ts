@@ -70,12 +70,13 @@ export default async function handler(
   }
 
   try {
+    const isO1orO3 = model.includes("o1") || model.includes("o3");
     const completion = await openai.chat.completions.create({
       model: model,
       messages: messages,
       user: user.data.user.email,
-      temperature: temperature,
-      max_tokens: maxTokens,
+      temperature: isO1orO3 ? undefined : temperature,
+      max_tokens: isO1orO3 ? undefined : maxTokens,
       tools: tools && tools.length > 0 ? tools : undefined,
     });
     res.status(200).json({ error: null, data: completion });

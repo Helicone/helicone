@@ -1,17 +1,11 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { InMemoryCache } from "../cache/staticMemCache";
+import { KeyPermissions, Role } from "../../models/models";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { hashAuth } from "../../utils/hash";
+import { KVCache } from "../cache/kvCache";
+import { HeliconeAuth } from "../requestWrapper";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { Database } from "./database.types";
-import { hashAuth } from "../../utils/hash";
-import { HeliconeAuth } from "../requestWrapper";
-import { redisClient } from "../clients/redisClient";
-import { KeyPermissions, Role } from "../../models/models";
-import { KVCache } from "../cache/kvCache";
-import { cacheResultCustom } from "../../utils/cacheResult";
-
-require("dotenv").config({
-  path: `${__dirname}/../../../.env`,
-});
 
 export interface AuthParams {
   organizationId: string;
