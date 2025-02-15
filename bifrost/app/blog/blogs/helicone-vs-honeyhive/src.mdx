@@ -1,0 +1,138 @@
+As Large Language Model (LLM) applications become more prevalent in production, developers need robust observability tools to monitor, debug, and optimize their models effectively. 
+
+Helicone and HoneyHive are two leading platforms in the LLM observability space, each offering unique capabilities tailored to different use cases.
+
+This article provides a side-by-side comparison of Helicone and HoneyHive, analyzing their features, integrations, strengths, and ideal user scenarios. By the end, you'll have a clear understanding of which platform suits your needs best.
+
+### Overview: Helicone vs. HoneyHive
+
+| Feature                  | Helicone | HoneyHive |
+|--------------------------|----------|-----------|
+| Open-Source             | ✅       | ❌        |
+| Self-Hosting            | ✅       | ✅        |
+| Observability Framework    | OpenLLMetry (built on OpenTelemetry specifically for LLMs) | OpenTelemetry |
+| One-Line Integration    | ✅       | ❌        |
+| Caching                 | ✅       | ❌        |
+| Pricing                 | Generous free tier, with flexible plans for teams of all sizes | Only free and enterprise plans, less suited for small to medium-sized teams |
+| Prompt Management       | ✅       | ✅        |
+| Agent Tracing           | ✅       | ✅        |
+| Experimentation         | ✅       | ✅        |
+| User Tracking & Feedback | ✅       | ❌       |
+| Online Evaluation       | ✅       | ✅        |
+| Annotations & Feedback  | ✅       | ✅        |
+| Cost Analysis           | ✅       | ❌        |
+| Data Export             | ✅       | ✅        |
+
+### Helicone: Developer-Focused LLM Observability
+
+#### What is Helicone?
+
+Helicone is an open-source observability platform designed for developers building production-ready LLM applications. 
+
+It provides logging, monitoring, debugging, and optimization capabilities, allowing teams to track and improve their AI models efficiently.
+
+#### Key Features
+
+- **One-Line Integration**: Simple setup with minimal code changes.
+- **Flexible Pricing Options**: Affordable pricing options for teams of all sizes—from small to enterprise—in addition to a generous free tier.
+- **Caching**: Reduces API costs and improves response times.
+- **Prompt Management**: Version, optimize, and test prompts within the platform.
+- **User Tracking & Analytics**: Monitor user interactions and usage patterns.
+- **Cost Optimization**: Get insights into LLM request costs and optimize spending.
+- **Custom Properties & Labels**: Segment and analyze logs for deeper insights.
+- **Self-Hosting**: Offers flexibility for teams requiring data control.
+- **Asynchronous Logging**: Keeps Helicone out of your critical path, ensuring maximum reliability and minimal latency.
+
+#### Strengths
+
+- **Developer-Friendly**: Simple, intuitive setup and integration process.
+- **Cost Reduction**: Caching and cost analysis help manage API expenses efficiently.
+- **Performance Optimization**: Asynchronous logging ensures that observability doesn’t impact request handling.
+- **Flexibility**: Open-source nature allows for self-hosting and customization.
+- **Comprehensive Analytics**: Detailed insights into user behavior and API usage.
+
+### HoneyHive: AI Observability & Evaluation
+
+#### What is HoneyHive?
+
+<a href="https://www.honeyhive.ai/observability">HoneyHive</a> is a modern AI observability and evaluation platform designed for AI teams needing end-to-end monitoring and debugging. It enables developers and domain experts to collaboratively ensure AI reliability through evaluation-driven development (EDD).
+
+#### Key Features
+
+- **Offline & Online Evaluation**: Evaluates prompt and application performance offline or in production.
+- **Artifact Management**: Tracks and versions prompts, datasets, and evaluators.
+- **Cloud & Self-Hosting Options**: Supports both managed services and on-premises deployments.
+
+#### Strengths
+
+- **Evaluation-Driven Development**: Supports pre-production and live evaluations to ensure model reliability.
+- **Robust Tracing & Debugging**: Provides full observability of AI pipelines using OpenTelemetry.
+
+---
+
+### How They Compare: Helicone vs HoneyHive
+
+- **Ease of Integration**: Helicone offers a one-line integration, making it simpler to set up compared to HoneyHive, which requires more configuration.
+- **Cost Efficiency**: Helicone provides built-in caching and cost analysis, reducing API expenses, while HoneyHive lacks cost-tracking features.
+- **Observability Framework**: Helicone uses OpenLLMetry, specifically built for LLMs, while HoneyHive relies on OpenTelemetry, a more general observability framework.
+- **Real-Time Evaluation**: Both platforms support online (and offline) evaluation.
+- **User Tracking & Feedback**: Helicone includes built-in user tracking and analytics, which HoneyHive lacks.
+- **App Performance Impact**: Helicone’s asynchronous logging method allows logging without affecting request handling, making it ideal for production environments with strict performance requirements.
+
+### Which One is Right for You?
+
+Choosing between Helicone and HoneyHive depends on your specific use case:
+
+- If you’re a **solo developer or small startup**, Helicone is the better option due to its easy integration, caching, and cost management.
+- If **managing costs** is a priority, Helicone is the better option due to its more robust cost-tracking features.
+- If **reducing API costs and optimizing response time** is a priority, Helicone’s caching feature makes it more appealing.
+- If **collecting user feedback and experimenting** is a priority, Both platforms are suitable, but Helicone makes it simpler via a more intuitive interface.
+- If your workflow involves **tracking and managing LLM user interactions**, Helicone provides better analytics and user feedback tools.
+- If your application demands a **high uptime**, Helicone’s asynchronous logging ensures zero impact on your critical path.
+
+**Verdict**: 
+
+**Choose Helicone** if you're a developer or team looking for easy integration, caching, and cost tracking.
+
+<CallToAction
+  title="Ready to scale your LLM app?"
+  description="Track your LLM usage, optimize costs, improve your prompts, and scale your LLM app with Helicone."
+  primaryButtonText="Try Helicone for free"
+  primaryButtonLink="https://www.helicone.ai/signup"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+### Frequently Asked Questions (FAQ)
+
+**1. Is Helicone open-source?**  
+Yes, Helicone is open-source and supports self-hosting, allowing teams to have full control over their data. HoneyHive, on the other hand, is not open-source.
+
+**2. Does HoneyHive support caching?**  
+No, HoneyHive does not offer built-in caching capabilities, making it less ideal for cost-sensitive applications.
+
+**3. Can I self-host HoneyHive?**  
+Yes, HoneyHive provides self-hosting options, but it requires additional setup and infrastructure.
+
+**4. Which platform is better for tracking AI costs?**  
+Helicone offers detailed cost analysis features, making it the better choice for tracking and optimizing API usage expenses.
+
+**5. Does HoneyHive provide real-time evaluation?**  
+Yes, HoneyHive supports online evaluations, allowing teams to monitor performance and regressions in real time.
+
+**6. Which tool is easier to integrate?**  
+Helicone, with its one-line integration, offers a very good developer experience—making it much easier to adopt compared to HoneyHive, which requires more configuration.
+
+### You might be interested in
+
+- <a href="/blog/best-arize-alternatives" rel="noopener" target="_blank">
+    Comparing Arize Phoenix to Helicone
+  </a>
+- <a href="/blog/braintrust-alternatives" rel="noopener" target="_blank">
+    Comparing Braintrust to Helicone
+  </a>
+- <a href="/blog/best-langfuse-alternatives" rel="noopener" target="_blank">
+    Comparing Langfuse to Helicone
+  </a>
+
+<Questions />
