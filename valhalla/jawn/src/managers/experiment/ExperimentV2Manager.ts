@@ -420,6 +420,35 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async addManualRowsToExperimentBatch(
+    experimentId: string,
+    inputs: Record<string, string>[]
+  ): Promise<Result<null, string>> {
+    try {
+      const experiment = await this.getExperimentById(experimentId);
+      if (!experiment) {
+        return err("Experiment not found");
+      }
+
+      const inputManager = new InputsManager(this.authParams);
+
+      await Promise.all(
+        inputs.map(async (input) => {
+          await inputManager.createInputRecord(
+            experiment.copied_original_prompt_version ?? "",
+            input,
+            undefined,
+            experimentId
+          );
+        })
+      );
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to create experiment table row batch");
+    }
+  }
+
   async createExperimentTableRowBatch(
     experimentId: string,
     rows: {
