@@ -1,3 +1,6 @@
+import { mapAnthropicRequest } from "../../packages/llm-mapper/mappers/anthropic/chat";
+import { mapGeminiPro } from "../../packages/llm-mapper/mappers/gemini/chat";
+import { mapOpenAIRequest } from "../../packages/llm-mapper/mappers/openai/chat";
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
@@ -436,6 +439,33 @@ export class LoggingHandler extends AbstractLogHandler {
     const usage = context.usage;
     const orgParams = context.orgParams;
 
+    let requestText = "";
+    let responseText = "";
+
+    try {
+      const provider = request.provider?.toLowerCase() || "";
+      const mapperFn = provider.includes("anthropic")
+        ? mapAnthropicRequest
+        : provider.includes("google")
+        ? mapGeminiPro
+        : mapOpenAIRequest;
+
+      const mapped = mapperFn({
+        request: context.processedLog.request.body,
+        response: context.processedLog.response.body,
+        statusCode: response.status || 200,
+        model: context.processedLog.model ?? "",
+      });
+
+      requestText = mapped.preview.request;
+      responseText = mapped.preview.response;
+    } catch (error) {
+      console.error("Error mapping request/response for preview:", error);
+      // Fallback to empty strings if mapping fails
+      requestText = "";
+      responseText = "";
+    }
+
     const requestResponseLog: RequestResponseRMT = {
       user_id: request.userId,
       request_id: request.id,
@@ -470,11 +500,8 @@ export class LoggingHandler extends AbstractLogHandler {
           ([key, value]) => [key, +(value ?? 0)]
         )
       ),
-      request_body:
-        this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
-      response_body:
-        this.extractResponseBodyMessage(context.processedLog.response.body) ??
-        "",
+      request_body: requestText,
+      response_body: responseText,
     };
 
     return requestResponseLog;
