@@ -16,11 +16,14 @@ export default async function handler(
     .select("*")
     .eq("owner", userAndOrg.data?.user.id ?? "");
 
+  const orgFromCookie = supabaseClient.orgFromCookie();
+
   const user = client.auth.getUser();
   return res.status(200).json({
     userAndOrg,
     session: session,
     user: user,
     orgs: orgs,
+    orgFromCookie: orgFromCookie,
   });
 }

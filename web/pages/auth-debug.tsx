@@ -5,11 +5,16 @@ import {
 } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
+import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
+import Cookies from "js-cookie";
+import { useMemo, useEffect } from "react";
 
 export default function AuthDebug() {
   const user = useUser();
   const session = useSession();
   const router = useRouter();
+
+  const orgFromCookie = useMemo(() => Cookies.get(ORG_ID_COOKIE_KEY) ?? "", []);
   const supabase = useSupabaseClient();
   const testQuery = useQuery({
     queryKey: ["test"],
@@ -38,9 +43,37 @@ export default function AuthDebug() {
     copyToClipboard(JSON.stringify(allData, null, 2));
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+            Authentication Required
+          </h1>
+          <p className="text-gray-600">Please sign in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <div className="flex flex-col space-y-2">
+            <div className="text-lg font-semibold text-gray-800">
+              Current User:{" "}
+              <span className="font-normal text-gray-600">{user.email}</span>
+            </div>
+            <div className="text-lg font-semibold text-gray-800">
+              Org from cookie:{" "}
+              <span className="font-normal text-gray-600">
+                {orgFromCookie || "None"}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-between items-center">
           <button
             onClick={copyAll}
