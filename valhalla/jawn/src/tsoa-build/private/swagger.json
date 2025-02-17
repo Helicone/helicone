@@ -1451,6 +1451,9 @@
 					"content": {
 						"type": "string"
 					},
+					"name": {
+						"type": "string"
+					},
 					"role": {
 						"type": "string"
 					},
@@ -9111,6 +9114,42 @@
 		"/v1/organization/create": {
 			"post": {
 				"operationId": "CreateNewOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewOrganizationParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/create/v2": {
+			"post": {
+				"operationId": "CreateNewOrganizationV2",
 				"responses": {
 					"200": {
 						"description": "Ok",

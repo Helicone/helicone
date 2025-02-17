@@ -4,6 +4,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useRouter } from "next/router";
+import OnboardingPage from "./onboarding";
 // import "prismjs/themes/prism.css";
 interface WelcomeProps {
   currentStep: number;
@@ -15,10 +16,13 @@ const Welcome = (props: WelcomeProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (org) {
-      if (org.allOrgs.length > 0) {
-        router.push("/dashboard");
-      }
+    // If org skipped onboarding, can return later to complete it
+    if (org && org.allOrgs.length > 0 && org.currentOrg?.has_onboarded) {
+      console.log("Org has onboarded, redirecting to dashboard");
+      router.push("/dashboard");
+    } else {
+      console.log("Org has not onboarded, redirecting to onboarding");
+      router.push("/onboarding");
     }
   }, [org, router]);
   return <LoadingAnimation title="Just setting up your account..." />;

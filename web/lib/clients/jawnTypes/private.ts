@@ -231,6 +231,9 @@ export interface paths {
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
+  "/v1/organization/create/v2": {
+    post: operations["CreateNewOrganizationV2"];
+  };
   "/v1/organization/{organizationId}/update": {
     post: operations["UpdateOrganization"];
   };
@@ -683,6 +686,7 @@ Json: JsonObject;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
+      name?: string;
       role?: string;
       id?: string;
       /** @enum {string} */
@@ -3443,6 +3447,21 @@ export interface operations {
     };
   };
   CreateNewOrganization: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["NewOrganizationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  CreateNewOrganizationV2: {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NewOrganizationParams"];

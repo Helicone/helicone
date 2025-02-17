@@ -71,6 +71,15 @@ export class OrganizationController extends Controller {
     }
   }
 
+  @Post("/create/v2")
+  public async createNewOrganizationV2(
+    @Body()
+    requestBody: NewOrganizationParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    return ok("test");
+  }
+
   @Post("/{organizationId}/update")
   public async updateOrganization(
     @Body()
