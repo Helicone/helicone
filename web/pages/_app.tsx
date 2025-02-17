@@ -1,4 +1,4 @@
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
@@ -66,7 +66,7 @@ export function SupabaseProvider({
       env("NEXT_PUBLIC_SUPABASE_URL") &&
       env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
     ) {
-      return createBrowserSupabaseClient({
+      return createPagesBrowserClient({
         supabaseUrl: env("NEXT_PUBLIC_SUPABASE_URL"),
         supabaseKey: env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
       });

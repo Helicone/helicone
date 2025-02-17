@@ -13,8 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
+  const user = await new SupabaseServerWrapper({ req, res }).getUser();
   if (!user.data || !user.data.user) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;

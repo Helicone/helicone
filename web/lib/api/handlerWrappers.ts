@@ -143,11 +143,12 @@ export function withAuthSSR<T>(
     const supabaseClient = new SupabaseServerWrapper(context);
     const { data, error } = await supabaseClient.getUserAndOrg();
 
+    console.log("data", data);
+    console.log("error", error);
     if (error !== null || !data.orgId || !data.userId) {
       return {
         redirect: {
-          destination: "/signin?unauthorized=true",
-          permanent: false,
+          destination: "#",
         },
       };
     } else {

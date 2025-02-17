@@ -19,8 +19,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<Anthropic.Messages.Message, string>>
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
+  const user = await new SupabaseServerWrapper({ req, res }).getUser();
   let { messages, requestId, temperature, model, maxTokens, anthropicAPIKey } =
     req.body as {
       messages: ChatParams[];

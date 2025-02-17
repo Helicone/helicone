@@ -6,4 +6,8 @@ export const supabaseUrl =
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY ?? "n/a";
 
 export const getSupabaseServer = () =>
-  createClient<Database>(supabaseUrl, supabaseServiceKey);
+  createClient<Database>(supabaseUrl, supabaseServiceKey, {
+    db: {
+      schema: "public",
+    },
+  });

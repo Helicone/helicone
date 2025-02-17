@@ -1,17 +1,21 @@
 import {
   SupabaseClient,
   User,
-  createServerSupabaseClient,
+  createPagesServerClient,
 } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../supabase/database.types";
 import {
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
+import { Database } from "../../supabase/database.types";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result, ok } from "../result";
+import { Result } from "../result";
+import {
+  getSupabaseServer,
+  supabaseUrl as serverSupabaseUrl,
+} from "../supabaseServer";
+import { dbExecute } from "../api/db/dbExecute";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
@@ -26,7 +30,7 @@ export class SupabaseServerWrapper<T> {
   constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
     const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
     this.ctx = ctx;
-    this.client = createServerSupabaseClient<Database>(ctx, {
+    this.client = createPagesServerClient<Database>(ctx, {
       supabaseUrl,
     });
   }
@@ -35,13 +39,16 @@ export class SupabaseServerWrapper<T> {
     return this.client;
   }
 
+  async getUser() {
+    await this.client.auth.refreshSession();
+    return this.client.auth.getUser();
+  }
+
   async getUserAndOrg(): Promise<
     Result<
       {
         userId: string;
         orgId: string;
-        org?: Database["public"]["Tables"]["organization"]["Row"];
-        orgHasOnboarded: boolean;
         user: User;
         role: string;
       },
@@ -52,71 +59,43 @@ export class SupabaseServerWrapper<T> {
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized User", data: null };
     }
-    const orgAccessCheck = await this.client
-      .from("organization")
-      .select("*")
-      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || "");
 
-    if (orgAccessCheck.data?.length === 0) {
-      // maybe then we should call the create dummy org api
-      return ok({
-        userId: user.data.user.id,
-        orgId: "na",
-        orgHasOnboarded: false,
-        user: user.data.user,
-        role: "owner",
-      });
-    }
-    if (!orgAccessCheck.data || orgAccessCheck.error !== null) {
-      return {
-        error: `Unauthorized orgChecking ${this.ctx.req.cookies[ORG_ID_COOKIE_KEY]}`,
-        data: null,
-      };
-    }
-    const org = orgAccessCheck.data[0];
+    const orgAccessCheck = await dbExecute<{
+      organization: string;
+      org_role: string;
+    }>(
+      `SELECT 
+      organization_member.organization,
+      organization_member.org_role
+      FROM organization left join organization_member on organization.id = organization_member.organization
+      WHERE (organization_member.member = $1 or organization.owner = $1)
+      AND organization.id = $2`,
+      [user.data.user.id, this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || ""]
+    );
 
-    // If owner, return role as owner
-    if (org.owner === user.data.user.id) {
-      return {
-        data: {
-          userId: user.data.user.id,
-          orgId: org.id,
-          org: org,
-          orgHasOnboarded: org.has_onboarded,
-          user: user.data.user,
-          role: "owner",
-        },
-        error: null,
-      };
-    }
-
-    const checkMembership = async (orgId: string) => {
-      const memberCheck = await this.client
-        .from("organization_member")
-        .select("*")
-        .eq("member", user.data.user?.id ?? "")
-        .eq("organization", orgId)
-        .single();
-
-      return memberCheck.data ? memberCheck.data.org_role : null;
-    };
-
-    const role =
-      (await checkMembership(org.id)) ||
-      (org.reseller_id && (await checkMembership(org.reseller_id)));
-
-    if (!role) {
+    console.log(
+      "query",
+      `
+      SELECT 
+      organization_member.organization,
+      organization_member.org_role
+      FROM organization left join organization_member on organization.id = organization_member.organization
+      WHERE (organization_member.member = '${
+        user.data.user.id
+      }' or organization.owner = '${user.data.user.id}')
+      AND organization.id = '${this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || ""}'`
+    );
+    if (!orgAccessCheck.data || orgAccessCheck.data.length === 0) {
+      console.log("Unauthorized", orgAccessCheck);
       return { error: "Unauthorized", data: null };
     }
 
     return {
       data: {
         userId: user.data.user.id,
-        orgId: org.id,
-        orgHasOnboarded: org.has_onboarded,
+        orgId: orgAccessCheck.data[0].organization,
         user: user.data.user,
-        role: role,
-        org: org,
+        role: orgAccessCheck.data[0].org_role,
       },
       error: null,
     };

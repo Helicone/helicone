@@ -15,8 +15,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<ChatCompletion, string>>
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
+  const user = await new SupabaseServerWrapper({ req, res }).getUser();
   let {
     messages,
     requestId,

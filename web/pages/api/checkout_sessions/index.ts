@@ -28,8 +28,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const supabase = new SupabaseServerWrapper({ req, res }).getClient();
-  const email = (await supabase.auth.getUser())?.data.user?.email;
+  const user = await new SupabaseServerWrapper({ req, res }).getUser();
+  const email = user.data.user?.email;
 
   const discountCode = req.query.discountCode as string;
 
