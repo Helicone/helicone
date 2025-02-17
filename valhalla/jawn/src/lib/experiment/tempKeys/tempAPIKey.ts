@@ -10,8 +10,10 @@ const CACHE_TTL = 60 * 1000 * 30; // 30 minutes
 
 const kvCache = new KVCache(CACHE_TTL);
 
+const IS_EU = process.env.AWS_REGION === "eu-west-1";
+
 async function getHeliconeApiKey() {
-  const apiKey = `sk-${generateApiKey({
+  const apiKey = `sk-helicone${IS_EU ? "-eu" : ""}-${generateApiKey({
     method: "base32",
     dashes: true,
   }).toString()}`.toLowerCase();
