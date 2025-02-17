@@ -33,6 +33,7 @@ export default function AuthDebug() {
       user,
       session,
       testQuery: testQuery.data,
+      testQueryBackend: testQueryBackend.data,
     };
     copyToClipboard(JSON.stringify(allData, null, 2));
   };
