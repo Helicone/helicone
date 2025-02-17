@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
+import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,6 +17,11 @@ export default async function handler(
     .select("*")
     .eq("owner", userAndOrg.data?.user.id ?? "");
 
+  const orgsServer = await getSupabaseServer()
+    .from("organization")
+    .select("*")
+    .eq("owner", userAndOrg.data?.user.id ?? "");
+
   const orgFromCookie = supabaseClient.orgFromCookie();
 
   const user = client.auth.getUser();
@@ -25,5 +31,6 @@ export default async function handler(
     user: user,
     orgs: orgs,
     orgFromCookie: orgFromCookie,
+    orgsServer: orgsServer,
   });
 }

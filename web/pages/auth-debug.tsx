@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import Cookies from "js-cookie";
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 
 export default function AuthDebug() {
   const user = useUser();
