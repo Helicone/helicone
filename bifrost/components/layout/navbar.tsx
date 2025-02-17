@@ -9,8 +9,23 @@ import {
   EnvelopeIcon,
   UsersIcon,
   XMarkIcon,
+  ChevronDownIcon,
+  CalculatorIcon,
+  ChartPieIcon,
+  ArrowsPointingOutIcon,
+  SignalIcon,
+  ClockIcon,
+  UserGroupIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { BookIcon, Globe } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -89,39 +104,99 @@ const NavLinks = () => {
       label: "Pricing",
     },
     {
-      href: "/changelog",
-      label: "Changelog",
+      type: "dropdown" as const,
+      label: "Tools",
+      items: [
+        {
+          href: "/open-stats",
+          label: "Open Stats",
+          icon: <Globe className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/comparison",
+          label: "Model Comparison",
+          icon: <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/status",
+          label: "Provider Status",
+          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/llm-cost",
+          label: "LLM API Pricing Calculator",
+          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
+        },
+      ],
     },
     {
-      href: "/community",
-      label: "Community",
+      type: "dropdown" as const,
+      label: "Resources",
+      items: [
+        {
+          href: "/changelog",
+          label: "Changelog",
+          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          icon: <UsersIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/blog",
+          label: "Blog",
+          icon: <BookIcon className="h-4 w-4 text-sky-500" />,
+        },
+      ],
     },
     {
-      href: "/blog",
-      label: "Blog",
-    },
-    {
-      href: "https://us.helicone.ai/open-stats",
-      label: "Stats",
+      href: "https://app.dover.com/jobs/helicone",
+      label: "Careers",
     },
   ];
   return (
     <div className="flex gap-x-2 flex-col lg:flex-row">
-      {links.map((link, i) => (
-        <Link
-          href={link.href}
-          className={
-            "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
-            " " +
-            (path === link.href
-              ? "text-black font-bold"
-              : "text-landing-description opacity-75")
-          }
-          key={`${link}-${i}`}
-        >
-          {link.label}
-        </Link>
-      ))}
+      {links.map((link, i) => {
+        if (link.type === "dropdown") {
+          return (
+            <DropdownMenu key={`${link}-${i}`}>
+              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-landing-description opacity-75">
+                {link.label}
+                <ChevronDownIcon className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {link.items?.map((item, j) => (
+                  <DropdownMenuItem key={j} asChild>
+                    <Link
+                      href={item.href}
+                      className="w-full cursor-pointer flex items-center gap-2 text-slate-700 font-base"
+                    >
+                      {item.icon}
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }
+        return (
+          <Link
+            href={link.href}
+            className={
+              "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
+              " " +
+              (path === link.href
+                ? "text-slate-700 font-medium"
+                : "text-landing-description opacity-75")
+            }
+            key={`${link}-${i}`}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
     </div>
   );
 };
@@ -175,6 +250,77 @@ const MobileNav = () => {
   useEffect(() => {
     setMenuOpen(false);
   }, [path]);
+
+  const mobileLinks: Array<{
+    href?: string;
+    label: string;
+    icon?: React.ReactNode;
+    type?: "section";
+    items?: Array<{
+      href: string;
+      label: string;
+      icon: React.ReactNode;
+    }>;
+  }> = [
+    {
+      href: "https://docs.helicone.ai/",
+      label: "Docs",
+      icon: <BookOpenIcon className="h-5 w-5 text-sky-500" />,
+    },
+    {
+      href: "/pricing",
+      label: "Pricing",
+      icon: <ChartBarIcon className="h-5 w-5 text-sky-500" />,
+    },
+    {
+      type: "section",
+      label: "Tools",
+      items: [
+        {
+          href: "/open-stats",
+          label: "Open Stats",
+          icon: <ChartPieIcon className="h-5 w-5 text-sky-500" />,
+        },
+        {
+          href: "/comparison",
+          label: "Model Comparison",
+          icon: <ArrowsPointingOutIcon className="h-5 w-5 text-sky-500" />,
+        },
+        {
+          href: "/status",
+          label: "Provider Status",
+          icon: <SignalIcon className="h-5 w-5 text-sky-500" />,
+        },
+        {
+          href: "/llm-cost",
+          label: "LLM API Pricing Calculator",
+          icon: <CalculatorIcon className="h-5 w-5 text-sky-500" />,
+        },
+      ],
+    },
+    {
+      type: "section",
+      label: "Resources",
+      items: [
+        {
+          href: "/changelog",
+          label: "Changelog",
+          icon: <ClockIcon className="h-5 w-5 text-sky-500" />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          icon: <UserGroupIcon className="h-5 w-5 text-sky-500" />,
+        },
+        {
+          href: "/blog",
+          label: "Blog",
+          icon: <NewspaperIcon className="h-5 w-5 text-sky-500" />,
+        },
+      ],
+    },
+  ];
+
   return (
     <nav className="lg:hidden" aria-label="Global">
       <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-10" />
@@ -195,7 +341,42 @@ const MobileNav = () => {
               Sign up for free
             </Link>
           </div>
-          <NavLinks />
+          <div className="flex flex-col gap-3">
+            {mobileLinks.map((link, i) => {
+              if (link.type === "section") {
+                return (
+                  <div key={i} className="flex flex-col gap-2">
+                    <p className="text-landing-description opacity-75 font-medium">
+                      {link.label}
+                    </p>
+                    <div className="flex flex-col gap-2 pl-4">
+                      {link.items?.map((item, j) => (
+                        <Link
+                          key={j}
+                          href={item.href}
+                          className="text-slate-700 font-medium hover:text-black flex items-center gap-2"
+                        >
+                          {item.icon}
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              if (!link.href) return null;
+              return (
+                <Link
+                  key={i}
+                  href={link.href}
+                  className="text-slate-700 font-medium hover:text-black flex items-center gap-2"
+                >
+                  {link.icon}
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
           <NavIcons />
         </div>
       )}
