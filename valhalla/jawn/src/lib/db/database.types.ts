@@ -2460,6 +2460,8 @@ export type Database = {
           request: string
           status: number | null
           time_to_first_token: number | null
+          prompt_cache_write_tokens: number | null
+          prompt_cache_read_tokens: number | null
         }
         Insert: {
           body: Json
@@ -2474,6 +2476,8 @@ export type Database = {
           request: string
           status?: number | null
           time_to_first_token?: number | null
+          prompt_cache_write_tokens?: number | null
+          prompt_cache_read_tokens?: number | null
         }
         Update: {
           body?: Json
@@ -2488,6 +2492,8 @@ export type Database = {
           request?: string
           status?: number | null
           time_to_first_token?: number | null
+          prompt_cache_write_tokens?: number | null
+          prompt_cache_read_tokens?: number | null
         }
         Relationships: []
       }
