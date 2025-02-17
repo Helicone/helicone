@@ -1,7 +1,6 @@
 import { LlmSchema, Message } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { MapperFn } from "../types";
-import crypto from "crypto";
 
 const randomId = () => {
   return (
@@ -44,11 +43,35 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
-    // Handle old format
+    // Handle old format with choices
+    if (responseBody?.choices && Array.isArray(responseBody.choices)) {
+      const choice = responseBody.choices[0];
+      if (typeof choice?.message?.content === "string") {
+        try {
+          // Try to parse stringified JSON content
+          const parsedContent = JSON.parse(choice.message.content);
+          if (Array.isArray(parsedContent)) {
+            const textContent = parsedContent.find(
+              (item: any) => item.type === "text"
+            );
+            if (textContent) {
+              return (textContent.text || "").replace(/undefined/g, "").trim();
+            }
+          }
+          return JSON.stringify(parsedContent);
+        } catch (e) {
+          // If parsing fails, return the content as is
+          return choice.message.content;
+        }
+      }
+    }
+
+    // Handle old format with content array
     if (Array.isArray(responseBody?.content)) {
       const toolUse = responseBody.content.find(
         (item: any) => item.type === "tool_use"
@@ -61,7 +84,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         (item: any) => item.type === "text"
       );
       if (textContent) {
-        return textContent.text || "";
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -208,7 +232,9 @@ const anthropicContentToMessage = (
   if (content.type === "text") {
     return {
       id: content.id || randomId(),
-      content: content.text || JSON.stringify(content, null, 2),
+      content: (content.text || JSON.stringify(content, null, 2))
+        .replace(/undefined/g, "")
+        .trim(),
       _type: "message",
       role,
     };
@@ -260,27 +286,104 @@ const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
   } else {
     const messages: Message[] = [];
 
-    // Handle new Claude 3 format
-    if (response?.type === "message" && response?.content) {
+    // Handle new Claude 3 format and message_stop type
+    if (
+      (response?.type === "message" || response?.type === "message_stop") &&
+      response?.content
+    ) {
       if (Array.isArray(response.content)) {
         for (const content of response.content) {
-          messages.push(anthropicContentToMessage(content, response.role));
+          const message = anthropicContentToMessage(content, response.role);
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       } else {
-        messages.push(
-          anthropicContentToMessage(response.content, response.role)
+        const message = anthropicContentToMessage(
+          response.content,
+          response.role
         );
+        // Clean up any undefined strings in the content
+        if (typeof message.content === "string") {
+          message.content = message.content.replace(/undefined/g, "").trim();
+        }
+        messages.push(message);
       }
     }
     // Handle old format with choices
     else if (response?.choices && Array.isArray(response?.choices)) {
       for (const choice of response?.choices) {
-        if (Array.isArray(choice.content)) {
-          for (const content of choice.content) {
-            messages.push(anthropicContentToMessage(content, choice.role));
+        if (Array.isArray(choice.message?.content)) {
+          for (const content of choice.message.content) {
+            const message = anthropicContentToMessage(
+              content,
+              choice.message.role
+            );
+            // Clean up any undefined strings in the content
+            if (typeof message.content === "string") {
+              message.content = message.content
+                .replace(/undefined/g, "")
+                .trim();
+            }
+            messages.push(message);
           }
-        } else {
-          messages.push(anthropicContentToMessage(choice.content, choice.role));
+        } else if (typeof choice.message?.content === "string") {
+          try {
+            // Try to parse the content as JSON if it's a string
+            const parsedContent = JSON.parse(choice.message.content);
+            if (Array.isArray(parsedContent)) {
+              for (const content of parsedContent) {
+                const message = anthropicContentToMessage(
+                  content,
+                  choice.message.role
+                );
+                // Clean up any undefined strings in the content
+                if (typeof message.content === "string") {
+                  message.content = message.content
+                    .replace(/undefined/g, "")
+                    .trim();
+                }
+                messages.push(message);
+              }
+            } else {
+              const message = anthropicContentToMessage(
+                parsedContent,
+                choice.message.role
+              );
+              // Clean up any undefined strings in the content
+              if (typeof message.content === "string") {
+                message.content = message.content
+                  .replace(/undefined/g, "")
+                  .trim();
+              }
+              messages.push(message);
+            }
+          } catch (e) {
+            // If parsing fails, treat it as regular text content
+            const message = anthropicContentToMessage(
+              { type: "text", text: choice.message.content },
+              choice.message.role
+            );
+            // Clean up any undefined strings in the content
+            if (typeof message.content === "string") {
+              message.content = message.content
+                .replace(/undefined/g, "")
+                .trim();
+            }
+            messages.push(message);
+          }
+        } else if (choice.message?.content) {
+          const message = anthropicContentToMessage(
+            choice.message.content,
+            choice.message.role
+          );
+          // Clean up any undefined strings in the content
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
         }
       }
     }

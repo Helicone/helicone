@@ -56,8 +56,6 @@ export type Log = {
 
 export type Usage = {
   promptTokens?: number;
-  promptCacheWriteTokens?: number;
-  promptCacheReadTokens?: number;
   completionTokens?: number;
   totalTokens?: number;
   heliconeCalculated?: boolean;

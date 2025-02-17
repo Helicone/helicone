@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 
 const ADDON_FEATURES = ["evals", "experiments", "prompts"] as const;
-const NON_FREE_FEATURES = ["sessions"] as const;
+const NON_FREE_FEATURES = ["sessions", "properties", "users"] as const;
 
 export const useHasAccess = (
   feature: (typeof ADDON_FEATURES)[number] | (typeof NON_FREE_FEATURES)[number]
@@ -31,7 +31,11 @@ export const useHasAccess = (
       return true;
     }
 
-    if (tier === "pro-20240913" || tier === "pro-20250202") {
+    if (
+      tier === "pro-20240913" ||
+      tier === "pro-20250202" ||
+      tier === "team-20250130"
+    ) {
       // Grandfather in evals and experiments only for old pro tier if they have prompts access
       if (
         tier === "pro-20240913" &&

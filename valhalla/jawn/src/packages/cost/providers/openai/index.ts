@@ -521,6 +521,28 @@ const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "o1-2024-12-17",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "o1",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.00006,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "o3-mini",
     },
     cost: {

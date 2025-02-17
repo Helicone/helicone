@@ -1,5 +1,4 @@
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import {
   ClipboardIcon,
   EyeIcon,
@@ -262,23 +261,24 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     return null;
   }
 
-  if (
-    org?.currentOrg?.tier !== "enterprise" &&
-    org?.currentOrg?.tier !== "pro-20240913" &&
-    org?.currentOrg?.tier !== "pro-20250202" &&
-    org?.currentOrg?.tier !== "demo"
-  ) {
+  const isWebhooksEnabled = () => {
     return (
-      <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
-        <InfoBox variant="warning" className="mb-4 max-w-xl">
-          Webhooks are currently in beta. And are only available for Pro plans.
-          If you have any issues, please contact us at support@helicone.ai.
-        </InfoBox>
+      org?.currentOrg?.tier === "enterprise" ||
+      org?.currentOrg?.tier === "pro-20240913" ||
+      org?.currentOrg?.tier === "pro-20250202" ||
+      org?.currentOrg?.tier === "demo" ||
+      org?.currentOrg?.tier === "team-20250130"
+    );
+  };
+
+  if (!isWebhooksEnabled()) {
+    return (
+      <div className="flex justify-center items-center bg-white">
         <FeatureUpgradeCard
-          title="Unlock Webhooks"
-          description="The Free plan does not include the BETA webhooks feature, but getting access is easy."
-          infoBoxText="Add webhooks to easily subscribe to API requests that come into Helicone."
-          documentationLink="https://docs.helicone.ai/features/sessions"
+          title="Webhooks"
+          headerTagline="Subscribe to API requests with webhooks"
+          icon={<PiWebhooksLogo className="h-4 w-4 text-sky-500" />}
+          highlightedFeature="webhooks"
         />
       </div>
     );

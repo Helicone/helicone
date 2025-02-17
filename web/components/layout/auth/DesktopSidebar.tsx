@@ -6,7 +6,6 @@ import {
   ChevronRightIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useEffect, useRef, useState } from "react";
 import { useOrg } from "../org/organizationContext";
@@ -18,11 +17,13 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
 import OnboardingNavItems from "./OnboardingNavItems";
 import useOnboardingContext from "../onboardingContext";
-import EndOnboardingConfirmation from "@/components/templates/onboarding/EndOnboardingConfirmation";
 import { Dialog } from "@/components/ui/dialog";
 import { DialogContent } from "@/components/ui/dialog";
 import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useOnboardingStore } from "@/store/onboardingStore";
+import { Rocket } from "lucide-react";
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
 export interface NavigationItem {
   name: string;
@@ -183,9 +184,8 @@ const DesktopSidebar = ({
   };
 
   const { isOnboardingVisible } = useOnboardingContext();
-  const [showEndOnboardingConfirmation, setShowEndOnboardingConfirmation] =
-    useState(false);
-  const [showCreateOrg, setShowCreateOrg] = useState(false);
+
+  const { showCreateOrg, setShowCreateOrg } = useOnboardingStore();
 
   return (
     <>
@@ -312,43 +312,65 @@ const DesktopSidebar = ({
                           deep={0}
                         />
                       ))}
+
+                    {org?.currentOrg?.tier === "demo" && (
+                      <Button
+                        onClick={() => {
+                          setShowCreateOrg(true);
+                        }}
+                        className={cn(
+                          "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          isCollapsed
+                            ? "h-8 w-8 px-2"
+                            : "h-[46px] w-full px-6 md:px-4"
+                        )}
+                        variant="action"
+                      >
+                        {!isCollapsed && <span>Ready to integrate</span>}
+                        <Rocket
+                          className={isCollapsed ? "h-4 w-4" : "h-6 w-6"}
+                        />
+                      </Button>
+                    )}
                   </nav>
                 </div>
               </div>
 
-              {org?.currentOrg?.tier === "demo" &&
-                org.allOrgs.filter(
-                  (org) => org.tier !== "demo" && org.owner === user?.id
-                ).length === 0 && (
-                  <Button
-                    variant="secondary"
-                    size={"lg"}
-                    className="w-full px-2"
-                    onClick={() => {
-                      setShowEndOnboardingConfirmation(true);
-                    }}
-                  >
-                    Ready to Integrate 🚀
-                  </Button>
-                )}
-
               {/* InfoBox */}
               {canShowInfoBox &&
-                !isCollapsed &&
-                org?.currentOrg?.tier !== "demo" && (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
-                    <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
-                      ⚡ Experiments is here: a new way to perfect your prompt.{" "}
-                      <Link
-                        href="https://docs.helicone.ai/features/experiments"
-                        target="_blank"
-                        className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                org?.currentOrg?.tier === "free" &&
+                (isCollapsed ? (
+                  <div className="px-2 py-2">
+                    <ProFeatureWrapper featureName="pro" enabled={false}>
+                      <Button
+                        variant="action"
+                        size="icon"
+                        className="w-full h-8 bg-sky-500 hover:bg-sky-600 text-white"
                       >
-                        Check out the docs.
-                      </Link>{" "}
-                    </h1>
+                        <Rocket className="h-4 w-4" />
+                      </Button>
+                    </ProFeatureWrapper>
                   </div>
-                )}
+                ) : (
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                        Unlock more features with{" "}
+                        <span className="font-bold text-sky-500">Pro</span>. No
+                        usage limits, sessions, user analytics, custom
+                        properties and much more.
+                      </h1>
+                      <ProFeatureWrapper featureName="pro" enabled={false}>
+                        <Button
+                          variant="action"
+                          className="w-full text-xs h-8 bg-sky-500 hover:bg-sky-600 text-white"
+                        >
+                          Start Pro Free Trial
+                        </Button>
+                      </ProFeatureWrapper>
+                    </div>
+                  </div>
+                ))}
             </div>
 
             {/* Sticky help dropdown */}
@@ -367,14 +389,6 @@ const DesktopSidebar = ({
         open={modalOpen}
         setOpen={handleModalOpen}
         changelog={changelogToView}
-      />
-      <EndOnboardingConfirmation
-        open={showEndOnboardingConfirmation}
-        setOpen={setShowEndOnboardingConfirmation}
-        onEnd={() => {
-          setShowEndOnboardingConfirmation(false);
-          setShowCreateOrg(true);
-        }}
       />
       <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
         <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">

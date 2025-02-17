@@ -303,8 +303,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const requestWithoutStream = requests.find((r) => {
     return (
-      r.schema.request.stream &&
-      !r.raw.request?.stream_options?.include_usage &&
+      r.raw?.request?.stream &&
+      !r.raw?.request?.stream_options?.include_usage &&
       r.heliconeMetadata.provider === "OPENAI"
     );
   });
@@ -857,7 +857,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               </ThemedTable>
             </div>
 
-            <div className="bg-white dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+            <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
               <TableFooter
                 currentPage={page}
                 pageSize={pageSize}

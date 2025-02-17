@@ -206,8 +206,6 @@ export class ScoreStore extends BaseStore {
             status: row.status,
             completion_tokens: row.completion_tokens,
             prompt_tokens: row.prompt_tokens,
-            prompt_cache_write_tokens: row.prompt_cache_write_tokens,
-            prompt_cache_read_tokens: row.prompt_cache_read_tokens,
             model:
               row.model && row.model !== ""
                 ? row.model

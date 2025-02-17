@@ -2,8 +2,9 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useHasAccess } from "@/hooks/useHasAccess";
 
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
@@ -19,9 +20,9 @@ import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
-import AuthHeader from "../../shared/authHeader";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
+import { ListTree } from "lucide-react";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -123,77 +124,69 @@ const SessionsPage = (props: SessionsPageProps) => {
       onValueChange={(value) => setCurrentTab(value)}
       className="w-full"
     >
-      <AuthHeader
-        isWithinIsland={true}
-        title={<div className="flex items-center gap-2 ml-8">Sessions</div>}
-        actions={
-          <TabsList className="grid w-full grid-cols-2 mr-8">
-            {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        }
-      />
-
       <div>
         {allNames.isLoading ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <LoadingAnimation />
           </div>
         ) : hasAccessToSessions ? (
-          <Row className="border-t border-slate-200 dark:border-slate-800">
-            <SessionNameSelection
-              sessionNameSearch={sessionNameSearch}
-              selectedName={selectedName}
-              setSessionNameSearch={setSessionNameSearch}
-              setSelectedName={setSelectedName}
-              sessionNames={names.sessions}
-            />
-            <SessionDetails
-              currentTab={currentTab}
-              selectedSession={
-                names.sessions.find(
-                  (session) => session.name === selectedName
-                ) ?? null
-              }
-              sessionIdSearch={sessionIdSearch ?? ""}
-              setSessionIdSearch={setSessionIdSearch}
-              sessions={sessions}
-              isLoading={isLoading}
-              sort={sort}
-              timeFilter={timeFilter}
-              setTimeFilter={setTimeFilter}
-              setInterval={() => {}}
-              advancedFilters={advancedFilters}
-              onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
-            />
-          </Row>
+          hasSomeSessions ? (
+            <Row className="border-t border-slate-200 dark:border-slate-800">
+              <SessionNameSelection
+                sessionNameSearch={sessionNameSearch}
+                selectedName={selectedName}
+                setSessionNameSearch={setSessionNameSearch}
+                setSelectedName={setSelectedName}
+                sessionNames={names.sessions}
+              />
+              <SessionDetails
+                currentTab={currentTab}
+                selectedSession={
+                  names.sessions.find(
+                    (session) => session.name === selectedName
+                  ) ?? null
+                }
+                sessionIdSearch={sessionIdSearch ?? ""}
+                setSessionIdSearch={setSessionIdSearch}
+                sessions={sessions}
+                isLoading={isLoading}
+                sort={sort}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                setInterval={() => {}}
+                advancedFilters={advancedFilters}
+                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+              />
+            </Row>
+          ) : (
+            <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+              <EmptyStateCard feature="sessions" />
+            </div>
+          )
         ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
             <FeatureUpgradeCard
-              title="Unlock Sessions"
-              description="The Free plan does not include the Sessions feature, but getting access is easy."
-              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers."
-              videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
-              documentationLink="https://docs.helicone.ai/features/sessions"
-              tier={org?.currentOrg?.tier ?? "free"}
+              title="Sessions"
+              featureImage={{
+                type: "image",
+                content: "/static/featureUpgrade/sessions-graphic.webp",
+              }}
+              headerTagline="Group, analyze and fix AI workflows"
+              icon={<ListTree className="w-4 h-4 text-sky-500" />}
+              highlightedFeature="sessions"
             />
           </div>
         ) : (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <FeatureUpgradeCard
-              title="Get Started with Sessions"
-              description="You have access to Sessions, but haven't created any yet. It's easy to get started!"
-              infoBoxText="Group and visualize multi-step LLM interactions by adding 2 simple headers to your requests."
-              videoSrc="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/sessions.mp4"
-              documentationLink="https://docs.helicone.ai/features/sessions"
-              tier={org?.currentOrg?.tier ?? "free"}
+              title="Sessions"
+              featureImage={{
+                type: "image",
+                content: "/static/featureUpgrade/sessions-graphic.webp",
+              }}
+              headerTagline="Group, analyze and fix AI workflows"
+              icon={<ListTree className="w-4 h-4 text-sky-500" />}
+              highlightedFeature="sessions"
             />
           </div>
         )}

@@ -205,7 +205,7 @@ export const LastMileDevConfigForm: React.FC<{
           rel="noopener noreferrer"
           className="text-blue-500 hover:text-blue-600"
         >
-          Last Mile AI Documentation
+          Lastmile AI Documentation
         </a>
       </div>
       <Label>Evaluator Name</Label>

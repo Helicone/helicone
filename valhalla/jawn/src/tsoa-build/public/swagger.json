@@ -2600,7 +2600,8 @@
 					"DEEPSEEK",
 					"X",
 					"AVIAN",
-					"NEBIUS"
+					"NEBIUS",
+					"NOVITA"
 				]
 			},
 			"Provider": {
@@ -2650,16 +2651,8 @@
 					"image_url": {
 						"type": "string"
 					},
-					"_type": {
-						"type": "string",
-						"enum": [
-							"function",
-							"functionCall",
-							"image",
-							"message",
-							"autoInput",
-							"contentArray"
-						]
+					"timestamp": {
+						"type": "string"
 					},
 					"tool_call_id": {
 						"type": "string"
@@ -2673,11 +2666,25 @@
 					"content": {
 						"type": "string"
 					},
+					"name": {
+						"type": "string"
+					},
 					"role": {
 						"type": "string"
 					},
 					"id": {
 						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"function",
+							"functionCall",
+							"image",
+							"message",
+							"autoInput",
+							"contentArray"
+						]
 					}
 				},
 				"required": [
@@ -2896,16 +2903,6 @@
 						"format": "double",
 						"nullable": true
 					},
-					"prompt_cache_write_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"prompt_cache_read_tokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
 					"completion_tokens": {
 						"type": "number",
 						"format": "double",
@@ -3006,8 +3003,6 @@
 					"time_to_first_token",
 					"total_tokens",
 					"prompt_tokens",
-					"prompt_cache_write_tokens",
-					"prompt_cache_read_tokens",
 					"completion_tokens",
 					"prompt_id",
 					"llmSchema",
@@ -4669,6 +4664,10 @@
 							}
 						},
 						"type": "object"
+					},
+					"seats": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"type": "object",
@@ -5470,6 +5469,44 @@
 				],
 				"type": "object"
 			},
+			"ResultSuccess__unsafe-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"unsafe": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"unsafe"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__unsafe-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__unsafe-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"IntegrationCreateParams": {
 				"properties": {
 					"integration_name": {
@@ -6145,14 +6182,6 @@
 						"type": "number",
 						"format": "double"
 					},
-					"promptCacheWriteTokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"promptCacheReadTokens": {
-						"type": "number",
-						"format": "double"
-					},
 					"delayMs": {
 						"type": "number",
 						"format": "double"
@@ -6166,8 +6195,6 @@
 					"createdAt",
 					"completionTokens",
 					"promptTokens",
-					"promptCacheWriteTokens",
-					"promptCacheReadTokens",
 					"delayMs",
 					"model"
 				],
@@ -8241,6 +8268,51 @@
 				}
 			}
 		},
+		"/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+			"post": {
+				"operationId": "CreateSubversionFromUi",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptVersionResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PromptCreateSubversionParams"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt/version/{promptVersionId}/subversion": {
 			"post": {
 				"operationId": "CreateSubversion",
@@ -9460,6 +9532,118 @@
 				}
 			}
 		},
+		"/v2/experiment/{experimentId}/add-manual-rows-batch": {
+			"post": {
+				"operationId": "AddManualRowsToExperimentBatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputs": {
+										"items": {
+											"$ref": "#/components/schemas/Record_string.string_"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v2/experiment/{experimentId}/rows": {
+			"delete": {
+				"operationId": "DeleteExperimentTableRows",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputRecordIds": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputRecordIds"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v2/experiment/{experimentId}/row/insert/batch": {
 			"post": {
 				"operationId": "CreateExperimentTableRowBatch",
@@ -9531,6 +9715,49 @@
 						}
 					}
 				}
+			}
+		},
+		"/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
+			"post": {
+				"operationId": "CreateExperimentTableRowFromDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v2/experiment/{experimentId}/row/update": {
@@ -12044,6 +12271,50 @@
 									"$ref": "#/components/schemas/ModelsToCompare"
 								},
 								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/security": {
+			"post": {
+				"operationId": "GetSecurity",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__unsafe-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Security"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"text": {
+										"type": "string"
+									},
+									"advanced": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"text",
+									"advanced"
+								],
+								"type": "object"
 							}
 						}
 					}

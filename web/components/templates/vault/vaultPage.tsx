@@ -107,7 +107,8 @@ const VaultPage = ({
   if (
     org?.currentOrg?.tier !== "enterprise" &&
     org?.currentOrg?.tier !== "pro-20240913" &&
-    org?.currentOrg?.tier !== "pro-20250202"
+    org?.currentOrg?.tier !== "pro-20250202" &&
+    org?.currentOrg?.tier !== "team-20250130"
   ) {
     return (
       <div className="flex flex-col space-y-8 items-center min-h-[calc(100vh-200px)]">
@@ -117,9 +118,12 @@ const VaultPage = ({
         </InfoBox>
         <FeatureUpgradeCard
           title="Unlock Vault"
-          description="The Free plan does not include the Vault feature, but getting access is easy."
-          infoBoxText="Use Vault to securely store and manage your API keys within Helicone."
-          documentationLink="https://docs.helicone.ai/features/vault"
+          headerTagline="The Free plan does not include the Vault feature, but getting access is easy."
+          featureName="Vault"
+          icon={
+            <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
+          }
+          highlightedFeature="vault"
         />
       </div>
     );

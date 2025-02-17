@@ -6,19 +6,20 @@ import { mapOpenAIEmbedding } from "../mappers/openai/embedding";
 import { mapOpenAIInstructRequest } from "../mappers/openai/instruct";
 import {
   HeliconeRequest,
-  Message,
   MappedLLMRequest,
   MapperType,
+  Message,
 } from "../types";
 
 import { modelCost } from "../../cost/costCalc";
 import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
 import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
-import { MapperFn } from "../mappers/types";
-import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
-import { mapVectorDB } from "../mappers/vector-db";
+import { mapRealtimeRequest } from "../mappers/openai/realtime";
 import { mapTool } from "../mappers/tool";
+import { MapperFn } from "../mappers/types";
+import { mapVectorDB } from "../mappers/vector-db";
+import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 
 const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
@@ -30,6 +31,7 @@ const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-moderation": mapOpenAIModeration,
   "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
+  "openai-realtime": mapRealtimeRequest,
   "vector-db": mapVectorDB,
   tool: mapTool,
   unknown: mapOpenAIRequest,
@@ -60,16 +62,11 @@ const metaDataFromHeliconeRequest = (
     requestId: heliconeRequest.request_id,
     countryCode: heliconeRequest.country_code,
     cost: modelCost({
-      provider: heliconeRequest.provider,
       model: model,
-
-      sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
-      prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
-      prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
-
       sum_completion_tokens: heliconeRequest.completion_tokens || 0,
-
+      sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
       sum_tokens: heliconeRequest.total_tokens || 0,
+      provider: heliconeRequest.provider,
     }),
     createdAt: heliconeRequest.request_created_at,
     path: heliconeRequest.request_path,
@@ -148,19 +145,49 @@ const getUnsanitizedMappedContent = ({
 const sanitizeMappedContent = (
   mappedContent: MappedLLMRequest
 ): MappedLLMRequest => {
-  const sanitizeMessage = (message: Message): Message => ({
-    ...message,
-    content:
-      typeof message.content === "string"
-        ? message.content
-        : JSON.stringify(message.content),
-  });
+  const sanitizeMessage = (message: Message): Message => {
+    if (!message) {
+      return {
+        role: "unknown",
+        content: "",
+        _type: "message",
+      };
+    }
+    return {
+      ...message,
+      content: message.content
+        ? typeof message.content === "string"
+          ? message.content
+          : JSON.stringify(message.content)
+        : "",
+    };
+  };
 
   const sanitizeMessages = (
     messages: Message[] | undefined | null
   ): Message[] | undefined | null => {
     return messages?.map(sanitizeMessage);
   };
+
+  if (mappedContent.schema.response?.error?.heliconeMessage) {
+    try {
+      if (
+        typeof mappedContent.schema.response.error.heliconeMessage === "string"
+      ) {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          JSON.parse(mappedContent.schema.response.error.heliconeMessage),
+          null,
+          2
+        );
+      } else {
+        mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
+          mappedContent.schema.response.error.heliconeMessage,
+          null,
+          2
+        );
+      }
+    } catch (e) {}
+  }
 
   return {
     _type: mappedContent._type,

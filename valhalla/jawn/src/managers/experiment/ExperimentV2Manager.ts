@@ -420,6 +420,35 @@ export class ExperimentV2Manager extends BaseManager {
     }
   }
 
+  async addManualRowsToExperimentBatch(
+    experimentId: string,
+    inputs: Record<string, string>[]
+  ): Promise<Result<null, string>> {
+    try {
+      const experiment = await this.getExperimentById(experimentId);
+      if (!experiment) {
+        return err("Experiment not found");
+      }
+
+      const inputManager = new InputsManager(this.authParams);
+
+      await Promise.all(
+        inputs.map(async (input) => {
+          await inputManager.createInputRecord(
+            experiment.copied_original_prompt_version ?? "",
+            input,
+            undefined,
+            experimentId
+          );
+        })
+      );
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to create experiment table row batch");
+    }
+  }
+
   async createExperimentTableRowBatch(
     experimentId: string,
     rows: {
@@ -436,6 +465,44 @@ export class ExperimentV2Manager extends BaseManager {
             row.inputRecordId,
             row.inputs,
             row.autoInputs
+          );
+        })
+      );
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to create experiment table row with cells batch");
+    }
+  }
+
+  async createExperimentTableRowBatchFromDataset(
+    experimentId: string,
+    datasetId: string
+  ): Promise<Result<null, string>> {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    const inputManager = new InputsManager(this.authParams);
+    const inputRecords =
+      await inputManager.getInputsFromPromptVersionAndDataset(
+        experiment.original_prompt_version ?? "",
+        datasetId
+      );
+
+    if (!inputRecords.data) {
+      return err("No input records found");
+    }
+
+    try {
+      await Promise.all(
+        (inputRecords.data ?? []).map(async (row) => {
+          await this.createExperimentTableRow(
+            experimentId,
+            row.id,
+            row.inputs,
+            row.auto_prompt_inputs
           );
         })
       );
@@ -495,6 +562,36 @@ export class ExperimentV2Manager extends BaseManager {
       return ok(null);
     } catch (e) {
       return err("Failed to create experiment table row");
+    }
+  }
+
+  async deleteExperimentTableRows(
+    experimentId: string,
+    inputRecordIds: string[]
+  ): Promise<Result<null, string>> {
+    const experiment = await this.getExperimentById(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    if (inputRecordIds.length === 0) {
+      return err("No input record ids provided");
+    }
+
+    try {
+      const result = await supabaseServer.client
+        .from("prompt_input_record")
+        .update({ experiment_id: null })
+        .in("id", inputRecordIds)
+        .eq("experiment_id", experimentId);
+
+      if (result.error) {
+        return err("Failed to delete experiment table rows");
+      }
+
+      return ok(null);
+    } catch (e) {
+      return err("Failed to delete experiment table rows");
     }
   }
 

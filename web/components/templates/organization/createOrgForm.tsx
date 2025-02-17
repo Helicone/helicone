@@ -13,6 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -98,11 +99,14 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
         ) : (
           <>
             <DialogHeader className="space-y-2">
-              <DialogTitle>What&apos;s your organization name?</DialogTitle>
+              <DialogTitle>Let&apos;s get you integrated</DialogTitle>
+              <DialogDescription>
+                What&apos;s your organization name?
+              </DialogDescription>
             </DialogHeader>
           </>
         )}
-        <div className="flex flex-col w-full space-y-6 mt-8">
+        <div className="flex flex-col w-full space-y-6 mt-6">
           <div className="space-y-1.5 text-sm">
             <Input
               type="text"

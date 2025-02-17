@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/dialog";
 import PromptsPreview from "../featurePreview/promptsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
+import { SquareArrowOutUpRight } from "lucide-react";
+import Link from "next/link";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -250,7 +252,51 @@ const chatCompletion = await openai.chat.completions.create(
               </div>
             )}
 
-            {filteredPrompts && (hasAccess || hasLimitedAccess) ? (
+            {hasAccess && (prompts?.length ?? 0) === 0 ? (
+              <div className="flex items-center justify-center w-full h-full absolute top-0 left-0">
+                <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <h3 className="text-2xl font-semibold">
+                      No prompts created yet
+                    </h3>
+
+                    <p className="text-gray-500 text-md">
+                      Get started by creating your first prompt. You can design,
+                      test, and version control your AI prompts all in one
+                      place.
+                    </p>
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="action"
+                      className="gap-2"
+                      onClick={handleCreatePrompt}
+                      disabled={isCreatingPrompt}
+                    >
+                      {isCreatingPrompt ? (
+                        <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
+                      ) : (
+                        <PiPlusBold className="h-4 w-4 mr-2" />
+                      )}
+                      {isCreatingPrompt ? "Creating..." : "Create First Prompt"}
+                    </Button>
+
+                    <Link
+                      href="https://docs.helicone.ai/features/prompts"
+                      target="_blank"
+                    >
+                      <Button
+                        variant="outline"
+                        className="gap-2 text-slate-700"
+                      >
+                        View Docs
+                        <SquareArrowOutUpRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : filteredPrompts && (hasAccess || hasLimitedAccess) ? (
               searchParams.get("view") === "card" ? (
                 <ul
                   className={cn(
