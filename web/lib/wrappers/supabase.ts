@@ -35,6 +35,10 @@ export class SupabaseServerWrapper<T> {
     return this.client;
   }
 
+  orgFromCookie() {
+    return this.ctx.req.cookies[ORG_ID_COOKIE_KEY];
+  }
+
   async getUserAndOrg(): Promise<
     Result<
       {

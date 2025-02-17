@@ -28,7 +28,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import { ListIcon, PlayIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import {
+  ListIcon,
+  PlayIcon,
+  PlusIcon,
+  Trash2Icon,
+  UploadIcon,
+} from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -48,7 +54,6 @@ import EditInputsPanel from "./EditInputsPanel";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -68,6 +73,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import ImportCSVDialog from "./ImportCSVDialog";
 
 type TableDataType = {
   index: number;
@@ -122,9 +128,7 @@ export function ExperimentTable({
     setExternallySelectedForkFromPromptVersionId,
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
-
-  const org = useOrg();
-  const orgId = org?.currentOrg?.id ?? "";
+  const [showImportCsvModal, setShowImportCsvModal] = useState(false);
 
   const [rowSelection, setRowSelection] = useState({});
 
@@ -517,6 +521,18 @@ export function ExperimentTable({
         <div className="flex items-center gap-5">
           {!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) ? (
             <>
+              <div className="flex gap-2 items-center">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setShowImportCsvModal(true);
+                  }}
+                >
+                  <UploadIcon className="w-3.5 h-3.5 mr-2" />
+                  Import from CSV
+                </Button>
+              </div>
               <div className="flex gap-2 items-center relative">
                 <Switch
                   size="sm"
@@ -858,6 +874,11 @@ export function ExperimentTable({
           numberOfExistingPromptVersions={
             promptVersionsData?.length ? promptVersionsData.length - 1 : 0
           }
+        />
+        <ImportCSVDialog
+          open={showImportCsvModal}
+          onOpenChange={setShowImportCsvModal}
+          experimentId={experimentTableId}
         />
       </div>
     </>

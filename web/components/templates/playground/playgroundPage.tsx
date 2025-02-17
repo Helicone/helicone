@@ -1,45 +1,51 @@
-import { useEffect, useState, useMemo, Dispatch, SetStateAction } from "react";
-import { usePlaygroundPage } from "../../../services/hooks/playground";
-import { clsx } from "../../shared/clsx";
-import ChatPlayground from "./chatPlayground";
-import { useDebounce } from "../../../services/hooks/debounce";
-import AuthHeader from "../../shared/authHeader";
-import RequestDrawerV2 from "../requests/requestDrawerV2";
-import useNotification from "../../shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   CodeBracketSquareIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
-import { Input } from "@/components/ui/input";
-import ThemedModal from "../../shared/themed/themedModal";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useDebounce } from "../../../services/hooks/debounce";
+import { usePlaygroundPage } from "../../../services/hooks/playground";
+import AuthHeader from "../../shared/authHeader";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedModal from "../../shared/themed/themedModal";
+import RequestDrawerV2 from "../requests/requestDrawerV2";
+import ChatPlayground from "./chatPlayground";
 
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { ChatCompletionTool } from "openai/resources";
 import {
   playgroundModels as PLAYGROUND_MODELS,
   playgroundModels,
 } from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
-import { ChatCompletionTool } from "openai/resources";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import { Slider } from "@/components/ui/slider";
 import {
   requestOptionsFromOpenAI,
   usePlaygroundRuntime,
 } from "@assistant-ui/react-playground";
+import { useQuery } from "@tanstack/react-query";
+import { TestTubeDiagonal } from "lucide-react";
 import "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/themes/prism.css";
-import React from "react";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useQuery } from "@tanstack/react-query";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import { Slider } from "@/components/ui/slider";
 import { PlaygroundModel } from "./types";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { TestTubeDiagonal } from "lucide-react";
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { request } = props;
@@ -48,7 +54,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
-  const debouncedRequestId = useDebounce(requestId, 500);
+  const debouncedRequestId: string | undefined = useDebounce(requestId, 500);
 
   const { data, isLoading, chat, hasData, isChat, tools } = usePlaygroundPage(
     debouncedRequestId || ""
@@ -63,7 +69,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     return PLAYGROUND_MODELS.filter((model) => model.provider !== "AZURE")
       .concat(fineTuneModels.data || [])
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [fineTuneModels]);
+  }, [fineTuneModels.data]);
 
   const singleRequest = data.length > 0 ? data[0] : null;
   const singleModel = useMemo(
@@ -89,53 +95,89 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [org?.currentOrg?.tier]);
 
   useEffect(() => {
-    if (selectedModels.find((model) => model.name === singleModel?.name)) {
-      return;
+    if (
+      singleModel &&
+      !selectedModels.some((model) => model.name === singleModel.name)
+    ) {
+      setSelectedModels((prev) => [...prev, singleModel]);
     }
-    if (singleModel) {
-      setSelectedModels((prev) => [
-        ...prev,
-        {
-          ...singleModel,
-        },
-      ]);
-    }
-  }, [selectedModels, singleModel]);
+  }, [singleModel]);
 
   const { setNotification } = useNotification();
 
   useEffect(() => {
-    if (tools !== undefined) {
-      setCurrentTools(tools);
-    } else {
-      setCurrentTools([]);
-    }
-  }, [tools, requestId]);
+    const newTools = tools ?? [];
+    setCurrentTools((prevTools) => {
+      if (
+        prevTools !== undefined &&
+        JSON.stringify(prevTools) === JSON.stringify(newTools)
+      ) {
+        return prevTools;
+      }
+      return newTools;
+    });
+  }, [tools]);
 
   const [newPlaygroundOpen, setNewPlaygroundOpen] = useLocalStorage<boolean>(
     "newPlaygroundOpen",
     false
   );
-  const runtime = usePlaygroundRuntime({
-    api: "/api/aui", // TODO update this
-    initialMessages: requestOptionsFromOpenAI({
-      model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
-      messages: chat as any,
-      tools: currentTools,
-    }).messages,
-  });
 
-  useEffect(() => {
-    if (chat.length) {
-      runtime.thread.setRequestData({
-        modelName: selectedModels?.[0]?.name || "gpt-3.5-turbo",
-        messages: requestOptionsFromOpenAI({
+  const transformedMessages: any[] = useMemo(() => {
+    if (!chat.length) return [];
+
+    return selectedModels?.[0]?.provider === "OPENAI"
+      ? requestOptionsFromOpenAI({
           model: selectedModels?.[0]?.name || "gpt-3.5-turbo",
           messages: chat as any,
-        }).messages,
-      });
+          tools: currentTools,
+        }).messages
+      : chat.map((msg) => ({
+          role: msg.role as "user" | "assistant" | "system",
+          content:
+            typeof msg.content === "string"
+              ? [{ type: "text" as const, text: msg.content }]
+              : msg.content,
+        }));
+  }, [chat, selectedModels, currentTools]);
+
+  const modelName: string = useMemo(
+    () => selectedModels?.[0]?.name || "gpt-3.5-turbo",
+    [selectedModels]
+  );
+
+  const runtime = usePlaygroundRuntime({
+    api: "/api/aui",
+    initialMessages: [] as any,
+  });
+
+  // Keep a stable reference to runtime
+  const runtimeRef = useRef(runtime);
+  useEffect(() => {
+    runtimeRef.current = runtime;
+  }, [runtime]);
+
+  // Before the useEffect for runtime, add a ref to hold previous messages
+  const prevTransformedMessagesRef = useRef<any[]>([]);
+
+  useEffect(() => {
+    if (!debouncedRequestId || !transformedMessages.length) return;
+    // For non-OPENAI providers (like Anthropics), skip updating the runtime to prevent rerenders
+    if (selectedModels?.[0]?.provider !== "OPENAI") return;
+
+    if (
+      JSON.stringify(prevTransformedMessagesRef.current) !==
+      JSON.stringify(transformedMessages)
+    ) {
+      prevTransformedMessagesRef.current = transformedMessages;
+      runtimeRef.current.thread.setRequestData({
+        modelName,
+        messages: transformedMessages,
+      } as any);
     }
-  }, [chat]);
+  }, [debouncedRequestId, transformedMessages, modelName, selectedModels]);
+
+  console.log("rerender");
 
   return !hasAccess ? (
     <div className="flex justify-center items-center bg-white">
