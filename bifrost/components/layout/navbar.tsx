@@ -105,6 +105,27 @@ const NavLinks = () => {
     },
     {
       type: "dropdown" as const,
+      label: "Resources",
+      items: [
+        {
+          href: "/changelog",
+          label: "Changelog",
+          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/blog",
+          label: "Blog",
+          icon: <BookIcon className="h-4 w-4 text-sky-500" />,
+        },
+      ],
+    },
+    {
+      type: "dropdown" as const,
       label: "Tools",
       items: [
         {
@@ -130,27 +151,6 @@ const NavLinks = () => {
       ],
     },
     {
-      type: "dropdown" as const,
-      label: "Resources",
-      items: [
-        {
-          href: "/changelog",
-          label: "Changelog",
-          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/community",
-          label: "Community",
-          icon: <UsersIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/blog",
-          label: "Blog",
-          icon: <BookIcon className="h-4 w-4 text-sky-500" />,
-        },
-      ],
-    },
-    {
       href: "https://app.dover.com/jobs/helicone",
       label: "Careers",
     },
@@ -170,7 +170,12 @@ const NavLinks = () => {
                   <DropdownMenuItem key={j} asChild>
                     <Link
                       href={item.href}
-                      className="w-full cursor-pointer flex items-center gap-2 text-slate-700 font-base"
+                      className={
+                        "w-full cursor-pointer flex items-center gap-2 " +
+                        (path === item.href
+                          ? "text-slate-700 font-medium"
+                          : "text-landing-description opacity-75")
+                      }
                     >
                       {item.icon}
                       {item.label}
@@ -354,7 +359,12 @@ const MobileNav = () => {
                         <Link
                           key={j}
                           href={item.href}
-                          className="text-slate-700 font-medium hover:text-black flex items-center gap-2"
+                          className={
+                            "flex items-center gap-2 " +
+                            (path === item.href
+                              ? "text-slate-700 font-medium"
+                              : "text-landing-description opacity-75")
+                          }
                         >
                           {item.icon}
                           {item.label}
