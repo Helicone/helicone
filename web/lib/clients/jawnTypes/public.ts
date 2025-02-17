@@ -1202,6 +1202,10 @@ Json: JsonObject;
       /** Format: double */
       prompt_tokens: number | null;
       /** Format: double */
+      prompt_cache_write_tokens: number | null;
+      /** Format: double */
+      prompt_cache_read_tokens: number | null;
+      /** Format: double */
       completion_tokens: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
@@ -2050,6 +2054,10 @@ Json: JsonObject;
       completionTokens: number;
       /** Format: double */
       promptTokens: number;
+      /** Format: double */
+      promptCacheWriteTokens: number;
+      /** Format: double */
+      promptCacheReadTokens: number;
       /** Format: double */
       delayMs: number;
       model: string;

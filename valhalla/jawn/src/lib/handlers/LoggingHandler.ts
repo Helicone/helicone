@@ -443,6 +443,8 @@ export class LoggingHandler extends AbstractLogHandler {
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -494,6 +496,8 @@ export class LoggingHandler extends AbstractLogHandler {
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
       prompt_tokens: context.usage.promptTokens,
+      prompt_cache_write_tokens: context.usage.promptCacheWriteTokens,
+      prompt_cache_read_tokens: context.usage.promptCacheReadTokens,
       time_to_first_token: response.timeToFirstToken,
       delay_ms: response.delayMs,
       created_at: response.responseCreatedAt.toISOString(),

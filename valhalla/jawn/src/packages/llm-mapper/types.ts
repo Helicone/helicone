@@ -148,6 +148,8 @@ export interface HeliconeRequest {
   time_to_first_token: number | null;
   total_tokens: number | null;
   prompt_tokens: number | null;
+  prompt_cache_write_tokens: number | null;
+  prompt_cache_read_tokens: number | null;
   completion_tokens: number | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;

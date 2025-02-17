@@ -363,7 +363,7 @@ WHEN (request_response_rmt.model ILIKE 'claude-3-sonnet-20240229') THEN 3000 * r
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20240620') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-haiku-20240307') THEN 250 * request_response_rmt.prompt_tokens + 1250 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'claude-3-5-haiku-20241022') THEN 1000 * request_response_rmt.prompt_tokens + 5000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'claude-3-5-haiku-20241022') THEN 800 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )
