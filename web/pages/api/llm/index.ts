@@ -1,7 +1,7 @@
+import { GenerateParams } from "@/lib/api/llm/generate";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { GenerateParams } from "@/lib/api/llm/generate";
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1/",
@@ -24,6 +24,7 @@ export default async function handler(
       {
         provider: {
           sort: "throughput",
+          order: ["Fireworks"],
         },
         model: params.model,
         messages: params.messages,
