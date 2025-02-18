@@ -1,0 +1,168 @@
+Grok 3 just dropped and it's making big claims about being the "Smartest AI in the world". 
+
+Built on massive computational resources and designed for real-time knowledge, it’s xAI’s strongest competitor yet.
+
+With significant improvements over Grok 2, this model promises better coding skills, reasoning, and even **scientific problem-solving**. 
+
+But how well does it actually perform? Let’s break it down.
+
+## What’s New in Grok 3?
+
+Grok 3 is a massive leap forward from its predecessor. Here’s what has changed:
+
+- **10-15x Compute Power**: Compared to Grok 2, the new model operates with significantly more processing capacity.
+- **100K+ Nvidia H100 GPUs**: Trained on xAI’s Memphis supercomputer, one of the largest AI clusters in the world—built in 122 days.
+- **Advanced Reasoning**: Runs multiple thought chains, self-corrects, and evaluates solutions before finalizing an answer.
+- **Deep Search**: A "next generation search engine" that allows Grok 3 to not just search and retrieve real-time information across multiple sources, but think about what it finds and what to look for. Users can view its thought process in detail in real-time. Not to be confused with <a href="https://www.helicone.ai/blog/openai-deep-research" target="_blank" rel="noopener">**Deep Research**</a>
+- **Big Brain mode**: A specialized mode where Grok 3 leverages additional compute resources to enhance its reasoning capabilities. This allows it to leverage more computing resources to perform complex multi-step problems.
+- **Real-Time Knowledge**: Integrated with X, giving it access to up-to-the-minute information.
+- **Better at Coding, Math, and Science**: Grok 3 excels in technical domains, making it a serious competitor in AI-driven research and programming tasks.
+
+<BottomLine
+  title="ℹ️ Fun Fact"
+  description="Grok 3 remains largely uncensored and interestingly uses Wikipedia as a source quite a lot despite Elon Musk’s public criticism of the platform."
+/>
+
+## So How Smart is Grok 3? Benchmarks and Real-World Performance 
+
+### Benchmarks 
+
+On paper, Grok 3 outperforms its rivals in various technical domains. Let’s look at some numbers:
+
+#### Official Benchmarks: Grok 3 vs ChatGPT vs Gemini vs Claude
+
+According to benchmark results shown in xAI's release demo, Grok 3 scores higher than **Gemini-2 Pro**, **DeepSeek V3**, **GPT-4o**, and **Claude 3.5 Sonnet** in math (AIME), science (GPQA), and coding tasks (LiveCodeBench).
+
+![Grok 3 Release Demo Benchmarks](/static/blog/grok-3/Grok-3-benchmarks.webp)
+
+_Image source: <a href="https://www.outlookbusiness.com/start-up/news/elon-musk-unveils-grok-3-how-it-performs-against-openais-gpt-4o-deepseek" target="_blank" rel="noopener">Elon Musk Unveils Grok 3: How It Performs Against OpenAI’s GPT-4o & DeepSeek</a>_
+
+<BottomLine
+  title="ℹ️ Fun Fact"
+  description="Grok 3 is said to have successfully solved fresh, unseen problems in the 2025 AIME math competition."
+/>
+
+#### LMArena Benchmarks
+
+Perhaps more notably, in blind user-voted evaluations on LMArena—a crowdsourced LLM benchmarking platform—Grok 3 has set a **new milestone**. 
+
+An early version of Grok 3 (codenamed “Chocolate”) has officially taken the #1 spot, outperforming models like GPT-4o, Claude 3.5 Sonnet, and Gemini 1.5 Pro.
+
+**Breaking Records**
+
+Impressively, Grok 3 simultaneously became the first-ever model to break the **1400 ELO** score barrier on LMArena—outperforming all other models across **all** categories, including:
+
+- Overall 
+- Hard Prompts (Prompts that utilize a pre-designed template to elicit model outputs)
+- Coding
+- Math
+- Creative Writing
+- Instruction Following
+- Longer Query Handling
+- Multi-Turn Conversations
+
+<BottomLine
+  title="💡 About LMArena"
+  description="Unlike traditional AI benchmarks that rely on static test sets, LMArena uses live human feedback in a blind A/B test format, making it one of the most reliable indicators of real-world AI performance."
+/>
+
+### Grok 3 in the Wild: Real-World Reviews
+
+Early real-world tests show **mixed but promising** results. While Grok 3’s reasoning is top-tier, its performance in some areas still lags behind OpenAI’s best models.
+
+#### Strengths
+
+✅ **Advanced Reasoning** 
+
+Andrej Karpathy—who got early access—<a href="https://x.com/karpathy/status/1891720635363254772" target="_blank" rel="noopener">noted on X</a> that Grok 3’s “Thinking” mode solves complex problems better than many competitors. It successfully solved a tricky **Settlers of Catan** programming task that stumped most other models.
+
+✅ **Logic** 
+
+The model performed well on structured logic problems, solving multiple tic-tac-toe challenges with proper chains of thought.
+
+✅ **Deep Search** 
+
+Its **Deep Search** tool was praised for finding high-quality information on recent events, such as Apple launch rumors and stock surges, similar in depth and quality to Perplexity's Deep Research but not at the level of OpenAI's.
+
+#### Weaknesses
+
+❌ **Coding Performance**
+
+An early user on X found Grok 3 <a href="https://x.com/theo/status/1891736803796832298" target="_blank" rel="noopener">**struggled**</a> with somewhat complex coding, at least compared to GPT-4o and Claude which coded up better solutions as shown below. 
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="static/blog/grok-3/theo-gg-coding-test.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+❌ **Math & Symbolic Logic** 
+
+While strong in structured problem-solving, it failed Andrej Karpathy’s **Unicode emoji mystery challenge**, whereas DeepSeek's R1 performed better.
+
+<BottomLine
+  title="Karpathy's Unicode Emoji Mystery Challenge"
+  description="It did not solve my 'Emoji mystery question where I give a smiling face with an attached message hidden inside Unicode variation selectors, even when I give a strong hint on how to decode it in the form of Rust code. The most progress I've seen is from DeepSeek-R1 which once partially decoded the message."
+/>
+
+❌ **Humor & Creativity** 
+
+The model lacks any advanced abilities for humor. When asked for jokes, it repeatedly gave variations of the same puns, similar to older LLMs. Given that
+
+❌ **Fact-checking Issues** 
+
+Grok 3 was caught **hallucinating citations** and even inventing fake URLs, similar to problems seen in other LLMs.
+
+Overall, Grok 3 so far has been impressive but not perfect—and seemingly not the "Smartest AI in the world" as Musk claims as it still lags behind other LLMs in some areas.
+
+## How to Use Grok 3
+
+Grok 3 is currently available through multiple channels:
+
+- **X Premium Plus Subscription**: Access it directly via X—update the app if unavailable.
+- **Standalone Grok App**: Available on <a href="https://apps.apple.com/us/app/grok/id6670324846" target="_blank" rel="noopener">iOS</a> and <a href="https://play.google.com/store/apps/details?id=ai.x.grok&hl=en" target="_blank" rel="noopener">Android</a>.
+- **Web Access**: The most up-to-date experience is on [grok.com](https://grok.com).
+
+## What’s Next for xAI and Grok?
+
+xAI has big plans beyond Grok 3. Here’s what’s coming next:
+
+- **API Access**: Developers will soon be able to integrate Grok into their own applications.
+- **Super Grok Subscription**: A premium tier offering early access to cutting-edge features.
+- **Voice Mode**: A fully interactive AI voice assistant, expected within a week.
+- **Memory Features**: Persistent memory to recall past conversations for personalized interactions.
+- **Bigger AI Cluster**: xAI is already working on a 5x more powerful training setup.
+- **Scientific Breakthroughs?**: Elon Musk predicts AI will win (or at least help to) a Nobel, Turing, or Fields Medal within the next 1-2 years.
+
+## Final Thoughts: Is Grok 3 the undisputed King?
+
+Grok 3 is xAI’s most serious attempt at competing with OpenAI, Google, and others. It’s a leap forward in AI capability, with superior reasoning and a massive compute infrastructure behind it.
+
+However, despite the improvements, Grok 3 is not yet the undisputed best. It still lags behind OpenAI’s best models in benchmarks, and its real-world performance is mixed.
+
+Here's what the benchmark from earlier looks like with OpenAI o3 added:
+
+![Grok 3 Benchmarks with OpenAI o3](/static/blog/grok-3/grok-3-with-o3.jpeg)
+
+_Image Source: <a href="https://x.com/search?q=they%20omitted%20o3%20so%20i%20added%20it%20back&src=typed_query&f=top" target="_blank" rel="noopener">Rex on X</a>_
+
+That said, xAI’s rapid progress with Grok has been nothing short of remarkable and it will be interesting to see how it evolves in the coming months.
+
+## FAQs
+
+### **What is Deep Search, and how does it work?**
+Deep Search is Grok 3’s research-style retrieval system. Instead of just pulling up search results, it actively reads, synthesizes, and cross-verifies information before responding.
+
+### **Is Grok 3 free?**
+No. You need an X Premium Plus subscription or a Grok app subscription to access it.
+
+### **When will the Grok API be available?**
+xAI plans to release it within the next few weeks.
+
+### **Does Grok 3 have memory?**
+Not yet, but memory features are planned for future updates.
+
+### **Will xAI open-source Grok 3?**
+No confirmation yet, but Grok 1 is open-source so it's a possibility.
