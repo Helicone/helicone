@@ -66,6 +66,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/add-manual-row": {
     post: operations["AddManualRowToExperiment"];
   };
+  "/v2/experiment/{experimentId}/add-manual-rows-batch": {
+    post: operations["AddManualRowsToExperimentBatch"];
+  };
   "/v2/experiment/{experimentId}/rows": {
     delete: operations["DeleteExperimentTableRows"];
   };
@@ -755,6 +758,10 @@ Json: JsonObject;
       total_tokens: number | null;
       /** Format: double */
       prompt_tokens: number | null;
+      /** Format: double */
+      prompt_cache_write_tokens: number | null;
+      /** Format: double */
+      prompt_cache_read_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
       prompt_id: string | null;
@@ -2473,6 +2480,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  AddManualRowsToExperimentBatch: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          inputs: components["schemas"]["Record_string.string_"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

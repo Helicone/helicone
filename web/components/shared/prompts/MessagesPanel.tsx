@@ -1,4 +1,4 @@
-import { Variable } from "@/types/prompt-state";
+import { StateVariable } from "@/types/prompt-state";
 import {
   PiDiceOneBold,
   PiDiceTwoBold,
@@ -20,8 +20,8 @@ interface PromptPanelsProps {
   onAddMessagePair: () => void;
   onAddPrefill: () => void;
   onRemoveMessage: (index: number) => void;
-  onVariableCreate: (variable: Variable) => void;
-  variables: Variable[];
+  onVariableCreate: (variable: StateVariable) => void;
+  variables: StateVariable[];
   isPrefillSupported: boolean;
 }
 

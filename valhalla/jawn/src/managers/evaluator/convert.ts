@@ -28,6 +28,8 @@ export const convertTestInputToHeliconeRequest = (
     total_tokens: null,
     prompt_tokens: null,
     completion_tokens: null,
+    prompt_cache_write_tokens: null,
+    prompt_cache_read_tokens: null,
     prompt_id: null,
     llmSchema: null,
     country_code: null,

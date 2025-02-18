@@ -108,10 +108,20 @@ export class LogManager {
               messageCount: batchContext.messageCount,
             },
           });
-          console.error(
-            `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
-          );
 
+          if (
+            result.error ===
+            "Authentication failed: Authentication failed: No API key found"
+          ) {
+            console.log(
+              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${batchContext.batchId}`
+            );
+            return;
+          } else {
+            console.error(
+              `Reproducing error for request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
+            );
+          }
           const kafkaProducer = new KafkaProducer();
           const res = await kafkaProducer.sendMessages(
             [logMessage],

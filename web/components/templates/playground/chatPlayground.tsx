@@ -74,7 +74,21 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
   const generatePayload = (history: ExtendedMessage[]) => {
     const cleanMessages = history.filter((message) => !message.model);
-
+    const containsO1orO3 = models.some(
+      (model) => model.name.includes("o1") || model.name.includes("o3")
+    );
+    if (containsO1orO3) {
+      return JSON.stringify(
+        {
+          messages: cleanMessages,
+          temperature,
+          model: models[0]?.name,
+          tools,
+        },
+        null,
+        2
+      );
+    }
     return JSON.stringify(
       {
         messages: cleanMessages,
@@ -119,6 +133,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
 
         if (model.provider === "OPENAI") {
           // Perform the OpenAI request
+
           const { data, error } = await fetchOpenAI({
             messages:
               historyWithoutId as unknown as ChatCompletionCreateParams[],

@@ -31,18 +31,20 @@ export const useHasAccess = (
       return true;
     }
 
+    // Grandfather in evals and experiments only for old pro tier if they have prompts access
+    if (
+      tier === "pro-20240913" &&
+      (feature === "evals" || feature === "experiments") &&
+      stripeMetadata?.addons?.["prompts"]
+    ) {
+      return true;
+    }
+
     if (
       tier === "pro-20240913" ||
       tier === "pro-20250202" ||
       tier === "team-20250130"
     ) {
-      // Grandfather in evals and experiments only for old pro tier if they have prompts access
-      if (
-        tier === "pro-20240913" &&
-        (feature === "evals" || feature === "experiments")
-      ) {
-        return stripeMetadata?.addons?.["prompts"] ?? false;
-      }
       return (
         stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
         false

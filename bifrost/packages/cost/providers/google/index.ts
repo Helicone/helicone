@@ -68,6 +68,16 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
+      operator: "includes",
+      value: "gemini-2.0-flash",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+    },
+  },
+  {
+    model: {
       operator: "equals",
       value: "claude-3-5-sonnet-v2@20241022",
     },
