@@ -1,0 +1,61 @@
+Helicone is an open-source platform that helps teams build better LLM applications through a complete development lifecycle of logging, evaluation, experimentation, and release. And we are excited to announce some major additions to the Helicone platform!
+
+![Introducing Helicone V2](/static/blog/introducing-helicone-v2/introducing-helicone-v2.webp)
+
+When we first launched 22 months ago, we focused on providing visibility into LLM applications. With just a single line of code, teams could trace requests and responses, track token usage, and debug production issues.
+
+That simple integration has since processed **<span style={{color: '#0ea5e9'}}>over 2.1 billion requests and 2.6 trillion tokens</span>**, working with teams ranging from startups to Fortune 500 companies. Check out our <a href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">open stats</a> for our public LLM usage statistics containing 16+ TB of anonymized data if you are curious.
+
+## What's New in Helicone V3?
+
+As we scaled and our customers matured, it became clear that logging alone wasn’t enough to manage production-grade applications.
+
+Teams like Cursor and V0 have shown what peak AI application performance looks like and it's our goal to help teams achieve that quality. From speaking with users, we realized our platform was missing the necessary tools to create an **<span style={{color: '#0ea5e9'}}>iterative improvement loop</span>** - prompt management, evaluations, and experimentation.
+
+**Helicone V1: Log → Review → Release (Hope it works)**
+
+From talking with our users, we noticed a pattern: while many successfully launch their MVP quickly, the teams that achieve peak performance take a systematic approach to improvement. They identify inconsistent behaviors through evaluation, experiment methodically with prompts, and measure the impact of each change.
+
+This observation shaped our new workflow:
+
+**Helicone V2: Log → Evaluate → Experiment → Review → Release**
+
+It begins with comprehensive logging, capturing the entire context of an LLM application. Not just prompts and responses, but variables, chain steps, embeddings, tool calls, and vector DB interactions, in our <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> feature.
+
+Yet even with detailed traces, probabilistic systems are notoriously hard to debug at scale. So, we released **Evaluators** (either via LLM-as-judge or custom Python evaluators leveraging the <a href="https://codesandbox.io/docs/sdk/sandboxes" target="_blank" rel="noopener">CodeSandbox SDK</a>).
+
+From there, our users were able to more easily monitor performance and investigate what went wrong. Did the embedding search return poor results? Did a tool call fail? Did the prompt mishandle an edge case?
+
+But teams would still edit prompts in a playground, run a few test cases, and deploy based on intuition. This lacked the systematic testing we’re used to in traditional software development. That’s why we built <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments</a> (similar to Anthropic's workbench but model-agnostic).
+
+For instance, when a prompt generates occasional rude support responses, you can test prompt variations against historical conversations. Each variant runs through your production evaluators, measuring real improvement before deployment.
+
+**Once deployed, the cycle begins again.**
+
+## How our infrastructure handled our growth
+
+Our initial architecture struggled - synchronous log processing overwhelmed our database and query times went from milliseconds to minutes.
+
+We've completely rebuilt our infrastructure with two key changes:
+
+1. using Kafka to decouple log ingestion from processing, and
+2. splitting storage by access pattern across S3, Kafka, and ClickHouse.
+
+This was a long journey but resulted in zero data loss and fast query times even at billions of records. You can read about that here: <a href="https://upstash.com/blog/implementing-upstash-kafka-with-cloudflare-workers" target="_blank" rel="noopener">Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers</a>
+
+## We'd love to hear from you!
+
+We'd love your feedback and questions - join us on <a href="https://discord.gg/2TkeWdXNPQ" target="_blank" rel="noopener">Discord</a> or send us an email at <a href="mailto:support@helicone.ai" target="_blank" rel="noopener">support@helicone.ai</a>. If you're interested in contributing to what we build next, check out our <a href="https://github.com/helicone" target="_blank" rel="noopener">GitHub</a>.
+
+We recognize that Helicone can’t solve all of the problems you might face when building an LLM application, but we hope that we can help you bring a better product to your customers through our new workflow.
+
+<CallToAction
+  title="Try Helicone V2 and tell us what you think!"
+  description="You can try our new features with a free demo by signing up or self-deploying with our new fully open-source helm chart."
+  primaryButtonText="Try Free Demo"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Self Host with Helm Chart"
+  secondaryButtonLink="https://helicone.ai/selfhost"
+/>
+
+<Questions />
