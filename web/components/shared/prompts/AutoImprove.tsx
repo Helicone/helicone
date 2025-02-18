@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/types/prompt-state";
-import ReactMarkdown from "react-markdown";
-import { PiBrainBold } from "react-icons/pi";
-import * as hamster from "@/public/lottie/Aniki Hamster.json";
 import { parseImprovedMessages } from "@/utils/messages";
+import { PiBrainBold } from "react-icons/pi";
+import ReactMarkdown from "react-markdown";
 
 interface Improvement {
   content: string;
@@ -69,34 +68,30 @@ export default function AutoImprove({
             improvement?.content ? "h-64" : "max-h-[42rem]"
           }`}
         >
-          <div className="w-full h-full overflow-y-scroll">
+          <div className="w-full h-full overflow-y-auto text-center">
             {improvement?.reasoning !== "" ? (
               <ReactMarkdown className="prose prose-sm dark:prose-invert text-secondary">
                 {improvement?.reasoning || ""}
               </ReactMarkdown>
             ) : (
               <p className="text-sm text-secondary">
-                Connecting you with one of our expert hamsters...
+                Connecting you with our systems...
               </p>
             )}
           </div>
-          {isImproving ? (
-            <LoadingAnimation animation={hamster} />
-          ) : (
-            <div className="w-full"></div>
-          )}
+          {isImproving ? <LoadingAnimation /> : <div className="w-full"></div>}
         </div>
       </div>
 
       {/* Difference View */}
       {improvement?.content && (
-        <div className="flex divide-x divide-slate-200 dark:divide-slate-800">
+        <div className="h-full flex divide-x divide-slate-200 dark:divide-slate-800">
           {/* Current Version */}
           <div className="flex flex-col gap-4 w-full max-w-[50%] pr-2">
             <h3 className="font-semibold text-red-500">
               V{version} <span className="">(Current)</span>
             </h3>
-            <div className="flex flex-col gap-2">
+            <div className="h-96 flex flex-col gap-2 overflow-y-auto">
               {messages.map((msg, index) => (
                 <MiniMessage
                   key={index}
@@ -112,7 +107,7 @@ export default function AutoImprove({
             <h3 className="font-semibold text-green-500">
               V{version + 1} <span className="">(Suggested)</span>
             </h3>
-            <div className="flex flex-col gap-2">
+            <div className="h-96 flex flex-col gap-2 overflow-y-auto">
               {parseImprovedMessages(improvement.content).map((msg, index) => (
                 <MiniMessage
                   key={index}
