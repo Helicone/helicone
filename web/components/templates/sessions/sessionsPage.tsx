@@ -4,7 +4,7 @@ import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
@@ -23,6 +23,7 @@ import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { ListTree } from "lucide-react";
+import AuthHeader from "@/components/shared/authHeader";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -131,33 +132,55 @@ const SessionsPage = (props: SessionsPageProps) => {
           </div>
         ) : hasAccessToSessions ? (
           hasSomeSessions ? (
-            <Row className="border-t border-slate-200 dark:border-slate-800">
-              <SessionNameSelection
-                sessionNameSearch={sessionNameSearch}
-                selectedName={selectedName}
-                setSessionNameSearch={setSessionNameSearch}
-                setSelectedName={setSelectedName}
-                sessionNames={names.sessions}
-              />
-              <SessionDetails
-                currentTab={currentTab}
-                selectedSession={
-                  names.sessions.find(
-                    (session) => session.name === selectedName
-                  ) ?? null
+            <>
+              <AuthHeader
+                isWithinIsland={true}
+                title={
+                  <div className="flex items-center gap-2 ml-8">Sessions</div>
                 }
-                sessionIdSearch={sessionIdSearch ?? ""}
-                setSessionIdSearch={setSessionIdSearch}
-                sessions={sessions}
-                isLoading={isLoading}
-                sort={sort}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                setInterval={() => {}}
-                advancedFilters={advancedFilters}
-                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+                actions={
+                  <TabsList className="grid w-full grid-cols-2 mr-8">
+                    {TABS.map((tab) => (
+                      <TabsTrigger
+                        key={tab.id}
+                        value={tab.id}
+                        className="flex items-center gap-2"
+                      >
+                        {tab.icon}
+                        {tab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                }
               />
-            </Row>
+              <Row className="border-t border-slate-200 dark:border-slate-800">
+                <SessionNameSelection
+                  sessionNameSearch={sessionNameSearch}
+                  selectedName={selectedName}
+                  setSessionNameSearch={setSessionNameSearch}
+                  setSelectedName={setSelectedName}
+                  sessionNames={names.sessions}
+                />
+                <SessionDetails
+                  currentTab={currentTab}
+                  selectedSession={
+                    names.sessions.find(
+                      (session) => session.name === selectedName
+                    ) ?? null
+                  }
+                  sessionIdSearch={sessionIdSearch ?? ""}
+                  setSessionIdSearch={setSessionIdSearch}
+                  sessions={sessions}
+                  isLoading={isLoading}
+                  sort={sort}
+                  timeFilter={timeFilter}
+                  setTimeFilter={setTimeFilter}
+                  setInterval={() => {}}
+                  advancedFilters={advancedFilters}
+                  onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+                />
+              </Row>
+            </>
           ) : (
             <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
               <EmptyStateCard feature="sessions" />

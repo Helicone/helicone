@@ -1451,6 +1451,9 @@
 					"content": {
 						"type": "string"
 					},
+					"name": {
+						"type": "string"
+					},
 					"role": {
 						"type": "string"
 					},
@@ -1685,6 +1688,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"prompt_cache_write_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_cache_read_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"completion_tokens": {
 						"type": "number",
 						"format": "double",
@@ -1785,6 +1798,8 @@
 					"time_to_first_token",
 					"total_tokens",
 					"prompt_tokens",
+					"prompt_cache_write_tokens",
+					"prompt_cache_read_tokens",
 					"completion_tokens",
 					"prompt_id",
 					"llmSchema",
@@ -6595,6 +6610,62 @@
 								"properties": {
 									"inputs": {
 										"$ref": "#/components/schemas/Record_string.string_"
+									}
+								},
+								"required": [
+									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v2/experiment/{experimentId}/add-manual-rows-batch": {
+			"post": {
+				"operationId": "AddManualRowsToExperimentBatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputs": {
+										"items": {
+											"$ref": "#/components/schemas/Record_string.string_"
+										},
+										"type": "array"
 									}
 								},
 								"required": [

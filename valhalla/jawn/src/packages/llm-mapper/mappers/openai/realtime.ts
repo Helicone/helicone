@@ -79,6 +79,7 @@ type RealtimeMessage = {
     | "response.function_call_arguments.done"
     | "rate_limits.updated";
 
+  // With "response.create"
   response?: {
     object: string; // "ex: "realtime.response"
     modalities?: string[]; // ex: ["text", "audio"]
@@ -101,13 +102,16 @@ type RealtimeMessage = {
       output?: any;
     }[];
   };
-  session?: {}; // With session.created, session.update, session.updated
+  // With "session.created", "session.update", "session.updated"
+  session?: {};
+  // With "conversation.item.create"
   item?: {
-    // With converstaion.item.create
     type: string; // "function_call_output"
     call_id: string; // ex: "call_123"
     output: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
   };
+  // With "conversation.item.input_audio_transcription.completed"
+  transcript?: string; // ex: "Hello, how are you?"
 };
 const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   if (!messages?.length) return [];
@@ -132,11 +136,11 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
 
         case "conversation.item.input_audio_transcription.completed":
           // -> User: Audio
-          return msg.content?.response?.output?.[0]?.content?.[0]?.transcript
+          return msg.content?.transcript
             ? {
                 role: "user",
                 _type: "audio",
-                content: msg.content.response.output[0].content[0].transcript,
+                content: msg.content.transcript,
                 timestamp: msg.timestamp,
               }
             : null;
