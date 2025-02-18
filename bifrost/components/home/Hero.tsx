@@ -31,7 +31,10 @@ const Hero = () => {
         Ship your AI app with <span className="text-brand">confidence</span>
       </h1>
       <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
-        The all-in-one platform to monitor, debug and improve <br />
+        The all-in-one platform to monitor, debug and improve{" "}
+        <span className="hidden sm:inline">
+          <br />
+        </span>
         production-ready LLM applications.
       </p>
       <Link href="https://us.helicone.ai/signup">
