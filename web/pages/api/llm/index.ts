@@ -22,6 +22,9 @@ export default async function handler(
 
     const response = await openai.chat.completions.create(
       {
+        provider: {
+          sort: "throughput",
+        },
         model: params.model,
         messages: params.messages,
         temperature: params.temperature,
@@ -31,10 +34,11 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
+        include_reasoning: params.includeReasoning,
         ...(params.schema && {
           response_format: zodResponseFormat(params.schema, "result"),
         }),
-      },
+      } as any,
       {
         signal: abortController.signal,
       }
@@ -47,6 +51,7 @@ export default async function handler(
       res.setHeader("Connection", "keep-alive");
 
       let fullResponse = "";
+      let fullReasoning = "";
       const stream =
         response as unknown as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
@@ -59,13 +64,36 @@ export default async function handler(
             return;
           }
 
-          const content = chunk?.choices?.[0]?.delta?.content;
-          if (content) {
+          const content = (chunk as any)?.choices?.[0]?.delta?.content;
+          const reasoning = (chunk as any)?.choices?.[0]?.delta?.reasoning;
+
+          if (params.includeReasoning) {
+            if (reasoning) {
+              fullReasoning += reasoning;
+              res.write(
+                JSON.stringify({ type: "reasoning", chunk: reasoning })
+              );
+            }
+            if (content) {
+              fullResponse += content;
+              res.write(JSON.stringify({ type: "content", chunk: content }));
+            }
+          } else if (content) {
             fullResponse += content;
-            res.write(content);
-            // @ts-ignore - flush exists on NodeJS.ServerResponse
-            res.flush?.();
+            res.write(content); // Direct string for non-reasoning case
           }
+          // @ts-ignore - flush exists on NodeJS.ServerResponse
+          res.flush?.();
+        }
+
+        if (params.includeReasoning) {
+          res.write(
+            JSON.stringify({
+              type: "final",
+              content: fullResponse,
+              reasoning: fullReasoning,
+            })
+          );
         }
         res.end();
         return;
@@ -82,9 +110,9 @@ export default async function handler(
       }
     }
 
-    const completionResponse =
-      response as OpenAI.Chat.Completions.ChatCompletion;
-    const content = completionResponse.choices?.[0]?.message?.content;
+    const resp = response as any;
+    const content = resp.choices?.[0]?.message?.content;
+    const reasoning = resp.choices?.[0]?.message?.reasoning;
 
     if (!content) {
       throw new Error("Failed to generate response");
@@ -95,7 +123,8 @@ export default async function handler(
       return res.json(parsed);
     }
 
-    return res.json({ content });
+    // For non-streaming responses, return just the content string if not including reasoning
+    return res.json(params.includeReasoning ? { content, reasoning } : content);
   } catch (error) {
     if (
       error instanceof Error &&

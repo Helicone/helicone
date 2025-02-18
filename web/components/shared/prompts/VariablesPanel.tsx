@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Variable } from "@/types/prompt-state";
+import { StateVariable } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
 import { populateVariables } from "./helpers";
 import { useInputs } from "@/services/hooks/prompts/inputs";
@@ -18,13 +18,13 @@ import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
 import { Input } from "@/components/ui/input";
 
 interface VariableItemProps {
-  variable: Variable;
+  variable: StateVariable;
   originalIndex: number;
   onVariableChange: (index: number, value: string) => void;
 }
 
 interface VariablesPanelProps {
-  variables: Variable[];
+  variables: StateVariable[];
   onVariableChange: (index: number, value: string) => void;
   promptVersionId: string;
 }
@@ -139,9 +139,11 @@ export default function VariablesPanel({
       {/* No Variables */}
       {validVariablesWithIndices.length === 0 ? (
         <p className="text-sm text-slate-400 text-center text-balance">
-          Make your prompt dynamic with variables. Type{" "}
+          Make your prompt dynamic with{" "}
+          <span className="font-semibold">Variables</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
-          value in a message and press ⌘ E.
+          value in a message and press{" "}
+          <span className="text-heliblue">⌘ E</span>.
         </p>
       ) : (
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">
@@ -191,16 +193,16 @@ const VariableItem = memo(
             }`}
           >
             <span>{variable.name}</span>
-            <span>{variable.isMessage && <PiChatBold />}</span>
+            <span>{variable.idx !== undefined && <PiChatBold />}</span>
           </div>
         </div>
         <Input
           variant="helicone"
           value={variable.value}
-          disabled={variable.isMessage}
+          disabled={variable.idx !== undefined}
           onChange={(e) => onVariableChange(originalIndex, e.target.value)}
           placeholder={
-            variable.isMessage
+            variable.idx
               ? "Import variable value from production..."
               : `Enter default value for {{${variable.name}}}...`
           }

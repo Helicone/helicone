@@ -13,15 +13,18 @@ export interface GenerateParams {
   stop?: string[];
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
+  includeReasoning?: boolean;
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
   };
 }
 
+export type GenerateResponse = string | { content: string; reasoning: string };
+
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
-): Promise<T extends object ? T : string> {
+): Promise<T extends object ? T : GenerateResponse> {
   params.model = `${params.provider}/${params.model}`; // OpenRouter requires the model to be in the format of provider/model
 
   const response = await fetch("/api/llm", {
@@ -44,6 +47,7 @@ export async function generate<T extends object | undefined = undefined>(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullResponse = "";
+    let fullReasoning = "";
 
     try {
       while (true) {
@@ -54,14 +58,35 @@ export async function generate<T extends object | undefined = undefined>(
         }
 
         const chunk = decoder.decode(value);
-        fullResponse += chunk;
-        params.stream?.onChunk(chunk);
+        if (params.includeReasoning) {
+          try {
+            // Try to parse as JSON in case it's the final response
+            const jsonResponse = JSON.parse(chunk);
+            fullResponse = jsonResponse.content || fullResponse;
+            fullReasoning = jsonResponse.reasoning || fullReasoning;
+          } catch {
+            // If not JSON, treat as reasoning chunk
+            fullReasoning += chunk;
+          }
+          params.stream?.onChunk(chunk);
+        } else {
+          fullResponse += chunk;
+          params.stream?.onChunk(chunk);
+        }
       }
 
-      return fullResponse as T extends object ? T : string;
+      return (
+        params.includeReasoning
+          ? { content: fullResponse, reasoning: fullReasoning }
+          : fullResponse
+      ) as T extends object ? T : GenerateResponse;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        return fullResponse as T extends object ? T : string;
+        return (
+          params.includeReasoning
+            ? { content: fullResponse, reasoning: fullReasoning }
+            : fullResponse
+        ) as T extends object ? T : GenerateResponse;
       }
       throw error;
     }
@@ -72,5 +97,9 @@ export async function generate<T extends object | undefined = undefined>(
     throw new Error(data.error || "Failed to generate response");
   }
 
-  return (data.content || data) as T extends object ? T : string;
+  return (
+    params.includeReasoning
+      ? { content: data.content, reasoning: data.reasoning }
+      : data.content || data
+  ) as T extends object ? T : GenerateResponse;
 }
