@@ -83,6 +83,9 @@ const bedrock = createAmazonBedrock({
   sessionToken: process.env.AWS_SESSION_TOKEN, // Optional: for temporary credentials
   headers: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "aws-access-key": process.env.AWS_ACCESS_KEY_ID,
+    "aws-secret-key": process.env.AWS_SECRET_ACCESS_KEY,
+    "aws-session-token": process.env.AWS_SESSION_TOKEN,
   },
 });
 
