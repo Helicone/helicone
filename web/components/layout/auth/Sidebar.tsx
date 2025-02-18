@@ -210,7 +210,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
       //   ],
       // },
     ],
-    [pathname, user?.email]
+    [pathname, org?.currentOrg?.tier]
   );
 
   return (

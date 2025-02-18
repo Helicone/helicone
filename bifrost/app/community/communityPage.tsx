@@ -13,7 +13,7 @@ export default function CommunityPage() {
     useState<(typeof TABS)[number]>("Projects");
 
   return (
-    <div className="w-full bg-[#F8FEFF] h-full antialiased relative text-black mb-[24px]">
+    <div className="w-full bg-white h-full antialiased relative text-black mb-[24px]">
       <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
           src={"/static/community/shiny-cube.webp"}
