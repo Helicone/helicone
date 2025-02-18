@@ -602,6 +602,7 @@ WHEN (request_response_rmt.model ILIKE 'gemini-1.0-pro') THEN 125 * request_resp
 WHEN (request_response_rmt.model ILIKE '%gemini-1.5-flash%') THEN 350 * request_response_rmt.prompt_tokens + 1050 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'gemini-flash-1.5-8b') THEN 38 * request_response_rmt.prompt_tokens + 150 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-1.5-pro%') THEN 3500 * request_response_rmt.prompt_tokens + 10500 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE '%gemini-2.0-flash%') THEN 100 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-v2@20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
   ELSE 0
 END

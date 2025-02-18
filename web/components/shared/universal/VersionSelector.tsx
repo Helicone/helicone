@@ -119,7 +119,7 @@ export default function VersionSelector({
             onKeyDown={handleKeyDown}
             onBlur={() => handleEditComplete(false)}
             autoFocus
-            className="px-2.5 -ml-[calc(0.625rem-2px)] appearance-none rounded-full text-xl outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue w-fit bg-white dark:bg-slate-950 max-w-56"
+            className="px-2.5 -ml-[calc(0.625rem-2px)] appearance-none rounded-full text-lg outline-none focus:border-transparent focus:ring-2 focus:ring-heliblue w-fit bg-white dark:bg-slate-950 max-w-56"
             aria-label="Edit prompt id"
           />
         ) : (
