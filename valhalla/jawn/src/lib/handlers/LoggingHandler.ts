@@ -1,6 +1,4 @@
-import { mapAnthropicRequest } from "../../packages/llm-mapper/mappers/anthropic/chat";
-import { mapGeminiPro } from "../../packages/llm-mapper/mappers/gemini/chat";
-import { mapOpenAIRequest } from "../../packages/llm-mapper/mappers/openai/chat";
+import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
@@ -12,6 +10,7 @@ import {
   ExperimentCellValue,
   HandlerContext,
   PromptRecord,
+  toHeliconeRequest,
 } from "./HandlerContext";
 
 type S3Record = {
@@ -443,22 +442,10 @@ export class LoggingHandler extends AbstractLogHandler {
     let responseText = "";
 
     try {
-      const provider = request.provider?.toLowerCase() || "";
-      const mapperFn = provider.includes("anthropic")
-        ? mapAnthropicRequest
-        : provider.includes("google")
-        ? mapGeminiPro
-        : mapOpenAIRequest;
-
-      const mapped = mapperFn({
-        request: context.processedLog.request.body,
-        response: context.processedLog.response.body,
-        statusCode: response.status || 200,
-        model: context.processedLog.model ?? "",
-      });
-
-      requestText = mapped.preview.request;
-      responseText = mapped.preview.response;
+      const heliconeRequest = toHeliconeRequest(context);
+      const mappedContent = heliconeRequestToMappedContent(heliconeRequest);
+      requestText = mappedContent.preview.request;
+      responseText = mappedContent.preview.response;
     } catch (error) {
       console.error("Error mapping request/response for preview:", error);
       // Fallback to empty strings if mapping fails
