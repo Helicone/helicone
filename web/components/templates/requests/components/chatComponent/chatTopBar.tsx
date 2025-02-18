@@ -1,13 +1,13 @@
-import React from "react";
+import { Message } from "@/packages/llm-mapper/types";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import {
   ArrowsPointingOutIcon,
-  BeakerIcon,
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { NotepadText } from "lucide-react";
 import { useRouter } from "next/router";
-import { Message } from "@/packages/llm-mapper/types";
+import React from "react";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -76,8 +76,8 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
             }}
             className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
           >
-            <BeakerIcon className="h-4 w-4" />
-            <p className="text-xs font-semibold">Playground</p>
+            <NotepadText className="h-4 w-4" />
+            <p className="text-xs font-semibold">Test Prompt</p>
           </button>
         )}
       </div>
