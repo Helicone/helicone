@@ -1,6 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 import { PiXBold } from "react-icons/pi";
-import { Button } from "@/components/ui/button";
 
 interface UniversalPopupProps {
   title?: string;
@@ -38,12 +38,12 @@ export default function UniversalPopup({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm h-screen"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
       <div
-        className={`${width} -mt-32 md:-mt-16 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col`}
+        className={`max-h-[90vh] ${width} -mt-16 md:-mt-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
