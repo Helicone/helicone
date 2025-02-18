@@ -4,16 +4,12 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BookOpenIcon,
   ChartBarIcon,
   EnvelopeIcon,
-  UsersIcon,
   XMarkIcon,
   ChevronDownIcon,
   CalculatorIcon,
-  ChartPieIcon,
   ArrowsPointingOutIcon,
-  SignalIcon,
   ClockIcon,
   UserGroupIcon,
   NewspaperIcon,
@@ -25,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { BookIcon, Globe } from "lucide-react";
+import { ArrowLeftRightIcon, BookIcon, Globe } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -94,6 +90,7 @@ const MobileHeader = (props: {
 
 const NavLinks = () => {
   const path = usePathname();
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const links = [
     {
       href: "https://docs.helicone.ai/",
@@ -110,17 +107,20 @@ const NavLinks = () => {
         {
           href: "/changelog",
           label: "Changelog",
-          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
+          description: "Latest updates and improvements",
+          icon: <ClockIcon className="h-6 w-6 text-sky-500" />,
         },
         {
           href: "/community",
           label: "Community",
-          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
+          description: "Join our growing developer community",
+          icon: <UserGroupIcon className="h-6 w-6 text-sky-500" />,
         },
         {
           href: "/blog",
           label: "Blog",
-          icon: <BookIcon className="h-4 w-4 text-sky-500" />,
+          description: "Insights on AI development and best practices",
+          icon: <BookIcon className="h-6 w-6 text-sky-500" />,
         },
       ],
     },
@@ -131,22 +131,26 @@ const NavLinks = () => {
         {
           href: "/open-stats",
           label: "Open Stats",
-          icon: <Globe className="h-4 w-4 text-sky-500" />,
+          description: "Real-time LLM usage analytics",
+          icon: <Globe className="h-6 w-6 text-sky-500" />,
         },
         {
           href: "/comparison",
           label: "Model Comparison",
-          icon: <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500" />,
+          description: "Compare different LLM models and providers",
+          icon: <ArrowLeftRightIcon className="h-6 w-6 text-sky-500" />,
         },
         {
           href: "/status",
           label: "Provider Status",
-          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
+          description: "Check LLM provider service status",
+          icon: <ChartBarIcon className="h-6 w-6 text-sky-500" />,
         },
         {
           href: "/llm-cost",
           label: "LLM API Pricing Calculator",
-          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
+          description: "Calculate and compare API costs",
+          icon: <CalculatorIcon className="h-6 w-6 text-sky-500" />,
         },
       ],
     },
@@ -160,25 +164,36 @@ const NavLinks = () => {
       {links.map((link, i) => {
         if (link.type === "dropdown") {
           return (
-            <DropdownMenu key={`${link}-${i}`}>
-              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-landing-description opacity-75">
+            <DropdownMenu
+              key={`${link}-${i}`}
+              onOpenChange={(open) => {
+                setOpenDropdown(open ? link.label : null);
+              }}
+            >
+              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-slate-700 opacity-75">
                 {link.label}
-                <ChevronDownIcon className="h-4 w-4" />
+                <ChevronDownIcon
+                  className={`h-4 w-4 transition-transform duration-600 ${
+                    openDropdown === link.label ? "rotate-180" : ""
+                  }`}
+                />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="min-w-[240px] p-2 space-y-1.5">
                 {link.items?.map((item, j) => (
                   <DropdownMenuItem key={j} asChild>
                     <Link
                       href={item.href}
-                      className={
-                        "w-full cursor-pointer flex items-center gap-2 " +
-                        (path === item.href
-                          ? "text-slate-700 font-medium"
-                          : "text-landing-description opacity-75")
-                      }
+                      className="w-full cursor-pointer flex items-start gap-2 p-3 text-slate-700 hover:text-black"
                     >
-                      {item.icon}
-                      {item.label}
+                      <div className="mt-1 flex-shrink-0 p-2.5 rounded-md border border-sky-100 bg-sky-50">
+                        {item.icon}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{item.label}</span>
+                        <span className="text-sm text-slate-500 font-normal">
+                          {item.description}
+                        </span>
+                      </div>
                     </Link>
                   </DropdownMenuItem>
                 ))}
@@ -194,7 +209,7 @@ const NavLinks = () => {
               " " +
               (path === link.href
                 ? "text-slate-700 font-medium"
-                : "text-landing-description opacity-75")
+                : "text-slate-700 opacity-75")
             }
             key={`${link}-${i}`}
           >
@@ -265,17 +280,16 @@ const MobileNav = () => {
       href: string;
       label: string;
       icon: React.ReactNode;
+      description?: string;
     }>;
   }> = [
     {
       href: "https://docs.helicone.ai/",
       label: "Docs",
-      icon: <BookOpenIcon className="h-5 w-5 text-sky-500" />,
     },
     {
       href: "/pricing",
       label: "Pricing",
-      icon: <ChartBarIcon className="h-5 w-5 text-sky-500" />,
     },
     {
       type: "section",
@@ -284,22 +298,22 @@ const MobileNav = () => {
         {
           href: "/open-stats",
           label: "Open Stats",
-          icon: <ChartPieIcon className="h-5 w-5 text-sky-500" />,
+          icon: <Globe className="h-4 w-4 text-sky-500" />,
         },
         {
           href: "/comparison",
           label: "Model Comparison",
-          icon: <ArrowsPointingOutIcon className="h-5 w-5 text-sky-500" />,
+          icon: <ArrowLeftRightIcon className="h-4 w-4 text-sky-500" />,
         },
         {
           href: "/status",
           label: "Provider Status",
-          icon: <SignalIcon className="h-5 w-5 text-sky-500" />,
+          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
         },
         {
           href: "/llm-cost",
           label: "LLM API Pricing Calculator",
-          icon: <CalculatorIcon className="h-5 w-5 text-sky-500" />,
+          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
         },
       ],
     },
@@ -310,17 +324,17 @@ const MobileNav = () => {
         {
           href: "/changelog",
           label: "Changelog",
-          icon: <ClockIcon className="h-5 w-5 text-sky-500" />,
+          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
         },
         {
           href: "/community",
           label: "Community",
-          icon: <UserGroupIcon className="h-5 w-5 text-sky-500" />,
+          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
         },
         {
           href: "/blog",
           label: "Blog",
-          icon: <NewspaperIcon className="h-5 w-5 text-sky-500" />,
+          icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
         },
       ],
     },
@@ -350,24 +364,24 @@ const MobileNav = () => {
             {mobileLinks.map((link, i) => {
               if (link.type === "section") {
                 return (
-                  <div key={i} className="flex flex-col gap-2">
-                    <p className="text-landing-description opacity-75 font-medium">
-                      {link.label}
-                    </p>
-                    <div className="flex flex-col gap-2 pl-4">
+                  <div key={i} className="flex flex-col gap-3">
+                    <p className="text-slate-700 font-medium">{link.label}</p>
+                    <div className="flex flex-col gap-3 pl-3">
                       {link.items?.map((item, j) => (
                         <Link
                           key={j}
                           href={item.href}
-                          className={
-                            "flex items-center gap-2 " +
-                            (path === item.href
-                              ? "text-slate-700 font-medium"
-                              : "text-landing-description opacity-75")
-                          }
+                          className="flex gap-2 group"
                         >
-                          {item.icon}
-                          {item.label}
+                          <div className="mt-1 flex-shrink-0">{item.icon}</div>
+                          <div className="flex flex-col">
+                            <span className="text-slate-500 font-normal group-hover:text-black">
+                              {item.label}
+                            </span>
+                            <span className="text-sm text-slate-500">
+                              {item.description}
+                            </span>
+                          </div>
                         </Link>
                       ))}
                     </div>
