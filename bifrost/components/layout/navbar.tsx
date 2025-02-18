@@ -4,13 +4,24 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BookOpenIcon,
   ChartBarIcon,
   EnvelopeIcon,
-  UsersIcon,
   XMarkIcon,
+  ChevronDownIcon,
+  CalculatorIcon,
+  ArrowsPointingOutIcon,
+  ClockIcon,
+  UserGroupIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { ArrowLeftRightIcon, BookIcon, Globe } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -79,6 +90,7 @@ const MobileHeader = (props: {
 
 const NavLinks = () => {
   const path = usePathname();
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const links = [
     {
       href: "https://docs.helicone.ai/",
@@ -89,39 +101,122 @@ const NavLinks = () => {
       label: "Pricing",
     },
     {
-      href: "/changelog",
-      label: "Changelog",
+      type: "dropdown" as const,
+      label: "Resources",
+      items: [
+        {
+          href: "/changelog",
+          label: "Changelog",
+          description: "Latest updates and improvements",
+          icon: <ClockIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          description: "Join our growing developer community",
+          icon: <UserGroupIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/blog",
+          label: "Blog",
+          description: "Insights on AI development and best practices",
+          icon: <BookIcon className="h-6 w-6 text-sky-500" />,
+        },
+      ],
     },
     {
-      href: "/community",
-      label: "Community",
+      type: "dropdown" as const,
+      label: "Tools",
+      items: [
+        {
+          href: "/open-stats",
+          label: "Open Stats",
+          description: "Real-time LLM usage analytics",
+          icon: <Globe className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/comparison",
+          label: "Model Comparison",
+          description: "Compare different LLM models and providers",
+          icon: <ArrowLeftRightIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/status",
+          label: "Provider Status",
+          description: "Check LLM provider service status",
+          icon: <ChartBarIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/llm-cost",
+          label: "LLM API Pricing Calculator",
+          description: "Calculate and compare API costs",
+          icon: <CalculatorIcon className="h-6 w-6 text-sky-500" />,
+        },
+      ],
     },
     {
-      href: "/blog",
-      label: "Blog",
-    },
-    {
-      href: "https://us.helicone.ai/open-stats",
-      label: "Stats",
+      href: "https://app.dover.com/jobs/helicone",
+      label: "Careers",
     },
   ];
   return (
     <div className="flex gap-x-2 flex-col lg:flex-row">
-      {links.map((link, i) => (
-        <Link
-          href={link.href}
-          className={
-            "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
-            " " +
-            (path === link.href
-              ? "text-black font-bold"
-              : "text-landing-description opacity-75")
-          }
-          key={`${link}-${i}`}
-        >
-          {link.label}
-        </Link>
-      ))}
+      {links.map((link, i) => {
+        if (link.type === "dropdown") {
+          return (
+            <DropdownMenu
+              key={`${link}-${i}`}
+              onOpenChange={(open) => {
+                setOpenDropdown(open ? link.label : null);
+              }}
+            >
+              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-slate-700 opacity-75">
+                {link.label}
+                <ChevronDownIcon
+                  className={`h-4 w-4 transition-transform duration-600 ${
+                    openDropdown === link.label ? "rotate-180" : ""
+                  }`}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="min-w-[240px] p-2 space-y-1.5">
+                {link.items?.map((item, j) => (
+                  <DropdownMenuItem key={j} asChild>
+                    <Link
+                      href={item.href}
+                      className="w-full cursor-pointer flex items-start gap-2 p-3 text-slate-700 hover:text-black"
+                    >
+                      <div className="mt-1 flex-shrink-0 p-2.5 rounded-md border border-sky-100 bg-sky-50">
+                        {item.icon}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{item.label}</span>
+                        <span className="text-sm text-slate-500 font-normal">
+                          {item.description}
+                        </span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }
+        return (
+          <Link
+            href={link.href}
+            className={
+              "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
+              " " +
+              (path === link.href
+                ? "text-slate-700 font-medium"
+                : "text-slate-700 opacity-75")
+            }
+            key={`${link}-${i}`}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
     </div>
   );
 };
@@ -175,6 +270,76 @@ const MobileNav = () => {
   useEffect(() => {
     setMenuOpen(false);
   }, [path]);
+
+  const mobileLinks: Array<{
+    href?: string;
+    label: string;
+    icon?: React.ReactNode;
+    type?: "section";
+    items?: Array<{
+      href: string;
+      label: string;
+      icon: React.ReactNode;
+      description?: string;
+    }>;
+  }> = [
+    {
+      href: "https://docs.helicone.ai/",
+      label: "Docs",
+    },
+    {
+      href: "/pricing",
+      label: "Pricing",
+    },
+    {
+      type: "section",
+      label: "Tools",
+      items: [
+        {
+          href: "/open-stats",
+          label: "Open Stats",
+          icon: <Globe className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/comparison",
+          label: "Model Comparison",
+          icon: <ArrowLeftRightIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/status",
+          label: "Provider Status",
+          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/llm-cost",
+          label: "LLM API Pricing Calculator",
+          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
+        },
+      ],
+    },
+    {
+      type: "section",
+      label: "Resources",
+      items: [
+        {
+          href: "/changelog",
+          label: "Changelog",
+          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
+        },
+        {
+          href: "/blog",
+          label: "Blog",
+          icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
+        },
+      ],
+    },
+  ];
+
   return (
     <nav className="lg:hidden" aria-label="Global">
       <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-10" />
@@ -195,7 +360,47 @@ const MobileNav = () => {
               Sign up for free
             </Link>
           </div>
-          <NavLinks />
+          <div className="flex flex-col gap-3">
+            {mobileLinks.map((link, i) => {
+              if (link.type === "section") {
+                return (
+                  <div key={i} className="flex flex-col gap-3">
+                    <p className="text-slate-700 font-medium">{link.label}</p>
+                    <div className="flex flex-col gap-3 pl-3">
+                      {link.items?.map((item, j) => (
+                        <Link
+                          key={j}
+                          href={item.href}
+                          className="flex gap-2 group"
+                        >
+                          <div className="mt-1 flex-shrink-0">{item.icon}</div>
+                          <div className="flex flex-col">
+                            <span className="text-slate-500 font-normal group-hover:text-black">
+                              {item.label}
+                            </span>
+                            <span className="text-sm text-slate-500">
+                              {item.description}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              if (!link.href) return null;
+              return (
+                <Link
+                  key={i}
+                  href={link.href}
+                  className="text-slate-700 font-medium hover:text-black flex items-center gap-2"
+                >
+                  {link.icon}
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
           <NavIcons />
         </div>
       )}

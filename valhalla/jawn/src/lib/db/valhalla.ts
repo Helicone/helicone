@@ -163,8 +163,10 @@ class ValhallaDB implements IValhallaDB {
         completion_tokens = $4,
         model = $5,
         prompt_tokens = $6,
-        response_received_at = $7
-      WHERE id = $8
+        response_received_at = $7,
+        prompt_cache_write_tokens = $8,
+        prompt_cache_read_tokens = $9
+      WHERE id = $10
     `;
     return this.query(query, [
       JSON.stringify(response.body),
@@ -174,6 +176,8 @@ class ValhallaDB implements IValhallaDB {
       response.model,
       response.promptTokens,
       response.responseReceivedAt?.toISOString(),
+      response.promptCacheWriteTokens,
+      response.promptCacheReadTokens,
       response.id,
     ]);
   }
@@ -228,9 +232,11 @@ class ValhallaDB implements IValhallaDB {
       model,
       prompt_tokens,
       response_received_at,
-      helicone_org_id
+      helicone_org_id,
+      prompt_cache_write_tokens,
+      prompt_cache_read_tokens
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
   `;
     return this.query(query, [
       response.id,
@@ -244,6 +250,8 @@ class ValhallaDB implements IValhallaDB {
       response.promptTokens,
       response.responseReceivedAt?.toISOString(),
       response.heliconeOrgID,
+      response.promptCacheWriteTokens,
+      response.promptCacheReadTokens
     ]);
   }
 }

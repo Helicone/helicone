@@ -249,6 +249,8 @@ export class EvaluatorManager extends BaseManager {
           time_to_first_token: null,
           total_tokens: null,
           prompt_tokens: null,
+          prompt_cache_write_tokens: null,
+          prompt_cache_read_tokens: null,
           completion_tokens: null,
           prompt_id: null,
           llmSchema: null,
