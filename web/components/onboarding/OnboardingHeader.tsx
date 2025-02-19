@@ -3,6 +3,7 @@ import Image from "next/image";
 import React from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { OnboardingStep, useOrgOnboardingStore } from "@/store/onboardingStore";
+import { useRouter } from "next/router";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -16,7 +17,16 @@ const BreadcrumbSeparator = () => (
   </svg>
 );
 
+const STEP_ROUTES: Record<OnboardingStep, string> = {
+  ORGANIZATION: "/onboarding",
+  MEMBERS: "/onboarding",
+  BILLING: "/onboarding/billing",
+  INTEGRATION: "/onboarding/integration",
+  EVENT: "/onboarding/event",
+};
+
 export const OnboardingHeader = () => {
+  const router = useRouter();
   const { formData, currentStep, setCurrentStep } = useOrgOnboardingStore();
 
   const billingStep: { label: string; step: OnboardingStep }[] =
@@ -34,6 +44,15 @@ export const OnboardingHeader = () => {
     { label: "Get integrated", step: "INTEGRATION" },
     { label: "Send an event", step: "EVENT" },
   ];
+
+  const currentStepIndex = steps.findIndex((s) => s.step === currentStep);
+
+  const handleStepClick = (step: OnboardingStep, index: number) => {
+    if (index < currentStepIndex) {
+      setCurrentStep(step);
+      router.push(STEP_ROUTES[step]);
+    }
+  };
 
   return (
     <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
@@ -55,15 +74,16 @@ export const OnboardingHeader = () => {
                   "text-sm font-normal",
                   currentStep === step.step
                     ? "text-slate-900"
-                    : "text-slate-500"
+                    : "text-slate-500",
+                  index < currentStepIndex && "hover:text-slate-700"
                 )}
                 onClick={() => {
-                  if (index < steps.length - 1) {
-                    setCurrentStep(step.step);
+                  if (index < currentStepIndex) {
+                    handleStepClick(step.step, index);
                   }
                 }}
                 style={{
-                  cursor: index < steps.length - 1 ? "pointer" : "default",
+                  cursor: index < currentStepIndex ? "pointer" : "default",
                 }}
               >
                 {step.label}

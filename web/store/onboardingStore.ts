@@ -29,8 +29,10 @@ interface OnboardingState {
     plan: PlanType;
     members: Array<{ email: string; role: MemberRole }>;
   };
+  createdOrgId: string | null;
   setCurrentStep: (step: OnboardingStep) => void;
   setFormData: (data: Partial<OnboardingState["formData"]>) => void;
+  setCreatedOrgId: (id: string | null) => void;
   resetOnboarding: () => void;
 }
 
@@ -43,13 +45,16 @@ export const useOrgOnboardingStore = create<OnboardingState>()(
         plan: "free",
         members: [],
       },
+      createdOrgId: null,
       setCurrentStep: (currentStep) => set({ currentStep }),
       setFormData: (formData) =>
         set((state) => ({ formData: { ...state.formData, ...formData } })),
+      setCreatedOrgId: (id) => set({ createdOrgId: id }),
       resetOnboarding: () =>
         set({
           currentStep: "ORGANIZATION",
           formData: { name: "", plan: "free", members: [] },
+          createdOrgId: null,
         }),
     }),
     {

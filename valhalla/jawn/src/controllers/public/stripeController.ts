@@ -21,6 +21,11 @@ export interface UpgradeToProRequest {
     evals?: boolean;
   };
   seats?: number;
+  ui_mode?: "embedded" | "hosted";
+}
+
+export interface UpgradeToTeamBundleRequest {
+  ui_mode?: "embedded" | "hosted";
 }
 
 export interface LLMUsage {
@@ -138,13 +143,15 @@ export class StripeController extends Controller {
 
   @Post("/subscription/new-customer/upgrade-to-team-bundle")
   public async upgradeToTeamBundle(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body?: UpgradeToTeamBundleRequest
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const clientOrigin = request.headers.origin;
 
     const result = await stripeManager.upgradeToTeamBundleLink(
-      `${clientOrigin}`
+      `${clientOrigin}`,
+      body ?? {}
     );
 
     if (result.error) {
@@ -157,12 +164,14 @@ export class StripeController extends Controller {
 
   @Post("/subscription/existing-customer/upgrade-to-team-bundle")
   public async upgradeExistingCustomerToTeamBundle(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body?: UpgradeToTeamBundleRequest
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const result = await stripeManager.upgradeToTeamBundleExistingCustomer(
-      request.headers.origin ?? ""
+      request.headers.origin ?? "",
+      body ?? {}
     );
 
     if (result.error) {
@@ -326,8 +335,11 @@ export class StripeController extends Controller {
       };
     }[];
   } | null> {
+    console.log(`Organization ID: ${request.authParams.organizationId}`);
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
+
+    console.log("result", result);
 
     if (result.error) {
       this.setStatus(400);

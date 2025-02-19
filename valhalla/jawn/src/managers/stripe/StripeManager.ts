@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import {
   LLMUsage,
   UpgradeToProRequest,
+  UpgradeToTeamBundleRequest,
 } from "../../controllers/public/stripeController";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { AuthParams, supabaseServer } from "../../lib/db/supabase";
@@ -293,14 +294,14 @@ WHERE (${builtFilter.filter})`,
 
       const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
 
-      const sessionUrl = await this.portalLinkUpgradeToPro(
+      const session = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
         seats,
         body
       );
 
-      return sessionUrl;
+      return ok(session.data?.url!);
     } catch (error: any) {
       return err(`Error upgrading to pro: ${error.message}`);
     }
@@ -362,7 +363,7 @@ WHERE (${builtFilter.filter})`,
     customerId: string,
     orgMemberCount: number,
     body: UpgradeToProRequest
-  ): Promise<Result<string, string>> {
+  ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -411,8 +412,6 @@ WHERE (${builtFilter.filter})`,
           : []),
       ],
       mode: "subscription",
-      success_url: `${origin}/dashboard`,
-      cancel_url: `${origin}/dashboard`,
       metadata: {
         orgId: this.authParams.organizationId,
         tier: "pro-20250202",
@@ -424,7 +423,16 @@ WHERE (${builtFilter.filter})`,
           tier: "pro-20250202",
         },
       },
+      ui_mode: body.ui_mode ?? "hosted",
     };
+
+    // Add success_url and cancel_url only if not in embedded mode
+    if (body.ui_mode !== "embedded") {
+      sessionParams.success_url = `${origin}/dashboard`;
+      sessionParams.cancel_url = `${origin}/dashboard`;
+    } else {
+      sessionParams.return_url = `${origin}/onboarding/integrate`;
+    }
 
     const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
     if (isWaterlooEmail) {
@@ -439,7 +447,7 @@ WHERE (${builtFilter.filter})`,
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 
-    return ok(session.url!);
+    return ok(session);
   }
 
   public async upgradeToProLink(
@@ -457,7 +465,6 @@ WHERE (${builtFilter.filter})`,
       if (customerId.error || !customerId.data) {
         return err("Error getting or creating stripe customer");
       }
-      console.log("ORIGIN", origin);
 
       const orgMemberCount = await this.getOrgMemberCount();
       if (orgMemberCount.error || !orgMemberCount.data) {
@@ -472,7 +479,12 @@ WHERE (${builtFilter.filter})`,
         body
       );
 
-      return sessionUrl;
+      // For embedded mode, return the client secret instead of the URL
+      if (body.ui_mode === "embedded") {
+        return ok(sessionUrl.data?.client_secret!);
+      }
+
+      return ok(sessionUrl.data?.url!);
     } catch (error: any) {
       return err(`Error creating upgrade link: ${error.message}`);
     }
@@ -481,8 +493,9 @@ WHERE (${builtFilter.filter})`,
   private async portalLinkUpgradeToTeamBundle(
     origin: string,
     customerId: string,
-    isNewCustomer: boolean
-  ): Promise<Result<string, string>> {
+    isNewCustomer: boolean,
+    uiMode: "embedded" | "hosted"
+  ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -498,8 +511,6 @@ WHERE (${builtFilter.filter})`,
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/dashboard`,
-      cancel_url: `${origin}/dashboard`,
       metadata: {
         orgId: this.authParams.organizationId,
         tier: "team-20250130",
@@ -511,7 +522,16 @@ WHERE (${builtFilter.filter})`,
           tier: "team-20250130",
         },
       },
+      ui_mode: uiMode,
     };
+
+    // Add success_url and cancel_url only if not in embedded mode
+    if (uiMode !== "embedded") {
+      sessionParams.success_url = `${origin}/dashboard`;
+      sessionParams.cancel_url = `${origin}/dashboard`;
+    } else {
+      sessionParams.return_url = `${origin}/dashboard`;
+    }
 
     const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
     if (isWaterlooEmail) {
@@ -526,11 +546,12 @@ WHERE (${builtFilter.filter})`,
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 
-    return ok(session.url!);
+    return ok(session);
   }
 
   async upgradeToTeamBundleLink(
-    returnUrl: string
+    returnUrl: string,
+    body: UpgradeToTeamBundleRequest
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -543,20 +564,26 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting or creating stripe customer");
       }
 
-      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+      const session = await this.portalLinkUpgradeToTeamBundle(
         returnUrl,
         customerId.data,
-        true
+        true,
+        body.ui_mode ?? "hosted"
       );
 
-      return sessionUrl;
+      if (body.ui_mode === "embedded") {
+        return ok(session.data?.client_secret!);
+      }
+
+      return ok(session.data?.url!);
     } catch (error: any) {
       return err(`Error upgrading to team bundle: ${error.message}`);
     }
   }
 
   async upgradeToTeamBundleExistingCustomer(
-    returnUrl: string
+    returnUrl: string,
+    body: UpgradeToTeamBundleRequest
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -575,12 +602,17 @@ WHERE (${builtFilter.filter})`,
         subscription.cancel_at_period_end ||
         subscription.status === "canceled"
       ) {
-        const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+        const session = await this.portalLinkUpgradeToTeamBundle(
           returnUrl,
           customerId.data,
-          false
+          false,
+          body.ui_mode ?? "hosted"
         );
-        return sessionUrl;
+
+        if (body.ui_mode === "embedded") {
+          return ok(session.data?.client_secret!);
+        }
+        return ok(session.data?.url!);
       }
 
       // Cancels after they pay for the new subscription
@@ -592,13 +624,17 @@ WHERE (${builtFilter.filter})`,
       //   },
       // });
 
-      const sessionUrl = await this.portalLinkUpgradeToTeamBundle(
+      const session = await this.portalLinkUpgradeToTeamBundle(
         returnUrl,
         customerId.data,
-        false
+        false,
+        body.ui_mode ?? "hosted"
       );
 
-      return sessionUrl;
+      if (body.ui_mode === "embedded") {
+        return ok(session.data?.client_secret!);
+      }
+      return ok(session.data?.url!);
     } catch (error: any) {
       return err(`Error upgrading to team bundle: ${error.message}`);
     }

@@ -234,9 +234,6 @@ export interface paths {
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
-  "/v1/organization/create/v2": {
-    post: operations["CreateNewOrganizationV2"];
-  };
   "/v1/organization/{organizationId}/update": {
     post: operations["UpdateOrganization"];
   };
@@ -1197,6 +1194,12 @@ Json: JsonObject;
       };
       /** Format: double */
       seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
     };
     LLMUsage: {
       model: string;
@@ -3297,6 +3300,11 @@ export interface operations {
     };
   };
   UpgradeToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -3307,6 +3315,11 @@ export interface operations {
     };
   };
   UpgradeExistingCustomerToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -3476,21 +3489,6 @@ export interface operations {
     };
   };
   CreateNewOrganization: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewOrganizationParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateNewOrganizationV2: {
     requestBody: {
       content: {
         "application/json": components["schemas"]["NewOrganizationParams"];

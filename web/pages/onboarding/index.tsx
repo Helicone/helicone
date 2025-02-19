@@ -1,68 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ExternalLink,
-  Check,
-  CornerDownLeft,
-  Plus,
-  X,
-  Mail,
-  ChevronRightIcon,
-  Settings,
-  Sun,
-} from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import { useUser } from "@supabase/auth-helpers-react";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { Addons } from "@/components/templates/organization/plan/upgradeProDialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { z } from "zod";
 import {
   MemberRole,
-  OnboardingStep,
   PlanType,
   useOrgOnboardingStore,
 } from "@/store/onboardingStore";
 import useNotification from "@/components/shared/notification/useNotification";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+
 import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Logo } from "@/components/logo";
-import Image from "next/image";
-import { OnboardingHeader } from "@/components/onboarding/Header";
+import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
 import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
 import { MembersTable } from "@/components/onboarding/MembersTable";
@@ -78,51 +33,71 @@ interface OrganizationForm {
   members: Member[];
 }
 
-const memberSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
-  role: z.enum(["member", "admin"] as const),
-});
-
-type MemberFormData = z.infer<typeof memberSchema>;
-
-const BreadcrumbSeparator = () => (
-  <svg
-    width="9"
-    height="15"
-    viewBox="0 0 9 15"
-    fill="none"
-    className="text-slate-200"
-  >
-    <path d="M1 0V15" stroke="currentColor" />
-  </svg>
-);
-
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const user = useUser();
   const { setNotification } = useNotification();
-  const { currentStep, formData, setCurrentStep, setFormData } =
-    useOrgOnboardingStore();
+  const {
+    currentStep,
+    formData,
+    createdOrgId,
+    setCurrentStep,
+    setFormData,
+    setCreatedOrgId,
+  } = useOrgOnboardingStore();
   const [nameError, setNameError] = useState("");
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
+      const jawn = getJawnClient();
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;
     },
     enabled: !!org?.currentOrg?.id,
   });
 
+  const { mutate: updateOrganization } = useMutation({
+    mutationFn: async (data: OrganizationForm) => {
+      const jawn = getJawnClient();
+      const { error: updateOrgError, data: responseData } = await jawn.POST(
+        "/v1/organization/{organizationId}/update",
+        {
+          body: {
+            name: data.name,
+          },
+          params: {
+            path: {
+              organizationId: createdOrgId ?? "",
+            },
+          },
+        }
+      );
+
+      if (updateOrgError) {
+        setNotification(
+          "Failed to update organization: " + updateOrgError,
+          "error"
+        );
+        return { error: updateOrgError, data: null };
+      }
+
+      return { error: null, data: responseData.data };
+    },
+    onSuccess: (response) => {
+      if (response.data) {
+        setNotification("Organization updated successfully!", "success");
+        org?.setCurrentOrg(response.data);
+        org?.refetchOrgs?.();
+      }
+    },
+  });
+
   const { mutate: createOrganization } = useMutation({
     mutationFn: async (data: OrganizationForm) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
+      const jawn = getJawnClient();
       const { error: createOrgError, data: responseData } = await jawn.POST(
         "/v1/organization/create",
         {
@@ -149,10 +124,13 @@ export default function OnboardingPage() {
     },
     onSuccess: (response) => {
       if (response.data) {
+        console.log("Created org:", response.data);
         setNotification("Organization created successfully!", "success");
+        console.log("Setting current org to:", response.data);
         org?.setCurrentOrg(response.data);
         org?.refetchOrgs?.();
-        router.push("/dashboard");
+        setCreatedOrgId(response.data);
+        console.log("New org context:", org);
       }
     },
   });
@@ -174,59 +152,67 @@ export default function OnboardingPage() {
     });
   };
 
+  const handleOrganizationSubmit = () => {
+    if (!formData.name) return;
+
+    if (createdOrgId) {
+      updateOrganization(formData);
+    } else {
+      createOrganization(formData);
+    }
+
+    if (formData.plan === "pro" || formData.plan === "team") {
+      setCurrentStep("BILLING");
+      router.push("/onboarding/billing");
+    } else {
+      setCurrentStep("INTEGRATION");
+      router.push("/onboarding/integrate");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center">
       <OnboardingHeader />
-
-      <div className="w-full max-w-md mt-20 px-4">
-        <div className="flex flex-col gap-4 w-full max-w-md mt-20">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-semibold">Welcome to Helicone! 👋</h1>
-            <div className="text-md font-light text-slate-500">
-              Glad to have you here. Create your first organization.
-            </div>
+      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold">Welcome to Helicone! 👋</h1>
+          <div className="text-md font-light text-slate-500">
+            Glad to have you here. Create your first organization.
           </div>
+        </div>
 
-          <OrganizationStep
-            name={formData.name}
-            onNameChange={(name) => {
-              setFormData({ name });
-              setNameError(name ? "" : "Please enter an organization name :)");
-            }}
+        <OrganizationStep
+          name={formData.name}
+          onNameChange={(name) => {
+            setFormData({ name });
+            setNameError(name ? "" : "Please enter an organization name :)");
+          }}
+        />
+
+        <PlanStep
+          plan={formData.plan}
+          onPlanChange={handlePlanChange}
+          onComplete={() => setCurrentStep("MEMBERS")}
+        />
+
+        {formData.plan !== "free" && (
+          <MembersTable
+            members={formData.members}
+            onAddMember={handleAddMember}
+            onRemoveMember={handleRemoveMember}
+            ownerEmail={user?.email ?? ""}
           />
+        )}
 
-          <PlanStep
-            plan={formData.plan}
-            onPlanChange={handlePlanChange}
-            onComplete={() => setCurrentStep("MEMBERS")}
-          />
-
-          {currentStep === "MEMBERS" && formData.plan !== "free" && (
-            <MembersTable
-              members={formData.members}
-              onAddMember={handleAddMember}
-              onRemoveMember={handleRemoveMember}
-              ownerEmail={user?.email ?? ""}
-            />
-          )}
-
-          <div className="flex justify-end">
-            <Button
-              variant="action"
-              className="w-full"
-              onClick={() => {
-                if (!formData.name) return;
-                if (formData.plan === "pro" || formData.plan === "team") {
-                  router.push("/onboarding/billing");
-                } else {
-                  createOrganization(formData);
-                }
-              }}
-              disabled={!formData.name || !formData.plan}
-            >
-              Create organization
-            </Button>
-          </div>
+        <div className="flex justify-end">
+          <Button
+            variant="action"
+            className="w-full"
+            onClick={handleOrganizationSubmit}
+            disabled={!formData.name || !formData.plan}
+          >
+            {createdOrgId ? "Update organization" : "Create organization"}
+          </Button>
         </div>
       </div>
     </div>

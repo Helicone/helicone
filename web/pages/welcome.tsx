@@ -4,7 +4,6 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useRouter } from "next/router";
-import OnboardingPage from "./onboarding";
 // import "prismjs/themes/prism.css";
 interface WelcomeProps {
   currentStep: number;

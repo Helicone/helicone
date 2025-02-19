@@ -1604,6 +1604,15 @@ const models: TsoaRoute.Models = {
         "properties": {
             "addons": {"dataType":"nestedObjectLiteral","nestedProperties":{"evals":{"dataType":"boolean"},"experiments":{"dataType":"boolean"},"prompts":{"dataType":"boolean"},"alerts":{"dataType":"boolean"}}},
             "seats": {"dataType":"double"},
+            "ui_mode": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["embedded"]},{"dataType":"enum","enums":["hosted"]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpgradeToTeamBundleRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "ui_mode": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["embedded"]},{"dataType":"enum","enums":["hosted"]}]},
         },
         "additionalProperties": false,
     },
@@ -5440,6 +5449,7 @@ export function RegisterRoutes(app: Router) {
             async function StripeController_upgradeToTeamBundle(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    body: {"in":"body","name":"body","ref":"UpgradeToTeamBundleRequest"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -5471,6 +5481,7 @@ export function RegisterRoutes(app: Router) {
             async function StripeController_upgradeExistingCustomerToTeamBundle(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    body: {"in":"body","name":"body","ref":"UpgradeToTeamBundleRequest"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -54,7 +54,8 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@sentry/nextjs": "^8",
-    "@stripe/stripe-js": "^1.46.0",
+    "@stripe/react-stripe-js": "^3.1.1",
+    "@stripe/stripe-js": "^5.6.0",
     "@supabase/auth-helpers-nextjs": "^0.5.4",
     "@supabase/auth-helpers-react": "^0.3.1",
     "@supabase/supabase-js": "^2.1.1",
@@ -111,7 +112,7 @@
     "react-simple-code-editor": "^0.13.1",
     "recharts": "^2.13.3",
     "rss-parser": "^3.13.0",
-    "stripe": "^16.11.0",
+    "stripe": "^17.6.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.0.0",
     "zustand": "^5.0.1"
