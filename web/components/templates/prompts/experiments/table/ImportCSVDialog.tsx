@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -15,15 +16,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const ImportCSVDialog = ({
   open,
   onOpenChange,
   experimentId,
+  experimentPromptInputKeys,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   experimentId: string;
+  experimentPromptInputKeys: string[];
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -122,15 +131,20 @@ const ImportCSVDialog = ({
       <DialogContent className="w-[90vw] max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Import from CSV</DialogTitle>
+          {experimentPromptInputKeys.length > 0 && (
+            <DialogDescription>
+              Import rows from a CSV file with the variable names as the columns{" "}
+              <span className="font-semibold">
+                (
+                {experimentPromptInputKeys.length > 3
+                  ? experimentPromptInputKeys.slice(0, 3).join(", ") + ", ..."
+                  : experimentPromptInputKeys.join(", ")}
+              </span>
+              ).
+            </DialogDescription>
+          )}
         </DialogHeader>
 
-        {/* <label
-          htmlFor="file-upload"
-          className={cn(
-            "border-2 border-slate-300 border-dashed rounded-md p-4 h-48 flex flex-col items-center justify-center cursor-pointer",
-            dragActive ? "border-blue-500" : ""
-          )}
-        > */}
         <label
           htmlFor="file-upload"
           className={cn(
@@ -222,6 +236,59 @@ const ImportCSVDialog = ({
             </div>
           )}
         </label>
+        {rows.length > 0 && (
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full mt-4 overflow-x-auto"
+          >
+            <AccordionItem value="preview">
+              <AccordionTrigger>
+                Preview Data ({rows.length} rows)
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="max-h-[300px] overflow-auto border rounded-md">
+                  <table className="w-full border-collapse text-sm">
+                    <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0">
+                      <tr>
+                        {Object.keys(rows[0] || {})
+                          .filter((header) =>
+                            experimentPromptInputKeys.includes(header)
+                          )
+                          .map((header) => (
+                            <th
+                              key={header}
+                              className="border border-slate-200 dark:border-slate-700 p-2 text-left"
+                            >
+                              {header}
+                            </th>
+                          ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row, index) => (
+                        <tr key={index}>
+                          {Object.entries(row)
+                            .filter(([key]) =>
+                              experimentPromptInputKeys.includes(key)
+                            )
+                            .map(([key, value], cellIndex) => (
+                              <td
+                                key={cellIndex}
+                                className="border border-slate-200 dark:border-slate-700 p-2 max-w-[200px] max-h-[100px]"
+                              >
+                                <div className="truncate">{value}</div>
+                              </td>
+                            ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
         <DialogFooter className="flex items-end sm:justify-between sm:items-center gap-y-1 w-full">
           <div className="flex items-center gap-1">
             <InfoIcon className="w-4 h-4 text-slate-500" />
