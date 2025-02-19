@@ -28,13 +28,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import {
-  ListIcon,
-  PlayIcon,
-  PlusIcon,
-  Trash2Icon,
-  UploadIcon,
-} from "lucide-react";
+import { ListIcon, PlayIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -521,18 +515,6 @@ export function ExperimentTable({
         <div className="flex items-center gap-5">
           {!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) ? (
             <>
-              <div className="flex gap-2 items-center">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setShowImportCsvModal(true);
-                  }}
-                >
-                  <UploadIcon className="w-3.5 h-3.5 mr-2" />
-                  Import from CSV
-                </Button>
-              </div>
               <div className="flex gap-2 items-center relative">
                 <Switch
                   size="sm"
@@ -795,6 +777,7 @@ export function ExperimentTable({
                       setShowExperimentDatasetSelector={
                         setShowExperimentDatasetSelector
                       }
+                      setShowImportCsvModal={setShowImportCsvModal}
                     />
                   </PopoverContent>
                 </Popover>
@@ -879,6 +862,7 @@ export function ExperimentTable({
           open={showImportCsvModal}
           onOpenChange={setShowImportCsvModal}
           experimentId={experimentTableId}
+          experimentPromptInputKeys={inputKeysData?.map((key) => key) ?? []}
         />
       </div>
     </>

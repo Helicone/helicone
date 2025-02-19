@@ -242,7 +242,7 @@ export class ExperimentV2Manager extends BaseManager {
       ) AS requests
     FROM prompt_input_record pir
     WHERE pir.experiment_id = $1
-    ORDER BY pir.created_at DESC
+    ORDER BY pir.created_at ASC
         `,
         [experimentId]
       );
