@@ -7,14 +7,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getJawnClient } from "@/lib/clients/jawn";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import {
   ArrowPathIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -93,25 +91,6 @@ const RequestRow = (props: RequestRowProps) => {
       "Helicone-Experiment-Id"
     ] as string | undefined;
   }, [request.heliconeMetadata.customProperties]);
-
-  const promptDataQuery = useQuery({
-    queryKey: ["prompt", promptId, org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const jawn = getJawnClient(query.queryKey[2]);
-      const prompt = await jawn.POST("/v1/prompt/query", {
-        body: {
-          filter: {
-            prompt_v2: {
-              user_defined_id: {
-                equals: query.queryKey[1],
-              },
-            },
-          },
-        },
-      });
-      return prompt.data?.data?.[0];
-    },
-  });
 
   useEffect(() => {
     // find all the key values of properties and set them to currentProperties

@@ -88,7 +88,6 @@ const RequestDiv = (props: RequestDivProps) => {
       null,
     [request?.heliconeMetadata.customProperties]
   );
-
   const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     queryFn: async (query) => {
