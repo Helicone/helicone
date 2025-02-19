@@ -823,11 +823,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
             )}
             <div
-              className={`flex items-center gap-0.5 text-sm ${
-                canRun && prompt?.metadata?.createdFromUi !== false
-                  ? "text-white opacity-60"
-                  : "text-slate-400"
-              }`}
+              className={`flex items-center gap-0.5 text-sm text-white opacity-60`}
             >
               <PiCommandBold className="h-4 w-4" />
               <MdKeyboardReturn className="h-4 w-4" />
