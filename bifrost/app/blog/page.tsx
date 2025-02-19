@@ -216,7 +216,7 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "grok-3",
+      folderName: "grok-3-benchmark-comparison",
     },
   },
   {
