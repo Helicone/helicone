@@ -564,7 +564,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "deepseek",
+        provider: "DEEPSEEK",
         model: "deepseek-r1",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
