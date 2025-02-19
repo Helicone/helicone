@@ -232,7 +232,14 @@
           ]
         },
         "features/sessions",
-        "features/prompts",
+        {
+          "group": "Prompts",
+          "pages": [
+            "features/prompts/editor",
+            "features/prompts/import",
+            "features/prompts/generate"
+          ]
+        },
         "features/experiments",
         {
           "group": "Webhooks",
