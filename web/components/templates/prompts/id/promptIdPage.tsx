@@ -34,7 +34,9 @@ import { toKebabCase } from "@/utils/strings";
 import {
   deduplicateVariables,
   extractVariables,
+  heliconeToTemplateTags,
   isValidVariableName,
+  templateToHeliconeTags,
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
@@ -558,7 +560,12 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const handleImprove = useCallback(async () => {
     setIsImproving(true);
 
-    const prompt = autoImprovePrompt(state?.messages || []);
+    // Convert messages to template tags for natural understanding of variables
+    const templateTagMessages = state?.messages.map((msg) => ({
+      ...msg,
+      content: heliconeToTemplateTags(msg.content),
+    }));
+    const prompt = autoImprovePrompt(templateTagMessages || []);
 
     try {
       abortController.current = new AbortController();
@@ -636,6 +643,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
     try {
       const improvedMessages = parseImprovedMessages(state.improvement.content);
+
       const latestVersionId = promptVersions?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -643,7 +651,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       const heliconeTemplate = {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
-        messages: improvedMessages,
+        messages: improvedMessages.map((msg) => ({
+          ...msg,
+          content: templateToHeliconeTags(msg.content), // Convert any template tags present to helicone tags
+        })),
       };
 
       const metadata = {

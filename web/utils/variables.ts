@@ -18,7 +18,9 @@ export function extractVariables(
   }));
 }
 
-export function deduplicateVariables(variables: StateVariable[]): StateVariable[] {
+export function deduplicateVariables(
+  variables: StateVariable[]
+): StateVariable[] {
   const uniqueVars = new Map<string, StateVariable>();
   variables.forEach((variable) => {
     if (!uniqueVars.has(variable.name)) {
