@@ -84,13 +84,14 @@ export default function ParametersPanel({
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
-                {PROVIDER_MODELS[
-                  parameters.provider as keyof typeof PROVIDER_MODELS
-                ].models.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
+                {parameters.provider &&
+                  PROVIDER_MODELS[
+                    parameters.provider as keyof typeof PROVIDER_MODELS
+                  ]?.models.map((model) => (
+                    <SelectItem key={model} value={model}>
+                      {model}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
