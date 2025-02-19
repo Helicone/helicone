@@ -1,0 +1,36 @@
+# Mistral JavaScript Integration
+
+This guide explains how to integrate Mistral AI with Helicone for logging and monitoring Mistral API usage using JavaScript.
+
+## Account Setup
+
+1. Create a Helicone account or log in at [helicone.ai](https://helicone.ai)
+2. Generate a Helicone API key from the [developer portal](https://helicone.ai/keys)
+
+## Implementation
+
+First, install the Mistral JavaScript package:
+
+
+
+Then, configure the Mistral client to use Helicone's proxy:
+
+
+
+Replace `<MISTRAL_API_KEY>` with your Mistral API key and `<HELICONE_API_KEY>` with your Helicone API key.
+
+## Supported Models
+
+Helicone supports all Mistral models including:
+- open-mistral-7b
+- open-mixtral-8x7b
+- mistral-small-latest
+- mistral-medium-latest
+- mistral-large-latest
+- mistral-embed
+
+## Prerequisites
+- Node.js environment
+- Mistral API key
+- Helicone account and API key
+- @mistralai/mistralai package
