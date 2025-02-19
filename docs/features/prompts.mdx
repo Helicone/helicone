@@ -30,6 +30,7 @@ Once you set up prompts in Helicone, your incoming requests will be matched to a
 
 - version and track iterations of your prompt over time.
 - maintain a dataset of inputs and outputs for each prompt.
+- generate content using predefined prompts through our [Generate API](/features/prompts/generate).
 
 ## Quick Start
 
@@ -349,7 +350,10 @@ In Helicone, you can create a prompt without touching the codebase for better co
 
 ### Use prompts created in the UI in code
 
-If you've created a prompt on the UI, you can easily pull this prompt into your codebase by calling the following API endpoint:
+If you've created a prompt on the UI, you can either:
+
+1. Use the [Generate API](/features/prompts/generate) for a simplified integration that works with multiple LLM providers, or
+2. Pull the prompt into your codebase using the following API endpoint:
 
 <Tabs>
   <Tab title="Typescript / Javascript">
