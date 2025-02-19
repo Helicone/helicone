@@ -54,7 +54,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
       )}
       key={index}
     >
-      <MessageHeader role={message.role} />
+      <MessageHeader message={message} />
       <div className="overflow-auto w-full">
         <MessageContent
           message={message}
