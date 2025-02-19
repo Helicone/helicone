@@ -131,7 +131,7 @@ export const getResponseText = (
   }
 };
 
-const getRequestMessages = (request: any): Message[] => {
+export const getRequestMessages = (request: any): Message[] => {
   return (
     request.messages?.map((msg: any) => {
       // Handle function calls first
