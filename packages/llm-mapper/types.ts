@@ -20,6 +20,7 @@ export type Message = {
   tool_call_id?: string;
   timestamp?: string;
   image_url?: string;
+  idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
 };
 

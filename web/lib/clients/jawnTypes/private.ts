@@ -681,6 +681,8 @@ Json: JsonObject;
     };
     Message: {
       contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;

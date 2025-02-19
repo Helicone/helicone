@@ -1433,6 +1433,10 @@
 						},
 						"type": "array"
 					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
 					"image_url": {
 						"type": "string"
 					},

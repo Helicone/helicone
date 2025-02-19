@@ -21,10 +21,9 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import autoImprovePrompt from "@/prompts/auto-improve";
-import { PromptState, StateMessage, StateVariable } from "@/types/prompt-state";
+import { PromptState, StateVariable } from "@/types/prompt-state";
 import { $system, $user } from "@/utils/llm";
 import {
-  heliconeToStateMessages,
   isLastMessageUser,
   isPrefillSupported,
   parseImprovedMessages,
@@ -42,6 +41,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Message } from "packages/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -148,9 +148,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             )?.major_version ?? ver.major_version;
 
       // 3. Convert any messages in the template to StateMessages
-      const stateMessages = heliconeToStateMessages(
-        templateData.messages || templateData.content
-      );
+      const stateMessages = (templateData.messages ||
+        templateData.content) as Message[];
 
       // 4.A. First collect all variables and their default values from the metadata inputs
       let variables: StateVariable[] = Object.entries(
@@ -162,7 +161,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       }));
       // 4.B. Extract additional variables contained in message content
       stateMessages.forEach((msg) => {
-        const vars = extractVariables(msg.content, "helicone");
+        const vars = extractVariables(msg.content || "", "helicone");
         vars.forEach((v) => {
           variables.push({
             name: v.name,
@@ -243,7 +242,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         console.log("Existing variables:", existingVariables);
 
         const extractedVars = updatedMessages.flatMap((msg) => {
-          const vars = extractVariables(msg.content, "helicone");
+          const vars = extractVariables(msg.content || "", "helicone");
           console.log("Extracted vars from message:", msg.content, vars);
           return vars;
         });
@@ -320,7 +319,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         // If this variable has an idx, also update the corresponding message
         if (variable.idx !== undefined) {
-          let parsedValue: StateMessage;
+          let parsedValue: Message;
           try {
             parsedValue = JSON.parse(value);
           } catch (e) {
@@ -563,7 +562,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     // Convert messages to template tags for natural understanding of variables
     const templateTagMessages = state?.messages.map((msg) => ({
       ...msg,
-      content: heliconeToTemplateTags(msg.content),
+      content: heliconeToTemplateTags(msg.content || ""),
     }));
     const prompt = autoImprovePrompt(templateTagMessages || []);
 
@@ -653,7 +652,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         temperature: state.parameters.temperature,
         messages: improvedMessages.map((msg) => ({
           ...msg,
-          content: templateToHeliconeTags(msg.content), // Convert any template tags present to helicone tags
+          content: templateToHeliconeTags(msg.content || ""), // Convert any template tags present to helicone tags
         })),
       };
 
@@ -739,8 +738,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         return {
           messages: [
             ...prev.messages,
-            { role: "assistant", content: "" },
-            { role: "user", content: "" },
+            { _type: "message", role: "assistant", content: "" },
+            { _type: "message", role: "user", content: "" },
           ],
         };
       } else return {};
@@ -755,7 +754,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         isLastMessageUser(prev.messages)
       ) {
         return {
-          messages: [...prev.messages, { role: "assistant", content: "" }],
+          messages: [
+            ...prev.messages,
+            { _type: "message", role: "assistant", content: "" },
+          ],
         };
       } else return {};
     });
