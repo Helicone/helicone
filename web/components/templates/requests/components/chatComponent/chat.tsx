@@ -15,6 +15,7 @@ interface ChatProps {
   messageSlice?: "lastTwo";
   className?: string;
   autoInputs?: any[];
+  promptData?: any;
 }
 
 export const Chat: React.FC<ChatProps> = ({
@@ -26,6 +27,7 @@ export const Chat: React.FC<ChatProps> = ({
   hideTopBar,
   messageSlice,
   className = "bg-slate-50",
+  promptData,
 }) => {
   const [open, setOpen] = useState(false);
   const [showAllMessages, setShowAllMessages] = useState(false);
@@ -58,12 +60,13 @@ export const Chat: React.FC<ChatProps> = ({
   const chatTopBarProps = {
     allExpanded,
     toggleAllExpanded,
-    requestMessages: mappedRequest.preview.concatenatedMessages,
+    requestBody: mappedRequest.schema.request,
     requestId: mappedRequest.heliconeMetadata.requestId,
-    model: mappedRequest.model,
     setOpen,
     mode,
     setMode,
+    isModal: open,
+    promptData,
   };
 
   const messagesToRender = useMemo(

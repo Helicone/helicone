@@ -40,19 +40,23 @@ function getPathName(url: string) {
   }
 }
 
-const RequestRow = (props: {
+interface RequestRowProps {
   request: MappedLLMRequest;
   properties: string[];
   open?: boolean;
   wFull?: boolean;
   displayPreview?: boolean;
-}) => {
+  promptData?: any;
+}
+
+const RequestRow = (props: RequestRowProps) => {
   const {
     request,
     properties,
     open = true,
     wFull = false,
     displayPreview = true,
+    promptData,
   } = props;
 
   const org = useOrg();
@@ -90,7 +94,7 @@ const RequestRow = (props: {
     ] as string | undefined;
   }, [request.heliconeMetadata.customProperties]);
 
-  const promptData = useQuery({
+  const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     queryFn: async (query) => {
       const jawn = getJawnClient(query.queryKey[2]);
@@ -652,7 +656,7 @@ const RequestRow = (props: {
                 className="flex flex-row items-center space-x-2 truncate"
                 asChild
               >
-                <Link href={`/prompts/${promptData.data?.id}`}>
+                <Link href={`/prompts/${promptData?.id}`}>
                   <span>Prompt:</span> <span>{promptId}</span>
                 </Link>
               </Button>
@@ -702,7 +706,10 @@ const RequestRow = (props: {
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex flex-col space-y-2">
-            <RenderMappedRequest mapperContent={request} />
+            <RenderMappedRequest
+              mapperContent={request}
+              promptData={promptData}
+            />
           </div>
         </div>
       )}

@@ -11,6 +11,7 @@ import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { cn } from "@/lib/utils";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import {
   DocumentTextIcon,
   EyeIcon,
@@ -24,7 +25,10 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { usePrompts } from "../../../services/hooks/prompts/prompts";
+import {
+  createPromptFromRequest,
+  usePrompts,
+} from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import useNotification from "../../shared/notification/useNotification";
@@ -63,55 +67,32 @@ const PromptsPage = (props: PromptsPageProps) => {
   }, [hasAccess, prompts?.length]);
 
   // EVENT HANDLERS
-  const createPrompt = async (userDefinedId: string) => {
-    // Prepare base prompt data
-    const basePrompt = {
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful assistant.",
-        },
-        {
-          role: "user",
-          content: "What is 2+2?",
-        },
-      ],
-    };
-
-    const res = await jawn.POST("/v1/prompt/create", {
-      body: {
-        userDefinedId,
-        prompt: basePrompt,
-        metadata: {
-          createdFromUi: true,
-        },
-      },
-    });
-
-    if (res.error || !res.data.data?.id) {
-      notification.setNotification("Error creating prompt", "error");
-    } else {
-      notification.setNotification("Prompt created successfully", "success");
-      router.push(`/prompts/${res.data.data?.id}`);
-    }
-  };
   const handleCreatePrompt = async () => {
     setIsCreatingPrompt(true);
     try {
-      // Generate a unique name like "new prompt", "new prompt (1)", etc.
-      const basePromptName = "new-prompt";
-      const existingPrompts = prompts || [];
+      // Create a basic prompt with default settings
+      const basePrompt: LLMRequestBody = {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            _type: "message",
+            role: "system",
+            content: "You are a helpful assistant.",
+          },
+          {
+            _type: "message",
+            role: "user",
+            content: "What is 2+2?",
+          },
+        ],
+      };
 
-      let promptName = basePromptName;
-      let counter = 1;
-
-      while (existingPrompts.some((p) => p.user_defined_id === promptName)) {
-        promptName = `${basePromptName}-${counter}`;
-        counter++;
-      }
-
-      await createPrompt(promptName);
+      await createPromptFromRequest(
+        jawn,
+        basePrompt,
+        router,
+        notification.setNotification
+      );
     } finally {
       setIsCreatingPrompt(false);
     }
