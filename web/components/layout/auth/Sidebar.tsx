@@ -19,6 +19,7 @@ import {
   SheetIcon,
   ShieldCheckIcon,
   TagIcon,
+  TestTube2,
   UsersIcon,
   Webhook,
 } from "lucide-react";
@@ -107,6 +108,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/datasets",
             icon: DatabaseIcon,
             current: pathname.includes("/datasets"),
+          },
+          {
+            name: "Playground (Prompts)",
+            href: "/prompts",
+            icon: TestTube2,
+            current: pathname.includes("/playground"),
           },
         ],
       },
