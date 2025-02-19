@@ -174,18 +174,18 @@ const PromptsPage = (props: PromptsPageProps) => {
                     maxHeight={false}
                     code={`
 // 1. Add this line
-import { hprompt } from "@helicone/helicone";
+import { hpf } from "@helicone/prompts";
 
 const chatCompletion = await openai.chat.completions.create(
   {
     messages: [
       {
         role: "user",
-        // 2: Add hprompt to any string, and nest any variable in additional brackets \`{}\`
-        content: hprompt\`Write a story about \${{ scene }}\`,
+        // 2: Add hpf to any string, and nest any variable in \`\${{ }}\` with additional brackets
+        content: hpf\`Write a story about \${{ scene }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
   },
   {
     // 3. Add Prompt Id Header
