@@ -82,7 +82,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           {
             _type: "message",
             role: "user",
-            content: "What is 2+2?",
+            content: 'What is 2+<helicone-prompt-input key="number" />?',
           },
         ],
       };
