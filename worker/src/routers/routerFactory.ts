@@ -12,6 +12,7 @@ import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
 import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
+import { getGenerateRouter } from "./generateRouter";
 
 export type BaseRouter = RouterType<
   Route,
@@ -35,6 +36,7 @@ const WORKER_MAP: Omit<
   OPENAI_PROXY: getOpenAIProxyRouter,
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
+  GENERATE_API: getGenerateRouter,
   CUSTOMER_GATEWAY: (router: BaseRouter) => {
     router.all(
       "*",
