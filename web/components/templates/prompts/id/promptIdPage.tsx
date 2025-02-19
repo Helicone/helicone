@@ -6,7 +6,6 @@ import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
 import GlassHeader from "@/components/shared/universal/GlassHeader";
-import UniversalPopup from "@/components/shared/universal/Popup";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
@@ -52,6 +51,8 @@ import {
   PiSpinnerGapBold,
   PiStopBold,
 } from "react-icons/pi";
+
+import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,
   usePromptVersions,
@@ -461,9 +462,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // B. Build Metadata for Saving
       const metadata = {
+        provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
-        createdFromUi: true,
-        provider: state.parameters.provider,
         inputs: variableMap,
       };
 

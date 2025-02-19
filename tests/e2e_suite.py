@@ -9,6 +9,7 @@ import base64
 import pytest
 from dotenv import load_dotenv
 import pathlib
+import requests  # Ensure this is imported at the top of your file
 
 # Load environment variables from .env file
 load_dotenv()
@@ -358,6 +359,41 @@ class TestHeliconeIntegrations:
             },
         )
         assert message.content[0].text is not None
+
+    def test_generate_basic(self):
+        """Test basic prompt generation without variables using requests"""
+        generate_url = os.getenv("HELICONE_GENERATE_BASE_URL")
+        if not generate_url:
+            pytest.skip("HELICONE_GENERATE_BASE_URL not set in environment")
+
+        payload = {
+            # Prompt Info
+            "promptId": "new-prompt",
+            "version": "production",
+            "inputs": {
+                "num": "10",
+            },
+            # Helicone Properties
+            "userId": "test-user",
+            "sessionId": SESSION_ID,
+        }
+        headers = {
+            # Helicone Auth
+            "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+            # Provider Keys
+            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
+            "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
+            "GOOGLE_API_KEY": os.getenv("GOOGLE_GENERATIVE_API_KEY"),
+            "COHERE_API_KEY": os.getenv("COHERE_API_KEY"),
+            "MISTRAL_API_KEY": os.getenv("MISTRAL_API_KEY"),
+        }
+        response = requests.post(generate_url, json=payload, headers=headers)
+
+        # Assert that the HTTP status code indicates success
+        assert response.status_code == 200, f"Request failed: {response.text}"
+
+    def test_generate_with_chat(self):
+        return "not implemented"
 
 
 if __name__ == "__main__":
