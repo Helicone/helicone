@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "grok-3",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "introducing-helicone-v2",
     },
   },
@@ -467,11 +472,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {
