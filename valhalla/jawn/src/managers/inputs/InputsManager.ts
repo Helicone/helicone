@@ -126,6 +126,61 @@ export class InputsManager extends BaseManager {
     return ok(inputRecordId);
   }
 
+  async createInputRecords(
+    promptVersionId: string,
+    inputs: Record<string, string>[],
+    sourceRequest?: string,
+    experimentId?: string
+  ): Promise<Result<string[], string>> {
+    const existingPrompt = await supabaseServer.client
+      .from("prompts_versions")
+      .select("*")
+      .eq("id", promptVersionId)
+      .eq("organization", this.authParams.organizationId)
+      .single();
+
+    if (existingPrompt.error || !existingPrompt.data) {
+      return err(existingPrompt.error?.message ?? "Prompt version not found");
+    }
+
+    // Generate UUIDs for each input record
+    const inputRecordIds = inputs.map(() => randomUUID());
+
+    // Create the VALUES part of the query dynamically
+    const values = inputs
+      .map(
+        (_, index) =>
+          `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${
+            index * 5 + 4
+          }, $${index * 5 + 5})`
+      )
+      .join(",");
+
+    // Flatten parameters array
+    const params = inputs.flatMap((input, index) => [
+      inputRecordIds[index],
+      JSON.stringify(input),
+      sourceRequest,
+      promptVersionId,
+      experimentId,
+    ]);
+
+    const result = await dbExecute<PromptInputRecord>(
+      `
+      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
+      VALUES ${values}
+      RETURNING id
+      `,
+      params
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(inputRecordIds);
+  }
+
   async updateInputRecord(
     inputRecordId: string,
     inputs: Record<string, string>

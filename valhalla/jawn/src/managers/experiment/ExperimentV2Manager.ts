@@ -431,16 +431,11 @@ export class ExperimentV2Manager extends BaseManager {
       }
 
       const inputManager = new InputsManager(this.authParams);
-
-      await Promise.all(
-        inputs.map(async (input) => {
-          await inputManager.createInputRecord(
-            experiment.copied_original_prompt_version ?? "",
-            input,
-            undefined,
-            experimentId
-          );
-        })
+      await inputManager.createInputRecords(
+        experiment.copied_original_prompt_version ?? "",
+        inputs,
+        undefined,
+        experimentId
       );
 
       return ok(null);
