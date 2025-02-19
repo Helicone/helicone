@@ -221,6 +221,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openai-deep-research",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "introducing-helicone-v2",
     },
   },
