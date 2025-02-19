@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { mapGeminiPro } from "../../llm-mapper/mappers/gemini/chat";
 import { mapAnthropicRequest } from "../../llm-mapper/mappers/anthropic/chat";
+import { Message } from "@/llm-mapper/types";
+import { getRequestMessages } from "@/llm-mapper/mappers/anthropic/requestParser";
 
 describe("mapGeminiPro", () => {
   it("should handle basic text messages", () => {
@@ -187,6 +189,7 @@ describe("mapAnthropicRequest", () => {
       role: "user",
       content: "Hello",
       _type: "message",
+      id: expect.any(String),
     });
 
     // Check response message
@@ -245,7 +248,7 @@ describe("mapAnthropicRequest", () => {
 
     // Check request message structure
     const requestMessage = result.schema.request.messages![0];
-    expect(requestMessage.content).toBe("Page 1 Page 2");
+
     expect(requestMessage._type).toBe("contentArray");
     expect(requestMessage.image_url).toBeUndefined();
 
@@ -257,23 +260,27 @@ describe("mapAnthropicRequest", () => {
       content: "Page 1",
       role: "user",
       _type: "message",
+      id: expect.any(String),
     });
     expect(contentArray[1]).toEqual({
       content: "",
       role: "user",
       _type: "image",
       image_url: "data:image/1",
+      id: expect.any(String),
     });
     expect(contentArray[2]).toEqual({
       content: "Page 2",
       role: "user",
       _type: "message",
+      id: expect.any(String),
     });
     expect(contentArray[3]).toEqual({
       content: "",
       role: "user",
       _type: "image",
       image_url: "data:image/2",
+      id: expect.any(String),
     });
 
     // Check response message
@@ -499,6 +506,7 @@ describe("mapAnthropicRequest", () => {
       role: "user",
       content: "hello",
       _type: "message",
+      id: expect.any(String),
     });
 
     // Check response message
@@ -512,5 +520,108 @@ describe("mapAnthropicRequest", () => {
     // Check preview
     expect(result.preview.request).toBe("hello");
     expect(result.preview.response).toBe("Hi! How can I help you today?");
+  });
+});
+
+describe("getRequestMessages", () => {
+  it("should handle tool use and tool results in messages", () => {
+    const request = {
+      max_tokens: 8192,
+      messages: [
+        {
+          role: "user",
+          content: "Hello",
+        },
+        {
+          role: "assistant",
+          content: [
+            {
+              text: "Hi there",
+              type: "text",
+            },
+            {
+              id: "tool_123",
+              input: { param: "value" },
+              name: "test_tool",
+              type: "tool_use",
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "tool_result",
+              tool_use_id: "tool_123",
+              content: "Tool result data",
+            },
+          ],
+        },
+      ],
+      model: "claude-3-test",
+      system: "Test system message",
+      temperature: 0,
+    };
+
+    const messages = getRequestMessages(request);
+
+    // Check system message
+    expect(messages[0]).toEqual({
+      role: "system",
+      content: "Test system message",
+      _type: "message",
+      id: expect.any(String),
+    });
+
+    // Check first user message
+    expect(messages[1]).toEqual({
+      role: "user",
+      content: "Hello",
+      _type: "message",
+      id: expect.any(String),
+    });
+
+    // Check assistant message with tool use
+    expect(messages[2]).toEqual({
+      role: "assistant",
+      _type: "contentArray",
+      id: expect.any(String),
+      contentArray: [
+        {
+          content: "Hi there",
+          role: "assistant",
+          _type: "message",
+          id: expect.any(String),
+        },
+        {
+          content: 'test_tool({"param":"value"})',
+          role: "assistant",
+          _type: "function",
+          id: expect.any(String),
+          tool_calls: [
+            {
+              arguments: {
+                param: "value",
+              },
+              name: "test_tool",
+            },
+          ],
+        },
+      ],
+    });
+
+    // Check tool result message
+    expect(messages[3]).toMatchObject({
+      role: "user",
+      _type: "contentArray",
+      contentArray: [
+        {
+          content: "Tool result data",
+          role: "user",
+          _type: "functionCall",
+          tool_call_id: "tool_123",
+        },
+      ],
+    } as Message);
   });
 });

@@ -1,5 +1,5 @@
 import { Message } from "@/packages/llm-mapper/types";
-import React from "react";
+import React, { useMemo } from "react";
 
 export const OpenAIImage: React.FC<{
   imageUrl: string;
@@ -18,22 +18,37 @@ export const UnsupportedImage: React.FC = () => (
 
 export const FunctionMessage: React.FC<{
   message: Message;
-}> = ({ message }) => (
-  <>
-    {message.tool_calls?.map((toolCall, index) => (
-      <div
-        className="flex flex-col space-y-2"
-        key={`${index}-${toolCall.name}`}
-      >
-        <code className="text-xs whitespace-pre-wrap font-semibold">
-          {toolCall.name}
-        </code>
-        <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
-          {typeof toolCall.arguments === "object"
-            ? JSON.stringify(toolCall.arguments, null, 2)
-            : toolCall.arguments}
-        </pre>
-      </div>
-    ))}
-  </>
-);
+}> = ({ message }) => {
+  const argumentString = useMemo(() => {
+    if (!message.tool_calls) return "";
+    if (typeof message.tool_calls?.[0]?.arguments === "object") {
+      if (Array.isArray(message.tool_calls?.[0]?.arguments)) {
+        return JSON.stringify(message.tool_calls?.[0]?.arguments, null, 2);
+      }
+      if (Object.keys(message.tool_calls?.[0]?.arguments).length > 0) {
+        return JSON.stringify(message.tool_calls?.[0]?.arguments, null, 2);
+      }
+      return "";
+    }
+    return message.tool_calls?.[0]?.arguments;
+  }, [message.tool_calls]);
+  return (
+    <>
+      {message.tool_calls?.map((toolCall, index) => (
+        <div
+          className="flex flex-col space-y-2"
+          key={`${index}-${toolCall.name}`}
+        >
+          <code className="text-xs whitespace-pre-wrap font-semibold">
+            {toolCall.name}
+          </code>
+          {argumentString && (
+            <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
+              {argumentString}
+            </pre>
+          )}
+        </div>
+      ))}
+    </>
+  );
+};
