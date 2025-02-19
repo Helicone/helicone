@@ -463,7 +463,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       // B. Build Metadata for Saving
       const metadata = {
         provider: state.parameters.provider.toUpperCase(),
-        provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
         inputs: variableMap,
       };

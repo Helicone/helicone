@@ -20,6 +20,8 @@ export interface GenerateParams {
   };
 }
 
+export type GenerateResponse = string | { content: string; reasoning: string };
+
 export const PROVIDER_MODELS = {
   // General Use Cases
   ANTHROPIC: {
@@ -170,7 +172,7 @@ export const PROVIDER_MODELS = {
 
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
-): Promise<T extends object ? T : string> {
+): Promise<T extends object ? T : GenerateResponse> {
   const providerConfig =
     PROVIDER_MODELS[params.provider as keyof typeof PROVIDER_MODELS];
   if (!providerConfig) {
