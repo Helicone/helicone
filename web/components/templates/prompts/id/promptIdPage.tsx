@@ -52,6 +52,7 @@ import {
   PiStopBold,
 } from "react-icons/pi";
 
+import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,
   usePromptVersions,
@@ -59,7 +60,6 @@ import {
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
-import UniversalPopup from "@/components/shared/universal/Popup";
 
 interface PromptIdPageProps {
   id: string;
@@ -462,6 +462,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // B. Build Metadata for Saving
       const metadata = {
+        provider: state.parameters.provider.toUpperCase(),
         provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
         inputs: variableMap,
