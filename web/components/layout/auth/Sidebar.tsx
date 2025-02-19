@@ -88,13 +88,8 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/prompts",
             icon: NotepadText,
             current: pathname.includes("/prompts"),
+            isNew: true,
           },
-          // {
-          //   name: "Playground",
-          //   href: "/playground",
-          //   icon: TestTube2,
-          //   current: pathname.includes("/playground"),
-          // },
           {
             name: "Experiments",
             href: "/experiments",
