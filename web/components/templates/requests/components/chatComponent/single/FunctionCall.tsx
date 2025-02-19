@@ -1,6 +1,7 @@
 import { Message } from "@/packages/llm-mapper/types";
 import React from "react";
 import { renderFunctionCall } from "./renderFunctionCall";
+import MarkdownEditor from "@/components/shared/markdownEditor";
 
 export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
   if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
@@ -47,5 +48,14 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
       </div>
     );
   }
-  return null;
+  return (
+    <div className="flex flex-col space-y-2">
+      <MarkdownEditor
+        language="markdown"
+        text={typeof message.content === "string" ? message.content : ""}
+        setText={() => {}}
+        className=""
+      />
+    </div>
+  );
 };

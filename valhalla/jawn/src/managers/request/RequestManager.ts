@@ -433,6 +433,8 @@ export class RequestManager extends BaseManager {
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,
+            promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
+            promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
           }),
         };
       });
@@ -498,6 +500,8 @@ export class RequestManager extends BaseManager {
               provider: r.provider ?? "",
               completionTokens: r.completion_tokens ?? 0,
               promptTokens: r.prompt_tokens ?? 0,
+              promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
+              promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
             }),
             model:
               r.model_override ??

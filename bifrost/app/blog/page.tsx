@@ -221,6 +221,21 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "grok-3-benchmark-comparison",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-deep-research",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "introducing-helicone-v2",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "deepseek-janus-pro",
     },
   },

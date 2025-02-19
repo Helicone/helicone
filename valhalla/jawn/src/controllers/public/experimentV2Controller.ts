@@ -322,6 +322,26 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Post("/{experimentId}/add-manual-rows-batch")
+  public async addManualRowsToExperimentBatch(
+    @Path() experimentId: string,
+    @Body() requestBody: { inputs: Record<string, string>[] },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.addManualRowsToExperimentBatch(
+      experimentId,
+      requestBody.inputs
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Delete("/{experimentId}/rows")
   public async deleteExperimentTableRows(
     @Path() experimentId: string,

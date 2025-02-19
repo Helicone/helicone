@@ -1,10 +1,10 @@
-import { Variable } from "@/types/prompt-state";
+import { StateVariable } from "@/types/prompt-state";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export function extractVariables(
   content: string,
   mode: "helicone" | "template"
-): Variable[] {
+): StateVariable[] {
   const regex =
     mode === "helicone"
       ? /<helicone-prompt-input key="([^"]+)"(?:[^>]*?)(?:>(.*?)<\/helicone-prompt-input>|\s*\/>)/g
@@ -18,8 +18,8 @@ export function extractVariables(
   }));
 }
 
-export function deduplicateVariables(variables: Variable[]): Variable[] {
-  const uniqueVars = new Map<string, Variable>();
+export function deduplicateVariables(variables: StateVariable[]): StateVariable[] {
+  const uniqueVars = new Map<string, StateVariable>();
   variables.forEach((variable) => {
     if (!uniqueVars.has(variable.name)) {
       uniqueVars.set(variable.name, variable);
@@ -34,7 +34,7 @@ export function isValidVariableName(varContent: string): boolean {
 
 export function getVariableStatus(
   varName: string,
-  variables: Variable[]
+  variables: StateVariable[]
 ): { isValid: boolean; hasValue: boolean; value?: string } {
   const variable = variables.find((v) => v.name === varName);
   const hasValue = Boolean(variable?.value && variable.value.length > 0);
@@ -49,7 +49,7 @@ export function getVariableStatus(
 
 export function replaceVariables(
   content: string,
-  variables: Variable[]
+  variables: StateVariable[]
 ): string {
   let result = content;
   (variables || [])
@@ -102,7 +102,7 @@ export function processMessageContent(
   message: ChatCompletionMessageParam,
   options: {
     convertTags?: boolean;
-    variables?: Variable[];
+    variables?: StateVariable[];
   } = {}
 ): string {
   const content = message.content;
@@ -145,7 +145,7 @@ function processContent(
   content: string,
   options: {
     convertTags?: boolean;
-    variables?: Variable[];
+    variables?: StateVariable[];
   } = {}
 ): string {
   // First convert helicone tags to variables if needed

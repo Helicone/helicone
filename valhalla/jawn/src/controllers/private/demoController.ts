@@ -69,6 +69,8 @@ export class DemoController extends Controller {
         baseURL:
           process.env.VERCEL_ENV === "production"
             ? "https://oai.helicone.ai/v1"
+            : process.env.HELICONE_WORKER_URL
+            ? `${process.env.HELICONE_WORKER_URL}/v1`
             : "http://localhost:8787/v1",
         defaultHeaders: {
           ...defaultHeaders,

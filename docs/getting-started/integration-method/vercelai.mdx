@@ -54,6 +54,48 @@ const response = streamText({
 });
 ```
 
+```javascript Google (gemini)
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_API_KEY,
+  baseURL: "https://gateway.helicone.ai/v1beta",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-URL": "https://generativelanguage.googleapis.com",
+  },
+});
+
+// Use Google AI to make API calls
+const response = streamText({
+  model: google("gemini-1.5-pro-latest"),
+  prompt: "Hello world",
+});
+```
+
+```javascript AWS Bedrock
+import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
+
+const bedrock = createAmazonBedrock({
+  region: "us-east-1",
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  sessionToken: process.env.AWS_SESSION_TOKEN, // Optional: for temporary credentials
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "aws-access-key": process.env.AWS_ACCESS_KEY_ID,
+    "aws-secret-key": process.env.AWS_SECRET_ACCESS_KEY,
+    "aws-session-token": process.env.AWS_SESSION_TOKEN,
+  },
+});
+
+// Use AWS Bedrock to make API calls
+const response = streamText({
+  model: bedrock("anthropic.claude-v2"),
+  prompt: "Hello world",
+});
+```
+
 </CodeGroup>
   </Step>
 </Steps>
