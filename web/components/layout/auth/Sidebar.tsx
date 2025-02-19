@@ -19,7 +19,6 @@ import {
   SheetIcon,
   ShieldCheckIcon,
   TagIcon,
-  TestTube2,
   UsersIcon,
   Webhook,
 } from "lucide-react";
@@ -90,12 +89,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: NotepadText,
             current: pathname.includes("/prompts"),
           },
-          {
-            name: "Playground",
-            href: "/playground",
-            icon: TestTube2,
-            current: pathname.includes("/playground"),
-          },
+          // {
+          //   name: "Playground",
+          //   href: "/playground",
+          //   icon: TestTube2,
+          //   current: pathname.includes("/playground"),
+          // },
           {
             name: "Experiments",
             href: "/experiments",
