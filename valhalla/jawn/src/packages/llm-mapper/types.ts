@@ -30,7 +30,7 @@ export interface FunctionCall {
   arguments: Record<string, any>;
 }
 
-interface LLMRequestBody {
+export interface LLMRequestBody {
   llm_type?: LlmType;
   model?: string;
   provider?: string;
