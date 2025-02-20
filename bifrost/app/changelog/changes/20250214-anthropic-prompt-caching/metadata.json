@@ -1,0 +1,4 @@
+{
+  "title": "Anthropic Prompt Caching Support",
+  "description": "Added support for monitoring Anthropic's prompt caching feature"
+}
