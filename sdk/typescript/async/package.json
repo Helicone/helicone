@@ -1,6 +1,6 @@
 {
   "name": "@helicone/async",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "A Node.js wrapper for logging llm traces directly to Helicone, by passing the proxy, with OpenLLMetry",
@@ -57,11 +57,12 @@
     "nock": "^13.5.4",
     "openai": "^4.48.3",
     "prettier": "^2.8.8",
+    "together-ai": "^0.13.0",
     "ts-jest": "^29.1.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@traceloop/node-server-sdk": "^0.11.2"
+    "@traceloop/node-server-sdk": "^0.12.1"
   },
   "publishConfig": {
     "access": "public"
