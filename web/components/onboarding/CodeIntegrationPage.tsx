@@ -133,8 +133,13 @@ export function CodeIntegrationPage({
     const updateHighlightedCode = async () => {
       const highlighter = await highlighterPromise;
       const generator = codeSnippets[provider][language] as CodeGenerator;
-      const code = generator(apiKey || "<YOUR_API_KEY>");
 
+      if (typeof generator !== "function") {
+        setHighlightedCode(""); // Clear the code if no generator exists
+        return;
+      }
+
+      const code = generator(apiKey || "<YOUR_API_KEY>");
       const html = highlighter.codeToHtml(code, {
         lang:
           language === "typescript"

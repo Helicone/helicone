@@ -65,8 +65,6 @@ logger = HeliconeAsyncLogger(
 logger.init()
 
 client = Anthropic()`,
-    curl: (key: string) => `# Async logging is not available via cURL
-# Please use one of our SDKs (Python or Node.js) for async logging.`,
     docsLink:
       "https://docs.helicone.ai/getting-started/integration/openllmetry",
   },
@@ -86,14 +84,14 @@ const logger = new HeliconeAsyncLogger({
 logger.init();
 
 const client = new OpenAIClient(
-  \`https://\${process.env.AZURE_RESOURCE_NAME}.openai.azure.com/\`,
+  "https://YOUR_RESOURCE_NAME.openai.azure.com",
   new AzureKeyCredential(process.env.AZURE_API_KEY!),
 );`,
     python: (key: string) => `from helicone_async import HeliconeAsyncLogger
 from openai import AzureOpenAI
 
 logger = HeliconeAsyncLogger(
-    api_key="YOUR_HELICONE_API_KEY",
+    api_key="${key}",
     providers={
         "azureOpenAI": AzureOpenAI
     }
@@ -189,7 +187,7 @@ import requests
 import json
 
 # Initialize with your Helicone API key
-logger = HeliconeManualLogger(api_key="YOUR_HELICONE_API_KEY")
+logger = HeliconeManualLogger(api_key="${key}")
 
 def custom_operation(recorder):
     # Make request to your model endpoint
@@ -224,7 +222,7 @@ result = logger.log_request(
 )`,
     curl: (key: string) => `# Direct API logging example
 curl -X POST https://api.us.hconeai.com/custom/v1/log \\
-  -H 'Authorization: Bearer YOUR_HELICONE_KEY' \\
+  -H 'Authorization: Bearer ${key}' \\
   -H 'Content-Type: application/json' \\
   -d '{
     "providerRequest": {

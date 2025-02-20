@@ -4,9 +4,6 @@ import {
   CodeIntegrationPage,
   CodeSnippet,
 } from "@/components/onboarding/CodeIntegrationPage";
-import { env } from "next-runtime-env";
-
-const BASE_PATH = env("NEXT_PUBLIC_BASE_PATH");
 
 const CODE_SNIPPETS: CodeSnippet = {
   openai: {
@@ -14,8 +11,8 @@ const CODE_SNIPPETS: CodeSnippet = {
     typescript: (key: string) => `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "{{OPENAI_API_KEY}}",
-  baseURL: "${BASE_PATH}",
+  apiKey: "YOUR_OPENAI_API_KEY",
+  baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}"
   }
@@ -23,13 +20,15 @@ const client = new OpenAI({
     python: (key: string) => `from openai import OpenAI
 
 client = OpenAI(
-  api_key="{{OPENAI_API_KEY}}",
-  base_url="${BASE_PATH}",
+  api_key="YOUR_OPENAI_API_KEY",
+  base_url="https://oai.helicone.ai/v1",
   default_headers={
     "Helicone-Auth": f"Bearer ${key}"
   }
 )`,
-    curl: (key: string) => `curl "${BASE_PATH}/chat/completions" \\
+    curl: (
+      key: string
+    ) => `curl "https://oai.helicone.ai/v1/chat/completions" \\
   -H "Authorization: Bearer {{OPENAI_API_KEY}}" \\
   -H "Helicone-Auth: Bearer ${key}" \\
   -H "Content-Type: application/json" \\
@@ -43,7 +42,7 @@ client = OpenAI(
     typescript: (key: string) => `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "{{AZURE_API_KEY}}",
+  apiKey: "YOUR_AZURE_API_KEY",
   baseURL: "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",
