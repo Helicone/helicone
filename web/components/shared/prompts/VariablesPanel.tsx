@@ -83,7 +83,7 @@ export default function VariablesPanel({
     <div className="flex flex-col gap-2">
       {/* Header */}
       <div className="h-8 flex items-center justify-between">
-        <h2 className="font-semibold text-secondary">Variables</h2>
+        <h2 className="font-semibold text-secondary">Inputs</h2>
         <div className="flex flex-row gap-2">
           <TooltipProvider delayDuration={0}>
             <Tooltip>
@@ -140,7 +140,7 @@ export default function VariablesPanel({
       {validVariablesWithIndices.length === 0 ? (
         <p className="text-sm text-slate-400 text-center text-balance">
           Make your prompt dynamic with{" "}
-          <span className="font-semibold">Variables</span>. Type{" "}
+          <span className="font-semibold">Inputs</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
           value in a message and press <span className="text-heliblue">⌘E</span>
           .

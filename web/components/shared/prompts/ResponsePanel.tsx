@@ -1,7 +1,7 @@
 // "use client";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ResponsePanelProps {
   response: string;

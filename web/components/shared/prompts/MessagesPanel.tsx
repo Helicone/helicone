@@ -59,12 +59,12 @@ export default function MessagesPanel({
         return (
           <div key={index} className="flex flex-col gap-2">
             {/* Header */}
-            <div className="h-8 flex items-center justify-between">
+            <div className="min-h-8 h-8 flex items-center justify-between">
               {/* Message Role */}
-              <h2 className="font-semibold">
-                <span className="capitalize text-secondary">{msg.role}</span>
+              <h2 className="font-semibold items-center">
+                <h2 className="capitalize text-secondary">{msg.role}</h2>
                 {msg.idx !== undefined && (
-                  <span className="text-tertiary"> - message_{msg.idx}</span>
+                  <h2 className="text-tertiary"> - message_{msg.idx}</h2>
                 )}
               </h2>
 
