@@ -1,5 +1,5 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import { Message } from "packages/llm-mapper/types";
+import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
   promptId: string;
@@ -28,6 +28,7 @@ export interface StateParameters {
   provider: string;
   model: string;
   temperature: number;
+  tools?: Tool[];
   // TODO: Add more parameters
 }
 

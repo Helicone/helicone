@@ -54,6 +54,7 @@ import {
   PiStopBold,
 } from "react-icons/pi";
 
+import ToolPanel from "@/components/shared/prompts/ToolPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,
@@ -197,6 +198,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           provider: metadata?.provider ?? "openai",
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
+          tools: templateData.tools || [],
         },
         variables: variables,
         evals: templateData.evals || [],
@@ -461,6 +463,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
         messages: state.messages,
+        tools: state.parameters.tools,
       };
 
       // B. Build Metadata for Saving
@@ -967,9 +970,6 @@ async function pullPromptAndRunCompletion() {
                 promptVersionId={state.versionId}
               />
 
-              {/* TODO: Planned */}
-              {/* <EvalsPanel /> */}
-
               <ParametersPanel
                 parameters={state.parameters}
                 onParameterChange={(updates) => {
@@ -984,6 +984,8 @@ async function pullPromptAndRunCompletion() {
                   });
                 }}
               />
+
+              <ToolPanel tools={state.parameters.tools || []} />
             </div>
           }
         />
