@@ -561,7 +561,6 @@ const models: TsoaRoute.Models = {
             "name": {"dataType":"string","required":true},
             "description": {"dataType":"string","required":true},
             "parameters": {"ref":"Record_string.any_"},
-            "input_schema": {"ref":"Record_string.any_"},
         },
         "additionalProperties": false,
     },

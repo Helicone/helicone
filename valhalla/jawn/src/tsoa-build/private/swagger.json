@@ -1491,9 +1491,6 @@
 					},
 					"parameters": {
 						"$ref": "#/components/schemas/Record_string.any_"
-					},
-					"input_schema": {
-						"$ref": "#/components/schemas/Record_string.any_"
 					}
 				},
 				"required": [

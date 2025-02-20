@@ -10,9 +10,6 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
     if (tool.parameters?.properties) {
       return Object.keys(tool.parameters.properties);
     }
-    if (tool.input_schema?.properties) {
-      return Object.keys(tool.input_schema.properties);
-    }
     return [];
   };
 

@@ -34,8 +34,7 @@ export interface FunctionCall {
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>; // OpenAI
-  input_schema?: Record<string, any>; // Anthropic
+  parameters?: Record<string, any>; // Used for both OpenAI parameters and Anthropic input_schema
 }
 
 export interface LLMRequestBody {

@@ -104,7 +104,7 @@ export const mapAnthropicRequest: MapperFn<any, any> = ({
       tools: request.tools?.map((tool: Tool) => ({
         name: tool.name,
         description: tool.description,
-        input_schema: tool.input_schema,
+        parameters: tool.parameters || (tool as any)["input_schema"],
       })),
     },
     response: responseData?.error

@@ -698,7 +698,6 @@ Json: JsonObject;
       name: string;
       description: string;
       parameters?: components["schemas"]["Record_string.any_"];
-      input_schema?: components["schemas"]["Record_string.any_"];
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
