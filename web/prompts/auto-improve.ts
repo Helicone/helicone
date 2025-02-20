@@ -1,6 +1,6 @@
-import { StateMessage } from "@/types/prompt-state";
+import { Message } from "@/packages/llm-mapper/types";
 
-export default function autoImprovePrompt(messages: StateMessage[]) {
+export default function autoImprovePrompt(messages: Message[]) {
   const formattedMessages = messages
     .map((msg) => `<${msg.role}>\n${msg.content}\n</${msg.role}>`)
     .join("\n\n");
