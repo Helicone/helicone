@@ -2,6 +2,7 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "claude-3-5-sonnet-20241022": "anthropic/claude-3.5-sonnet",
   "claude-3-opus-20240229": "anthropic/claude-3-opus",
   "claude-3-haiku-20240307": "anthropic/claude-3-haiku",
+  "claude-3-5-haiku": "anthropic/claude-3.5-haiku",
   "claude-3-5-sonnet": "anthropic/claude-3.5-sonnet",
   "claude-3-opus": "anthropic/claude-3-opus",
   "claude-3-haiku": "anthropic/claude-3-haiku",
