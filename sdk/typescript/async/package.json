@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "description": "A Node.js wrapper for logging llm traces directly to Helicone, by passing the proxy, with OpenLLMetry",
+  "description": "A Node.js wrapper for logging llm traces directly to Helicone, bypassing the proxy, with OpenLLMetry",
   "repository": {
     "type": "git",
     "url": "git@github.com:Helicone/helicone.git",
