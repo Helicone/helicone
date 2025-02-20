@@ -530,7 +530,7 @@ WHERE (${builtFilter.filter})`,
       sessionParams.success_url = `${origin}/dashboard`;
       sessionParams.cancel_url = `${origin}/dashboard`;
     } else {
-      sessionParams.return_url = `${origin}/dashboard`;
+      sessionParams.return_url = `${origin}/onboarding/integrate`;
     }
 
     const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);

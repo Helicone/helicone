@@ -84,12 +84,12 @@ export default function OnboardingPage() {
         return { error: updateOrgError, data: null };
       }
 
-      return { error: null, data: responseData.data };
+      return { error: null, data: null };
     },
     onSuccess: (response) => {
-      if (response.data) {
+      if (!response.error) {
         setNotification("Organization updated successfully!", "success");
-        org?.setCurrentOrg(response.data);
+        org?.setCurrentOrg(createdOrgId ?? "");
         org?.refetchOrgs?.();
       }
     },
@@ -124,13 +124,10 @@ export default function OnboardingPage() {
     },
     onSuccess: (response) => {
       if (response.data) {
-        console.log("Created org:", response.data);
         setNotification("Organization created successfully!", "success");
-        console.log("Setting current org to:", response.data);
         org?.setCurrentOrg(response.data);
         org?.refetchOrgs?.();
         setCreatedOrgId(response.data);
-        console.log("New org context:", org);
       }
     },
   });
@@ -173,7 +170,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center">
       <OnboardingHeader />
-      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-8">
+      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-12">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold">Welcome to Helicone! 👋</h1>
           <div className="text-md font-light text-slate-500">

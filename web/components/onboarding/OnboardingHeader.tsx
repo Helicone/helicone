@@ -21,7 +21,7 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
   MEMBERS: "/onboarding",
   BILLING: "/onboarding/billing",
-  INTEGRATION: "/onboarding/integration",
+  INTEGRATION: "/onboarding/integrate",
   EVENT: "/onboarding/event",
 };
 

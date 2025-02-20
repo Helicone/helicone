@@ -6,50 +6,22 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useOrgOnboardingStore } from "@/store/onboardingStore";
-import {
-  EmbeddedCheckout,
-  EmbeddedCheckoutProvider,
-} from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
-  {
-    betas: ["custom_checkout_beta_5"],
-  }
-);
+import { TeamPlanCheckout } from "@/components/onboarding/Checkout/TeamPlanCheckout";
+import { ProPlanCheckout } from "@/components/onboarding/Checkout/ProPlanCheckout";
+import useNotification from "@/components/shared/notification/useNotification";
 
 export default function BillingPage() {
   const org = useOrg();
   const router = useRouter();
-  const { formData, currentStep, setCurrentStep, setFormData } =
-    useOrgOnboardingStore();
+  const { formData, setFormData } = useOrgOnboardingStore();
+  const { setNotification } = useNotification();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const createdOrgId = org?.currentOrg?.id;
 
-  // Check if they're an existing customer
-  const subscription = useQuery({
-    queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const jawn = getJawnClient();
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      console.log("Subscription response:", subscription);
-      return subscription;
-    },
-    enabled: !!org?.currentOrg?.id,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
-
-  useEffect(() => {
-    if (subscription.data?.data?.status === "active") {
-      router.replace("/onboarding/integrate");
-    }
-  }, [subscription.data, router]);
-
+  // Move mutations to the top level
   const upgradeToPro = useMutation({
     mutationFn: async (variables: { addons: any; seats?: number }) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
+      const jawn = getJawnClient();
       const endpoint =
         subscription.data?.data?.status === "canceled"
           ? "/v1/stripe/subscription/existing-customer/upgrade-to-pro"
@@ -72,7 +44,7 @@ export default function BillingPage() {
 
   const upgradeToTeamBundle = useMutation({
     mutationFn: async () => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
+      const jawn = getJawnClient();
       const endpoint =
         subscription.data?.data?.status === "canceled"
           ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
@@ -87,12 +59,38 @@ export default function BillingPage() {
     },
   });
 
-  const isLoading = upgradeToPro.isLoading || upgradeToTeamBundle.isLoading;
+  // Enhanced subscription check
+  const subscription = useQuery({
+    queryKey: ["subscription", createdOrgId],
+    queryFn: async (query) => {
+      const jawn = getJawnClient();
+      const subscription = await jawn.GET("/v1/stripe/subscription");
+      return subscription;
+    },
+    enabled: !!createdOrgId,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    onError: (error) => {
+      console.error("Subscription query error:", error);
+    },
+  });
 
-  // Add this effect to create checkout session on page load
+  // Redirect if subscription is active or if payment is pending
+  useEffect(() => {
+    if (
+      subscription.data?.data?.status === "active" ||
+      subscription.data?.data?.status === "trialing" ||
+      subscription.data?.data?.status === "incomplete"
+    ) {
+      setNotification("You've already subscribed to Helicone!", "success");
+      router.replace("/onboarding/integrate");
+    }
+  }, [subscription.data, router]);
+
+  // Create checkout session effect
   useEffect(() => {
     const createCheckoutSession = async () => {
-      if (!org?.currentOrg?.id) return;
+      if (!createdOrgId) return;
 
       try {
         let result;
@@ -101,11 +99,7 @@ export default function BillingPage() {
           result = await upgradeToTeamBundle.mutateAsync();
         } else {
           result = await upgradeToPro.mutateAsync({
-            addons: {
-              prompts: false,
-              experiments: false,
-              evals: false,
-            },
+            addons: formData.addons,
             seats: formData.members.length,
           });
         }
@@ -119,28 +113,47 @@ export default function BillingPage() {
     };
 
     createCheckoutSession();
-  }, [org?.currentOrg?.id, formData.plan, formData.members.length]);
+  }, [createdOrgId, formData.plan, formData.members.length, formData.addons]);
+
+  // Show loading state while checking subscription
+  if (subscription.isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-white">
+        <OnboardingHeader />
+        <main className="mx-auto pt-12 px-4 max-w-4xl">
+          <div className="flex items-center justify-center">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-white">
-      {/* Progress Header */}
       <OnboardingHeader />
-      <div className="mx-auto pt-12 px-4">
-        {isLoading ? (
-          <LoadingAnimation />
-        ) : clientSecret ? (
-          <EmbeddedCheckoutProvider
-            stripe={stripePromise}
-            options={{ clientSecret }}
-          >
-            <EmbeddedCheckout className="w-full h-full bg-white" />
-          </EmbeddedCheckoutProvider>
+
+      <main
+        className={`mx-auto pt-12 px-4 ${
+          formData.plan === "team" ? "max-w-7xl" : "max-w-4xl"
+        }`}
+      >
+        <div className="max-w-[1000px] mx-auto">
+          <header className="mb-8 ml-0 md:ml-16">
+            <h1 className="text-2xl font-semibold">Add billing information</h1>
+            <p className="text-sm text-slate-500 mt-2">
+              You can add billing information later, but you'll need to do it
+              before you can use Helicone.
+            </p>
+          </header>
+        </div>
+
+        {formData.plan === "team" ? (
+          <TeamPlanCheckout clientSecret={clientSecret} />
         ) : (
-          <div className="text-center text-gray-600">
-            Failed to load checkout. Please try again.
-          </div>
+          <ProPlanCheckout clientSecret={clientSecret} />
         )}
-      </div>
+      </main>
     </div>
   );
 }

@@ -27,6 +27,11 @@ interface OnboardingState {
   formData: {
     name: string;
     plan: PlanType;
+    addons: {
+      prompts: boolean;
+      experiments: boolean;
+      evals: boolean;
+    };
     members: Array<{ email: string; role: MemberRole }>;
   };
   createdOrgId: string | null;
@@ -43,6 +48,11 @@ export const useOrgOnboardingStore = create<OnboardingState>()(
       formData: {
         name: "",
         plan: "free",
+        addons: {
+          prompts: false,
+          experiments: false,
+          evals: false,
+        },
         members: [],
       },
       createdOrgId: null,
@@ -53,7 +63,12 @@ export const useOrgOnboardingStore = create<OnboardingState>()(
       resetOnboarding: () =>
         set({
           currentStep: "ORGANIZATION",
-          formData: { name: "", plan: "free", members: [] },
+          formData: {
+            name: "",
+            plan: "free",
+            addons: { prompts: false, experiments: false, evals: false },
+            members: [],
+          },
           createdOrgId: null,
         }),
     }),
