@@ -74,6 +74,11 @@ export const MODEL_LIST: {
     provider: "anthropic",
   },
   {
+    value: "claude-3-5-haiku",
+    label: "claude-3-5-haiku",
+    provider: "anthropic",
+  },
+  {
     value: "gpt-3.5-turbo",
     label: "gpt-3.5-turbo",
     provider: "openai",
