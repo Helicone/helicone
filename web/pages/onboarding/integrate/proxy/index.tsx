@@ -11,7 +11,7 @@ const CODE_SNIPPETS: CodeSnippet = {
     typescript: (key: string) => `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "YOUR_OPENAI_API_KEY",
+  apiKey: "{{OPENAI_API_KEY}}",
   baseURL: "https://oai.helicone.ai/v1",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}"
@@ -20,7 +20,7 @@ const client = new OpenAI({
     python: (key: string) => `from openai import OpenAI
 
 client = OpenAI(
-  api_key="YOUR_OPENAI_API_KEY",
+  api_key="{{OPENAI_API_KEY}}",
   base_url="https://oai.helicone.ai/v1",
   default_headers={
     "Helicone-Auth": f"Bearer ${key}"
@@ -42,7 +42,7 @@ client = OpenAI(
     typescript: (key: string) => `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "YOUR_AZURE_API_KEY",
+  apiKey: "{{AZURE_API_KEY}}",
   baseURL: "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
   defaultHeaders: {
     "Helicone-Auth": "Bearer ${key}",

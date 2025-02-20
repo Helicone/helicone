@@ -84,8 +84,8 @@ const logger = new HeliconeAsyncLogger({
 logger.init();
 
 const client = new OpenAIClient(
-  "https://YOUR_RESOURCE_NAME.openai.azure.com",
-  new AzureKeyCredential(process.env.AZURE_API_KEY!),
+  "https://{{RESOURCE_NAME}}.openai.azure.com",
+  new AzureKeyCredential("{{AZURE_API_KEY}}"),
 );`,
     python: (key: string) => `from helicone_async import HeliconeAsyncLogger
 from openai import AzureOpenAI
@@ -99,9 +99,9 @@ logger = HeliconeAsyncLogger(
 logger.init()
 
 client = AzureOpenAI(
-    api_key="YOUR_AZURE_API_KEY",
-    api_version="YOUR_API_VERSION",
-    azure_endpoint="https://YOUR_RESOURCE_NAME.openai.azure.com"
+    api_key="{{AZURE_API_KEY}}",
+    api_version="{{API_VERSION}}",
+    azure_endpoint="https://{{RESOURCE_NAME}}.openai.azure.com"
 )`,
     docsLink:
       "https://docs.helicone.ai/getting-started/integration/openllmetry",
