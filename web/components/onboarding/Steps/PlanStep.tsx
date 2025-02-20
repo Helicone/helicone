@@ -45,7 +45,7 @@ export const PlanStep = ({
     >
       <SelectTrigger>
         <SelectValue>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-sm">
             <span>{PLAN_OPTIONS[plan].label}</span>
             {PLAN_OPTIONS[plan].hasTrial && (
               <Badge variant="helicone-sky">7-day trial</Badge>

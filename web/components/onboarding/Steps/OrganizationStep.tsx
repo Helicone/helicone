@@ -30,7 +30,7 @@ export const OrganizationStep = ({
           type="text"
           value={localName}
           onChange={handleNameChange}
-          className={`${error ? "border-red-500 text-red-500" : ""}`}
+          className={`text-sm ${error ? "border-red-500 text-red-500" : ""}`}
         />
         {error ? (
           <p className="text-sm text-red-500">{error}</p>
