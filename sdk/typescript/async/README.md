@@ -136,7 +136,7 @@ We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.
 
 ## License
 
-[Add your license information here]
+Apache-2.0
 
 ## Support
 
