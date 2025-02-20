@@ -54,7 +54,7 @@ import {
   PiStopBold,
 } from "react-icons/pi";
 
-import ToolPanel from "@/components/shared/prompts/ToolPanel";
+import ToolPanel from "@/components/shared/prompts/ToolsPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,

@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { StateVariable } from "@/types/prompt-state";
+import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
-import { createSelectionRange } from "@/utils/selection";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { $assistant, $system, $user } from "@/utils/llm";
 import { readStream } from "@/lib/api/llm/read-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
-import performEditPrompt from "@/prompts/perform-edit";
-import { suggestions } from "@/prompts/perform-edit";
+import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
+import { $assistant, $system, $user } from "@/utils/llm";
 import {
+  cleanSuggestionIfNeeded,
   MIN_LENGTH_FOR_SUGGESTIONS,
   SUGGESTION_DELAY,
   suggestionReducer,
-  cleanSuggestionIfNeeded,
 } from "@/utils/suggestions";
 
-import LoadingDots from "@/components/shared/universal/LoadingDots";
 import Toolbar from "@/components/shared/prompts/Toolbar";
-import { PiChatDotsBold } from "react-icons/pi";
+import LoadingDots from "@/components/shared/universal/LoadingDots";
 import { MdKeyboardTab } from "react-icons/md";
+import { PiChatDotsBold } from "react-icons/pi";
 
 type SelectionState = {
   text: string;
@@ -565,7 +564,7 @@ export default function PromptBox({
   const tools = [
     {
       icon: <h3 className="font-medium">{"{{}}"}</h3>,
-      label: "Make Into Variable",
+      label: "Make Into Input",
       hotkey: "e",
       onSubmit: (varName: string) => {
         if (!selection || !textareaRef.current) return;
@@ -591,7 +590,7 @@ export default function PromptBox({
 
         handleTextEdit(newValue, newStart, newEnd);
       },
-      placeholder: "Variable name...",
+      placeholder: "Input name...",
     },
     {
       icon: <h3 className="font-medium">{"</>"}</h3>,

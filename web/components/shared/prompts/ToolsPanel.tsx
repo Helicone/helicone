@@ -1,5 +1,12 @@
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Tool } from "packages/llm-mapper/types";
-import { PiToolboxBold } from "react-icons/pi";
+import { PiPlusBold, PiToolboxBold } from "react-icons/pi";
 
 interface ToolPanelProps {
   tools: Tool[];
@@ -18,6 +25,26 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
       {/* Header */}
       <div className="h-8 flex items-center justify-between">
         <h2 className="font-semibold text-secondary">Tools</h2>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button
+                  variant={"outline"}
+                  size={"square_icon"}
+                  asPill
+                  disabled={true}
+                  onClick={() => {}}
+                >
+                  <PiPlusBold className="w-4 h-4 text-secondary" />
+                </Button>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add a tool to your prompt (coming soon)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       <div className="divide-y divide-slate-100 dark:divide-slate-900">
         {tools.map((tool, index) => (
@@ -36,7 +63,9 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
           </div>
         ))}
         {tools.length === 0 && (
-          <div className="py-2 text-sm text-tertiary">No tools configured</div>
+          <div className="py-2 text-sm text-tertiary text-center">
+            No tools configured.
+          </div>
         )}
       </div>
     </div>
