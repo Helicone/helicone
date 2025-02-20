@@ -1,3 +1,4 @@
+import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -5,17 +6,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useInputs } from "@/services/hooks/prompts/inputs";
 import { StateVariable } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
-import { populateVariables } from "./helpers";
-import { useInputs } from "@/services/hooks/prompts/inputs";
-import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
-import { memo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+import { memo, useState } from "react";
+import { populateVariables } from "./helpers";
 
-import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
 import { Input } from "@/components/ui/input";
+import { PiChatBold, PiDatabaseBold, PiShuffleBold } from "react-icons/pi";
 
 interface VariableItemProps {
   variable: StateVariable;
@@ -142,8 +142,8 @@ export default function VariablesPanel({
           Make your prompt dynamic with{" "}
           <span className="font-semibold">Variables</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
-          value in a message and press{" "}
-          <span className="text-heliblue">⌘ E</span>.
+          value in a message and press <span className="text-heliblue">⌘E</span>
+          .
         </p>
       ) : (
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">
