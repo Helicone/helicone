@@ -130,6 +130,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           ? JSON.parse(ver.helicone_template)
           : ver.helicone_template;
 
+      console.log("Template data:", templateData);
+
       const metadata =
         typeof ver.metadata === "string"
           ? JSON.parse(ver.metadata)
@@ -774,7 +776,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   }
   // - Page
   return (
-    <Tabs className="relative flex flex-col" defaultValue="editor">
+    <Tabs className="relative flex flex-col h-screen" defaultValue="editor">
       {/* Header */}
       <GlassHeader>
         {/* Left Side: Navigation */}
@@ -941,7 +943,7 @@ async function pullPromptAndRunCompletion() {
       </GlassHeader>
 
       {/* Prompt Editor Tab */}
-      <TabsContent className="p-4" value="editor">
+      <TabsContent className="flex-1 overflow-auto p-4" value="editor">
         <ResizablePanels
           leftPanel={
             <MessagesPanel
@@ -988,7 +990,7 @@ async function pullPromptAndRunCompletion() {
       </TabsContent>
 
       {/* Metrics Tab */}
-      <TabsContent value="metrics">
+      <TabsContent className="flex-1 overflow-auto" value="metrics">
         <PromptMetricsTab
           id={id}
           promptUserDefinedId={prompt?.user_defined_id || ""}
