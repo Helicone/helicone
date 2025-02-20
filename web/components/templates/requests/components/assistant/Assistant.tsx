@@ -24,6 +24,7 @@ export const Assistant = ({
   const chatTopBarProps = {
     allExpanded: false,
     toggleAllExpanded: () => {},
+    requestBody: mappedRequest.raw.request,
     requestMessages: mappedRequest.preview.concatenatedMessages,
     requestId: mappedRequest.heliconeMetadata.requestId,
     model: mappedRequest.model,

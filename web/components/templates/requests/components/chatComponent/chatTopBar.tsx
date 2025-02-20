@@ -8,9 +8,7 @@ import {
 import { NotepadText } from "lucide-react";
 import { useRouter } from "next/router";
 import React from "react";
-import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { useCreatePromptFromRequest } from "../../../../../services/hooks/prompts/prompts";
-import useNotification from "../../../../shared/notification/useNotification";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -48,8 +46,6 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   promptData,
 }) => {
   const router = useRouter();
-  const jawn = useJawnClient();
-  const { setNotification } = useNotification();
   const createPrompt = useCreatePromptFromRequest();
 
   return (
