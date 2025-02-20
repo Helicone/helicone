@@ -14,6 +14,7 @@ export interface GenerateParams {
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
   includeReasoning?: boolean;
+  reasoningEffort?: "low" | "medium" | "high";
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
@@ -27,7 +28,12 @@ export const PROVIDER_MODELS = {
   ANTHROPIC: {
     name: "Anthropic",
     openrouterDirectory: "anthropic",
-    models: ["claude-3.5-haiku", "claude-3.5-sonnet", "claude-3-opus"],
+    models: ["claude-3.5-haiku", "claude-3.5-sonnet", "claude-3-opus"].map(
+      (model) => ({
+        name: model,
+        supportsReasoningEffort: false,
+      })
+    ),
   },
   OPENAI: {
     name: "OpenAI",
@@ -35,11 +41,18 @@ export const PROVIDER_MODELS = {
     models: [
       "gpt-4o-mini",
       "gpt-4o",
+      "chatgpt-4o-latest",
       "gpt-4-turbo",
       "gpt-4",
       "gpt-3.5-turbo",
-      "chatgpt-4o-latest",
-    ],
+      "o3-mini",
+      "o1",
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: ["o1", "o3-mini"].some((str) =>
+        model.includes(str)
+      ),
+    })),
   },
   GOOGLE: {
     name: "Google",
@@ -50,7 +63,10 @@ export const PROVIDER_MODELS = {
       "gemini-pro-1.5",
       "gemma-2-27b-it",
       "gemma-2-9b-it",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   META_LLAMA: {
     name: "Meta Llama",
@@ -70,12 +86,18 @@ export const PROVIDER_MODELS = {
       "llama-3-8b-instruct:extended",
       "llama-guard-2-8b",
       "llama-3.1-405b",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   DEEPSEEK: {
     name: "DeepSeek",
     openrouterDirectory: "deepseek",
-    models: ["deepseek-r1", "deepseek-chat"],
+    models: ["deepseek-r1", "deepseek-chat"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   MISTRALAI: {
     name: "Mistral AI",
@@ -100,7 +122,10 @@ export const PROVIDER_MODELS = {
       "mixtral-8x7b-instruct:nitro",
       "mixtral-8x22b-instruct",
       "mistral-tiny",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   QWEN: {
     name: "Qwen",
@@ -110,12 +135,18 @@ export const PROVIDER_MODELS = {
       "qwen-2.5-7b-instruct",
       "qwen-2.5-coder-32b-instruct",
       "eva-qwen-2.5-72b",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   X: {
     name: "X AI",
     openrouterDirectory: "x-ai",
-    models: ["grok-2-1212", "grok-beta", "grok-2-vision-1212"],
+    models: ["grok-2-1212", "grok-beta", "grok-2-vision-1212"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   PERPLEXITY: {
     name: "Perplexity",
@@ -125,27 +156,42 @@ export const PROVIDER_MODELS = {
       "llama-3.1-sonar-large-128k-chat",
       "llama-3.1-sonar-huge-128k-online",
       "llama-3.1-sonar-small-128k-online",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   COHERE: {
     name: "Cohere",
     openrouterDirectory: "cohere",
-    models: ["command-r-plus", "command-r"],
+    models: ["command-r-plus", "command-r"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   AMAZON: {
     name: "Amazon",
     openrouterDirectory: "amazon",
-    models: ["nova-lite-v1", "nova-micro-v1", "nova-pro-v1"],
+    models: ["nova-lite-v1", "nova-micro-v1", "nova-pro-v1"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   MICROSOFT: {
     name: "Microsoft",
     openrouterDirectory: "microsoft",
-    models: ["wizardlm-2-8x22b", "wizardlm-2-7b", "phi-4"],
+    models: ["wizardlm-2-8x22b", "wizardlm-2-7b", "phi-4"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   NVIDIA: {
     name: "NVIDIA",
     openrouterDirectory: "nvidia",
-    models: ["llama-3.1-nemotron-70b-instruct"],
+    models: ["llama-3.1-nemotron-70b-instruct"].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   // Finetunes and Roleplay Use Cases
   NOUSRESEARCH: {
@@ -156,7 +202,10 @@ export const PROVIDER_MODELS = {
       "hermes-3-llama-3.1-70b",
       "hermes-2-pro-llama-3-8b",
       "nous-hermes-llama2-13b",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   SAO10K: {
     name: "SAO10K",
@@ -166,7 +215,10 @@ export const PROVIDER_MODELS = {
       "l3.1-euryale-70b",
       "l3-lunaris-8b",
       "l3.1-70b-hanami-x1",
-    ],
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
 } as const;
 

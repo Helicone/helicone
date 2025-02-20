@@ -681,6 +681,8 @@ Json: JsonObject;
     };
     Message: {
       contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -691,6 +693,11 @@ Json: JsonObject;
       id?: string;
       /** @enum {string} */
       _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+    };
+    Tool: {
+      name: string;
+      description: string;
+      parameters?: components["schemas"]["Record_string.any_"];
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
@@ -713,7 +720,12 @@ Json: JsonObject;
       n?: number | null;
       stop?: string[] | null;
       messages?: components["schemas"]["Message"][] | null;
-      tool_choice?: unknown;
+      tools?: components["schemas"]["Tool"][];
+      tool_choice?: {
+        name?: string;
+        /** @enum {string} */
+        type: "auto" | "none" | "tool";
+      };
     };
     LLMResponseBody: {
       error?: {
@@ -2941,10 +2953,7 @@ export interface operations {
       content: {
         "application/json": {
           metadata: components["schemas"]["Record_string.any_"];
-          prompt: {
-            messages: unknown[];
-            model: string;
-          };
+          prompt: unknown;
           userDefinedId: string;
         };
       };

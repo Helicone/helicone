@@ -29,6 +29,7 @@ export default {
         popin: "popin 1s ease-out forwards",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shine: "shine 2s linear infinite",
       },
       keyframes: {
         popin: {
@@ -38,6 +39,10 @@ export default {
         blink: {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0" },
+        },
+        shine: {
+          "0%": { backgroundPosition: "200% center" },
+          "100%": { backgroundPosition: "0% center" },
         },
         "accordion-down": {
           from: { height: "0" },
@@ -50,6 +55,8 @@ export default {
       },
       colors: {
         heliblue: "#0DA5E8",
+        "heliblue-light": "#E6F6FD",
+        "heliblue-dark": "#0369A1",
         aui: {
           primary: {
             DEFAULT: "#18a4e9",

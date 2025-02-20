@@ -1,8 +1,8 @@
-import { describe, expect, it } from "@jest/globals";
-import { mapGeminiPro } from "../../llm-mapper/mappers/gemini/chat";
-import { mapAnthropicRequest } from "../../llm-mapper/mappers/anthropic/chat";
-import { Message } from "@/llm-mapper/types";
 import { getRequestMessages } from "@/llm-mapper/mappers/anthropic/requestParser";
+import { Message } from "@/llm-mapper/types";
+import { describe, expect, it } from "@jest/globals";
+import { mapAnthropicRequest } from "../../llm-mapper/mappers/anthropic/chat";
+import { mapGeminiPro } from "../../llm-mapper/mappers/gemini/chat";
 
 describe("mapGeminiPro", () => {
   it("should handle basic text messages", () => {
@@ -314,7 +314,7 @@ describe("mapAnthropicRequest", () => {
           {
             name: "[REDACTED TOOL NAME]",
             description: "[REDACTED TOOL DESCRIPTION]",
-            input_schema: {
+            parameters: {
               type: "object",
               properties: {
                 topic: {
@@ -409,7 +409,7 @@ describe("mapAnthropicRequest", () => {
           {
             name: "[REDACTED TOOL NAME]",
             description: "[REDACTED TOOL DESCRIPTION]",
-            input_schema: {
+            parameters: {
               type: "object",
               properties: {
                 topic: {
