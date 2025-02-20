@@ -2696,6 +2696,28 @@
 				],
 				"type": "object"
 			},
+			"Tool": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"input_schema": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
@@ -2772,7 +2794,31 @@
 						"type": "array",
 						"nullable": true
 					},
-					"tool_choice": {}
+					"tools": {
+						"items": {
+							"$ref": "#/components/schemas/Tool"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"auto",
+									"none",
+									"tool"
+								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false

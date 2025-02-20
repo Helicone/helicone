@@ -1,4 +1,4 @@
-import { LlmSchema, Message } from "../../types";
+import { LlmSchema, Message, Tool } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
@@ -275,6 +275,11 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     top_p: request.top_p,
     messages: getRequestMessages(request),
     tool_choice: request.tool_choice,
+    tools: request.tools?.map((tool: Tool) => ({
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+    })),
   };
 
   const llmSchema: LlmSchema = {

@@ -31,6 +31,13 @@ export interface FunctionCall {
   arguments: Record<string, any>;
 }
 
+export interface Tool {
+  name: string;
+  description: string;
+  parameters?: Record<string, any>; // OpenAI
+  input_schema?: Record<string, any>; // Anthropic
+}
+
 export interface LLMRequestBody {
   llm_type?: LlmType;
   model?: string;
@@ -46,7 +53,12 @@ export interface LLMRequestBody {
   n?: number | null;
   stop?: string[] | null;
   messages?: Message[] | null;
-  tool_choice?: any;
+  tools?: Tool[];
+  tool_choice?: {
+    // Anthropic only
+    type: "auto" | "none" | "tool";
+    name?: string;
+  };
 }
 
 type LLMResponseBody = {

@@ -555,6 +555,17 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"content":{"dataType":"string"},"name":{"dataType":"string"},"role":{"dataType":"string"},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]}],"required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Tool": {
+        "dataType": "refObject",
+        "properties": {
+            "name": {"dataType":"string","required":true},
+            "description": {"dataType":"string","required":true},
+            "parameters": {"ref":"Record_string.any_"},
+            "input_schema": {"ref":"Record_string.any_"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LLMRequestBody": {
         "dataType": "refObject",
         "properties": {
@@ -572,7 +583,8 @@ const models: TsoaRoute.Models = {
             "n": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
             "stop": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"enum","enums":[null]}]},
             "messages": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},{"dataType":"enum","enums":[null]}]},
-            "tool_choice": {"dataType":"any"},
+            "tools": {"dataType":"array","array":{"dataType":"refObject","ref":"Tool"}},
+            "tool_choice": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["tool"]}],"required":true}}},
         },
         "additionalProperties": false,
     },
