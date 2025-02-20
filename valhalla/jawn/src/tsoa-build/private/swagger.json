@@ -7820,22 +7820,7 @@
 									"metadata": {
 										"$ref": "#/components/schemas/Record_string.any_"
 									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
+									"prompt": {},
 									"userDefinedId": {
 										"type": "string"
 									}

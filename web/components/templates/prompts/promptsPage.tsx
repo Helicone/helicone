@@ -24,14 +24,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
-  createPromptFromRequest,
+  useCreatePromptFromRequest,
   usePrompts,
 } from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import useNotification from "../../shared/notification/useNotification";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -52,10 +50,9 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
   const router = useRouter();
+  const createPrompt = useCreatePromptFromRequest();
   const searchParams = useSearchParams();
   const [isCreatingPrompt, setIsCreatingPrompt] = useState<boolean>(false);
-  const notification = useNotification();
-  const jawn = useJawnClient();
   const hasAccess = useHasAccess("prompts");
 
   // DERIVED STATE
@@ -87,12 +84,10 @@ const PromptsPage = (props: PromptsPageProps) => {
         ],
       };
 
-      await createPromptFromRequest(
-        jawn,
-        basePrompt,
-        router,
-        notification.setNotification
-      );
+      const res = await createPrompt(basePrompt);
+      if (res?.id) {
+        router.push(`/prompts/${res.id}`);
+      }
     } finally {
       setIsCreatingPrompt(false);
     }

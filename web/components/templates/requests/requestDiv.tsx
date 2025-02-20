@@ -14,7 +14,7 @@ import { FlaskConicalIcon, NotepadText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
-import { createPromptFromRequest } from "../../../services/hooks/prompts/prompts";
+import { useCreatePromptFromRequest } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
@@ -46,6 +46,7 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
+  const createPrompt = useCreatePromptFromRequest();
 
   const org = useOrg();
 
@@ -124,12 +125,10 @@ const RequestDiv = (props: RequestDivProps) => {
                     if (promptDataQuery.data?.id) {
                       router.push(`/prompts/${promptDataQuery.data?.id}`);
                     } else {
-                      await createPromptFromRequest(
-                        jawn,
-                        request.schema.request,
-                        router,
-                        setNotification
-                      );
+                      const res = await createPrompt(request.schema.request);
+                      if (res?.id) {
+                        router.push(`/prompts/${res.id}`);
+                      }
                     }
                   }}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"

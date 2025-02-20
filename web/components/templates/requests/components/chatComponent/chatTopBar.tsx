@@ -9,7 +9,7 @@ import { NotepadText } from "lucide-react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
-import { createPromptFromRequest } from "../../../../../services/hooks/prompts/prompts";
+import { useCreatePromptFromRequest } from "../../../../../services/hooks/prompts/prompts";
 import useNotification from "../../../../shared/notification/useNotification";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
@@ -50,6 +50,7 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   const router = useRouter();
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
+  const createPrompt = useCreatePromptFromRequest();
 
   return (
     <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
@@ -73,12 +74,10 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
             if (requestBody.messages && promptData?.id) {
               router.push(`/prompts/${promptData.id}`);
             } else if (requestBody.messages) {
-              await createPromptFromRequest(
-                jawn,
-                requestBody,
-                router,
-                setNotification
-              );
+              const res = await createPrompt(requestBody);
+              if (res?.id) {
+                router.push(`/prompts/${res.id}`);
+              }
             }
           }}
           className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"

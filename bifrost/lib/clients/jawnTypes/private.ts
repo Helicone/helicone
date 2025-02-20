@@ -2943,10 +2943,7 @@ export interface operations {
       content: {
         "application/json": {
           metadata: components["schemas"]["Record_string.any_"];
-          prompt: {
-            messages: unknown[];
-            model: string;
-          };
+          prompt: unknown;
           userDefinedId: string;
         };
       };

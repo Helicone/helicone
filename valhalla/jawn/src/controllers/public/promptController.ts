@@ -4,24 +4,20 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Path,
   Post,
   Request,
   Route,
   Security,
   Tags,
-  Patch,
 } from "tsoa";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, resultMap } from "../../lib/shared/result";
-import {
-  FilterLeafSubset,
-  FilterNode,
-} from "../../lib/shared/filters/filterDefs";
+import { InputsManager } from "../../managers/inputs/InputsManager";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { InputsManager } from "../../managers/inputs/InputsManager";
-import { randomUUID } from "crypto";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export type PromptsFilterBranch = {
   left: PromptsFilterNode;
@@ -213,10 +209,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: {
       userDefinedId: string;
-      prompt: {
-        model: string;
-        messages: any[];
-      };
+      prompt: any;
       metadata: Record<string, any>;
     },
     @Request() request: JawnAuthenticatedRequest
