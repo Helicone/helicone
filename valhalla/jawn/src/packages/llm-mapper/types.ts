@@ -6,8 +6,8 @@ export type LlmType = "chat" | "completion";
 
 export type Message = {
   _type:
-    | "function"
-    | "functionCall"
+    | "function" // This is the same as function (openai) or tool_use (anthropic)
+    | "functionCall" // This is the same as tool_use (openai) or tool_result (anthropic)
     | "image"
     | "message"
     | "autoInput"
@@ -16,7 +16,7 @@ export type Message = {
   role?: string;
   name?: string;
   content?: string;
-  tool_calls?: FunctionCall[];
+  tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
   timestamp?: string;
   image_url?: string;

@@ -1,24 +1,14 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
+import AutoImprove from "@/components/shared/prompts/AutoImprove";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
-import {
-  PiCaretLeftBold,
-  PiCommandBold,
-  PiPlayBold,
-  PiRocketLaunchBold,
-  PiStopBold,
-  PiSpinnerGapBold,
-} from "react-icons/pi";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
-import { toKebabCase } from "@/utils/strings";
-import Link from "next/link";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -27,31 +17,47 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateStream } from "@/lib/api/llm/generate-stream";
+import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { PromptState, StateMessage, Variable } from "@/types/prompt-state";
+import autoImprovePrompt from "@/prompts/auto-improve";
+import { PromptState, StateMessage, StateVariable } from "@/types/prompt-state";
+import { $system, $user } from "@/utils/llm";
 import {
   heliconeToStateMessages,
   isLastMessageUser,
   isPrefillSupported,
+  parseImprovedMessages,
   removeMessagePair,
 } from "@/utils/messages";
+import { toKebabCase } from "@/utils/strings";
 import {
   deduplicateVariables,
   extractVariables,
   isValidVariableName,
 } from "@/utils/variables";
+import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
+import {
+  PiBrainBold,
+  PiCaretLeftBold,
+  PiCommandBold,
+  PiPlayBold,
+  PiRocketLaunchBold,
+  PiSpinnerGapBold,
+  PiStopBold,
+} from "react-icons/pi";
 
+import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { DiffHighlight } from "../../welcome/diffHighlight";
-import { autoFillInputs } from "@helicone/prompts";
-import { Button } from "@/components/ui/button";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
@@ -67,6 +73,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
   // STATE
   const [state, setState] = useState<PromptState | null>(null);
+  const [isAutoIterateOpen, setIsAutoIterateOpen] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
 
   // STREAMING
   const [isStreaming, setIsStreaming] = useState(false);
@@ -143,14 +151,13 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       );
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: Variable[] = Object.entries(metadata?.inputs || {}).map(
-        ([name, value]) => ({
-          name,
-          value: value as string,
-          isValid: isValidVariableName(name),
-          isMessage: false,
-        })
-      );
+      let variables: StateVariable[] = Object.entries(
+        metadata.inputs || {}
+      ).map(([name, value]) => ({
+        name,
+        value: value as string,
+        isValid: isValidVariableName(name),
+      }));
       // 4.B. Extract additional variables contained in message content
       stateMessages.forEach((msg) => {
         const vars = extractVariables(msg.content, "helicone");
@@ -159,7 +166,6 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             name: v.name,
             value: metadata?.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
-            isMessage: msg.idx !== undefined,
           });
         });
       });
@@ -170,7 +176,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             name: `message_${msg.idx}`,
             value: "",
             isValid: true,
-            isMessage: true,
+            idx: msg.idx,
           });
       });
 
@@ -278,7 +284,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   );
   // - Create Variable
   const handleVariableCreate = useCallback(
-    (newVariable: Variable) => {
+    (newVariable: StateVariable) => {
       updateState((prev) => {
         if (!prev) return {};
         const currentVars = [...(prev.variables || [])];
@@ -306,16 +312,12 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       updateState((prev) => {
         if (!prev?.variables) return {};
 
-        // TODO: Make variables carry an optional idx instead of isMessage, so all of this can be cleaned up with (index: number, value: string, idx?: number)
-        // TODO: This will also allow me to clean up the populateVariables helper function from VariablesPanel
         const updatedVariables = [...prev.variables];
         const variable = updatedVariables[index];
         updatedVariables[index] = { ...variable, value };
 
-        // If this is a message variable, also update the corresponding message
-        const messageMatch = variable.name.match(/^message_(\d+)$/);
-        if (messageMatch) {
-          const messageIdx = parseInt(messageMatch[1]);
+        // If this variable has an idx, also update the corresponding message
+        if (variable.idx !== undefined) {
           let parsedValue: StateMessage;
           try {
             parsedValue = JSON.parse(value);
@@ -324,7 +326,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           }
 
           const updatedMessages = prev.messages.map((msg) => {
-            if (msg.idx === messageIdx) {
+            if (msg.idx === variable.idx) {
               return {
                 ...msg,
                 role: parsedValue.role,
@@ -341,7 +343,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         }
 
         return { variables: updatedVariables };
-      });
+      }, false);
     },
     [updateState]
   );
@@ -451,17 +453,17 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       const latestVersionId = promptVersions?.[0]?.id;
       if (!latestVersionId) return;
 
-      // 3.1. Build Helicone Template for Saving
+      // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
         messages: state.messages,
       };
 
+      // B. Build Metadata for Saving
       const metadata = {
+        provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
-        createdFromUi: true,
-        provider: state.parameters.provider,
         inputs: variableMap,
       };
 
@@ -550,6 +552,143 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     loadVersionData,
     updateState,
     promptVersions,
+  ]);
+
+  // WIP
+  const handleImprove = useCallback(async () => {
+    setIsImproving(true);
+
+    const prompt = autoImprovePrompt(state?.messages || []);
+
+    try {
+      abortController.current = new AbortController();
+
+      const stream = await generateStream({
+        provider: "DEEPSEEK",
+        model: "deepseek-r1",
+        messages: [$system(prompt.system), $user(prompt.user)],
+        temperature: 1,
+        includeReasoning: true,
+        signal: abortController.current.signal,
+        stop: ["</improved_user>", "</response_format>"], // TODO: Make this dynamic
+      });
+
+      await readStream(
+        stream,
+        (chunk: string) => {
+          try {
+            const jsonResponse = JSON.parse(chunk);
+
+            // Handle different types of chunks
+            if (jsonResponse.type === "content") {
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content:
+                      (prev?.improvement?.content || "") + jsonResponse.chunk,
+                    reasoning: prev?.improvement?.reasoning || "",
+                  },
+                }),
+                false
+              );
+            } else if (jsonResponse.type === "reasoning") {
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content: prev?.improvement?.content || "",
+                    reasoning:
+                      (prev?.improvement?.reasoning || "") + jsonResponse.chunk,
+                  },
+                }),
+                false
+              );
+            } else if (jsonResponse.type === "final") {
+              // Final message just confirms the complete content and reasoning
+              updateState(
+                (prev) => ({
+                  improvement: {
+                    content: jsonResponse.content,
+                    reasoning: jsonResponse.reasoning,
+                  },
+                }),
+                false
+              );
+            }
+          } catch (error) {
+            console.error("Error parsing chunk:", error);
+          }
+        },
+        abortController.current.signal
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("Error generating improvements:", error);
+        setNotification("Failed to generate improvements", "error");
+      }
+    } finally {
+      setIsImproving(false);
+      abortController.current = null;
+    }
+  }, [state?.messages, updateState, setNotification]);
+
+  const handleApplyImprovement = useCallback(async () => {
+    if (!state?.improvement?.content) return;
+
+    try {
+      const improvedMessages = parseImprovedMessages(state.improvement.content);
+      const latestVersionId = promptVersions?.[0]?.id;
+      if (!latestVersionId) return;
+
+      // Build Helicone Template for Saving
+      const heliconeTemplate = {
+        model: state.parameters.model,
+        temperature: state.parameters.temperature,
+        messages: improvedMessages,
+      };
+
+      const metadata = {
+        isProduction: false,
+        createdFromUi: true,
+        provider: state.parameters.provider,
+        inputs: Object.fromEntries(
+          (state.variables || []).map((v) => [v.name, v.value || ""])
+        ),
+      };
+
+      const result = await jawnClient.POST(
+        "/v1/prompt/version/{promptVersionId}/subversion",
+        {
+          params: { path: { promptVersionId: latestVersionId } },
+          body: {
+            newHeliconeTemplate: heliconeTemplate,
+            metadata,
+            isMajorVersion: true,
+          },
+        }
+      );
+
+      if (result?.error || !result?.data) {
+        setNotification("Error saving improved prompt", "error");
+        return;
+      }
+
+      // Load the new version data and refresh the versions list
+      loadVersionData(result.data.data);
+      await refetchPromptVersions();
+
+      setNotification("Successfully applied improvements", "success");
+      setIsAutoIterateOpen(false);
+    } catch (error) {
+      console.error("Error applying improvements:", error);
+      setNotification("Failed to apply improvements", "error");
+    }
+  }, [
+    state,
+    promptVersions,
+    jawnClient,
+    loadVersionData,
+    refetchPromptVersions,
+    setNotification,
   ]);
 
   // EFFECTS
@@ -652,6 +791,15 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
+          <Button
+            variant="link"
+            onClick={() => setIsAutoIterateOpen(true)}
+            disabled={state.isDirty}
+          >
+            <PiBrainBold className="h-4 w-4 mr-2" />
+            Auto-Improve
+          </Button>
+
           {/* Run & Save Button */}
           <Button
             className={`${
@@ -808,6 +956,9 @@ async function pullPromptAndRunCompletion() {
                 promptVersionId={state.versionId}
               />
 
+              {/* TODO: Planned */}
+              {/* <EvalsPanel /> */}
+
               <ParametersPanel
                 parameters={state.parameters}
                 onParameterChange={(updates) => {
@@ -834,6 +985,28 @@ async function pullPromptAndRunCompletion() {
           promptUserDefinedId={prompt?.user_defined_id || ""}
         />
       </TabsContent>
+
+      {/* Auto-improve Popup */}
+      <UniversalPopup
+        title="Auto-Improve (Beta)"
+        width="w-full max-w-7xl"
+        isOpen={isAutoIterateOpen}
+        onClose={() => {
+          setIsAutoIterateOpen(false);
+          updateState({ improvement: undefined }, false);
+        }}
+      >
+        <AutoImprove
+          isImproving={isImproving}
+          improvement={state.improvement}
+          version={state.version}
+          messages={state.messages}
+          onStartImprove={handleImprove}
+          onApplyImprovement={handleApplyImprovement}
+          onCancel={() => setIsAutoIterateOpen(false)}
+          updateState={(updates) => updateState(updates, false)}
+        />
+      </UniversalPopup>
     </Tabs>
   );
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { Variable } from "@/types/prompt-state";
+import { StateVariable } from "@/types/prompt-state";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 import { createSelectionRange } from "@/utils/selection";
@@ -47,9 +47,9 @@ const sharedTextAreaStyles = {
 interface PromptBoxProps {
   value: string;
   onChange: (value: string) => void;
-  onVariableCreate?: (variable: Variable) => void;
+  onVariableCreate?: (variable: StateVariable) => void;
   contextText?: string;
-  variables?: Variable[];
+  variables?: StateVariable[];
   disabled?: boolean;
 }
 
