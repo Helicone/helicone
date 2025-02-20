@@ -1,6 +1,6 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
-import { StateMessage } from "@/types/prompt-state";
+import { Message } from "@/packages/llm-mapper/types";
 import { parseImprovedMessages } from "@/utils/messages";
 import { PiBrainBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
@@ -18,7 +18,7 @@ interface AutoImproveProps {
   isImproving: boolean;
   improvement?: Improvement;
   version: number;
-  messages: StateMessage[];
+  messages: Message[];
   onStartImprove: () => void;
   onApplyImprovement: () => void;
   onCancel: () => void;
@@ -95,8 +95,8 @@ export default function AutoImprove({
               {messages.map((msg, index) => (
                 <MiniMessage
                   key={index}
-                  role={msg.role}
-                  content={msg.content}
+                  role={msg.role || ""}
+                  content={msg.content || ""}
                 />
               ))}
             </div>
@@ -111,8 +111,8 @@ export default function AutoImprove({
               {parseImprovedMessages(improvement.content).map((msg, index) => (
                 <MiniMessage
                   key={index}
-                  role={msg.role}
-                  content={msg.content}
+                  role={msg.role || ""}
+                  content={msg.content || ""}
                 />
               ))}
             </div>
