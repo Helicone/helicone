@@ -28,7 +28,9 @@ export default function ParametersPanel({
   // Initialize provider if not set
   useEffect(() => {
     if (!parameters.provider) {
-      const defaultProvider = Object.keys(PROVIDER_MODELS)[0];
+      const defaultProvider = Object.keys(
+        PROVIDER_MODELS
+      )[0] as keyof typeof PROVIDER_MODELS;
       onParameterChange({
         provider: defaultProvider,
         model:
