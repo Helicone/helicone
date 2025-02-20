@@ -20,6 +20,7 @@ export type Message = {
   tool_call_id?: string;
   timestamp?: string;
   image_url?: string;
+  idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
 };
 
@@ -30,7 +31,13 @@ export interface FunctionCall {
   arguments: Record<string, any>;
 }
 
-interface LLMRequestBody {
+export interface Tool {
+  name: string;
+  description: string;
+  parameters?: Record<string, any>; // Used for both OpenAI parameters and Anthropic input_schema
+}
+
+export interface LLMRequestBody {
   llm_type?: LlmType;
   model?: string;
   provider?: string;
@@ -45,7 +52,12 @@ interface LLMRequestBody {
   n?: number | null;
   stop?: string[] | null;
   messages?: Message[] | null;
-  tool_choice?: any;
+  tools?: Tool[];
+  tool_choice?: {
+    // Anthropic only
+    type: "auto" | "none" | "tool";
+    name?: string;
+  };
 }
 
 type LLMResponseBody = {

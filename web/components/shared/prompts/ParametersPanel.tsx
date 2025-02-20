@@ -7,18 +7,18 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
+import { StateParameters } from "@/types/prompt-state";
 import { useEffect } from "react";
-import { PiPaintBrushBold, PiPlugsBold, PiTargetBold } from "react-icons/pi";
-interface Parameters {
-  model: string;
-  provider: string;
-  temperature: number;
-  // TODO: Add other parameters
-}
+import {
+  PiBrainBold,
+  PiPaintBrushBold,
+  PiPlugsBold,
+  PiTargetBold,
+} from "react-icons/pi";
 
 interface ParametersPanelProps {
-  parameters: Parameters;
-  onParameterChange: (updates: Partial<Parameters>) => void;
+  parameters: StateParameters;
+  onParameterChange: (updates: Partial<StateParameters>) => void;
 }
 
 export default function ParametersPanel({
@@ -33,7 +33,7 @@ export default function ParametersPanel({
         provider: defaultProvider,
         model:
           PROVIDER_MODELS[defaultProvider as keyof typeof PROVIDER_MODELS]
-            .models[0],
+            .models[0].name,
       });
     }
   }, [parameters.provider, onParameterChange]);
@@ -42,9 +42,18 @@ export default function ParametersPanel({
     const validProvider = provider as keyof typeof PROVIDER_MODELS;
     onParameterChange({
       provider: validProvider,
-      model: PROVIDER_MODELS[validProvider].models[0],
+      model: PROVIDER_MODELS[validProvider].models[0].name,
     });
   };
+
+  const currentModel =
+    parameters.provider && parameters.model
+      ? PROVIDER_MODELS[
+          parameters.provider as keyof typeof PROVIDER_MODELS
+        ].models.find((m) => m.name === parameters.model)
+      : undefined;
+
+  const supportsReasoningEffort = currentModel?.supportsReasoningEffort;
 
   return (
     <div className="flex flex-col gap-2">
@@ -88,8 +97,8 @@ export default function ParametersPanel({
                   PROVIDER_MODELS[
                     parameters.provider as keyof typeof PROVIDER_MODELS
                   ]?.models.map((model) => (
-                    <SelectItem key={model} value={model}>
-                      {model}
+                    <SelectItem key={model.name} value={model.name}>
+                      {model.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -122,6 +131,35 @@ export default function ParametersPanel({
             />
           </div>
         </div>
+        {supportsReasoningEffort && (
+          <div className="flex flex-row items-center justify-between gap-4 py-2">
+            <div className="flex items-center gap-2">
+              <PiBrainBold className="text-secondary" />
+              <label className="text-sm font-medium text-secondary">
+                Reasoning Effort
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={parameters.reasoning_effort || "medium"}
+                onValueChange={(value) =>
+                  onParameterChange({
+                    reasoning_effort: value as "low" | "medium" | "high",
+                  })
+                }
+              >
+                <SelectTrigger className="w-28 h-8">
+                  <SelectValue placeholder="Effort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

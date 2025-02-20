@@ -1,5 +1,7 @@
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
+import useNotification from "../../../components/shared/notification/useNotification";
 import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
 import { Result, resultMap } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
@@ -153,5 +155,51 @@ export const usePromptRequestsOverTime = (
     isLoading: promptUsageOverTime.isLoading,
     refetch: promptUsageOverTime.refetch,
     total: totalRequests,
+  };
+};
+
+export const useCreatePromptFromRequest = () => {
+  const org = useOrg();
+  const { setNotification } = useNotification();
+  const jawn = getJawnClient(org?.currentOrg?.id);
+
+  return async (request: Partial<LLMRequestBody>) => {
+    // Generate a unique name like "new prompt", "new prompt (1)", etc.
+    const basePromptName = "new-prompt";
+    const existingPrompts =
+      (
+        await jawn.POST("/v1/prompt/query", {
+          body: {
+            filter: "all",
+          },
+        })
+      )?.data?.data || [];
+
+    let promptName = basePromptName;
+    let counter = 1;
+
+    while (existingPrompts.some((p: any) => p.user_defined_id === promptName)) {
+      promptName = `${basePromptName}-${counter}`;
+      counter++;
+    }
+
+    const res = await jawn.POST("/v1/prompt/create", {
+      body: {
+        userDefinedId: promptName,
+        prompt: request,
+        metadata: {
+          provider: "OPENAI",
+          createdFromUi: true,
+        },
+      },
+    });
+
+    if (res.error || !res.data.data?.id) {
+      setNotification("Error creating prompt", "error");
+      return null;
+    } else {
+      setNotification("Prompt created successfully", "success");
+      return res.data.data;
+    }
   };
 };

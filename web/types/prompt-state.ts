@@ -1,4 +1,5 @@
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
   promptId: string;
@@ -7,7 +8,7 @@ export interface PromptState {
   versionId: string; // The actual version ID (UUID) used for API calls
   version: number;
 
-  messages: StateMessage[];
+  messages: Message[];
   parameters: StateParameters;
   variables?: StateVariable[];
   evals?: any[]; // TODO: Add evals to the state
@@ -18,12 +19,6 @@ export interface PromptState {
   improvement?: { reasoning: string; content: string };
 }
 
-export type StateMessage = {
-  role: "developer" | "system" | "user" | "assistant" | "tool";
-  content: string;
-  toolCallId?: string;
-  idx?: number;
-};
 export type HeliconeMessage =
   | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
   | { type: "text"; text: string } // Assistants API - from content: []
@@ -33,6 +28,8 @@ export interface StateParameters {
   provider: string;
   model: string;
   temperature: number;
+  reasoning_effort?: "low" | "medium" | "high";
+  tools?: Tool[];
   // TODO: Add more parameters
 }
 
