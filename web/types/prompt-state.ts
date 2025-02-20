@@ -28,6 +28,7 @@ export interface StateParameters {
   provider: string;
   model: string;
   temperature: number;
+  reasoning_effort?: "low" | "medium" | "high";
   tools?: Tool[];
   // TODO: Add more parameters
 }

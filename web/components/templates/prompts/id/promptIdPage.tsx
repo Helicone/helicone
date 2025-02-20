@@ -199,6 +199,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
           tools: templateData.tools || [],
+          reasoning_effort: templateData.reasoning_effort,
         },
         variables: variables,
         evals: templateData.evals || [],
@@ -460,10 +461,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
-        model: state.parameters.model,
-        temperature: state.parameters.temperature,
+        ...state.parameters,
         messages: state.messages,
-        tools: state.parameters.tools,
       };
 
       // B. Build Metadata for Saving
