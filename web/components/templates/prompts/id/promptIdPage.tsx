@@ -155,18 +155,18 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         templateData.content) as Message[];
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: StateVariable[] = Object.entries(
-        metadata.inputs || {}
-      ).map(([name, value]) => ({
-        name,
-        value: value as string,
-        isValid: isValidVariableName(name),
-      }));
+      let inputs: StateVariable[] = Object.entries(metadata.inputs || {}).map(
+        ([name, value]) => ({
+          name,
+          value: value as string,
+          isValid: isValidVariableName(name),
+        })
+      );
       // 4.B. Extract additional variables contained in message content
       stateMessages.forEach((msg) => {
         const vars = extractVariables(msg.content || "", "helicone");
         vars.forEach((v) => {
-          variables.push({
+          inputs.push({
             name: v.name,
             value: metadata?.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
@@ -176,7 +176,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       // 4.C. Add message variables to the list
       stateMessages.forEach((msg) => {
         msg.idx !== undefined &&
-          variables.push({
+          inputs.push({
             name: `message_${msg.idx}`,
             value: "",
             isValid: true,
@@ -185,7 +185,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       });
 
       // 4.D. Deduplicate variables
-      variables = deduplicateVariables(variables);
+      inputs = deduplicateVariables(inputs);
 
       // 6. Update state with the processed data
       setState({
@@ -195,13 +195,13 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: stateMessages,
         parameters: {
-          provider: metadata?.provider ?? "openai",
+          provider: metadata?.provider ?? "OPENAI",
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
           tools: templateData.tools || [],
           reasoning_effort: templateData.reasoning_effort,
         },
-        variables: variables,
+        variables: inputs,
         evals: templateData.evals || [],
         structure: templateData.structure,
         isDirty: false,

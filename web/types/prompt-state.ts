@@ -1,3 +1,4 @@
+import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
@@ -25,7 +26,7 @@ export type HeliconeMessage =
   | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
 
 export interface StateParameters {
-  provider: string;
+  provider: keyof typeof PROVIDER_MODELS;
   model: string;
   temperature: number;
   reasoning_effort?: "low" | "medium" | "high";
