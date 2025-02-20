@@ -24,9 +24,8 @@ export const Tool = ({
   const chatTopBarProps = {
     allExpanded: false,
     toggleAllExpanded: () => {},
-    requestMessages: mappedRequest.preview.concatenatedMessages,
+    requestBody: mappedRequest.raw.request,
     requestId: mappedRequest.heliconeMetadata.requestId,
-    model: mappedRequest.model,
     setOpen,
     mode,
     setMode,

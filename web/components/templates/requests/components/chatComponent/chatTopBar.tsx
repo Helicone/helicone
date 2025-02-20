@@ -67,9 +67,9 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
 
         <button
           onClick={async () => {
-            if (requestBody.messages && promptData?.id) {
+            if (requestBody?.messages && promptData?.id) {
               router.push(`/prompts/${promptData.id}`);
-            } else if (requestBody.messages) {
+            } else if (requestBody?.messages) {
               const res = await createPrompt(requestBody);
               if (res?.id) {
                 router.push(`/prompts/${res.id}`);
