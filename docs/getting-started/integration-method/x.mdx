@@ -41,7 +41,7 @@ Authorization: Bearer <your API key>
 
 Now you can access all the models on X AI with a simple fetch call:
 
-## Example
+## Example using cURL
 
 ```bash
 curl \
@@ -52,6 +52,27 @@ curl \
     "messages": [{"role": "user", "content": "Say this is a test"}]
 }' \
   --url https://x.helicone.ai/chat/completions
+```
+
+## Example using OpenAI SDK
+
+You can also use the OpenAI SDK to interact with X AI's models. Simply configure the base URL to point to Helicone's endpoint:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-x-ai-api-key",  # X AI API key
+    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
+)
+
+response = client.chat.completions.create(
+    model="grok-beta",
+    messages=[
+        {"role": "user", "content": "Say this is a test"}
+    ]
+)
+print(response.choices[0].message.content)
 ```
 
 For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
