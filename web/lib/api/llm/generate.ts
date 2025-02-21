@@ -2,7 +2,7 @@ import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { z } from "zod";
 
 export interface GenerateParams {
-  provider: string;
+  provider: keyof typeof PROVIDER_MODELS;
   model: string;
   messages: ChatCompletionMessageParam[];
   temperature?: number;
