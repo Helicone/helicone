@@ -67,7 +67,7 @@ export function CodeIntegrationPage({
   defaultProvider = "openai",
   defaultLanguage = "typescript",
 }: CodeIntegrationPageProps) {
-  const { setCurrentStep } = useOrgOnboardingStore();
+  const { setCurrentStep, resetOnboarding } = useOrgOnboardingStore();
   const user = useUser();
   const { setNotification } = useNotification();
   const org = useOrg();
@@ -155,11 +155,10 @@ export function CodeIntegrationPage({
     updateHighlightedCode();
   }, [provider, language, apiKey, codeSnippets]);
 
-  // Effect to handle auto-redirect when event is received
   useEffect(() => {
     if (hasEvent?.data) {
-      // Wait 1.5 seconds to show the success state before redirecting
       const timeout = setTimeout(() => {
+        resetOnboarding();
         router.push("/dashboard");
       }, 1500);
 
@@ -167,7 +166,6 @@ export function CodeIntegrationPage({
     }
   }, [hasEvent?.data, router]);
 
-  // Get available languages for current provider
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function"
   );

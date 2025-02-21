@@ -13,25 +13,28 @@ export default async function handler(
 
   const userId = req.query.id as string;
   const isEu = req.body.isEu;
+  const isDemo = req.body.isDemo;
 
-  // First, try to find existing demo org
-  const { data: existingDemoOrg } = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("soft_delete", false)
-    .eq("owner", userId)
-    .eq("tier", "demo")
-    .single();
+  if (isDemo) {
+    // First, try to find existing demo org
+    const { data: existingDemoOrg } = await getSupabaseServer()
+      .from("organization")
+      .select("*")
+      .eq("soft_delete", false)
+      .eq("owner", userId)
+      .eq("tier", "demo")
+      .single();
 
-  if (existingDemoOrg) {
-    return res.status(201).json({ orgId: existingDemoOrg.id });
+    if (existingDemoOrg) {
+      return res.status(201).json({ orgId: existingDemoOrg.id });
+    }
   }
 
   // If no demo org exists, create one with upsert
 
   // Add member record
   const result = await getSupabaseServer()
-    .rpc("ensure_one_demo_org", {
+    .rpc(isDemo ? "ensure_one_demo_org" : "create_main_org", {
       user_id: userId,
     })
     .single();

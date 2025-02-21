@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -45,8 +45,33 @@ export default function OnboardingPage() {
     setCurrentStep,
     setFormData,
     setCreatedOrgId,
+    resetOnboarding,
   } = useOrgOnboardingStore();
   const [nameError, setNameError] = useState("");
+
+  useEffect(() => {
+    if (formData.plan === "pro" || formData.plan === "team") {
+      setCurrentStep("MEMBERS");
+    } else {
+      setCurrentStep("ORGANIZATION");
+    }
+  }, [formData.plan]);
+
+  useEffect(() => {
+    if (!createdOrgId && org?.currentOrg?.id) {
+      resetOnboarding();
+    }
+  }, [org?.currentOrg?.id]);
+
+  useEffect(() => {
+    if (
+      createdOrgId &&
+      org?.currentOrg?.id === createdOrgId &&
+      org?.currentOrg?.has_onboarded
+    ) {
+      router.push("/dashboard");
+    }
+  }, [org?.currentOrg, createdOrgId]);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -125,6 +150,7 @@ export default function OnboardingPage() {
     onSuccess: (response) => {
       if (response.data) {
         setNotification("Organization created successfully!", "success");
+        console.log(`Setting current org to ${response.data}`);
         org?.setCurrentOrg(response.data);
         org?.refetchOrgs?.();
         setCreatedOrgId(response.data);

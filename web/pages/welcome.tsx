@@ -16,7 +16,18 @@ const Welcome = (props: WelcomeProps) => {
 
   useEffect(() => {
     // If org skipped onboarding, can return later to complete it
-    if (org && org.allOrgs.length > 0 && org.currentOrg?.has_onboarded) {
+    console.log(`Org: ${JSON.stringify(org)}`);
+    console.log(`Org length: ${org?.allOrgs.length}`);
+    console.log(`Org currentOrg: ${org?.currentOrg}`);
+    console.log(
+      `Org currentOrg has_onboarded: ${org?.currentOrg?.has_onboarded}`
+    );
+    if (
+      org &&
+      org.allOrgs.length > 0 &&
+      org.currentOrg?.tier !== "demo" &&
+      org.currentOrg?.has_onboarded
+    ) {
       console.log("Org has onboarded, redirecting to dashboard");
       router.push("/dashboard");
     } else {

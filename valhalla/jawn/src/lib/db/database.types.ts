@@ -2456,12 +2456,12 @@ export type Database = {
           helicone_org_id: string | null
           id: string
           model: string | null
+          prompt_cache_read_tokens: number | null
+          prompt_cache_write_tokens: number | null
           prompt_tokens: number | null
           request: string
           status: number | null
           time_to_first_token: number | null
-          prompt_cache_write_tokens: number | null
-          prompt_cache_read_tokens: number | null
         }
         Insert: {
           body: Json
@@ -2472,12 +2472,12 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_cache_read_tokens?: number | null
+          prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
           request: string
           status?: number | null
           time_to_first_token?: number | null
-          prompt_cache_write_tokens?: number | null
-          prompt_cache_read_tokens?: number | null
         }
         Update: {
           body?: Json
@@ -2488,12 +2488,12 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_cache_read_tokens?: number | null
+          prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
           request?: string
           status?: number | null
           time_to_first_token?: number | null
-          prompt_cache_write_tokens?: number | null
-          prompt_cache_read_tokens?: number | null
         }
         Relationships: []
       }
@@ -2926,6 +2926,14 @@ export type Database = {
             }
             Returns: boolean
           }
+      create_main_org: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
+      }
       date_count:
         | {
             Args: {
@@ -3068,7 +3076,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -3082,7 +3089,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -3096,7 +3102,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -3118,7 +3123,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -3129,7 +3133,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -3140,7 +3143,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3276,10 +3278,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {
