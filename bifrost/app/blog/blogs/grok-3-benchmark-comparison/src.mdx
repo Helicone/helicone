@@ -75,8 +75,7 @@ Its **Deep Search** tool was praised for finding high-quality information on rec
 🆇 **Coding Performance**
 
 An early user on X found Grok 3 <a href="https://x.com/theo/status/1891736803796832298" target="_blank" rel="noopener">**struggled with somewhat complex coding**</a>, at least compared to GPT-4o and Claude which coded up better solutions as shown below.
-
-<video width="100%" controls autoplay loop>
+<video width="100%" controls autoplay loop className="rounded-xl">
   <source
     src="/static/blog/grok-3-benchmark-comparison/theo-gg-coding-test.mp4"
     type="video/mp4"
@@ -133,15 +132,21 @@ xAI has big plans beyond Grok 3. Here’s what’s coming next:
   secondaryButtonText="See Docs"
   secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/x#x-ai-integration"
 >
-```bash
-curl \
-  --header 'Authorization: Bearer <X_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "model": "grok-beta",
-    "messages": [{"role": "user", "content": "Say this is a test"}]
-}' \
-  --url https://x.helicone.ai/chat/completions
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-x-ai-api-key",  # X AI API key
+    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
+)
+
+response = client.chat.completions.create(
+    model="grok-beta",
+    messages=[
+        {"role": "user", "content": "Say this is a test"}
+    ]
+)
+print(response.choices[0].message.content)
 ```
 </CallToAction>
 
