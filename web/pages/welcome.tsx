@@ -15,13 +15,6 @@ const Welcome = (props: WelcomeProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    // If org skipped onboarding, can return later to complete it
-    console.log(`Org: ${JSON.stringify(org)}`);
-    console.log(`Org length: ${org?.allOrgs.length}`);
-    console.log(`Org currentOrg: ${org?.currentOrg}`);
-    console.log(
-      `Org currentOrg has_onboarded: ${org?.currentOrg?.has_onboarded}`
-    );
     if (
       org &&
       org.allOrgs.length > 0 &&

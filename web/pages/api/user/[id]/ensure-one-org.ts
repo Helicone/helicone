@@ -28,13 +28,26 @@ export default async function handler(
     if (existingDemoOrg) {
       return res.status(201).json({ orgId: existingDemoOrg.id });
     }
+  } else {
+    const { data: existingMainOrg } = await getSupabaseServer()
+      .from("organization")
+      .select("*")
+      .eq("soft_delete", false)
+      .eq("owner", userId)
+      .eq("tier", "free")
+      .eq("name", "My Organization")
+      .single();
+
+    if (existingMainOrg) {
+      return res.status(201).json({ orgId: existingMainOrg.id });
+    }
   }
 
-  // If no demo org exists, create one with upsert
+  const rpcName = isDemo ? "ensure_one_demo_org" : "create_main_org";
 
   // Add member record
   const result = await getSupabaseServer()
-    .rpc(isDemo ? "ensure_one_demo_org" : "create_main_org", {
+    .rpc(rpcName, {
       user_id: userId,
     })
     .single();

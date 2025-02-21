@@ -301,6 +301,9 @@ const useOrgsContextManager = () => {
       // First create the main org
       fetch(`/api/user/${user.id}/ensure-one-org`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           isEu,
           isDemo: false,
@@ -308,12 +311,12 @@ const useOrgsContextManager = () => {
       })
         .then((res) => res.json())
         .then((mainOrgData) => {
-          // Set the cookie to the main org immediately
-          setOrgCookie(mainOrgData.orgId);
-
           // Then create the demo org
           return fetch(`/api/user/${user.id}/ensure-one-org`, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               isEu,
               isDemo: true,

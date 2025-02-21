@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { OnboardingStep, useOrgOnboardingStore } from "@/store/onboardingStore";
 import { useRouter } from "next/router";
+import { useOrg } from "../layout/org/organizationContext";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -28,6 +29,13 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
 export const OnboardingHeader = () => {
   const router = useRouter();
   const { formData, currentStep, setCurrentStep } = useOrgOnboardingStore();
+  const org = useOrg();
+
+  useEffect(() => {
+    if (org?.currentOrg?.has_onboarded) {
+      router.push("/dashboard");
+    }
+  }, [org?.currentOrg?.has_onboarded]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
     formData.plan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];

@@ -1614,6 +1614,7 @@ export type Database = {
           limits: Json | null
           logo_path: string | null
           name: string
+          onboarding_status: Json
           org_provider_key: string | null
           organization_type: string
           owner: string
@@ -1642,6 +1643,7 @@ export type Database = {
           limits?: Json | null
           logo_path?: string | null
           name: string
+          onboarding_status?: Json
           org_provider_key?: string | null
           organization_type?: string
           owner: string
@@ -1670,6 +1672,7 @@ export type Database = {
           limits?: Json | null
           logo_path?: string | null
           name?: string
+          onboarding_status?: Json
           org_provider_key?: string | null
           organization_type?: string
           owner?: string

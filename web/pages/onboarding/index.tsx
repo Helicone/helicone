@@ -1,20 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
-
 import { useUser } from "@supabase/auth-helpers-react";
 import { getJawnClient } from "@/lib/clients/jawn";
-import {
-  MemberRole,
-  PlanType,
-  useOrgOnboardingStore,
-} from "@/store/onboardingStore";
+import { MemberRole, PlanType } from "@/store/onboardingStore";
 import useNotification from "@/components/shared/notification/useNotification";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import React from "react";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
@@ -22,175 +17,89 @@ import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep
 import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
 import { MembersTable } from "@/components/onboarding/MembersTable";
 
-interface Member {
-  email: string;
-  role: MemberRole;
-}
-
-interface OrganizationForm {
-  name: string;
-  plan: PlanType;
-  members: Member[];
-}
-
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const user = useUser();
   const { setNotification } = useNotification();
-  const {
-    currentStep,
-    formData,
-    createdOrgId,
-    setCurrentStep,
-    setFormData,
-    setCreatedOrgId,
-    resetOnboarding,
-  } = useOrgOnboardingStore();
   const [nameError, setNameError] = useState("");
 
-  useEffect(() => {
-    if (formData.plan === "pro" || formData.plan === "team") {
-      setCurrentStep("MEMBERS");
-    } else {
-      setCurrentStep("ORGANIZATION");
-    }
-  }, [formData.plan]);
+  console.log(`Orgs: ${JSON.stringify(org?.allOrgs)}`);
+  console.log(`Current Org: ${JSON.stringify(org?.currentOrg)}`);
+  const { onboardingState, updateFormData, setCurrentStep } = useOrgOnboarding(
+    org?.currentOrg?.id ?? ""
+  );
 
-  useEffect(() => {
-    if (!createdOrgId && org?.currentOrg?.id) {
-      resetOnboarding();
-    }
-  }, [org?.currentOrg?.id]);
+  console.log(`onboardingState: ${JSON.stringify(onboardingState)}`);
 
-  useEffect(() => {
-    if (
-      createdOrgId &&
-      org?.currentOrg?.id === createdOrgId &&
-      org?.currentOrg?.has_onboarded
-    ) {
-      router.push("/dashboard");
-    }
-  }, [org?.currentOrg, createdOrgId]);
-
-  const subscription = useQuery({
+  // Subscription query
+  const { data: subscription } = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient();
-      const subscription = await jawn.GET("/v1/stripe/subscription");
-      return subscription;
-    },
+    queryFn: () => getJawnClient().GET("/v1/stripe/subscription"),
     enabled: !!org?.currentOrg?.id,
   });
 
   const { mutate: updateOrganization } = useMutation({
-    mutationFn: async (data: OrganizationForm) => {
-      const jawn = getJawnClient();
-      const { error: updateOrgError, data: responseData } = await jawn.POST(
+    mutationFn: async (data: {
+      name: string;
+      plan: PlanType;
+      members: Array<{ email: string; role: MemberRole }>;
+    }) => {
+      const { error, data: responseData } = await getJawnClient().POST(
         "/v1/organization/{organizationId}/update",
         {
-          body: {
-            name: data.name,
-          },
-          params: {
-            path: {
-              organizationId: createdOrgId ?? "",
-            },
-          },
+          body: { name: data.name },
+          params: { path: { organizationId: org?.currentOrg?.id ?? "" } },
         }
       );
 
-      if (updateOrgError) {
-        setNotification(
-          "Failed to update organization: " + updateOrgError,
-          "error"
-        );
-        return { error: updateOrgError, data: null };
+      if (error) {
+        setNotification("Failed to update organization: " + error, "error");
+        return { error: error, data: null };
       }
 
       return { error: null, data: null };
     },
-    onSuccess: (response) => {
-      if (!response.error) {
-        setNotification("Organization updated successfully!", "success");
-        org?.setCurrentOrg(createdOrgId ?? "");
-        org?.refetchOrgs?.();
+    onSuccess: () => {
+      setNotification("Organization updated successfully!", "success");
+      org?.refetchOrgs?.();
+
+      // Navigate based on plan
+      if (onboardingState?.formData.plan === "free") {
+        setCurrentStep("INTEGRATION");
+        router.push("/onboarding/integrate");
+      } else {
+        setCurrentStep("BILLING");
+        router.push("/onboarding/billing");
       }
     },
-  });
-
-  const { mutate: createOrganization } = useMutation({
-    mutationFn: async (data: OrganizationForm) => {
-      const jawn = getJawnClient();
-      const { error: createOrgError, data: responseData } = await jawn.POST(
-        "/v1/organization/create",
-        {
-          body: {
-            name: data.name,
-            owner: user?.id!,
-            color: "blue",
-            icon: "code",
-            has_onboarded: false,
-            tier: "free",
-          },
-        }
-      );
-
-      if (createOrgError) {
-        setNotification(
-          "Failed to create organization: " + createOrgError,
-          "error"
-        );
-        return { error: createOrgError, data: null };
-      }
-
-      return { error: null, data: responseData.data };
-    },
-    onSuccess: (response) => {
-      if (response.data) {
-        setNotification("Organization created successfully!", "success");
-        console.log(`Setting current org to ${response.data}`);
-        org?.setCurrentOrg(response.data);
-        org?.refetchOrgs?.();
-        setCreatedOrgId(response.data);
-      }
+    onError: (error) => {
+      setNotification("Failed to update organization: " + error, "error");
     },
   });
 
   const handlePlanChange = (plan: PlanType) => {
-    setFormData({ plan });
+    updateFormData({ plan });
     if (plan === "pro") setCurrentStep("MEMBERS");
   };
 
   const handleAddMember = (email: string, role: MemberRole) => {
-    setFormData({
-      members: [...formData.members, { email, role }],
+    updateFormData({
+      members: [...(onboardingState?.formData.members ?? []), { email, role }],
     });
   };
 
   const handleRemoveMember = (email: string) => {
-    setFormData({
-      members: formData.members.filter((m) => m.email !== email),
+    updateFormData({
+      members:
+        onboardingState?.formData.members.filter((m) => m.email !== email) ??
+        [],
     });
   };
 
   const handleOrganizationSubmit = () => {
-    if (!formData.name) return;
-
-    if (createdOrgId) {
-      updateOrganization(formData);
-    } else {
-      createOrganization(formData);
-    }
-
-    if (formData.plan === "pro" || formData.plan === "team") {
-      setCurrentStep("BILLING");
-      router.push("/onboarding/billing");
-    } else {
-      setCurrentStep("INTEGRATION");
-      router.push("/onboarding/integrate");
-    }
+    if (!onboardingState?.formData.name) return;
+    updateOrganization(onboardingState.formData);
   };
 
   return (
@@ -205,22 +114,22 @@ export default function OnboardingPage() {
         </div>
 
         <OrganizationStep
-          name={formData.name}
+          name={onboardingState?.formData.name ?? ""}
           onNameChange={(name) => {
-            setFormData({ name });
+            updateFormData({ name });
             setNameError(name ? "" : "Please enter an organization name :)");
           }}
         />
 
         <PlanStep
-          plan={formData.plan}
+          plan={onboardingState?.formData.plan ?? "free"}
           onPlanChange={handlePlanChange}
           onComplete={() => setCurrentStep("MEMBERS")}
         />
 
-        {formData.plan !== "free" && (
+        {onboardingState?.formData.plan !== "free" && (
           <MembersTable
-            members={formData.members}
+            members={onboardingState?.formData.members ?? []}
             onAddMember={handleAddMember}
             onRemoveMember={handleRemoveMember}
             ownerEmail={user?.email ?? ""}
@@ -232,9 +141,11 @@ export default function OnboardingPage() {
             variant="action"
             className="w-full"
             onClick={handleOrganizationSubmit}
-            disabled={!formData.name || !formData.plan}
+            disabled={!onboardingState?.formData.name}
           >
-            {createdOrgId ? "Update organization" : "Create organization"}
+            {onboardingState?.formData.name
+              ? "Update organization"
+              : "Create organization"}
           </Button>
         </div>
       </div>
