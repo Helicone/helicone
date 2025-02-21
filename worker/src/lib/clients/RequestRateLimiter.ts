@@ -18,23 +18,23 @@ export class RateLimiter {
     > = {
       free: {
         windowSizeSeconds: 60,
-        maxCount: 1_200,
+        maxCount: 10_200,
       },
       pro: {
         windowSizeSeconds: 60,
-        maxCount: 6_000,
+        maxCount: 60_000,
       },
       growth: {
         windowSizeSeconds: 60,
-        maxCount: 6_000,
+        maxCount: 60_000,
       },
       team: {
         windowSizeSeconds: 60,
-        maxCount: 15_000,
+        maxCount: 150_000,
       },
       enterprise: {
         windowSizeSeconds: 60,
-        maxCount: 30_000,
+        maxCount: 300_000,
       },
     };
 
