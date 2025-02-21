@@ -51,7 +51,7 @@ export default function MessagesPanel({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-4">
       {/* Messages */}
       {messages.map((msg, index) => {
         const isRemovable = isRemovableMessage(index);

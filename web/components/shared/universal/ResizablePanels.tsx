@@ -51,40 +51,40 @@ export default function ResizablePanels({
     setState((prev) => ({ ...prev, isResizing: false }));
   }, []);
 
-  const resizeHandleClasses = `px-2 ${
-    state.isResizing ? "cursor-col-resize" : "hover:cursor-col-resize"
-  }`;
-  const dividerClasses = `w-0.5 h-full rounded-full transition-colors ${
-    state.isResizing || state.isHovering
-      ? "bg-heliblue dark:bg-heliblue"
-      : "bg-slate-200 dark:bg-slate-800"
-  }`;
-
   return (
     <div
-      className="resizable-container flex h-full w-full select-none gap-2"
+      className="resizable-container flex w-full select-none gap-2"
       onMouseUp={handleMouseUp}
       onMouseLeave={() =>
         setState((prev) => ({ ...prev, isResizing: false, isHovering: false }))
       }
       onMouseMove={handleResize}
     >
-      <div className="flex h-full flex-1 flex-col">{leftPanel}</div>
+      {/* Left Panel */}
+      <div className="flex-1">{leftPanel}</div>
 
+      {/* Resize Handle */}
       <div
-        className={resizeHandleClasses}
+        className={`w-4 flex items-stretch justify-center ${
+          state.isResizing ? "cursor-col-resize" : "hover:cursor-col-resize"
+        }`}
         onMouseDown={handleMouseDown}
         onMouseEnter={() => setState((prev) => ({ ...prev, isHovering: true }))}
         onMouseLeave={() =>
           setState((prev) => ({ ...prev, isHovering: false }))
         }
       >
-        <div className={dividerClasses} />
+        <div
+          className={`w-0.5 self-stretch rounded-full transition-colors ${
+            state.isResizing || state.isHovering
+              ? "bg-heliblue dark:bg-heliblue"
+              : "bg-slate-200 dark:bg-slate-800"
+          }`}
+        />
       </div>
 
-      <div className="h-full" style={{ width: `${state.rightPanelWidth}%` }}>
-        {rightPanel}
-      </div>
+      {/* Right Panel */}
+      <div style={{ width: `${state.rightPanelWidth}%` }}>{rightPanel}</div>
     </div>
   );
 }

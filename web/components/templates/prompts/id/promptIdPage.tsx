@@ -960,7 +960,7 @@ async function pullPromptAndRunCompletion() {
             />
           }
           rightPanel={
-            <div className="flex h-full flex-col gap-4">
+            <div className="h-full flex flex-col gap-4">
               <ResponsePanel response={state.response || ""} />
 
               <VariablesPanel
