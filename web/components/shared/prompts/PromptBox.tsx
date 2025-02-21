@@ -170,7 +170,7 @@ export default function PromptBox({
 
         const stream = await generateStream(
           {
-            provider: "anthropic",
+            provider: "ANTHROPIC",
             model: "claude-3-5-haiku:beta",
             messages: [
               $system(prompt.system),
@@ -507,7 +507,7 @@ export default function PromptBox({
 
       const stream = await generateStream(
         {
-          provider: "anthropic",
+          provider: "ANTHROPIC",
           model: "claude-3-5-haiku:beta",
           messages: [
             $system(prompt.system),
