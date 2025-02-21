@@ -311,6 +311,7 @@ const useOrgsContextManager = () => {
       })
         .then((res) => res.json())
         .then((mainOrgData) => {
+          setOrgCookie(mainOrgData.orgId);
           // Then create the demo org
           return fetch(`/api/user/${user.id}/ensure-one-org`, {
             method: "POST",
