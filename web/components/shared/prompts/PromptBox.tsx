@@ -631,8 +631,8 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 caret-black dark:caret-white ${
-        disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
+      className={`group relative grid h-full focus-within:border-transparent dark:border-slate-800 caret-black dark:caret-white ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
       <textarea
@@ -642,7 +642,7 @@ export default function PromptBox({
         onKeyDown={handleKeyDown}
         onSelect={handleSelection}
         onBlur={handleBlur}
-        className="col-[1] row-[1] h-full w-full border-none bg-transparent p-4 outline-none"
+        className="col-[1] row-[1] h-full w-full border-none bg-transparent px-4 outline-none"
         style={{
           ...sharedTextAreaStyles,
           color: "transparent",
@@ -653,7 +653,7 @@ export default function PromptBox({
       />
       <pre
         aria-hidden="true"
-        className="pointer-events-none col-[1] row-[1] h-full w-full p-4 selection:bg-blue-200"
+        className="pointer-events-none col-[1] row-[1] h-full w-full px-4 selection:bg-blue-200"
         style={{
           ...sharedTextAreaStyles,
         }}

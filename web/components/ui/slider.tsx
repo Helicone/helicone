@@ -1,5 +1,5 @@
-import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,7 @@ const Slider = React.forwardRef<
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb
       className={cn(
-        "block h-5 w-5 rounded-full border-2 bg-white ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-slate-950 dark:ring-offset-slate-950",
+        "block h-5 w-5 rounded-full border-2 bg-white ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none cursor-grab disabled:opacity-50 dark:bg-slate-950 dark:ring-offset-slate-950",
         variant === "default"
           ? "border-slate-900 dark:border-slate-50 dark:focus-visible:ring-slate-300"
           : variant === "secondary"

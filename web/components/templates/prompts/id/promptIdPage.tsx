@@ -2,10 +2,7 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
-import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
-import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
@@ -54,8 +51,11 @@ import {
   PiStopBold,
 } from "react-icons/pi";
 
+import VariablesPanel from "@/components/shared/prompts/InputsPanel";
+import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ToolPanel from "@/components/shared/prompts/ToolsPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
+import CustomScrollbar from "@/components/shared/universal/Scrollbar";
 import {
   usePrompt,
   usePromptVersions,
@@ -780,7 +780,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   return (
     <Tabs className="relative flex flex-col h-screen" defaultValue="editor">
       {/* Header */}
-      <GlassHeader>
+      <div className="bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           <Link
@@ -942,27 +942,34 @@ async function pullPromptAndRunCompletion() {
             </DialogContent>
           </Dialog>
         </div>
-      </GlassHeader>
+      </div>
 
       {/* Prompt Editor Tab */}
-      <TabsContent className="flex-1 overflow-auto p-4" value="editor">
+      <TabsContent className="flex-1 overflow-hidden" value="editor">
         <ResizablePanels
           leftPanel={
-            <MessagesPanel
-              messages={state.messages}
-              onMessageChange={handleMessageChange}
-              onAddMessagePair={handleAddMessagePair}
-              onAddPrefill={handleAddPrefill}
-              onRemoveMessage={handleRemoveMessage}
-              onVariableCreate={handleVariableCreate}
-              variables={state.variables || []}
-              isPrefillSupported={isPrefillSupported(state.parameters.provider)}
-            />
+            <CustomScrollbar className="h-full bg-white dark:bg-black">
+              <MessagesPanel
+                messages={state.messages}
+                onMessageChange={handleMessageChange}
+                onAddMessagePair={handleAddMessagePair}
+                onAddPrefill={handleAddPrefill}
+                onRemoveMessage={handleRemoveMessage}
+                onVariableCreate={handleVariableCreate}
+                variables={state.variables || []}
+                isPrefillSupported={isPrefillSupported(
+                  state.parameters.provider
+                )}
+              />
+            </CustomScrollbar>
           }
-          rightPanel={
-            <div className="h-full flex flex-col gap-4">
+          rightTopPanel={
+            <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
               <ResponsePanel response={state.response || ""} />
-
+            </CustomScrollbar>
+          }
+          rightBottomPanel={
+            <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
               <VariablesPanel
                 variables={state.variables || []}
                 onVariableChange={handleVariableChange}
@@ -985,7 +992,7 @@ async function pullPromptAndRunCompletion() {
               />
 
               <ToolPanel tools={state.parameters.tools || []} />
-            </div>
+            </CustomScrollbar>
           }
         />
       </TabsContent>

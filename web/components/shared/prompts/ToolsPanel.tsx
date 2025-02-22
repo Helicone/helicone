@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Tool } from "packages/llm-mapper/types";
 import { PiPlusBold, PiToolboxBold } from "react-icons/pi";
+import GlassHeader from "../universal/GlassHeader";
 
 interface ToolPanelProps {
   tools: Tool[];
@@ -21,9 +22,9 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
+      <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Tools</h2>
         <TooltipProvider delayDuration={0}>
           <Tooltip>
@@ -45,8 +46,8 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-900">
+      </GlassHeader>
+      <div className="divide-y divide-slate-100 dark:divide-slate-900 px-4">
         {tools.map((tool, index) => (
           <div key={index} className="flex flex-col gap-1 py-2 first:pt-0">
             <div className="flex items-start gap-2">

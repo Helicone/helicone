@@ -39,8 +39,8 @@ export default function AutoImprove({
     <div className="h-full min-h-[42rem] w-full flex flex-col gap-4 justify-between items-center">
       {/* Starting View */}
       {!improvement && (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <p className="text-sm text-secondary max-w-lg text-pretty">
+        <div className="flex flex-col justify-center items-center gap-4">
+          <p className="text-sm text-secondary max-w-lg text-pretty text-center">
             <span className="font-semibold">Auto-Improve</span> will read your
             prompt to understand how it comes off now vs its instructional
             intent. Then it will suggest improvements to get it closer to its

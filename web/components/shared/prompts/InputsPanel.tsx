@@ -16,6 +16,7 @@ import { populateVariables } from "./helpers";
 
 import { Input } from "@/components/ui/input";
 import { PiChatBold, PiDatabaseBold, PiShuffleBold } from "react-icons/pi";
+import GlassHeader from "../universal/GlassHeader";
 
 interface VariableItemProps {
   variable: StateVariable;
@@ -80,9 +81,9 @@ export default function VariablesPanel({
 
   const [openInputSelector, setOpenInputSelector] = useState(false);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
+      <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Inputs</h2>
         <div className="flex flex-row gap-2">
           <TooltipProvider delayDuration={0}>
@@ -134,11 +135,11 @@ export default function VariablesPanel({
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
+      </GlassHeader>
 
       {/* No Variables */}
       {validVariablesWithIndices.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center text-balance">
+        <p className="text-sm text-slate-400 text-center text-balance px-4">
           Make your prompt dynamic with{" "}
           <span className="font-semibold">Inputs</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
@@ -146,7 +147,7 @@ export default function VariablesPanel({
           .
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900 px-4">
           {/* Variables */}
           {validVariablesWithIndices.map(({ variable, originalIndex }) => (
             <VariableItem

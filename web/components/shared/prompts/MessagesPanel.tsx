@@ -14,6 +14,7 @@ import {
   PiMagicWandBold,
   PiTrashBold,
 } from "react-icons/pi";
+import GlassHeader from "../universal/GlassHeader";
 
 interface PromptPanelsProps {
   messages: Message[];
@@ -57,9 +58,9 @@ export default function MessagesPanel({
         const isRemovable = isRemovableMessage(index);
 
         return (
-          <div key={index} className="flex flex-col gap-2">
+          <div key={index} className="flex flex-col">
             {/* Header */}
-            <div className="min-h-8 h-8 flex items-center justify-between">
+            <GlassHeader className="h-14 px-4 flex-shrink-0">
               {/* Message Role */}
               <h2 className="font-semibold items-center">
                 <h2 className="capitalize text-secondary">{msg.role}</h2>
@@ -99,7 +100,7 @@ export default function MessagesPanel({
                   <PiTrashBold className="w-4 h-4 text-secondary" />
                 </Button>
               )}
-            </div>
+            </GlassHeader>
 
             {/* Message Content */}
             {msg._type === "image" || msg.image_url ? (
@@ -121,7 +122,7 @@ export default function MessagesPanel({
       })}
 
       {/* Add Message Pair and/or Prefill Message */}
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-row gap-4 p-4">
         <button
           onClick={onAddMessagePair}
           disabled={!canAddMessagePair}

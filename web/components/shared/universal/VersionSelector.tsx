@@ -9,8 +9,8 @@ import {
   PiCopyBold,
   PiPencilSimpleBold,
 } from "react-icons/pi";
-import Tooltip from "./Tooltip";
 import useNotification from "../notification/useNotification";
+import Tooltip from "./Tooltip";
 
 interface VersionSelectorProps {
   isLoading: boolean;

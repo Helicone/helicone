@@ -179,6 +179,7 @@ export default {
     },
   ],
   plugins: [
+    require("tailwind-scrollbar"),
     require("@assistant-ui/react/tailwindcss")({
       components: ["default-theme"],
     }),

@@ -15,6 +15,7 @@ import {
   PiPlugsBold,
   PiTargetBold,
 } from "react-icons/pi";
+import GlassHeader from "../universal/GlassHeader";
 
 interface ParametersPanelProps {
   parameters: StateParameters;
@@ -60,12 +61,12 @@ export default function ParametersPanel({
   const supportsReasoningEffort = currentModel?.supportsReasoningEffort;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
+      <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Parameters</h2>
-      </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-900">
+      </GlassHeader>
+      <div className="divide-y divide-slate-100 dark:divide-slate-900 px-4">
         <div className="flex flex-row items-center justify-between gap-4 py-1 first:pt-0">
           <div className="flex items-center gap-2">
             <PiPlugsBold className="text-secondary" />
