@@ -146,18 +146,17 @@ xAI has big plans beyond Grok 3. Here’s what’s coming next:
 from openai import OpenAI
 
 client = OpenAI(
-api_key="your-x-ai-api-key", # X AI API key
-base_url="https://x.helicone.ai/v1/chat/completions" # Helicone proxy URL for X AI
+    api_key="your-x-ai-api-key",  # X AI API key
+    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
 )
 
 response = client.chat.completions.create(
-model="grok-beta",
-messages=[
-{"role": "user", "content": "Say this is a test"}
-]
+    model="grok-beta",
+    messages=[
+        {"role": "user", "content": "Say this is a test"}
+    ]
 )
 print(response.choices[0].message.content)
-
 ```
 </CallToAction>
 

@@ -3481,11 +3481,12 @@ export interface operations {
          * @example {
          *   "filter": "all",
          *   "isCached": false,
-         *   "limit": 10,
+         *   "limit": 100,
          *   "offset": 0,
          *   "sort": {
          *     "created_at": "desc"
          *   },
+         *   "includeInputs": false,
          *   "isScored": false,
          *   "isPartOfExperiment": false
          * }

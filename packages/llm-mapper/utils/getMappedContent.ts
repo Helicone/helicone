@@ -147,6 +147,26 @@ const getUnsanitizedMappedContent = ({
   };
 };
 
+const messageToText = (message: Message): string => {
+  let text = "";
+  message.contentArray?.forEach((message) => {
+    text += messageToText(message).trim();
+  });
+  text += message.content?.trim() ?? "";
+  message.tool_calls?.forEach((toolCall) => {
+    text += JSON.stringify(toolCall.arguments).trim();
+    text += JSON.stringify(toolCall.name).trim();
+  });
+  text += message.role ?? "";
+  text += message.name ?? "";
+  text += message.tool_call_id ?? "";
+  return text.trim();
+};
+
+const messagesToText = (messages: Message[]): string => {
+  return messages.map(messageToText).join("\n").trim();
+};
+
 const sanitizeMappedContent = (
   mappedContent: MappedLLMRequest
 ): MappedLLMRequest => {
@@ -212,6 +232,12 @@ const sanitizeMappedContent = (
       response: mappedContent.preview.response?.slice(0, 30),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
+      fullRequestText: () => {
+        return messagesToText(mappedContent.schema.request.messages ?? []);
+      },
+      fullResponseText: () => {
+        return messagesToText(mappedContent.schema.response?.messages ?? []);
+      },
     },
     model: mappedContent.model,
     raw: mappedContent.raw,

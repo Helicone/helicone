@@ -74,6 +74,8 @@ export interface LlmSchema {
 }
 
 export type LLMPreview = {
+  fullRequestText: () => string;
+  fullResponseText: () => string;
   request: string;
   response: string;
   concatenatedMessages: Message[];
