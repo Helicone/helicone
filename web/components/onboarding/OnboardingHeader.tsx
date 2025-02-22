@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect } from "react";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
 import { OnboardingStep } from "@/store/onboardingStore";
@@ -27,19 +27,23 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
   EVENT: "/onboarding/event",
 };
 
-export const OnboardingHeader = () => {
+interface OnboardingHeaderProps {
+  children?: React.ReactNode;
+}
+
+export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const router = useRouter();
   const org = useOrg();
 
-  const { onboardingState, draftPlan, updateCurrentStep } = useOrgOnboarding(
-    org?.currentOrg?.id ?? ""
-  );
+  const { onboardingState, draftPlan, updateCurrentStep, isLoading } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
-    if (org?.currentOrg?.has_onboarded) {
+    if (!isLoading && org?.currentOrg?.has_onboarded) {
       router.push("/dashboard");
+      return;
     }
-  }, [org?.currentOrg?.has_onboarded]);
+  }, [org?.currentOrg?.has_onboarded, isLoading, router]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
     draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
@@ -71,49 +75,73 @@ export const OnboardingHeader = () => {
     }
   };
 
-  return (
-    <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <Image
-          src="/static/logo-clear.png"
-          alt="Helicone Logo"
-          className="rounded-xl"
-          width={20}
-          height={20}
-        />
-        <BreadcrumbSeparator />
-
-        <nav className="flex items-center gap-1.5">
-          {steps.map((step, index) => (
-            <React.Fragment key={step.label}>
-              <span
-                className={cn(
-                  "text-sm font-normal",
-                  onboardingState?.currentStep === step.step
-                    ? "text-slate-900"
-                    : "text-slate-500",
-                  index < currentStepIndex && "hover:text-slate-700"
-                )}
-                onClick={() => {
-                  if (index < currentStepIndex) {
-                    handleStepClick(step.step, index);
-                  }
-                }}
-                style={{
-                  cursor: index < currentStepIndex ? "pointer" : "default",
-                }}
-              >
-                {step.label}
-              </span>
-              {index < steps.length - 1 && (
-                <ChevronRightIcon className="w-4 h-4 text-slate-500" />
-              )}
-            </React.Fragment>
-          ))}
-        </nav>
+  if (isLoading || !org?.currentOrg?.id) {
+    return (
+      <div className="min-h-screen w-full flex flex-col">
+        <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Image
+              src="/static/logo-clear.png"
+              alt="Helicone Logo"
+              className="rounded-xl"
+              width={20}
+              height={20}
+            />
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+        </div>
       </div>
+    );
+  }
 
-      <ChevronRightIcon className="w-4 h-4 text-slate-500" />
-    </header>
+  return (
+    <>
+      <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Image
+            src="/static/logo-clear.png"
+            alt="Helicone Logo"
+            className="rounded-xl"
+            width={20}
+            height={20}
+          />
+          <BreadcrumbSeparator />
+
+          <nav className="flex items-center gap-1.5">
+            {steps.map((step, index) => (
+              <React.Fragment key={step.label}>
+                <span
+                  className={cn(
+                    "text-sm font-normal",
+                    onboardingState?.currentStep === step.step
+                      ? "text-slate-900"
+                      : "text-slate-500",
+                    index < currentStepIndex && "hover:text-slate-700"
+                  )}
+                  onClick={() => {
+                    if (index < currentStepIndex) {
+                      handleStepClick(step.step, index);
+                    }
+                  }}
+                  style={{
+                    cursor: index < currentStepIndex ? "pointer" : "default",
+                  }}
+                >
+                  {step.label}
+                </span>
+                {index < steps.length - 1 && (
+                  <ChevronRightIcon className="w-4 h-4 text-slate-500" />
+                )}
+              </React.Fragment>
+            ))}
+          </nav>
+        </div>
+
+        <ChevronRightIcon className="w-4 h-4 text-slate-500" />
+      </header>
+      {children}
+    </>
   );
 };

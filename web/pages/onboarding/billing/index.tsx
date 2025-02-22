@@ -125,21 +125,18 @@ export default function BillingPage() {
   // Show loading state while checking subscription
   if (subscription.isLoading) {
     return (
-      <div className="w-full min-h-screen bg-white">
-        <OnboardingHeader />
+      <OnboardingHeader>
         <main className="mx-auto pt-12 px-4 max-w-4xl">
           <div className="flex items-center justify-center">
             <div className="animate-pulse">Loading...</div>
           </div>
         </main>
-      </div>
+      </OnboardingHeader>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-white">
-      <OnboardingHeader />
-
+    <OnboardingHeader>
       <main
         className={`mx-auto pt-12 px-4 ${
           draftPlan === "team" ? "max-w-7xl" : "max-w-4xl"
@@ -161,6 +158,6 @@ export default function BillingPage() {
           <ProPlanCheckout clientSecret={clientSecret} />
         )}
       </main>
-    </div>
+    </OnboardingHeader>
   );
 }

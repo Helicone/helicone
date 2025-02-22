@@ -184,8 +184,7 @@ export function CodeIntegrationPage({
   }, [provider, availableLanguages, language]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <OnboardingHeader />
+    <OnboardingHeader>
       <div className="flex flex-col gap-6 mx-auto max-w-4xl py-12">
         <main className="w-full">
           <div className="flex flex-col gap-6">
@@ -346,6 +345,6 @@ export function CodeIntegrationPage({
           </div>
         </main>
       </div>
-    </div>
+    </OnboardingHeader>
   );
 }

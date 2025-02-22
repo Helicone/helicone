@@ -22,9 +22,7 @@ export default function IntegratePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <OnboardingHeader />
-
+    <OnboardingHeader>
       <div className="flex flex-col gap-6 mx-auto max-w-4xl mt-12">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold">Get integrated</h1>
@@ -109,6 +107,6 @@ export default function IntegratePage() {
           </Button>
         </div>
       </div>
-    </div>
+    </OnboardingHeader>
   );
 }

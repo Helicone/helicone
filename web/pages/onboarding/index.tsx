@@ -99,9 +99,8 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center">
-      <OnboardingHeader />
-      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-12">
+    <OnboardingHeader>
+      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-12 mx-auto">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold">Welcome to Helicone! 👋</h1>
           <div className="text-sm font-light text-slate-500">
@@ -151,6 +150,6 @@ export default function OnboardingPage() {
           </Button>
         </div>
       </div>
-    </div>
+    </OnboardingHeader>
   );
 }
