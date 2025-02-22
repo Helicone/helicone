@@ -356,8 +356,8 @@
     {
       "group": "Request",
       "pages": [
-        "rest/request/post-v1requestquery",
         "rest/request/post-v1requestquery-clickhouse",
+        "rest/request/post-v1requestquery",
         "rest/request/get-v1request",
         "rest/request/post-v1requestquery-ids",
         "rest/request/post-v1request-feedback",
