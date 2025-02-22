@@ -40,9 +40,9 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
-  const org = useOrg();
+  const orgContext = useOrg();
   const user = useUser();
-  const tier = org?.currentOrg?.tier;
+  const tier = orgContext?.currentOrg?.tier;
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -125,7 +125,7 @@ const DesktopSidebar = ({
       if (
         event.key === "b" &&
         event.metaKey &&
-        org?.currentOrg?.tier !== "demo"
+        orgContext?.currentOrg?.tier !== "demo"
       ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
@@ -257,8 +257,8 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {((!isCollapsed &&
-                  org?.currentOrg?.organization_type === "reseller") ||
-                  org?.isResellerOfCurrentCustomerOrg) && (
+                  orgContext?.currentOrg?.organization_type === "reseller") ||
+                  orgContext?.isResellerOfCurrentCustomerOrg) && (
                   <div className="flex w-full justify-center px-5 py-2">
                     <Button
                       variant="outline"
@@ -267,14 +267,17 @@ const DesktopSidebar = ({
                       onClick={() => {
                         router.push("/enterprise/portal");
                         if (
-                          org.currentOrg?.organization_type === "customer" &&
-                          org.currentOrg?.reseller_id
+                          orgContext.currentOrg?.organization_type ===
+                            "customer" &&
+                          orgContext.currentOrg?.reseller_id
                         ) {
-                          org.setCurrentOrg(org.currentOrg.reseller_id);
+                          orgContext.setCurrentOrg(
+                            orgContext.currentOrg.reseller_id
+                          );
                         }
                       }}
                     >
-                      {org.currentOrg?.organization_type === "customer"
+                      {orgContext.currentOrg?.organization_type === "customer"
                         ? "Back to Portal"
                         : "Customer Portal"}
                     </Button>
@@ -301,10 +304,15 @@ const DesktopSidebar = ({
                       />
                     ))}
 
-                    {org?.currentOrg?.tier === "demo" && (
+                    {orgContext?.currentOrg?.tier === "demo" && (
                       <Button
                         onClick={() => {
-                          router.push("/onboarding");
+                          orgContext.allOrgs.forEach((org) => {
+                            if (org.is_main_org === true) {
+                              orgContext.setCurrentOrg(org.id);
+                              router.push("/onboarding");
+                            }
+                          });
                         }}
                         className={cn(
                           "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
@@ -326,7 +334,7 @@ const DesktopSidebar = ({
 
               {/* InfoBox */}
               {canShowInfoBox &&
-                org?.currentOrg?.tier === "free" &&
+                orgContext?.currentOrg?.tier === "free" &&
                 (isCollapsed ? (
                   <div className="px-2 py-2">
                     <ProFeatureWrapper featureName="pro" enabled={false}>
@@ -362,7 +370,7 @@ const DesktopSidebar = ({
             </div>
 
             {/* Sticky help dropdown */}
-            {org?.currentOrg?.tier !== "demo" && (
+            {orgContext?.currentOrg?.tier !== "demo" && (
               <div className="p-3">
                 <SidebarHelpDropdown
                   changelog={changelog}

@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
 import { OnboardingStep } from "@/store/onboardingStore";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import LoadingAnimation from "../shared/loadingAnimation";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -75,22 +76,11 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     }
   };
 
-  if (isLoading || !org?.currentOrg?.id) {
+  if (isLoading || !org?.currentOrg?.id || org?.currentOrg?.has_onboarded) {
     return (
       <div className="min-h-screen w-full flex flex-col">
-        <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Image
-              src="/static/logo-clear.png"
-              alt="Helicone Logo"
-              className="rounded-xl"
-              width={20}
-              height={20}
-            />
-          </div>
-        </header>
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+          <LoadingAnimation />
         </div>
       </div>
     );

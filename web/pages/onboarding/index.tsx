@@ -6,7 +6,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
 import { MemberRole, PlanType } from "@/store/onboardingStore";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
-import React from "react";
+import React, { useEffect } from "react";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
 import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
@@ -32,6 +32,10 @@ export default function OnboardingPage() {
     setDraftPlan,
     updateCurrentStep,
   } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+
+  useEffect(() => {
+    updateCurrentStep("ORGANIZATION");
+  }, []);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],

@@ -1610,6 +1610,7 @@ export type Database = {
           has_onboarded: boolean
           icon: string
           id: string
+          is_main_org: boolean
           is_personal: boolean
           limits: Json | null
           logo_path: string | null
@@ -1639,6 +1640,7 @@ export type Database = {
           has_onboarded?: boolean
           icon?: string
           id?: string
+          is_main_org?: boolean
           is_personal?: boolean
           limits?: Json | null
           logo_path?: string | null
@@ -1668,6 +1670,7 @@ export type Database = {
           has_onboarded?: boolean
           icon?: string
           id?: string
+          is_main_org?: boolean
           is_personal?: boolean
           limits?: Json | null
           logo_path?: string | null

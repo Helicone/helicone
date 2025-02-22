@@ -31,7 +31,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   }, [pathname]);
 
   const { alertBanners } = useAlertBanners();
-  const org = useOrg();
+  const orgContext = useOrg();
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
@@ -45,20 +45,28 @@ const AuthLayout = (props: AuthLayoutProps) => {
         updated_at: activeBanner.updated_at,
       } as BannerType;
     }
-    if (org?.currentOrg?.tier === "demo") {
+    if (orgContext?.currentOrg?.tier === "demo") {
       return {
         message: (
           <div className="flex items-center gap-2">
-            Click here to start integrating <Rocket className="h-6 w-6" />
+            Click here to start integrating your organization
+            <Rocket className="h-6 w-6" />
           </div>
         ),
         title: "Welcome to Your Demo",
         active: true,
-        onClick: () => router.push("/onboarding"),
+        onClick: () => {
+          orgContext.allOrgs.forEach((org) => {
+            if (org.is_main_org === true) {
+              orgContext.setCurrentOrg(org.id);
+              router.push("/onboarding");
+            }
+          });
+        },
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, org?.currentOrg?.tier, router]);
+  }, [alertBanners?.data, orgContext?.currentOrg?.tier, router]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 
