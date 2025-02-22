@@ -34,7 +34,7 @@ class HeliconeAsyncLogger:
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
 
-        os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
+        os.environ["TRACELOOP_TRACE_CONTENT"] = "true"
 
         Traceloop.init(
             exporter=exporter,
