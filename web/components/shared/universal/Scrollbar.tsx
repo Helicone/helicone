@@ -6,10 +6,12 @@ export default function CustomScrollbar({
   children,
   className = "",
   style = {},
+  withBorder = false,
 }: {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  withBorder?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({
@@ -73,14 +75,16 @@ export default function CustomScrollbar({
       {scrollHeight > clientHeight + 1 && (
         <div className="absolute top-0 right-0 bottom-0 w-[8px] pointer-events-none z-10">
           <div
-            className={`absolute right-0 transition-colors duration-200 ${
-              hovered ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
-            } ${
+            className={`absolute right-0 transition-opacity duration-200 ${
+              withBorder
+                ? "bg-slate-200 dark:bg-slate-800 border-slate-100 dark:border-slate-900"
+                : "bg-slate-200 dark:bg-slate-800"
+            } ${hovered ? "opacity-100" : "opacity-0"} ${
               thumbTop === 0
-                ? "rounded-r-xs rounded-bl-md"
+                ? "rounded-r-xs rounded-bl-md border-l border-b"
                 : thumbTop + thumbHeight >= clientHeight
-                ? "rounded-r-xs rounded-tl-md"
-                : "rounded-l-md rounded-r-xs"
+                ? "rounded-r-xs rounded-tl-md border-l border-t"
+                : "rounded-l-md rounded-r-xs border-l border-y"
             }`}
             style={{
               top: thumbTop,
