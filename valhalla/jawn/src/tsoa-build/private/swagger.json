@@ -3337,122 +3337,176 @@
 				"additionalProperties": false
 			},
 			"NewOrganizationParams": {
+				"allOf": [
+					{
+						"properties": {
+							"tier": {
+								"type": "string",
+								"nullable": true
+							},
+							"subscription_status": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_subscription_item_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_subscription_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_metadata": {
+								"$ref": "#/components/schemas/Json"
+							},
+							"stripe_customer_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"soft_delete": {
+								"type": "boolean"
+							},
+							"size": {
+								"type": "string",
+								"nullable": true
+							},
+							"reseller_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"request_limit": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							},
+							"referral": {
+								"type": "string",
+								"nullable": true
+							},
+							"percent_to_log": {
+								"type": "number",
+								"format": "double",
+								"nullable": true
+							},
+							"owner": {
+								"type": "string"
+							},
+							"organization_type": {
+								"type": "string"
+							},
+							"org_provider_key": {
+								"type": "string",
+								"nullable": true
+							},
+							"onboarding_status": {
+								"$ref": "#/components/schemas/Json"
+							},
+							"name": {
+								"type": "string"
+							},
+							"logo_path": {
+								"type": "string",
+								"nullable": true
+							},
+							"limits": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/Json"
+									}
+								],
+								"nullable": true
+							},
+							"is_personal": {
+								"type": "boolean"
+							},
+							"id": {
+								"type": "string"
+							},
+							"icon": {
+								"type": "string"
+							},
+							"has_onboarded": {
+								"type": "boolean"
+							},
+							"governance_settings": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/Json"
+									}
+								],
+								"nullable": true
+							},
+							"domain": {
+								"type": "string",
+								"nullable": true
+							},
+							"created_at": {
+								"type": "string",
+								"nullable": true
+							},
+							"color": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"owner",
+							"name"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"is_main_org": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					}
+				]
+			},
+			"ResultSuccess__demoOrgId-string--starterOrgId-string__": {
 				"properties": {
-					"tier": {
-						"type": "string",
-						"nullable": true
-					},
-					"subscription_status": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_subscription_item_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_subscription_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_metadata": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"stripe_customer_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"soft_delete": {
-						"type": "boolean"
-					},
-					"size": {
-						"type": "string",
-						"nullable": true
-					},
-					"reseller_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"request_limit": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"referral": {
-						"type": "string",
-						"nullable": true
-					},
-					"percent_to_log": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"owner": {
-						"type": "string"
-					},
-					"organization_type": {
-						"type": "string"
-					},
-					"org_provider_key": {
-						"type": "string",
-						"nullable": true
-					},
-					"onboarding_status": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"name": {
-						"type": "string"
-					},
-					"logo_path": {
-						"type": "string",
-						"nullable": true
-					},
-					"limits": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Json"
+					"data": {
+						"properties": {
+							"starterOrgId": {
+								"type": "string"
+							},
+							"demoOrgId": {
+								"type": "string"
 							}
+						},
+						"required": [
+							"starterOrgId",
+							"demoOrgId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
 						],
 						"nullable": true
-					},
-					"is_personal": {
-						"type": "boolean"
-					},
-					"id": {
-						"type": "string"
-					},
-					"icon": {
-						"type": "string"
-					},
-					"has_onboarded": {
-						"type": "boolean"
-					},
-					"governance_settings": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Json"
-							}
-						],
-						"nullable": true
-					},
-					"domain": {
-						"type": "string",
-						"nullable": true
-					},
-					"created_at": {
-						"type": "string",
-						"nullable": true
-					},
-					"color": {
-						"type": "string"
 					}
 				},
 				"required": [
-					"owner",
-					"name"
+					"data",
+					"error"
 				],
-				"type": "object"
+				"type": "object",
+				"additionalProperties": false
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+			"Result__demoOrgId-string--starterOrgId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__demoOrgId-string--starterOrgId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -3474,6 +3528,9 @@
 					},
 					"organization_type": {
 						"type": "string"
+					},
+					"onboarding_status": {
+						"$ref": "#/components/schemas/Json"
 					}
 				},
 				"required": [
@@ -3485,7 +3542,7 @@
 			"UpdateOrganizationParams": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"
 					},
 					{
 						"properties": {
@@ -3735,6 +3792,47 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+				"properties": {
+					"currentStep": {
+						"type": "string"
+					},
+					"selectedTier": {
+						"type": "string"
+					},
+					"hasOnboarded": {
+						"type": "boolean"
+					},
+					"members": {
+						"items": {},
+						"type": "array"
+					},
+					"addons": {
+						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
+							"prompts": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"evals",
+							"experiments",
+							"prompts"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"OnboardingStatus": {
+				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
 			"HeliconeMeta": {
 				"properties": {
@@ -9262,6 +9360,32 @@
 				}
 			}
 		},
+		"/v1/organization/create/starter": {
+			"post": {
+				"operationId": "CreateStarterOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__demoOrgId-string--starterOrgId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/organization/{organizationId}/update": {
 			"post": {
 				"operationId": "UpdateOrganization",
@@ -9788,6 +9912,58 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/organization/update_onboarding": {
+			"post": {
+				"operationId": "UpdateOnboardingStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"has_onboarded": {
+										"type": "boolean"
+									},
+									"name": {
+										"type": "string"
+									},
+									"onboarding_status": {
+										"$ref": "#/components/schemas/OnboardingStatus"
+									}
+								},
+								"required": [
+									"has_onboarded",
+									"name",
+									"onboarding_status"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/log/request": {

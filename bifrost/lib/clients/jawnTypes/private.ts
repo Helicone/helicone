@@ -234,6 +234,9 @@ export interface paths {
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
+  "/v1/organization/create/starter": {
+    post: operations["CreateStarterOrganization"];
+  };
   "/v1/organization/{organizationId}/update": {
     post: operations["UpdateOrganization"];
   };
@@ -269,6 +272,9 @@ export interface paths {
   };
   "/v1/organization/setup-demo": {
     post: operations["SetupDemo"];
+  };
+  "/v1/organization/update_onboarding": {
+    post: operations["UpdateOnboardingStatus"];
   };
   "/v1/log/request": {
     post: operations["GetRequests"];
@@ -1220,7 +1226,7 @@ Json: JsonObject;
         completion_token: number;
       };
     };
-    NewOrganizationParams: {
+    NewOrganizationParams: ({
       tier?: string | null;
       subscription_status?: string | null;
       stripe_subscription_item_id?: string | null;
@@ -1250,9 +1256,20 @@ Json: JsonObject;
       domain?: string | null;
       created_at?: string | null;
       color?: string;
+    }) & {
+      is_main_org?: boolean;
     };
+    "ResultSuccess__demoOrgId-string--starterOrgId-string__": {
+      data: {
+        starterOrgId: string;
+        demoOrgId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__demoOrgId-string--starterOrgId-string_.string_": components["schemas"]["ResultSuccess__demoOrgId-string--starterOrgId-string__"] | components["schemas"]["ResultError_string_"];
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
       name: string;
       color?: string;
       icon?: string;
@@ -1260,8 +1277,9 @@ Json: JsonObject;
       limits?: components["schemas"]["Json"];
       reseller_id?: string;
       organization_type?: string;
+      onboarding_status?: components["schemas"]["Json"];
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"] & {
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
@@ -1317,6 +1335,19 @@ Json: JsonObject;
       error: null;
     };
     "Result_OrganizationOwner-Array.string_": components["schemas"]["ResultSuccess_OrganizationOwner-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    "Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+      currentStep?: string;
+      selectedTier?: string;
+      hasOnboarded?: boolean;
+      members?: unknown[];
+      addons?: {
+        evals: boolean;
+        experiments: boolean;
+        prompts: boolean;
+      };
+    };
+    OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
     HeliconeMeta: {
       heliconeManualAccessKey?: string;
       lytixHost?: string;
@@ -3505,6 +3536,16 @@ export interface operations {
       };
     };
   };
+  CreateStarterOrganization: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__demoOrgId-string--starterOrgId-string_.string_"];
+        };
+      };
+    };
+  };
   UpdateOrganization: {
     parameters: {
       path: {
@@ -3710,6 +3751,25 @@ export interface operations {
     };
   };
   SetupDemo: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOnboardingStatus: {
+    requestBody: {
+      content: {
+        "application/json": {
+          has_onboarded: boolean;
+          name: string;
+          onboarding_status: components["schemas"]["OnboardingStatus"];
+        };
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

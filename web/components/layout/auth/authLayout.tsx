@@ -12,7 +12,6 @@ import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { OnboardingBackground, OnboardingProvider } from "../onboardingContext";
 import { useOrg } from "../org/organizationContext";
-import { useOnboardingStore } from "@/store/onboardingStore";
 import { Rocket } from "lucide-react";
 
 interface AuthLayoutProps {
@@ -33,7 +32,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const { alertBanners } = useAlertBanners();
   const org = useOrg();
-  const { setShowCreateOrg } = useOnboardingStore();
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
@@ -56,11 +54,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
         ),
         title: "Welcome to Your Demo",
         active: true,
-        onClick: () => setShowCreateOrg(true),
+        onClick: () => router.push("/onboarding"),
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, org?.currentOrg?.tier, setShowCreateOrg]);
+  }, [alertBanners?.data, org?.currentOrg?.tier, router]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 

@@ -15,6 +15,7 @@ import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
 import {
   NewOrganizationParams,
+  OnboardingStatus,
   OrganizationFilter,
   OrganizationLayout,
   OrganizationManager,
@@ -68,6 +69,23 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(201); // set return status 201
       return ok(result.data.id ?? "");
+    }
+  }
+
+  @Post("/create/starter")
+  public async createStarterOrganization(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ demoOrgId: string; starterOrgId: string }, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.createStarterOrganization();
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error creating starter organization");
+    } else {
+      this.setStatus(201);
+      return ok(result.data);
     }
   }
 
@@ -392,6 +410,34 @@ export class OrganizationController extends Controller {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error ?? "Error setting up demo");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/update_onboarding")
+  public async updateOnboardingStatus(
+    @Body()
+    requestBody: {
+      onboarding_status: OnboardingStatus;
+      name: string;
+      has_onboarded: boolean;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateOnboardingStatus(
+      request.authParams.organizationId ?? "",
+      requestBody.onboarding_status,
+      requestBody.name,
+      requestBody.has_onboarded
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error updating onboarding status");
     } else {
       this.setStatus(201);
       return ok(null);

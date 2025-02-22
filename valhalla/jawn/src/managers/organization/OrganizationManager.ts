@@ -4,9 +4,12 @@ import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export type NewOrganizationParams =
-  Database["public"]["Tables"]["organization"]["Insert"];
+  Database["public"]["Tables"]["organization"]["Insert"] & {
+    is_main_org?: boolean;
+  };
 
 export type UpdateOrganizationParams = Pick<
   NewOrganizationParams,
@@ -17,6 +20,7 @@ export type UpdateOrganizationParams = Pick<
   | "limits"
   | "reseller_id"
   | "organization_type"
+  | "onboarding_status"
 > & {
   variant?: string;
 };
@@ -59,6 +63,18 @@ export type OrganizationOwner = {
   email: string;
   tier: string;
 };
+
+export type OnboardingStatus = Partial<{
+  currentStep: string;
+  selectedTier: string;
+  hasOnboarded: boolean;
+  members: any[];
+  addons: {
+    prompts: boolean;
+    experiments: boolean;
+    evals: boolean;
+  };
+}>;
 
 export class OrganizationManager extends BaseManager {
   private organizationStore: OrganizationStore;
@@ -140,6 +156,40 @@ export class OrganizationManager extends BaseManager {
       return err(`Failed to update organization: ${error}`);
     }
     return ok(data);
+  }
+
+  async createStarterOrganization(): Promise<
+    Result<
+      {
+        demoOrgId: string;
+        starterOrgId: string;
+      },
+      string
+    >
+  > {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    // Get org, check if demo org exists, if not create it.
+    const demoOrg = await this.organizationStore.createDemoOrg(
+      this.authParams.userId
+    );
+
+    if (demoOrg.error) {
+      return err(demoOrg.error);
+    }
+
+    const starterOrg = await this.organizationStore.createStarterOrg(
+      this.authParams.userId
+    );
+
+    if (starterOrg.error) {
+      return err(starterOrg.error);
+    }
+
+    return ok({
+      demoOrgId: demoOrg.data ?? "",
+      starterOrgId: starterOrg.data ?? "",
+    });
   }
 
   async addMember(
@@ -423,5 +473,38 @@ export class OrganizationManager extends BaseManager {
       return err(orgError ?? "Error setting up demo");
     }
     return ok(null);
+  }
+
+  async updateOnboardingStatus(
+    organizationId: string,
+    onboardingStatus: OnboardingStatus,
+    name: string,
+    hasOnboarded: boolean
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
+      organizationId,
+      this.authParams.userId
+    );
+
+    if (!hasAccess) {
+      return err(
+        "User does not have access to update organization onboarding status"
+      );
+    }
+
+    const { data, error } = await this.organizationStore.updateOnboardingStatus(
+      onboardingStatus,
+      name,
+      hasOnboarded
+    );
+
+    if (error || !data) {
+      console.error(`Failed to update onboarding status: ${error}`);
+      return err(`Failed to update onboarding status: ${error}`);
+    }
+
+    return ok(data);
   }
 }

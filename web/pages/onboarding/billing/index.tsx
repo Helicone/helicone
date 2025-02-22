@@ -5,7 +5,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useOrgOnboardingStore } from "@/store/onboardingStore";
+import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { TeamPlanCheckout } from "@/components/onboarding/Checkout/TeamPlanCheckout";
 import { ProPlanCheckout } from "@/components/onboarding/Checkout/ProPlanCheckout";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -13,7 +13,14 @@ import useNotification from "@/components/shared/notification/useNotification";
 export default function BillingPage() {
   const org = useOrg();
   const router = useRouter();
-  const { formData, setFormData } = useOrgOnboardingStore();
+  const {
+    draftPlan,
+    draftMembers,
+    draftAddons,
+    setDraftPlan,
+    setDraftMembers,
+    setDraftAddons,
+  } = useDraftOnboardingStore(org?.currentOrg?.id ?? "")();
   const { setNotification } = useNotification();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createdOrgId = org?.currentOrg?.id;
@@ -95,12 +102,12 @@ export default function BillingPage() {
       try {
         let result;
 
-        if (formData.plan === "team") {
+        if (draftPlan === "team") {
           result = await upgradeToTeamBundle.mutateAsync();
         } else {
           result = await upgradeToPro.mutateAsync({
-            addons: formData.addons,
-            seats: formData.members.length,
+            addons: draftAddons,
+            seats: draftMembers.length,
           });
         }
 
@@ -113,7 +120,7 @@ export default function BillingPage() {
     };
 
     createCheckoutSession();
-  }, [createdOrgId, formData.plan, formData.members.length, formData.addons]);
+  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]);
 
   // Show loading state while checking subscription
   if (subscription.isLoading) {
@@ -135,7 +142,7 @@ export default function BillingPage() {
 
       <main
         className={`mx-auto pt-12 px-4 ${
-          formData.plan === "team" ? "max-w-7xl" : "max-w-4xl"
+          draftPlan === "team" ? "max-w-7xl" : "max-w-4xl"
         }`}
       >
         <div className="max-w-[1000px] mx-auto">
@@ -148,7 +155,7 @@ export default function BillingPage() {
           </header>
         </div>
 
-        {formData.plan === "team" ? (
+        {draftPlan === "team" ? (
           <TeamPlanCheckout clientSecret={clientSecret} />
         ) : (
           <ProPlanCheckout clientSecret={clientSecret} />

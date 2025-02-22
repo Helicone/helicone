@@ -15,13 +15,7 @@ import { ChangelogItem } from "./types";
 import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import { useTheme } from "next-themes";
-import OnboardingNavItems from "./OnboardingNavItems";
-import useOnboardingContext from "../onboardingContext";
-import { Dialog } from "@/components/ui/dialog";
-import { DialogContent } from "@/components/ui/dialog";
-import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useOnboardingStore } from "@/store/onboardingStore";
 import { Rocket } from "lucide-react";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
@@ -183,10 +177,6 @@ const DesktopSidebar = ({
     setModalOpen(open);
   };
 
-  const { isOnboardingVisible } = useOnboardingContext();
-
-  const { showCreateOrg, setShowCreateOrg } = useOnboardingStore();
-
   return (
     <>
       {/* Mobile hamburger menu */}
@@ -296,27 +286,25 @@ const DesktopSidebar = ({
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2"
                 >
                   <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {isOnboardingVisible && <OnboardingNavItems />}
-                    {!isOnboardingVisible &&
-                      NAVIGATION_ITEMS.map((link) => (
-                        <NavItem
-                          key={link.name}
-                          link={link}
-                          isCollapsed={isCollapsed}
-                          expandedItems={expandedItems}
-                          toggleExpand={toggleExpand}
-                          onClick={() => {
-                            setIsCollapsed(false);
-                            setIsMobileMenuOpen(false);
-                          }}
-                          deep={0}
-                        />
-                      ))}
+                    {NAVIGATION_ITEMS.map((link) => (
+                      <NavItem
+                        key={link.name}
+                        link={link}
+                        isCollapsed={isCollapsed}
+                        expandedItems={expandedItems}
+                        toggleExpand={toggleExpand}
+                        onClick={() => {
+                          setIsCollapsed(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        deep={0}
+                      />
+                    ))}
 
                     {org?.currentOrg?.tier === "demo" && (
                       <Button
                         onClick={() => {
-                          setShowCreateOrg(true);
+                          router.push("/onboarding");
                         }}
                         className={cn(
                           "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
@@ -390,23 +378,6 @@ const DesktopSidebar = ({
         setOpen={handleModalOpen}
         changelog={changelogToView}
       />
-      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
-        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
-          <CreateOrgForm
-            firstOrg={true}
-            onCancelHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onCloseHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onSuccess={(orgId) => {
-              org?.setCurrentOrg(orgId ?? "");
-              router.push("/dashboard");
-            }}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

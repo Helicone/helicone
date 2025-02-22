@@ -6,22 +6,24 @@ import { Gift, Package, FlaskConical, ClipboardCheck } from "lucide-react";
 import { CheckoutLayout } from "./CheckoutLayout";
 import { ADDONS } from "@/utils/pricingConfigs";
 import Image from "next/image";
+import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 export const ProPlanCheckout = ({
   clientSecret,
 }: {
   clientSecret: string | null;
 }) => {
-  const { formData, setFormData } = useOrgOnboardingStore();
+  const org = useOrg();
+  const { draftAddons, setDraftAddons } = useDraftOnboardingStore(
+    org?.currentOrg?.id ?? ""
+  )();
 
   const handleAddAll = () => {
-    setFormData({
-      ...formData,
-      addons: {
-        prompts: true,
-        experiments: true,
-        evals: true,
-      },
+    setDraftAddons({
+      prompts: true,
+      experiments: true,
+      evals: true,
     });
   };
 
@@ -73,11 +75,11 @@ export const ProPlanCheckout = ({
                 <div key={addon.id} className="flex items-center gap-4">
                   <Switch
                     variant="helicone"
-                    checked={formData.addons[addon.id]}
+                    checked={draftAddons[addon.id]}
                     onCheckedChange={(checked) =>
-                      setFormData({
-                        ...formData,
-                        addons: { ...formData.addons, [addon.id]: checked },
+                      setDraftAddons({
+                        ...draftAddons,
+                        [addon.id]: checked,
                       })
                     }
                   />

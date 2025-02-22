@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { useOrgOnboardingStore } from "@/store/onboardingStore";
 import { useEffect } from "react";
 import {
   ArrowLeftRight,
@@ -12,12 +10,15 @@ import {
   Waypoints,
 } from "lucide-react";
 import Link from "next/link";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 export default function IntegratePage() {
-  const { setCurrentStep } = useOrgOnboardingStore();
+  const org = useOrg();
+  const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
-    setCurrentStep("INTEGRATION");
+    updateCurrentStep("INTEGRATION");
   }, []);
 
   return (

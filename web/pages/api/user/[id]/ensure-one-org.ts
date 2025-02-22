@@ -34,8 +34,7 @@ export default async function handler(
       .select("*")
       .eq("soft_delete", false)
       .eq("owner", userId)
-      .eq("tier", "free")
-      .eq("name", "My Organization")
+      .eq("is_main_org", true)
       .single();
 
     if (existingMainOrg) {

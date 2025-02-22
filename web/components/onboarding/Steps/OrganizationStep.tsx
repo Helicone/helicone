@@ -1,25 +1,22 @@
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
-export const OrganizationStep = ({
-  name,
-  onNameChange,
-}: {
-  name: string;
-  onNameChange: (name: string) => void;
-}) => {
-  const [localName, setLocalName] = useState(name);
+export const OrganizationStep = () => {
+  const orgId = useOrg()?.currentOrg?.id ?? "";
+  const { draftName, setDraftName } = useDraftOnboardingStore(orgId)();
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setLocalName(name);
-  }, [name]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
-    setLocalName(newName);
-    onNameChange(newName);
-    setError(newName ? "" : "Please enter an organization name :)");
+    setDraftName(newName);
+
+    if (!newName) {
+      setError("Please enter an organization name :)");
+    } else {
+      setError("");
+    }
   };
 
   return (
@@ -28,13 +25,13 @@ export const OrganizationStep = ({
         <h2 className="text-sm font-medium text-slate-800">Organization</h2>
         <Input
           type="text"
-          value={localName}
+          value={draftName}
           onChange={handleNameChange}
           className={`text-sm ${error ? "border-red-500 text-red-500" : ""}`}
         />
         {error ? (
           <p className="text-sm text-red-500">{error}</p>
-        ) : localName ? (
+        ) : draftName ? (
           <p className="text-sm font-light text-slate-400">
             Don't worry, you can rename your organization later.
           </p>

@@ -1,3 +1,11 @@
+ALTER TABLE public.organization
+ADD COLUMN onboarding_status jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+
+ALTER TABLE public.organization
+ADD COLUMN is_main_org BOOLEAN NOT NULL DEFAULT false;
+
+
 CREATE OR REPLACE FUNCTION create_main_org(user_id UUID)
 RETURNS TABLE (organization_id UUID) AS $$
 BEGIN
@@ -5,15 +13,26 @@ BEGIN
         RAISE EXCEPTION 'User can only have one free organization';
     ELSE
         RETURN QUERY
-        INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete)
-        VALUES ('My Organization', user_id, 'free', true, false, false)
+        INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete, onboarding_status, is_main_org)
+        VALUES (
+            'My Organization', 
+            user_id, 
+            'free', 
+            true, 
+            false, 
+            false,
+            jsonb_build_object(
+                'hasOnboarded', false,
+                'selectedTier', 'free',
+                'currentStep', 'ORGANIZATION',
+                'members', jsonb_build_array()
+            ),
+            true
+        )
         RETURNING organization.id as organization_id;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
-
-ALTER TABLE public.organization
-ADD COLUMN onboarding_status jsonb NOT NULL DEFAULT '{}'::jsonb;
 
 CREATE OR REPLACE FUNCTION ensure_one_demo_org(user_id UUID)
 RETURNS TABLE (organization_id UUID) AS $$

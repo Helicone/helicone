@@ -28,6 +28,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/lib/result";
 import { useRouter } from "next/navigation";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -67,11 +68,12 @@ export function CodeIntegrationPage({
   defaultProvider = "openai",
   defaultLanguage = "typescript",
 }: CodeIntegrationPageProps) {
-  const { setCurrentStep, resetOnboarding } = useOrgOnboardingStore();
   const user = useUser();
   const { setNotification } = useNotification();
   const org = useOrg();
   const router = useRouter();
+  const { updateCurrentStep, completeOnboarding, resetOnboarding } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
   const [provider, setProvider] = useState<Provider>(defaultProvider);
   const [language, setLanguage] = useState<Language>(defaultLanguage);
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -103,7 +105,7 @@ export function CodeIntegrationPage({
   );
 
   useEffect(() => {
-    setCurrentStep("EVENT");
+    updateCurrentStep("EVENT");
     const generateKey = async () => {
       if (!user) return;
       if (apiKey) return;
@@ -157,14 +159,15 @@ export function CodeIntegrationPage({
 
   useEffect(() => {
     if (hasEvent?.data) {
-      const timeout = setTimeout(() => {
+      const timeout = setTimeout(async () => {
+        await completeOnboarding();
         resetOnboarding();
         router.push("/dashboard");
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [hasEvent?.data, router]);
+  }, [hasEvent?.data, router, completeOnboarding, resetOnboarding]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function"

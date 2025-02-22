@@ -168,7 +168,6 @@ const useGetOrgs = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
-      console.log("useGetOrgs", user?.id);
       if (!user?.id) {
         return [];
       }
@@ -269,6 +268,7 @@ const setOrgCookie = (orgId: string) => {
 const useOrgsContextManager = () => {
   const user = useUser();
   const { data: orgs, refetch } = useGetOrgs();
+  const jawn = getJawnClient();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);

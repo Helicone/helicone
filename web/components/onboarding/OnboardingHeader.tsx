@@ -2,9 +2,10 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect } from "react";
 import { ChevronRightIcon } from "lucide-react";
-import { OnboardingStep, useOrgOnboardingStore } from "@/store/onboardingStore";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
+import { OnboardingStep } from "@/store/onboardingStore";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -28,8 +29,11 @@ const STEP_ROUTES: Record<OnboardingStep, string> = {
 
 export const OnboardingHeader = () => {
   const router = useRouter();
-  const { formData, currentStep, setCurrentStep } = useOrgOnboardingStore();
   const org = useOrg();
+
+  const { onboardingState, draftPlan, updateCurrentStep } = useOrgOnboarding(
+    org?.currentOrg?.id ?? ""
+  );
 
   useEffect(() => {
     if (org?.currentOrg?.has_onboarded) {
@@ -38,26 +42,31 @@ export const OnboardingHeader = () => {
   }, [org?.currentOrg?.has_onboarded]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
-    formData.plan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
+    draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
 
   const isCreatingOrg =
-    currentStep === "ORGANIZATION" || currentStep === "MEMBERS";
+    onboardingState?.currentStep === "ORGANIZATION" ||
+    onboardingState?.currentStep === "MEMBERS";
 
   const steps: { label: string; step: OnboardingStep }[] = [
     {
       label: "Create an organization",
-      step: isCreatingOrg ? currentStep : "ORGANIZATION",
+      step: isCreatingOrg
+        ? (onboardingState?.currentStep as OnboardingStep)
+        : "ORGANIZATION",
     },
     ...billingStep,
     { label: "Get integrated", step: "INTEGRATION" },
     { label: "Send an event", step: "EVENT" },
   ];
 
-  const currentStepIndex = steps.findIndex((s) => s.step === currentStep);
+  const currentStepIndex = steps.findIndex(
+    (s) => s.step === onboardingState?.currentStep
+  );
 
-  const handleStepClick = (step: OnboardingStep, index: number) => {
+  const handleStepClick = async (step: OnboardingStep, index: number) => {
     if (index < currentStepIndex) {
-      setCurrentStep(step);
+      await updateCurrentStep(step);
       router.push(STEP_ROUTES[step]);
     }
   };
@@ -80,7 +89,7 @@ export const OnboardingHeader = () => {
               <span
                 className={cn(
                   "text-sm font-normal",
-                  currentStep === step.step
+                  onboardingState?.currentStep === step.step
                     ? "text-slate-900"
                     : "text-slate-500",
                   index < currentStepIndex && "hover:text-slate-700"
