@@ -1,10 +1,15 @@
 ---
-title: "Get Requests"
-sidebarTitle: "Get Requests"
+title: "Get Requests (Point Queries)"
+sidebarTitle: "Get Requests (Point Queries)"
 description: "Retrieve all requests visible in the request table at Helicone."
-"twitter:title": "Get Requests - Helicone OSS LLM Observability"
+"twitter:title": "Get Requests (Point Queries) - Helicone OSS LLM Observability"
 openapi: post /v1/request/query
 ---
+
+<Warning>
+  This API is optimized for point queries. For bulk queries, use the [Get
+  Requests (faster)](/rest/request/post-v1requestquery-clickhouse) API.
+</Warning>
 
 The following API lets you get all of the requests
 that would be visible in the request table at
