@@ -140,10 +140,14 @@ export const useOrgOnboarding = (orgId: string) => {
   });
 
   useEffect(() => {
-    if (onboardingState && !draftName) {
+    if (
+      onboardingState &&
+      !draftName &&
+      onboardingState.name !== "My Organization"
+    ) {
       setDraftName(onboardingState.name);
     }
-  }, [onboardingState, draftName]);
+  }, []);
 
   const currentState = {
     ...onboardingState,

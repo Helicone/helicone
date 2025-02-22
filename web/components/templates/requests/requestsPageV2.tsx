@@ -637,6 +637,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   useEffect(() => {
+    orgContext?.refetchOrgs();
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
     }

@@ -72,8 +72,9 @@ export function CodeIntegrationPage({
   const { setNotification } = useNotification();
   const org = useOrg();
   const router = useRouter();
-  const { updateCurrentStep, completeOnboarding, resetOnboarding } =
-    useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
+    org?.currentOrg?.id ?? ""
+  );
   const [provider, setProvider] = useState<Provider>(defaultProvider);
   const [language, setLanguage] = useState<Language>(defaultLanguage);
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -161,13 +162,12 @@ export function CodeIntegrationPage({
     if (hasEvent?.data) {
       const timeout = setTimeout(async () => {
         await completeOnboarding();
-        resetOnboarding();
         router.push("/dashboard");
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [hasEvent?.data, router, completeOnboarding, resetOnboarding]);
+  }, [hasEvent?.data, router, completeOnboarding]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function"

@@ -102,6 +102,7 @@ const DashboardPage = (props: DashboardPageProps) => {
   );
 
   useEffect(() => {
+    orgContext?.refetchOrgs();
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
     }
