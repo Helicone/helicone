@@ -71,10 +71,16 @@ export default function CustomScrollbar({
       </div>
       {/* Custom overlay scrollbar */}
       {scrollHeight > clientHeight + 1 && (
-        <div className="absolute top-0 right-0 bottom-0 w-2 pointer-events-none z-10">
+        <div className="absolute top-0 right-0 bottom-0 w-[8px] pointer-events-none z-10">
           <div
-            className={`absolute right-0 rounded-l-full transition-colors duration-200 ${
+            className={`absolute right-0 transition-colors duration-200 ${
               hovered ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
+            } ${
+              thumbTop === 0
+                ? "rounded-r-xs rounded-bl-md"
+                : thumbTop + thumbHeight >= clientHeight
+                ? "rounded-r-xs rounded-tl-md"
+                : "rounded-l-md rounded-r-xs"
             }`}
             style={{
               top: thumbTop,
