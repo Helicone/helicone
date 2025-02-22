@@ -107,10 +107,15 @@ export default function IntegratePage() {
         </div>
 
         <div className="flex flex-col gap-4 md:gap-6">
-          <Button variant="link" className="h-auto w-fit p-0 text-sky-500">
-            Read more about the difference
-            <ExternalLink className="ml-2 h-4 w-4" />
-          </Button>
+          <Link
+            href="https://docs.helicone.ai/references/proxy-vs-async"
+            target="_blank"
+          >
+            <Button variant="link" className="h-auto w-fit p-0 text-sky-500">
+              Read more about the difference
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
           <Link href="/dashboard">
             <Button variant="secondary" className="w-fit">
               Do it later

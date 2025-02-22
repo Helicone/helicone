@@ -281,8 +281,9 @@ export function CodeIntegrationPage({
             <div className="flex flex-col gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="w-fit">
-                    Need some help? <ChevronDown className="ml-2 h-4 w-4" />
+                  <Button variant="link" className="w-fit group">
+                    Need some help?
+                    <ChevronDown className="ml-2 h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
