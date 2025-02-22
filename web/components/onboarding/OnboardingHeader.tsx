@@ -98,23 +98,25 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
 
   return (
     <>
-      <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Image
-            src="/static/logo-clear.png"
-            alt="Helicone Logo"
-            className="rounded-xl"
-            width={20}
-            height={20}
-          />
+      <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between overflow-x-auto">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="flex-shrink-0">
+            <Image
+              src="/static/logo-clear.png"
+              alt="Helicone Logo"
+              className="rounded-xl"
+              width={20}
+              height={20}
+            />
+          </div>
           <BreadcrumbSeparator />
 
-          <nav className="flex items-center gap-1.5">
+          <nav className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap pb-1">
             {steps.map((step, index) => (
               <React.Fragment key={step.label}>
                 <span
                   className={cn(
-                    "text-sm font-normal",
+                    "text-sm font-normal flex-shrink-0",
                     onboardingState?.currentStep === step.step
                       ? "text-slate-900"
                       : "text-slate-500",
@@ -132,14 +134,12 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
                   {step.label}
                 </span>
                 {index < steps.length - 1 && (
-                  <ChevronRightIcon className="w-4 h-4 text-slate-500" />
+                  <ChevronRightIcon className="w-4 h-4 text-slate-500 flex-shrink-0" />
                 )}
               </React.Fragment>
             ))}
           </nav>
         </div>
-
-        <ChevronRightIcon className="w-4 h-4 text-slate-500" />
       </header>
       {children}
     </>

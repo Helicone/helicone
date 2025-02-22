@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useEffect } from "react";
 
 // Define draft state interface
 interface DraftOnboardingState {
@@ -48,6 +49,7 @@ const createDraftStore = (orgId: string) => {
       }),
       {
         name: `onboarding-draft-storage-${orgId}`,
+        skipHydration: true, // Skip initial hydration
       }
     )
   );
@@ -56,6 +58,13 @@ const createDraftStore = (orgId: string) => {
 const storeCache = new Map<string, ReturnType<typeof createDraftStore>>();
 
 export const useDraftOnboardingStore = (orgId: string) => {
+  useEffect(() => {
+    // Hydrate the store after mount
+    if (storeCache.has(orgId)) {
+      storeCache.get(orgId)!.persist.rehydrate();
+    }
+  }, [orgId]);
+
   if (!storeCache.has(orgId)) {
     storeCache.set(orgId, createDraftStore(orgId));
   }
@@ -121,6 +130,7 @@ export const useOrgOnboarding = (orgId: string) => {
 
       const baseState =
         (data?.onboarding_status as OnboardingState) ?? defaultOnboardingState;
+
       return {
         ...baseState,
         name: data?.name ?? "",
@@ -150,6 +160,9 @@ export const useOrgOnboarding = (orgId: string) => {
         members: draftMembers,
         addons: draftAddons,
       };
+
+      console.log("fullState: ", JSON.stringify(fullState, null, 2));
+      console.log("draftName: ", draftName);
 
       const { data, error } = await jawn.POST(
         "/v1/organization/update_onboarding",
@@ -200,7 +213,6 @@ export const useOrgOnboarding = (orgId: string) => {
     draftMembers,
     setDraftMembers,
     updateCurrentStep,
-    resetOnboarding,
-    completeOnboarding,
+    resetOnboarding: clearDraft,
   };
 };

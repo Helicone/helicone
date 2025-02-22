@@ -5,7 +5,10 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
+import {
+  useDraftOnboardingStore,
+  useOrgOnboarding,
+} from "@/services/hooks/useOrgOnboarding";
 import { TeamPlanCheckout } from "@/components/onboarding/Checkout/TeamPlanCheckout";
 import { ProPlanCheckout } from "@/components/onboarding/Checkout/ProPlanCheckout";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -22,6 +25,7 @@ export default function BillingPage() {
     setDraftAddons,
   } = useDraftOnboardingStore(org?.currentOrg?.id ?? "")();
   const { setNotification } = useNotification();
+  const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createdOrgId = org?.currentOrg?.id;
 

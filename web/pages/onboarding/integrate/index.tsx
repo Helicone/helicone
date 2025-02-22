@@ -18,27 +18,29 @@ export default function IntegratePage() {
   const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
-    updateCurrentStep("INTEGRATION");
-  }, []);
+    if (org?.currentOrg?.id) {
+      updateCurrentStep("INTEGRATION");
+    }
+  }, [org?.currentOrg?.id]);
 
   return (
     <OnboardingHeader>
-      <div className="flex flex-col gap-6 mx-auto max-w-4xl mt-12">
+      <div className="flex flex-col gap-6 mx-auto max-w-4xl mt-6 md:mt-12 px-4 md:px-0">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold">Get integrated</h1>
+          <h1 className="text-xl md:text-2xl font-semibold">Get integrated</h1>
           <p className="text-sm text-slate-500">
             Choose your preferred integration method.
           </p>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Async Card */}
           <Link href="/onboarding/integrate/async" className="flex-1">
             <Card className="h-full transition-colors hover:bg-slate-50">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
-                    <ArrowLeftRight className="h-6 w-6" />
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
+                    <ArrowLeftRight className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
                     <h3 className="font-semibold">Async</h3>
@@ -46,7 +48,11 @@ export default function IntegratePage() {
                       Flexible, not on the critical path.
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:flex"
+                  >
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -66,8 +72,8 @@ export default function IntegratePage() {
             <Card className="h-full transition-colors hover:bg-slate-50">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
-                    <Waypoints className="h-6 w-6" />
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
+                    <Waypoints className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
                     <h3 className="font-semibold">Proxy</h3>
@@ -75,7 +81,11 @@ export default function IntegratePage() {
                       Simplest and fastest integration.
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:flex"
+                  >
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -96,7 +106,7 @@ export default function IntegratePage() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 md:gap-6">
           <Button variant="link" className="h-auto w-fit p-0 text-sky-500">
             Read more about the difference
             <ExternalLink className="ml-2 h-4 w-4" />
