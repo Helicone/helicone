@@ -309,10 +309,15 @@ const useOrgsContextManager = () => {
           isDemo: false,
         }),
       })
-        .then((res) => res.json())
-        .then((mainOrgData) => {
-          setOrgCookie(mainOrgData.orgId);
-          // Then create the demo org
+        .then((res) =>
+          res.json().then((data) => ({ status: res.status, data }))
+        )
+        .then((mainOrg) => {
+          if (mainOrg.status === 200) {
+            setOrgCookie(mainOrg.data.orgId);
+          }
+
+          // Create demo org after main org, regardless of status
           return fetch(`/api/user/${user.id}/ensure-one-org`, {
             method: "POST",
             headers: {

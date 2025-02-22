@@ -101,10 +101,11 @@ export default function IntegratePage() {
             Read more about the difference
             <ExternalLink className="ml-2 h-4 w-4" />
           </Button>
-
-          <Button variant="secondary" className="w-fit">
-            Do it later
-          </Button>
+          <Link href="/dashboard">
+            <Button variant="secondary" className="w-fit">
+              Do it later
+            </Button>
+          </Link>
         </div>
       </div>
     </OnboardingHeader>
