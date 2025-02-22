@@ -1,161 +1,304 @@
-import axios, { all } from "axios";
+/**
+ * Helicone Data Export Tool
+ * A command-line tool to export request/response data from Helicone's API.
+ */
 
-import { HeliconeAPIClient } from "@helicone/helicone";
+import * as fs from "fs";
+
+interface RequestResponse {
+  response_id: string;
+  response_created_at: string;
+  response_body?: unknown;
+  response_status: number;
+  signed_body_url?: string;
+  [key: string]: any;
+}
+
+interface ApiResponse {
+  data: RequestResponse[];
+}
+
+interface QueryOptions {
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+  format?: "json" | "jsonl" | "csv";
+  includeBody?: boolean;
+}
 
 const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 if (!HELICONE_API_KEY) {
-  throw new Error("HELICONE_API_KEY is not set");
+  throw new Error("HELICONE_API_KEY environment variable is required");
 }
-const heliconeClient = new HeliconeAPIClient({
-  apiKey: HELICONE_API_KEY,
-});
 
-function makeRequest(startTime: string, endTime: string, offset: number) {
-  return heliconeClient.rawClient.POST("/v1/request/query", {
-    body: {
-      filter: {
-        left: {
-          request: {
-            created_at: {
-              gte: startTime,
-            },
-          },
-        },
-        right: {
-          request: {
-            created_at: {
-              lt: endTime,
-            },
-          },
-        },
-        operator: "and",
+function parseArgs(): QueryOptions {
+  const args = process.argv.slice(2);
+  const options: QueryOptions = {};
+
+  for (let i = 0; i < args.length; i++) {
+    const flag = args[i];
+    const value = args[i + 1];
+
+    switch (flag) {
+      case "--start-date":
+        options.startDate = new Date(value);
+        i++;
+        break;
+      case "--end-date":
+        options.endDate = new Date(value);
+        i++;
+        break;
+      case "--limit":
+        options.limit = parseInt(value, 10);
+        if (isNaN(options.limit)) {
+          throw new Error("Limit must be a number");
+        }
+        i++;
+        break;
+      case "--format":
+        if (value !== "json" && value !== "jsonl" && value !== "csv") {
+          throw new Error("Format must be json, jsonl, or csv");
+        }
+        options.format = value;
+        i++;
+        break;
+      case "--include-body":
+        options.includeBody = true;
+        break;
+    }
+  }
+
+  // Set default values
+  const now = new Date();
+  options.endDate = options.endDate || now;
+  options.startDate =
+    options.startDate || new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  options.format = options.format || "jsonl";
+  options.includeBody = options.includeBody || false;
+
+  // Swap dates if start is after end
+  if (options.startDate > options.endDate) {
+    [options.startDate, options.endDate] = [options.endDate, options.startDate];
+  }
+
+  return options;
+}
+
+function convertToCSVRow(item: RequestResponse): string {
+  const fields = [
+    "response_id",
+    "response_created_at",
+    "response_status",
+    "request_created_at",
+    "request_body",
+    "request_properties",
+    "request_user_id",
+    "model",
+    "prompt_tokens",
+    "completion_tokens",
+    "latency",
+    "cost_usd",
+  ];
+
+  return fields
+    .map((field) => {
+      let value = item[field];
+      if (typeof value === "object" && value !== null) {
+        value = JSON.stringify(value).replace(/"/g, '""');
+      }
+      if (value === undefined || value === null) {
+        return "";
+      }
+      return `"${String(value).replace(/"/g, '""')}"`;
+    })
+    .join(",");
+}
+
+function writeCSVHeader(outputStream: fs.WriteStream): void {
+  const header = [
+    "response_id",
+    "response_created_at",
+    "response_status",
+    "request_created_at",
+    "request_body",
+    "request_properties",
+    "request_user_id",
+    "model",
+    "prompt_tokens",
+    "completion_tokens",
+    "latency",
+    "cost_usd",
+  ].join(",");
+  outputStream.write(header + "\n");
+}
+
+async function makeRequest(
+  offset: number,
+  limit: number,
+  options: QueryOptions
+): Promise<RequestResponse[]> {
+  const requestBody = {
+    filter: "all",
+    isCached: false,
+    limit,
+    offset,
+    sort: { created_at: "desc" },
+    includeInputs: false,
+    isScored: false,
+    isPartOfExperiment: false,
+  };
+
+  const response = await fetch(
+    "https://api.helicone.ai/v1/request/query-clickhouse",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${HELICONE_API_KEY}`,
       },
-      isCached: false,
-      limit: 100, // Increase limit to get more data per request
-      offset,
-      sort: { created_at: "asc" },
-    },
-  });
+      body: JSON.stringify(requestBody),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  const data = (await response.json()) as ApiResponse;
+  return data.data || [];
 }
 
-type Unpromise<T> = T extends Promise<infer U> ? U : T;
-type NotUndefined<T> = T extends undefined ? never : T;
-type NotNull<T> = T extends null ? never : T;
+async function fetchSignedBody(url: string): Promise<Record<string, any>> {
+  if (!url) return {};
 
-type ResponseData = NotNull<
-  NotUndefined<Unpromise<ReturnType<typeof makeRequest>>["data"]>["data"]
->;
-
-async function fetchSignedBodyAsync(url: string): Promise<Record<string, any>> {
-  if (!url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = (await response.json()) as Record<string, any>;
+    return data;
+  } catch (e) {
     return {};
+  }
+}
+
+async function getAllData(options: QueryOptions): Promise<RequestResponse[]> {
+  const allData: RequestResponse[] = [];
+  let offset = 0;
+  const batchSize = Math.min(options.limit || 1000, 1000);
+  const outputStream = fs.createWriteStream(`output.${options.format}`, {
+    flags: "w",
+  });
+
+  if (options.format === "json") {
+    outputStream.write("[\n");
+  } else if (options.format === "csv") {
+    writeCSVHeader(outputStream);
   }
 
   try {
-    const response = await axios.get(url);
-    return response.data;
-  } catch (e) {
-    console.log(`Failed to fetch signed body for ${url}: ${e}`);
-    return {};
-  }
-
-  // return response.data;
-}
-
-async function fetchAllSignedBodies(data: ResponseData): Promise<void> {
-  const tasks = data.map((d) => fetchSignedBodyAsync(d.signed_body_url ?? ""));
-  for (const [index, task] of tasks.entries()) {
-    try {
-      (data[index] as any).signed_body_content = await task;
-    } catch (e) {
-      console.log(
-        `Failed to fetch or decode signed_body_url for response_id ${data[index].response_id}: ${e}`
-      );
-    }
-  }
-}
-
-async function getAllData(
-  startTime: string,
-  endTime: string,
-  stepHours: number
-): Promise<ResponseData> {
-  const allData: ResponseData = [];
-  let currentTime = new Date(endTime);
-  let startTimeDate = new Date(startTime);
-  let nextTime = new Date(startTimeDate.getTime() + stepHours * 60 * 60 * 1000);
-  if (nextTime > currentTime) {
-    nextTime = currentTime;
-  }
-
-  while (startTimeDate < currentTime) {
-    console.log(
-      `Fetching data from ${startTimeDate} to ${nextTime}: ${allData.length} records fetched so far`
-    );
-    let offset = 0;
     while (true) {
-      const apiResponse = await makeRequest(
-        startTimeDate.toISOString(),
-        nextTime.toISOString(),
-        offset
-      );
-      if (!apiResponse.response.ok) {
-        throw new Error(
-          `Failed to fetch data: ${JSON.stringify(apiResponse.error)}`
+      const batchData = await makeRequest(offset, batchSize, options);
+      if (!batchData || batchData.length === 0) break;
+
+      // Process records in batches of 10 to avoid rate limiting
+      for (let i = 0; i < batchData.length; i += 10) {
+        const chunk = batchData.slice(i, i + 10);
+        const processedChunk = await Promise.all(
+          chunk.map(async (record) => {
+            if (options.includeBody && record.signed_body_url) {
+              const signedBody = await fetchSignedBody(record.signed_body_url);
+              if (signedBody.request) {
+                record.request_body = signedBody.request;
+              }
+              if (signedBody.response) {
+                record.response_body = signedBody.response;
+              }
+            }
+            return record;
+          })
         );
-      }
 
-      console.log(`fetching ${apiResponse.data?.data?.length} bodies`);
-      if (
-        !apiResponse ||
-        !apiResponse.data?.data ||
-        apiResponse.data?.data?.length === 0
-      ) {
-        console.log("No more data to fetch - going next");
-        break;
-      }
-
-      let retries = 3;
-      while (retries > 0) {
-        try {
-          if (retries < 3 || apiResponse.error) {
-            await makeRequest(
-              startTimeDate.toISOString(),
-              nextTime.toISOString(),
-              offset
+        // Write processed records to file
+        processedChunk.forEach((record) => {
+          if (options.format === "json") {
+            outputStream.write(
+              JSON.stringify(record, null, 2) +
+                (allData.length + 1 < (options.limit || Infinity)
+                  ? ",\n"
+                  : "\n")
             );
+          } else if (options.format === "jsonl") {
+            outputStream.write(JSON.stringify(record) + "\n");
+          } else if (options.format === "csv") {
+            outputStream.write(convertToCSVRow(record) + "\n");
           }
-          await fetchAllSignedBodies(apiResponse.data.data);
-          allData.push(...apiResponse.data.data);
+        });
+
+        allData.push(...processedChunk);
+
+        if (options.limit && allData.length >= options.limit) {
           break;
-        } catch (e) {
-          console.log(
-            `Failed to fetch signed bodies: ${e}, retrying ${retries} more times`
-          );
-          retries -= 1;
+        }
+
+        // Add delay between chunks to avoid rate limiting
+        if (i + 10 < batchData.length) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       }
 
-      offset += 100; // Increment offset to paginate through results
-    }
+      if (options.limit && allData.length >= options.limit) {
+        break;
+      }
 
-    startTimeDate = nextTime;
-    nextTime = new Date(startTimeDate.getTime() + stepHours * 60 * 60 * 1000);
-    if (nextTime > currentTime) {
-      nextTime = currentTime;
+      offset += batchSize;
     }
+  } finally {
+    if (options.format === "json") {
+      outputStream.write("]\n");
+    }
+    outputStream.end();
   }
 
   return allData;
 }
 
-// Example usage
-const start_time_input = "2024-05-10 07:00:00";
-const end_time_input = "2024-05-12 00:00:00";
-const step_hours = 1; // Configurable step size in hours
-getAllData(start_time_input, end_time_input, step_hours)
-  .then((allData) => {
-    console.log(allData);
-    console.log("Data written to output.xlsx");
-  })
-  .catch((err) => console.error(err));
+// Main execution
+try {
+  const options = parseArgs();
+  getAllData(options)
+    .then(() => {
+      process.exit(0);
+    })
+    .catch((err: Error) => {
+      console.error("Error:", err.message);
+      process.exit(1);
+    });
+} catch (err) {
+  if (err instanceof Error) {
+    console.error("Error:", err.message);
+  } else {
+    console.error("An unknown error occurred");
+  }
+  console.error("\nUsage:");
+  console.error("  ts-node index.ts [options]");
+  console.error("\nOptions:");
+  console.error("  --start-date <date>    Start date (default: 30 days ago)");
+  console.error("  --end-date <date>      End date (default: now)");
+  console.error("  --limit <number>       Maximum number of records to fetch");
+  console.error(
+    "  --format <format>      Output format: json, jsonl, or csv (default: jsonl)"
+  );
+  console.error(
+    "  --include-body         Include full request/response bodies (default: false)"
+  );
+  console.error("\nDate format: YYYY-MM-DD or ISO string");
+  console.error(
+    "Example: ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --limit 5000 --format csv --include-body"
+  );
+  process.exit(1);
+}
