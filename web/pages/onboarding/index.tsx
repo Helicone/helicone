@@ -33,7 +33,6 @@ export default function OnboardingPage() {
     updateCurrentStep,
   } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
-  // Check subscription status
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
     queryFn: async () => {

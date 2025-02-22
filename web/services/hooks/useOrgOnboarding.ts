@@ -139,16 +139,19 @@ export const useOrgOnboarding = (orgId: string) => {
     enabled: !!orgId,
   });
 
+  useEffect(() => {
+    if (onboardingState && !draftName) {
+      setDraftName(onboardingState.name);
+    }
+  }, [onboardingState, draftName]);
+
   const currentState = {
     ...onboardingState,
     selectedTier: draftPlan,
     members: draftMembers,
   };
 
-  const {
-    mutate: saveOnboardingChanges,
-    mutateAsync: saveOnboardingChangesAsync,
-  } = useMutation({
+  const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
         hasOnboarded: onboardingState?.hasOnboarded ?? false,
@@ -160,9 +163,6 @@ export const useOrgOnboarding = (orgId: string) => {
         members: draftMembers,
         addons: draftAddons,
       };
-
-      console.log("fullState: ", JSON.stringify(fullState, null, 2));
-      console.log("draftName: ", draftName);
 
       const { data, error } = await jawn.POST(
         "/v1/organization/update_onboarding",
@@ -195,12 +195,9 @@ export const useOrgOnboarding = (orgId: string) => {
 
   const completeOnboarding = async () => {
     await saveOnboardingChangesAsync({ hasOnboarded: true });
+    clearDraft();
     await queryClient.invalidateQueries(["org", orgId, "onboarding"]);
     await queryClient.refetchQueries(["org", orgId, "onboarding"]);
-  };
-
-  const resetOnboarding = () => {
-    clearDraft();
   };
 
   return {
@@ -213,6 +210,6 @@ export const useOrgOnboarding = (orgId: string) => {
     draftMembers,
     setDraftMembers,
     updateCurrentStep,
-    resetOnboarding: clearDraft,
+    completeOnboarding,
   };
 };
