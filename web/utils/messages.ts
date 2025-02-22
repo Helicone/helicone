@@ -6,23 +6,63 @@ export function isLastMessageUser(messages: Message[]): boolean {
 }
 
 export function isPrefillSupported(provider: string): boolean {
-  return provider === "anthropic";
+  return provider === "ANTHROPIC";
 }
 
-export function removeMessagePair(
-  messages: Message[],
-  index: number
-): Message[] {
+export interface MessageRemovalOptions {
+  isPrefillSupported: boolean;
+  messages: Message[];
+  index: number;
+}
+export function getMessagesToRemove({
+  isPrefillSupported,
+  messages,
+  index,
+}: MessageRemovalOptions): number[] {
+  // First system and user messages are not removable
+  if (index <= 1) return [];
+
+  // For providers that support prefill, just remove the single message if it's a user message
+  if (isPrefillSupported && messages[index].role === "user") {
+    return [index];
+  }
+
+  // For providers that don't support prefill, we need to handle message pairs
+  // If it's a user message preceded by an assistant message, remove both messages
+  if (
+    index > 0 &&
+    messages[index].role === "user" &&
+    messages[index - 1]?.role === "assistant"
+  ) {
+    return [index - 1, index];
+  }
+
   // If it's an assistant message followed by a user message, remove both
   if (
     index < messages.length - 1 &&
     messages[index].role === "assistant" &&
     messages[index + 1].role === "user"
   ) {
-    return [...messages.slice(0, index), ...messages.slice(index + 2)];
+    return [index, index + 1];
   }
+
   // If it's a single assistant message (prefill), just remove it
-  else return [...messages.slice(0, index), ...messages.slice(index + 1)];
+  return [index];
+}
+
+export function removeMessage({
+  isPrefillSupported,
+  messages,
+  index,
+}: MessageRemovalOptions): Message[] {
+  const indicesToRemove = getMessagesToRemove({
+    isPrefillSupported,
+    messages,
+    index,
+  });
+  if (indicesToRemove.length === 0) return messages;
+
+  return messages.filter((_, i) => !indicesToRemove.includes(i));
 }
 
 export function inferMessageRole(

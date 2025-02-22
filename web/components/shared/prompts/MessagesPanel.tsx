@@ -2,21 +2,18 @@ import ImageBox from "@/components/shared/prompts/ImageBox";
 import PromptBox from "@/components/shared/prompts/PromptBox";
 import { Button } from "@/components/ui/button";
 import { StateVariable } from "@/types/prompt-state";
-import { isLastMessageUser } from "@/utils/messages";
+import { getMessagesToRemove, isLastMessageUser } from "@/utils/messages";
 import {
   heliconeToTemplateTags,
   templateToHeliconeTags,
 } from "@/utils/variables";
 import { Message } from "packages/llm-mapper/types";
-import {
-  PiDiceOneBold,
-  PiDiceTwoBold,
-  PiMagicWandBold,
-  PiTrashBold,
-} from "react-icons/pi";
+import { useEffect, useState } from "react";
+import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
+
 import GlassHeader from "../universal/GlassHeader";
 
-interface PromptPanelsProps {
+interface MessagesPanelPrompts {
   messages: Message[];
   onMessageChange: (index: number, content: string) => void;
   onAddMessagePair: () => void;
@@ -36,7 +33,15 @@ export default function MessagesPanel({
   onVariableCreate,
   variables,
   isPrefillSupported,
-}: PromptPanelsProps) {
+}: MessagesPanelPrompts) {
+  // STATES
+  const [hoveredTrashIdx, setHoveredTrashIdx] = useState<number | null>(null);
+
+  // Reset hover state when messages change
+  useEffect(() => {
+    setHoveredTrashIdx(null);
+  }, [messages.length]);
+
   // HELPERS
   // - Are the first two messages empty?
   const areFirstMessagesEmpty = messages
@@ -48,7 +53,27 @@ export default function MessagesPanel({
   const isRemovableMessage = (index: number) => {
     // First system and user messages are not removable
     if (index <= 1) return false;
-    else return true;
+    return true;
+  };
+  // - Should message be highlighted for removal?
+  const shouldHighlightMessage = (index: number) => {
+    // If no hover index, don't highlight
+    if (hoveredTrashIdx === null) return false;
+    // If index is out of bounds, don't highlight
+    if (
+      index < 0 ||
+      index >= messages.length ||
+      hoveredTrashIdx >= messages.length
+    )
+      return false;
+
+    const messagesToRemove = getMessagesToRemove({
+      isPrefillSupported,
+      messages,
+      index: hoveredTrashIdx,
+    });
+
+    return messagesToRemove.includes(index);
   };
 
   return (
@@ -58,7 +83,14 @@ export default function MessagesPanel({
         const isRemovable = isRemovableMessage(index);
 
         return (
-          <div key={index} className="flex flex-col">
+          <div
+            key={index}
+            className={`flex flex-col ${
+              shouldHighlightMessage(index)
+                ? "ring-1 ring-red-300 dark:ring-red-700"
+                : ""
+            }`}
+          >
             {/* Header */}
             <GlassHeader className="h-14 px-4 flex-shrink-0">
               {/* Message Role */}
@@ -70,7 +102,7 @@ export default function MessagesPanel({
               </h2>
 
               {/* Suggest starting prompt */}
-              {index === 0 && areFirstMessagesEmpty && (
+              {/* {index === 0 && areFirstMessagesEmpty && (
                 <button
                   onClick={() => {
                     onMessageChange(
@@ -87,7 +119,7 @@ export default function MessagesPanel({
                   <PiMagicWandBold />
                   Suggest starting prompt
                 </button>
-              )}
+              )} */}
 
               {/* Remove Message */}
               {isRemovable && (
@@ -95,7 +127,21 @@ export default function MessagesPanel({
                   variant={"outline"}
                   size={"square_icon"}
                   asPill
-                  onClick={() => onRemoveMessage(index)}
+                  onMouseEnter={() => setHoveredTrashIdx(index)}
+                  onMouseLeave={() => setHoveredTrashIdx(null)}
+                  onClick={() => {
+                    // If we're clicking on a user message and prefill isn't supported,
+                    // remove from the assistant message instead
+                    if (
+                      !isPrefillSupported &&
+                      msg.role === "user" &&
+                      messages[index - 1]?.role === "assistant"
+                    ) {
+                      onRemoveMessage(index - 1);
+                    } else {
+                      onRemoveMessage(index);
+                    }
+                  }}
                 >
                   <PiTrashBold className="w-4 h-4 text-secondary" />
                 </Button>
@@ -132,7 +178,7 @@ export default function MessagesPanel({
               : "cursor-not-allowed text-tertiary"
           }`}
         >
-          <PiDiceTwoBold />
+          <PiChatsBold />
           Add Message Pair
         </button>
 
@@ -146,7 +192,7 @@ export default function MessagesPanel({
                 : "cursor-not-allowed text-tertiary"
             }`}
           >
-            <PiDiceOneBold />
+            <PiChatFill />
             Add Prefill Message
           </button>
         )}

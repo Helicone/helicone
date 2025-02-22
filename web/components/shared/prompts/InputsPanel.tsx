@@ -1,5 +1,6 @@
 import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -12,11 +13,9 @@ import { StateVariable } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
 import { useMutation } from "@tanstack/react-query";
 import { memo, useState } from "react";
-import { populateVariables } from "./helpers";
-
-import { Input } from "@/components/ui/input";
 import { PiChatBold, PiDatabaseBold, PiShuffleBold } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
+import { populateVariables } from "./helpers";
 
 interface VariableItemProps {
   variable: StateVariable;
@@ -86,7 +85,7 @@ export default function VariablesPanel({
       <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Inputs</h2>
         <div className="flex flex-row gap-2">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
@@ -110,7 +109,7 @@ export default function VariablesPanel({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>

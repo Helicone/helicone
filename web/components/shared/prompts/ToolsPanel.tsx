@@ -26,7 +26,7 @@ export default function ToolPanel({ tools }: ToolPanelProps) {
       {/* Header */}
       <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Tools</h2>
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div>

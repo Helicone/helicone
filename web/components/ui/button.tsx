@@ -25,9 +25,9 @@ const buttonVariants = cva(
           "text-white font-semibold hover:text-slate-100 border border-slate-200 bg-heliblue hover:bg-heliblue/90 dark:border-slate-800 dark:bg-heliblue dark:hover:bg-heliblue/90 dark:hover:text-slate-50 interactive",
       },
       size: {
-        default: "px-4 py-2 h-10",
         xs: "h-8 px-3",
-        sm: "h-9 rounded-md px-3",
+        sm: "h-9 rounded-lg px-3",
+        default: "px-4 py-2 h-10",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
         sm_sleek: "h-6 rounded-md px-3 text-xs",

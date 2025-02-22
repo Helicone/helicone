@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -24,7 +25,7 @@ import {
   isLastMessageUser,
   isPrefillSupported,
   parseImprovedMessages,
-  removeMessagePair,
+  removeMessage,
 } from "@/utils/messages";
 import { toKebabCase } from "@/utils/strings";
 import {
@@ -283,7 +284,11 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const handleRemoveMessage = useCallback(
     (index: number) => {
       updateState({
-        messages: removeMessagePair(state!.messages, index),
+        messages: removeMessage({
+          isPrefillSupported: isPrefillSupported(state!.parameters.provider),
+          messages: state!.messages,
+          index,
+        }),
       });
     },
     [state, updateState]
@@ -735,35 +740,35 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   }, [handleSaveAndRun, prompt?.metadata?.createdFromUi]);
 
   // HELPERS
-  // - Add Message Pair
-  const handleAddMessagePair = () => {
+  // - Add Messages
+  const handleAddMessages = (messages?: Message[]) => {
     updateState((prev) => {
-      if (prev && isLastMessageUser(prev.messages)) {
+      if (!prev) return {};
+
+      // If no messages provided, add default empty message pair
+      if (!messages) {
+        return isLastMessageUser(prev.messages)
+          ? {
+              messages: [
+                ...prev.messages,
+                { _type: "message", role: "assistant", content: "" },
+                { _type: "message", role: "user", content: "" },
+              ],
+            }
+          : {};
+      }
+
+      // For any provided messages, append them if last message is user
+      // or if it's a single assistant message (prefill)
+      const isAddingSingleAssistant =
+        messages.length === 1 && messages[0].role === "assistant";
+      if (isLastMessageUser(prev.messages) || isAddingSingleAssistant) {
         return {
-          messages: [
-            ...prev.messages,
-            { _type: "message", role: "assistant", content: "" },
-            { _type: "message", role: "user", content: "" },
-          ],
+          messages: [...prev.messages, ...messages],
         };
-      } else return {};
-    });
-  };
-  // - Add Prefill
-  const handleAddPrefill = () => {
-    updateState((prev) => {
-      if (
-        prev &&
-        isPrefillSupported(prev.parameters.provider) &&
-        isLastMessageUser(prev.messages)
-      ) {
-        return {
-          messages: [
-            ...prev.messages,
-            { _type: "message", role: "assistant", content: "" },
-          ],
-        };
-      } else return {};
+      }
+
+      return {};
     });
   };
 
@@ -825,6 +830,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
                 : ""
             }`}
             variant="action"
+            size="sm"
             disabled={!canRun}
             onClick={handleSaveAndRun}
           >
@@ -850,6 +856,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           {/* Experiment Button */}
           <Button
             variant="outline"
+            size="sm"
             disabled={newFromPromptVersion.isLoading}
             onClick={async () => {
               const result = await newFromPromptVersion.mutateAsync({
@@ -868,6 +875,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             <DialogTrigger asChild>
               <Button
                 variant="outline"
+                size="sm"
                 disabled={prompt?.metadata?.createdFromUi === false}
                 onClick={() => {}}
               >
@@ -952,8 +960,12 @@ async function pullPromptAndRunCompletion() {
               <MessagesPanel
                 messages={state.messages}
                 onMessageChange={handleMessageChange}
-                onAddMessagePair={handleAddMessagePair}
-                onAddPrefill={handleAddPrefill}
+                onAddMessagePair={() => handleAddMessages()}
+                onAddPrefill={() =>
+                  handleAddMessages([
+                    { _type: "message", role: "assistant", content: "" },
+                  ])
+                }
                 onRemoveMessage={handleRemoveMessage}
                 onVariableCreate={handleVariableCreate}
                 variables={state.variables || []}
@@ -965,7 +977,19 @@ async function pullPromptAndRunCompletion() {
           }
           rightTopPanel={
             <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
-              <ResponsePanel response={state.response || ""} />
+              <ResponsePanel
+                response={state.response || ""}
+                onAddToMessages={() =>
+                  handleAddMessages([
+                    {
+                      _type: "message",
+                      role: "assistant",
+                      content: state.response || "",
+                    },
+                    { _type: "message", role: "user", content: "" },
+                  ])
+                }
+              />
             </CustomScrollbar>
           }
           rightBottomPanel={
