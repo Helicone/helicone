@@ -1,1 +1,0 @@
-export const regex: RegExp;
