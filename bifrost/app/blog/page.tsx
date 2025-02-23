@@ -216,6 +216,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "helicone-vs-comet",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "helicone-vs-honeyhive",
     },
   },
