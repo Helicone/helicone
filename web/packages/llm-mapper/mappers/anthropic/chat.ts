@@ -1,4 +1,4 @@
-import { LlmSchema, Tool } from "../../types";
+import { LlmSchema } from "../../types";
 import { MapperFn } from "../types";
 import { getRequestMessages } from "./requestParser";
 import { getLLMSchemaResponse } from "./responseParser";
@@ -101,10 +101,10 @@ export const mapAnthropicRequest: MapperFn<any, any> = ({
       tool_choice: request.tool_choice,
       max_tokens: request.max_tokens,
       model: request.model || model,
-      tools: request.tools?.map((tool: Tool) => ({
+      tools: request.tools?.map((tool: any) => ({
         name: tool.name,
         description: tool.description,
-        parameters: tool.parameters || (tool as any)["input_schema"],
+        parameters: tool.input_schema,
       })),
     },
     response: responseData?.error
