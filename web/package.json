@@ -111,6 +111,7 @@
     "react-simple-code-editor": "^0.13.1",
     "recharts": "^2.13.3",
     "rss-parser": "^3.13.0",
+    "string-similarity-js": "^2.1.4",
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.0.0",
