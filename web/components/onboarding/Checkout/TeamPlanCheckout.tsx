@@ -1,5 +1,4 @@
 import { CheckoutLayout } from "./CheckoutLayout";
-import { Users2 } from "lucide-react";
 
 export const TeamPlanCheckout = ({
   clientSecret,

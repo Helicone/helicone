@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createHighlighter } from "shiki";
 import { Button } from "@/components/ui/button";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { useOrgOnboardingStore } from "@/store/onboardingStore";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";

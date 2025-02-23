@@ -36,7 +36,7 @@ export default function OnboardingFloatingPrompt({
           </h2>
           <p className="text-sm text-muted-foreground leading-5">
             Integrate your LLM app to start logging, evaluating and improving
-            your app. It'll take a few seconds!
+            your app. It&apos;ll take a few seconds!
           </p>
         </div>
 

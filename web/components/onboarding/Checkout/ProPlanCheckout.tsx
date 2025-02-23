@@ -1,8 +1,7 @@
-import { useOrgOnboardingStore } from "@/store/onboardingStore";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Gift, Package, FlaskConical, ClipboardCheck } from "lucide-react";
+import { Gift } from "lucide-react";
 import { CheckoutLayout } from "./CheckoutLayout";
 import { ADDONS } from "@/utils/pricingConfigs";
 import Image from "next/image";

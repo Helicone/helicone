@@ -150,8 +150,8 @@ export default function BillingPage() {
           <header className="mb-8 ml-0 md:ml-16">
             <h1 className="text-2xl font-semibold">Add billing information</h1>
             <p className="text-sm text-slate-500 mt-2">
-              You can add billing information later, but you'll need to do it
-              before you can use Helicone.
+              You can add billing information later, but you&apos;ll need to do
+              it before you can use Helicone.
             </p>
           </header>
         </div>

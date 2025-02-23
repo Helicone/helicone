@@ -33,7 +33,7 @@ export const OrganizationStep = () => {
           <p className="text-sm text-red-500">{error}</p>
         ) : draftName ? (
           <p className="text-sm font-light text-slate-400">
-            Don't worry, you can rename your organization later.
+            Don&apos;t worry, you can rename your organization later.
           </p>
         ) : null}
       </div>

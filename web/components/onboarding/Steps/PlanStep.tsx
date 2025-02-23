@@ -7,13 +7,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { PlanType, useOrgOnboardingStore } from "@/store/onboardingStore";
-import {
-  useDraftOnboardingStore,
-  useOrgOnboarding,
-} from "@/services/hooks/useOrgOnboarding";
+import { PlanType } from "@/store/onboardingStore";
+import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useState, useEffect } from "react";
 
 const PLAN_OPTIONS: Record<PlanType, { label: string; hasTrial: boolean }> = {
   free: { label: "Free ($0/mo)", hasTrial: false },

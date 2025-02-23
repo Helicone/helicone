@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect } from "react";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
 import { OnboardingStep } from "@/store/onboardingStore";
