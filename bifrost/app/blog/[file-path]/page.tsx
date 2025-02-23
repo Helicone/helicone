@@ -9,9 +9,8 @@ import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/atom-one-dark.css";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Twitter } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
 
 export default async function Home({
@@ -48,31 +47,14 @@ export default async function Home({
   return (
     <div className="w-full bg-white h-full antialiased relative">
       <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-6">
-        <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
+        <div className="hidden md:flex w-56 h-full flex-col space-y-2 md:sticky top-16 md:top-32">
           <Link href="/blog" className="flex items-center gap-1">
             <ChevronLeftIcon className="w-4 h-4" />
             <span className="text-sm font-bold">back</span>
           </Link>
-          <h3 className="text-sm font-semibold text-gray-500 pt-8 px-3">
-            <span className="text-black">Time</span>: {String(metadata.time)}
-          </h3>
-          <h3 className="text-sm font-semibold text-gray-500 px-3">
-            <span className="text-black">Created</span>: {String(metadata.date)}
-          </h3>
-          {metadata.authors ? (
-            <h3 className="text-sm font-semibold text-gray-500 px-3">
-              <span className="text-black">Authors</span>:{" "}
-              {metadata.authors.map((author) => author).join(", ")}
-            </h3>
-          ) : (
-            <h3 className="text-sm font-semibold text-gray-500 px-3">
-              <span className="text-black">Author</span>:{" "}
-              {String(metadata.author)}
-            </h3>
-          )}
-          <section className="w-52 mt-6 mb-2 pt-3">
+          <section className="hidden md:block w-52 mt-6 mb-2 pt-3">
             <div className="rounded-lg bg-[#F2F9FC] px-4 py-3 space-y-2 border border-[#E3EFF3]">
-              <div className="hidden md:block">
+              <div>
                 <p className="text-[#6B8C9C] text-sm leading-relaxed">
                   Join Helicone&apos;s community to monitor and optimize your
                   LLM app in real-time.
@@ -92,9 +74,60 @@ export default async function Home({
           </section>
         </div>
         <article className="prose w-full h-full">
-          <h1 className="text-bold text-sky-500 mt-16 md:mt-0">
-            {String(metadata.title)}
-          </h1>
+          <h1 className="text-bold text-sky-500">{String(metadata.title)}</h1>
+          <div
+            className={`flex items-center gap-2 ${
+              metadata.authors && metadata.authors.length > 0
+                ? "md:-mt-8 md:-mb-6"
+                : "-mt-8 -mb-6"
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                {metadata.authors && metadata.authors.length > 0 ? (
+                  <>
+                    {metadata.authors.map((author, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <img
+                          src={`/static/blog/${author
+                            .toLowerCase()
+                            .replace(/\s+/g, "")}-headshot.webp`}
+                          alt={`${author}'s headshot`}
+                          className="w-8 h-8 rounded-full hidden md:block"
+                        />
+                        <span className="text-slate-500 text-sm font-medium">
+                          {author}
+                          {i < (metadata.authors?.length ?? 0) - 1 && ","}
+                        </span>
+                      </div>
+                    ))}
+                    <span className="text-slate-400 text-sm font-medium">
+                      · {String(metadata.date)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={`/static/blog/${metadata.author
+                        ?.toLowerCase()
+                        .replace(/\s+/g, "")}-headshot.webp`}
+                      alt={`${metadata.author}'s headshot`}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="text-gray-600 text-sm font-medium">
+                      {metadata.author}
+                    </span>
+                    <span className="text-gray-400 text-sm font-medium">
+                      · {String(metadata.date)}
+                    </span>
+                  </>
+                )}
+              </div>
+              <span className="text-gray-600 text-sm font-medium hidden md:block">
+                {String(metadata.time)}
+              </span>
+            </div>
+          </div>
           <RemoteMdxPage mdxSource={mdxSource} />
         </article>
       </div>
