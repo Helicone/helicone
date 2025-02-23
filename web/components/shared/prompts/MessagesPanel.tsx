@@ -1,7 +1,7 @@
 import ImageBox from "@/components/shared/prompts/ImageBox";
 import PromptBox from "@/components/shared/prompts/PromptBox";
 import { Button } from "@/components/ui/button";
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
 import { getMessagesToRemove, isLastMessageUser } from "@/utils/messages";
 import {
   heliconeToTemplateTags,
@@ -19,8 +19,8 @@ interface MessagesPanelPrompts {
   onAddMessagePair: () => void;
   onAddPrefill: () => void;
   onRemoveMessage: (index: number) => void;
-  onVariableCreate: (variable: StateVariable) => void;
-  variables: StateVariable[];
+  onVariableCreate: (variable: StateInputs) => void;
+  variables: StateInputs[];
   isPrefillSupported: boolean;
 }
 

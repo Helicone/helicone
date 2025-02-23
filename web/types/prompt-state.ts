@@ -1,4 +1,4 @@
-import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
+import { PROVIDER_MODELS } from "@/utils/generate";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
@@ -11,7 +11,7 @@ export interface PromptState {
 
   messages: Message[];
   parameters: StateParameters;
-  variables?: StateVariable[];
+  inputs?: StateInputs[];
   evals?: any[]; // TODO: Add evals to the state
   structure?: any; // TODO: Real structure when feature is added
 
@@ -34,7 +34,7 @@ export interface StateParameters {
   // TODO: Add more parameters
 }
 
-export interface StateVariable {
+export interface StateInputs {
   name: string;
   value: string;
   isValid?: boolean;

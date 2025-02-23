@@ -19,8 +19,13 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import autoImprovePrompt from "@/prompts/auto-improve";
-import { PromptState, StateVariable } from "@/types/prompt-state";
-import { $system, $user } from "@/utils/llm";
+import { PromptState, StateInputs } from "@/types/prompt-state";
+import {
+  $system,
+  $user,
+  findClosestModel,
+  findClosestProvider,
+} from "@/utils/generate";
 import {
   isLastMessageUser,
   isPrefillSupported,
@@ -155,7 +160,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         templateData.content) as Message[];
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let inputs: StateVariable[] = Object.entries(metadata?.inputs || {}).map(
+      let inputs: StateInputs[] = Object.entries(metadata?.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
@@ -187,23 +192,32 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       // 4.D. Deduplicate variables
       inputs = deduplicateVariables(inputs);
 
+      // 5. Validate model-provider or closest match or default
+      const provider = findClosestProvider(metadata?.provider ?? "OPENAI");
+      const model = findClosestModel(
+        provider,
+        templateData.model ?? "gpt-4o-mini"
+      );
+
       // 6. Update state with the processed data
       setState({
         promptId: id,
         masterVersion: masterVersion,
         version: ver.major_version,
         versionId: ver.id,
+
         messages: stateMessages,
         parameters: {
-          provider: metadata?.provider ?? "OPENAI",
-          model: templateData.model ?? "gpt-4o-mini",
-          temperature: templateData.temperature ?? 0.7,
-          tools: templateData.tools || [],
-          reasoning_effort: templateData.reasoning_effort,
+          provider: provider,
+          model: model,
+          temperature: templateData.temperature ?? 1,
+          tools: templateData.tools ?? [],
+          reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
-        variables: inputs,
-        evals: templateData.evals || [],
-        structure: templateData.structure,
+        inputs: inputs,
+        evals: metadata?.evals ?? [],
+        structure: metadata?.structure ?? undefined,
+
         isDirty: false,
       });
     },
@@ -243,7 +257,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         });
 
         // Extract variables from all updatedMessages, preserving existing variable data, and deduplicating
-        const existingVariables = prev.variables || [];
+        const existingVariables = prev.inputs || [];
         console.log("Existing variables:", existingVariables);
 
         const extractedVars = updatedMessages.flatMap((msg) => {
@@ -273,7 +287,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         return {
           messages: updatedMessages,
-          variables: updatedVariables,
+          inputs: updatedVariables,
         };
       });
     },
@@ -294,10 +308,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   );
   // - Create Variable
   const handleVariableCreate = useCallback(
-    (newVariable: StateVariable) => {
+    (newVariable: StateInputs) => {
       updateState((prev) => {
         if (!prev) return {};
-        const currentVars = [...(prev.variables || [])];
+        const currentVars = [...(prev.inputs || [])];
         const existingIndex = currentVars.findIndex(
           (v) => v.name === newVariable.name
         );
@@ -311,7 +325,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           currentVars.push(newVariable);
         }
 
-        return { variables: currentVars };
+        return { inputs: currentVars };
       });
     },
     [updateState]
@@ -320,9 +334,9 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const handleVariableChange = useCallback(
     (index: number, value: string) => {
       updateState((prev) => {
-        if (!prev?.variables) return {};
+        if (!prev?.inputs) return {};
 
-        const updatedVariables = [...prev.variables];
+        const updatedVariables = [...prev.inputs];
         const variable = updatedVariables[index];
         updatedVariables[index] = { ...variable, value };
 
@@ -332,7 +346,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           try {
             parsedValue = JSON.parse(value);
           } catch (e) {
-            return { variables: updatedVariables };
+            return { inputs: updatedVariables };
           }
 
           const updatedMessages = prev.messages.map((msg) => {
@@ -347,12 +361,12 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           });
 
           return {
-            variables: updatedVariables,
+            inputs: updatedVariables,
             messages: updatedMessages,
           };
         }
 
-        return { variables: updatedVariables };
+        return { inputs: updatedVariables };
       }, false);
     },
     [updateState]
@@ -453,7 +467,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     setIsStreaming(true);
     updateState({ response: "" }, false);
 
-    const variables = state.variables || [];
+    const variables = state.inputs || [];
     const variableMap = Object.fromEntries(
       variables.map((v) => [v.name, v.value || ""])
     );
@@ -669,7 +683,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         createdFromUi: true,
         provider: state.parameters.provider,
         inputs: Object.fromEntries(
-          (state.variables || []).map((v) => [v.name, v.value || ""])
+          (state.inputs || []).map((v) => [v.name, v.value || ""])
         ),
       };
 
@@ -926,7 +940,7 @@ async function pullPromptAndRunCompletion() {
     prompt?.user_defined_id || "my-prompt-id"
   }", {
     ${
-      state?.variables
+      state?.inputs
         ?.map((v) => `${v.name}: "${v.value || "value"}"`)
         .join(",\n    ") || 'color: "red"'
     }
@@ -967,7 +981,7 @@ async function pullPromptAndRunCompletion() {
                 }
                 onRemoveMessage={handleRemoveMessage}
                 onVariableCreate={handleVariableCreate}
-                variables={state.variables || []}
+                variables={state.inputs || []}
                 isPrefillSupported={isPrefillSupported(
                   state.parameters.provider
                 )}
@@ -994,7 +1008,7 @@ async function pullPromptAndRunCompletion() {
           rightBottomPanel={
             <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
               <VariablesPanel
-                variables={state.variables || []}
+                variables={state.inputs || []}
                 onVariableChange={handleVariableChange}
                 promptVersionId={state.versionId}
               />

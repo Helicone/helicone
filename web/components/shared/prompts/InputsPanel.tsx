@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useInputs } from "@/services/hooks/prompts/inputs";
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
 import { isValidVariableName } from "@/utils/variables";
 import { useMutation } from "@tanstack/react-query";
 import { memo, useState } from "react";
@@ -18,13 +18,13 @@ import GlassHeader from "../universal/GlassHeader";
 import { populateVariables } from "./helpers";
 
 interface VariableItemProps {
-  variable: StateVariable;
+  variable: StateInputs;
   originalIndex: number;
   onVariableChange: (index: number, value: string) => void;
 }
 
 interface VariablesPanelProps {
-  variables: StateVariable[];
+  variables: StateInputs[];
   onVariableChange: (index: number, value: string) => void;
   promptVersionId: string;
 }

@@ -6,8 +6,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
 import { StateParameters } from "@/types/prompt-state";
+import { PROVIDER_MODELS } from "@/utils/generate";
 import { useEffect } from "react";
 import {
   PiBrainBold,

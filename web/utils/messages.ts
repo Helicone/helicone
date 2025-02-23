@@ -1,10 +1,13 @@
+import { PROVIDER_MODELS } from "@/utils/generate";
 import { Message } from "packages/llm-mapper/types";
 
 export function isLastMessageUser(messages: Message[]): boolean {
   return messages?.at(-1)?.role === "user";
 }
 
-export function isPrefillSupported(provider: string): boolean {
+export function isPrefillSupported(
+  provider: keyof typeof PROVIDER_MODELS
+): boolean {
   return provider === "ANTHROPIC";
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
 import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
@@ -9,7 +9,7 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
 import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
-import { $assistant, $system, $user } from "@/utils/llm";
+import { $assistant, $system, $user } from "@/utils/generate";
 import {
   cleanSuggestionIfNeeded,
   MIN_LENGTH_FOR_SUGGESTIONS,
@@ -46,9 +46,9 @@ const sharedTextAreaStyles = {
 interface PromptBoxProps {
   value: string;
   onChange: (value: string) => void;
-  onVariableCreate?: (variable: StateVariable) => void;
+  onVariableCreate?: (variable: StateInputs) => void;
   contextText?: string;
-  variables?: StateVariable[];
+  variables?: StateInputs[];
   disabled?: boolean;
 }
 

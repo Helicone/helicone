@@ -1,10 +1,10 @@
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export function extractVariables(
   content: string,
   mode: "helicone" | "template"
-): StateVariable[] {
+): StateInputs[] {
   const regex =
     mode === "helicone"
       ? /<helicone-prompt-input key="([^"]+)"(?:[^>]*?)(?:>(.*?)<\/helicone-prompt-input>|\s*\/>)/g
@@ -18,10 +18,8 @@ export function extractVariables(
   }));
 }
 
-export function deduplicateVariables(
-  variables: StateVariable[]
-): StateVariable[] {
-  const uniqueVars = new Map<string, StateVariable>();
+export function deduplicateVariables(variables: StateInputs[]): StateInputs[] {
+  const uniqueVars = new Map<string, StateInputs>();
   variables.forEach((variable) => {
     if (!uniqueVars.has(variable.name)) {
       uniqueVars.set(variable.name, variable);
@@ -36,7 +34,7 @@ export function isValidVariableName(varContent: string): boolean {
 
 export function getVariableStatus(
   varName: string,
-  variables: StateVariable[]
+  variables: StateInputs[]
 ): { isValid: boolean; hasValue: boolean; value?: string } {
   const variable = variables.find((v) => v.name === varName);
   const hasValue = Boolean(variable?.value && variable.value.length > 0);
@@ -51,7 +49,7 @@ export function getVariableStatus(
 
 export function replaceVariables(
   content: string,
-  variables: StateVariable[]
+  variables: StateInputs[]
 ): string {
   let result = content;
   (variables || [])
@@ -104,7 +102,7 @@ export function processMessageContent(
   message: ChatCompletionMessageParam,
   options: {
     convertTags?: boolean;
-    variables?: StateVariable[];
+    variables?: StateInputs[];
   } = {}
 ): string {
   const content = message.content;
@@ -147,7 +145,7 @@ function processContent(
   content: string,
   options: {
     convertTags?: boolean;
-    variables?: StateVariable[];
+    variables?: StateInputs[];
   } = {}
 ): string {
   // First convert helicone tags to variables if needed
