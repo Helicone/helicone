@@ -3,11 +3,11 @@ import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
-  promptId: string;
-  masterVersion: number;
+  promptId: string; // The prompt ID (UUID)
+  masterVersion: number; // The master prompt version
 
-  versionId: string; // The actual version ID (UUID) used for API calls
-  version: number;
+  versionId: string; // The prompt version ID (UUID)
+  version: number; // The version the user is currently editing
 
   messages: Message[];
   parameters: StateParameters;

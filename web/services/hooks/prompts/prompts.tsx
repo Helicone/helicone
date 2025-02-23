@@ -165,7 +165,6 @@ export const useCreatePromptFromRequest = () => {
 
   return async (request: Partial<LLMRequestBody>) => {
     // Generate a unique name like "new prompt", "new prompt (1)", etc.
-    const basePromptName = "new-prompt";
     const existingPrompts =
       (
         await jawn.POST("/v1/prompt/query", {
@@ -174,12 +173,10 @@ export const useCreatePromptFromRequest = () => {
           },
         })
       )?.data?.data || [];
-
-    let promptName = basePromptName;
+    let promptName = "new-prompt";
     let counter = 1;
-
     while (existingPrompts.some((p: any) => p.user_defined_id === promptName)) {
-      promptName = `${basePromptName}-${counter}`;
+      promptName = `new-prompt-${counter}`;
       counter++;
     }
 
