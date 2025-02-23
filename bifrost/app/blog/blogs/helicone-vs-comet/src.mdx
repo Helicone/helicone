@@ -1,59 +1,98 @@
-As your Large Language Model (LLM) application goes into production, you need reliable observability tools to track, debug, and optimize model performance. 
+As your Large Language Model (LLM) application goes into production, you need reliable observability tools to track, debug, and optimize model performance.
 
-Enter **<span style={{color: '#0ea5e9'}}>Helicone</span>** and **<span style={{color: '#0ea5e9'}}>Opik</span>** (by Comet), two leading platforms in the LLM observability space, each offering unique capabilities tailored to different use cases.
+Enter **<span style={{color: '#0ea5e9'}}>Helicone</span>** and **<span style={{color: '#0ea5e9'}}>Opik</span>** (by Comet), two leading open-source LLM evaluation platforms, each offering unique capabilities tailored to different use cases.
 
 ![Helicone AI vs. Comet Opik](/static/blog/helicone-vs-comet/helicone-vs-comet.webp)
 
-Helicone is a **fast-rising** observability tool designed specifically for developers looking for an efficient way to monitor and optimize LLM applications. It offers a seamless setup, cost-saving features, and robust analytics to enhance AI-driven workflows.
-
-Opik, on the other hand, is a comprehensive observability platform that integrates deeply into the broader Comet ecosystem. Comet itself is a well-established ML observability tool, and Opik extends its capabilities to LLMs by providing a suite of LLM-focused features.
-
 This article compares their features, integrations, and strengths to help you determine which tool is the best fit for you.
 
-## Helicone vs. Opik at a Glance
+## How is Helicone different?
 
-Here’s a high-level comparison of Helicone and Opik:
+### 1. Helicone is easy to set up
 
-| **Feature**               | **Helicone**                                                                                                         | **Opik**                                                                 |
-|--------------------------|----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| **Open-source & Self-hosting** | ✅ Fully open-source and can be self-hosted                                                                     | ✅ Fully open-source and can be self-hosted                                              |
-| **Ease of Setup**        | ✅ One-line integration via API headers                                                                              | ❌ Requires SDK and more configuration                                                  |
-| **Ease of Use**          | ✅ Intuitive UI, enabling most actions without coding.                                | ❌ Requires more coding to use |
-| **Visualization**        | ✅ Rich dashboards with PostHog integration for robust customization options                                        | ❌ No centralized dashboard for all key metrics; requires more navigation               |
-| **Pricing**             | ✅ Generous free tier, flexible paid plans                                                                          | ✅ Free, Pro, and Enterprise tiers available                                            |
-| **Caching**             | ✅ Cache responses via headers to reduce API costs and latency                                                      | ❌ No built-in caching                                                                  |
-| **Rate Limits**         | ✅ Customizable rate limits separate from API provider limits                                                       | ❌ No built-in rate limiting                                                            |
-| **Prompt Management**   | ✅ Robust prompt versioning and tracking tools                                                                     | ✅ Supports prompt versioning and tracking                                              |
-| **Experimentation**     | ✅ UI-based experimentation (less coding required)                                                                 | ✅ Code-based experimentation                                                           |
-| **Automated Scoring**   | ❌ No built-in automated scoring, but can be implemented via API                                                   | ✅ Out-of-the-box automated scoring with LLM as a judge and heuristics                  |
-| **Cost Tracking & Analysis** | ✅ Highly detailed cost tracking with rich dashboards                                                      | ❌ Basic cost tracking and visualization                                               |
-| **LLM Evaluation**      | ✅ Supports evaluation via UI and API. Integrates with [LastMile](https://lastmileai.dev/) for fine-tuned evaluators          | ❌ Supports evaluation via UI and API.  |
-| **Security Features**   | ✅ Robust out-of-the-box security, including Key Vault for API key management and Prompt Armor                     | ❌ Limited security features                                                            |
-| **Integrations**        | ✅ Supports multiple model providers, orchestration frameworks, and third-party tools                             | ❌ Supports fewer model providers and third-party integrations                          |
-| **Alerting & Webhooks** | ✅ Supports alerts for cost monitoring, request failures, and status changes. Webhooks for automation             | ❌ No alerting or webhook support                                                       |
-| **Supported Languages** | ✅ Python and JS/TS. No SDK required                                                                               | ❌ Python and JS/TS. SDK required                                                       |
+Helicone's key strengths lie in its **<span style={{color: '#0ea5e9'}}>extremely simple setup</span>** for the cloud offering, **<span style={{color: '#0ea5e9'}}>built-in caching</span>**, and intuitive **<span style={{color: '#0ea5e9'}}>prompt experimentation</span>** and **<span style={{color: '#0ea5e9'}}>evaluation</span>** features to optimize application performance.
 
-## TL;DR
+Beyond the easy developer experience, we try to be as transparent as possible about <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">our pricing</a>. You do not need to provide your credit card to try the free tier.
 
-- Helicone is a **more complete** observability tool.
-- They have similar features but Opik requires more coding to use whereas **Helicone is more suited for multifunctional teams**. 
-- Helicone **offers a more flexible, security-focused, and developer-friendly experience** with broader integrations.
-- Opik excels at **automated scoring and AI-driven model comparison**, but lacks caching and cost-reduction features.
+See our <a href="https://www.helicone.ai/llm-cost" rel="noopener" target="_blank">API Cost Calculator</a> for a rough estimate of how much you can save with different model providers.
+
+### 2. Helicone is designed for teams
+
+Helicone is a complete observability tool that **<span style={{color: '#0ea5e9'}}>covers the full LLM lifecycle</span>**, from logging and experimentation to evaluation and deployment. Opik shares similar features as Helicone but requires more coding to use.
+
+Helicone is more suited for cross-functional teams given the ability to have non-technical members involved in prompt design and evaluation.
+
+## At a Glance: Helicone vs. Opik by Comet
+
+### Platform
+
+| **Feature**                                                                                                                                                                                                                                               | **Helicone**                                                                                                                  | **Opik**                                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Open-source**                                                                                                                                                                                                                                           | ✅                                                                                                                            | ✅                                                                                                                                     |
+| **Self-hosting**                                                                                                                                                                                                                                          | ✅                                                                                                                            | ✅                                                                                                                                     |
+| **Generous Free Tier**                                                                                                                                                                                                                                    | ✅                                                                                                                            | ✅                                                                                                                                     |
+| **Seat-Based Pricing**                                                                                                                                                                                                                                    | Starting at `$20/seat/month`.                                                                                                 | Starting at `$39/seat/month`                                                                                                           |
+| **Pricing Tiers**                                                                                                                                                                                                                                         | Free, Pro, Teams and Enterprise <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">tiers available</a>. | Free, Pro, and Enterprise <a href="https://www.comet.com/site/pricing/" rel="noopener noreferrer" target="_blank">tiers available</a>. |
+| **One-line Integration** <br/> Integrate with the platform with a single line of code                                                                                                                                                                     | ✅                                                                                                                            | ❌                                                                                                                                     |
+| **Intuitive UI**                                                                                                                                                                                                                                          | ✅                                                                                                                            | ❌                                                                                                                                     |
+| **Built-in <a href="https://docs.helicone.ai/features/advanced-usage/llm-security#security-implementation" rel="noopener" target="_blank">Security</a> Features** <br/> Detects prompt injections, jailbreak attempts, etc. Omit logs for sensitive data. | ✅                                                                                                                            | ❌                                                                                                                                     |
+| **Wide Integration Support** <br/> Supports all major LLM providers, orchestration frameworks, and third-party tools.                                                                                                                                     | ✅                                                                                                                            | ❌                                                                                                                                     |
+| **Supported Languages**                                                                                                                                                                                                                                   | Python and JS/TS. No SDK required                                                                                             | Python and JS/TS. SDK required                                                                                                         |
+
+### LLM Evaluation
+
+| **Feature**                                                      | **Helicone**     | **Opik**           |
+| ---------------------------------------------------------------- | ---------------- | ------------------ |
+| **Prompt Management** <br /> Version and track prompt changes.   | ✅               | ✅                 |
+| **Experimentation** <br /> Iterate and improve prompts at scale. | ✅ <br/>UI-based | ✅ <br/>Code-based |
+| **Evaluation** <br /> LLM evaluation via UI and API.             | ✅               | ✅                 |
+
+### LLM Monitoring
+
+| **Feature**                                                                                              | **Helicone** | **Opik** |
+| -------------------------------------------------------------------------------------------------------- | ------------ | -------- |
+| **Dashboard Visualization**                                                                              | ✅           | ❌       |
+| **Caching** <br/>Built-in caching via headers to reduce API costs and latency                            | ✅           | ❌       |
+| **Rate Limits** <br/>Customizable rate limits separate from API provider limits                          | ✅           | ❌       |
+| **Cost & Usage Tracking** <br/>Detailed cost tracking with rich dashboards                               | ✅           | ❌       |
+| **Alerting & Webhooks** <br/>Automate LLM workflows, trigger actions, and get alerts for critical events | ✅           | ❌       |
+| **Security Features** <br/> Out-of-the-box security, including Key Vault for API key management          | ✅           | ❌       |
+
+### Security, Compliance, Privacy
+
+|                     | **Helicone**                                                          | **Opik**                                                          |
+| ------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Data Retention**  | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | 120 days for Free<br/>360 days for Pro<br/>forever for Enterprise |
+| **HIPPA-compliant** | ✅                                                                    | ✅                                                                |
+| **GDPR-compliant**  | ✅                                                                    | ✅                                                                |
+| **SOC 2**           | ✅                                                                    | ✅                                                                |
+| **Self-hosted**     | ✅                                                                    | ✅                                                                |
+
+<CallToAction
+  title="Get Started with Helicone"
+  description="Ready to optimize your LLM applications? Start using Helicone today and see the difference for yourself."
+  primaryButtonText="Try Helicone for Free"
+  primaryButtonLink="https://app.helicone.ai/signup"
+  secondaryButtonText="Calculate LLM Costs"
+  secondaryButtonLink="https://www.helicone.ai/llm-cost"
+/>
 
 ## Helicone: Best for Multi-Functional Teams
 
 ![Helicone AI](/static/blog/helicone-vs-comet/helicone-ai.webp)
 
+[![Helicone](https://img.shields.io/github/stars/Helicone/helicone.svg?stylAe=social)](https://github.com/Helicone/helicone)
+
 ### What is Helicone?
 
-**<a href="https://github.com/Helicone/helicone" rel="noopener" target="_blank">Helicone</a>** is an open-source observability platform designed for developers and teams building production-ready LLM applications. It covers the full LLM lifecycle, from logging and experimentation to evaluation and deployment.
+Helicone is an open-source observability platform designed for developers and teams building production-ready LLM applications. It covers the full LLM lifecycle, from logging and experimentation to evaluation and deployment.
 
 ### Key Features
 
 - **1-Line Integration**: Get started quickly with a one-line proxy setup.
 - **<a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">Response Caching</a>**: Reduce API costs and latency with simple header-based caching.
 - **<a href="https://docs.helicone.ai/features/experiments" rel="noopener" target="_blank">Prompt Experimentation & Evaluation</a>**: Test and refine prompts and run experiments all via an intuitive UI.
-- **<a href="https://docs.helicone.ai/features/webhooks" rel="noopener" target="_blank">Webhooks & Alerts</a>**: Automate LLM workflows, trigger actions, and get alerts for critical events—never miss a beat. 
+- **<a href="https://docs.helicone.ai/features/webhooks" rel="noopener" target="_blank">Webhooks & Alerts</a>**: Automate LLM workflows, trigger actions, and get alerts for critical events—never miss a beat.
 - **<a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">Flexible Pricing</a>**: Transparent pricing with a generous free tier to explore most features.
 
 ### Why Developers Choose Helicone
@@ -64,6 +103,8 @@ Here’s a high-level comparison of Helicone and Opik:
 - **In-Depth Analytics**: Provides rich insights into API performance, user activity, and overall usage trends.
 
 ### How to Integrate with Helicone
+
+Integration is available for all providers.
 
 ```javascript
 import OpenAI from "openai";
@@ -79,49 +120,51 @@ const openai = new OpenAI({
 
 For other providers, check out the <a href="https://docs.helicone.ai/integrations/openai/javascript" rel="noopener" target="_blank">documentation</a>.
 
-## Opik: Comprehensive Evaluation & Scoring
+---
+
+## Opik by Comet: Comprehensive Evaluation & Scoring
 
 ![Comet Opik](/static/blog/helicone-vs-comet/comet-opik.webp)
 
+[![Opik](https://img.shields.io/github/stars/comet-ml/opik.svg?stylAe=social)](https://github.com/comet-ml/opik)
+
 ### What is Opik?
 
-**<a href="https://www.comet.com/docs/opik/" target="_blank" rel="noopener noreferrer">Opik</a>** is an observability tool that
-focuses on experimentation and automated evaluation. It integrates
-with the broader <a href="https://www.comet.com/" target="_blank" rel="noopener noreferrer">CometML</a> ecosystem and largely supports code-based workflows.
+Opik by Comet is an observability tool that focuses on experimentation and automated evaluation. It integrates with the broader <a href="https://www.comet.com/" target="_blank" rel="noopener noreferrer">CometML</a> ecosystem and largely supports code-based workflows.
 
 ### Key Features
 
 - **Automated Scoring**: Robust automation scoring capabilities.
-- **Deep Comet Integration**: Ideal for teams already using Comet’s ML observability tools.
+- **Deep Comet Integration**: Ideal for teams already using Comet's ML observability tools.
 - **Code-Based Experimentation**: Provides fine-grained control over AI evaluation.
 - **LLM Tracing**: Provides insights into multi-step and multi-LLM workflows.
 
 ### Why Developers Choose Opik
 
 - **Strong Evaluation Capabilities**: Out-of-the-box support for robust automated evaluation workflows.
-- **Seamless Comet Integration**: Seamlessly integrates with Comet’s broader ML experimentation and tracking tools.
+- **Deep CometML Integration**: Seamlessly integrates with the Comet ecosystem, including broader ML experimentation and tracking tools.
 
 ## How Opik Compares to Helicone
 
-| Feature                      | Helicone                                                                  | Opik                                                 |
-| ---------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Ease of Use               | ⭐️ UI-driven, most actions require no coding                   | Requires more code for setup and use           |
-| Security & Compliance        | ⭐️ Built-in security features                                           | No security-focused features                        |
-| Evaluation & Scoring      | Very robust UI-driven evaluation tools                                          | ⭐️ Robust code-driven evaluation, with strong automation support                    |
-| Cost Tracking & Optimization | ⭐️ Advanced cost analytics & caching for reducing API expenses | Less cost-focused tools                       |
-| Integrations                 | ⭐️ Broad support for LLM providers & third-party tools                            | Fewer integrations                                  |
-| Programming Language Support | ⭐️ Supports multiple languages without SDK requirement                     | Requires SDK for usage                             |
+| Feature                      | Helicone                                                                | Opik                                                              |
+| ---------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Ease of Use                  | ⭐️ UI-driven, most actions require no coding                           | Requires more code for setup and use                              |
+| Security & Compliance        | ⭐️ Built-in security features (i.e., Key Vault for API key management) | No security-focused features                                      |
+| Evaluation & Scoring         | Very robust UI-driven evaluation tools                                  | ⭐️ Robust code-driven evaluation, with strong automation support |
+| Cost Tracking & Optimization | ⭐️ Advanced cost analytics & caching for reducing API expenses         | Less cost-focused tools                                           |
+| Integrations                 | ⭐️ Broad support for LLM providers & third-party tools                 | Fewer integrations                                                |
+| Programming Language Support | ⭐️ Supports multiple languages without SDK requirement                 | Requires SDK for usage                                            |
 
-## Which LLM Observability Platform is Right for You?  
+## Which LLM evaluation platform should you choose?
 
-Both platforms are excellent choices for monitoring and optimizing LLM applications. Here’s a quick guide to help you decide:
+Both platforms are excellent choices for monitoring and optimizing LLM applications. Here's a quick guide to help you decide:
 
-- Choose **<span style={{color: '#0ea5e9'}}>Helicone</span>** if you want a full observability suite with easy setup, caching, cost tracking, and security. It’s ideal for **teams that need a mix of no-code UI and developer-friendly tools**.  
-- Choose **Opik** if you're mainly focused on AI evaluation and need robust automated scoring with fine-grained, code-based control.   
-- Choose **<span style={{color: '#0ea5e9'}}>Helicone</span>** if your team includes non-technical members involved in building and managing the application.  
+- Choose **<span style={{color: '#0ea5e9'}}>Helicone</span>** if you want a full observability suite with easy setup, caching, cost tracking, and security. It's ideal for **<span style={{color: '#0ea5e9'}}>cross-functional teams</span>** that need a mix of no-code UI and developer-friendly tools.
+- Choose **Opik** if you're mainly focused on AI evaluation and need robust automated scoring with fine-grained, code-based control.
+- Choose **<span style={{color: '#0ea5e9'}}>Helicone</span>** if your team includes non-technical members involved in building and managing the application.
 - Choose **Opik** if you need a strong integration with the Comet ecosystem.
 
-Both are **open-source** with free tiers—so you can try both and decide based on your workflow!  
+Both are **open-source** with free tiers—so you can try both and decide based on your workflow!
 
 ## Additional Resources
 
@@ -147,27 +190,34 @@ Both are **open-source** with free tiers—so you can try both and decide based 
     A Deep Dive Into Helicone Features
   </a>
 
-## Frequently Asked Questions (FAQs) 
+## Frequently Asked Questions (FAQs)
 
-#### **1. Which platform is easier to set up?**  
-**Helicone** is easier to integrate since it only requires adding headers to API calls. **Opik**, on the other hand, requires an SDK and more configuration to get started.  
+#### 1. Which platform is easier to set up?
 
-#### **2. Which platform has better cost tracking?**  
-**Helicone** provides a centralized dashboard with detailed cost tracking and analysis. **Opik** offers basic cost tracking and lacks the same level of visualization.  
+Helicone is easier to integrate since it only requires adding headers to API calls. Opik, on the other hand, requires an SDK and more configuration to get started.
 
-#### **3. Which platform has better prompt management?**  
-Both platforms support **prompt versioning and tracking**, but **Helicone** offers a more feature-rich playground with better UI-driven prompt experimentation.  
+#### 2. Which platform has better cost tracking?
 
-#### **4. Which platform is better for evaluating LLM performance?**  
-Both **Helicone** and **Opik** support human, automated, and **LLM-as-a-judge evaluations** with custom evaluation metrics. However, **Opik** has better **automated scoring**, while **Helicone** allows integration with **LastMile** for fine-tuned evaluations.  
+Helicone provides a centralized dashboard with detailed cost tracking and analysis. Opik offers basic cost tracking and lacks the same level of visualization.
 
-#### **5. Does either platform support caching?**  
-Yes, **Helicone** provides **built-in caching** to reduce API costs and latency. **Opik** does not offer caching.  
+#### 3. Which platform has better prompt management?
 
-#### **6. Which platform is better for large-scale integrations?**  
-**Helicone** supports **more integrations** with third-party tools, orchestration frameworks, and model providers. **Opik** has fewer integrations.  
+Both platforms support prompt versioning and tracking, but Helicone offers a more feature-rich playground with better UI-driven prompt experimentation.
 
-#### **7. Which platform offers better security?**  
-**Helicone** provides **robust security features**, including **Key Vault** for secure API key management and **Prompt Armor** for enhanced security. **Opik** has limited security features.  
+#### 4. Which platform is better for evaluating LLM performance?
+
+Both Helicone and Opik support human, automated, and LLM-as-a-judge evaluations with custom evaluation metrics. However, Opik has better automated scoring, while Helicone allows integration with LastMile for fine-tuned evaluations.
+
+#### 5. Does either platform support caching?
+
+Yes, Helicone provides built-in caching to reduce API costs and latency. Opik does not offer caching.
+
+#### 6. Which platform is better for large-scale integrations?
+
+Helicone supports more integrations with third-party tools, orchestration frameworks, and model providers. Opik has fewer integrations.
+
+#### 7. Which platform offers better security?
+
+Helicone provides robust security features, including Key Vault for secure API key management and Prompt Armor for enhanced security. Opik has limited security features.
 
 <Questions />
