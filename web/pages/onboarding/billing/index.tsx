@@ -5,10 +5,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  useDraftOnboardingStore,
-  useOrgOnboarding,
-} from "@/services/hooks/useOrgOnboarding";
+import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { TeamPlanCheckout } from "@/components/onboarding/Checkout/TeamPlanCheckout";
 import { ProPlanCheckout } from "@/components/onboarding/Checkout/ProPlanCheckout";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -16,16 +13,10 @@ import useNotification from "@/components/shared/notification/useNotification";
 export default function BillingPage() {
   const org = useOrg();
   const router = useRouter();
-  const {
-    draftPlan,
-    draftMembers,
-    draftAddons,
-    setDraftPlan,
-    setDraftMembers,
-    setDraftAddons,
-  } = useDraftOnboardingStore(org?.currentOrg?.id ?? "")();
+  const { draftPlan, draftMembers, draftAddons } = useDraftOnboardingStore(
+    org?.currentOrg?.id ?? ""
+  )();
   const { setNotification } = useNotification();
-  const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const createdOrgId = org?.currentOrg?.id;
 
@@ -70,7 +61,6 @@ export default function BillingPage() {
     },
   });
 
-  // Enhanced subscription check
   const subscription = useQuery({
     queryKey: ["subscription", createdOrgId],
     queryFn: async (query) => {
@@ -86,7 +76,6 @@ export default function BillingPage() {
     },
   });
 
-  // Redirect if subscription is active or if payment is pending
   useEffect(() => {
     if (
       subscription.data?.data?.status === "active" ||
@@ -98,7 +87,6 @@ export default function BillingPage() {
     }
   }, [subscription.data, router]);
 
-  // Create checkout session effect
   useEffect(() => {
     const createCheckoutSession = async () => {
       if (!createdOrgId) return;
@@ -126,7 +114,6 @@ export default function BillingPage() {
     createCheckoutSession();
   }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]);
 
-  // Show loading state while checking subscription
   if (subscription.isLoading) {
     return (
       <OnboardingHeader>
