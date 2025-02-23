@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 import { SupabaseServerWrapper } from "../lib/wrappers/supabase";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useRouter } from "next/router";
 // import "prismjs/themes/prism.css";
@@ -13,15 +13,22 @@ const Welcome = (props: WelcomeProps) => {
   const { currentStep } = props;
   const org = useOrg();
   const router = useRouter();
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   useEffect(() => {
-    if (org) {
-      if (org.allOrgs.length > 0) {
+    if (org && !initialCheckDone) {
+      if (org.allOrgs?.length > 0 && org.allOrgs[0]?.id) {
         router.push("/dashboard");
       }
+      setInitialCheckDone(true);
     }
-  }, [org, router]);
-  return <LoadingAnimation title="Just setting up your account..." />;
+  }, [org, router, initialCheckDone]);
+
+  if (!org) {
+    return <LoadingAnimation title="Just setting up your account..." />;
+  }
+
+  return <LoadingAnimation title="Finalizing your setup..." />;
 };
 
 export default Welcome;
