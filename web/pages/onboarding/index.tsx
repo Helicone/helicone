@@ -4,16 +4,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useUser } from "@supabase/auth-helpers-react";
-import { MemberRole, PlanType } from "@/store/onboardingStore";
-import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { PlanType, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import React, { useEffect } from "react";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
 import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
-import { MembersTable } from "@/components/onboarding/MembersTable";
+import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
-import useNotification from "@/components/shared/notification/useNotification";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
@@ -21,7 +19,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const user = useUser();
-  const { setNotification } = useNotification();
   const {
     onboardingState,
     isLoading,

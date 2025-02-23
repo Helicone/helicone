@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { PlanType } from "@/store/onboardingStore";
-import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
+import {
+  PlanType,
+  useDraftOnboardingStore,
+} from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
 
 const PLAN_OPTIONS: Record<PlanType, { label: string; hasTrial: boolean }> = {

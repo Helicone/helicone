@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { MemberRole } from "@/store/onboardingStore";
 import { useMemo, useState } from "react";
 import {
   ColumnDef,
@@ -33,6 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+
+export type MemberRole = "admin" | "member";
 
 export const memberSchema = z.object({
   email: z

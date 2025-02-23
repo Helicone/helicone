@@ -5,7 +5,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useEffect } from "react";
 
-// Define draft state interface
+export type OnboardingStep =
+  | "ORGANIZATION"
+  | "MEMBERS"
+  | "BILLING"
+  | "INTEGRATION"
+  | "EVENT";
+
+export type PlanType = "free" | "pro" | "team";
+
 interface DraftOnboardingState {
   draftName: string;
   draftPlan: "free" | "pro" | "team";
@@ -102,7 +110,6 @@ export const useOrgOnboarding = (orgId: string) => {
   const supabase = useSupabaseClient();
   const jawn = useJawnClient();
 
-  // Get org-specific store
   const draftStore = useDraftOnboardingStore(orgId);
   const {
     draftName,
@@ -112,11 +119,9 @@ export const useOrgOnboarding = (orgId: string) => {
     draftMembers,
     setDraftMembers,
     draftAddons,
-    setDraftAddons,
     clearDraft,
   } = draftStore();
 
-  // Query to fetch onboarding state
   const { data: onboardingState, isLoading } = useQuery({
     queryKey: ["org", orgId, "onboarding"],
     queryFn: async () => {

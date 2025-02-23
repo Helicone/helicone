@@ -4,8 +4,10 @@ import React, { useEffect } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
-import { OnboardingStep } from "@/store/onboardingStore";
-import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import {
+  OnboardingStep,
+  useOrgOnboarding,
+} from "@/services/hooks/useOrgOnboarding";
 import LoadingAnimation from "../shared/loadingAnimation";
 
 const BreadcrumbSeparator = () => (
