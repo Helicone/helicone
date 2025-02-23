@@ -1,18 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 // CustomScrollbar: This component wraps its children and hides the native scrollbar completely.
 // It shows a custom overlay scrollbar (thumb) on hover without affecting layout.
-export default function CustomScrollbar({
-  children,
-  className = "",
-  style = {},
-  withBorder = false,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-  withBorder?: boolean;
-}) {
+export interface CustomScrollbarRef {
+  scrollToBottom: () => void;
+}
+
+const CustomScrollbar = forwardRef<
+  CustomScrollbarRef,
+  {
+    children: React.ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
+    withBorder?: boolean;
+  }
+>(({ children, className = "", style = {}, withBorder = false }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({
     scrollTop: 0,
@@ -20,6 +28,18 @@ export default function CustomScrollbar({
     scrollHeight: 0,
   });
   const [hovered, setHovered] = useState(false);
+
+  // Expose scrollToBottom method
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      const container = containerRef.current;
+      if (container) {
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight;
+        });
+      }
+    },
+  }));
 
   useEffect(() => {
     const container = containerRef.current;
@@ -96,4 +116,8 @@ export default function CustomScrollbar({
       )}
     </div>
   );
-}
+});
+
+CustomScrollbar.displayName = "CustomScrollbar";
+
+export default CustomScrollbar;

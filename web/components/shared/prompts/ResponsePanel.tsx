@@ -15,11 +15,13 @@ import GlassHeader from "../universal/GlassHeader";
 interface ResponsePanelProps {
   response: string;
   onAddToMessages?: () => void;
+  scrollToBottom?: () => void;
 }
 
 export default function ResponsePanel({
   response,
   onAddToMessages,
+  scrollToBottom,
 }: ResponsePanelProps) {
   const [view, setView] = useState("markdown");
 
@@ -42,7 +44,10 @@ export default function ResponsePanel({
                     size="square_icon"
                     asPill
                     className=""
-                    onClick={onAddToMessages}
+                    onClick={() => {
+                      onAddToMessages();
+                      scrollToBottom?.();
+                    }}
                   >
                     <PiChatsBold className="w-4 h-4" />
                   </Button>

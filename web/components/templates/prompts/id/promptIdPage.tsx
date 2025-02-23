@@ -61,7 +61,9 @@ import VariablesPanel from "@/components/shared/prompts/InputsPanel";
 import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ToolPanel from "@/components/shared/prompts/ToolsPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
-import CustomScrollbar from "@/components/shared/universal/Scrollbar";
+import CustomScrollbar, {
+  CustomScrollbarRef,
+} from "@/components/shared/universal/Scrollbar";
 import {
   usePrompt,
   usePromptVersions,
@@ -84,6 +86,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoIterateOpen, setIsAutoIterateOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
+  const messagesScrollRef = useRef<CustomScrollbarRef>(null);
 
   // STREAMING
   const [isStreaming, setIsStreaming] = useState(false);
@@ -576,8 +579,11 @@ export default function PromptIdPage(props: PromptIdPageProps) {
     updateState,
     promptVersions,
   ]);
-
-  // WIP
+  // - Scroll to bottom
+  const scrollToBottom = useCallback(() => {
+    messagesScrollRef.current?.scrollToBottom();
+  }, []);
+  // - BETA: Auto-Improve
   const handleImprove = useCallback(async () => {
     setIsImproving(true);
 
@@ -658,7 +664,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       abortController.current = null;
     }
   }, [state?.messages, updateState, setNotification]);
-
+  // - BETA: Apply Improvements
   const handleApplyImprovement = useCallback(async () => {
     if (!state?.improvement?.content) return;
 
@@ -969,7 +975,10 @@ async function pullPromptAndRunCompletion() {
       <TabsContent className="flex-1 overflow-hidden" value="editor">
         <ResizablePanels
           leftPanel={
-            <CustomScrollbar className="h-full bg-white dark:bg-black">
+            <CustomScrollbar
+              ref={messagesScrollRef}
+              className="h-full bg-white dark:bg-black"
+            >
               <MessagesPanel
                 messages={state.messages}
                 onMessageChange={handleMessageChange}
@@ -985,6 +994,7 @@ async function pullPromptAndRunCompletion() {
                 isPrefillSupported={isPrefillSupported(
                   state.parameters.provider
                 )}
+                scrollToBottom={scrollToBottom}
               />
             </CustomScrollbar>
           }
@@ -1002,6 +1012,7 @@ async function pullPromptAndRunCompletion() {
                     { _type: "message", role: "user", content: "" },
                   ])
                 }
+                scrollToBottom={scrollToBottom}
               />
             </CustomScrollbar>
           }

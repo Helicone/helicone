@@ -8,7 +8,7 @@ import {
   templateToHeliconeTags,
 } from "@/utils/variables";
 import { Message } from "packages/llm-mapper/types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 
 import GlassHeader from "../universal/GlassHeader";
@@ -22,6 +22,7 @@ interface MessagesPanelPrompts {
   onVariableCreate: (variable: StateInputs) => void;
   variables: StateInputs[];
   isPrefillSupported: boolean;
+  scrollToBottom?: () => void;
 }
 
 export default function MessagesPanel({
@@ -33,11 +34,14 @@ export default function MessagesPanel({
   onVariableCreate,
   variables,
   isPrefillSupported,
+  scrollToBottom,
 }: MessagesPanelPrompts) {
-  // STATES
+  // STATES AND REFERENCES
   const [hoveredTrashIdx, setHoveredTrashIdx] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reset hover state when messages change
+  // EFFECTS
+  // - Reset hover state when messages change
   useEffect(() => {
     setHoveredTrashIdx(null);
   }, [messages.length]);
@@ -77,7 +81,7 @@ export default function MessagesPanel({
   };
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div ref={containerRef} className="h-full flex flex-col gap-4">
       {/* Messages */}
       {messages.map((msg, index) => {
         const isRemovable = isRemovableMessage(index);
@@ -170,7 +174,10 @@ export default function MessagesPanel({
       {/* Add Message Pair and/or Prefill Message */}
       <div className="flex flex-row gap-4 p-4">
         <button
-          onClick={onAddMessagePair}
+          onClick={() => {
+            onAddMessagePair();
+            scrollToBottom?.();
+          }}
           disabled={!canAddMessagePair}
           className={`flex flex-row items-center gap-2 text-sm ${
             canAddMessagePair
@@ -184,7 +191,10 @@ export default function MessagesPanel({
 
         {isPrefillSupported && (
           <button
-            onClick={onAddPrefill}
+            onClick={() => {
+              onAddPrefill();
+              scrollToBottom?.();
+            }}
             disabled={!canAddMessagePair}
             className={`flex flex-row items-center gap-2 text-sm ${
               canAddMessagePair
