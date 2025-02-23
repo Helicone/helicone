@@ -1,27 +1,28 @@
-import { Variable } from "@/types/prompt-state";
+import ImageBox from "@/components/shared/prompts/ImageBox";
+import PromptBox from "@/components/shared/prompts/PromptBox";
+import { Button } from "@/components/ui/button";
+import { StateVariable } from "@/types/prompt-state";
+import { isLastMessageUser } from "@/utils/messages";
+import {
+  heliconeToTemplateTags,
+  templateToHeliconeTags,
+} from "@/utils/variables";
+import { Message } from "packages/llm-mapper/types";
 import {
   PiDiceOneBold,
   PiDiceTwoBold,
   PiMagicWandBold,
   PiTrashBold,
 } from "react-icons/pi";
-import { isLastMessageUser } from "@/utils/messages";
-import PromptBox from "@/components/shared/prompts/PromptBox";
-import {
-  templateToHeliconeTags,
-  heliconeToTemplateTags,
-} from "@/utils/variables";
-import { Button } from "@/components/ui/button";
-import { StateMessage } from "@/types/prompt-state";
 
 interface PromptPanelsProps {
-  messages: StateMessage[];
+  messages: Message[];
   onMessageChange: (index: number, content: string) => void;
   onAddMessagePair: () => void;
   onAddPrefill: () => void;
   onRemoveMessage: (index: number) => void;
-  onVariableCreate: (variable: Variable) => void;
-  variables: Variable[];
+  onVariableCreate: (variable: StateVariable) => void;
+  variables: StateVariable[];
   isPrefillSupported: boolean;
 }
 
@@ -41,7 +42,7 @@ export default function MessagesPanel({
     .slice(0, 2)
     .every((msg) => msg.content === "");
   // - Can we add a message pair or prefill message?
-  const canAddMessages = isLastMessageUser(messages);
+  const canAddMessagePair = isLastMessageUser(messages);
   // - Is message removable?
   const isRemovableMessage = (index: number) => {
     // First system and user messages are not removable
@@ -100,17 +101,21 @@ export default function MessagesPanel({
               )}
             </div>
 
-            {/* Prompt Box */}
-            <PromptBox
-              value={heliconeToTemplateTags(msg.content)}
-              onChange={(content) =>
-                onMessageChange(index, templateToHeliconeTags(content))
-              }
-              onVariableCreate={onVariableCreate}
-              contextText={""} // TODO: Add context for better auto-complete
-              variables={variables}
-              disabled={msg.idx !== undefined}
-            />
+            {/* Message Content */}
+            {msg._type === "image" || msg.image_url ? (
+              <ImageBox message={msg} disabled={msg.idx !== undefined} />
+            ) : (
+              <PromptBox
+                value={heliconeToTemplateTags(msg.content || "")}
+                onChange={(content) =>
+                  onMessageChange(index, templateToHeliconeTags(content))
+                }
+                onVariableCreate={onVariableCreate}
+                contextText={""}
+                variables={variables}
+                disabled={msg.idx !== undefined}
+              />
+            )}
           </div>
         );
       })}
@@ -119,9 +124,9 @@ export default function MessagesPanel({
       <div className="flex flex-row gap-4">
         <button
           onClick={onAddMessagePair}
-          disabled={!canAddMessages}
+          disabled={!canAddMessagePair}
           className={`flex flex-row items-center gap-2 text-sm ${
-            canAddMessages
+            canAddMessagePair
               ? "text-heliblue hover:underline"
               : "cursor-not-allowed text-tertiary"
           }`}
@@ -133,9 +138,9 @@ export default function MessagesPanel({
         {isPrefillSupported && (
           <button
             onClick={onAddPrefill}
-            disabled={!canAddMessages}
+            disabled={!canAddMessagePair}
             className={`flex flex-row items-center gap-2 text-sm ${
-              canAddMessages
+              canAddMessagePair
                 ? "text-emerald-400 hover:underline"
                 : "cursor-not-allowed text-tertiary"
             }`}

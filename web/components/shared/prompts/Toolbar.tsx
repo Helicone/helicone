@@ -1,4 +1,10 @@
 "use client";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   CSSProperties,
   ReactNode,
@@ -8,12 +14,6 @@ import {
   useState,
 } from "react";
 import { PiArrowRightBold, PiCheckBold, PiXBold } from "react-icons/pi";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 
 interface ToolbarProps {
   isVisible: boolean;
@@ -408,10 +408,10 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                       className="z-[9999]"
                     >
                       <div className="flex flex-row items-center gap-1 text-sm">
-                        <span>{tool.label}</span>
+                        <span className="">{tool.label}</span>
                         {tool.hotkey && (
-                          <span className="font-bold">
-                            ⌘ {tool.hotkey.toUpperCase()}
+                          <span className="text-heliblue">
+                            ⌘{tool.hotkey.toUpperCase()}
                           </span>
                         )}
                       </div>

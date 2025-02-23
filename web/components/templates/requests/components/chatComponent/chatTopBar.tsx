@@ -1,13 +1,14 @@
-import React from "react";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import {
   ArrowsPointingOutIcon,
-  BeakerIcon,
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { NotepadText } from "lucide-react";
 import { useRouter } from "next/router";
-import { Message } from "@/packages/llm-mapper/types";
+import React from "react";
+import { useCreatePromptFromRequest } from "../../../../../services/hooks/prompts/prompts";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -25,27 +26,27 @@ function cycleMode(
 interface ChatTopBarProps {
   allExpanded: boolean;
   toggleAllExpanded: () => void;
-  requestMessages: Message[];
+  requestBody: LLMRequestBody;
   requestId: string;
-  model: string;
   setOpen: (open: boolean) => void;
   mode: (typeof PROMPT_MODES)[number];
   setMode: (mode: (typeof PROMPT_MODES)[number]) => void;
   isModal?: boolean;
+  promptData?: any;
 }
 
 export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   allExpanded,
   toggleAllExpanded,
-  requestMessages,
-  requestId,
-  model,
+  requestBody,
   setOpen,
   mode,
   setMode,
   isModal = false,
+  promptData,
 }) => {
   const router = useRouter();
+  const createPrompt = useCreatePromptFromRequest();
 
   return (
     <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
@@ -63,23 +64,23 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
             {allExpanded ? "Shrink All" : "Expand All"}
           </p>
         </button>
-        {!(
-          model === "gpt-4-vision-preview" ||
-          model === "gpt-4-1106-vision-preview" ||
-          requestId === ""
-        ) && (
-          <button
-            onClick={() => {
-              if (requestMessages) {
-                router.push("/playground?request=" + requestId);
+
+        <button
+          onClick={async () => {
+            if (requestBody?.messages && promptData?.id) {
+              router.push(`/prompts/${promptData.id}`);
+            } else if (requestBody?.messages) {
+              const res = await createPrompt(requestBody);
+              if (res?.id) {
+                router.push(`/prompts/${res.id}`);
               }
-            }}
-            className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
-          >
-            <BeakerIcon className="h-4 w-4" />
-            <p className="text-xs font-semibold">Playground</p>
-          </button>
-        )}
+            }
+          }}
+          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
+        >
+          <NotepadText className="h-4 w-4" />
+          <p className="text-xs font-semibold">Test Prompt</p>
+        </button>
       </div>
       <div className="flex flex-row items-center space-x-2">
         {!isModal && (

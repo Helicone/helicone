@@ -1,29 +1,28 @@
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useOnboardingStore } from "@/store/onboardingStore";
 import {
+  Bars3Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon,
 } from "@heroicons/react/24/outline";
+import { useUser } from "@supabase/auth-helpers-react";
+import { Rocket } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ChangelogModal from "../ChangelogModal";
+import useOnboardingContext from "../onboardingContext";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
-import NavItem from "./NavItem";
-import { ChangelogItem } from "./types";
-import ChangelogModal from "../ChangelogModal";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
-import { useTheme } from "next-themes";
+import NavItem from "./NavItem";
 import OnboardingNavItems from "./OnboardingNavItems";
-import useOnboardingContext from "../onboardingContext";
-import { Dialog } from "@/components/ui/dialog";
-import { DialogContent } from "@/components/ui/dialog";
-import CreateOrgForm from "@/components/templates/organization/createOrgForm";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useOnboardingStore } from "@/store/onboardingStore";
-import { Rocket } from "lucide-react";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { ChangelogItem } from "./types";
 
 export interface NavigationItem {
   name: string;
@@ -319,7 +318,7 @@ const DesktopSidebar = ({
                           setShowCreateOrg(true);
                         }}
                         className={cn(
-                          "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          "mt-10 gap-1 text-white text-large font-medium leading-normal tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
                           isCollapsed
                             ? "h-8 w-8 px-2"
                             : "h-[46px] w-full px-6 md:px-4"

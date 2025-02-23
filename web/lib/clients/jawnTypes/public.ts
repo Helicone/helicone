@@ -1127,6 +1127,8 @@ Json: JsonObject;
     };
     Message: {
       contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -1137,6 +1139,11 @@ Json: JsonObject;
       id?: string;
       /** @enum {string} */
       _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+    };
+    Tool: {
+      name: string;
+      description: string;
+      parameters?: components["schemas"]["Record_string.any_"];
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
@@ -1159,7 +1166,12 @@ Json: JsonObject;
       n?: number | null;
       stop?: string[] | null;
       messages?: components["schemas"]["Message"][] | null;
-      tool_choice?: unknown;
+      tools?: components["schemas"]["Tool"][];
+      tool_choice?: {
+        name?: string;
+        /** @enum {string} */
+        type: "auto" | "none" | "tool";
+      };
     };
     LLMResponseBody: {
       error?: {
@@ -1201,6 +1213,10 @@ Json: JsonObject;
       total_tokens: number | null;
       /** Format: double */
       prompt_tokens: number | null;
+      /** Format: double */
+      prompt_cache_write_tokens: number | null;
+      /** Format: double */
+      prompt_cache_read_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
       prompt_id: string | null;
@@ -2051,6 +2067,10 @@ Json: JsonObject;
       /** Format: double */
       promptTokens: number;
       /** Format: double */
+      promptCacheWriteTokens: number;
+      /** Format: double */
+      promptCacheReadTokens: number;
+      /** Format: double */
       delayMs: number;
       model: string;
     };
@@ -2568,10 +2588,7 @@ export interface operations {
       content: {
         "application/json": {
           metadata: components["schemas"]["Record_string.any_"];
-          prompt: {
-            messages: unknown[];
-            model: string;
-          };
+          prompt: unknown;
           userDefinedId: string;
         };
       };
@@ -3464,11 +3481,12 @@ export interface operations {
          * @example {
          *   "filter": "all",
          *   "isCached": false,
-         *   "limit": 10,
+         *   "limit": 100,
          *   "offset": 0,
          *   "sort": {
          *     "created_at": "desc"
          *   },
+         *   "includeInputs": false,
          *   "isScored": false,
          *   "isPartOfExperiment": false
          * }

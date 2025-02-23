@@ -89,12 +89,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/prompts",
             icon: NotepadText,
             current: pathname.includes("/prompts"),
-          },
-          {
-            name: "Playground",
-            href: "/playground",
-            icon: TestTube2,
-            current: pathname.includes("/playground"),
+            isNew: true,
           },
           {
             name: "Experiments",
@@ -113,6 +108,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/datasets",
             icon: DatabaseIcon,
             current: pathname.includes("/datasets"),
+          },
+          {
+            name: "Playground (Prompts)",
+            href: "/prompts",
+            icon: TestTube2,
+            current: pathname.includes("/playground"),
           },
         ],
       },
@@ -210,7 +211,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
       //   ],
       // },
     ],
-    [pathname, user?.email]
+    [pathname, org?.currentOrg?.tier]
   );
 
   return (

@@ -18,6 +18,8 @@ export interface ResponseObj {
   createdAt: string;
   completionTokens: number;
   promptTokens: number;
+  promptCacheWriteTokens: number;
+  promptCacheReadTokens: number;
   delayMs: number;
   model: string;
 }
@@ -974,6 +976,8 @@ export class ExperimentStore extends BaseStore {
       created_at: string;
       completion_tokens: number;
       prompt_tokens: number;
+      prompt_cache_write_tokens: number;
+      prompt_cache_read_tokens: number;
       delay_ms: number;
       scores: Record<string, Score>;
     }>(query, [hypothesisId, this.organizationId]);
@@ -1002,6 +1006,8 @@ export class ExperimentStore extends BaseStore {
             model: run.model,
             provider: run.provider,
             sum_prompt_tokens: run.prompt_tokens,
+            prompt_cache_write_tokens: run.prompt_cache_write_tokens,
+            prompt_cache_read_tokens: run.prompt_cache_read_tokens,
             sum_completion_tokens: run.completion_tokens,
           }) ?? 0;
         return sum + cost;
@@ -1642,6 +1648,8 @@ function getExperimentHypothesisScores(
             model: hypothesis.model,
             provider: run.request!.provider,
             sum_prompt_tokens: run.response!.promptTokens,
+            prompt_cache_write_tokens: run.response!.promptCacheWriteTokens,
+            prompt_cache_read_tokens: run.response!.promptCacheReadTokens,
             sum_completion_tokens: run.response!.completionTokens,
           }) ?? 0;
 
@@ -1696,6 +1704,8 @@ function getExperimentDatasetScores(
             model: row.inputRecord!.response.model,
             provider: row.inputRecord!.request.provider,
             sum_prompt_tokens: row.inputRecord!.response.promptTokens,
+            prompt_cache_write_tokens: row.inputRecord!.response.promptCacheWriteTokens,
+            prompt_cache_read_tokens: row.inputRecord!.response.promptCacheReadTokens,
             sum_completion_tokens: row.inputRecord!.response.completionTokens,
           }) ?? 0;
 
@@ -1768,15 +1778,21 @@ function modelCost(modelRow: {
   model: string;
   provider: string;
   sum_prompt_tokens: number;
+  prompt_cache_write_tokens: number;
+  prompt_cache_read_tokens: number;
   sum_completion_tokens: number;
 }): number {
   const model = modelRow.model;
   const promptTokens = modelRow.sum_prompt_tokens;
+  const promptCacheWriteTokens = modelRow.prompt_cache_write_tokens;
+  const promptCacheReadTokens = modelRow.prompt_cache_read_tokens;
   const completionTokens = modelRow.sum_completion_tokens;
   return (
     costOfPrompt({
       model,
       promptTokens,
+      promptCacheWriteTokens,
+      promptCacheReadTokens,
       completionTokens,
       provider: modelRow.provider,
     }) ?? 0

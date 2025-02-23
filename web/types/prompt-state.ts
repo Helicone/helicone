@@ -1,16 +1,6 @@
+import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-
-export type HeliconeMessage =
-  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
-  | { type: "text"; text: string } // Assistants API - from content: []
-  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
-
-export type StateMessage = {
-  role: "developer" | "system" | "user" | "assistant" | "tool";
-  content: string;
-  toolCallId?: string;
-  idx?: number;
-};
+import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
   promptId: string;
@@ -19,30 +9,41 @@ export interface PromptState {
   versionId: string; // The actual version ID (UUID) used for API calls
   version: number;
 
-  messages: StateMessage[];
-  parameters: Parameters;
-  variables?: Variable[];
-  evals?: EvalReference[];
-  structure?: string; // TODO: Real structure when feature is added
+  messages: Message[];
+  parameters: StateParameters;
+  variables?: StateVariable[];
+  evals?: any[]; // TODO: Add evals to the state
+  structure?: any; // TODO: Real structure when feature is added
 
   isDirty: boolean;
   response?: string;
+  improvement?: { reasoning: string; content: string };
 }
 
-export interface Parameters {
-  provider: string;
+export type HeliconeMessage =
+  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
+  | { type: "text"; text: string } // Assistants API - from content: []
+  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
+
+export interface StateParameters {
+  provider: keyof typeof PROVIDER_MODELS;
   model: string;
   temperature: number;
+  reasoning_effort?: "low" | "medium" | "high";
+  tools?: Tool[];
   // TODO: Add more parameters
 }
-export interface Variable {
+
+export interface StateVariable {
   name: string;
   value: string;
   isValid?: boolean;
-  isMessage?: boolean;
   idx?: number;
 }
 
+export interface StateEval {}
+
+// DB INTERFACE
 export interface PromptVersionReference {
   id: string;
   minor_version: number;
@@ -56,38 +57,3 @@ export interface PromptVersionReference {
   experiment_id?: string | null;
   updated_at?: string;
 }
-
-export interface EvalReference {
-  evalId: string;
-  version: number;
-}
-
-export interface BaseEvalState {
-  evalId: string;
-  masterVersion: number;
-  deleted: boolean;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-  version: number;
-}
-
-export interface PythonEvalState extends BaseEvalState {
-  type: "python";
-  python: string;
-}
-
-export interface TypeScriptEvalState extends BaseEvalState {
-  type: "typescript";
-  typescript: string;
-}
-
-export interface ClassifierEvalState extends BaseEvalState {
-  type: "classifier";
-  classifier: string;
-}
-
-export type EvalState =
-  | PythonEvalState
-  | TypeScriptEvalState
-  | ClassifierEvalState;

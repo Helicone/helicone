@@ -216,7 +216,17 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "helicone-vs-traceloop",
+      folderName: "grok-3-benchmark-comparison",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-deep-research",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "introducing-helicone-v2",
     },
   },
   {
@@ -282,6 +292,21 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "openai-structured-outputs",
+    },
+  },
+    {
+    dynmaicEntry: {
+      folderName: "helicone-vs-traceloop",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-comet",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-honeyhive",
     },
   },
   {

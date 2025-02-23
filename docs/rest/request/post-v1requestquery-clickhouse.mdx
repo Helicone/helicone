@@ -1,10 +1,33 @@
 ---
-title: "Get Requests (faster)"
-sidebarTitle: "Get Requests (faster)"
+title: "Get Requests"
+sidebarTitle: "Get Requests"
 description: "Retrieve all requests visible in the request table at Helicone."
 "twitter:title": "Get Requests - Helicone OSS LLM Observability"
 openapi: post /v1/request/query-clickhouse
 ---
+
+<Warning>
+  For users in the European Union: Please use `eu.api.helicone.ai` instead of
+  `api.helicone.ai` to ensure compliance with data residency requirements and
+  optimal performance.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card
+    title="Python Example"
+    href="https://github.com/Helicone/helicone/tree/main/examples/export/python"
+    icon="python"
+  >
+    See how to query requests using our Python SDK.
+  </Card>
+  <Card
+    title="TypeScript Example"
+    href="https://github.com/Helicone/helicone/tree/main/examples/export/typescript"
+    icon="code"
+  >
+    Learn to fetch requests with TypeScript/JavaScript.
+  </Card>
+</CardGroup>
 
 The following API is the same as the [Get Requests](/rest/request/post-v1requestquery) API, but it is optimized for speed when querying large amount of data. This endpoint will timeout for point queries and is really slow when querying just a few requests.
 

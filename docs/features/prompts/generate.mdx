@@ -1,0 +1,169 @@
+---
+title: "Generate API"
+sidebarTitle: "Generate API"
+description: "Generate content using predefined prompts through a dedicated API endpoint."
+"twitter:title": "Generate API | Helicone OSS LLM Observability"
+---
+
+## Overview
+
+The Generate API allows you to use predefined prompts to generate content through a unified endpoint. This feature simplifies the process of using prompts across different LLM providers while maintaining Helicone's observability features.
+
+## Prerequisites
+
+- A Helicone account and API key
+- At least one predefined prompt in Helicone
+- API keys for the LLM providers you want to use
+
+## API Endpoint
+
+## Request Format
+
+The request body should include:
+
+Required headers:
+
+Provider API keys (at least one required):
+
+## Example Usage
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```javascript
+    const generateUrl = "https://generate.helicone.ai";
+
+    const payload = {
+        // Prompt Info
+        promptId: "new-prompt",
+        version: "production", // defaults to "production" or provide specific version number
+        inputs: {
+            num: "10",
+        },
+        // Helicone Properties
+        userId: "test-user",
+        sessionId: "session-123",
+    };
+
+    const headers = {
+        // Helicone Auth
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        // Provider Keys
+        "OPENAI_API_KEY": process.env.OPENAI_API_KEY,
+        "ANTHROPIC_API_KEY": process.env.ANTHROPIC_API_KEY,
+        "GOOGLE_API_KEY": process.env.GOOGLE_GENERATIVE_API_KEY,
+        "COHERE_API_KEY": process.env.COHERE_API_KEY,
+        "MISTRAL_API_KEY": process.env.MISTRAL_API_KEY,
+    };
+
+    const response = await fetch(generateUrl, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    console.log(data);
+    bash
+    curl -X POST https://generate.helicone.ai/v1/generate \
+      -H "Content-Type: application/json" \
+      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+      -H "OPENAI_API_KEY: $OPENAI_API_KEY" \
+      -H "ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY" \
+      -H "GOOGLE_API_KEY: $GOOGLE_GENERATIVE_API_KEY" \
+      -H "COHERE_API_KEY: $COHERE_API_KEY" \
+      -H "MISTRAL_API_KEY: $MISTRAL_API_KEY" \
+      -d '{
+        "promptId": "new-prompt",
+        "version": "production",
+        "inputs": {
+          "num": "10"
+        },
+        "userId": "test-user",
+        "sessionId": "session-123"
+      }'
+    ```
+
+  </Tab>
+  <Tab title="Python">
+    ```python
+    import requests
+    import os
+
+    generate_url = "https://generate.helicone.ai"
+
+    payload = {
+        # Prompt Info
+        "promptId": "new-prompt",
+        "version": "production", # defaults to "production" or provide specific version number
+        "inputs": {
+            "num": "10",
+        },
+        # Helicone Properties
+        "userId": "test-user",
+        "sessionId": "session-123",
+    }
+
+    headers = {
+        # Helicone Auth
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
+        # Provider Keys
+        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY"),
+        "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY"),
+        "GOOGLE_API_KEY": os.environ.get("GOOGLE_GENERATIVE_API_KEY"),
+        "COHERE_API_KEY": os.environ.get("COHERE_API_KEY"),
+        "MISTRAL_API_KEY": os.environ.get("MISTRAL_API_KEY"),
+    }
+
+    response = requests.post(generate_url, headers=headers, json=payload)
+    data = response.json()
+    print(data)
+    ```
+
+  </Tab>
+
+</Tabs>
+
+## Response Format
+
+The response format will match the standard format of the underlying LLM provider being used. All responses will be logged in Helicone and can be viewed in your dashboard.
+
+## Features
+
+- **Unified Endpoint**: Use a single endpoint for multiple LLM providers
+- **Version Control**: Specify prompt versions for testing and production
+- **Input Variables**: Pass dynamic inputs to your prompts
+- **User Tracking**: Include user and session IDs for request tracking
+- **Full Observability**: All requests are logged in Helicone's dashboard
+
+## Upcoming Features
+
+- Reverse mapper for Anthropic and other API paths
+- Support for additional LLM providers
+- Enhanced prompt template key-value store
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Which LLM providers are supported?">
+    The Generate API currently supports:
+    - OpenAI
+    - OpenRouter
+
+    Additional providers will be added in future updates.
+
+  </Accordion>
+  <Accordion title="Can I use this with streaming responses?">
+    Yes, the Generate API supports streaming responses. The response format will match the streaming format of the underlying provider being used.
+  </Accordion>
+  <Accordion title="How do I handle errors?">
+    The API will return standard HTTP error codes along with detailed error messages in the response body. Common error scenarios include:
+    - 400: Invalid request format
+    - 401: Authentication error
+    - 404: Prompt not found
+    - 500: Server error
+  </Accordion>
+</AccordionGroup>
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+<QuestionsSection />
