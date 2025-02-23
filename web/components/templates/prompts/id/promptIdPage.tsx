@@ -126,18 +126,17 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const loadVersionData = useCallback(
     (ver: any) => {
       if (!ver) return;
+      console.log("Loading version row:", ver);
+
       // 1. Parse the helicone template and metadata columns from the version
       const templateData =
         typeof ver.helicone_template === "string"
           ? JSON.parse(ver.helicone_template)
-          : ver.helicone_template;
-
-      console.log("Template data:", templateData);
-
+          : ver.helicone_template || {};
       const metadata =
         typeof ver.metadata === "string"
           ? JSON.parse(ver.metadata)
-          : (ver.metadata as {
+          : ((ver.metadata || {}) as {
               provider?: string;
               isProduction?: boolean;
               inputs?: Record<string, string>;
@@ -156,7 +155,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         templateData.content) as Message[];
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let inputs: StateVariable[] = Object.entries(metadata.inputs || {}).map(
+      let inputs: StateVariable[] = Object.entries(metadata?.inputs || {}).map(
         ([name, value]) => ({
           name,
           value: value as string,
@@ -174,7 +173,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           });
         });
       });
-      // 4.C. Add message variables to the list
+      // 4.C. Add message auto-inputs to the list
       stateMessages.forEach((msg) => {
         msg.idx !== undefined &&
           inputs.push({

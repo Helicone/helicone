@@ -1,8 +1,7 @@
 import { Message } from "packages/llm-mapper/types";
 
 export function isLastMessageUser(messages: Message[]): boolean {
-  const lastMessage = messages[messages.length - 1];
-  return lastMessage.role === "user";
+  return messages?.at(-1)?.role === "user";
 }
 
 export function isPrefillSupported(provider: string): boolean {
