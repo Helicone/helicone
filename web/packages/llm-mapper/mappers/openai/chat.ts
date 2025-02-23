@@ -1,4 +1,4 @@
-import { LlmSchema, Message } from "../../types";
+import { LlmSchema, Message, Tool } from "../../types";
 import { getContentType } from "../../utils/contentHelpers";
 import { getFormattedMessageContent } from "../../utils/messageUtils";
 import { MapperFn } from "../types";
@@ -131,7 +131,7 @@ export const getResponseText = (
   }
 };
 
-const getRequestMessages = (request: any): Message[] => {
+export const getRequestMessages = (request: any): Message[] => {
   return (
     request.messages?.map((msg: any) => {
       // Handle function calls first
@@ -275,6 +275,11 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     top_p: request.top_p,
     messages: getRequestMessages(request),
     tool_choice: request.tool_choice,
+    tools: request.tools?.map((tool: Tool) => ({
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+    })),
   };
 
   const llmSchema: LlmSchema = {

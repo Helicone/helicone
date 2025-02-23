@@ -45,7 +45,8 @@ export interface BASE_Env {
     | "ANTHROPIC_PROXY"
     | "HELICONE_API"
     | "GATEWAY_API"
-    | "CUSTOMER_GATEWAY";
+    | "CUSTOMER_GATEWAY"
+    | "GENERATE_API";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
@@ -141,6 +142,11 @@ async function modifyEnvBasedOnPath(
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
+      };
+    } else if (hostParts[0].includes("generate")) {
+      return {
+        ...env,
+        WORKER_TYPE: "GENERATE_API",
       };
     } else if (hostParts[0].includes("oai")) {
       return {

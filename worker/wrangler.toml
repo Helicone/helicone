@@ -66,6 +66,7 @@ routes = [
 	{ pattern = "nebius.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "perplexity.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "novita.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "generate.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "anthropic.us.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
@@ -169,6 +170,7 @@ kv_namespaces = [
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155" },
 	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285" },
+	# TODO: Add prompts table
 ]
 
 durable_objects.bindings = [

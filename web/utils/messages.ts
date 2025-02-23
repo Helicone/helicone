@@ -1,7 +1,6 @@
-import { StateMessage, HeliconeMessage } from "@/types/prompt-state";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { Message } from "packages/llm-mapper/types";
 
-export function isLastMessageUser(messages: StateMessage[]): boolean {
+export function isLastMessageUser(messages: Message[]): boolean {
   const lastMessage = messages[messages.length - 1];
   return lastMessage.role === "user";
 }
@@ -11,9 +10,9 @@ export function isPrefillSupported(provider: string): boolean {
 }
 
 export function removeMessagePair(
-  messages: StateMessage[],
+  messages: Message[],
   index: number
-): StateMessage[] {
+): Message[] {
   // If it's an assistant message followed by a user message, remove both
   if (
     index < messages.length - 1 &&
@@ -34,79 +33,14 @@ export function inferMessageRole(
   return adjustedIndex % 2 === 0 ? "user" : "assistant";
 }
 
-export function heliconeToStateMessages(
-  messages: HeliconeMessage[]
-): StateMessage[] {
-  // First determine if we have a system/developer message at the start
-  let hasSystemStart = false;
-  if (messages.length > 0 && typeof messages[0] !== "string") {
-    hasSystemStart =
-      (messages[0] as ChatCompletionMessageParam).role === "system" ||
-      (messages[0] as ChatCompletionMessageParam).role === "developer";
-  }
-
-  return messages.map((message, messageIndex) => {
-    // 1. Handle Helicone auto-prompt input string
-    if (typeof message === "string") {
-      const idxMatch = message.match(/idx=(\d+)/);
-      const idx = idxMatch ? parseInt(idxMatch[1]) : undefined;
-
-      return {
-        role: inferMessageRole(hasSystemStart, messageIndex),
-        content: message,
-        idx,
-      };
-    }
-
-    // 2. Handle direct content
-    const baseMessage: StateMessage = {
-      role: !("role" in message)
-        ? inferMessageRole(hasSystemStart, messageIndex) // Infer role if not present
-        : message.role === "function"
-        ? "tool" // "function" always becomes "tool"
-        : message.role, // Role is present
-      content:
-        "text" in message // Content is "text"
-          ? message.text
-          : typeof message.content === "string" // Content is "content"
-          ? message.content
-          : "", // Content not found directly
-    };
-
-    // Handle non-string content (arrays of content parts)
-    if ("content" in message && Array.isArray(message.content)) {
-      baseMessage.content = (message.content as any[])
-        .map((part: any) => {
-          if (typeof part === "string") return part;
-          if (part && typeof part === "object" && "text" in part)
-            return part.text;
-          return "";
-        })
-        .join("");
-    }
-
-    // Add toolCallId to state message if present
-    if ("tool_call_id" in message && typeof message.tool_call_id === "string") {
-      baseMessage.toolCallId = message.tool_call_id;
-    } else if (
-      "function_call_id" in message &&
-      typeof message.function_call_id === "string"
-    ) {
-      baseMessage.toolCallId = message.function_call_id;
-    }
-
-    return baseMessage;
-  });
-}
-
 // TODO: Streamline and improve this util
-export function parseImprovedMessages(input: string): StateMessage[] {
-  const messages: StateMessage[] = [];
+export function parseImprovedMessages(input: string): Message[] {
+  const messages: Message[] = [];
   let currentContent = "";
-  let currentRole: StateMessage["role"] | null = null;
+  let currentRole: Message["role"] | null = null;
 
   // Helper to map tag names to StateMessage roles
-  const tagToRole = (tag: string): StateMessage["role"] | null => {
+  const tagToRole = (tag: string): Message["role"] | null => {
     if (!tag.startsWith("improved_")) return null;
     const role = tag.replace("improved_", "");
     if (role === "system") return "system";
@@ -148,6 +82,7 @@ export function parseImprovedMessages(input: string): StateMessage[] {
           // Save previous message if we had one
           if (currentRole && currentContent) {
             messages.push({
+              _type: "message",
               role: currentRole,
               content: cleanContent(currentContent),
             });
@@ -179,6 +114,7 @@ export function parseImprovedMessages(input: string): StateMessage[] {
   // Handle any remaining content
   if (currentRole && currentContent) {
     messages.push({
+      _type: "message",
       role: currentRole,
       content: cleanContent(currentContent),
     });

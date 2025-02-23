@@ -7,14 +7,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getJawnClient } from "@/lib/clients/jawn";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import {
   ArrowPathIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -40,19 +38,23 @@ function getPathName(url: string) {
   }
 }
 
-const RequestRow = (props: {
+interface RequestRowProps {
   request: MappedLLMRequest;
   properties: string[];
   open?: boolean;
   wFull?: boolean;
   displayPreview?: boolean;
-}) => {
+  promptData?: any;
+}
+
+const RequestRow = (props: RequestRowProps) => {
   const {
     request,
     properties,
     open = true,
     wFull = false,
     displayPreview = true,
+    promptData,
   } = props;
 
   const org = useOrg();
@@ -89,25 +91,6 @@ const RequestRow = (props: {
       "Helicone-Experiment-Id"
     ] as string | undefined;
   }, [request.heliconeMetadata.customProperties]);
-
-  const promptData = useQuery({
-    queryKey: ["prompt", promptId, org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const jawn = getJawnClient(query.queryKey[2]);
-      const prompt = await jawn.POST("/v1/prompt/query", {
-        body: {
-          filter: {
-            prompt_v2: {
-              user_defined_id: {
-                equals: query.queryKey[1],
-              },
-            },
-          },
-        },
-      });
-      return prompt.data?.data?.[0];
-    },
-  });
 
   useEffect(() => {
     // find all the key values of properties and set them to currentProperties
@@ -652,7 +635,7 @@ const RequestRow = (props: {
                 className="flex flex-row items-center space-x-2 truncate"
                 asChild
               >
-                <Link href={`/prompts/${promptData.data?.id}`}>
+                <Link href={`/prompts/${promptData?.id}`}>
                   <span>Prompt:</span> <span>{promptId}</span>
                 </Link>
               </Button>
@@ -702,7 +685,10 @@ const RequestRow = (props: {
       {displayPreview && (
         <div className="flex flex-col space-y-8">
           <div className="flex flex-col space-y-2">
-            <RenderMappedRequest mapperContent={request} />
+            <RenderMappedRequest
+              mapperContent={request}
+              promptData={promptData}
+            />
           </div>
         </div>
       )}

@@ -18,6 +18,7 @@ type RenderMappedRequestProps = {
   messageSlice?: "lastTwo";
   className?: string;
   autoInputs?: any[];
+  promptData?: any;
 };
 
 export const RenderMappedRequest = (

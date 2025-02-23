@@ -1,8 +1,8 @@
-import { useState } from "react";
+import useNotification from "@/components/shared/notification/useNotification";
 import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useState } from "react";
 import { ChatTopBar, PROMPT_MODES } from "./chatComponent/chatTopBar";
-import useNotification from "@/components/shared/notification/useNotification";
 
 interface CompletionProps {
   mappedRequest: MappedLLMRequest;
@@ -45,9 +45,8 @@ export const Completion = (props: CompletionProps) => {
         <ChatTopBar
           allExpanded={false}
           isModal={true}
-          requestMessages={[]}
+          requestBody={mappedRequest.raw.request}
           requestId={mappedRequest.id}
-          model={mappedRequest.model}
           setOpen={() => {}}
           mode={mode}
           setMode={setMode}

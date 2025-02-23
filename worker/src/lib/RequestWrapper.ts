@@ -6,19 +6,19 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env, hash } from "..";
 import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "./db/DBWrapper";
-import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
-import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import {
   checkLimits,
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
+import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
+import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 
+import { Sha256 } from "@aws-crypto/sha256-js";
 import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
-import { SignatureV4 } from "@smithy/signature-v4";
-import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
+import { SignatureV4 } from "@smithy/signature-v4";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -654,7 +654,7 @@ export async function getProviderKeyFromPortalKey(
     .from("decrypted_provider_keys")
     .select("decrypted_provider_key")
     .eq("id", providerKeyId.data?.id ?? "")
-    .eq("soft_delete", "false")
+    .eq("soft_delete", false)
     .single();
 
   return map(mapPostgrestErr(providerKey), (x) => ({
@@ -689,7 +689,7 @@ export async function getProviderKeyFromProxy(
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single(),
     supabaseClient
       .from("helicone_proxy_key_limits")
@@ -721,7 +721,7 @@ export async function getProviderKeyFromProxy(
     .from("decrypted_provider_keys")
     .select("decrypted_provider_key")
     .eq("id", storedProxyKey.data.provider_key_id)
-    .eq("soft_delete", "false")
+    .eq("soft_delete", false)
     .single();
 
   if (providerKey.error || !providerKey.data?.decrypted_provider_key) {

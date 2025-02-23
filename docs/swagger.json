@@ -2648,6 +2648,10 @@
 						},
 						"type": "array"
 					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -2691,6 +2695,25 @@
 					"_type"
 				],
 				"type": "object"
+			},
+			"Tool": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"LLMRequestBody": {
 				"properties": {
@@ -2768,7 +2791,31 @@
 						"type": "array",
 						"nullable": true
 					},
-					"tool_choice": {}
+					"tools": {
+						"items": {
+							"$ref": "#/components/schemas/Tool"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"auto",
+									"none",
+									"tool"
+								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -8135,22 +8182,7 @@
 									"metadata": {
 										"$ref": "#/components/schemas/Record_string.any_"
 									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
+									"prompt": {},
 									"userDefinedId": {
 										"type": "string"
 									}
@@ -10324,11 +10356,12 @@
 							"example": {
 								"filter": "all",
 								"isCached": false,
-								"limit": 10,
+								"limit": 100,
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
 								},
+								"includeInputs": false,
 								"isScored": false,
 								"isPartOfExperiment": false
 							}

@@ -1,23 +1,23 @@
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
+  Bars3Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import { useMemo, useEffect, useRef, useState } from "react";
-import { useOrg } from "../org/organizationContext";
-import OrgDropdown from "../orgDropdown";
-import NavItem from "./NavItem";
-import { ChangelogItem } from "./types";
-import ChangelogModal from "../ChangelogModal";
-import SidebarHelpDropdown from "../SidebarHelpDropdown";
-import { useTheme } from "next-themes";
 import { useUser } from "@supabase/auth-helpers-react";
 import { Rocket } from "lucide-react";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { useTheme } from "next-themes";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ChangelogModal from "../ChangelogModal";
+import { useOrg } from "../org/organizationContext";
+import OrgDropdown from "../orgDropdown";
+import SidebarHelpDropdown from "../SidebarHelpDropdown";
+import NavItem from "./NavItem";
+import { ChangelogItem } from "./types";
 
 export interface NavigationItem {
   name: string;
@@ -315,7 +315,7 @@ const DesktopSidebar = ({
                           });
                         }}
                         className={cn(
-                          "mt-10 gap-1 text-white text-large font-medium leading-normal text-white tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          "mt-10 gap-1 text-white text-large font-medium leading-normal tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
                           isCollapsed
                             ? "h-8 w-8 px-2"
                             : "h-[46px] w-full px-6 md:px-4"

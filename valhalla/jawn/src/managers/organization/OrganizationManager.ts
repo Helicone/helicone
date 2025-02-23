@@ -442,14 +442,30 @@ export class OrganizationManager extends BaseManager {
     if (!hasAccess) {
       return err("User does not have access to get organization members");
     }
+    const { data: superUsers, error: adminsError } = await supabaseServer.client
+      .from("admins")
+      .select("*");
 
     const { data: members, error: membersError } =
       await this.organizationStore.getOrganizationMembers(organizationId);
-
     if (membersError !== null) {
       return err(membersError);
     }
-    return ok(members);
+    if (
+      this.authParams.userId &&
+      superUsers?.some(
+        (superUser) => superUser.user_id === this.authParams.userId
+      )
+    ) {
+      return ok(members);
+    }
+
+    return ok(
+      members.filter(
+        (member) =>
+          !superUsers?.some((superUser) => superUser.user_id === member.member)
+      )
+    );
   }
 
   async setupDemo(organizationId: string): Promise<Result<null, string>> {

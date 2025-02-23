@@ -6,7 +6,6 @@ import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import VariablesPanel from "@/components/shared/prompts/VariablesPanel";
 import GlassHeader from "@/components/shared/universal/GlassHeader";
-import UniversalPopup from "@/components/shared/universal/Popup";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
@@ -22,10 +21,9 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import autoImprovePrompt from "@/prompts/auto-improve";
-import { PromptState, StateMessage, StateVariable } from "@/types/prompt-state";
+import { PromptState, StateVariable } from "@/types/prompt-state";
 import { $system, $user } from "@/utils/llm";
 import {
-  heliconeToStateMessages,
   isLastMessageUser,
   isPrefillSupported,
   parseImprovedMessages,
@@ -35,12 +33,15 @@ import { toKebabCase } from "@/utils/strings";
 import {
   deduplicateVariables,
   extractVariables,
+  heliconeToTemplateTags,
   isValidVariableName,
+  templateToHeliconeTags,
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Message } from "packages/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -52,6 +53,9 @@ import {
   PiSpinnerGapBold,
   PiStopBold,
 } from "react-icons/pi";
+
+import ToolPanel from "@/components/shared/prompts/ToolPanel";
+import UniversalPopup from "@/components/shared/universal/Popup";
 import {
   usePrompt,
   usePromptVersions,
@@ -127,6 +131,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           ? JSON.parse(ver.helicone_template)
           : ver.helicone_template;
 
+      console.log("Template data:", templateData);
+
       const metadata =
         typeof ver.metadata === "string"
           ? JSON.parse(ver.metadata)
@@ -145,23 +151,22 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             )?.major_version ?? ver.major_version;
 
       // 3. Convert any messages in the template to StateMessages
-      const stateMessages = heliconeToStateMessages(
-        templateData.messages || templateData.content
-      );
+      const stateMessages = (templateData.messages ||
+        templateData.content) as Message[];
 
       // 4.A. First collect all variables and their default values from the metadata inputs
-      let variables: StateVariable[] = Object.entries(
-        metadata.inputs || {}
-      ).map(([name, value]) => ({
-        name,
-        value: value as string,
-        isValid: isValidVariableName(name),
-      }));
+      let inputs: StateVariable[] = Object.entries(metadata.inputs || {}).map(
+        ([name, value]) => ({
+          name,
+          value: value as string,
+          isValid: isValidVariableName(name),
+        })
+      );
       // 4.B. Extract additional variables contained in message content
       stateMessages.forEach((msg) => {
-        const vars = extractVariables(msg.content, "helicone");
+        const vars = extractVariables(msg.content || "", "helicone");
         vars.forEach((v) => {
-          variables.push({
+          inputs.push({
             name: v.name,
             value: metadata?.inputs?.[v.name] ?? v.value ?? "",
             isValid: v.isValid ?? true,
@@ -171,7 +176,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       // 4.C. Add message variables to the list
       stateMessages.forEach((msg) => {
         msg.idx !== undefined &&
-          variables.push({
+          inputs.push({
             name: `message_${msg.idx}`,
             value: "",
             isValid: true,
@@ -180,7 +185,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       });
 
       // 4.D. Deduplicate variables
-      variables = deduplicateVariables(variables);
+      inputs = deduplicateVariables(inputs);
 
       // 6. Update state with the processed data
       setState({
@@ -190,11 +195,13 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         versionId: ver.id,
         messages: stateMessages,
         parameters: {
-          provider: metadata?.provider ?? "openai",
+          provider: metadata?.provider ?? "OPENAI",
           model: templateData.model ?? "gpt-4o-mini",
           temperature: templateData.temperature ?? 0.7,
+          tools: templateData.tools || [],
+          reasoning_effort: templateData.reasoning_effort,
         },
-        variables: variables,
+        variables: inputs,
         evals: templateData.evals || [],
         structure: templateData.structure,
         isDirty: false,
@@ -240,7 +247,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         console.log("Existing variables:", existingVariables);
 
         const extractedVars = updatedMessages.flatMap((msg) => {
-          const vars = extractVariables(msg.content, "helicone");
+          const vars = extractVariables(msg.content || "", "helicone");
           console.log("Extracted vars from message:", msg.content, vars);
           return vars;
         });
@@ -317,7 +324,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
         // If this variable has an idx, also update the corresponding message
         if (variable.idx !== undefined) {
-          let parsedValue: StateMessage;
+          let parsedValue: Message;
           try {
             parsedValue = JSON.parse(value);
           } catch (e) {
@@ -454,16 +461,14 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
-        model: state.parameters.model,
-        temperature: state.parameters.temperature,
+        ...state.parameters,
         messages: state.messages,
       };
 
       // B. Build Metadata for Saving
       const metadata = {
+        provider: state.parameters.provider.toUpperCase(),
         isProduction: false,
-        createdFromUi: true,
-        provider: state.parameters.provider,
         inputs: variableMap,
       };
 
@@ -558,13 +563,18 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const handleImprove = useCallback(async () => {
     setIsImproving(true);
 
-    const prompt = autoImprovePrompt(state?.messages || []);
+    // Convert messages to template tags for natural understanding of variables
+    const templateTagMessages = state?.messages.map((msg) => ({
+      ...msg,
+      content: heliconeToTemplateTags(msg.content || ""),
+    }));
+    const prompt = autoImprovePrompt(templateTagMessages || []);
 
     try {
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "deepseek",
+        provider: "DEEPSEEK",
         model: "deepseek-r1",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
@@ -636,6 +646,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
 
     try {
       const improvedMessages = parseImprovedMessages(state.improvement.content);
+
       const latestVersionId = promptVersions?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -643,7 +654,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
       const heliconeTemplate = {
         model: state.parameters.model,
         temperature: state.parameters.temperature,
-        messages: improvedMessages,
+        messages: improvedMessages.map((msg) => ({
+          ...msg,
+          content: templateToHeliconeTags(msg.content || ""), // Convert any template tags present to helicone tags
+        })),
       };
 
       const metadata = {
@@ -728,8 +742,8 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         return {
           messages: [
             ...prev.messages,
-            { role: "assistant", content: "" },
-            { role: "user", content: "" },
+            { _type: "message", role: "assistant", content: "" },
+            { _type: "message", role: "user", content: "" },
           ],
         };
       } else return {};
@@ -744,7 +758,10 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         isLastMessageUser(prev.messages)
       ) {
         return {
-          messages: [...prev.messages, { role: "assistant", content: "" }],
+          messages: [
+            ...prev.messages,
+            { _type: "message", role: "assistant", content: "" },
+          ],
         };
       } else return {};
     });
@@ -761,7 +778,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   }
   // - Page
   return (
-    <Tabs className="relative flex flex-col" defaultValue="editor">
+    <Tabs className="relative flex flex-col h-screen" defaultValue="editor">
       {/* Header */}
       <GlassHeader>
         {/* Left Side: Navigation */}
@@ -823,11 +840,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
               <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
             )}
             <div
-              className={`flex items-center gap-0.5 text-sm ${
-                canRun && prompt?.metadata?.createdFromUi !== false
-                  ? "text-white opacity-60"
-                  : "text-slate-400"
-              }`}
+              className={`flex items-center gap-0.5 text-sm text-white opacity-60`}
             >
               <PiCommandBold className="h-4 w-4" />
               <MdKeyboardReturn className="h-4 w-4" />
@@ -932,7 +945,7 @@ async function pullPromptAndRunCompletion() {
       </GlassHeader>
 
       {/* Prompt Editor Tab */}
-      <TabsContent className="p-4" value="editor">
+      <TabsContent className="flex-1 overflow-auto p-4" value="editor">
         <ResizablePanels
           leftPanel={
             <MessagesPanel
@@ -956,9 +969,6 @@ async function pullPromptAndRunCompletion() {
                 promptVersionId={state.versionId}
               />
 
-              {/* TODO: Planned */}
-              {/* <EvalsPanel /> */}
-
               <ParametersPanel
                 parameters={state.parameters}
                 onParameterChange={(updates) => {
@@ -973,13 +983,15 @@ async function pullPromptAndRunCompletion() {
                   });
                 }}
               />
+
+              <ToolPanel tools={state.parameters.tools || []} />
             </div>
           }
         />
       </TabsContent>
 
       {/* Metrics Tab */}
-      <TabsContent value="metrics">
+      <TabsContent className="flex-1 overflow-auto" value="metrics">
         <PromptMetricsTab
           id={id}
           promptUserDefinedId={prompt?.user_defined_id || ""}

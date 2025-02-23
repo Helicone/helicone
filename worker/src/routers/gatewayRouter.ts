@@ -263,3 +263,6 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
 
   return router;
 };
+
+// Export the gatewayForwarder so the generate router can reuse its logic
+export { gatewayForwarder };

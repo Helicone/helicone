@@ -16,6 +16,7 @@ interface NavigationItem {
   current: boolean;
   featured?: boolean;
   subItems?: NavigationItem[];
+  isNew?: boolean;
 }
 
 interface NavItemProps {
@@ -116,8 +117,8 @@ const NavItem: React.FC<NavItemProps> = ({
             />
           )}
           {link.name}
-          {link.name === "Experiments" && (
-            <div className="uppercase text-[9px] font-semibold border bg-blue-100 dark:bg-blue-800 border-blue-200 dark:border-blue-800 p-px px-1 rounded-md text-blue-500 ml-2">
+          {link.isNew && (
+            <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
               New
             </div>
           )}
