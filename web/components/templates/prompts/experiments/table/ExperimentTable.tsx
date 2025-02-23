@@ -48,7 +48,6 @@ import EditInputsPanel from "./EditInputsPanel";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -68,6 +67,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import ImportCSVDialog from "./ImportCSVDialog";
 
 type TableDataType = {
   index: number;
@@ -122,9 +122,7 @@ export function ExperimentTable({
     setExternallySelectedForkFromPromptVersionId,
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
-
-  const org = useOrg();
-  const orgId = org?.currentOrg?.id ?? "";
+  const [showImportCsvModal, setShowImportCsvModal] = useState(false);
 
   const [rowSelection, setRowSelection] = useState({});
 
@@ -779,6 +777,7 @@ export function ExperimentTable({
                       setShowExperimentDatasetSelector={
                         setShowExperimentDatasetSelector
                       }
+                      setShowImportCsvModal={setShowImportCsvModal}
                     />
                   </PopoverContent>
                 </Popover>
@@ -858,6 +857,12 @@ export function ExperimentTable({
           numberOfExistingPromptVersions={
             promptVersionsData?.length ? promptVersionsData.length - 1 : 0
           }
+        />
+        <ImportCSVDialog
+          open={showImportCsvModal}
+          onOpenChange={setShowImportCsvModal}
+          experimentId={experimentTableId}
+          experimentPromptInputKeys={inputKeysData?.map((key) => key) ?? []}
         />
       </div>
     </>

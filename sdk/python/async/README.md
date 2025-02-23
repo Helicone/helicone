@@ -36,3 +36,11 @@ print(response.choices[0])
 ```
 
 For more information on Asynchronous Logging, see the [docs](https://docs.helicone.ai/getting-started/integration-method/openllmetry).
+
+## Deploy
+
+```bash
+poetry build
+rm -rf dist
+twine upload dist/*
+```

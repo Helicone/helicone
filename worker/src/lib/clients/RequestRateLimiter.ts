@@ -8,7 +8,7 @@ export class RateLimiter {
     private authParams: AuthParams
   ) {}
 
-  private getRateLimitParams(tier: string) {
+  private getRateLimitParams(tier: "free") {
     const rateLimitParams: Record<
       string,
       {
@@ -18,30 +18,9 @@ export class RateLimiter {
     > = {
       free: {
         windowSizeSeconds: 60,
-        maxCount: 1_200,
-      },
-      pro: {
-        windowSizeSeconds: 60,
-        maxCount: 6_000,
-      },
-      growth: {
-        windowSizeSeconds: 60,
-        maxCount: 6_000,
-      },
-      team: {
-        windowSizeSeconds: 60,
-        maxCount: 15_000,
-      },
-      enterprise: {
-        windowSizeSeconds: 60,
-        maxCount: 30_000,
+        maxCount: 10_000,
       },
     };
-
-    if (tier?.toLowerCase().includes("pro")) {
-      tier = "pro";
-    }
-    tier = tier?.toLowerCase() in rateLimitParams ? tier.toLowerCase() : "free";
 
     return rateLimitParams[tier];
   }
@@ -62,6 +41,13 @@ export class RateLimiter {
       );
 
       const rateLimiter = this.rateLimiter.get(rateLimiterId);
+      if (tier !== "free") {
+        return ok({
+          isRateLimited: false,
+          shouldLogInDB: false,
+          rlIncrementDB: 0,
+        });
+      }
 
       const params = this.getRateLimitParams(tier);
 

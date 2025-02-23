@@ -2648,6 +2648,10 @@
 						},
 						"type": "array"
 					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -2664,6 +2668,9 @@
 						"type": "array"
 					},
 					"content": {
+						"type": "string"
+					},
+					"name": {
 						"type": "string"
 					},
 					"role": {
@@ -2688,6 +2695,25 @@
 					"_type"
 				],
 				"type": "object"
+			},
+			"Tool": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"LLMRequestBody": {
 				"properties": {
@@ -2765,7 +2791,31 @@
 						"type": "array",
 						"nullable": true
 					},
-					"tool_choice": {}
+					"tools": {
+						"items": {
+							"$ref": "#/components/schemas/Tool"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"auto",
+									"none",
+									"tool"
+								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -2900,6 +2950,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"prompt_cache_write_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"prompt_cache_read_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"completion_tokens": {
 						"type": "number",
 						"format": "double",
@@ -3000,6 +3060,8 @@
 					"time_to_first_token",
 					"total_tokens",
 					"prompt_tokens",
+					"prompt_cache_write_tokens",
+					"prompt_cache_read_tokens",
 					"completion_tokens",
 					"prompt_id",
 					"llmSchema",
@@ -6179,6 +6241,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"promptCacheWriteTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"promptCacheReadTokens": {
+						"type": "number",
+						"format": "double"
+					},
 					"delayMs": {
 						"type": "number",
 						"format": "double"
@@ -6192,6 +6262,8 @@
 					"createdAt",
 					"completionTokens",
 					"promptTokens",
+					"promptCacheWriteTokens",
+					"promptCacheReadTokens",
 					"delayMs",
 					"model"
 				],
@@ -8090,22 +8162,7 @@
 									"metadata": {
 										"$ref": "#/components/schemas/Record_string.any_"
 									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
+									"prompt": {},
 									"userDefinedId": {
 										"type": "string"
 									}
@@ -9529,6 +9586,62 @@
 				}
 			}
 		},
+		"/v2/experiment/{experimentId}/add-manual-rows-batch": {
+			"post": {
+				"operationId": "AddManualRowsToExperimentBatch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"inputs": {
+										"items": {
+											"$ref": "#/components/schemas/Record_string.string_"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"inputs"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v2/experiment/{experimentId}/rows": {
 			"delete": {
 				"operationId": "DeleteExperimentTableRows",
@@ -10223,11 +10336,12 @@
 							"example": {
 								"filter": "all",
 								"isCached": false,
-								"limit": 10,
+								"limit": 100,
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
 								},
+								"includeInputs": false,
 								"isScored": false,
 								"isPartOfExperiment": false
 							}

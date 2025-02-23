@@ -1,3 +1,4 @@
+import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
@@ -9,6 +10,7 @@ import {
   ExperimentCellValue,
   HandlerContext,
   PromptRecord,
+  toHeliconeRequest,
 } from "./HandlerContext";
 
 type S3Record = {
@@ -43,6 +45,12 @@ export type BatchPayload = {
     evaluatorIds: Record<string, string>;
   }[];
 };
+
+const avgTokenLength = 4;
+const maxContentLength = 2_000_000;
+const maxResponseLength = 100_000;
+const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
+const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
 
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
@@ -436,6 +444,26 @@ export class LoggingHandler extends AbstractLogHandler {
     const usage = context.usage;
     const orgParams = context.orgParams;
 
+    let requestText = "";
+    let responseText = "";
+
+    try {
+      const mappedContent = heliconeRequestToMappedContent(
+        toHeliconeRequest(context)
+      );
+      requestText = mappedContent.preview
+        .fullRequestText()
+        .slice(0, MAX_CONTENT_LENGTH);
+      responseText = mappedContent.preview
+        .fullResponseText()
+        .slice(0, MAX_RESPONSE_LENGTH);
+    } catch (error) {
+      console.error("Error mapping request/response for preview:", error);
+      // Fallback to empty strings if mapping fails
+      requestText = "";
+      responseText = "";
+    }
+
     const requestResponseLog: RequestResponseRMT = {
       user_id: request.userId,
       request_id: request.id,
@@ -443,6 +471,8 @@ export class LoggingHandler extends AbstractLogHandler {
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -468,11 +498,8 @@ export class LoggingHandler extends AbstractLogHandler {
           ([key, value]) => [key, +(value ?? 0)]
         )
       ),
-      request_body:
-        this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
-      response_body:
-        this.extractResponseBodyMessage(context.processedLog.response.body) ??
-        "",
+      request_body: requestText,
+      response_body: responseText,
     };
 
     return requestResponseLog;
@@ -494,6 +521,8 @@ export class LoggingHandler extends AbstractLogHandler {
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
       prompt_tokens: context.usage.promptTokens,
+      prompt_cache_write_tokens: context.usage.promptCacheWriteTokens,
+      prompt_cache_read_tokens: context.usage.promptCacheReadTokens,
       time_to_first_token: response.timeToFirstToken,
       delay_ms: response.delayMs,
       created_at: response.responseCreatedAt.toISOString(),

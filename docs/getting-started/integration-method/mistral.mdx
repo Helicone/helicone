@@ -1,16 +1,58 @@
 ---
-title: "Mistral Integration"
-sidebarTitle: "Mistral"
-description: "Connect Helicone with Mistral, a platform for running open-source language models. Monitor and optimize your AI applications using Mistral's powerful models through a simple base_url configuration."
-"twitter:title": "Mistral Integration - Helicone OSS LLM Observability"
+title: "Mistral AI Integration"
+sidebarTitle: "Mistral AI"
+description: "Connect Helicone with Mistral AI, a platform that provides state-of-the-art language models including Mistral-Large and Mistral-Medium for various AI applications."
+"twitter:title": "Mistral AI Integration - Helicone OSS LLM Observability"
 ---
 
-You can seamlessly integrate Helicone with your OpenAI compatible models that are deployed on Mistral.
+You can follow their documentation here: [https://docs.mistral.ai/](https://docs.mistral.ai/)
 
-The integration process closely mirrors the [proxy approach](/integrations/openai/javascript). The only distinction lies in the modification of the base_url to point to the dedicated Mistral endpoint `https://mistral.helicone.ai/v1`.
+# Gateway Integration
 
-```bash
-base_url="https://mistral.helicone.ai/v1"
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Mistral AI account">
+    Log into console.mistral.ai or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and MISTRAL_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+MISTRAL_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following Mistral AI URL with the Helicone Gateway URL:
+
+`https://api.mistral.ai/v1/chat/completions` -> `https://mistral.helicone.ai/v1/chat/completions`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
 ```
 
-Please ensure that the base_url is correctly set to ensure successful integration.
+</Step>
+</Steps>
+
+Now you can access all the models on Mistral AI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <MISTRAL_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "mistral-large-latest",
+    "messages": [{"role": "user", "content": "Say this is a test"}]
+}' \
+  --url https://mistral.helicone.ai/chat/completions
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+And for more information on how to use Mistral AI, see [Mistral AI Docs](https://docs.mistral.ai/).

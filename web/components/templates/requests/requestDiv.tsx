@@ -4,14 +4,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { FlaskConicalIcon, TestTube2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { FlaskConicalIcon, NotepadText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useCreatePromptFromRequest } from "../../../services/hooks/prompts/prompts";
+import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
@@ -42,6 +46,9 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
+  const createPrompt = useCreatePromptFromRequest();
+
+  const org = useOrg();
 
   const setOpenHandler = (divOpen: boolean) => {
     setOpen(divOpen);
@@ -76,6 +83,31 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const jawn = useJawnClient();
 
+  const promptId = useMemo(
+    () =>
+      request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
+      null,
+    [request?.heliconeMetadata.customProperties]
+  );
+  const promptDataQuery = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
+
   return (
     <ThemedDiv
       open={open}
@@ -83,6 +115,29 @@ const RequestDiv = (props: RequestDivProps) => {
       actions={
         <div className="w-full flex flex-row justify-between items-center">
           <div className="flex flex-row items-center space-x-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="#"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!request) return;
+                    if (promptDataQuery.data?.id) {
+                      router.push(`/prompts/${promptDataQuery.data?.id}`);
+                    } else {
+                      const res = await createPrompt(request.schema.request);
+                      if (res?.id) {
+                        router.push(`/prompts/${res.id}`);
+                      }
+                    }
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
+                >
+                  <NotepadText className="h-4 w-4" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Test Prompt</TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -116,17 +171,7 @@ const RequestDiv = (props: RequestDivProps) => {
               </TooltipTrigger>
               <TooltipContent>Experiment</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={request ? `/playground?request=${request.id}` : "#"}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
-                >
-                  <TestTube2 className="h-4 w-4" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Playground</TooltipContent>
-            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -182,7 +227,12 @@ const RequestDiv = (props: RequestDivProps) => {
       }
     >
       {request ? (
-        <RequestRow request={request} properties={properties} open={open} />
+        <RequestRow
+          request={request}
+          properties={properties}
+          open={open}
+          promptData={promptDataQuery.data}
+        />
       ) : (
         <p>Loading...</p>
       )}

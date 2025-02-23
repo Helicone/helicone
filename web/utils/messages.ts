@@ -1,7 +1,6 @@
-import { StateMessage, HeliconeMessage } from "@/types/prompt-state";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { Message } from "packages/llm-mapper/types";
 
-export function isLastMessageUser(messages: StateMessage[]): boolean {
+export function isLastMessageUser(messages: Message[]): boolean {
   const lastMessage = messages[messages.length - 1];
   return lastMessage.role === "user";
 }
@@ -11,9 +10,9 @@ export function isPrefillSupported(provider: string): boolean {
 }
 
 export function removeMessagePair(
-  messages: StateMessage[],
+  messages: Message[],
   index: number
-): StateMessage[] {
+): Message[] {
   // If it's an assistant message followed by a user message, remove both
   if (
     index < messages.length - 1 &&
@@ -34,67 +33,92 @@ export function inferMessageRole(
   return adjustedIndex % 2 === 0 ? "user" : "assistant";
 }
 
-export function heliconeToStateMessages(
-  messages: HeliconeMessage[]
-): StateMessage[] {
-  // First determine if we have a system/developer message at the start
-  let hasSystemStart = false;
-  if (messages.length > 0 && typeof messages[0] !== "string") {
-    hasSystemStart =
-      (messages[0] as ChatCompletionMessageParam).role === "system" ||
-      (messages[0] as ChatCompletionMessageParam).role === "developer";
+// TODO: Streamline and improve this util
+export function parseImprovedMessages(input: string): Message[] {
+  const messages: Message[] = [];
+  let currentContent = "";
+  let currentRole: Message["role"] | null = null;
+
+  // Helper to map tag names to StateMessage roles
+  const tagToRole = (tag: string): Message["role"] | null => {
+    if (!tag.startsWith("improved_")) return null;
+    const role = tag.replace("improved_", "");
+    if (role === "system") return "system";
+    if (role === "user") return "user";
+    if (role === "assistant") return "assistant";
+    if (role === "tool") return "tool";
+    if (role === "developer") return "developer";
+    return null;
+  };
+
+  // Helper to clean content by removing closing improved_ tags
+  const cleanContent = (content: string): string => {
+    return content
+      .replace(/<\/improved_(system|user|assistant|tool|developer)>/g, "")
+      .trim();
+  };
+
+  // Process the input character by character
+  let i = 0;
+  while (i < input.length) {
+    if (input[i] === "<") {
+      // Look for the end of the tag
+      const tagEnd = input.indexOf(">", i);
+      if (tagEnd === -1) {
+        // No closing bracket found, treat rest as content
+        if (currentRole) {
+          currentContent += input.slice(i);
+        }
+        break;
+      }
+
+      const tag = input.slice(i + 1, tagEnd);
+
+      // Only process if it's not a closing tag
+      if (!tag.startsWith("/")) {
+        const newRole = tagToRole(tag);
+        // If we found a new valid improved_ tag
+        if (newRole !== null) {
+          // Save previous message if we had one
+          if (currentRole && currentContent) {
+            messages.push({
+              _type: "message",
+              role: currentRole,
+              content: cleanContent(currentContent),
+            });
+          }
+          // Start new message
+          currentRole = newRole;
+          currentContent = "";
+        } else if (currentRole) {
+          // If it's not a valid improved_ tag but we're in a message, treat as content
+          currentContent += input.slice(i, tagEnd + 1);
+        }
+      } else if (currentRole) {
+        // It's a closing tag but we're in a message, check if it's an improved_ closing tag
+        if (!tag.startsWith("/improved_")) {
+          // Only add non-improved closing tags to content
+          currentContent += input.slice(i, tagEnd + 1);
+        }
+      }
+      i = tagEnd + 1;
+    } else {
+      // If we're inside a role definition, accumulate content
+      if (currentRole) {
+        currentContent += input[i];
+      }
+      i++;
+    }
   }
 
-  return messages.map((message, messageIndex) => {
-    // 1. Handle Helicone auto-prompt input string
-    if (typeof message === "string") {
-      const idxMatch = message.match(/idx=(\d+)/);
-      const idx = idxMatch ? parseInt(idxMatch[1]) : undefined;
+  // Handle any remaining content
+  if (currentRole && currentContent) {
+    messages.push({
+      _type: "message",
+      role: currentRole,
+      content: cleanContent(currentContent),
+    });
+  }
 
-      return {
-        role: inferMessageRole(hasSystemStart, messageIndex),
-        content: message,
-        idx,
-      };
-    }
-
-    // 2. Handle direct content
-    const baseMessage: StateMessage = {
-      role: !("role" in message)
-        ? inferMessageRole(hasSystemStart, messageIndex) // Infer role if not present
-        : message.role === "function"
-        ? "tool" // "function" always becomes "tool"
-        : message.role, // Role is present
-      content:
-        "text" in message // Content is "text"
-          ? message.text
-          : typeof message.content === "string" // Content is "content"
-          ? message.content
-          : "", // Content not found directly
-    };
-
-    // Handle non-string content (arrays of content parts)
-    if ("content" in message && Array.isArray(message.content)) {
-      baseMessage.content = (message.content as any[])
-        .map((part: any) => {
-          if (typeof part === "string") return part;
-          if (part && typeof part === "object" && "text" in part)
-            return part.text;
-          return "";
-        })
-        .join("");
-    }
-
-    // Add toolCallId to state message if present
-    if ("tool_call_id" in message && typeof message.tool_call_id === "string") {
-      baseMessage.toolCallId = message.tool_call_id;
-    } else if (
-      "function_call_id" in message &&
-      typeof message.function_call_id === "string"
-    ) {
-      baseMessage.toolCallId = message.function_call_id;
-    }
-
-    return baseMessage;
-  });
+  return messages;
 }

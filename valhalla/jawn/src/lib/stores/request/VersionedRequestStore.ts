@@ -116,6 +116,8 @@ export class VersionedRequestStore {
         assets: row.assets,
         scores: row.scores,
         properties: newVersion.properties,
+        prompt_cache_write_tokens: row.prompt_cache_write_tokens,
+        prompt_cache_read_tokens: row.prompt_cache_read_tokens,
       },
     ]);
 

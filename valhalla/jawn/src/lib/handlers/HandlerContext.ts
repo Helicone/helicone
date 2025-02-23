@@ -56,6 +56,8 @@ export type Log = {
 
 export type Usage = {
   promptTokens?: number;
+  promptCacheWriteTokens?: number;
+  promptCacheReadTokens?: number;
   completionTokens?: number;
   totalTokens?: number;
   heliconeCalculated?: boolean;
@@ -155,6 +157,8 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     total_tokens: context.usage.totalTokens ?? null,
     prompt_tokens: context.usage.promptTokens ?? null,
     completion_tokens: context.usage.completionTokens ?? null,
+    prompt_cache_write_tokens: context.usage.promptCacheWriteTokens ?? null,
+    prompt_cache_read_tokens: context.usage.promptCacheReadTokens ?? null,
     prompt_id: context.message.log.request.promptId ?? null,
     llmSchema: null,
     country_code: context.message.log.request.countryCode ?? null,
