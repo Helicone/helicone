@@ -89,26 +89,26 @@ iconType: "solid"
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
     if (!process.env.GOOGLE_API_KEY) {
-        throw new Error("GOOGLE_API_KEY environment variable must be set");
+      throw new Error("GOOGLE_API_KEY environment variable must be set");
     }
 
     if (!process.env.HELICONE_API_KEY) {
-        throw new Error("HELICONE_API_KEY environment variable must be set");
+      throw new Error("HELICONE_API_KEY environment variable must be set");
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
     const modelParams = {
-        model: "gemini-2.0-flash",
-        systemInstruction: "You are a helpful assistant that can answer questions and help with tasks.",
+      model: "gemini-2.0-flash",
+      systemInstruction: "You are a helpful assistant that can answer questions and help with tasks.",
     };
 
     const modelInstance = genAI.getGenerativeModel(modelParams, {
-        baseUrl: "https://gateway.helicone.ai",
-        customHeaders: {
-            'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-            'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
-        }
+      baseUrl: "https://gateway.helicone.ai",
+      customHeaders: {
+          'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+          'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+      }
     });
     ```
 
@@ -117,10 +117,10 @@ iconType: "solid"
     ```javascript
     async function generateContent() {
       try {
-          const response = await modelInstance.generateContent("Hello, world!");
-          console.log(JSON.stringify(response, null, 2));
+        const response = await modelInstance.generateContent("Hello, world!");
+        console.log(JSON.stringify(response, null, 2));
       } catch (error) {
-          console.error("Error generating content:", error);
+        console.error("Error generating content:", error);
       }
     }
 
