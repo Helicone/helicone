@@ -10,23 +10,53 @@ This article evaluates both tools based on their strengths, integrations, and pe
 
 ## Helicone vs. Traceloop At a Glance
 
-| **Feature**               | **Helicone**  | **Traceloop** |
-|--------------------------|--------------|--------------|
-| **Open-source & Self-hosting** | ✅ Yes | ✅ Yes |
-| **Ease of Setup** | ✅ Header-based proxy setup, minimal code required | ❌ SDK-based setup, more configuration and coding involved |
-| **Dashboard & Visualization** | ✅ Rich UI with extensive metrics and customization | ❌ Basic dashboard with limited custom metrics |
-| **Tracing & Evaluation** | ✅ UI and Code-based tracing, supports prebuilt and robust custom evaluators with <a href="https://lastmileai.dev/" rel="noopener" target="_blank">LastMile</a> integration | ✅ Fully SDK-based tracing with prebuilt evaluation metrics. Limited customization.  |
-| **Prompt Management** | ✅ Advanced UI for prompt versioning, testing, and deployment. Can be done via code too. | ✅ UI-based prompt versioning, testing, and deployment. |
-| **LLM & Vector DB Support** | ✅ Broad support for AI providers and vector DBs | ❌ Supports fewer LLMs and vector DBs |
-| **Gateway & Request Routing** | ✅ Smart gateway to connect to multiple LLM providers and serves as a fallback in case of failure. | ❌ Supports Hub (Rust-based proxy) for observability across multiple LLM providers. No fallback functionality |
-| **Security Features** | ✅ Key Vault for API key security, Prompt Armor | ❌ Lacks security-focused features |
-| **Integrations** | ✅ Works with major LLM providers, PostHog, and major orchestration tools | ❌ Integrates with PostHog, LangChain, LlamaIndex. Fewer integrations overall |
-| **Alerting & Webhooks** | ✅ Supports alerts and webhooks for automation | ❌ No alerting or webhooks features |
+### Platform
+
+|                         | **Helicone**                                                                                                                   | **Traceloop**                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **Open-source**         | ✅                                                                                                                             | ✅                                                                                                                  |
+| **Self-hosting**        | ✅                                                                                                                             | ✅                                                                                                                  |
+| **Ease of Setup**       | ✅ <br/>Header-based proxy setup, minimal code required                                                                        | ✅ <br/>SDK-based setup, more configuration and coding involved                                                     |
+| **Free Tier**           | **10,000 logs/mo**<br/>`1 month` data retention                                                                                | **50,000 logs/mo**<br/>`24 hours` data retention                                                                    |
+| **Pricing Tiers**       | Free, Pro, Teams and Enterprise <a href="https://docs.helicone.ai/pricing" rel="noopener" target="_blank">tiers available</a>. | Free and Enterprise <a href="https://www.traceloop.com/pricing" rel="noopener" target="_blank">tiers available</a>. |
+| **Integration Support** | ✅ <br/>Works with major LLM providers, orchestration tools and third-party integrations                                       | ✅ <br/>Supports multiple integrations like PostHog, LangChain, LlamaIndex. Fewer integrations overall.             |
+| **Supported Languages** | Python and JS/TS. **No SDK required.**                                                                                         | Python, TypeScript, Go (beta), Ruby (beta). **SDK required.**                                                       |
+
+### LLM Monitoring
+
+| **Feature**                       | **Helicone**                                                                                                                         | **Traceloop**                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Dashboard Visualization** <br/> | ✅                                                                                                                                   | ✅                                                                                                                 |
+| **Tracing**                       | ✅ <br/>UI and code-based tracing of agentic workflows                                                                               | ✅ <br/>Fully SDK-based tracing                                                                                    |
+| **LLM & Vector DB Support**       | ✅ <br/>Broad support for AI providers and vector DBs                                                                                | ❌ <br/>Supports fewer LLMs and vector DBs                                                                         |
+| **LLM Evaluation**                | ✅ <br/>Pre-built + custom evaluators with <a href="https://lastmileai.dev/" rel="noopener" target="_blank">LastMile</a> integration | ✅ <br/>Fully prebuilt evaluation metrics. Limited customization.                                                  |
+| **Prompt Management**             | ✅ <br/>UI and code-based versioning and testing of prompts.                                                                         | ✅ <br/>UI-based prompt management.                                                                                |
+| **Gateway & Request Routing**     | ✅ <br/>Connect multiple LLM providers and serves as a fallback in case of failure.                                                  | ❌ <br/>Supports Hub (Rust-based proxy) for observability across multiple LLM providers. No fallback functionality |
+| **Alerting & Webhooks**           | ✅ <br/>Supports alerts and webhooks for automation                                                                                  | ❌ <br/>No alerting or webhooks features                                                                           |
+| **Security Features**             | ✅ <br/>API Key Vault, protection against prompt injections, omit logs for sensitive data                                            | ❌ <br/> No security-focused features                                                                              |
+
+### Security, Compliance, and Privacy
+
+|                     | **Helicone**                                                          | **Traceloop**                               |
+| ------------------- | --------------------------------------------------------------------- | ------------------------------------------- |
+| **Data Retention**  | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | 24 hours for Free<br/>Custom for Enterprise |
+| **HIPPA-Compliant** | ✅                                                                    | ❓                                          |
+| **GDPR-Compliant**  | ✅                                                                    | ❓                                          |
+| **SOC 2**           | ✅                                                                    | ✅                                          |
 
 ## TL;DR
 
-- **Traceloop** is built for code-first users needing a standard toolset for evaluation and tracing with minimal need for third-party integrations and customizations. It also integrates more easily with OpenTelemetry.
-- **Helicone** is more feature-rich and UI-driven, with deeper analytics, security features, and flexible integrations for tracing, monitoring, and cost management. Great for both engineering and non-engineering teams.
+- **Traceloop** is built for code-first users needing a standard toolset for evaluation and tracing with minimal need for third-party integrations and customizations. It also **<span style={{ color: "#0ea5e9" }}>integrates more easily with OpenTelemetry</span>**.
+- **Helicone** offers more end-to-end observability features like **<span style={{ color: "#0ea5e9" }}>deeper analytics, security features, and flexible integrations</span>** for tracing, monitoring, and cost management. Available via code or the UI.
+
+<CallToAction
+  title="Get Started with Helicone"
+  description="Ready to track your cost and usage? Start for free with Helicone to improve your prompts, and scale your LLM app with confidence."
+  primaryButtonText="Try Helicone for free"
+  primaryButtonLink="https://www.helicone.ai/signup"
+  secondaryButtonText="Contact us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
 
 ## Helicone: Powerful Observability With a Developer-Friendly Experience
 
@@ -80,7 +110,7 @@ const openai = new OpenAI({
 });
 ```
 
-## Traceloop: Comprehensive Code-First Observability 
+## Traceloop: Comprehensive Code-First Observability
 
 **Best for:** Code-first teams needing a capable toolset for evaluation and tracing.
 
@@ -110,32 +140,18 @@ It focuses mainly on evaluation, and aims to help teams detect hallucinations, i
 
 - **Flexible Integration**: Supports multiple programming languages and integrates with various observability platforms.
 
-### Sample Integration
-
-Here's a sample integration of Traceloop with OpenAI:
-
-```python
-from traceloop.sdk import LLMObserver
-
-observer = LLMObserver(api_key="YOUR_TRACELOOP_API_KEY")
-response = observer.trace(openai.ChatCompletion.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": "What is LLM observability?"}]
-))
-```
-
-## Comparing Helicone and Traceloop across Key Features
+## Comparing Features & Integrations
 
 Here's a table comparing Helicone and Traceloop across a few key areas:
 
-| Feature                      | Helicone                                                                  | Traceloop                                           |
-| ---------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------- |
-| Ease of Use                  | ⭐️ UI-driven, minimal coding required                                     | Requires SDK setup and manual tracing configuration |
-| Security & Compliance        | ⭐️ Key Vault for API security, Prompt Armor for data protection          | No built-in security features                      |
-| Tracing & Evaluation         | ⭐️ UI and SDK-based tracing, supports custom evaluation                     | Fully SDK-based tracing with standard evaluation metrics |
-| Cost Tracking & Optimization | ⭐️ Advanced cost analytics, caching, and rate limiting                   | No built-in cost reduction features. Limited cost tracking.                |
-| Integrations                 | ⭐️ Broad support for LLM providers, PostHog, and orchestration tools     | Limited integrations, optimized for LangChain & LlamaIndex |
-| Programming Language Support | ⭐️ Works with multiple languages without requiring an SDK                | Supports multiple languages but best for Python & TypeScript |
+| Feature                          | Helicone                                                              | Traceloop                                                    |
+| -------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Ease of Use**                  | ⭐️ UI-driven, minimal coding required                                | Requires SDK setup and manual tracing configuration          |
+| **Security & Compliance**        | ⭐️ Key Vault for API security, Prompt Armor for data protection      | No built-in security features                                |
+| **Tracing & Evaluation**         | ⭐️ UI and SDK-based tracing, supports custom evaluation              | Fully SDK-based tracing with standard evaluation metrics     |
+| **Cost Tracking & Optimization** | ⭐️ Advanced cost analytics, caching, and rate limiting               | No built-in cost reduction features. Limited cost tracking.  |
+| **Integrations**                 | ⭐️ Broad support for LLM providers, PostHog, and orchestration tools | Limited integrations, optimized for LangChain & LlamaIndex   |
+| **Programming Language Support** | ⭐️ Works with multiple languages without requiring an SDK            | Supports multiple languages but best for Python & TypeScript |
 
 ## Which LLM Observability Platform is Right for You?
 
@@ -173,7 +189,7 @@ Feel free to try out both tools before making a decision!
   </a>
 
 <CallToAction
-  title="Stay ahead with Helicone"
+  title="Stay Ahead with Helicone"
   description="Track your LLM usage, optimize costs, improve your prompts, and scale your LLM app with Helicone."
   primaryButtonText="Try Helicone for free"
   primaryButtonLink="https://www.helicone.ai/signup"
