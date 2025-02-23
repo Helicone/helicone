@@ -106,8 +106,8 @@ iconType: "solid"
     const modelInstance = genAI.getGenerativeModel(modelParams, {
       baseUrl: "https://gateway.helicone.ai",
       customHeaders: {
-          'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-          'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+        'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
       }
     });
     ```
