@@ -451,12 +451,16 @@ export class LoggingHandler extends AbstractLogHandler {
       const mappedContent = heliconeRequestToMappedContent(
         toHeliconeRequest(context)
       );
-      requestText = mappedContent.preview
-        .fullRequestText()
-        .slice(0, MAX_CONTENT_LENGTH);
-      responseText = mappedContent.preview
-        .fullResponseText()
-        .slice(0, MAX_RESPONSE_LENGTH);
+
+      requestText =
+        mappedContent.preview?.fullRequestText?.() ??
+        JSON.stringify(mappedContent.raw.request);
+      responseText =
+        mappedContent.preview?.fullResponseText?.() ??
+        JSON.stringify(mappedContent.raw.response);
+
+      requestText = requestText.slice(0, MAX_CONTENT_LENGTH);
+      responseText = responseText.slice(0, MAX_RESPONSE_LENGTH);
     } catch (error) {
       console.error("Error mapping request/response for preview:", error);
       // Fallback to empty strings if mapping fails
