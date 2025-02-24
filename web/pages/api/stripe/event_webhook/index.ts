@@ -8,6 +8,8 @@ import {
   getExperimentUsage,
 } from "@/lib/api/stripe/llmUsage";
 import { costOf } from "@/packages/cost";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 
 const ADDON_PRICES: Record<string, keyof Addons> = {
   [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
@@ -124,10 +126,49 @@ const PricingVersionOld = {
   },
 };
 
+async function inviteOnboardingMembers(orgId: string | undefined) {
+  if (!orgId) return;
+
+  // Get the organization data including onboarding status
+  const { data: orgData } = await getSupabaseServer()
+    .from("organization")
+    .select("onboarding_status")
+    .eq("id", orgId)
+    .single();
+
+  // Send invites to any members added during onboarding
+  const onboardingStatus =
+    orgData?.onboarding_status as unknown as OnboardingState | null;
+  if (
+    onboardingStatus &&
+    Array.isArray(onboardingStatus.members) &&
+    onboardingStatus.members.length > 0
+  ) {
+    const jawn = getJawnClient(orgId);
+    for (const member of onboardingStatus.members) {
+      if (!member.email) continue;
+      try {
+        await jawn.POST("/v1/organization/{organizationId}/add_member", {
+          params: {
+            path: {
+              organizationId: orgId,
+            },
+          },
+          body: {
+            email: member.email,
+          },
+        });
+        console.log(`Invited member: ${member.email}`);
+      } catch (error) {
+        console.error(`Failed to invite member ${member.email}:`, error);
+      }
+    }
+  }
+}
+
 const TeamVersion20250130 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
-    // subscription.metadata?.["helcionePricingVersion"] !==
     const subscriptionId = subscription.id;
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
@@ -170,6 +211,9 @@ const TeamVersion20250130 = {
     if (error) {
       console.error("Failed to update organization:", error);
     }
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
   },
 
   handleUpdate: async (event: Stripe.Event) => {
@@ -205,34 +249,6 @@ const PricingVersion20240913 = {
     console.log(`Subscription JSON: ${JSON.stringify(subscription)}`);
     console.log(`Addons: ${JSON.stringify(addons)}`);
 
-    // const subscription = await this.stripe.subscriptions.retrieve(
-    //   organization.data.stripe_subscription_id,
-    //   {
-    //     expand: ["items.data.price.product"],
-    //   }
-    // );
-
-    // const currentOrgStripeMetadata = await this.getStripeMetadata();
-    // if (currentOrgStripeMetadata.error) {
-    //   return err(currentOrgStripeMetadata.error);
-    // }
-
-    // const currentMetadata = currentOrgStripeMetadata.data;
-
-    // await supabaseServer.client
-    //   .from("organization")
-    //   .update({
-    //     stripe_metadata: {
-    //       addons: {
-    //         ...(typeof currentMetadata?.addons === "object"
-    //           ? currentMetadata?.addons
-    //           : {}),
-    //         [productType]: false,
-    //       },
-    //     },
-
-    // subscription.
-
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
@@ -245,6 +261,9 @@ const PricingVersion20240913 = {
         },
       })
       .eq("id", orgId || "");
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
   },
 
   handleUpdate: async (event: Stripe.Event) => {

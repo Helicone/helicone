@@ -14,11 +14,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import useNotification from "@/components/shared/notification/useNotification";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const user = useUser();
+  const { setNotification } = useNotification();
   const {
     onboardingState,
     isLoading,
@@ -74,6 +76,13 @@ export default function OnboardingPage() {
 
   const handleOrganizationSubmit = () => {
     if (!draftName) return;
+
+    setNotification(
+      onboardingState?.name && onboardingState.name !== "My Organization"
+        ? "Organization updated!"
+        : "Organization created!",
+      "success"
+    );
 
     if (isSubscribed) {
       updateCurrentStep("INTEGRATION");
@@ -144,7 +153,7 @@ export default function OnboardingPage() {
             onClick={handleOrganizationSubmit}
             disabled={!draftName}
           >
-            {onboardingState?.name
+            {onboardingState?.name && onboardingState.name !== "My Organization"
               ? "Update organization"
               : "Create organization"}
           </Button>

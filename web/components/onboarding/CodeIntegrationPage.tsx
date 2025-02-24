@@ -9,6 +9,8 @@ import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
+import { Alert } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -23,6 +25,7 @@ import {
   Loader2,
   Check,
   Copy,
+  Loader,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/lib/result";
@@ -79,6 +82,7 @@ export function CodeIntegrationPage({
   const [highlightedCode, setHighlightedCode] = useState("");
   const [apiKey, setApiKey] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   // Add the event listening query
   const { data: hasEvent } = useQuery<Result<boolean, string>, Error>(
@@ -103,6 +107,16 @@ export function CodeIntegrationPage({
       enabled: true,
     }
   );
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (!hasEvent?.data) {
+      interval = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [hasEvent?.data]);
 
   useEffect(() => {
     updateCurrentStep("EVENT");
@@ -276,6 +290,37 @@ export function CodeIntegrationPage({
                 </div>
               </div>
             </div>
+
+            {hasEvent?.data ? (
+              <Alert className="bg-green-50 border-green-100 p-4 rounded-md">
+                <div className="flex items-start gap-4">
+                  <Check className="h-6 w-6 text-green-600" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-green-900 text-sm font-medium leading-none">
+                      Event received successfully!
+                    </p>
+                    <p className="text-green-600 text-sm leading-5">
+                      Great job! Let's head to your dashboard.
+                    </p>
+                  </div>
+                </div>
+              </Alert>
+            ) : (
+              <Card className="p-4 bg-sky-50 border-sky-100">
+                <div className="flex items-start gap-4">
+                  <Loader className="h-6 w-6 text-sky-500 animate-spin" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium text-sky-900 leading-[14px]">
+                      Listening for events...
+                    </p>
+                    <p className="text-sm text-sky-500 leading-tight">
+                      Elapsed time: {Math.floor(elapsedTime / 60)}:
+                      {String(elapsedTime % 60).padStart(2, "0")}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             <div className="flex flex-col gap-4">
               <DropdownMenu>

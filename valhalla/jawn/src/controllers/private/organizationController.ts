@@ -140,6 +140,22 @@ export class OrganizationController extends Controller {
       return err(`Error getting organization: ${org.error}`);
     }
 
+    // Check if user is already a member
+    const members = await organizationManager.getOrganizationMembers(
+      organizationId
+    );
+    if (members.error) {
+      return err(`Error checking existing members: ${members.error}`);
+    }
+
+    const isExistingMember = members.data?.some(
+      (member) => member.email.toLowerCase() === requestBody.email.toLowerCase()
+    );
+
+    if (isExistingMember) {
+      return ok(null); // Silently succeed if member already exists
+    }
+
     if (org.data.tier === "enterprise" || "team-20250130") {
       // Enterprise tier: Proceed to add member without additional checks
     } else if (
