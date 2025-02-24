@@ -1070,7 +1070,7 @@ async function pullPromptAndRunCompletion() {
 
       {/* Prompt Editor */}
       <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={50} minSize={25}>
           <CustomScrollbar
             ref={messagesScrollRef}
             className="h-full bg-white dark:bg-black"
@@ -1095,9 +1095,9 @@ async function pullPromptAndRunCompletion() {
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={50}>
+            <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
                   response={state.response || ""}
@@ -1118,7 +1118,7 @@ async function pullPromptAndRunCompletion() {
 
             <ResizableHandle />
 
-            <ResizablePanel defaultSize={50}>
+            <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
                 <VariablesPanel
                   variables={state.inputs || []}
