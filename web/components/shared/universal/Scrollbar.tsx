@@ -98,7 +98,7 @@ const CustomScrollbar = forwardRef<
             className={`absolute right-0 transition-opacity duration-200 ${
               withBorder
                 ? "bg-slate-200 dark:bg-slate-800 border-slate-100 dark:border-slate-900"
-                : "bg-slate-200 dark:bg-slate-800"
+                : "bg-slate-200 dark:bg-slate-800 border-transparent"
             } ${hovered ? "opacity-100" : "opacity-0"} ${
               thumbTop === 0
                 ? "rounded-r-xs rounded-bl-md border-l border-b"

@@ -9607,10 +9607,10 @@ value-or-promise@^1.0.11, value-or-promise@^1.0.12:
   resolved "https://registry.npmjs.org/value-or-promise/-/value-or-promise-1.0.12.tgz"
   integrity sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==
 
-vaul@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/vaul/-/vaul-1.0.0.tgz"
-  integrity sha512-TegfMkwy86RSvSiIVREG6OqgRL7agqRsKYyWYacyVUAdpcIi34QoCOED476Mbf8J5d06e1hygSdvJhehlxEBhQ==
+vaul@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/vaul/-/vaul-1.1.2.tgz#c959f8b9dc2ed4f7d99366caee433fbef91f5ba9"
+  integrity sha512-ZFkClGpWyI2WUQjdLJ/BaGuV6AVQiJ3uELGk3OYtP+B6yCO7Cmn9vPFXVJkRaGkOJu3m8bQMgtyzNHixULceQA==
   dependencies:
     "@radix-ui/react-dialog" "^1.1.1"
 

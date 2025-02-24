@@ -107,7 +107,7 @@
     "string-similarity-js": "^2.1.4",
     "stripe": "^16.11.0",
     "tailwind-merge": "^2.5.2",
-    "vaul": "^1.0.0",
+    "vaul": "^1.1.2",
     "zustand": "^5.0.1"
   },
   "devDependencies": {

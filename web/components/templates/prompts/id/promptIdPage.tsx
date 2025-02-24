@@ -1,9 +1,16 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
+import VariablesPanel from "@/components/shared/prompts/InputsPanel";
 import MessagesPanel from "@/components/shared/prompts/MessagesPanel";
+import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
+import ToolPanel from "@/components/shared/prompts/ToolsPanel";
+import UniversalPopup from "@/components/shared/universal/Popup";
 import ResizablePanels from "@/components/shared/universal/ResizablePanels";
+import CustomScrollbar, {
+  CustomScrollbarRef,
+} from "@/components/shared/universal/Scrollbar";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +20,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs } from "@/components/ui/tabs";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -50,20 +58,13 @@ import { MdKeyboardReturn } from "react-icons/md";
 import {
   PiBrainBold,
   PiCaretLeftBold,
+  PiChartBarBold,
   PiCommandBold,
   PiPlayBold,
   PiRocketLaunchBold,
   PiSpinnerGapBold,
   PiStopBold,
 } from "react-icons/pi";
-
-import VariablesPanel from "@/components/shared/prompts/InputsPanel";
-import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
-import ToolPanel from "@/components/shared/prompts/ToolsPanel";
-import UniversalPopup from "@/components/shared/universal/Popup";
-import CustomScrollbar, {
-  CustomScrollbarRef,
-} from "@/components/shared/universal/Scrollbar";
 import {
   usePrompt,
   usePromptVersions,
@@ -824,10 +825,22 @@ export default function PromptIdPage(props: PromptIdPageProps) {
             onVersionPromote={handleVersionPromote}
             onIdEdit={handleIdEdit}
           />
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="editor">Editor</TabsTrigger>
-            <TabsTrigger value="metrics">Metrics</TabsTrigger>
-          </TabsList>
+          <Drawer>
+            <DrawerTrigger>
+              <Button variant="link" disabled={state.isDirty}>
+                <PiChartBarBold className="h-4 w-4 mr-2" />
+                Metrics
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="w-full h-[75vh]">
+              <ScrollArea className="h-full">
+                <PromptMetricsTab
+                  id={id}
+                  promptUserDefinedId={prompt?.user_defined_id || ""}
+                />
+              </ScrollArea>
+            </DrawerContent>
+          </Drawer>
         </div>
 
         {/* Right Side: Actions */}
@@ -971,87 +984,75 @@ async function pullPromptAndRunCompletion() {
         </div>
       </div>
 
-      {/* Prompt Editor Tab */}
-      <TabsContent className="flex-1 overflow-hidden" value="editor">
-        <ResizablePanels
-          leftPanel={
-            <CustomScrollbar
-              ref={messagesScrollRef}
-              className="h-full bg-white dark:bg-black"
-            >
-              <MessagesPanel
-                messages={state.messages}
-                onMessageChange={handleMessageChange}
-                onAddMessagePair={() => handleAddMessages()}
-                onAddPrefill={() =>
-                  handleAddMessages([
-                    { _type: "message", role: "assistant", content: "" },
-                  ])
-                }
-                onRemoveMessage={handleRemoveMessage}
-                onVariableCreate={handleVariableCreate}
-                variables={state.inputs || []}
-                isPrefillSupported={isPrefillSupported(
-                  state.parameters.provider
-                )}
-                scrollToBottom={scrollToBottom}
-              />
-            </CustomScrollbar>
-          }
-          rightTopPanel={
-            <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
-              <ResponsePanel
-                response={state.response || ""}
-                onAddToMessages={() =>
-                  handleAddMessages([
-                    {
-                      _type: "message",
-                      role: "assistant",
-                      content: state.response || "",
+      {/* Prompt Editor */}
+      <ResizablePanels
+        leftPanel={
+          <CustomScrollbar
+            ref={messagesScrollRef}
+            className="h-full bg-white dark:bg-black"
+          >
+            <MessagesPanel
+              messages={state.messages}
+              onMessageChange={handleMessageChange}
+              onAddMessagePair={() => handleAddMessages()}
+              onAddPrefill={() =>
+                handleAddMessages([
+                  { _type: "message", role: "assistant", content: "" },
+                ])
+              }
+              onRemoveMessage={handleRemoveMessage}
+              onVariableCreate={handleVariableCreate}
+              variables={state.inputs || []}
+              isPrefillSupported={isPrefillSupported(state.parameters.provider)}
+              scrollToBottom={scrollToBottom}
+            />
+          </CustomScrollbar>
+        }
+        rightTopPanel={
+          <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
+            <ResponsePanel
+              response={state.response || ""}
+              onAddToMessages={() =>
+                handleAddMessages([
+                  {
+                    _type: "message",
+                    role: "assistant",
+                    content: state.response || "",
+                  },
+                  { _type: "message", role: "user", content: "" },
+                ])
+              }
+              scrollToBottom={scrollToBottom}
+            />
+          </CustomScrollbar>
+        }
+        rightBottomPanel={
+          <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
+            <VariablesPanel
+              variables={state.inputs || []}
+              onVariableChange={handleVariableChange}
+              promptVersionId={state.versionId}
+            />
+
+            <ParametersPanel
+              parameters={state.parameters}
+              onParameterChange={(updates) => {
+                updateState((prev) => {
+                  if (!prev) return {};
+                  return {
+                    parameters: {
+                      ...prev.parameters,
+                      ...updates,
                     },
-                    { _type: "message", role: "user", content: "" },
-                  ])
-                }
-                scrollToBottom={scrollToBottom}
-              />
-            </CustomScrollbar>
-          }
-          rightBottomPanel={
-            <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
-              <VariablesPanel
-                variables={state.inputs || []}
-                onVariableChange={handleVariableChange}
-                promptVersionId={state.versionId}
-              />
+                  };
+                });
+              }}
+            />
 
-              <ParametersPanel
-                parameters={state.parameters}
-                onParameterChange={(updates) => {
-                  updateState((prev) => {
-                    if (!prev) return {};
-                    return {
-                      parameters: {
-                        ...prev.parameters,
-                        ...updates,
-                      },
-                    };
-                  });
-                }}
-              />
-
-              <ToolPanel tools={state.parameters.tools || []} />
-            </CustomScrollbar>
-          }
-        />
-      </TabsContent>
-
-      {/* Metrics Tab */}
-      <TabsContent className="flex-1 overflow-auto" value="metrics">
-        <PromptMetricsTab
-          id={id}
-          promptUserDefinedId={prompt?.user_defined_id || ""}
-        />
-      </TabsContent>
+            <ToolPanel tools={state.parameters.tools || []} />
+          </CustomScrollbar>
+        }
+      />
 
       {/* Auto-improve Popup */}
       <UniversalPopup
