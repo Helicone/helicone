@@ -452,10 +452,10 @@ export class LoggingHandler extends AbstractLogHandler {
         toHeliconeRequest(context)
       );
 
-      let requestText =
+      requestText =
         mappedContent.preview?.fullRequestText?.() ??
         JSON.stringify(mappedContent.raw.request);
-      let responseText =
+      responseText =
         mappedContent.preview?.fullResponseText?.() ??
         JSON.stringify(mappedContent.raw.response);
 
