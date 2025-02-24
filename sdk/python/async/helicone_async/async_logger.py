@@ -34,9 +34,7 @@ class HeliconeAsyncLogger:
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
 
-        os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
-
-        attach(set_value("override_enable_content_tracing", True))
+        os.environ["TRACELOOP_TRACE_CONTENT"] = "true"
 
         Traceloop.init(
             exporter=exporter,
@@ -46,10 +44,10 @@ class HeliconeAsyncLogger:
         )
 
     def disable_content_tracing(self) -> None:
-        attach(set_value("override_enable_content_tracing", False))
+        os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
 
     def enable_content_tracing(self) -> None:
-        attach(set_value("override_enable_content_tracing", True))
+        os.environ["TRACELOOP_TRACE_CONTENT"] = "true"
 
     def set_properties(self, properties: dict) -> None:
         Traceloop.set_association_properties(properties)
