@@ -32,10 +32,10 @@ export default function ParametersPanel({
         PROVIDER_MODELS
       )[0] as keyof typeof PROVIDER_MODELS;
       onParameterChange({
-        provider: defaultProvider,
+        provider: defaultProvider ?? "OPENAI",
         model:
-          PROVIDER_MODELS[defaultProvider as keyof typeof PROVIDER_MODELS]
-            .models[0].name,
+          PROVIDER_MODELS?.[defaultProvider as keyof typeof PROVIDER_MODELS]
+            ?.models[0].name ?? "gpt-4o",
       });
     }
   }, [parameters.provider, onParameterChange]);
@@ -43,16 +43,18 @@ export default function ParametersPanel({
   const handleProviderChange = (provider: string) => {
     const validProvider = provider as keyof typeof PROVIDER_MODELS;
     onParameterChange({
-      provider: validProvider,
-      model: PROVIDER_MODELS[validProvider].models[0].name,
+      provider: validProvider ?? "OPENAI",
+      model:
+        PROVIDER_MODELS?.[validProvider as keyof typeof PROVIDER_MODELS]
+          ?.models[0].name ?? "gpt-4o",
     });
   };
 
   const currentModel =
     parameters.provider && parameters.model
-      ? PROVIDER_MODELS[
+      ? PROVIDER_MODELS?.[
           parameters.provider as keyof typeof PROVIDER_MODELS
-        ].models.find((m) => m.name === parameters.model)
+        ]?.models.find((m) => m.name === parameters.model)
       : undefined;
 
   const supportsReasoningEffort = currentModel?.supportsReasoningEffort;
