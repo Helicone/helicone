@@ -121,36 +121,13 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
           Request Summary
         </h2>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
-          {renderKeyValue(
-            "Operation",
-            requestDetails?.operation,
-            <DocumentIcon className="h-5 w-5 text-blue-500" />
-          )}
-
-          {renderKeyValue("Text", requestDetails?.text)}
-
-          {renderKeyValue(
-            "Database",
-            requestDetails?.databaseName,
-            <ServerIcon className="h-5 w-5 text-blue-500" />
-          )}
-
-          {requestDetails?.filter &&
-            renderKeyValue(
-              "Filter",
-              JSON.stringify(requestDetails.filter),
-              <FunnelIcon className="h-5 w-5 text-blue-500" />
-            )}
-
-          {requestDetails?.query &&
-            renderKeyValue("Query", requestDetails.query)}
-
-          {requestDetails?.topK && (
-            <div className="mb-2">
-              <span className="font-semibold">Top K:</span>{" "}
-              {requestDetails.topK}, Type: Vector DB
-            </div>
-          )}
+          {Object.entries(requestDetails ?? {}).map(([key, value]) => {
+            return renderKeyValue(
+              key,
+              value,
+              <DocumentIcon className="h-5 w-5 text-blue-500" />
+            );
+          })}
         </div>
       </div>
 
