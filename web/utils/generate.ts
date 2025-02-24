@@ -7,12 +7,15 @@ export const PROVIDER_MODELS = {
   ANTHROPIC: {
     name: "Anthropic",
     openrouterDirectory: "anthropic",
-    models: ["claude-3.5-haiku", "claude-3.5-sonnet", "claude-3-opus"].map(
-      (model) => ({
-        name: model,
-        supportsReasoningEffort: false,
-      })
-    ),
+    models: [
+      "claude-3.7-sonnet",
+      "claude-3.5-haiku",
+      "claude-3.5-sonnet",
+      "claude-3-opus",
+    ].map((model) => ({
+      name: model,
+      supportsReasoningEffort: false,
+    })),
   },
   OPENAI: {
     name: "OpenAI",
