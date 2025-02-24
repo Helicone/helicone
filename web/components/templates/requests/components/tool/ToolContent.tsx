@@ -3,13 +3,9 @@ import { PROMPT_MODES } from "../chatComponent/chatTopBar";
 import { JsonView } from "../chatComponent/jsonView";
 import useNotification from "@/components/shared/notification/useNotification";
 import {
-  ClipboardIcon,
   CheckCircleIcon,
   XCircleIcon,
   TagIcon,
-  CalendarIcon,
-  UserGroupIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
 interface ToolContentProps {

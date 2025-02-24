@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { PROMPT_MODES } from "../chatComponent/chatTopBar";
-import { JsonView } from "../chatComponent/jsonView";
 import useNotification from "@/components/shared/notification/useNotification";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import {
-  XCircleIcon,
+  ClipboardDocumentCheckIcon,
+  ClipboardIcon,
   DocumentIcon,
-  ClockIcon,
-  MapPinIcon,
   FunnelIcon,
   ServerIcon,
-  ClipboardIcon,
-  ClipboardDocumentCheckIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
+import React, { useState } from "react";
+import { PROMPT_MODES } from "../chatComponent/chatTopBar";
+import { JsonView } from "../chatComponent/jsonView";
 
 interface VectorDBContentProps {
   mode: (typeof PROMPT_MODES)[number];
