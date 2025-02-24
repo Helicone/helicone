@@ -648,7 +648,7 @@ export default function PromptBox({
           color: "transparent",
           resize: "none",
         }}
-        placeholder="Start typing your prompt..."
+        placeholder="Type your prompt..."
         disabled={disabled}
       />
       <pre

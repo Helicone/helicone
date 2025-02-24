@@ -80,7 +80,7 @@ export default function ResponsePanel({
             <p className="text-sm text-secondary pt-0.5">{response}</p>
           )
         ) : (
-          <p className="whitespace-pre-wrap text-sm text-secondary">
+          <p className="whitespace-pre-wrap text-sm text-tertiary">
             Response will appear here...
           </p>
         )}

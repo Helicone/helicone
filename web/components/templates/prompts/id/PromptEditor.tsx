@@ -7,7 +7,6 @@ import ParametersPanel from "@/components/shared/prompts/ParametersPanel";
 import ResponsePanel from "@/components/shared/prompts/ResponsePanel";
 import ToolPanel from "@/components/shared/prompts/ToolsPanel";
 import UniversalPopup from "@/components/shared/universal/Popup";
-import ResizablePanels from "@/components/shared/universal/ResizablePanels";
 import CustomScrollbar, {
   CustomScrollbarRef,
 } from "@/components/shared/universal/Scrollbar";
@@ -21,6 +20,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
@@ -845,7 +849,7 @@ export default function PromptEditor(props: PromptEditorProps) {
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-15 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}
@@ -871,7 +875,7 @@ export default function PromptEditor(props: PromptEditorProps) {
               onIdEdit={handleIdEdit}
             />
           )}
-          {/* Request Label */}
+          {/* From Request: ID Label */}
           {requestId && (
             <Link
               className="text-sm text-secondary hover:underline"
@@ -885,7 +889,7 @@ export default function PromptEditor(props: PromptEditorProps) {
           {promptId && (
             <Drawer>
               <DrawerTrigger>
-                <Button variant="link" disabled={state.isDirty}>
+                <Button variant="link">
                   <PiChartBarBold className="h-4 w-4 mr-2" />
                   Metrics
                 </Button>
@@ -916,6 +920,16 @@ export default function PromptEditor(props: PromptEditorProps) {
             </Button>
           )}
 
+          {/* From Request: Unsaved Changes Indicator */}
+          {requestId && state.isDirty && (
+            <div className="flex flex-row items-center gap-2 mr-2">
+              <span className="text-sm text-secondary font-semibold">
+                Unsaved Changes
+              </span>
+              <div className={`h-2 w-2 rounded-full bg-amber-500`} />
+            </div>
+          )}
+
           {/* Run & Save Button */}
           <Button
             className={`${
@@ -934,7 +948,11 @@ export default function PromptEditor(props: PromptEditorProps) {
               <PiPlayBold className="h-4 w-4 mr-2" />
             )}
             <span className="mr-2">
-              {isStreaming ? "Stop" : state.isDirty ? "Save & Run" : "Run"}
+              {isStreaming
+                ? "Stop"
+                : state.isDirty && promptId
+                ? "Save & Run"
+                : "Run"}
             </span>
             {isStreaming && (
               <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
@@ -1051,8 +1069,8 @@ async function pullPromptAndRunCompletion() {
       </div>
 
       {/* Prompt Editor */}
-      <ResizablePanels
-        leftPanel={
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel defaultSize={50}>
           <CustomScrollbar
             ref={messagesScrollRef}
             className="h-full bg-white dark:bg-black"
@@ -1073,52 +1091,62 @@ async function pullPromptAndRunCompletion() {
               scrollToBottom={scrollToBottom}
             />
           </CustomScrollbar>
-        }
-        rightTopPanel={
-          <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
-            <ResponsePanel
-              response={state.response || ""}
-              onAddToMessages={() =>
-                handleAddMessages([
-                  {
-                    _type: "message",
-                    role: "assistant",
-                    content: state.response || "",
-                  },
-                  { _type: "message", role: "user", content: "" },
-                ])
-              }
-              scrollToBottom={scrollToBottom}
-            />
-          </CustomScrollbar>
-        }
-        rightBottomPanel={
-          <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
-            <VariablesPanel
-              variables={state.inputs || []}
-              onVariableChange={handleVariableChange}
-              promptVersionId={state.versionId}
-            />
+        </ResizablePanel>
 
-            <ParametersPanel
-              parameters={state.parameters}
-              onParameterChange={(updates) => {
-                updateState((prev) => {
-                  if (!prev) return {};
-                  return {
-                    parameters: {
-                      ...prev.parameters,
-                      ...updates,
-                    },
-                  };
-                });
-              }}
-            />
+        <ResizableHandle />
 
-            <ToolPanel tools={state.parameters.tools || []} />
-          </CustomScrollbar>
-        }
-      />
+        <ResizablePanel defaultSize={50}>
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel defaultSize={50}>
+              <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
+                <ResponsePanel
+                  response={state.response || ""}
+                  onAddToMessages={() =>
+                    handleAddMessages([
+                      {
+                        _type: "message",
+                        role: "assistant",
+                        content: state.response || "",
+                      },
+                      { _type: "message", role: "user", content: "" },
+                    ])
+                  }
+                  scrollToBottom={scrollToBottom}
+                />
+              </CustomScrollbar>
+            </ResizablePanel>
+
+            <ResizableHandle />
+
+            <ResizablePanel defaultSize={50}>
+              <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
+                <VariablesPanel
+                  variables={state.inputs || []}
+                  onVariableChange={handleVariableChange}
+                  promptVersionId={state.versionId}
+                />
+
+                <ParametersPanel
+                  parameters={state.parameters}
+                  onParameterChange={(updates) => {
+                    updateState((prev) => {
+                      if (!prev) return {};
+                      return {
+                        parameters: {
+                          ...prev.parameters,
+                          ...updates,
+                        },
+                      };
+                    });
+                  }}
+                />
+
+                <ToolPanel tools={state.parameters.tools || []} />
+              </CustomScrollbar>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
       {/* Auto-improve Popup */}
       {promptId && state.version && (
