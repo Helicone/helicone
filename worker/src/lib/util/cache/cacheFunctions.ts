@@ -3,7 +3,7 @@ import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
 import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
-
+const CACHE_BACKOFF_RETRIES = 5;
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
   freeIndex: number,
@@ -31,38 +31,69 @@ export async function kvKeyFromRequest(
   );
 }
 
-export async function saveToCache(
-  request: HeliconeProxyRequest,
-  response: Response,
-  responseBody: string[],
-  cacheControl: string,
-  settings: { bucketSize: number },
-  cacheKv: KVNamespace,
-  cacheSeed: string | null
-): Promise<void> {
-  const expirationTtl = cacheControl.includes("max-age=")
-    ? parseInt(cacheControl.split("max-age=")[1])
-    : 0;
-  const { freeIndexes } = await getMaxCachedResponses(
-    request,
-    settings,
-    cacheKv,
-    cacheSeed
-  );
-  if (freeIndexes.length > 0) {
-    await cacheKv.put(
-      await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
-      JSON.stringify({
-        headers: Object.fromEntries(response.headers.entries()),
-        body: responseBody,
-      }),
-      {
-        expirationTtl,
-      }
+interface SaveToCacheOptions {
+  request: HeliconeProxyRequest;
+  response: Response;
+  responseBody: string[];
+  cacheControl: string;
+  settings: { bucketSize: number };
+  cacheKv: KVNamespace;
+  cacheSeed: string | null;
+}
+
+async function trySaveToCache(options: SaveToCacheOptions) {
+  try {
+    const {
+      request,
+      response,
+      responseBody,
+      cacheControl,
+      settings,
+      cacheKv,
+      cacheSeed,
+    } = options;
+    const expirationTtl = cacheControl.includes("max-age=")
+      ? parseInt(cacheControl.split("max-age=")[1])
+      : 0;
+    const { freeIndexes } = await getMaxCachedResponses(
+      request,
+      settings,
+      cacheKv,
+      cacheSeed
     );
-  } else {
-    throw new Error("No free indexes");
+    if (freeIndexes.length > 0) {
+      await cacheKv.put(
+        await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
+        JSON.stringify({
+          headers: Object.fromEntries(response.headers.entries()),
+          body: responseBody,
+        }),
+        {
+          expirationTtl,
+        }
+      );
+    } else {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error saving to cache:", error);
+    return false;
   }
+}
+
+async function saveToCacheBackoff(options: SaveToCacheOptions) {
+  for (let i = 0; i < CACHE_BACKOFF_RETRIES; i++) {
+    const result = await trySaveToCache(options);
+    if (result) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i));
+  }
+}
+
+export async function saveToCache(options: SaveToCacheOptions): Promise<void> {
+  await saveToCacheBackoff(options);
 }
 
 export async function recordCacheHit(
