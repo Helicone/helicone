@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs } from "@/components/ui/tabs";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
 import {
@@ -33,6 +33,7 @@ import {
   $user,
   findClosestModel,
   findClosestProvider,
+  PROVIDER_MODELS,
 } from "@/utils/generate";
 import {
   isLastMessageUser,
@@ -69,19 +70,18 @@ import {
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
+import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
-interface PromptIdPageProps {
-  id: string;
-  currentPage: number;
-  pageSize: number;
+interface PromptEditorProps {
+  promptId?: string;
+  requestId?: string;
 }
-
-export default function PromptIdPage(props: PromptIdPageProps) {
-  // PARAMS
-  const { id, currentPage, pageSize } = props;
+export default function PromptEditor(props: PromptEditorProps) {
+  // PROPS
+  const { promptId, requestId } = props;
 
   // STATE
   const [state, setState] = useState<PromptState | null>(null);
@@ -98,18 +98,21 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const router = useRouter();
   // - Jawn Client
   const jawnClient = useJawnClient();
+  // - Request Data (if loading from request)
+  const { data: requestData, isLoading: isRequestLoading } =
+    useGetRequestWithBodies(requestId ?? "");
   // - Prompt Table
   const {
     prompt,
     isLoading: isPromptLoading,
     refetch: refetchPrompt,
-  } = usePrompt(id);
+  } = usePrompt(promptId ?? "");
   // - Prompt Versions Table
   const {
     prompts: promptVersions,
     isLoading: isVersionsLoading,
     refetch: refetchPromptVersions,
-  } = usePromptVersions(id);
+  } = usePromptVersions(promptId ?? "");
   // - Notifications
   const { setNotification } = useNotification();
   // - Experiment
@@ -134,98 +137,123 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // - Load Version Data into State
   const loadVersionData = useCallback(
     (ver: any) => {
-      if (!ver) return;
+      if (!ver && !requestId) return;
+
       console.log("Loading version row:", ver);
 
-      // 1. Parse the helicone template and metadata columns from the version
-      const templateData =
-        typeof ver.helicone_template === "string"
-          ? JSON.parse(ver.helicone_template)
-          : ver.helicone_template || {};
-      const metadata =
-        typeof ver.metadata === "string"
-          ? JSON.parse(ver.metadata)
-          : ((ver.metadata || {}) as {
-              provider?: string;
-              isProduction?: boolean;
-              inputs?: Record<string, string>;
+      let templateData: any = {};
+      let metadata: {
+        provider?: string;
+        isProduction?: boolean;
+        inputs?: Record<string, string>;
+        evals?: any[];
+        structure?: any;
+      } = {};
+      let stateMessages: Message[] = [];
+      let inputs: StateInputs[] = [];
+      let masterVersion: number | undefined;
+
+      // Load data either from request or version
+      if (requestId && requestData?.data) {
+        const mappedContent = heliconeRequestToMappedContent(requestData.data);
+        const requestBody = mappedContent.schema.request;
+
+        templateData = requestBody;
+        stateMessages = requestBody.messages || [];
+      } else {
+        // 1. Parse the helicone template and metadata columns from the version
+        templateData =
+          typeof ver.helicone_template === "string"
+            ? JSON.parse(ver.helicone_template)
+            : ver.helicone_template || {};
+        metadata =
+          typeof ver.metadata === "string"
+            ? JSON.parse(ver.metadata)
+            : ((ver.metadata || {}) as {
+                provider?: string;
+                isProduction?: boolean;
+                inputs?: Record<string, string>;
+                evals?: any[];
+                structure?: any;
+              });
+
+        // 2. Derive "masterVersion" if needed
+        masterVersion =
+          metadata?.isProduction === true
+            ? ver.major_version
+            : promptVersions?.find(
+                (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+              )?.major_version ?? ver.major_version;
+
+        // 3. Convert any messages in the template to StateMessages
+        stateMessages = (templateData.messages ||
+          templateData.content) as Message[];
+
+        // 4.A. First collect all variables and their default values from the metadata inputs
+        inputs = Object.entries(metadata?.inputs || {}).map(
+          ([name, value]) => ({
+            name,
+            value: value as string,
+            isValid: isValidVariableName(name),
+          })
+        );
+
+        // 4.B. Extract additional variables contained in message content
+        stateMessages.forEach((msg) => {
+          const vars = extractVariables(msg.content || "", "helicone");
+          vars.forEach((v) => {
+            inputs.push({
+              name: v.name,
+              value: metadata?.inputs?.[v.name] ?? v.value ?? "",
+              isValid: v.isValid ?? true,
             });
-
-      // 2. Derive "masterVersion" if needed
-      const masterVersion =
-        metadata?.isProduction === true
-          ? ver.major_version
-          : promptVersions?.find(
-              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
-            )?.major_version ?? ver.major_version;
-
-      // 3. Convert any messages in the template to StateMessages
-      const stateMessages = (templateData.messages ||
-        templateData.content) as Message[];
-
-      // 4.A. First collect all variables and their default values from the metadata inputs
-      let inputs: StateInputs[] = Object.entries(metadata?.inputs || {}).map(
-        ([name, value]) => ({
-          name,
-          value: value as string,
-          isValid: isValidVariableName(name),
-        })
-      );
-      // 4.B. Extract additional variables contained in message content
-      stateMessages.forEach((msg) => {
-        const vars = extractVariables(msg.content || "", "helicone");
-        vars.forEach((v) => {
-          inputs.push({
-            name: v.name,
-            value: metadata?.inputs?.[v.name] ?? v.value ?? "",
-            isValid: v.isValid ?? true,
           });
         });
-      });
-      // 4.C. Add message auto-inputs to the list
-      stateMessages.forEach((msg) => {
-        msg.idx !== undefined &&
-          inputs.push({
-            name: `message_${msg.idx}`,
-            value: "",
-            isValid: true,
-            idx: msg.idx,
-          });
-      });
 
-      // 4.D. Deduplicate variables
-      inputs = deduplicateVariables(inputs);
+        // 4.C. Add message auto-inputs to the list
+        stateMessages.forEach((msg) => {
+          msg.idx !== undefined &&
+            inputs.push({
+              name: `message_${msg.idx}`,
+              value: "",
+              isValid: true,
+              idx: msg.idx,
+            });
+        });
+
+        // 4.D. Deduplicate variables
+        inputs = deduplicateVariables(inputs);
+      }
 
       // 5. Validate model-provider or closest match or default
-      const provider = findClosestProvider(metadata?.provider ?? "OPENAI");
-      const model = findClosestModel(
-        provider,
-        templateData.model ?? "gpt-4o-mini"
+      const provider = findClosestProvider(
+        templateData.provider || metadata?.provider || "OPENAI"
       );
+      const model = findClosestModel(provider, templateData.model || "gpt-4");
 
       // 6. Update state with the processed data
       setState({
-        promptId: id,
-        masterVersion: masterVersion,
-        version: ver.major_version,
-        versionId: ver.id,
+        promptId: promptId,
+        masterVersion,
+        version: ver?.major_version,
+        versionId: ver?.id,
 
         messages: stateMessages,
         parameters: {
-          provider: provider,
+          provider: provider as keyof typeof PROVIDER_MODELS,
           model: model,
           temperature: templateData.temperature ?? 1,
           tools: templateData.tools ?? [],
           reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
-        inputs: inputs,
+        inputs,
         evals: metadata?.evals ?? [],
         structure: metadata?.structure ?? undefined,
 
         isDirty: false,
       });
     },
-    [id, promptVersions]
+    [promptId, promptVersions, requestId, requestData]
   );
   // - Update State
   const updateState = useCallback(
@@ -430,7 +458,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   const handleIdEdit = useCallback(
     async (newId: string) => {
       const kebabId = toKebabCase(newId);
-      if (kebabId !== id) {
+      if (kebabId !== promptId) {
         const result = await jawnClient.PATCH(
           "/v1/prompt/{promptId}/user-defined-id",
           {
@@ -454,7 +482,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
         await refetchPrompt();
       }
     },
-    [id, jawnClient, prompt?.id, refetchPrompt, setNotification]
+    [promptId, jawnClient, prompt?.id, refetchPrompt, setNotification]
   );
   // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
@@ -733,15 +761,26 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
-    if (
-      !state &&
-      promptVersions &&
-      promptVersions.length > 0 &&
-      !isVersionsLoading
-    ) {
-      loadVersionData(promptVersions[0]);
+    if (!state) {
+      if (requestId && requestData?.data) {
+        loadVersionData(null);
+      } else if (
+        promptVersions &&
+        promptVersions.length > 0 &&
+        !isVersionsLoading
+      ) {
+        // Load from prompt version data
+        loadVersionData(promptVersions[0]);
+      }
     }
-  }, [isVersionsLoading, loadVersionData, promptVersions, state]);
+  }, [
+    isVersionsLoading,
+    loadVersionData,
+    promptVersions,
+    state,
+    requestId,
+    requestData,
+  ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -793,6 +832,7 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   };
 
   // RENDER
+  // TODO: Prompt or request not found page (use mutations I think)
   // - Loading Page
   if (isPromptLoading || isVersionsLoading || !state) {
     return (
@@ -803,56 +843,78 @@ export default function PromptIdPage(props: PromptIdPageProps) {
   }
   // - Page
   return (
-    <Tabs className="relative flex flex-col h-screen" defaultValue="editor">
+    <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
-          <Link
-            className="text-base text-slate-500 hover:text-heliblue"
-            href="/prompts"
-          >
-            <PiCaretLeftBold />
-          </Link>
-          <VersionSelector
-            id={prompt?.user_defined_id || ""}
-            currentVersion={state.version}
-            masterVersion={state.masterVersion}
-            versions={promptVersions || []}
-            isLoading={isVersionsLoading}
-            isDirty={state.isDirty}
-            onVersionSelect={loadVersionData}
-            onVersionPromote={handleVersionPromote}
-            onIdEdit={handleIdEdit}
-          />
-          <Drawer>
-            <DrawerTrigger>
-              <Button variant="link" disabled={state.isDirty}>
-                <PiChartBarBold className="h-4 w-4 mr-2" />
-                Metrics
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="w-full h-[75vh]">
-              <ScrollArea className="h-full">
-                <PromptMetricsTab
-                  id={id}
-                  promptUserDefinedId={prompt?.user_defined_id || ""}
-                />
-              </ScrollArea>
-            </DrawerContent>
-          </Drawer>
+          {/* Back Button */}
+          {promptId && (
+            <Link
+              className="text-base text-slate-500 hover:text-heliblue"
+              href="/prompts"
+            >
+              <PiCaretLeftBold />
+            </Link>
+          )}
+          {/* Version Selector */}
+          {promptId && (
+            <VersionSelector
+              id={prompt?.user_defined_id || ""}
+              currentVersion={state.version ?? 0}
+              masterVersion={state.masterVersion ?? 0}
+              versions={promptVersions || []}
+              isLoading={isVersionsLoading}
+              isDirty={state.isDirty}
+              onVersionSelect={loadVersionData}
+              onVersionPromote={handleVersionPromote}
+              onIdEdit={handleIdEdit}
+            />
+          )}
+          {/* Request Label */}
+          {requestId && (
+            <Link
+              className="text-sm text-secondary hover:underline"
+              href={`/requests?requestId=${requestId}`}
+            >
+              From Request: {requestId}
+            </Link>
+          )}
+
+          {/* Metrics Drawer */}
+          {promptId && (
+            <Drawer>
+              <DrawerTrigger>
+                <Button variant="link" disabled={state.isDirty}>
+                  <PiChartBarBold className="h-4 w-4 mr-2" />
+                  Metrics
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="w-full h-[75vh]">
+                <ScrollArea className="h-full">
+                  <PromptMetricsTab
+                    id={promptId}
+                    promptUserDefinedId={prompt?.user_defined_id || ""}
+                  />
+                </ScrollArea>
+              </DrawerContent>
+            </Drawer>
+          )}
         </div>
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
-          <Button
-            variant="link"
-            onClick={() => setIsAutoIterateOpen(true)}
-            disabled={state.isDirty}
-          >
-            <PiBrainBold className="h-4 w-4 mr-2" />
-            Auto-Improve
-          </Button>
+          {/* Auto-Improve Button */}
+          {promptId && (
+            <Button
+              variant="link"
+              onClick={() => setIsAutoIterateOpen(true)}
+              disabled={state.isDirty}
+            >
+              <PiBrainBold className="h-4 w-4 mr-2" />
+              Auto-Improve
+            </Button>
+          )}
 
           {/* Run & Save Button */}
           <Button
@@ -886,45 +948,48 @@ export default function PromptIdPage(props: PromptIdPageProps) {
           </Button>
 
           {/* Experiment Button */}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={newFromPromptVersion.isLoading}
-            onClick={async () => {
-              const result = await newFromPromptVersion.mutateAsync({
-                name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
-                originalPromptVersion: state.versionId,
-              });
-              router.push(`/experiments/${result.data?.data?.experimentId}`);
-            }}
-          >
-            <FlaskConicalIcon className="h-4 w-4 mr-2" />
-            <span>Experiment</span>
-          </Button>
+          {promptId && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={newFromPromptVersion.isLoading}
+              onClick={async () => {
+                const result = await newFromPromptVersion.mutateAsync({
+                  name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                  originalPromptVersion: state.versionId ?? "",
+                });
+                router.push(`/experiments/${result.data?.data?.experimentId}`);
+              }}
+            >
+              <FlaskConicalIcon className="h-4 w-4 mr-2" />
+              <span>Experiment</span>
+            </Button>
+          )}
 
           {/* Deploy Button */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={prompt?.metadata?.createdFromUi === false}
-                onClick={() => {}}
-              >
-                <PiRocketLaunchBold className="h-4 w-4 mr-2" />
-                <span>Deploy</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
-              <DialogHeader>
-                <DialogTitle>Deploy Prompt</DialogTitle>
-              </DialogHeader>
+          {promptId && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={prompt?.metadata?.createdFromUi === false}
+                  onClick={() => {}}
+                >
+                  <PiRocketLaunchBold className="h-4 w-4 mr-2" />
+                  <span>Deploy</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Deploy Prompt</DialogTitle>
+                </DialogHeader>
 
-              {/* Code example */}
-              <DiffHighlight
-                maxHeight={false}
-                className="h-full"
-                code={`
+                {/* Code example */}
+                <DiffHighlight
+                  maxHeight={false}
+                  className="h-full"
+                  code={`
 export async function getPrompt(
   id: string,
   variables: Record<string, any>
@@ -975,12 +1040,13 @@ async function pullPromptAndRunCompletion() {
   );
   console.log(response);
 }`}
-                language="tsx"
-                newLines={[]}
-                oldLines={[]}
-              />
-            </DialogContent>
-          </Dialog>
+                  language="tsx"
+                  newLines={[]}
+                  oldLines={[]}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
@@ -1055,26 +1121,28 @@ async function pullPromptAndRunCompletion() {
       />
 
       {/* Auto-improve Popup */}
-      <UniversalPopup
-        title="Auto-Improve (Beta)"
-        width="w-full max-w-7xl"
-        isOpen={isAutoIterateOpen}
-        onClose={() => {
-          setIsAutoIterateOpen(false);
-          updateState({ improvement: undefined }, false);
-        }}
-      >
-        <AutoImprove
-          isImproving={isImproving}
-          improvement={state.improvement}
-          version={state.version}
-          messages={state.messages}
-          onStartImprove={handleImprove}
-          onApplyImprovement={handleApplyImprovement}
-          onCancel={() => setIsAutoIterateOpen(false)}
-          updateState={(updates) => updateState(updates, false)}
-        />
-      </UniversalPopup>
-    </Tabs>
+      {promptId && state.version && (
+        <UniversalPopup
+          title="Auto-Improve (Beta)"
+          width="w-full max-w-7xl"
+          isOpen={isAutoIterateOpen}
+          onClose={() => {
+            setIsAutoIterateOpen(false);
+            updateState({ improvement: undefined }, false);
+          }}
+        >
+          <AutoImprove
+            isImproving={isImproving}
+            improvement={state.improvement}
+            version={state.version}
+            messages={state.messages}
+            onStartImprove={handleImprove}
+            onApplyImprovement={handleApplyImprovement}
+            onCancel={() => setIsAutoIterateOpen(false)}
+            updateState={(updates) => updateState(updates, false)}
+          />
+        </UniversalPopup>
+      )}
+    </main>
   );
 }

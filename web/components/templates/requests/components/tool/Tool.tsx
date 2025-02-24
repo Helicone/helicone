@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { PROMPT_MODES } from "../chatComponent/chatTopBar";
+import { ChatTopBarProps, PROMPT_MODES } from "../chatComponent/chatTopBar";
 import { ToolContent } from "./ToolContent";
 import { ToolTopBar } from "./ToolTopBar";
 
@@ -22,7 +22,7 @@ export const Tool = ({
     "Pretty"
   );
 
-  const toolTopBarProps = {
+  const chatTopBarProps: ChatTopBarProps = {
     allExpanded: false,
     toggleAllExpanded: () => {},
     requestBody: mappedRequest.raw.request,
@@ -34,7 +34,7 @@ export const Tool = ({
 
   const content = (
     <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
-      <ToolTopBar {...toolTopBarProps} />
+      <ToolTopBar {...chatTopBarProps} />
       <ToolContent mode={mode} mappedRequest={mappedRequest} />
     </div>
   );
@@ -51,7 +51,7 @@ export const Tool = ({
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-          <ToolTopBar {...toolTopBarProps} isModal={true} />
+          <ToolTopBar {...chatTopBarProps} isModal={true} />
           <ToolContent mode={mode} mappedRequest={mappedRequest} />
         </div>
       </ThemedModal>

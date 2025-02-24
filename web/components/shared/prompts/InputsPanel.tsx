@@ -26,9 +26,8 @@ interface VariableItemProps {
 interface VariablesPanelProps {
   variables: StateInputs[];
   onVariableChange: (index: number, value: string) => void;
-  promptVersionId: string;
+  promptVersionId?: string;
 }
-
 export default function VariablesPanel({
   variables,
   onVariableChange,
