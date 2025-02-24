@@ -363,29 +363,6 @@ export function CodeIntegrationPage({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <div className="flex items-center justify-between gap-4">
-                <Link href="/dashboard">
-                  <Button variant="secondary">Do it Later</Button>
-                </Link>
-                <Button
-                  variant="action"
-                  className="flex items-center gap-2 w-fit"
-                  disabled={true}
-                >
-                  {hasEvent?.data ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Event received!
-                    </>
-                  ) : (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Listening
-                    </>
-                  )}
-                </Button>
-              </div>
             </div>
           </div>
         </main>
