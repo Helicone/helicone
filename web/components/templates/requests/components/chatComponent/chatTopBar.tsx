@@ -5,10 +5,10 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import { NotepadText } from "lucide-react";
 import { useRouter } from "next/router";
 import React from "react";
-import { useCreatePromptFromRequest } from "../../../../../services/hooks/prompts/prompts";
+import { PiPlayBold } from "react-icons/pi";
+import { useCreatePrompt } from "../../../../../services/hooks/prompts/prompts";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -23,7 +23,7 @@ function cycleMode(
   return PROMPT_MODES[(index + 1) % (PROMPT_MODES.length - 1)];
 }
 
-interface ChatTopBarProps {
+export interface ChatTopBarProps {
   allExpanded: boolean;
   toggleAllExpanded: () => void;
   requestBody: LLMRequestBody;
@@ -38,6 +38,7 @@ interface ChatTopBarProps {
 export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   allExpanded,
   toggleAllExpanded,
+  requestId,
   requestBody,
   setOpen,
   mode,
@@ -46,7 +47,7 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   promptData,
 }) => {
   const router = useRouter();
-  const createPrompt = useCreatePromptFromRequest();
+  const createPrompt = useCreatePrompt();
 
   return (
     <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
@@ -66,19 +67,17 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
         </button>
 
         <button
-          onClick={async () => {
-            if (requestBody?.messages && promptData?.id) {
+          onClick={async (e) => {
+            e.preventDefault();
+            if (promptData?.id) {
               router.push(`/prompts/${promptData.id}`);
-            } else if (requestBody?.messages) {
-              const res = await createPrompt(requestBody);
-              if (res?.id) {
-                router.push(`/prompts/${res.id}`);
-              }
+            } else if (requestId) {
+              router.push(`/prompts/fromRequest/${requestId}`);
             }
           }}
           className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
         >
-          <NotepadText className="h-4 w-4" />
+          <PiPlayBold className="h-4 w-4" />
           <p className="text-xs font-semibold">Test Prompt</p>
         </button>
       </div>

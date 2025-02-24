@@ -9,8 +9,9 @@ import {
   PiCopyBold,
   PiPencilSimpleBold,
 } from "react-icons/pi";
-import Tooltip from "./Tooltip";
 import useNotification from "../notification/useNotification";
+import CustomScrollbar from "./Scrollbar";
+import Tooltip from "./Tooltip";
 
 interface VersionSelectorProps {
   isLoading: boolean;
@@ -222,7 +223,10 @@ export default function VersionSelector({
             className="shadow-lg overflow-hidden absolute w-full top-full left-0 rounded-b-[1.1rem] bg-slate-200 dark:bg-slate-800 border-b border-x border-slate-200 dark:border-slate-800 z-40"
             role="menu"
           >
-            <div className="p-[2px] overflow-x-hidden overflow-y-scroll h-full w-full flex flex-col max-h-[23.5rem]">
+            <CustomScrollbar
+              className="h-full w-full flex flex-col max-h-[23.5rem]"
+              withBorder
+            >
               {isLoading ? (
                 <>
                   <VersionItem isLoading />
@@ -247,7 +251,7 @@ export default function VersionSelector({
                     />
                   ))
               )}
-            </div>
+            </CustomScrollbar>
           </div>
         )}
       </div>

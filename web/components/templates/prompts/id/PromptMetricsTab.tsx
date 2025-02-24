@@ -1,7 +1,9 @@
-import { useState } from "react";
 import { TimeFilter } from "@/types/timeFilter";
+import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import {
   TimeInterval,
   getTimeInterval,
@@ -10,22 +12,20 @@ import {
 import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { usePromptRequestsOverTime } from "../../../../services/hooks/prompts/prompts";
+import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
 import {
   FilterBranch,
   FilterLeaf,
 } from "../../../../services/lib/filters/filterDefs";
-import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
-import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
-import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Button } from "../../../ui/button";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
+import { MODEL_LIST } from "../../playground/new/modelList";
 import ModelPill from "../../requests/modelPill";
 import StatusBadge from "../../requests/statusBadge";
-import { MODEL_LIST } from "../../playground/new/modelList";
 
 interface PromptMetricsTabProps {
   id: string;
@@ -156,6 +156,7 @@ const PromptMetricsTab = ({
   return (
     <div className="flex flex-col space-y-16 py-4 px-4">
       <div className="w-full h-full flex flex-col space-y-4">
+        <h2 className="text-2xl font-semibold text-secondary">Usage Metrics</h2>
         <div className="flex items-center justify-between w-full">
           <ThemedTimeFilter
             timeFilterOptions={[
@@ -202,7 +203,7 @@ const PromptMetricsTab = ({
         </div>
       </div>
       <div className="flex flex-col space-y-4 h-full w-full">
-        <h2 className="text-2xl font-semibold text-black dark:text-white">
+        <h2 className="text-2xl font-semibold text-secondary">
           Experiment Logs
         </h2>
         <div className="flex items-center justify-between w-full">
