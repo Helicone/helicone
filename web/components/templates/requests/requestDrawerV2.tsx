@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePromptFromRequest } from "../../../services/hooks/prompts/prompts";
+import { useCreatePrompt } from "../../../services/hooks/prompts/prompts";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -48,7 +48,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const router = useRouter();
   const org = useOrg();
   const jawn = useJawnClient();
-  const createPrompt = useCreatePromptFromRequest();
+  const createPrompt = useCreatePrompt();
 
   const properties = useMemo(
     () =>

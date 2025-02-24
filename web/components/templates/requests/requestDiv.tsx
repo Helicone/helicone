@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePromptFromRequest } from "../../../services/hooks/prompts/prompts";
+import { useCreatePrompt } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
@@ -47,7 +47,7 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const createPrompt = useCreatePromptFromRequest();
+  const createPrompt = useCreatePrompt();
 
   const org = useOrg();
 

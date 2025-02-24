@@ -26,6 +26,12 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -71,6 +77,7 @@ import {
   PiStopBold,
 } from "react-icons/pi";
 import {
+  useCreatePrompt,
   usePrompt,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
@@ -121,6 +128,8 @@ export default function PromptEditor(props: PromptEditorProps) {
   const { setNotification } = useNotification();
   // - Experiment
   const { newFromPromptVersion } = useExperiment();
+  // - Create Prompt
+  const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
 
   // VALIDATION
   // - Can Run
@@ -509,7 +518,7 @@ export default function PromptEditor(props: PromptEditorProps) {
     );
 
     // 3. SAVE: If dirty
-    if (state.isDirty) {
+    if (promptId && state.isDirty) {
       const latestVersionId = promptVersions?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -602,6 +611,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       setIsStreaming(false);
     }
   }, [
+    promptId,
     state,
     isStreaming,
     canRun,
@@ -762,6 +772,41 @@ export default function PromptEditor(props: PromptEditorProps) {
     setNotification,
   ]);
 
+  // - From Request: Handle Save As Prompt
+  const handleSaveAsPrompt = useCallback(async () => {
+    if (!state) return;
+
+    try {
+      // Create a prompt from the current state
+      const prompt = {
+        messages: state.messages,
+        ...state.parameters,
+        provider: undefined, // TODO: Move provider to the prompt?
+      };
+
+      // Extract variable values for metadata
+      const inputsMap = Object.fromEntries(
+        (state.inputs || []).map((v) => [v.name, v.value || ""])
+      );
+
+      // Include metadata with the request
+      const metadata = {
+        provider: state.parameters.provider,
+        createdFromUi: true,
+        inputs: inputsMap,
+      };
+
+      const res = await createPrompt(prompt, metadata);
+      if (res?.id) {
+        setNotification("Prompt created successfully", "success");
+        router.push(`/prompts/${res.id}`);
+      }
+    } catch (error) {
+      console.error("Error creating prompt:", error);
+      setNotification("Failed to create prompt", "error");
+    }
+  }, [state, createPrompt, router, setNotification]);
+
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
@@ -849,7 +894,7 @@ export default function PromptEditor(props: PromptEditorProps) {
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="h-15 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}
@@ -883,6 +928,26 @@ export default function PromptEditor(props: PromptEditorProps) {
             >
               From Request: {requestId}
             </Link>
+          )}
+
+          {/* From Request: Unsaved Changes Indicator */}
+          {requestId && state.isDirty && (
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <div className="flex flex-row items-center gap-2 cursor-default">
+                  <div className={`h-2 w-2 rounded-full bg-amber-500`} />
+                  <span className="text-sm text-secondary font-semibold">
+                    Unsaved Changes
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>
+                  <span className="font-semibold">Save As Prompt</span> to keep
+                  your progress
+                </p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* Metrics Drawer */}
@@ -920,24 +985,33 @@ export default function PromptEditor(props: PromptEditorProps) {
             </Button>
           )}
 
-          {/* From Request: Unsaved Changes Indicator */}
-          {requestId && state.isDirty && (
-            <div className="flex flex-row items-center gap-2 mr-2">
-              <span className="text-sm text-secondary font-semibold">
-                Unsaved Changes
-              </span>
-              <div className={`h-2 w-2 rounded-full bg-amber-500`} />
-            </div>
+          {/* From Request: Save Changes Button */}
+          {requestId && (
+            <Button
+              variant="action"
+              size="sm"
+              onClick={handleSaveAsPrompt}
+              disabled={isCreatingPrompt}
+            >
+              {isCreatingPrompt ? (
+                <>
+                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save As Prompt"
+              )}
+            </Button>
           )}
 
           {/* Run & Save Button */}
           <Button
             className={`${
               isStreaming
-                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90"
+                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                 : ""
             }`}
-            variant="action"
+            variant={promptId ? "action" : "outline"}
             size="sm"
             disabled={!canRun}
             onClick={handleSaveAndRun}
@@ -958,7 +1032,11 @@ export default function PromptEditor(props: PromptEditorProps) {
               <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
             )}
             <div
-              className={`flex items-center gap-0.5 text-sm text-white opacity-60`}
+              className={`flex items-center gap-0.5 text-sm ${
+                requestId && !isStreaming
+                  ? "text-black opacity-60"
+                  : "text-white opacity-60"
+              }`}
             >
               <PiCommandBold className="h-4 w-4" />
               <MdKeyboardReturn className="h-4 w-4" />

@@ -111,7 +111,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           },
           {
             name: "Playground (New Prompt)",
-            href: "/prompts",
+            href: "/prompts/new",
             icon: TestTube2,
             current: pathname.includes("/playground"),
           },

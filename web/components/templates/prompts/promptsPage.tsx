@@ -11,7 +11,6 @@ import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { cn } from "@/lib/utils";
-import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import {
   DocumentTextIcon,
   EyeIcon,
@@ -25,7 +24,7 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
 import {
-  useCreatePromptFromRequest,
+  useCreatePrompt,
   usePrompts,
 } from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
@@ -50,9 +49,8 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
   const router = useRouter();
-  const createPrompt = useCreatePromptFromRequest();
+  const { createPrompt, isCreating } = useCreatePrompt();
   const searchParams = useSearchParams();
-  const [isCreatingPrompt, setIsCreatingPrompt] = useState<boolean>(false);
   const hasAccess = useHasAccess("prompts");
 
   // DERIVED STATE
@@ -65,31 +63,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   // EVENT HANDLERS
   const handleCreatePrompt = async () => {
-    setIsCreatingPrompt(true);
     try {
-      // Create a basic prompt with default settings
-      const basePrompt: LLMRequestBody = {
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            _type: "message",
-            role: "system",
-            content: "You are a helpful assistant.",
-          },
-          {
-            _type: "message",
-            role: "user",
-            content: 'What is 2+<helicone-prompt-input key="number" />?',
-          },
-        ],
-      };
-
-      const res = await createPrompt(basePrompt);
-      if (res?.id) {
-        router.push(`/prompts/${res.id}`);
-      }
-    } finally {
-      setIsCreatingPrompt(false);
+      router.push(`/prompts/new`);
+    } catch (error) {
+      console.error("Error navigating to new prompt:", error);
     }
   };
 
@@ -123,14 +100,14 @@ const PromptsPage = (props: PromptsPageProps) => {
               <Button
                 variant="action"
                 onClick={handleCreatePrompt}
-                disabled={isCreatingPrompt}
+                disabled={isCreating}
               >
-                {isCreatingPrompt ? (
+                {isCreating ? (
                   <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
                 ) : (
                   <PiPlusBold className="h-4 w-4 mr-2" />
                 )}
-                {isCreatingPrompt ? "Creating..." : "New Prompt"}
+                {isCreating ? "Creating..." : "New Prompt"}
               </Button>
 
               <Dialog>
@@ -247,14 +224,14 @@ const chatCompletion = await openai.chat.completions.create(
                     variant="action"
                     className="gap-2"
                     onClick={handleCreatePrompt}
-                    disabled={isCreatingPrompt}
+                    disabled={isCreating}
                   >
-                    {isCreatingPrompt ? (
+                    {isCreating ? (
                       <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
                     ) : (
                       <PiPlusBold className="h-4 w-4 mr-2" />
                     )}
-                    {isCreatingPrompt ? "Creating..." : "Create First Prompt"}
+                    {isCreating ? "Creating..." : "Create First Prompt"}
                   </Button>
 
                   <Link
