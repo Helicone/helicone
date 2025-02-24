@@ -3,7 +3,11 @@ import { useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { ChatTopBar, PROMPT_MODES } from "../chatComponent/chatTopBar";
+import {
+  ChatTopBar,
+  ChatTopBarProps,
+  PROMPT_MODES,
+} from "../chatComponent/chatTopBar";
 import { VectorDBContent } from "./VectorDBContent";
 
 interface VectorDBProps {
@@ -21,7 +25,7 @@ export const VectorDB = ({
     "Pretty"
   );
 
-  const chatTopBarProps = {
+  const chatTopBarProps: ChatTopBarProps = {
     allExpanded: false,
     toggleAllExpanded: () => {},
     requestBody: mappedRequest.raw.request,

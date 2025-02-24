@@ -10,11 +10,12 @@ import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConicalIcon, NotepadText } from "lucide-react";
+import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-import { useCreatePromptFromRequest } from "../../../services/hooks/prompts/prompts";
+import { PiPlayBold } from "react-icons/pi";
+import { useCreatePrompt } from "../../../services/hooks/prompts/prompts";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -47,7 +48,7 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
   const router = useRouter();
   const org = useOrg();
   const jawn = useJawnClient();
-  const createPrompt = useCreatePromptFromRequest();
+  const createPrompt = useCreatePrompt();
 
   const properties = useMemo(
     () =>
@@ -111,19 +112,15 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
                   href="#"
                   onClick={async (e) => {
                     e.preventDefault();
-                    if (!request) return;
                     if (promptDataQuery.data?.id) {
                       router.push(`/prompts/${promptDataQuery.data?.id}`);
-                    } else {
-                      const res = await createPrompt(request.schema.request);
-                      if (res?.id) {
-                        router.push(`/prompts/${res.id}`);
-                      }
+                    } else if (request) {
+                      router.push(`/prompts/fromRequest/${request.id}`);
                     }
                   }}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
                 >
-                  <NotepadText className="h-4 w-4" />
+                  <PiPlayBold className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Test Prompt</TooltipContent>

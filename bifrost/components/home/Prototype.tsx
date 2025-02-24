@@ -1,9 +1,7 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/lib/utils";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Button, buttonVariants } from "../ui/button";
+import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import {
   BeakerIcon,
   ChevronDownIcon,
@@ -11,14 +9,15 @@ import {
   ChevronRightIcon,
   HomeIcon,
   ListTreeIcon,
-  NotepadTextIcon,
   RocketIcon,
+  ScrollTextIcon,
   SparklesIcon,
   TagIcon,
   TestTube2Icon,
   UsersIcon,
 } from "lucide-react";
-import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { Button, buttonVariants } from "../ui/button";
 
 const IMG_PATH = {
   dashboard: "/static/home/dashboard.png",
@@ -213,7 +212,7 @@ const PrototypeSidebar = ({
                     )}
                   >
                     <div className="flex items-center">
-                      <NotepadTextIcon className="mr-2 h-4 w-4" />
+                      <ScrollTextIcon className="mr-2 h-4 w-4" />
                       Prompts
                     </div>
                   </div>

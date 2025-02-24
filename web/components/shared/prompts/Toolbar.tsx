@@ -382,7 +382,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 const isOnly = tools.length === 1;
 
                 return (
-                  <Tooltip key={index} delayDuration={0}>
+                  <Tooltip key={index} delayDuration={100}>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => handleToolClick(tool, index)}

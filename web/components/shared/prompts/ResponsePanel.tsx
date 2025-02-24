@@ -1,13 +1,28 @@
 // "use client";
-import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useEffect, useState } from "react";
+import { PiChatsBold } from "react-icons/pi";
+import ReactMarkdown from "react-markdown";
+import GlassHeader from "../universal/GlassHeader";
 
 interface ResponsePanelProps {
   response: string;
+  onAddToMessages?: () => void;
+  scrollToBottom?: () => void;
 }
 
-export default function ResponsePanel({ response }: ResponsePanelProps) {
+export default function ResponsePanel({
+  response,
+  onAddToMessages,
+  scrollToBottom,
+}: ResponsePanelProps) {
   const [view, setView] = useState("markdown");
 
   useEffect(() => {
@@ -15,32 +30,57 @@ export default function ResponsePanel({ response }: ResponsePanelProps) {
   }, [response]);
 
   return (
-    <div className="flex h-[27rem] flex-col gap-2">
+    <div className="h-full flex flex-col group">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
+      <GlassHeader className="h-14 px-4 flex-shrink-0">
         <h2 className="font-semibold text-secondary">Response</h2>
-        <Tabs value={view} onValueChange={setView} defaultValue="markdown">
-          <TabsList variant="default" asPill>
-            <TabsTrigger value="markdown" size="xs" asPill>
-              Markdown
-            </TabsTrigger>
-            <TabsTrigger value="text" size="xs" asPill>
-              Text
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      <div className=" flex-1 overflow-auto rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 select-text">
+        <div className="flex flex-row items-center gap-2">
+          {response && onAddToMessages && (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="square_icon"
+                    asPill
+                    className=""
+                    onClick={() => {
+                      onAddToMessages();
+                      scrollToBottom?.();
+                    }}
+                  >
+                    <PiChatsBold className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Add response to messages</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <Tabs value={view} onValueChange={setView} defaultValue="markdown">
+            <TabsList variant="default" size="xs" asPill>
+              <TabsTrigger value="markdown" asPill>
+                Markdown
+              </TabsTrigger>
+              <TabsTrigger value="text" asPill>
+                Text
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </GlassHeader>
+
+      {/* Response Views */}
+      <div className="select-text px-4">
         {response ? (
           view === "markdown" ? (
-            <ReactMarkdown className="prose dark:prose-invert prose-sm text-secondary px-4 py-3.5">
+            <ReactMarkdown className="prose dark:prose-invert prose-sm text-secondary">
               {response}
             </ReactMarkdown>
           ) : (
-            <p className="text-sm text-secondary p-4">{response}</p>
+            <p className="text-sm text-secondary pt-0.5">{response}</p>
           )
         ) : (
-          <p className="whitespace-pre-wrap text-sm text-secondary p-4">
+          <p className="whitespace-pre-wrap text-sm text-tertiary">
             Response will appear here...
           </p>
         )}
