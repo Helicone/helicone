@@ -113,6 +113,19 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "claude-3-7-sonnet-20250219",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      prompt_cache_write_token: 0.000003 * 1.25,
+      prompt_cache_read_token: 0.000003 * 0.1,
+      completion_token: 0.000015,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "claude-3-haiku-20240307",
     },
     cost: {
@@ -392,8 +405,16 @@ export const modelDetails: ModelDetailsMap = {
     },
   },
   "claude-3.5-sonnet": {
-    matches: ["claude-3-5-sonnet-20240620", "claude-3-5-sonnet-20241022"],
-    searchTerms: ["claude 3.5 sonnet", "claude-3-5-sonnet"],
+    matches: [
+      "claude-3-5-sonnet-20240620",
+      "claude-3-5-sonnet-20241022",
+      "claude-3-7-sonnet-20250219",
+    ],
+    searchTerms: [
+      "claude 3.5 sonnet",
+      "claude-3-5-sonnet",
+      "claude 3.7 sonnet",
+    ],
     info: {
       maxTokens: 200000,
       releaseDate: "2024-06-20",
