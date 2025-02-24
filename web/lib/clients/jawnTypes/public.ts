@@ -1145,6 +1145,26 @@ Json: JsonObject;
       description: string;
       parameters?: components["schemas"]["Record_string.any_"];
     };
+    HeliconeEventTool: {
+      /** @enum {string} */
+      _type: "tool";
+      toolName: string;
+      input: unknown;
+      [key: string]: unknown;
+    };
+    HeliconeEventVectorDB: {
+      /** @enum {string} */
+      _type: "vector_db";
+      /** @enum {string} */
+      operation: "search" | "insert" | "delete" | "update";
+      text?: string;
+      vector?: number[];
+      /** Format: double */
+      topK?: number;
+      filter?: Record<string, never>;
+      databaseName?: string;
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       model?: string;
@@ -1172,8 +1192,36 @@ Json: JsonObject;
         /** @enum {string} */
         type: "auto" | "none" | "tool";
       };
+      toolDetails?: components["schemas"]["HeliconeEventTool"];
+      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
     };
     LLMResponseBody: {
+      vectorDBDetailsResponse?: {
+        /** @enum {string} */
+        _type: "vector_db";
+        metadata: {
+          timestamp: string;
+          destination_parsed?: boolean;
+          destination?: string;
+        };
+        /** Format: double */
+        actualSimilarity?: number;
+        /** Format: double */
+        similarityThreshold?: number;
+        message: string;
+        status: string;
+      };
+      toolDetailsResponse?: {
+        toolName: string;
+        /** @enum {string} */
+        _type: "tool";
+        metadata: {
+          timestamp: string;
+        };
+        tips: string[];
+        message: string;
+        status: string;
+      };
       error?: {
         heliconeMessage: unknown;
       };
