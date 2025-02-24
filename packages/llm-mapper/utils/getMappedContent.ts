@@ -121,6 +121,12 @@ const getUnsanitizedMappedContent = ({
         concatenatedMessages: [],
         request: JSON.stringify(heliconeRequest.request_body),
         response: JSON.stringify(heliconeRequest.response_body),
+        fullRequestText: () => {
+          return JSON.stringify(heliconeRequest.request_body);
+        },
+        fullResponseText: () => {
+          return JSON.stringify(heliconeRequest.response_body);
+        },
       },
       schema: {
         request: {
