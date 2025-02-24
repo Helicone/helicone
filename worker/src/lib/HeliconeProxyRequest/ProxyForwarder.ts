@@ -270,19 +270,17 @@ export async function proxyForwarder(
         console.error("Error getting org", orgError);
       } else {
         ctx.waitUntil(
-          loggable
-            .waitForResponse()
-            .then((responseBody) =>
-              saveToCache(
-                proxyRequest,
-                response,
-                responseBody.body,
-                cacheSettings.cacheControl,
-                cacheSettings.bucketSettings,
-                env.CACHE_KV,
-                cacheSettings.cacheSeed ?? null
-              )
-            )
+          loggable.waitForResponse().then((responseBody) =>
+            saveToCache({
+              request: proxyRequest,
+              response,
+              responseBody: responseBody.body,
+              cacheControl: cacheSettings.cacheControl,
+              settings: cacheSettings.bucketSettings,
+              cacheKv: env.CACHE_KV,
+              cacheSeed: cacheSettings.cacheSeed ?? null,
+            })
+          )
         );
       }
     }
