@@ -555,7 +555,7 @@ export class LoggingHandler extends AbstractLogHandler {
       helicone_user: authParams?.userId ?? null,
       helicone_api_key_id: authParams?.heliconeApiKeyId ?? null,
       helicone_org_id: orgParams?.id ?? null,
-      provider: request.provider,
+      provider: request.provider ?? "",
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       model: processedRequest.model,
       model_override: heliconeMeta.modelOverride ?? null,
