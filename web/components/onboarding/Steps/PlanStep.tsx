@@ -15,7 +15,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 
 const PLAN_OPTIONS: Record<PlanType, { label: string; hasTrial: boolean }> = {
   free: { label: "Free ($0/mo)", hasTrial: false },
-  pro: { label: "Pro ($20/mo/user)", hasTrial: true },
+  pro: { label: "Pro ($20/user/mo)", hasTrial: true },
   team: { label: "Team ($200/mo)", hasTrial: true },
 };
 
