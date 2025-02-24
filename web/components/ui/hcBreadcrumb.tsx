@@ -1,13 +1,13 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { LinkIcon, ScrollTextIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import useOnboardingContext, {
   ONBOARDING_STEPS,
 } from "../layout/onboardingContext";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { LinkIcon, NotepadTextIcon } from "lucide-react";
 import { Button } from "./button";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
@@ -210,7 +210,7 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
               <PopoverContent className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2 relative">
                 <div className="flex justify-between items-center">
                   <div className="flex gap-2 items-center text-slate-900 dark:text-slate-100">
-                    <NotepadTextIcon className="h-4 w-4 flex-shrink-0" />
+                    <ScrollTextIcon className="h-4 w-4 flex-shrink-0" />
                     <h3 className="font-semibold text-base">
                       Woohoo! The new prompt is better.{" "}
                     </h3>

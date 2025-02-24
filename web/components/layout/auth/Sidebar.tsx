@@ -15,7 +15,7 @@ import {
   Home,
   ListTreeIcon,
   LockIcon,
-  NotepadText,
+  ScrollTextIcon,
   SheetIcon,
   ShieldCheckIcon,
   TagIcon,
@@ -87,7 +87,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           {
             name: "Prompts",
             href: "/prompts",
-            icon: NotepadText,
+            icon: ScrollTextIcon,
             current: pathname.includes("/prompts"),
             isNew: true,
           },
