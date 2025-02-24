@@ -4,6 +4,11 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/router";
+import {
+  useOrgOnboarding,
+  OnboardingStep,
+} from "@/services/hooks/useOrgOnboarding";
+import { STEP_ROUTES } from "@/components/onboarding/OnboardingHeader";
 
 interface OnboardingFloatingPromptProps {
   open: boolean;
@@ -16,6 +21,9 @@ export default function OnboardingFloatingPrompt({
 }: OnboardingFloatingPromptProps) {
   const router = useRouter();
   const orgContext = useOrg();
+  const { onboardingState } = useOrgOnboarding(
+    orgContext?.currentOrg?.id || ""
+  );
 
   if (!open) return null;
 
@@ -24,6 +32,16 @@ export default function OnboardingFloatingPrompt({
     if (demoOrg && orgContext?.setCurrentOrg) {
       orgContext.setCurrentOrg(demoOrg.id);
       setOpen(false);
+    }
+  };
+
+  const handleGetStarted = () => {
+    setOpen(false);
+    const currentStep = onboardingState?.currentStep || "ORGANIZATION";
+    if (currentStep === "EVENT") {
+      router.push("/onboarding/integrate");
+    } else {
+      router.push(STEP_ROUTES[currentStep]);
     }
   };
 
@@ -44,12 +62,7 @@ export default function OnboardingFloatingPrompt({
           <Button variant="outline" onClick={handleDemoClick}>
             Try demo
           </Button>
-          <Button
-            onClick={() => {
-              setOpen(false);
-              router.push("/onboarding");
-            }}
-          >
+          <Button variant="action" onClick={handleGetStarted}>
             Get started <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>

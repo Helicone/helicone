@@ -22,7 +22,7 @@ const BreadcrumbSeparator = () => (
   </svg>
 );
 
-const STEP_ROUTES: Record<OnboardingStep, string> = {
+export const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
   MEMBERS: "/onboarding",
   BILLING: "/onboarding/billing",

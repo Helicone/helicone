@@ -326,7 +326,11 @@ const DesktopSidebar = ({
                           <span className="text-white">Ready to integrate</span>
                         )}
                         <Rocket
-                          className={isCollapsed ? "h-4 w-4" : "h-6 w-6"}
+                          className={
+                            isCollapsed
+                              ? "h-4 w-4 text-white"
+                              : "h-6 w-6 text-white"
+                          }
                         />
                       </Button>
                     )}

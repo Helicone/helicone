@@ -7,6 +7,7 @@ import { ADDONS } from "@/utils/pricingConfigs";
 import Image from "next/image";
 import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { useState } from "react";
 
 export const ProPlanCheckout = ({
   clientSecret,
@@ -17,12 +18,22 @@ export const ProPlanCheckout = ({
   const { draftAddons, setDraftAddons } = useDraftOnboardingStore(
     org?.currentOrg?.id ?? ""
   )();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleAddAll = () => {
+    setIsUpdating(true);
     setDraftAddons({
       prompts: true,
       experiments: true,
       evals: true,
+    });
+  };
+
+  const handleAddonChange = (addonId: string, checked: boolean) => {
+    setIsUpdating(true);
+    setDraftAddons({
+      ...draftAddons,
+      [addonId]: checked,
     });
   };
 
@@ -76,10 +87,7 @@ export const ProPlanCheckout = ({
                     variant="helicone"
                     checked={draftAddons[addon.id]}
                     onCheckedChange={(checked) =>
-                      setDraftAddons({
-                        ...draftAddons,
-                        [addon.id]: checked,
-                      })
+                      handleAddonChange(addon.id, checked)
                     }
                   />
                   <div className="flex flex-col gap-1.5">
@@ -101,6 +109,15 @@ export const ProPlanCheckout = ({
           </div>
         </Card>
       }
-    />
+    >
+      {isUpdating && !clientSecret && (
+        <div className="h-[600px] w-full bg-white border rounded-lg flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+            <p className="text-sm text-slate-600">Updating checkout...</p>
+          </div>
+        </div>
+      )}
+    </CheckoutLayout>
   );
 };

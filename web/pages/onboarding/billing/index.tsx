@@ -18,6 +18,7 @@ export default function BillingPage() {
   )();
   const { setNotification } = useNotification();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
   const createdOrgId = org?.currentOrg?.id;
 
   // Move mutations to the top level
@@ -89,16 +90,20 @@ export default function BillingPage() {
 
   useEffect(() => {
     const createCheckoutSession = async () => {
-      if (!createdOrgId) return;
+      if (!createdOrgId || isCreatingCheckout) return;
+
+      // Don't create a session if we don't have the plan selected
+      if (!draftPlan) return;
 
       try {
+        setIsCreatingCheckout(true);
         let result;
 
         if (draftPlan === "team") {
           result = await upgradeToTeamBundle.mutateAsync();
         } else {
           result = await upgradeToPro.mutateAsync({
-            addons: draftAddons,
+            addons: draftAddons || {},
             seats: draftMembers.length,
           });
         }
@@ -108,11 +113,15 @@ export default function BillingPage() {
         }
       } catch (error) {
         console.error("Error creating checkout session:", error);
+      } finally {
+        setIsCreatingCheckout(false);
       }
     };
 
+    // Reset client secret when dependencies change
+    setClientSecret(null);
     createCheckoutSession();
-  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]);
+  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]); // Include all dependencies that should trigger a new checkout session
 
   if (subscription.isLoading) {
     return (

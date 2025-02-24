@@ -364,6 +364,11 @@ export function CodeIntegrationPage({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <Link href="/dashboard">
+              <Button variant="secondary" className="w-fit">
+                Do it later
+              </Button>
+            </Link>
           </div>
         </main>
       </div>
