@@ -322,7 +322,9 @@ const DesktopSidebar = ({
                         )}
                         variant="action"
                       >
-                        {!isCollapsed && <span>Ready to integrate</span>}
+                        {!isCollapsed && (
+                          <span className="text-white">Ready to integrate</span>
+                        )}
                         <Rocket
                           className={isCollapsed ? "h-4 w-4" : "h-6 w-6"}
                         />

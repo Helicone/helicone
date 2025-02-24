@@ -55,7 +55,6 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import DemoDisclaimerModal from "./DemoDisclaimerModal";
 import { TimeFilter } from "@/types/timeFilter";
 import OnboardingFloatingPrompt from "./OnboardingFloatingPrompt";
 
@@ -997,17 +996,6 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
-
-        {showDemoDisclaimerModal && orgContext?.currentOrg?.tier === "demo" && (
-          <DemoDisclaimerModal
-            open={showDemoDisclaimerModal}
-            setOpen={setShowDemoDisclaimerModal}
-            onSuccess={() => {
-              setShowDemoDisclaimerModal(false);
-            }}
-          />
-        )}
-
         <OnboardingFloatingPrompt
           open={showOnboardingPopUp}
           setOpen={setShowOnboardingPopUp}
