@@ -33,14 +33,13 @@ iconType: "solid"
 
     client = genai.Client(
         api_key=os.environ.get('GOOGLE_API_KEY'),
-        client_options={
-            'api_endpoint': 'gateway.helicone.ai',
-        },
-        default_metadata=[
-            ('helicone-auth', f'Bearer {os.environ.get("HELICONE_API_KEY")}'),
-            ('helicone-target-url', 'https://generativelanguage.googleapis.com')
-        ],
-        transport="rest"
+        http_options={
+            "base_url": 'https://gateway.helicone.ai',
+            "headers": {
+                "helicone-auth": f'Bearer {os.environ.get("HELICONE_API_KEY")}',
+                "helicone-target-url": 'https://generativelanguage.googleapis.com'
+            }
+        }
     )
     ```
 
@@ -52,6 +51,11 @@ iconType: "solid"
         contents='Tell me a story in 300 words.'
     )
     print(response.text)
+
+    # Optional: Print the full response details
+    print(response.model_dump_json(
+        exclude_none=True, indent=4))
     ```
+
   </Step>
 </Steps>
