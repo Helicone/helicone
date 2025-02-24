@@ -64,6 +64,11 @@ export const MODEL_LIST: {
     provider: "anthropic",
   },
   {
+    value: "claude-3-7-sonnet",
+    label: "claude-3-7-sonnet",
+    provider: "anthropic",
+  },
+  {
     value: "claude-3-opus-20240229",
     label: "claude-3-opus-20240229",
     provider: "anthropic",
