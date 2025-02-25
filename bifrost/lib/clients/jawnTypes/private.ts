@@ -1019,6 +1019,7 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
+      cost_usd?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
