@@ -10,21 +10,11 @@ interface WelcomeProps {
 }
 
 const Welcome = (props: WelcomeProps) => {
-  const { currentStep } = props;
   const org = useOrg();
   const router = useRouter();
 
   useEffect(() => {
-    if (
-      org &&
-      org.allOrgs.length > 0 &&
-      org.currentOrg?.tier !== "demo" &&
-      org.currentOrg?.has_onboarded
-    ) {
-      router.push("/dashboard");
-    } else {
-      router.push("/onboarding");
-    }
+    router.push("/onboarding");
   }, [org, router]);
   return <LoadingAnimation title="Just setting up your account..." />;
 };
