@@ -1,9 +1,21 @@
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
-import { BeakerIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
+import { FlaskConicalIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
+import { PiPlayBold } from "react-icons/pi";
+import { useCreatePrompt } from "../../../services/hooks/prompts/prompts";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
@@ -34,6 +46,9 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
+  const org = useOrg();
+  const jawn = useJawnClient();
+  const createPrompt = useCreatePrompt();
 
   const properties = useMemo(
     () =>
@@ -59,6 +74,31 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
     }
   };
 
+  const promptId = useMemo(
+    () =>
+      request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
+      null,
+    [request?.heliconeMetadata.customProperties]
+  );
+  const promptDataQuery = useQuery({
+    queryKey: ["prompt", promptId, org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[2]);
+      const prompt = await jawn.POST("/v1/prompt/query", {
+        body: {
+          filter: {
+            prompt_v2: {
+              user_defined_id: {
+                equals: query.queryKey[1],
+              },
+            },
+          },
+        },
+      });
+      return prompt.data?.data?.[0];
+    },
+  });
+
   return (
     <ThemedDrawer
       open={open}
@@ -66,58 +106,106 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       actions={
         <div className="w-full flex flex-row justify-between items-center">
           <div className="flex flex-row items-center space-x-2">
-            <Tooltip title="Playground">
-              <button
-                onClick={() => {
-                  if (request) {
-                    router.push("/playground?request=" + request.id);
-                  }
-                }}
-                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-              >
-                <BeakerIcon className="h-5 w-5" />
-              </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="#"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (promptDataQuery.data?.id) {
+                      router.push(`/prompts/${promptDataQuery.data?.id}`);
+                    } else if (request) {
+                      router.push(`/prompts/fromRequest/${request.id}`);
+                    }
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                >
+                  <PiPlayBold className="h-4 w-4" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Test Prompt</TooltipContent>
             </Tooltip>
-            <Tooltip title="Copy">
-              <button
-                onClick={() => {
-                  setNotification("Copied to clipboard", "success");
-                  const copy = { ...request };
-                  navigator.clipboard.writeText(
-                    JSON.stringify(copy || {}, null, 4)
-                  );
-                }}
-                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-              >
-                <ClipboardDocumentIcon className="h-5 w-5" />
-              </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    jawn
+                      .POST("/v2/experiment/create/from-request/{requestId}", {
+                        params: {
+                          path: {
+                            requestId: request?.id!,
+                          },
+                        },
+                      })
+                      .then((res) => {
+                        if (res.error || !res.data.data?.experimentId) {
+                          setNotification(
+                            "Failed to create experiment",
+                            "error"
+                          );
+                          return;
+                        }
+                        router.push(
+                          `/experiments/${res.data.data?.experimentId}`
+                        );
+                      });
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                >
+                  <FlaskConicalIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Experiment</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    setNotification("Copied to clipboard", "success");
+                    const copy = { ...request };
+                    navigator.clipboard.writeText(
+                      JSON.stringify(copy || {}, null, 4)
+                    );
+                  }}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                >
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Copy</TooltipContent>
             </Tooltip>
           </div>
           {(hasPrevious || hasNext) && (
             <div className="flex flex-row items-center space-x-1.5">
-              <Tooltip title="Previous">
-                <button
-                  onClick={onPrevHandler}
-                  disabled={!hasPrevious}
-                  className={clsx(
-                    !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 dark:hover:bg-gray-800  rounded-md -m-1 p-1"
-                  )}
-                >
-                  <ArrowUpIcon className="h-5 w-5" />
-                </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onPrevHandler}
+                    disabled={!hasPrevious}
+                    className={clsx(
+                      !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                    )}
+                  >
+                    <ArrowUpIcon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Previous</TooltipContent>
               </Tooltip>
-              <Tooltip title="Next">
-                <button
-                  onClick={onNextHandler}
-                  disabled={!hasNext}
-                  className={clsx(
-                    !hasNext && "opacity-50 hover:cursor-not-allowed",
-                    "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md -m-1 p-1"
-                  )}
-                >
-                  <ArrowDownIcon className="h-5 w-5" />
-                </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onNextHandler}
+                    disabled={!hasNext}
+                    className={clsx(
+                      !hasNext && "opacity-50 hover:cursor-not-allowed",
+                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                    )}
+                  >
+                    <ArrowDownIcon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Next</TooltipContent>
               </Tooltip>
             </div>
           )}
@@ -125,7 +213,12 @@ const RequestDrawerV2 = (props: RequestDrawerV2Props) => {
       }
     >
       {request ? (
-        <RequestRow request={request} properties={properties} open={open} />
+        <RequestRow
+          request={request}
+          properties={properties}
+          open={open}
+          promptData={promptDataQuery.data}
+        />
       ) : (
         <p>Loading...</p>
       )}

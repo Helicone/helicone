@@ -1,5 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
+import useNotification from "../../../components/shared/notification/useNotification";
 import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
 import { Result, resultMap } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
@@ -153,5 +155,71 @@ export const usePromptRequestsOverTime = (
     isLoading: promptUsageOverTime.isLoading,
     refetch: promptUsageOverTime.refetch,
     total: totalRequests,
+  };
+};
+
+export const useCreatePrompt = () => {
+  const org = useOrg();
+  const { setNotification } = useNotification();
+  const jawn = getJawnClient(org?.currentOrg?.id);
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      prompt: prompt,
+      metadata = {
+        provider: "OPENAI",
+        createdFromUi: true,
+      },
+    }: {
+      prompt: Partial<LLMRequestBody>;
+      metadata?: Record<string, any>;
+    }) => {
+      // Generate a unique name like "new prompt", "new prompt (1)", etc.
+      const existingPrompts =
+        (
+          await jawn.POST("/v1/prompt/query", {
+            body: {
+              filter: "all",
+            },
+          })
+        )?.data?.data || [];
+      let promptName = "new-prompt";
+      let counter = 1;
+      while (
+        existingPrompts.some((p: any) => p.user_defined_id === promptName)
+      ) {
+        promptName = `new-prompt-${counter}`;
+        counter++;
+      }
+
+      const res = await jawn.POST("/v1/prompt/create", {
+        body: {
+          userDefinedId: promptName,
+          prompt: prompt,
+          metadata: metadata,
+        },
+      });
+
+      if (res.error || !res.data.data?.id) {
+        throw new Error("Error creating prompt");
+      }
+
+      return res.data.data;
+    },
+    onSuccess: () => {
+      setNotification("Prompt created successfully", "success");
+    },
+    onError: () => {
+      setNotification("Error creating prompt", "error");
+    },
+  });
+
+  return {
+    createPrompt: (
+      request: Partial<LLMRequestBody>,
+      metadata?: Record<string, any>
+    ) => mutation.mutateAsync({ prompt: request, metadata }),
+    isCreating: mutation.isLoading,
+    error: mutation.error,
   };
 };

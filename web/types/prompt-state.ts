@@ -1,15 +1,17 @@
+import { PROVIDER_MODELS } from "@/utils/generate";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
-  promptId: string;
-  masterVersion: number;
+  promptId?: string; // The prompt ID (UUID)
+  masterVersion?: number; // The master prompt version
 
-  versionId: string; // The actual version ID (UUID) used for API calls
-  version: number;
+  versionId?: string; // The prompt version ID (UUID)
+  version?: number; // The version the user is currently editing
 
-  messages: StateMessage[];
+  messages: Message[];
   parameters: StateParameters;
-  variables?: StateVariable[];
+  inputs?: StateInputs[];
   evals?: any[]; // TODO: Add evals to the state
   structure?: any; // TODO: Real structure when feature is added
 
@@ -18,25 +20,21 @@ export interface PromptState {
   improvement?: { reasoning: string; content: string };
 }
 
-export type StateMessage = {
-  role: "developer" | "system" | "user" | "assistant" | "tool";
-  content: string;
-  toolCallId?: string;
-  idx?: number;
-};
 export type HeliconeMessage =
   | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
   | { type: "text"; text: string } // Assistants API - from content: []
   | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
 
 export interface StateParameters {
-  provider: string;
+  provider: keyof typeof PROVIDER_MODELS;
   model: string;
   temperature: number;
+  reasoning_effort?: "low" | "medium" | "high";
+  tools?: Tool[];
   // TODO: Add more parameters
 }
 
-export interface StateVariable {
+export interface StateInputs {
   name: string;
   value: string;
   isValid?: boolean;

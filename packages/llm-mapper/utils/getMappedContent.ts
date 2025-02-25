@@ -121,6 +121,12 @@ const getUnsanitizedMappedContent = ({
         concatenatedMessages: [],
         request: JSON.stringify(heliconeRequest.request_body),
         response: JSON.stringify(heliconeRequest.response_body),
+        fullRequestText: () => {
+          return JSON.stringify(heliconeRequest.request_body);
+        },
+        fullResponseText: () => {
+          return JSON.stringify(heliconeRequest.response_body);
+        },
       },
       schema: {
         request: {
@@ -145,6 +151,26 @@ const getUnsanitizedMappedContent = ({
       heliconeRequest.model
     ),
   };
+};
+
+const messageToText = (message: Message): string => {
+  let text = "";
+  message.contentArray?.forEach((message) => {
+    text += messageToText(message).trim();
+  });
+  text += message.content?.trim() ?? "";
+  message.tool_calls?.forEach((toolCall) => {
+    text += JSON.stringify(toolCall.arguments).trim();
+    text += JSON.stringify(toolCall.name).trim();
+  });
+  text += message.role ?? "";
+  text += message.name ?? "";
+  text += message.tool_call_id ?? "";
+  return text.trim();
+};
+
+const messagesToText = (messages: Message[]): string => {
+  return messages.map(messageToText).join("\n").trim();
 };
 
 const sanitizeMappedContent = (
@@ -212,6 +238,12 @@ const sanitizeMappedContent = (
       response: mappedContent.preview.response?.slice(0, 30),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
+      fullRequestText: () => {
+        return messagesToText(mappedContent.schema.request.messages ?? []);
+      },
+      fullResponseText: () => {
+        return messagesToText(mappedContent.schema.response?.messages ?? []);
+      },
     },
     model: mappedContent.model,
     raw: mappedContent.raw,

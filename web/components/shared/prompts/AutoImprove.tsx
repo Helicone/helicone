@@ -1,6 +1,6 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
-import { StateMessage } from "@/types/prompt-state";
+import { Message } from "@/packages/llm-mapper/types";
 import { parseImprovedMessages } from "@/utils/messages";
 import { PiBrainBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
@@ -18,7 +18,7 @@ interface AutoImproveProps {
   isImproving: boolean;
   improvement?: Improvement;
   version: number;
-  messages: StateMessage[];
+  messages: Message[];
   onStartImprove: () => void;
   onApplyImprovement: () => void;
   onCancel: () => void;
@@ -39,8 +39,8 @@ export default function AutoImprove({
     <div className="h-full min-h-[42rem] w-full flex flex-col gap-4 justify-between items-center">
       {/* Starting View */}
       {!improvement && (
-        <div className="flex flex-col justify-center items-center gap-2">
-          <p className="text-sm text-secondary max-w-lg text-pretty">
+        <div className="flex flex-col justify-center items-center gap-4">
+          <p className="text-sm text-secondary max-w-lg text-pretty text-center">
             <span className="font-semibold">Auto-Improve</span> will read your
             prompt to understand how it comes off now vs its instructional
             intent. Then it will suggest improvements to get it closer to its
@@ -95,8 +95,8 @@ export default function AutoImprove({
               {messages.map((msg, index) => (
                 <MiniMessage
                   key={index}
-                  role={msg.role}
-                  content={msg.content}
+                  role={msg.role || ""}
+                  content={msg.content || ""}
                 />
               ))}
             </div>
@@ -111,8 +111,8 @@ export default function AutoImprove({
               {parseImprovedMessages(improvement.content).map((msg, index) => (
                 <MiniMessage
                   key={index}
-                  role={msg.role}
-                  content={msg.content}
+                  role={msg.role || ""}
+                  content={msg.content || ""}
                 />
               ))}
             </div>

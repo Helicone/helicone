@@ -1,10 +1,10 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
+import useNotification from "@/components/shared/notification/useNotification";
+import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
+import { useFeatureTrial } from "@/hooks/useFeatureTrial";
+import { useMemo, useState } from "react";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
-import useNotification from "@/components/shared/notification/useNotification";
-import { useState, useMemo } from "react";
-import { useFeatureTrial } from "@/hooks/useFeatureTrial";
-import { TrialConfirmationDialog } from "@/components/shared/TrialConfirmationDialog";
 
 type PromptPricingPlanName = "Prompt" | "Pro + Prompt" | "Team Bundle";
 
@@ -170,7 +170,7 @@ const PromptsPreview = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col justify-center items-center py-4">
       <FeaturePreview
         title="Prompt Management"
         subtitle="in a Shared Workspace"
@@ -195,7 +195,7 @@ const PromptsPreview = () => {
         onConfirm={confirmPromptsChange}
         isUpgrade={isPaidPlan}
       />
-    </>
+    </div>
   );
 };
 

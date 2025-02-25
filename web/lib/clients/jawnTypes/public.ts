@@ -1127,6 +1127,8 @@ Json: JsonObject;
     };
     Message: {
       contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -1137,6 +1139,31 @@ Json: JsonObject;
       id?: string;
       /** @enum {string} */
       _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+    };
+    Tool: {
+      name: string;
+      description: string;
+      parameters?: components["schemas"]["Record_string.any_"];
+    };
+    HeliconeEventTool: {
+      /** @enum {string} */
+      _type: "tool";
+      toolName: string;
+      input: unknown;
+      [key: string]: unknown;
+    };
+    HeliconeEventVectorDB: {
+      /** @enum {string} */
+      _type: "vector_db";
+      /** @enum {string} */
+      operation: "search" | "insert" | "delete" | "update";
+      text?: string;
+      vector?: number[];
+      /** Format: double */
+      topK?: number;
+      filter?: Record<string, never>;
+      databaseName?: string;
+      [key: string]: unknown;
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
@@ -1159,9 +1186,42 @@ Json: JsonObject;
       n?: number | null;
       stop?: string[] | null;
       messages?: components["schemas"]["Message"][] | null;
-      tool_choice?: unknown;
+      tools?: components["schemas"]["Tool"][];
+      tool_choice?: {
+        name?: string;
+        /** @enum {string} */
+        type: "auto" | "none" | "tool";
+      };
+      toolDetails?: components["schemas"]["HeliconeEventTool"];
+      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
     };
     LLMResponseBody: {
+      vectorDBDetailsResponse?: {
+        /** @enum {string} */
+        _type: "vector_db";
+        metadata: {
+          timestamp: string;
+          destination_parsed?: boolean;
+          destination?: string;
+        };
+        /** Format: double */
+        actualSimilarity?: number;
+        /** Format: double */
+        similarityThreshold?: number;
+        message: string;
+        status: string;
+      };
+      toolDetailsResponse?: {
+        toolName: string;
+        /** @enum {string} */
+        _type: "tool";
+        metadata: {
+          timestamp: string;
+        };
+        tips: string[];
+        message: string;
+        status: string;
+      };
       error?: {
         heliconeMessage: unknown;
       };
@@ -1332,6 +1392,7 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["SortDirection"];
       };
+      cost_usd?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -1674,6 +1735,12 @@ Json: JsonObject;
       };
       /** Format: double */
       seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
     };
     LLMUsage: {
       model: string;
@@ -2576,10 +2643,7 @@ export interface operations {
       content: {
         "application/json": {
           metadata: components["schemas"]["Record_string.any_"];
-          prompt: {
-            messages: unknown[];
-            model: string;
-          };
+          prompt: unknown;
           userDefinedId: string;
         };
       };
@@ -3472,11 +3536,12 @@ export interface operations {
          * @example {
          *   "filter": "all",
          *   "isCached": false,
-         *   "limit": 10,
+         *   "limit": 100,
          *   "offset": 0,
          *   "sort": {
          *     "created_at": "desc"
          *   },
+         *   "includeInputs": false,
          *   "isScored": false,
          *   "isPartOfExperiment": false
          * }
@@ -3943,6 +4008,11 @@ export interface operations {
     };
   };
   UpgradeToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -3953,6 +4023,11 @@ export interface operations {
     };
   };
   UpgradeExistingCustomerToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

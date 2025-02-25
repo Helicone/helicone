@@ -46,6 +46,12 @@ export type BatchPayload = {
   }[];
 };
 
+const avgTokenLength = 4;
+const maxContentLength = 2_000_000;
+const maxResponseLength = 100_000;
+const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
+const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
+
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
   private logStore: LogStore;
@@ -442,10 +448,19 @@ export class LoggingHandler extends AbstractLogHandler {
     let responseText = "";
 
     try {
-      const heliconeRequest = toHeliconeRequest(context);
-      const mappedContent = heliconeRequestToMappedContent(heliconeRequest);
-      requestText = mappedContent.preview.request;
-      responseText = mappedContent.preview.response;
+      const mappedContent = heliconeRequestToMappedContent(
+        toHeliconeRequest(context)
+      );
+
+      requestText =
+        mappedContent.preview?.fullRequestText?.() ??
+        JSON.stringify(mappedContent.raw.request);
+      responseText =
+        mappedContent.preview?.fullResponseText?.() ??
+        JSON.stringify(mappedContent.raw.response);
+
+      requestText = requestText.slice(0, MAX_CONTENT_LENGTH);
+      responseText = responseText.slice(0, MAX_RESPONSE_LENGTH);
     } catch (error) {
       console.error("Error mapping request/response for preview:", error);
       // Fallback to empty strings if mapping fails
@@ -540,7 +555,7 @@ export class LoggingHandler extends AbstractLogHandler {
       helicone_user: authParams?.userId ?? null,
       helicone_api_key_id: authParams?.heliconeApiKeyId ?? null,
       helicone_org_id: orgParams?.id ?? null,
-      provider: request.provider,
+      provider: request.provider ?? "",
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       model: processedRequest.model,
       model_override: heliconeMeta.modelOverride ?? null,

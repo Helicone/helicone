@@ -495,14 +495,6 @@ export class RequestManager extends BaseManager {
             response_created_at: r.response_created_at
               ? toISOStringClickhousePatch(r.response_created_at)
               : null,
-            costUSD: costOfPrompt({
-              model: r.request_model ?? "",
-              provider: r.provider ?? "",
-              completionTokens: r.completion_tokens ?? 0,
-              promptTokens: r.prompt_tokens ?? 0,
-              promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
-              promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
-            }),
             model:
               r.model_override ??
               r.request_model ??

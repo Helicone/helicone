@@ -101,6 +101,11 @@ export const mapAnthropicRequest: MapperFn<any, any> = ({
       tool_choice: request.tool_choice,
       max_tokens: request.max_tokens,
       model: request.model || model,
+      tools: request.tools?.map((tool: any) => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.input_schema,
+      })),
     },
     response: responseData?.error
       ? responseData

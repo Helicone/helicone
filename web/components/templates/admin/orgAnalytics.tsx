@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { BarChart } from "@tremor/react";
 import { formatLargeNumber } from "@/components/shared/utils/numberFormat";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { SearchIcon } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
+import useNotification from "@/components/shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@supabase/auth-helpers-react";
 
 const OrgAnalytics = () => {
+  const user = useUser();
   const [organizationId, setOrganizationId] = useState("");
   const [userId, setUserId] = useState("");
   const [email, setEmail] = useState("");
@@ -89,12 +93,37 @@ const OrgAnalytics = () => {
     }[]
   ): { name: string; email: string } => {
     return (
-      members.find((member) => member.role.toLowerCase() === "owner") || {
+      members.find((member) => member?.role?.toLowerCase() === "owner") || {
         name: "N/A",
         email: "N/A",
       }
     );
   };
+  const { setNotification } = useNotification();
+
+  const { mutate: addAdminToOrg, isLoading: isAddingAdminToOrg } = useMutation({
+    mutationKey: ["addAdminToOrg"],
+    mutationFn: async ({
+      orgId,
+      adminIds,
+    }: {
+      orgId: string;
+      adminIds: string[];
+    }) => {
+      const jawn = getJawnClient();
+      const { data, error } = await jawn.POST("/v1/admin/admins/org/query", {
+        body: {
+          orgId,
+          adminIds,
+        },
+      });
+      if (error) {
+        setNotification("Failed to add admins to org", "error");
+      } else {
+        setNotification("Admins added to org", "success");
+      }
+    },
+  });
 
   return (
     <div className="flex flex-col space-y-8 text-gray-200 bg-gray-800 p-6 rounded-lg max-w-7xl mx-auto">
@@ -471,6 +500,19 @@ const OrgAnalytics = () => {
                             <div className="p-4 bg-gray-700 rounded-lg mt-2 mb-2">
                               <div className="grid grid-cols-2 gap-4">
                                 <p>ID: {org.organization.id}</p>
+                                <p>
+                                  <Button
+                                    size="sm_sleek"
+                                    onClick={() =>
+                                      addAdminToOrg({
+                                        orgId: org.organization.id,
+                                        adminIds: [user?.id || ""],
+                                      })
+                                    }
+                                  >
+                                    Add Me ({user?.email})
+                                  </Button>
+                                </p>
                                 <p>
                                   Created:{" "}
                                   {new Date(

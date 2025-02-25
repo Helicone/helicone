@@ -17,12 +17,10 @@ import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { err, ok, Result } from "../../lib/shared/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { RequestManager } from "../../managers/request/RequestManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../../lib/cache/kvCache";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -121,11 +119,12 @@ export class RequestController extends Controller {
    * @example requestBody {
    *  "filter": "all",
    *  "isCached": false,
-   *  "limit": 10,
+   *  "limit": 100,
    *  "offset": 0,
    *  "sort": {
    *    "created_at": "desc"
    *  },
+   *  "includeInputs": false,
    *  "isScored": false,
    *  "isPartOfExperiment": false
    * }

@@ -26,9 +26,10 @@ import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
+import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
+import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 
 interface OrgDropdownProps {}
 
@@ -87,6 +88,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     signOut(supabaseClient).then(() => router.push("/"));
   }, [supabaseClient, router]);
 
+  // Get tier display info from the centralized config
+  const tierDisplayInfo = useMemo(() => {
+    return getTierDisplayInfo(orgContext?.currentOrg?.tier);
+  }, [orgContext?.currentOrg?.tier]);
+
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   return (
     <>
@@ -94,7 +100,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full "
+            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full"
           >
             <div className="flex flex-col gap-1">
               <div className="flex flex-row gap-2 items-center">
@@ -147,15 +153,9 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
                 <Link href="/settings/billing" className="flex flex-row gap-2 ">
                   <span>Billing</span>
-                  {orgContext?.currentOrg?.tier === "free" ? (
-                    <span className="text-xs text-sky-500 bg-sky-50 px-2 py-[2px] rounded-md font-semibold">
-                      Upgrade
-                    </span>
-                  ) : (
-                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-[2px] rounded-md font-semibold">
-                      Enterprise
-                    </span>
-                  )}
+                  <span className={tierDisplayInfo.className}>
+                    {tierDisplayInfo.text}
+                  </span>
                 </Link>
               </DropdownMenuItem>
             )}

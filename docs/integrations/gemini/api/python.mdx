@@ -17,39 +17,45 @@ iconType: "solid"
   <Step title="Set API keys as environment variables">
     ```bash
     export HELICONE_API_KEY=<your Helicone API key>
-    export GOOGLE_GENERATIVE_API_KEY=<your Google Generative AI API key>
+    export GOOGLE_API_KEY=<your Google Generative AI API key>
     ```
   </Step>
   <Step title="Install the Google Generative AI SDK">
     Ensure you have the necessary packages installed in your Python environment:
     ```bash
-    pip install google-generativeai
+    pip install -U -q "google-genai"
     ```
   </Step>
   <Step title="Import and configure the client">
     ```python
-    import google.generativeai as genai
+    from google import genai
     import os
 
-    genai.configure(
-        api_key=os.environ.get('GOOGLE_GENERATIVE_API_KEY'),
-        client_options={
-            'api_endpoint': 'gateway.helicone.ai',
-        },
-        default_metadata=[
-            ('helicone-auth', f'Bearer {os.environ.get("HELICONE_API_KEY")}'),
-            ('helicone-target-url', 'https://generativelanguage.googleapis.com')
-        ],
-        transport="rest"
+    client = genai.Client(
+        api_key=os.environ.get('GOOGLE_API_KEY'),
+        http_options={
+            "base_url": 'https://gateway.helicone.ai',
+            "headers": {
+                "helicone-auth": f'Bearer {os.environ.get("HELICONE_API_KEY")}',
+                "helicone-target-url": 'https://generativelanguage.googleapis.com'
+            }
+        }
     )
     ```
 
   </Step>
   <Step title="Generate content using the model">
     ```python
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content("The opposite of hot is")
-    print(response.result)
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents='Tell me a story in 300 words.'
+    )
+    print(response.text)
+
+    # Optional: Print the full response details
+    print(response.model_dump_json(
+        exclude_none=True, indent=4))
     ```
+
   </Step>
 </Steps>

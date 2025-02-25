@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
+import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
-import { createSelectionRange } from "@/utils/selection";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { $assistant, $system, $user } from "@/utils/llm";
 import { readStream } from "@/lib/api/llm/read-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
-import performEditPrompt from "@/prompts/perform-edit";
-import { suggestions } from "@/prompts/perform-edit";
+import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
+import { $assistant, $system, $user } from "@/utils/generate";
 import {
+  cleanSuggestionIfNeeded,
   MIN_LENGTH_FOR_SUGGESTIONS,
   SUGGESTION_DELAY,
   suggestionReducer,
-  cleanSuggestionIfNeeded,
 } from "@/utils/suggestions";
 
-import LoadingDots from "@/components/shared/universal/LoadingDots";
 import Toolbar from "@/components/shared/prompts/Toolbar";
-import { PiChatDotsBold } from "react-icons/pi";
+import LoadingDots from "@/components/shared/universal/LoadingDots";
 import { MdKeyboardTab } from "react-icons/md";
+import { PiChatDotsBold } from "react-icons/pi";
 
 type SelectionState = {
   text: string;
@@ -47,9 +46,9 @@ const sharedTextAreaStyles = {
 interface PromptBoxProps {
   value: string;
   onChange: (value: string) => void;
-  onVariableCreate?: (variable: StateVariable) => void;
+  onVariableCreate?: (variable: StateInputs) => void;
   contextText?: string;
-  variables?: StateVariable[];
+  variables?: StateInputs[];
   disabled?: boolean;
 }
 
@@ -170,7 +169,7 @@ export default function PromptBox({
 
         const stream = await generateStream(
           {
-            provider: "anthropic",
+            provider: "ANTHROPIC",
             model: "claude-3-5-haiku:beta",
             messages: [
               $system(prompt.system),
@@ -507,7 +506,7 @@ export default function PromptBox({
 
       const stream = await generateStream(
         {
-          provider: "anthropic",
+          provider: "ANTHROPIC",
           model: "claude-3-5-haiku:beta",
           messages: [
             $system(prompt.system),
@@ -565,7 +564,7 @@ export default function PromptBox({
   const tools = [
     {
       icon: <h3 className="font-medium">{"{{}}"}</h3>,
-      label: "Make Into Variable",
+      label: "Make Into Input",
       hotkey: "e",
       onSubmit: (varName: string) => {
         if (!selection || !textareaRef.current) return;
@@ -591,7 +590,7 @@ export default function PromptBox({
 
         handleTextEdit(newValue, newStart, newEnd);
       },
-      placeholder: "Variable name...",
+      placeholder: "Input name...",
     },
     {
       icon: <h3 className="font-medium">{"</>"}</h3>,
@@ -632,8 +631,8 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 caret-black dark:caret-white ${
-        disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
+      className={`group relative grid h-full focus-within:border-transparent dark:border-slate-800 caret-black dark:caret-white ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
       <textarea
@@ -643,18 +642,18 @@ export default function PromptBox({
         onKeyDown={handleKeyDown}
         onSelect={handleSelection}
         onBlur={handleBlur}
-        className="col-[1] row-[1] h-full w-full border-none bg-transparent p-4 outline-none"
+        className="col-[1] row-[1] h-full w-full border-none bg-transparent px-4 outline-none"
         style={{
           ...sharedTextAreaStyles,
           color: "transparent",
           resize: "none",
         }}
-        placeholder="Start typing your prompt..."
+        placeholder="Type your prompt..."
         disabled={disabled}
       />
       <pre
         aria-hidden="true"
-        className="pointer-events-none col-[1] row-[1] h-full w-full p-4 selection:bg-blue-200"
+        className="pointer-events-none col-[1] row-[1] h-full w-full px-4 selection:bg-blue-200"
         style={{
           ...sharedTextAreaStyles,
         }}

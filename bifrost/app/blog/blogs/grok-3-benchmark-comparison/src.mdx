@@ -6,6 +6,15 @@ With significant improvements over Grok 2, this model promises better coding ski
 
 But how well does it actually perform? Let’s break it down.
 
+<CallToAction
+  title="Update: Grok 3 is now free! ...for a short while"
+  description="Available in the link below. X Premium+ and SuperGrok users will have increased access, on top of early access to advanced features like Voice Mode"
+  primaryButtonText="Try Grok 3 for Free"
+  primaryButtonLink="https://x.com/i/grok"
+  secondaryButtonText="Integrate xAI with Helicone"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/x"
+/>
+
 ## What’s New in Grok 3?
 
 Grok 3 is a massive leap forward from its predecessor. Here’s what changed:
@@ -76,7 +85,7 @@ Its **Deep Search** tool was praised for finding high-quality information on rec
 
 An early user on X found Grok 3 <a href="https://x.com/theo/status/1891736803796832298" target="_blank" rel="noopener">**struggled with somewhat complex coding**</a>, at least compared to GPT-4o and Claude which coded up better solutions as shown below.
 
-<video width="100%" controls autoplay loop>
+<video width="100%" controls autoplay loop className="rounded-xl">
   <source
     src="/static/blog/grok-3-benchmark-comparison/theo-gg-coding-test.mp4"
     type="video/mp4"
@@ -133,15 +142,21 @@ xAI has big plans beyond Grok 3. Here’s what’s coming next:
   secondaryButtonText="See Docs"
   secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/x#x-ai-integration"
 >
-```bash
-curl \
-  --header 'Authorization: Bearer <X_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "model": "grok-beta",
-    "messages": [{"role": "user", "content": "Say this is a test"}]
-}' \
-  --url https://x.helicone.ai/chat/completions
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-x-ai-api-key",  # X AI API key
+    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
+)
+
+response = client.chat.completions.create(
+    model="grok-beta",
+    messages=[
+        {"role": "user", "content": "Say this is a test"}
+    ]
+)
+print(response.choices[0].message.content)
 ```
 </CallToAction>
 
@@ -170,6 +185,8 @@ Deep Search is Grok 3’s research-style retrieval system. Instead of just pulli
 ### **Is Grok 3 free?**
 
 No. You need an X Premium Plus subscription or a Grok app subscription to access it.
+
+**Update:** As of February 19, Grok 3 is free for a short while. See the <a href="https://x.com/xai/status/1892400129719611567" target="_blank" rel="noopener">official announcement</a> for more details.
 
 ### **When will the Grok API be available?**
 

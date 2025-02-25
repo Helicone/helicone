@@ -734,6 +734,8 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
+        promptCacheReadTokens: 0,
+        promptCacheWriteTokens: 0,
       }) ?? 0
     );
   }

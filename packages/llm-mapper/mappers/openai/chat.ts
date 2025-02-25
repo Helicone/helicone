@@ -275,6 +275,11 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
     top_p: request.top_p,
     messages: getRequestMessages(request),
     tool_choice: request.tool_choice,
+    tools: request.tools?.map((tool: any) => ({
+      name: tool.name || tool.function.name,
+      description: tool.description || tool.function.description,
+      parameters: tool.parameters || tool.function.parameters,
+    })),
   };
 
   const llmSchema: LlmSchema = {

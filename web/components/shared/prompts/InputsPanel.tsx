@@ -1,34 +1,33 @@
+import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { StateVariable } from "@/types/prompt-state";
-import { isValidVariableName } from "@/utils/variables";
-import { populateVariables } from "./helpers";
-import { useInputs } from "@/services/hooks/prompts/inputs";
-import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
-import { memo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-
-import { PiChatBold, PiShuffleBold, PiDatabaseBold } from "react-icons/pi";
-import { Input } from "@/components/ui/input";
+import { useInputs } from "@/services/hooks/prompts/inputs";
+import { StateInputs } from "@/types/prompt-state";
+import { isValidVariableName } from "@/utils/variables";
+import { useMutation } from "@tanstack/react-query";
+import { memo, useState } from "react";
+import { PiChatBold, PiDatabaseBold, PiShuffleBold } from "react-icons/pi";
+import GlassHeader from "../universal/GlassHeader";
+import { populateVariables } from "./helpers";
 
 interface VariableItemProps {
-  variable: StateVariable;
+  variable: StateInputs;
   originalIndex: number;
   onVariableChange: (index: number, value: string) => void;
 }
 
 interface VariablesPanelProps {
-  variables: StateVariable[];
+  variables: StateInputs[];
   onVariableChange: (index: number, value: string) => void;
-  promptVersionId: string;
+  promptVersionId?: string;
 }
-
 export default function VariablesPanel({
   variables,
   onVariableChange,
@@ -80,12 +79,12 @@ export default function VariablesPanel({
 
   const [openInputSelector, setOpenInputSelector] = useState(false);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="h-8 flex items-center justify-between">
-        <h2 className="font-semibold text-secondary">Variables</h2>
+      <GlassHeader className="h-14 px-4">
+        <h2 className="font-semibold text-secondary">Inputs</h2>
         <div className="flex flex-row gap-2">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
@@ -109,7 +108,7 @@ export default function VariablesPanel({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
@@ -134,19 +133,19 @@ export default function VariablesPanel({
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
+      </GlassHeader>
 
       {/* No Variables */}
       {validVariablesWithIndices.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center text-balance">
+        <p className="text-sm text-slate-400 text-center text-balance px-4">
           Make your prompt dynamic with{" "}
-          <span className="font-semibold">Variables</span>. Type{" "}
+          <span className="font-semibold">Inputs</span>. Type{" "}
           <span className="text-heliblue">{`{{name}}`}</span> or highlight a
-          value in a message and press{" "}
-          <span className="text-heliblue">⌘ E</span>.
+          value in a message and press <span className="text-heliblue">⌘E</span>
+          .
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900">
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-900 px-4">
           {/* Variables */}
           {validVariablesWithIndices.map(({ variable, originalIndex }) => (
             <VariableItem

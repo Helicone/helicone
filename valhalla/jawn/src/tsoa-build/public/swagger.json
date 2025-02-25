@@ -2648,6 +2648,10 @@
 						},
 						"type": "array"
 					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -2691,6 +2695,94 @@
 					"_type"
 				],
 				"type": "object"
+			},
+			"Tool": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HeliconeEventTool": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"tool"
+						],
+						"nullable": false
+					},
+					"toolName": {
+						"type": "string"
+					},
+					"input": {}
+				},
+				"required": [
+					"_type",
+					"toolName",
+					"input"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
+			"HeliconeEventVectorDB": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"vector_db"
+						],
+						"nullable": false
+					},
+					"operation": {
+						"type": "string",
+						"enum": [
+							"search",
+							"insert",
+							"delete",
+							"update"
+						]
+					},
+					"text": {
+						"type": "string"
+					},
+					"vector": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					},
+					"topK": {
+						"type": "number",
+						"format": "double"
+					},
+					"filter": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"databaseName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"_type",
+					"operation"
+				],
+				"type": "object",
+				"additionalProperties": {}
 			},
 			"LLMRequestBody": {
 				"properties": {
@@ -2768,13 +2860,138 @@
 						"type": "array",
 						"nullable": true
 					},
-					"tool_choice": {}
+					"tools": {
+						"items": {
+							"$ref": "#/components/schemas/Tool"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"auto",
+									"none",
+									"tool"
+								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"toolDetails": {
+						"$ref": "#/components/schemas/HeliconeEventTool"
+					},
+					"vectorDBDetails": {
+						"$ref": "#/components/schemas/HeliconeEventVectorDB"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"vectorDBDetailsResponse": {
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"vector_db"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									},
+									"destination_parsed": {
+										"type": "boolean"
+									},
+									"destination": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"actualSimilarity": {
+								"type": "number",
+								"format": "double"
+							},
+							"similarityThreshold": {
+								"type": "number",
+								"format": "double"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
+					"toolDetailsResponse": {
+						"properties": {
+							"toolName": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"tool"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"tips": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"toolName",
+							"_type",
+							"metadata",
+							"tips",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"error": {
 						"properties": {
 							"heliconeMessage": {}
@@ -3355,6 +3572,9 @@
 							"$ref": "#/components/schemas/SortDirection"
 						},
 						"type": "object"
+					},
+					"cost_usd": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
@@ -4680,6 +4900,26 @@
 					"seats": {
 						"type": "number",
 						"format": "double"
+					},
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpgradeToTeamBundleRequest": {
+				"properties": {
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
 					}
 				},
 				"type": "object",
@@ -8115,22 +8355,7 @@
 									"metadata": {
 										"$ref": "#/components/schemas/Record_string.any_"
 									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
+									"prompt": {},
 									"userDefinedId": {
 										"type": "string"
 									}
@@ -10304,11 +10529,12 @@
 							"example": {
 								"filter": "all",
 								"isCached": false,
-								"limit": 10,
+								"limit": 100,
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
 								},
+								"includeInputs": false,
 								"isScored": false,
 								"isPartOfExperiment": false
 							}
@@ -11452,7 +11678,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
@@ -11478,7 +11714,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/manage-subscription": {

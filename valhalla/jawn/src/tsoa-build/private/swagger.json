@@ -1433,6 +1433,10 @@
 						},
 						"type": "array"
 					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -1476,6 +1480,94 @@
 					"_type"
 				],
 				"type": "object"
+			},
+			"Tool": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parameters": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HeliconeEventTool": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"tool"
+						],
+						"nullable": false
+					},
+					"toolName": {
+						"type": "string"
+					},
+					"input": {}
+				},
+				"required": [
+					"_type",
+					"toolName",
+					"input"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
+			"HeliconeEventVectorDB": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"vector_db"
+						],
+						"nullable": false
+					},
+					"operation": {
+						"type": "string",
+						"enum": [
+							"search",
+							"insert",
+							"delete",
+							"update"
+						]
+					},
+					"text": {
+						"type": "string"
+					},
+					"vector": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					},
+					"topK": {
+						"type": "number",
+						"format": "double"
+					},
+					"filter": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"databaseName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"_type",
+					"operation"
+				],
+				"type": "object",
+				"additionalProperties": {}
 			},
 			"LLMRequestBody": {
 				"properties": {
@@ -1553,13 +1645,138 @@
 						"type": "array",
 						"nullable": true
 					},
-					"tool_choice": {}
+					"tools": {
+						"items": {
+							"$ref": "#/components/schemas/Tool"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"auto",
+									"none",
+									"tool"
+								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"toolDetails": {
+						"$ref": "#/components/schemas/HeliconeEventTool"
+					},
+					"vectorDBDetails": {
+						"$ref": "#/components/schemas/HeliconeEventVectorDB"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"vectorDBDetailsResponse": {
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"vector_db"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									},
+									"destination_parsed": {
+										"type": "boolean"
+									},
+									"destination": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"actualSimilarity": {
+								"type": "number",
+								"format": "double"
+							},
+							"similarityThreshold": {
+								"type": "number",
+								"format": "double"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
+					"toolDetailsResponse": {
+						"properties": {
+							"toolName": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"tool"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"tips": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"toolName",
+							"_type",
+							"metadata",
+							"tips",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"error": {
 						"properties": {
 							"heliconeMessage": {}
@@ -2315,6 +2532,9 @@
 							"$ref": "#/components/schemas/SortDirection"
 						},
 						"type": "object"
+					},
+					"cost_usd": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
@@ -3253,6 +3473,26 @@
 					"seats": {
 						"type": "number",
 						"format": "double"
+					},
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpgradeToTeamBundleRequest": {
+				"properties": {
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
 					}
 				},
 				"type": "object",
@@ -3376,6 +3616,9 @@
 						"type": "string",
 						"nullable": true
 					},
+					"onboarding_status": {
+						"$ref": "#/components/schemas/Json"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -3392,6 +3635,9 @@
 						"nullable": true
 					},
 					"is_personal": {
+						"type": "boolean"
+					},
+					"is_main_org": {
 						"type": "boolean"
 					},
 					"id": {
@@ -3429,7 +3675,7 @@
 				],
 				"type": "object"
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_": {
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -3451,6 +3697,9 @@
 					},
 					"organization_type": {
 						"type": "string"
+					},
+					"onboarding_status": {
+						"$ref": "#/components/schemas/Json"
 					}
 				},
 				"required": [
@@ -3462,7 +3711,7 @@
 			"UpdateOrganizationParams": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type_"
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"
 					},
 					{
 						"properties": {
@@ -3712,6 +3961,47 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___": {
+				"properties": {
+					"currentStep": {
+						"type": "string"
+					},
+					"selectedTier": {
+						"type": "string"
+					},
+					"hasOnboarded": {
+						"type": "boolean"
+					},
+					"members": {
+						"items": {},
+						"type": "array"
+					},
+					"addons": {
+						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
+							"prompts": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"evals",
+							"experiments",
+							"prompts"
+						],
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"OnboardingStatus": {
+				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
 			"HeliconeMeta": {
 				"properties": {
@@ -5486,7 +5776,7 @@
 					}
 				]
 			},
-			"PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"status": {
 						"type": "number",
@@ -5552,6 +5842,9 @@
 								"org_provider_key": {
 									"type": "string"
 								},
+								"onboarding_status": {
+									"$ref": "#/components/schemas/Json"
+								},
 								"name": {
 									"type": "string"
 								},
@@ -5562,6 +5855,9 @@
 									"$ref": "#/components/schemas/Json"
 								},
 								"is_personal": {
+									"type": "boolean"
+								},
+								"is_main_org": {
 									"type": "boolean"
 								},
 								"id": {
@@ -5602,10 +5898,12 @@
 								"owner",
 								"organization_type",
 								"org_provider_key",
+								"onboarding_status",
 								"name",
 								"logo_path",
 								"limits",
 								"is_personal",
+								"is_main_org",
 								"id",
 								"icon",
 								"has_onboarded",
@@ -5634,10 +5932,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/PostgrestResponseFailure"
@@ -7372,11 +7670,12 @@
 							"example": {
 								"filter": "all",
 								"isCached": false,
-								"limit": 10,
+								"limit": 100,
 								"offset": 0,
 								"sort": {
 									"created_at": "desc"
 								},
+								"includeInputs": false,
 								"isScored": false,
 								"isPartOfExperiment": false
 							}
@@ -7816,22 +8115,7 @@
 									"metadata": {
 										"$ref": "#/components/schemas/Record_string.any_"
 									},
-									"prompt": {
-										"properties": {
-											"messages": {
-												"items": {},
-												"type": "array"
-											},
-											"model": {
-												"type": "string"
-											}
-										},
-										"required": [
-											"messages",
-											"model"
-										],
-										"type": "object"
-									},
+									"prompt": {},
 									"userDefinedId": {
 										"type": "string"
 									}
@@ -8666,7 +8950,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
@@ -8692,7 +8986,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/manage-subscription": {
@@ -9743,6 +10047,58 @@
 				"parameters": []
 			}
 		},
+		"/v1/organization/update_onboarding": {
+			"post": {
+				"operationId": "UpdateOnboardingStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"has_onboarded": {
+										"type": "boolean"
+									},
+									"name": {
+										"type": "string"
+									},
+									"onboarding_status": {
+										"$ref": "#/components/schemas/OnboardingStatus"
+									}
+								},
+								"required": [
+									"has_onboarded",
+									"name",
+									"onboarding_status"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/log/request": {
 			"post": {
 				"operationId": "GetRequests",
@@ -10566,7 +10922,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_personal-boolean--limits-Json--logo_path-string--name-string--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+									"$ref": "#/components/schemas/PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 								}
 							}
 						}

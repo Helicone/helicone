@@ -294,6 +294,21 @@ const blogContent: BlogStructure[] = [
       folderName: "openai-structured-outputs",
     },
   },
+    {
+    dynmaicEntry: {
+      folderName: "helicone-vs-traceloop",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-comet",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-honeyhive",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "text-classification-with-llms",

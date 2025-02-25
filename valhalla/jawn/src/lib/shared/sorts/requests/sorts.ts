@@ -24,6 +24,7 @@ export interface SortLeafRequest {
   values?: {
     [key: string]: SortDirection;
   };
+  cost_usd?: SortDirection;
 }
 
 function assertValidSortDirection(direction: SortDirection) {
@@ -94,6 +95,10 @@ export function buildRequestSort(sort: SortLeafRequest) {
       return `(request.properties ->> '${key}')::text ${sort.properties[key]}`;
     }
   }
+  if (sort.cost_usd) {
+    assertValidSortDirection(sort.cost_usd);
+    return `cost_usd ${sort.cost_usd}`;
+  }
   if (sort.values) {
     for (const key in sort.values) {
       assertValidSortDirection(sort.values[key]);
@@ -149,6 +154,10 @@ export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
   if (sort.response_text) {
     assertValidSortDirection(sort.response_text);
     return `JSONExtractString(request_response_rmt.response_body, 'choices', 0, 'text') ${sort.response_text}`;
+  }
+  if (sort.cost_usd) {
+    assertValidSortDirection(sort.cost_usd);
+    return `cost_usd ${sort.cost_usd}`;
   }
   if (sort.properties) {
     for (const key in sort.properties) {
