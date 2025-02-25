@@ -153,6 +153,35 @@ END
 `;
 }
 export const COST_MULTIPLE = 1_000_000_000;
+
+export function clickhousePriceCalcNonAggregated(table: string) {
+  // This is so that we don't need to do any floating point math in the database
+  // and we can just divide by 1_000_000 to get the cost in dollars
+
+  const providersWithCosts = providers.filter(
+    (p) => p.costs && defaultProvider.provider !== p.provider
+  );
+  if (!defaultProvider.costs) {
+    throw new Error("Default provider does not have costs");
+  }
+  return `
+(
+  CASE
+    ${providersWithCosts
+      .map((provider) => {
+        if (!provider.costs) {
+          throw new Error("Provider does not have costs");
+        }
+        return `    WHEN (${table}.provider = '${provider.provider}') 
+      THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
+      })
+      .join("\n")}
+    ELSE (${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)})
+  END
+) / ${COST_MULTIPLE}
+`;
+}
+
 export function clickhousePriceCalc(table: string) {
   // This is so that we don't need to do any floating point math in the database
   // and we can just divide by 1_000_000 to get the cost in dollars
