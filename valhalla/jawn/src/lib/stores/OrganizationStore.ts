@@ -1,5 +1,6 @@
 import {
   NewOrganizationParams,
+  OnboardingStatus,
   OrganizationFilter,
   OrganizationLayout,
   OrganizationMember,
@@ -44,6 +45,41 @@ export class OrganizationStore extends BaseStore {
       return err(memberError?.message ?? "Failed to create organization");
     }
     return ok(insert);
+  }
+
+  async createStarterOrg(userId: string): Promise<Result<string, string>> {
+    const result = await dbExecute<{ id: string }>(
+      `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete)
+       SELECT 'My Organization', $1, 'free', true, false, false
+       WHERE NOT EXISTS (
+         SELECT 1 FROM organization 
+         WHERE owner = $1 
+         AND tier = 'free' 
+         AND name = 'My Organization'
+       )
+       RETURNING id;`,
+      [userId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      // If insert failed, try to get existing starter org
+      const existing = await dbExecute<{ id: string }>(
+        `SELECT id FROM organization 
+         WHERE owner = $1 
+         AND tier = 'free' 
+         AND name = 'My Organization'
+         LIMIT 1`,
+        [userId]
+      );
+
+      if (existing.error || !existing.data || existing.data.length === 0) {
+        return err("Failed to create or find starter organization");
+      }
+
+      return ok(existing.data[0].id);
+    }
+
+    return ok(result.data[0].id);
   }
 
   async getOrganizationMember(
@@ -405,9 +441,44 @@ export class OrganizationStore extends BaseStore {
         });
       });
 
+      const result = await dbExecute<{ id: string }>(
+        `UPDATE organization 
+         SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || '{"demoDataSetup": true}'::jsonb
+         WHERE id = $1
+         RETURNING id`,
+        [organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Failed to update organization onboarding status");
+      }
+
       return ok(null);
     } catch (error) {
       return err(`Failed to setup demo: ${error}`);
     }
+  }
+
+  async updateOnboardingStatus(
+    onboardingStatus: OnboardingStatus,
+    name: string,
+    hasOnboarded: boolean
+  ): Promise<Result<string, string>> {
+    const result = await dbExecute<{ id: string }>(
+      `UPDATE organization 
+       SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || $1::jsonb,
+           name = COALESCE(NULLIF($2, ''), name),
+           has_onboarded = CASE WHEN has_onboarded = true THEN true ELSE $3 END
+       WHERE id = $4
+       RETURNING id`,
+      [onboardingStatus, name, hasOnboarded, this.organizationId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      console.error("Failed to update onboarding status:", result.error);
+      return err(result.error ?? "Failed to update onboarding status");
+    }
+
+    return ok(result.data[0].id);
   }
 }

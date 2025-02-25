@@ -442,7 +442,7 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "HIPPA",
+        name: "HIPAA",
         hobby: false,
         pro: false,
         team: true,

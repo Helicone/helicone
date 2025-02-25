@@ -15,6 +15,7 @@ import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
 import {
   NewOrganizationParams,
+  OnboardingStatus,
   OrganizationFilter,
   OrganizationLayout,
   OrganizationManager,
@@ -120,6 +121,22 @@ export class OrganizationController extends Controller {
     const org = await organizationManager.getOrg();
     if (org.error || !org.data) {
       return err(`Error getting organization: ${org.error}`);
+    }
+
+    // Check if user is already a member
+    const members = await organizationManager.getOrganizationMembers(
+      organizationId
+    );
+    if (members.error) {
+      return err(`Error checking existing members: ${members.error}`);
+    }
+
+    const isExistingMember = members.data?.some(
+      (member) => member.email.toLowerCase() === requestBody.email.toLowerCase()
+    );
+
+    if (isExistingMember) {
+      return ok(null); // Silently succeed if member already exists
     }
 
     if (org.data.tier === "enterprise" || "team-20250130") {
@@ -392,6 +409,34 @@ export class OrganizationController extends Controller {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error ?? "Error setting up demo");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
+  @Post("/update_onboarding")
+  public async updateOnboardingStatus(
+    @Body()
+    requestBody: {
+      onboarding_status: OnboardingStatus;
+      name: string;
+      has_onboarded: boolean;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateOnboardingStatus(
+      request.authParams.organizationId ?? "",
+      requestBody.onboarding_status,
+      requestBody.name,
+      requestBody.has_onboarded
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error updating onboarding status");
     } else {
       this.setStatus(201);
       return ok(null);
