@@ -299,7 +299,7 @@ export function CodeIntegrationPage({
                       Event received successfully!
                     </p>
                     <p className="text-green-600 text-sm leading-5">
-                      Great job! Let's head to your dashboard.
+                      Great job! Let&apos;s head to your dashboard.
                     </p>
                   </div>
                 </div>
