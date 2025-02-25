@@ -46,14 +46,10 @@ const SignIn = ({
   }, [unauthorized]);
 
   if (user) {
-    const { pi_session, redirect_to, ...restQuery } = router.query;
+    const { pi_session, ...restQuery } = router.query;
     router.push({
-      pathname: redirect_to
-        ? String(redirect_to)
-        : pi_session
-        ? "/pi/onboarding"
-        : "/dashboard",
-      query: restQuery,
+      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+      query: router.query,
     });
   }
 
