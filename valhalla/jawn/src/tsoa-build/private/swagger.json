@@ -2532,6 +2532,9 @@
 							"$ref": "#/components/schemas/SortDirection"
 						},
 						"type": "object"
+					},
+					"cost_usd": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
