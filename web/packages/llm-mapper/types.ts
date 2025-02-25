@@ -12,8 +12,7 @@ export type Message = {
     | "message"
     | "autoInput"
     | "contentArray"
-    | "audio"
-    | "text";
+    | "audio";
   id?: string;
   role?: string;
   name?: string;
