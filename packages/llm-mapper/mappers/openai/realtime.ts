@@ -106,9 +106,15 @@ type RealtimeMessage = {
   session?: {};
   // With "conversation.item.create"
   item?: {
-    type: string; // "function_call_output"
-    call_id: string; // ex: "call_123"
-    output: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
+    type: string; // "function_call_output" or "message"
+    call_id?: string; // ex: "call_123"
+    output?: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
+    content?: {
+      type: string; // "input_audio" or other types
+      transcript?: string;
+      audio?: string; // Base64 encoded audio
+      text?: string;
+    }[];
   };
   // With "conversation.item.input_audio_transcription.completed"
   transcript?: string; // ex: "Hello, how are you?"
@@ -141,6 +147,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 role: "user",
                 _type: "audio",
                 content: msg.content.transcript,
+                audio_data: msg.content.item?.content?.[0]?.audio || null,
                 timestamp: msg.timestamp,
               }
             : null;
@@ -155,6 +162,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               role: "assistant",
               _type: content.text ? "text" : "audio",
               content: content.text || content.transcript || "",
+              audio_data: content.audio || null,
               timestamp: msg.timestamp,
             };
           }
@@ -196,6 +204,22 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "function",
               tool_call_id: item.call_id,
               content: item.output,
+              timestamp: msg.timestamp,
+            };
+          }
+
+          // Handle user-created audio items
+          if (
+            item?.type === "message" &&
+            item.content &&
+            Array.isArray(item.content) &&
+            item.content[0]?.type === "input_audio"
+          ) {
+            return {
+              role: "user",
+              _type: "audio",
+              content: item.content[0].transcript || "",
+              audio_data: item.content[0].audio || null,
               timestamp: msg.timestamp,
             };
           }

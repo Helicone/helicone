@@ -686,6 +686,7 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      audio_data?: string;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -695,7 +696,7 @@ Json: JsonObject;
       role?: string;
       id?: string;
       /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray" | "audio" | "text";
     };
     Tool: {
       name: string;
