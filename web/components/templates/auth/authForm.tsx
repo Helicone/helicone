@@ -390,11 +390,11 @@ const AuthForm = (props: AuthFormProps) => {
         {showQuote ? (
           <>
             <div className="relative z-20 space-y-3 w-full">
-              <h1 className="text-4xl font-extrabold text-slate-300">"</h1>
+              <h1 className="text-4xl font-extrabold text-slate-300">&quot;</h1>
               <p className="text-slate-400 text-4xl font-medium w-full">
                 {highlightText(selectedQuote.text, selectedQuote.highlights)}
               </p>
-              <h1 className="text-4xl font-bold text-slate-300">"</h1>
+              <h1 className="text-4xl font-bold text-slate-300">&quot;</h1>
             </div>
 
             {/* Name and logo - Only shown with quote */}
