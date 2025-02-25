@@ -104,7 +104,7 @@ export default function BillingPage() {
         } else {
           result = await upgradeToPro.mutateAsync({
             addons: draftAddons || {},
-            seats: draftMembers.length,
+            seats: draftMembers.length + 1, // +1 for the owner
           });
         }
 

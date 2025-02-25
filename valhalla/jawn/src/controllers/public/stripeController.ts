@@ -335,12 +335,8 @@ export class StripeController extends Controller {
       };
     }[];
   } | null> {
-    console.log("sup mofo");
-    console.log(`Organization ID: ${request.authParams.organizationId}`);
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getSubscription();
-
-    console.log("result", result);
 
     if (result.error) {
       this.setStatus(400);
