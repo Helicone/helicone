@@ -2691,8 +2691,7 @@
 							"message",
 							"autoInput",
 							"contentArray",
-							"audio",
-							"text"
+							"audio"
 						]
 					}
 				},
