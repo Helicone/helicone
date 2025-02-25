@@ -441,6 +441,18 @@ export class OrganizationStore extends BaseStore {
         });
       });
 
+      const result = await dbExecute<{ id: string }>(
+        `UPDATE organization 
+         SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || '{"demoDataSetup": true}'::jsonb
+         WHERE id = $1
+         RETURNING id`,
+        [organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Failed to update organization onboarding status");
+      }
+
       return ok(null);
     } catch (error) {
       return err(`Failed to setup demo: ${error}`);

@@ -290,15 +290,19 @@ const useOrgsContextManager = () => {
     });
   }, [refetch]);
 
-  const [ensuringOneOrg, setEnsuringOneOrg] = useState(false);
   const hasRunRef = useRef<string | null>(null);
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
-    refetch();
+    if (user?.id && hasRunRef.current === user.id) {
+      return;
+    }
 
-    // If user exists but no orgs, we need to wait for the trigger to complete
-    if (user?.id && (!orgs || orgs.length === 0) && !ensuringOneOrg) {
-      // Set a small timeout to give the database trigger time to complete
+    if (isProcessingRef.current) {
+      return;
+    }
+
+    if (user?.id && (!orgs || orgs.length === 0)) {
       setTimeout(() => {
         refetch();
       }, 1500);
@@ -307,13 +311,13 @@ const useOrgsContextManager = () => {
 
     if (
       user?.id &&
-      !ensuringOneOrg &&
+      !isProcessingRef.current &&
       hasRunRef.current !== user.id &&
       orgs &&
       orgs.length > 0
     ) {
+      isProcessingRef.current = true;
       hasRunRef.current = user.id;
-      setEnsuringOneOrg(true);
 
       const jwtToken = getHeliconeCookie().data?.jwtToken;
       const demoOrg = orgs?.find((org) => org.tier === "demo");
@@ -349,9 +353,12 @@ const useOrgsContextManager = () => {
       }
 
       refreshCurrentOrg();
-      setEnsuringOneOrg(false);
+
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 0);
     }
-  }, [orgs, user?.id, refreshCurrentOrg, ensuringOneOrg, refetch]);
+  }, [orgs, user?.id]);
 
   useEffect(() => {
     if (user) {
