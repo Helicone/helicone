@@ -4900,6 +4900,26 @@
 					"seats": {
 						"type": "number",
 						"format": "double"
+					},
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpgradeToTeamBundleRequest": {
+				"properties": {
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
 					}
 				},
 				"type": "object",
@@ -11658,7 +11678,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
@@ -11684,7 +11714,17 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpgradeToTeamBundleRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/manage-subscription": {

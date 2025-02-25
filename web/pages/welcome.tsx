@@ -15,10 +15,15 @@ const Welcome = (props: WelcomeProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (org) {
-      if (org.allOrgs.length > 0) {
-        router.push("/dashboard");
-      }
+    if (
+      org &&
+      org.allOrgs.length > 0 &&
+      org.currentOrg?.tier !== "demo" &&
+      org.currentOrg?.has_onboarded
+    ) {
+      router.push("/dashboard");
+    } else {
+      router.push("/onboarding");
     }
   }, [org, router]);
   return <LoadingAnimation title="Just setting up your account..." />;

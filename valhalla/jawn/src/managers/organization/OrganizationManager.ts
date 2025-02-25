@@ -17,6 +17,7 @@ export type UpdateOrganizationParams = Pick<
   | "limits"
   | "reseller_id"
   | "organization_type"
+  | "onboarding_status"
 > & {
   variant?: string;
 };
@@ -59,6 +60,18 @@ export type OrganizationOwner = {
   email: string;
   tier: string;
 };
+
+export type OnboardingStatus = Partial<{
+  currentStep: string;
+  selectedTier: string;
+  hasOnboarded: boolean;
+  members: any[];
+  addons: {
+    prompts: boolean;
+    experiments: boolean;
+    evals: boolean;
+  };
+}>;
 
 export class OrganizationManager extends BaseManager {
   private organizationStore: OrganizationStore;
@@ -439,5 +452,38 @@ export class OrganizationManager extends BaseManager {
       return err(orgError ?? "Error setting up demo");
     }
     return ok(null);
+  }
+
+  async updateOnboardingStatus(
+    organizationId: string,
+    onboardingStatus: OnboardingStatus,
+    name: string,
+    hasOnboarded: boolean
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
+      organizationId,
+      this.authParams.userId
+    );
+
+    if (!hasAccess) {
+      return err(
+        "User does not have access to update organization onboarding status"
+      );
+    }
+
+    const { data, error } = await this.organizationStore.updateOnboardingStatus(
+      onboardingStatus,
+      name,
+      hasOnboarded
+    );
+
+    if (error || !data) {
+      console.error(`Failed to update onboarding status: ${error}`);
+      return err(`Failed to update onboarding status: ${error}`);
+    }
+
+    return ok(data);
   }
 }

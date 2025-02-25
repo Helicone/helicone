@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const switchVariants = cva(
-  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-slate-900 data-[state=unchecked]:bg-slate-200 dark:focus-visible:ring-slate-200 dark:focus-visible:ring-offset-slate-850 dark:data-[state=checked]:bg-slate-200 dark:data-[state=unchecked]:bg-slate-600",
+  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-slate-200 dark:focus-visible:ring-offset-slate-850",
   {
     variants: {
       size: {
@@ -13,9 +13,16 @@ const switchVariants = cva(
         sm: "h-4 w-7",
         md: "h-5 w-9",
       },
+      variant: {
+        default:
+          "data-[state=checked]:bg-slate-900 data-[state=unchecked]:bg-slate-200 dark:data-[state=checked]:bg-slate-200 dark:data-[state=unchecked]:bg-slate-600",
+        helicone:
+          "data-[state=checked]:bg-sky-500 data-[state=unchecked]:bg-slate-100",
+      },
     },
     defaultVariants: {
       size: "default",
+      variant: "default",
     },
   }
 );
@@ -44,9 +51,9 @@ interface SwitchProps
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   SwitchProps
->(({ className, size, ...props }, ref) => (
+>(({ className, size, variant, ...props }, ref) => (
   <SwitchPrimitives.Root
-    className={cn(switchVariants({ size, className }))}
+    className={cn(switchVariants({ size, variant, className }))}
     {...props}
     ref={ref}
   >

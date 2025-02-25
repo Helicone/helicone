@@ -55,9 +55,8 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import OnboardingQuickStartModal from "./OnboardingQuickStartModal";
-import DemoDisclaimerModal from "./DemoDisclaimerModal";
 import { TimeFilter } from "@/types/timeFilter";
+import OnboardingFloatingPrompt from "./OnboardingFloatingPrompt";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -95,11 +94,19 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const orgContext = useOrg();
 
-  const [showQuickStartModal, setShowQuickStartModal] = useState(
+  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(
     orgContext?.currentOrg?.has_onboarded != undefined
       ? !orgContext?.currentOrg?.has_onboarded
       : false
   );
+
+  useEffect(() => {
+    orgContext?.refetchOrgs();
+    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
+      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
+    }
+  }, [orgContext?.currentOrg?.has_onboarded]);
+
   const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
     useOrganizationLayout(
       orgContext?.currentOrg?.id!,
@@ -989,23 +996,10 @@ const DashboardPage = (props: DashboardPageProps) => {
         />
 
         <UpgradeProModal open={open} setOpen={setOpen} />
-
-        {showDemoDisclaimerModal && orgContext?.currentOrg?.tier === "demo" && (
-          <DemoDisclaimerModal
-            open={showDemoDisclaimerModal}
-            setOpen={setShowDemoDisclaimerModal}
-            onSuccess={() => {
-              setShowDemoDisclaimerModal(false);
-            }}
-          />
-        )}
-
-        {orgContext?.currentOrg?.tier !== "demo" && (
-          <OnboardingQuickStartModal
-            open={showQuickStartModal ?? false}
-            setOpen={setShowQuickStartModal}
-          />
-        )}
+        <OnboardingFloatingPrompt
+          open={showOnboardingPopUp}
+          setOpen={setShowOnboardingPopUp}
+        />
       </IslandContainer>
     </>
   );
