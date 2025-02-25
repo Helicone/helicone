@@ -11,6 +11,7 @@ import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import { cn } from "@/lib/utils";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import {
   DocumentTextIcon,
   EyeIcon,
@@ -64,9 +65,33 @@ const PromptsPage = (props: PromptsPageProps) => {
   // EVENT HANDLERS
   const handleCreatePrompt = async () => {
     try {
-      router.push(`/prompts/new`);
+      // Create a basic prompt with default settings
+      const basePrompt: LLMRequestBody = {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            _type: "message",
+            role: "system",
+            content: "You are a helpful assistant.",
+          },
+          {
+            _type: "message",
+            role: "user",
+            content: 'What is 2+<helicone-prompt-input key="number" />?',
+          },
+        ],
+      };
+      const metadata = {
+        provider: "OPENAI",
+        createdFromUi: true,
+      };
+
+      const newPrompt = await createPrompt(basePrompt, metadata);
+      if (newPrompt?.id) {
+        router.push(`/prompts/${newPrompt.id}`);
+      }
     } catch (error) {
-      console.error("Error navigating to new prompt:", error);
+      console.error("Error creating prompt:", error);
     }
   };
 
