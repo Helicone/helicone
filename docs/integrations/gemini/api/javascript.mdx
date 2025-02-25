@@ -81,42 +81,50 @@ iconType: "solid"
   <Step title="Install necessary packages">
     Ensure you have the necessary packages installed in your Javascript project:
     ```bash
-    npm install google-genai
+    npm install @google/generative-ai
     ```
   </Step>
   <Step title="Import and configure the client">
     ```javascript
-    import { genai } from "google-genai";
+    import { GoogleGenerativeAI } from "@google/generative-ai";
 
     if (!process.env.GOOGLE_API_KEY) {
       throw new Error("GOOGLE_API_KEY environment variable must be set");
     }
 
-    const client = genai.Client({
-      api_key: process.env.GOOGLE_API_KEY,
-      client_options: {
-        api_endpoint: "gateway.helicone.ai",
-      },
-      default_metadata: [
-        ["helicone-auth", `Bearer ${process.env.HELICONE_API_KEY}`],
-        ["helicone-target-url", "https://generativelanguage.googleapis.com"],
-      ],
-      transport: "rest",
+    if (!process.env.HELICONE_API_KEY) {
+      throw new Error("HELICONE_API_KEY environment variable must be set");
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+
+    const modelParams = {
+      model: "gemini-2.0-flash",
+      systemInstruction: "You are a helpful assistant that can answer questions and help with tasks.",
+    };
+
+    const modelInstance = genAI.getGenerativeModel(modelParams, {
+      baseUrl: "https://gateway.helicone.ai",
+      customHeaders: {
+        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+        'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+      }
     });
     ```
 
   </Step>
   <Step title="Generate content using the model">
     ```javascript
-    async function run() {
-      const response = await client.models.generate_content({
-        model: "gemini-2.0-flash",
-        contents: "Tell me a story in 300 words.",
-      });
-      console.log(response.text);
+    async function generateContent() {
+      try {
+        const response = await modelInstance.generateContent("Hello, world!");
+        console.log(JSON.stringify(response, null, 2));
+      } catch (error) {
+        console.error("Error generating content:", error);
+      }
     }
 
-    run();
+    generateContent();
     ```
 
   </Step>
