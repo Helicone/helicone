@@ -137,8 +137,8 @@ export default function PromptEditor(props: PromptEditorProps) {
     () =>
       (state?.messages.some(
         (m) =>
+          // Check if any message (regardless of role) has non-empty content
           typeof m !== "string" &&
-          m.role === "user" &&
           (typeof m.content === "string" ? m.content.trim().length > 0 : true)
       ) ??
         false) &&
