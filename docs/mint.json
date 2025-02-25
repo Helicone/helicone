@@ -280,6 +280,7 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/prompt-thinking-models",
             "guides/cookbooks/fine-tune",
             "guides/cookbooks/openai-structured-outputs",
             "guides/cookbooks/experiments",
