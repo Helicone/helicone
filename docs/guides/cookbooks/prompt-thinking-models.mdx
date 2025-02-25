@@ -1,0 +1,117 @@
+---
+title: "How to Prompt Thinking Models"
+description: "Learn effective strategies for prompting thinking models like DeepSeek R1 and OpenAI o3 to get optimal results."
+---
+
+# How to Prompt Thinking Models
+
+Thinking models like DeepSeek R1, OpenAI o3, and Google's Gemini 2.0 Flash Thinking represent a new class of language models designed to reason more effectively than their predecessors. These models have internalized the Chain-of-Thought (CoT) prompting process, handling reasoning natively without explicit prompting.
+
+However, their enhanced reasoning capabilities mean you need to prompt them differently for optimal results. This guide covers best practices for working with thinking models.
+
+## Top Thinking Models
+
+As of 2025, the leading thinking models include:
+
+- DeepSeek R1
+- OpenAI o3 & o1
+- Google's Gemini 2.0 Flash Thinking
+- Meta's LLaMA 3.1
+
+## Best Practices for Prompting Thinking Models
+
+### 1. Use Minimal Prompting
+
+Thinking models work best with concise, direct, and structured prompts. Unlike previous models where more context helped, thinking models already structure their reasoning internally.
+
+**Effective Approach:**
+
+
+**Less Effective Approach:**
+
+
+Fewer instructions allow the model to engage its reasoning process naturally, often leading to better results.
+
+### 2. Encourage More Reasoning for Complex Tasks
+
+For complex problems, you can improve response quality by prompting the model to take its time and think through each aspect carefully.
+
+**Effective Approach:**
+
+
+**Less Effective Approach:**
+
+
+Encouraging longer reasoning helps for multi-step problems, improving accuracy significantly, though it may increase token usage and cost.
+
+### 3. Avoid Few-Shot and Chain-of-Thought Prompting
+
+Traditional few-shot examples and explicit Chain-of-Thought prompting can actually reduce performance for thinking models. Research shows that thinking models performed worse when given few-shot examples, contrary to older models where few-shot learning improved results.
+
+**Effective Approach:**
+
+
+**Less Effective Approach:**
+
+
+For thinking models, zero-shot prompts typically work better than few-shot prompts.
+
+### 4. Use Thinking Models for Complex Multi-Step Tasks
+
+Thinking models perform best on tasks that require five or more steps. For simpler tasks (fewer than 3 steps), performance may actually degrade compared to traditional LLMs because they "overthink."
+
+**Effective Use Case:**
+
+
+**Less Effective Use Case:**
+
+
+> **Tip:** To check how many steps a problem requires, you can prompt the web version of a reasoning model to see how many reasoning steps it takes.
+
+### 5. Use Delimiters to Structure Prompts
+
+While thinking models struggle with structured outputs, you can guide them to maintain consistency by using delimiters like brackets, XML tags, or section titles to clearly define distinct sections of the input.
+
+**Effective Approach:**
+
+
+**Less Effective Approach:**
+
+
+If structured output is critical, consider using a standard LLM instead of a thinking model.
+
+### 6. Use Ensembling for Highly Complex Tasks
+
+For high-stakes or complex problems, ensembling can improve performance. This involves running multiple prompts (either the same prompt multiple times or variations of the prompt) and aggregating the results.
+
+**Effective Approach:**
+
+
+**Less Effective Approach:**
+
+
+While ensembling boosts performance, it increases costs and should only be used when high accuracy is critical.
+
+## Summary: DOs and DON'Ts
+
+### ✅ DOs
+- Use minimal prompting to let the model think independently
+- Encourage more reasoning for better performance at complex tasks
+- Use delimiters for clarity to separate distinct parts of input
+- Use ensembling for highly complex tasks requiring high accuracy
+
+### ❌ DON'Ts
+- Avoid few-shot and CoT prompting
+- Don't use thinking models for structured outputs unless absolutely necessary
+- Avoid overloading the model with unnecessary details
+
+## Monitoring Thinking Models with Helicone
+
+To get full visibility into your thinking models' performance, you can use Helicone to:
+
+1. Track token usage and costs
+2. Monitor response times
+3. Compare performance across different prompting strategies
+4. Analyze success rates for different types of tasks
+
+By following these guidelines and monitoring your models' performance, you can optimize your interactions with thinking models and get the best possible responses.
