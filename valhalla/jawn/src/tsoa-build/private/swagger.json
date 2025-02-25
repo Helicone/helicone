@@ -1437,6 +1437,9 @@
 						"type": "number",
 						"format": "double"
 					},
+					"audio_data": {
+						"type": "string"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -1472,7 +1475,9 @@
 							"image",
 							"message",
 							"autoInput",
-							"contentArray"
+							"contentArray",
+							"audio",
+							"text"
 						]
 					}
 				},

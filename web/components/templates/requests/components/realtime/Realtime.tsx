@@ -1,10 +1,14 @@
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { Buffer } from "buffer";
 import React, { useState } from "react";
 import {
   PiCaretDownBold,
   PiCodeBold,
+  PiDownloadBold,
   PiGearBold,
   PiMicrophoneBold,
+  PiPauseBold,
+  PiPlayBold,
   PiSpeakerHighBold,
   PiTextTBold,
 } from "react-icons/pi";
@@ -124,6 +128,12 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
                   ) : (
                     <div className="whitespace-pre-wrap break-words">
                       {message.content || ""}
+                      {messageType === "audio" && message.audio_data && (
+                        <AudioPlayer
+                          audioData={message.audio_data}
+                          isUserMessage={isUser}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -394,6 +404,258 @@ const FunctionOutputContent: React.FC<FunctionOutputContentProps> = ({
         {toolCallId ? `[${toolCallId}] ` : ""}
       </span>
       <span className="text-slate-300">{content}</span>
+    </div>
+  );
+};
+
+interface AudioPlayerProps {
+  audioData: string; // Base64 encoded audio data
+  isUserMessage?: boolean; // Whether this is a user message (for styling)
+  audioFormat?: string; // Format hint from the API (pcm16)
+}
+
+const AudioPlayer: React.FC<AudioPlayerProps> = ({
+  audioData,
+  isUserMessage = false,
+}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const progressRef = React.useRef<HTMLDivElement>(null);
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        // Reset error state when trying to play
+        setError(null);
+        audioRef.current.play().catch((err) => {
+          setError("Could not play audio");
+          console.error("Audio playback error:", err);
+        });
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (progressRef.current && audioRef.current) {
+      const rect = progressRef.current.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      audioRef.current.currentTime = pos * duration;
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  // Convert PCM16 data to WAV format for browser compatibility
+  // PCM16 from OpenAI Realtime API is 16-bit, 24kHz, mono, little-endian
+  const convertPcm16ToWav = (base64PcmData: string): string => {
+    try {
+      // Use Buffer to decode base64 to binary data
+      const binaryData = Buffer.from(base64PcmData, "base64");
+
+      // Create WAV header (44 bytes)
+      const wavHeader = new Uint8Array(44);
+      const headerView = new DataView(wavHeader.buffer);
+
+      // "RIFF" chunk descriptor
+      headerView.setUint8(0, 0x52); // 'R'
+      headerView.setUint8(1, 0x49); // 'I'
+      headerView.setUint8(2, 0x46); // 'F'
+      headerView.setUint8(3, 0x46); // 'F'
+
+      // Chunk size (36 + data size)
+      const fileSize = 36 + binaryData.length;
+      headerView.setUint32(4, fileSize, true);
+
+      // "WAVE" format
+      headerView.setUint8(8, 0x57); // 'W'
+      headerView.setUint8(9, 0x41); // 'A'
+      headerView.setUint8(10, 0x56); // 'V'
+      headerView.setUint8(11, 0x45); // 'E'
+
+      // "fmt " sub-chunk
+      headerView.setUint8(12, 0x66); // 'f'
+      headerView.setUint8(13, 0x6d); // 'm'
+      headerView.setUint8(14, 0x74); // 't'
+      headerView.setUint8(15, 0x20); // ' '
+
+      // Subchunk1 size (16 for PCM)
+      headerView.setUint32(16, 16, true);
+
+      // Audio format (1 for PCM)
+      headerView.setUint16(20, 1, true);
+
+      // Number of channels (1 for mono)
+      headerView.setUint16(22, 1, true);
+
+      // Sample rate (24kHz for OpenAI Realtime API)
+      headerView.setUint32(24, 24000, true);
+
+      // Byte rate (SampleRate * NumChannels * BitsPerSample/8)
+      headerView.setUint32(28, 24000 * 2, true);
+
+      // Block align (NumChannels * BitsPerSample/8)
+      headerView.setUint16(32, 2, true);
+
+      // Bits per sample (16)
+      headerView.setUint16(34, 16, true);
+
+      // "data" sub-chunk
+      headerView.setUint8(36, 0x64); // 'd'
+      headerView.setUint8(37, 0x61); // 'a'
+      headerView.setUint8(38, 0x74); // 't'
+      headerView.setUint8(39, 0x61); // 'a'
+
+      // Subchunk2 size (data size)
+      headerView.setUint32(40, binaryData.length, true);
+
+      // Combine header and PCM data
+      const wavBytes = new Uint8Array(wavHeader.length + binaryData.length);
+      wavBytes.set(wavHeader);
+      wavBytes.set(new Uint8Array(binaryData), wavHeader.length);
+
+      // Convert back to base64 using Buffer
+      return Buffer.from(wavBytes).toString("base64");
+    } catch (e) {
+      console.error("Error converting PCM16 to WAV:", e);
+      // Return original data if conversion fails
+      return base64PcmData;
+    }
+  };
+
+  // Convert PCM16 to WAV and create audio source
+  const audioSrc = React.useMemo(() => {
+    if (!audioData) return "";
+
+    try {
+      const wavData = convertPcm16ToWav(audioData);
+      return `data:audio/wav;base64,${wavData}`;
+    } catch (e) {
+      console.error("Error converting PCM16 to WAV:", e);
+      return "";
+    }
+  }, [audioData]);
+
+  // Handle download
+  const handleDownload = () => {
+    if (!audioData) return;
+
+    const link = document.createElement("a");
+    link.href = audioSrc;
+    link.download = `audio-message-${new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace(/:/g, "-")}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Button color based on message type
+  const buttonClass = isUserMessage
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
+    : "bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200";
+
+  // Progress bar colors
+  const progressBgClass = isUserMessage
+    ? "bg-blue-400/30"
+    : "bg-slate-300 dark:bg-slate-600";
+
+  const progressFillClass = isUserMessage
+    ? "bg-white"
+    : "bg-blue-500 dark:bg-blue-400";
+
+  // Handle errors
+  const handleError = () => {
+    setError("Error loading audio");
+    setIsPlaying(false);
+  };
+
+  return (
+    <div className="mt-3 flex flex-col gap-2">
+      {error && (
+        <div className="text-xs text-red-500 dark:text-red-400 mb-1">
+          {error}
+        </div>
+      )}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handlePlayPause}
+          className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors ${
+            error ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          aria-label={isPlaying ? "Pause" : "Play"}
+          disabled={!!error}
+        >
+          {isPlaying ? (
+            <PiPauseBold className="w-4 h-4" />
+          ) : (
+            <PiPlayBold className="w-4 h-4" />
+          )}
+        </button>
+
+        <div className="flex-1 flex flex-col gap-1">
+          <div
+            ref={progressRef}
+            className={`h-2 rounded-full cursor-pointer ${progressBgClass} ${
+              error ? "opacity-50" : ""
+            }`}
+            onClick={!error ? handleProgressClick : undefined}
+          >
+            <div
+              className={`h-full rounded-full ${progressFillClass}`}
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
+          </div>
+
+          <div className="flex justify-between text-xs opacity-80">
+            <span>{formatTime(currentTime)}</span>
+            <span>{duration ? formatTime(duration) : "--:--"}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleDownload}
+          className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors`}
+          aria-label="Download audio"
+          title="Download audio"
+        >
+          <PiDownloadBold className="w-4 h-4" />
+        </button>
+      </div>
+
+      <audio
+        ref={audioRef}
+        src={audioSrc}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => setIsPlaying(false)}
+        onPause={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
+        onError={handleError}
+        className="hidden" // Hide the default audio controls
+      />
     </div>
   );
 };
