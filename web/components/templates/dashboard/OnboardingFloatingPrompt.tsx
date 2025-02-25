@@ -4,10 +4,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/router";
-import {
-  useOrgOnboarding,
-  OnboardingStep,
-} from "@/services/hooks/useOrgOnboarding";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { STEP_ROUTES } from "@/components/onboarding/OnboardingHeader";
 
 interface OnboardingFloatingPromptProps {

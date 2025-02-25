@@ -22,7 +22,6 @@ import {
   BookOpen,
   MessageSquare,
   Mail,
-  Loader2,
   Check,
   Copy,
   Loader,
