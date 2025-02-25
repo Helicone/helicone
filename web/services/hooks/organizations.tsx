@@ -331,7 +331,6 @@ const useOrgsContextManager = () => {
 
       isProcessingRef.current = true;
       hasRunRef.current = user.id;
-
       const jwtToken = getHeliconeCookie().data?.jwtToken;
       const mainOrg = orgs?.find((org) => org.is_main_org === true);
 
