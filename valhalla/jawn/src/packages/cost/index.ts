@@ -153,6 +153,7 @@ END
 `;
 }
 export const COST_MULTIPLE = 1_000_000_000;
+
 export function clickhousePriceCalcNonAggregated(table: string) {
   // This is so that we don't need to do any floating point math in the database
   // and we can just divide by 1_000_000 to get the cost in dollars
@@ -171,7 +172,6 @@ export function clickhousePriceCalcNonAggregated(table: string) {
         if (!provider.costs) {
           throw new Error("Provider does not have costs");
         }
-
         return `    WHEN (${table}.provider = '${provider.provider}') 
       THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
       })
