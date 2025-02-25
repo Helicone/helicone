@@ -234,9 +234,6 @@ export interface paths {
   "/v1/organization/create": {
     post: operations["CreateNewOrganization"];
   };
-  "/v1/organization/create/starter": {
-    post: operations["CreateStarterOrganization"];
-  };
   "/v1/organization/{organizationId}/update": {
     post: operations["UpdateOrganization"];
   };
@@ -1238,7 +1235,7 @@ Json: JsonObject;
         completion_token: number;
       };
     };
-    NewOrganizationParams: ({
+    NewOrganizationParams: {
       tier?: string | null;
       subscription_status?: string | null;
       stripe_subscription_item_id?: string | null;
@@ -1269,18 +1266,7 @@ Json: JsonObject;
       domain?: string | null;
       created_at?: string | null;
       color?: string;
-    }) & {
-      is_main_org?: boolean;
     };
-    "ResultSuccess__demoOrgId-string--starterOrgId-string__": {
-      data: {
-        starterOrgId: string;
-        demoOrgId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__demoOrgId-string--starterOrgId-string_.string_": components["schemas"]["ResultSuccess__demoOrgId-string--starterOrgId-string__"] | components["schemas"]["ResultError_string_"];
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
       name: string;
@@ -3544,16 +3530,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateStarterOrganization: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__demoOrgId-string--starterOrgId-string_.string_"];
         };
       };
     };

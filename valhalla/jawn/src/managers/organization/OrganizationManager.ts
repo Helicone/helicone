@@ -4,12 +4,9 @@ import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export type NewOrganizationParams =
-  Database["public"]["Tables"]["organization"]["Insert"] & {
-    is_main_org?: boolean;
-  };
+  Database["public"]["Tables"]["organization"]["Insert"];
 
 export type UpdateOrganizationParams = Pick<
   NewOrganizationParams,
@@ -156,40 +153,6 @@ export class OrganizationManager extends BaseManager {
       return err(`Failed to update organization: ${error}`);
     }
     return ok(data);
-  }
-
-  async createStarterOrganization(): Promise<
-    Result<
-      {
-        demoOrgId: string;
-        starterOrgId: string;
-      },
-      string
-    >
-  > {
-    if (!this.authParams.userId) return err("Unauthorized");
-
-    // Get org, check if demo org exists, if not create it.
-    const demoOrg = await this.organizationStore.createDemoOrg(
-      this.authParams.userId
-    );
-
-    if (demoOrg.error) {
-      return err(demoOrg.error);
-    }
-
-    const starterOrg = await this.organizationStore.createStarterOrg(
-      this.authParams.userId
-    );
-
-    if (starterOrg.error) {
-      return err(starterOrg.error);
-    }
-
-    return ok({
-      demoOrgId: demoOrg.data ?? "",
-      starterOrgId: starterOrg.data ?? "",
-    });
   }
 
   async addMember(

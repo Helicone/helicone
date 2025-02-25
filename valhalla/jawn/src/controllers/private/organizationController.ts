@@ -72,23 +72,6 @@ export class OrganizationController extends Controller {
     }
   }
 
-  @Post("/create/starter")
-  public async createStarterOrganization(
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ demoOrgId: string; starterOrgId: string }, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.createStarterOrganization();
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error ?? "Error creating starter organization");
-    } else {
-      this.setStatus(201);
-      return ok(result.data);
-    }
-  }
-
   @Post("/{organizationId}/update")
   public async updateOrganization(
     @Body()

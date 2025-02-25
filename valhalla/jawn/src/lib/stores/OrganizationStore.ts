@@ -47,37 +47,6 @@ export class OrganizationStore extends BaseStore {
     return ok(insert);
   }
 
-  async createDemoOrg(userId: string): Promise<Result<string, string>> {
-    const result = await dbExecute<{ id: string }>(
-      `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete)
-       SELECT 'Demo Org', $1, 'demo', true, true, false
-       WHERE NOT EXISTS (
-         SELECT 1 FROM organization 
-         WHERE owner = $1 AND tier = 'demo'
-       )
-       RETURNING id;`,
-      [userId]
-    );
-
-    if (result.error || !result.data || result.data.length === 0) {
-      // If insert failed, try to get existing demo org
-      const existing = await dbExecute<{ id: string }>(
-        `SELECT id FROM organization 
-         WHERE owner = $1 AND tier = 'demo' 
-         LIMIT 1`,
-        [userId]
-      );
-
-      if (existing.error || !existing.data || existing.data.length === 0) {
-        return err("Failed to create or find demo org");
-      }
-
-      return ok(existing.data[0].id);
-    }
-
-    return ok(result.data[0].id);
-  }
-
   async createStarterOrg(userId: string): Promise<Result<string, string>> {
     const result = await dbExecute<{ id: string }>(
       `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete)

@@ -21,10 +21,8 @@ const Welcome = (props: WelcomeProps) => {
       org.currentOrg?.tier !== "demo" &&
       org.currentOrg?.has_onboarded
     ) {
-      console.log("Org has onboarded, redirecting to dashboard");
       router.push("/dashboard");
     } else {
-      console.log("Org has not onboarded, redirecting to onboarding");
       router.push("/onboarding");
     }
   }, [org, router]);
