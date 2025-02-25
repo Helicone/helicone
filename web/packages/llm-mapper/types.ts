@@ -136,6 +136,7 @@ type LLMResponseBody = {
   toolDetailsResponse?: {
     status: string;
     message: string;
+    tips: string[];
     metadata: {
       timestamp: string;
     };
