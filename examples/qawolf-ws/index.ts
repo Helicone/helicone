@@ -2,7 +2,19 @@ import { config } from "dotenv";
 import Microphone from "node-microphone";
 import * as readline from "readline";
 import { inspect } from "util";
+import { resample } from "wave-resampler";
 import WebSocket from "ws";
+
+/**
+ * OpenAI Realtime API Audio Format Requirements:
+ * - Format: PCM with 16-bit integer samples (Int16Array)
+ * - Mono audio (single channel)
+ * - Sample rate: 24000 Hz (24 kHz)
+ *
+ * Note: This example uses node-microphone which only supports 8000, 16000, or 44100 Hz.
+ * We use wave-resampler to convert from 44.1kHz to 24kHz.
+ */
+
 config({ path: ".env" });
 
 const url =
@@ -12,7 +24,7 @@ const ws = new WebSocket(url, {
     Authorization: "Bearer " + process.env.OPENAI_API_KEY,
     "OpenAI-Beta": "realtime=v1",
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
-    "Helicone-Session-Id": "session_123",
+    "Helicone-Session-Id": `session_${Date.now()}`,
   },
 });
 
@@ -70,15 +82,16 @@ let isRecording = false;
 // Initialize microphone
 function initMicrophone() {
   try {
-    // Note: The API requires 24kHz, but node-microphone only supports specific rates
-    // Using 16kHz as the closest available option
+    // The API requires PCM with 16-bit integer samples, mono audio, 24kHz sample rate
+    // node-microphone only supports 8000, 16000, or 44100 Hz
+    // Using 44100 Hz and converting to 24kHz using wave-resampler
     mic = new Microphone({
-      rate: 16000, // 16kHz sample rate (closest to 24kHz that's supported)
+      rate: 44100, // Using highest quality, then converting to 24kHz
       channels: 1, // Mono
       bitwidth: 16, // 16-bit
     });
-    console.log("Microphone initialized successfully with 16kHz sample rate");
-    console.log("Note: OpenAI recommends 24kHz for optimal results");
+    console.log("Microphone initialized successfully with 44.1kHz sample rate");
+    console.log("Audio will be resampled to 24kHz as required by OpenAI");
     return true;
   } catch (error) {
     console.error("Failed to initialize microphone:", error);
@@ -101,11 +114,40 @@ function startRecording() {
 
     micStream.on("data", (data: Buffer) => {
       if (ws.readyState === WebSocket.OPEN) {
+        // Convert the Buffer to Int16Array for resampling
+        const int16Array = new Int16Array(
+          data.buffer,
+          data.byteOffset,
+          data.byteLength / 2
+        );
+
+        // Log original data info
+        if (process.env.DEBUG) {
+          console.log(
+            `Original audio: ${data.byteLength} bytes, ${int16Array.length} samples at 44.1kHz`
+          );
+        }
+
+        // Resample from 44.1kHz to 24kHz
+        const resampledData = resample(int16Array, 44100, 24000);
+
+        // Convert the resampled data to a Buffer
+        // Create a new Int16Array from the resampled data
+        const resampledInt16 = new Int16Array(resampledData);
+        const resampledBuffer = Buffer.from(resampledInt16.buffer);
+
+        // Log resampled data info
+        if (process.env.DEBUG) {
+          console.log(
+            `Resampled audio: ${resampledBuffer.byteLength} bytes, ${resampledInt16.length} samples at 24kHz`
+          );
+        }
+
         // Send audio data to the WebSocket server
         ws.send(
           JSON.stringify({
             type: "input_audio_buffer.append",
-            audio: data.toString("base64"),
+            audio: resampledBuffer.toString("base64"),
           })
         );
       }

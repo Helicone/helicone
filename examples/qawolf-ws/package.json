@@ -22,6 +22,7 @@
     "node-microphone": "0.1.6",
     "openai": "^4.45.0",
     "uuid": "^9.0.1",
+    "wave-resampler": "^1.0.0",
     "ws": "^8.18.0"
   }
 }
