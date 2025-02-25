@@ -53,6 +53,7 @@ import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -172,6 +173,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     MappedLLMRequest | undefined
   >(undefined);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
 
   const encodeFilters = (filters: UIFilterRowTree): string => {
     const encode = (node: UIFilterRowTree): any => {
@@ -634,6 +636,13 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   };
 
+  useEffect(() => {
+    orgContext?.refetchOrgs();
+    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
+      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
+    }
+  }, [orgContext?.currentOrg?.has_onboarded]);
+
   return (
     <>
       <div className="h-screen flex flex-col">
@@ -881,6 +890,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }}
         />
       </ThemedModal>
+
+      <OnboardingFloatingPrompt
+        open={showOnboardingPopUp}
+        setOpen={setShowOnboardingPopUp}
+      />
     </>
   );
 };

@@ -13,25 +13,40 @@ export default async function handler(
 
   const userId = req.query.id as string;
   const isEu = req.body.isEu;
+  const isDemo = req.body.isDemo;
 
-  // First, try to find existing demo org
-  const { data: existingDemoOrg } = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("soft_delete", false)
-    .eq("owner", userId)
-    .eq("tier", "demo")
-    .single();
+  if (isDemo) {
+    // First, try to find existing demo org
+    const { data: existingDemoOrg } = await getSupabaseServer()
+      .from("organization")
+      .select("*")
+      .eq("soft_delete", false)
+      .eq("owner", userId)
+      .eq("tier", "demo")
+      .single();
 
-  if (existingDemoOrg) {
-    return res.status(201).json({ orgId: existingDemoOrg.id });
+    if (existingDemoOrg) {
+      return res.status(201).json({ orgId: existingDemoOrg.id });
+    }
+  } else {
+    const { data: existingMainOrg } = await getSupabaseServer()
+      .from("organization")
+      .select("*")
+      .eq("soft_delete", false)
+      .eq("owner", userId)
+      .eq("is_main_org", true)
+      .single();
+
+    if (existingMainOrg) {
+      return res.status(201).json({ orgId: existingMainOrg.id });
+    }
   }
 
-  // If no demo org exists, create one with upsert
+  const rpcName = isDemo ? "ensure_one_demo_org" : "create_main_org";
 
   // Add member record
   const result = await getSupabaseServer()
-    .rpc("ensure_one_demo_org", {
+    .rpc(rpcName, {
       user_id: userId,
     })
     .single();

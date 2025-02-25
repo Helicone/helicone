@@ -1610,10 +1610,12 @@ export type Database = {
           has_onboarded: boolean
           icon: string
           id: string
+          is_main_org: boolean
           is_personal: boolean
           limits: Json | null
           logo_path: string | null
           name: string
+          onboarding_status: Json
           org_provider_key: string | null
           organization_type: string
           owner: string
@@ -1638,10 +1640,12 @@ export type Database = {
           has_onboarded?: boolean
           icon?: string
           id?: string
+          is_main_org?: boolean
           is_personal?: boolean
           limits?: Json | null
           logo_path?: string | null
           name: string
+          onboarding_status?: Json
           org_provider_key?: string | null
           organization_type?: string
           owner: string
@@ -1666,10 +1670,12 @@ export type Database = {
           has_onboarded?: boolean
           icon?: string
           id?: string
+          is_main_org?: boolean
           is_personal?: boolean
           limits?: Json | null
           logo_path?: string | null
           name?: string
+          onboarding_status?: Json
           org_provider_key?: string | null
           organization_type?: string
           owner?: string
@@ -2456,6 +2462,8 @@ export type Database = {
           helicone_org_id: string | null
           id: string
           model: string | null
+          prompt_cache_read_tokens: number | null
+          prompt_cache_write_tokens: number | null
           prompt_tokens: number | null
           request: string
           status: number | null
@@ -2470,6 +2478,8 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_cache_read_tokens?: number | null
+          prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
           request: string
           status?: number | null
@@ -2484,6 +2494,8 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_cache_read_tokens?: number | null
+          prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
           request?: string
           status?: number | null
@@ -2920,6 +2932,14 @@ export type Database = {
             }
             Returns: boolean
           }
+      create_main_org: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
+      }
       date_count:
         | {
             Args: {
@@ -3062,7 +3082,6 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
-          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -3076,7 +3095,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -3090,7 +3108,6 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
-          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -3112,7 +3129,6 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
-          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -3123,7 +3139,6 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
-          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -3134,7 +3149,6 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
-          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -3270,10 +3284,6 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
-      }
-      operation: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       search: {
         Args: {

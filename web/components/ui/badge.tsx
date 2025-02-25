@@ -17,6 +17,8 @@ const badgeVariants = cva(
         outline: "text-slate-950 dark:text-slate-50",
         helicone:
           "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 rounded-md text-[11px] font-medium py-1 px-2 leading-tight",
+        "helicone-sky":
+          "h-5 border-white/0 bg-sky-500 text-sky-50 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)] rounded-md text-xs font-normal",
         label:
           "border-transparent bg-sky-500 text-white font-light hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-700 tracking-wide",
       },

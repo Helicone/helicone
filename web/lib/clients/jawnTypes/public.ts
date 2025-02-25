@@ -1735,6 +1735,12 @@ Json: JsonObject;
       };
       /** Format: double */
       seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
     };
     LLMUsage: {
       model: string;
@@ -4002,6 +4008,11 @@ export interface operations {
     };
   };
   UpgradeToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -4012,6 +4023,11 @@ export interface operations {
     };
   };
   UpgradeExistingCustomerToTeamBundle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
