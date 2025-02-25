@@ -8,6 +8,9 @@ import {
   getExperimentUsage,
 } from "@/lib/api/stripe/llmUsage";
 import { costOf } from "@/packages/cost";
+import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
+import { hashAuth } from "../../../../lib/hashClient";
+import generateApiKey from "generate-api-key";
 
 const ADDON_PRICES: Record<string, keyof Addons> = {
   [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
@@ -24,7 +27,7 @@ type Addons = {
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2025-02-24.acacia",
 });
 
 const PricingVersionOld = {
@@ -124,10 +127,154 @@ const PricingVersionOld = {
   },
 };
 
+// TempAPIKey class for managing temporary API keys with automatic cleanup
+class TempAPIKey {
+  constructor(private apiKey: string, private keyId: number) {}
+
+  // Use the key for an operation and ensure cleanup afterward
+  async use<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {
+    try {
+      return await callback(this.apiKey);
+    } finally {
+      await this.cleanup();
+    }
+  }
+
+  // Clean up the key by soft-deleting it
+  private async cleanup() {
+    try {
+      await getSupabaseServer()
+        .from("helicone_api_keys")
+        .update({
+          soft_delete: true,
+        })
+        .eq("id", this.keyId);
+    } catch (error) {
+      console.error("Failed to cleanup temporary API key:", error);
+    }
+  }
+}
+
+// Generate a temporary API key for server-to-server communication
+async function generateTempAPIKey(
+  organizationId: string,
+  keyName: string,
+  keyPermissions: "rw" | "r" | "w"
+): Promise<TempAPIKey> {
+  const apiKey = `sk-helicone-${generateApiKey({
+    method: "base32",
+    dashes: true,
+  }).toString()}`.toLowerCase();
+
+  const organization = await getSupabaseServer()
+    .from("organization")
+    .select("*")
+    .eq("id", organizationId)
+    .single();
+
+  const res = await getSupabaseServer()
+    .from("helicone_api_keys")
+    .insert({
+      api_key_hash: await hashAuth(apiKey),
+      user_id: organization.data?.owner ?? "",
+      api_key_name: keyName,
+      organization_id: organizationId,
+      key_permissions: keyPermissions,
+      temp_key: true,
+    })
+    .select("*")
+    .single();
+
+  if (res?.error || !res.data?.id) {
+    throw new Error("Failed to create API key");
+  }
+
+  return new TempAPIKey(apiKey, res.data.id);
+}
+
+// Helper function to get the Jawn service URL, replacing localhost with 127.0.0.1 in serverless environments
+function getJawnServiceUrl(): string {
+  // Get the URL from environment variable
+  const jawnServiceUrl =
+    process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
+
+  // In serverless environments (Next.js API routes), replace localhost with 127.0.0.1
+  // This is needed because localhost doesn't resolve correctly in serverless environments
+  if (typeof window === "undefined" && jawnServiceUrl.includes("localhost")) {
+    return jawnServiceUrl.replace("localhost", "127.0.0.1");
+  }
+
+  return jawnServiceUrl;
+}
+
+async function inviteOnboardingMembers(orgId: string | undefined) {
+  if (!orgId) {
+    return;
+  }
+
+  const { data: orgData } = await getSupabaseServer()
+    .from("organization")
+    .select("onboarding_status")
+    .eq("id", orgId)
+    .single();
+
+  const onboardingStatus =
+    orgData?.onboarding_status as unknown as OnboardingState | null;
+
+  if (
+    !onboardingStatus ||
+    !Array.isArray(onboardingStatus.members) ||
+    onboardingStatus.members.length === 0
+  ) {
+    return;
+  }
+
+  // Get the Jawn service URL (with localhost replaced by 127.0.0.1 if needed)
+  const jawnServiceUrl = getJawnServiceUrl();
+
+  // Generate a temporary API key and use it with automatic cleanup
+  const tempKey = await generateTempAPIKey(
+    orgId,
+    "Stripe Webhook Server Key",
+    "rw"
+  );
+
+  // Use the key with automatic cleanup
+  await tempKey.use(async (serverApiKey) => {
+    for (const member of onboardingStatus.members) {
+      if (!member.email) {
+        continue;
+      }
+      try {
+        const response = await fetch(
+          `${jawnServiceUrl}/v1/organization/${orgId}/add_member`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serverApiKey}`,
+            },
+            body: JSON.stringify({
+              email: member.email,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        await response.json();
+      } catch (error) {
+        console.error(`Failed to invite member ${member.email}:`, error);
+      }
+    }
+  });
+}
+
 const TeamVersion20250130 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
-    // subscription.metadata?.["helcionePricingVersion"] !==
     const subscriptionId = subscription.id;
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
@@ -170,6 +317,9 @@ const TeamVersion20250130 = {
     if (error) {
       console.error("Failed to update organization:", error);
     }
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
   },
 
   handleUpdate: async (event: Stripe.Event) => {
@@ -202,37 +352,6 @@ const PricingVersion20240913 = {
       }
     });
 
-    console.log(`Subscription JSON: ${JSON.stringify(subscription)}`);
-    console.log(`Addons: ${JSON.stringify(addons)}`);
-
-    // const subscription = await this.stripe.subscriptions.retrieve(
-    //   organization.data.stripe_subscription_id,
-    //   {
-    //     expand: ["items.data.price.product"],
-    //   }
-    // );
-
-    // const currentOrgStripeMetadata = await this.getStripeMetadata();
-    // if (currentOrgStripeMetadata.error) {
-    //   return err(currentOrgStripeMetadata.error);
-    // }
-
-    // const currentMetadata = currentOrgStripeMetadata.data;
-
-    // await supabaseServer.client
-    //   .from("organization")
-    //   .update({
-    //     stripe_metadata: {
-    //       addons: {
-    //         ...(typeof currentMetadata?.addons === "object"
-    //           ? currentMetadata?.addons
-    //           : {}),
-    //         [productType]: false,
-    //       },
-    //     },
-
-    // subscription.
-
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
@@ -245,6 +364,9 @@ const PricingVersion20240913 = {
         },
       })
       .eq("id", orgId || "");
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
   },
 
   handleUpdate: async (event: Stripe.Event) => {

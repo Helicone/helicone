@@ -51,7 +51,7 @@ const SignUp = () => {
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `${origin}/welcome`,
+              emailRedirectTo: `${origin}/onboarding`,
             },
           });
 

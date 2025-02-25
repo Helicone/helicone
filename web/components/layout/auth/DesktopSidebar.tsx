@@ -1,10 +1,7 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import CreateOrgForm from "@/components/templates/organization/createOrgForm";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useOnboardingStore } from "@/store/onboardingStore";
 import {
   Bars3Icon,
   ChevronLeftIcon,
@@ -16,12 +13,10 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
-import useOnboardingContext from "../onboardingContext";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
-import OnboardingNavItems from "./OnboardingNavItems";
 import { ChangelogItem } from "./types";
 
 export interface NavigationItem {
@@ -45,9 +40,9 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
-  const org = useOrg();
+  const orgContext = useOrg();
   const user = useUser();
-  const tier = org?.currentOrg?.tier;
+  const tier = orgContext?.currentOrg?.tier;
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -130,7 +125,7 @@ const DesktopSidebar = ({
       if (
         event.key === "b" &&
         event.metaKey &&
-        org?.currentOrg?.tier !== "demo"
+        orgContext?.currentOrg?.tier !== "demo"
       ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
@@ -181,10 +176,6 @@ const DesktopSidebar = ({
     }
     setModalOpen(open);
   };
-
-  const { isOnboardingVisible } = useOnboardingContext();
-
-  const { showCreateOrg, setShowCreateOrg } = useOnboardingStore();
 
   return (
     <>
@@ -266,8 +257,8 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {((!isCollapsed &&
-                  org?.currentOrg?.organization_type === "reseller") ||
-                  org?.isResellerOfCurrentCustomerOrg) && (
+                  orgContext?.currentOrg?.organization_type === "reseller") ||
+                  orgContext?.isResellerOfCurrentCustomerOrg) && (
                   <div className="flex w-full justify-center px-5 py-2">
                     <Button
                       variant="outline"
@@ -276,14 +267,17 @@ const DesktopSidebar = ({
                       onClick={() => {
                         router.push("/enterprise/portal");
                         if (
-                          org.currentOrg?.organization_type === "customer" &&
-                          org.currentOrg?.reseller_id
+                          orgContext.currentOrg?.organization_type ===
+                            "customer" &&
+                          orgContext.currentOrg?.reseller_id
                         ) {
-                          org.setCurrentOrg(org.currentOrg.reseller_id);
+                          orgContext.setCurrentOrg(
+                            orgContext.currentOrg.reseller_id
+                          );
                         }
                       }}
                     >
-                      {org.currentOrg?.organization_type === "customer"
+                      {orgContext.currentOrg?.organization_type === "customer"
                         ? "Back to Portal"
                         : "Customer Portal"}
                     </Button>
@@ -295,27 +289,30 @@ const DesktopSidebar = ({
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2"
                 >
                   <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {isOnboardingVisible && <OnboardingNavItems />}
-                    {!isOnboardingVisible &&
-                      NAVIGATION_ITEMS.map((link) => (
-                        <NavItem
-                          key={link.name}
-                          link={link}
-                          isCollapsed={isCollapsed}
-                          expandedItems={expandedItems}
-                          toggleExpand={toggleExpand}
-                          onClick={() => {
-                            setIsCollapsed(false);
-                            setIsMobileMenuOpen(false);
-                          }}
-                          deep={0}
-                        />
-                      ))}
+                    {NAVIGATION_ITEMS.map((link) => (
+                      <NavItem
+                        key={link.name}
+                        link={link}
+                        isCollapsed={isCollapsed}
+                        expandedItems={expandedItems}
+                        toggleExpand={toggleExpand}
+                        onClick={() => {
+                          setIsCollapsed(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        deep={0}
+                      />
+                    ))}
 
-                    {org?.currentOrg?.tier === "demo" && (
+                    {orgContext?.currentOrg?.tier === "demo" && (
                       <Button
                         onClick={() => {
-                          setShowCreateOrg(true);
+                          orgContext.allOrgs.forEach((org) => {
+                            if (org.is_main_org === true) {
+                              orgContext.setCurrentOrg(org.id);
+                              router.push("/onboarding");
+                            }
+                          });
                         }}
                         className={cn(
                           "mt-10 gap-1 text-white text-large font-medium leading-normal tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
@@ -325,9 +322,15 @@ const DesktopSidebar = ({
                         )}
                         variant="action"
                       >
-                        {!isCollapsed && <span>Ready to integrate</span>}
+                        {!isCollapsed && (
+                          <span className="text-white">Ready to integrate</span>
+                        )}
                         <Rocket
-                          className={isCollapsed ? "h-4 w-4" : "h-6 w-6"}
+                          className={
+                            isCollapsed
+                              ? "h-4 w-4 text-white"
+                              : "h-6 w-6 text-white"
+                          }
                         />
                       </Button>
                     )}
@@ -337,7 +340,7 @@ const DesktopSidebar = ({
 
               {/* InfoBox */}
               {canShowInfoBox &&
-                org?.currentOrg?.tier === "free" &&
+                orgContext?.currentOrg?.tier === "free" &&
                 (isCollapsed ? (
                   <div className="px-2 py-2">
                     <ProFeatureWrapper featureName="pro" enabled={false}>
@@ -373,7 +376,7 @@ const DesktopSidebar = ({
             </div>
 
             {/* Sticky help dropdown */}
-            {org?.currentOrg?.tier !== "demo" && (
+            {orgContext?.currentOrg?.tier !== "demo" && (
               <div className="p-3">
                 <SidebarHelpDropdown
                   changelog={changelog}
@@ -389,23 +392,6 @@ const DesktopSidebar = ({
         setOpen={handleModalOpen}
         changelog={changelogToView}
       />
-      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
-        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
-          <CreateOrgForm
-            firstOrg={true}
-            onCancelHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onCloseHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onSuccess={(orgId) => {
-              org?.setCurrentOrg(orgId ?? "");
-              router.push("/dashboard");
-            }}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
