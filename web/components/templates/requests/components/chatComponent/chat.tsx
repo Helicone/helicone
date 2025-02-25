@@ -4,7 +4,7 @@ import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
 import ThemedModal from "../../../../shared/themed/themedModal";
 import { ChatContent } from "./ChatContent";
-import { ChatTopBar, PROMPT_MODES } from "./chatTopBar";
+import { ChatTopBar, ChatTopBarProps, PROMPT_MODES } from "./chatTopBar";
 
 interface ChatProps {
   mappedRequest: MappedLLMRequest;
@@ -57,7 +57,7 @@ export const Chat: React.FC<ChatProps> = ({
     );
   };
 
-  const chatTopBarProps = {
+  const chatTopBarProps: ChatTopBarProps = {
     allExpanded,
     toggleAllExpanded,
     requestBody: mappedRequest.schema.request,
@@ -87,7 +87,19 @@ export const Chat: React.FC<ChatProps> = ({
         )}
       >
         <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
-          {!hideTopBar && <ChatTopBar {...chatTopBarProps} />}
+          {!hideTopBar && (
+            <ChatTopBar
+              allExpanded={allExpanded}
+              toggleAllExpanded={toggleAllExpanded}
+              requestBody={mappedRequest.schema.request}
+              requestId={mappedRequest.heliconeMetadata.requestId}
+              setOpen={setOpen}
+              mode={mode}
+              setMode={setMode}
+              isModal={open}
+              promptData={promptData}
+            />
+          )}
 
           <ChatContent
             mode={mode}

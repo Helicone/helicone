@@ -180,7 +180,7 @@ const DesktopSidebar = ({
   return (
     <>
       {/* Mobile hamburger menu */}
-      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <Button
           variant="ghost"
           size="icon"
@@ -218,7 +218,7 @@ const DesktopSidebar = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 bg-background dark:bg-neutral-950 transition-all duration-300 h-screen bg-white",
+          "flex flex-col z-50 bg-background transition-all duration-300 h-screen bg-slate-100 dark:bg-slate-900",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
@@ -227,10 +227,10 @@ const DesktopSidebar = ({
             : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
+        <div className="w-full flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center border-b dark:border-slate-800 p-2.5 
+            className={`flex flex-row items-center border-b border-slate-200 dark:border-slate-800 p-2.5 
               ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}
@@ -241,7 +241,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={handleCollapseToggle}
-              className="flex justify-center items-center dark:hover:bg-slate-800 shrink-0"
+              className="flex justify-center items-center hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />

@@ -19,6 +19,7 @@ type GenerateParameters = {
 type PromptVersion = Database["public"]["Tables"]["prompts_versions"]["Row"];
 type PromptMetadata = {
   provider?: (typeof providersNames)[number];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 
@@ -129,6 +130,7 @@ const generateHandler = async (
       env,
       ctx
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     console.error("Error in generate route:", e);
     return new Response(

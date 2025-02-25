@@ -2715,6 +2715,75 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"HeliconeEventTool": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"tool"
+						],
+						"nullable": false
+					},
+					"toolName": {
+						"type": "string"
+					},
+					"input": {}
+				},
+				"required": [
+					"_type",
+					"toolName",
+					"input"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
+			"HeliconeEventVectorDB": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"vector_db"
+						],
+						"nullable": false
+					},
+					"operation": {
+						"type": "string",
+						"enum": [
+							"search",
+							"insert",
+							"delete",
+							"update"
+						]
+					},
+					"text": {
+						"type": "string"
+					},
+					"vector": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					},
+					"topK": {
+						"type": "number",
+						"format": "double"
+					},
+					"filter": {
+						"additionalProperties": false,
+						"type": "object"
+					},
+					"databaseName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"_type",
+					"operation"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
@@ -2815,6 +2884,12 @@
 							"type"
 						],
 						"type": "object"
+					},
+					"toolDetails": {
+						"$ref": "#/components/schemas/HeliconeEventTool"
+					},
+					"vectorDBDetails": {
+						"$ref": "#/components/schemas/HeliconeEventVectorDB"
 					}
 				},
 				"type": "object",
@@ -2822,6 +2897,101 @@
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"vectorDBDetailsResponse": {
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"vector_db"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									},
+									"destination_parsed": {
+										"type": "boolean"
+									},
+									"destination": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"actualSimilarity": {
+								"type": "number",
+								"format": "double"
+							},
+							"similarityThreshold": {
+								"type": "number",
+								"format": "double"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
+					"toolDetailsResponse": {
+						"properties": {
+							"toolName": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"tool"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"tips": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"toolName",
+							"_type",
+							"metadata",
+							"tips",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"error": {
 						"properties": {
 							"heliconeMessage": {}
@@ -3402,6 +3572,9 @@
 							"$ref": "#/components/schemas/SortDirection"
 						},
 						"type": "object"
+					},
+					"cost_usd": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",

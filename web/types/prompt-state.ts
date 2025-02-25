@@ -1,17 +1,17 @@
-import { PROVIDER_MODELS } from "@/lib/api/llm/generate";
+import { PROVIDER_MODELS } from "@/utils/generate";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
 export interface PromptState {
-  promptId: string;
-  masterVersion: number;
+  promptId?: string; // The prompt ID (UUID)
+  masterVersion?: number; // The master prompt version
 
-  versionId: string; // The actual version ID (UUID) used for API calls
-  version: number;
+  versionId?: string; // The prompt version ID (UUID)
+  version?: number; // The version the user is currently editing
 
   messages: Message[];
   parameters: StateParameters;
-  variables?: StateVariable[];
+  inputs?: StateInputs[];
   evals?: any[]; // TODO: Add evals to the state
   structure?: any; // TODO: Real structure when feature is added
 
@@ -34,7 +34,7 @@ export interface StateParameters {
   // TODO: Add more parameters
 }
 
-export interface StateVariable {
+export interface StateInputs {
   name: string;
   value: string;
   isValid?: boolean;

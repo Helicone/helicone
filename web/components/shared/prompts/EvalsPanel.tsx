@@ -1,16 +1,16 @@
-import { XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PiPlusBold } from "react-icons/pi";
-import { useState } from "react";
 import { useEvaluators } from "@/components/templates/evals/EvaluatorHook";
 import { Evaluator } from "@/components/templates/evals/details/types";
-import ThemedDrawer from "../../shared/themed/themedDrawer";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { XIcon } from "lucide-react";
+import { useState } from "react";
+import { PiPlusBold } from "react-icons/pi";
+import ThemedDrawer from "../../shared/themed/themedDrawer";
 
 export default function EvalsPanel() {
   const { evaluators, deleteEvaluator } = useEvaluators();
@@ -24,7 +24,7 @@ export default function EvalsPanel() {
       <div className="h-8 flex items-center justify-between">
         <h2 className="font-semibold text-secondary">Evals</h2>
         <div className="flex flex-row gap-2">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>

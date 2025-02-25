@@ -1,4 +1,4 @@
-import { StateVariable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
 
 interface AutoPromptInput {
   role: string;
@@ -13,7 +13,7 @@ export const populateVariables = ({
 }: {
   inputsFromBackend: Record<string, string>;
   validVariablesWithIndices: {
-    variable: StateVariable;
+    variable: StateInputs;
     originalIndex: number;
   }[];
   onVariableChange: (index: number, value: string) => void;

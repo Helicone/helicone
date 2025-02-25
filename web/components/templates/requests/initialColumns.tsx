@@ -170,6 +170,9 @@ export const getInitialColumns: (
       }
       return <span></span>;
     },
+    meta: {
+      sortKey: "cost_usd",
+    },
     size: 175,
   },
   {

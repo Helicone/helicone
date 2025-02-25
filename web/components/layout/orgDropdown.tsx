@@ -26,9 +26,9 @@ import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
+import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 
 interface OrgDropdownProps {}
@@ -100,7 +100,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full "
+            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full"
           >
             <div className="flex flex-col gap-1">
               <div className="flex flex-row gap-2 items-center">

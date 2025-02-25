@@ -1,4 +1,4 @@
-import { LlmSchema } from "../../types";
+import { LlmSchema, HeliconeEventVectorDB } from "../../types";
 import { MapperFn } from "../types";
 
 const getRequestText = (requestBody: any) => {
@@ -39,31 +39,35 @@ export const mapVectorDB: MapperFn<any, any> = ({
 }) => {
   const requestToReturn: LlmSchema["request"] = {
     model: "vector_db",
-    messages: [
-      {
-        role: "system",
-        content: `Vector DB ${request.operation} operation`,
-        _type: "message",
-      },
-      {
-        role: "user",
-        content: getRequestText(request),
-        _type: "message",
-      },
-    ],
+    vectorDBDetails: {
+      _type: "vector_db",
+      operation: request.operation,
+      text: request.text,
+      vector: request.vector,
+      topK: request.topK,
+      filter: request.filter,
+      databaseName: request.databaseName,
+    },
+    messages: [],
   };
 
   const llmSchema: LlmSchema = {
     request: requestToReturn,
     response: {
       model: "vector_db",
-      messages: [
-        {
-          role: "assistant",
-          content: getResponseText(response, statusCode),
-          _type: "message",
+      vectorDBDetailsResponse: {
+        status: response?.status || "unknown",
+        message: response?.message || "",
+        similarityThreshold: response?.similarityThreshold,
+        actualSimilarity: response?.actualSimilarity,
+        metadata: {
+          destination: response?.metadata?.destination,
+          destination_parsed: response?.metadata?.destination_parsed,
+          timestamp: new Date().toISOString(),
         },
-      ],
+        _type: "vector_db",
+      },
+      messages: [],
     },
   };
 
@@ -72,10 +76,7 @@ export const mapVectorDB: MapperFn<any, any> = ({
     preview: {
       request: getRequestText(request),
       response: getResponseText(response, statusCode),
-      concatenatedMessages: [
-        ...(llmSchema.request.messages || []),
-        ...(llmSchema.response?.messages || []),
-      ],
+      concatenatedMessages: [],
     },
   };
 };

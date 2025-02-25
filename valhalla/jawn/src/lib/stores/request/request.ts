@@ -20,6 +20,10 @@ import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
 import { Provider } from "../../../packages/llm-mapper/types";
 import { HeliconeRequest } from "../../../packages/llm-mapper/types";
+import {
+  clickhousePriceCalc,
+  clickhousePriceCalcNonAggregated,
+} from "../../../packages/cost";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -200,6 +204,7 @@ export async function getRequestsClickhouse(
       properties,
       assets as asset_ids,
       target_url,
+      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
     FROM request_response_rmt FINAL
     WHERE (
       (${builtFilter.filter})
