@@ -316,11 +316,23 @@ const useOrgsContextManager = () => {
       orgs &&
       orgs.length > 0
     ) {
+      const demoOrg = orgs?.find((org) => org.tier === "demo");
+
+      // If demo org exists and demo data is already set up, mark as complete and exit
+      if (
+        demoOrg &&
+        demoOrg.onboarding_status &&
+        typeof demoOrg.onboarding_status === "object" &&
+        (demoOrg.onboarding_status as any).demoDataSetup === true
+      ) {
+        hasRunRef.current = user.id;
+        return;
+      }
+
       isProcessingRef.current = true;
       hasRunRef.current = user.id;
 
       const jwtToken = getHeliconeCookie().data?.jwtToken;
-      const demoOrg = orgs?.find((org) => org.tier === "demo");
       const mainOrg = orgs?.find((org) => org.is_main_org === true);
 
       if (
