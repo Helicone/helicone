@@ -21,6 +21,53 @@ type RenderMappedRequestProps = {
   promptData?: any;
 };
 
+const ErrorMessage = ({
+  mapperContent,
+}: {
+  mapperContent: MappedLLMRequest;
+}) => {
+  const errorText = useMemo(() => {
+    if (
+      typeof mapperContent?.schema.response?.error?.heliconeMessage === "string"
+    ) {
+      return mapperContent?.schema.response?.error?.heliconeMessage;
+    }
+    if (mapperContent?.schema.response?.error?.heliconeMessage) {
+      return JSON.stringify(
+        mapperContent?.schema.response?.error?.heliconeMessage,
+        null,
+        2
+      );
+    }
+    return JSON.stringify(mapperContent.raw.response, null, 2);
+  }, [mapperContent]);
+
+  return (
+    <div className="w-full flex flex-col text-left space-y-8 text-sm">
+      <div className="w-full flex flex-col text-left space-y-1 text-sm">
+        <p className="font-semibold text-sm">
+          Response <span className="text-red-500 text-xs">(Error)</span>
+        </p>
+        <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+          {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
+          "string"
+            ? mapperContent?.schema.response?.error?.heliconeMessage
+            : JSON.stringify(
+                mapperContent?.schema.response?.error?.heliconeMessage,
+                null,
+                2
+              )}
+        </pre>
+      </div>
+      <p className="font-semibold text-sm">Request</p>
+      <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+        {mapperContent?.schema.request?.messages &&
+          JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
+      </pre>
+    </div>
+  );
+};
+
 export const RenderMappedRequest = (
   props: RenderMappedRequestProps & { mapperContent: MappedLLMRequest }
 ) => {
@@ -45,30 +92,7 @@ export const RenderMappedRequest = (
         </>
       );
     } else {
-      return (
-        <div className="w-full flex flex-col text-left space-y-8 text-sm">
-          <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-sm">
-              Response <span className="text-red-500 text-xs">(Error)</span>
-            </p>
-            <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
-              "string"
-                ? mapperContent?.schema.response?.error?.heliconeMessage
-                : JSON.stringify(
-                    mapperContent?.schema.response?.error?.heliconeMessage,
-                    null,
-                    2
-                  )}
-            </pre>
-          </div>
-          <p className="font-semibold text-sm">Request</p>
-          <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-            {mapperContent?.schema.request?.messages &&
-              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
-          </pre>
-        </div>
-      );
+      return <ErrorMessage mapperContent={mapperContent} />;
     }
   } else if (
     mapperContent._type === "openai-instruct" ||
@@ -107,30 +131,7 @@ export const RenderMappedRequest = (
     ) {
       return <Realtime mappedRequest={mapperContent} {...props} />;
     } else {
-      return (
-        <div className="w-full flex flex-col text-left space-y-8 text-sm">
-          <div className="w-full flex flex-col text-left space-y-1 text-sm">
-            <p className="font-semibold text-sm">
-              Response <span className="text-red-500 text-xs">(Error)</span>
-            </p>
-            <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {typeof mapperContent?.schema.response?.error?.heliconeMessage ===
-              "string"
-                ? mapperContent?.schema.response?.error?.heliconeMessage
-                : JSON.stringify(
-                    mapperContent?.schema.response?.error?.heliconeMessage,
-                    null,
-                    2
-                  )}
-            </pre>
-          </div>
-          <p className="font-semibold text-sm">Request</p>
-          <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-            {mapperContent?.schema.request?.messages &&
-              JSON.stringify(mapperContent?.schema.request?.messages, null, 2)}
-          </pre>
-        </div>
-      );
+      return <ErrorMessage mapperContent={mapperContent} />;
     }
   }
   return (
