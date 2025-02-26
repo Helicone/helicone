@@ -36,7 +36,7 @@ export class HeliconeManualLogger {
       const result = await operation(resultRecorder);
       const endTime = Date.now();
 
-      await this.sendLog(request, resultRecorder.getResults(), {
+      this.sendLog(request, resultRecorder.getResults(), {
         startTime,
         endTime,
         additionalHeaders,
@@ -49,13 +49,41 @@ export class HeliconeManualLogger {
     }
   }
 
+  public async logStream<T>(
+    request: HeliconeLogRequest,
+    operation: (resultRecorder: HeliconeStreamResultRecorder) => Promise<T>,
+    additionalHeaders?: Record<string, string>
+  ): Promise<T> {
+    const startTime = Date.now();
+    const resultRecorder = new HeliconeStreamResultRecorder();
+    const result = await operation(resultRecorder);
+    try {
+      resultRecorder.getStreamTexts().then((texts) => {
+        const endTime = Date.now();
+        this.sendLog(request, texts.join(""), {
+          startTime,
+          endTime,
+          additionalHeaders,
+          timeToFirstToken: resultRecorder.firstChunkTimeUnix
+            ? resultRecorder.firstChunkTimeUnix - startTime
+            : undefined,
+        });
+      });
+      return result;
+    } catch (error) {
+      console.error("Helicone error during stream logging:", error);
+      throw error;
+    }
+  }
+
   private async sendLog(
     request: HeliconeLogRequest,
-    response: Record<string, any>,
+    response: Record<string, any> | string,
     options: {
       startTime: number;
       endTime: number;
       additionalHeaders?: Record<string, string>;
+      timeToFirstToken?: number;
     }
   ): Promise<void> {
     const { startTime, endTime, additionalHeaders } = options;
@@ -68,14 +96,19 @@ export class HeliconeManualLogger {
       meta: {},
     };
 
+    const isResponseString = typeof response === "string";
+
     const providerResponse: ProviderResponse = {
       headers: this.headers,
       status: 200,
-      json: {
-        ...response,
-        _type: request._type,
-        toolName: request.toolName,
-      },
+      json: isResponseString
+        ? {}
+        : {
+            ...response,
+            _type: request._type,
+            toolName: request.toolName,
+          },
+      textBody: isResponseString ? response : undefined,
     };
 
     const timing: Timing = {
@@ -87,6 +120,7 @@ export class HeliconeManualLogger {
         seconds: Math.trunc(endTime / 1000),
         milliseconds: endTime % 1000,
       },
+      timeToFirstToken: options.timeToFirstToken,
     };
 
     const fetchOptions = {
@@ -116,6 +150,32 @@ export class HeliconeManualLogger {
   }
 }
 
+class HeliconeStreamResultRecorder {
+  private streams: ReadableStream[] = [];
+  firstChunkTimeUnix: number | null = null;
+
+  constructor() {}
+
+  attachStream(stream: ReadableStream): void {
+    this.streams.push(stream);
+  }
+
+  async getStreamTexts(): Promise<string[]> {
+    const decoder = new TextDecoder();
+    return Promise.all(
+      this.streams.map(async (stream) => {
+        if (!this.firstChunkTimeUnix) {
+          this.firstChunkTimeUnix = Date.now();
+        }
+        const streamedData: any[] = [];
+        for await (const chunk of stream) {
+          streamedData.push(decoder.decode(chunk));
+        }
+        return streamedData.join("");
+      })
+    );
+  }
+}
 class HeliconeResultRecorder {
   private results: Record<string, any> = {};
 

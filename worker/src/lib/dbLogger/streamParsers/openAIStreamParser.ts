@@ -23,7 +23,7 @@ export async function parseOpenAIStream(
     return {
       data: {
         ...consolidateTextFields(data),
-        usage: await getUsage(data, requestBody, tokenCounter),
+        usage: await getUsage(data, requestBody, () => Promise.resolve(0)),
       },
       error: null,
     };
