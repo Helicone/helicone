@@ -134,4 +134,34 @@ You can still see the key metrics for each request, without the request or respo
   />
 </Frame>
 
+## Completely Disabling Logging
+
+If you are using Helicone's Asynchronous Logging, you can also completely disable all logging to Helicone:
+
+```python
+from helicone_async import HeliconeAsyncLogger
+from openai import OpenAI
+
+logger = HeliconeAsyncLogger(
+  api_key=HELICONE_API_KEY,
+)
+
+logger.init()
+
+# Completely disable all logging
+logger.disable_logging()
+
+# Your OpenAI calls here
+# No data will be sent to Helicone
+
+# Later, re-enable logging if needed
+logger.enable_logging()
+```
+
+When logging is disabled, no traces will be sent to Helicone at all. This is different from `disable_content_tracing()` which only omits request and response content but still sends other metrics. Note that this feature is only available when using Helicone's async integration mode and not with the proxy integration.
+
+### Request View
+
+You can still see the key metrics for each request, without the request or response contents.
+
 <QuestionsSection />
