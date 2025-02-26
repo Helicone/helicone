@@ -41,7 +41,14 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   const getMessageType = (message: any): MessageType => {
     if (message._type === "functionCall") return "functionCall";
     if (message._type === "function") return "functionOutput";
-    if (message._type === "message") return "session";
+    if (
+      message._type === "message" &&
+      message.content &&
+      (message.content.startsWith("{") ||
+        message.content.includes('"session":'))
+    ) {
+      return "session";
+    }
     if (message._type === "audio") return "audio";
     return "text";
   };
