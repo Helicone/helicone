@@ -59,7 +59,7 @@ export class HeliconeManualLogger {
     const resultRecorder = new HeliconeStreamResultRecorder();
     const result = await operation(resultRecorder);
     try {
-      resultRecorder.getStreamTexts().then((texts) => {
+      await resultRecorder.getStreamTexts().then((texts) => {
         const endTime = Date.now();
         this.sendLog(request, texts.join(""), {
           startTime,
