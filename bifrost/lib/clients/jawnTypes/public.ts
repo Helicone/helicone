@@ -295,6 +295,9 @@ export interface paths {
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
+  "/v1/property/{propertyKey}/top-costs/query": {
+    post: operations["GetTopCosts"];
+  };
   "/v1/public/pi/get-api-key": {
     post: operations["GetApiKey"];
   };
@@ -1828,6 +1831,22 @@ Json: JsonObject;
       error: null;
     };
     "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__value-string--cost-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost: number;
+          value: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__value-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__value-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    TimeFilterRequest: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
     "ResultSuccess__apiKey-string__": {
       data: {
         apiKey: string;
@@ -4225,6 +4244,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTopCosts: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TimeFilterRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__value-string--cost-number_-Array.string_"];
         };
       };
     };
