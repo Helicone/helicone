@@ -1,18 +1,16 @@
-import { useState, useMemo } from "react";
-
-import AuthHeader from "../../shared/authHeader";
-
-import { TagIcon } from "@heroicons/react/24/outline";
+import { useMemo, useState } from "react";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { useHasAccess } from "@/hooks/useHasAccess";
+import { Tag } from "lucide-react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import { clsx } from "../../shared/clsx";
+import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import PropertyPanel from "./propertyPanel";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import { useHasAccess } from "@/hooks/useHasAccess";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
@@ -20,7 +18,6 @@ const PropertiesPage = (props: {}) => {
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
   const hasAccess = useHasAccess("properties");
-  const org = useOrg();
 
   const hasAccessToProperties = useMemo(() => {
     return (
@@ -28,7 +25,7 @@ const PropertiesPage = (props: {}) => {
       (properties.length > 0 &&
         new Date().getTime() < new Date("2024-09-27").getTime())
     );
-  }, [org?.currentOrg?.tier, properties.length]);
+  }, [hasAccess, properties.length]);
 
   if (isPropertiesLoading) {
     return <LoadingAnimation title="Loading Properties" />;
@@ -36,12 +33,12 @@ const PropertiesPage = (props: {}) => {
 
   if (!hasAccessToProperties) {
     return (
-      <div className="flex justify-center items-center bg-white">
+      <div className="flex justify-center items-center bg-white dark:bg-gray-950">
         <FeatureUpgradeCard
           title="Properties"
           featureName="Properties"
           headerTagline="Tag and analyze request metadata"
-          icon={<TagIcon className="w-4 h-4 text-sky-500" />}
+          icon={<Tag className="w-4 h-4 text-sky-500" />}
           highlightedFeature="properties"
         />
       </div>
@@ -50,58 +47,50 @@ const PropertiesPage = (props: {}) => {
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+      <div className="flex flex-col w-full min-h-screen items-center bg-slate-50 dark:bg-gray-900">
         <EmptyStateCard feature="properties" />
       </div>
     );
   }
 
   return (
-    <IslandContainer>
-      <AuthHeader isWithinIsland={true} title={"Properties"} />
-      <div className="flex flex-col gap-4">
-        {isPropertiesLoading ? (
-          <LoadingAnimation title="Loading Properties" />
-        ) : (
-          <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
-            <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
-              <h3 className="font-semibold text-md text-black dark:text-white">
+    <div className="flex flex-col">
+      {isPropertiesLoading ? (
+        <LoadingAnimation title="Loading Properties" />
+      ) : (
+        <div className="flex flex-col xl:flex-row h-full">
+          <Card className="w-full xl:w-[350px] h-full rounded-none border-0 shadow-none">
+            <CardContent className="p-0">
+              <h3 className="font-semibold text-lg text-black dark:text-white p-4">
                 Your Properties
               </h3>
 
-              <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
-                {properties.map((property, i) => (
-                  <li key={i}>
-                    <button
-                      onClick={() => {
-                        setSelectedProperty(property);
-                      }}
-                      className={clsx(
-                        selectedProperty === property
-                          ? "bg-sky-200 dark:bg-sky-800"
-                          : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
-                        i === 0 ? "rounded-t-md" : "",
-                        i === properties.length - 1 ? "rounded-b-md" : "",
-                        "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-800"
-                      )}
+              <ScrollArea className="h-full">
+                <div>
+                  {properties.map((property, i) => (
+                    <Button
+                      key={i}
+                      variant={
+                        selectedProperty === property ? "default" : "ghost"
+                      }
+                      className="w-full justify-start font-medium h-auto py-3 rounded-none"
+                      onClick={() => setSelectedProperty(property)}
                     >
-                      <TagIcon className="h-4 w-4 text-black dark:text-white" />
-                      <p className="text-md font-semibold text-black dark:text-white">
-                        {property}
-                      </p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      <Tag className="h-4 w-4 mr-2" />
+                      <span className="truncate">{property}</span>
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
-            <div className="w-full xl:pl-4 flex flex-col space-y-4">
-              <PropertyPanel property={selectedProperty} />
-            </div>
+          <div className="w-full flex flex-col pt-2">
+            <PropertyPanel property={selectedProperty} />
           </div>
-        )}
-      </div>
-    </IslandContainer>
+        </div>
+      )}
+    </div>
   );
 };
 
