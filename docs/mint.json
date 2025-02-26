@@ -77,14 +77,14 @@
       "pages": [
         {
           "group": "Generic Gateway",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/custom"
-          ]
+          "pages": ["getting-started/integration-method/gateway"]
         },
         {
           "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"]
+          "pages": [
+            "getting-started/integration-method/custom",
+            "getting-started/integration-method/openllmetry"
+          ]
         },
         {
           "group": "OpenAI",
