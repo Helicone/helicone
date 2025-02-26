@@ -41,6 +41,7 @@ const HEADSHOTS = {
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
+  Yusuf: "/static/blog/yusuf-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -216,6 +217,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "claude-3.7",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "grok-3-benchmark-comparison",
     },
   },
@@ -294,7 +300,7 @@ const blogContent: BlogStructure[] = [
       folderName: "openai-structured-outputs",
     },
   },
-    {
+  {
     dynmaicEntry: {
       folderName: "helicone-vs-traceloop",
     },
@@ -492,6 +498,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "open-webui-alts",
     },
   },
   {
