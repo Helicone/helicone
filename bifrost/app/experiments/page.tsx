@@ -2,7 +2,7 @@
 
 import { clsx } from "@/utils/clsx";
 import { CheckIcon } from "@radix-ui/react-icons";
-import { useState, useEffect, ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { TwoBillion } from "./TwoBillion";
 
@@ -73,7 +73,7 @@ const Purple = ({ className }: { className?: string }) => (
         width="1760.97"
         height="1232.46"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -111,7 +111,7 @@ const Blue = ({ className }: { className?: string }) => (
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -152,7 +152,7 @@ const Pink = ({ className }: { className?: string }) => (
         width="1950.73"
         height="1720.48"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -233,7 +233,7 @@ const LightPurpleBottom = ({ className }: { className?: string }) => (
         width="1631"
         height="1631"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -278,7 +278,7 @@ const BlueBottom = ({ className }: { className?: string }) => (
         width="1316"
         height="1511"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -319,7 +319,7 @@ const PinkBottom = ({ className }: { className?: string }) => (
         width="1697"
         height="1546"
         filterUnits="userSpaceOnUse"
-        colorInterpolationFilters"sRGB"
+        colorInterpolationFilters="sRGB"
       >
         <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
