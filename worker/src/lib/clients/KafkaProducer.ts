@@ -85,8 +85,6 @@ export class KafkaProducer {
       msg.heliconeMeta.heliconeManualAccessKey ===
         this.HELICONE_MANUAL_ACCESS_KEY
     ) {
-      console.log("Sending message via REST");
-      console.log(msg);
       await this.sendMessageHttp(msg);
       return;
     }
