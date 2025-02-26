@@ -41,6 +41,7 @@ const HEADSHOTS = {
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
+  Yusuf: "/static/blog/yusuf-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -299,7 +300,7 @@ const blogContent: BlogStructure[] = [
       folderName: "openai-structured-outputs",
     },
   },
-    {
+  {
     dynmaicEntry: {
       folderName: "helicone-vs-traceloop",
     },
