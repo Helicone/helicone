@@ -82,6 +82,7 @@ export function CodeIntegrationPage({
   const [apiKey, setApiKey] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Add the event listening query
   const { data: hasEvent } = useQuery<Result<boolean, string>, Error>(
@@ -194,6 +195,12 @@ export function CodeIntegrationPage({
       setLanguage(availableLanguages[0]);
     }
   }, [provider, availableLanguages, language]);
+
+  // Add this function to handle the "Do it later" button click
+  const handleDoItLater = () => {
+    setIsRedirecting(true);
+    router.push("/dashboard");
+  };
 
   return (
     <OnboardingHeader>
@@ -363,11 +370,21 @@ export function CodeIntegrationPage({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <Link href="/dashboard">
-              <Button variant="secondary" className="w-fit">
-                Do it later
-              </Button>
-            </Link>
+            <Button
+              variant="secondary"
+              className="w-fit"
+              onClick={handleDoItLater}
+              disabled={isRedirecting}
+            >
+              {isRedirecting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Redirecting...
+                </>
+              ) : (
+                "Do it later"
+              )}
+            </Button>
           </div>
         </main>
       </div>
