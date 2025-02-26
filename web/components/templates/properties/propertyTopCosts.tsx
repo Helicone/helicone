@@ -12,7 +12,7 @@ import {
 
 interface PropertyTopCostsProps {
   property: string;
-  timeFilter?: {
+  timeFilter: {
     start: Date;
     end: Date;
   };
@@ -29,14 +29,12 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
             propertyKey: property,
           },
         },
-        body: timeFilter
-          ? {
-              timeFilter: {
-                start: timeFilter.start.toISOString(),
-                end: timeFilter.end.toISOString(),
-              },
-            }
-          : {},
+        body: {
+          timeFilter: {
+            start: timeFilter.start.toISOString(),
+            end: timeFilter.end.toISOString(),
+          },
+        },
       }),
     enabled: !!property,
   });
