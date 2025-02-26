@@ -86,7 +86,7 @@ _Image Source: <a href="https://www.anthropic.com/news/claude-3-7-sonnet" target
 
 ### Comparison Summary
 - Claude 3.7 Sonnet **excels in software engineering and agentic workflows**, outperforming OpenAI, Grok, and DeepSeek in these categories.
-- OpenAI's models **lead in multilingual Q&A, reasoning, and mathematical problem-solving**, with o3-mini dominating in complex math tasks.
+- OpenAI's models **lead in multilingual Q&A, visual reasoning, and mathematical problem-solving**, with o3-mini dominating in complex math tasks.
 - Grok 3 shows superior performance in **visual reasoning and high school mathematics**.
 - Unsurprisingly, Claude 3.5 Sonnet lags behind in most areas compared to Claude 3.7.
 
@@ -152,23 +152,9 @@ Unlike previous AI coding assistants, Claude Code runs in your terminal and dire
 
 Key features include:
 
-### Full Repository Analysis
+1. **Full Repository Analysis**: Claude Code understands entire repositories, enabling context-aware suggestions that match your project’s structure, dependencies, and coding style.
 
-Claude Code can ingest and understand entire repositories, giving it context about your project's structure, dependencies, and coding patterns. 
-
-This enables it to provide more relevant suggestions and make changes that align with your codebase's style and architecture.
-
-### Automated Task Execution
-
-The tool can:
-- Search through files for relevant code
-- Run terminal commands
-- Edit files across the codebase
-- Debug build failures
-- Write tests based on implementation code
-- Make commits, generate PRs, and perform other tasks on GitHub
-
-It requests permission before making changes so you can oversee the changes being made.
+2. **Automated Task Execution**: It can search files, run commands, edit code, debug, write tests, and manage GitHub tasks (commits, PRs, etc.), always requesting approval before making changes.
 
 ## How to Access Claude 3.7 Sonnet and Claude Code
 
@@ -191,33 +177,35 @@ Pricing for Claude 3.7 Sonnet matches that of Claude 3.5 Sonnet:
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="See Docs"
-  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/x#x-ai-integration"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/anthropic/python"
 >
 ```python
-from openai import OpenAI
+import anthropic
+import os
 
-client = OpenAI(
-    api_key="your-x-ai-api-key",  # X AI API key
-    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
+client = anthropic.Anthropic(
+  api_key=os.environ.get("ANTHROPIC_API_KEY"),
+  base_url="https://anthropic.helicone.ai",
+  default_headers={
+    "Helicone-Auth": f"Bearer {os.environ.get("HELICONE_API_KEY")}",
+  },
 )
 
-response = client.chat.completions.create(
-    model="claude-3.7-sonnet",
-    messages=[
-        {"role": "user", "content": "Say this is a test"}
-    ]
+client.messages.create(
+  model="claude-3-7-sonnet-20250219",
+  max_tokens=1024,
+  messages=[
+    {"role": "user", "content": "Hello, world"}
+  ]
 )
-print(response.choices[0].message.content)
 ```
 </CallToAction>
 
-## How to Access and Use Claude Code 
+### How to Access and Use Claude Code 
 
-**Claude Code** is currently in limited research preview and is available only to a few select users. 
+**Claude Code** is currently in limited research preview and is available only to a few select users. You can join the waitlist <a href="https://console.anthropic.com/code/welcome" target="_blank" rel="noopener">here</a>.
 
-You can join the waitlist <a href="https://console.anthropic.com/code/welcome" target="_blank" rel="noopener">here</a>.
-
-### Claude Code Setup Instructions
+{/* ### Claude Code Setup Instructions
 
 Before installing, ensure your system meets the following requirements:
 
@@ -255,20 +243,20 @@ Before installing, ensure your system meets the following requirements:
 5. **Try a simple command**:
     ```sh
     claude "summarize this project"
-    ```
+    ``` */}
 
-## What's Next for Claude 3.7
+{/* ## What's Next for Claude 3.7?
 
 The rapid advancement of Claude models suggests an exciting roadmap ahead:
 
 Anthropic's team is likely focused on:
 
 1. **Scaling up reasoning capabilities** - Future Claude models will probably leverage even more compute for deeper thinking.
-2. **Expanding agentic abilities** - The success of Claude Code points to more integrated tools that work autonomously within development environments.
+2. **Expanding agentic abilities** - The success of Claude Code points to more integrated tools that work autonomously within development environments. */}
 
-### The Future of AI Software Development
+### The Future of Software Development
 
-Looking more broadly at AI tools for developers:
+Anthropic's new releases paint quite the picture for the future of software development. Here are some trends we can expect:
 
 1. **AI-native development environments** will become standard, with models that understand code at a fundamental level.
 2. **Continuous integration with AI agents** that automatically maintain and improve codebases.
@@ -303,6 +291,10 @@ Claude 3.7 shows strong performance across widely-used languages including Pytho
 5. **Do I need special hardware to run Claude Code?**
 
 Claude Code is a command-line tool that runs on standard developer machines. The heavy computational work happens on Anthropic's servers, so local hardware requirements are minimal. However, a stable internet connection is necessary as the tool communicates with Anthropic's API.
+
+5. **When is Claude 4.0 going to be released?**
+
+There is no official release date for Claude 4.0 yet. While a lot of people expected the next model after Claude 3.5 to be Claude 4.0, Anthropic clearly had different plans. We're just as eager as you to see what 4.0 has in stock. 
 
 6. **What is Claude's 3.7's context window?**
 
