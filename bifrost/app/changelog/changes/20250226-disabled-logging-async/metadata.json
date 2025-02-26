@@ -1,0 +1,4 @@
+{
+  "title": "Complete Logging Control for Async Integration",
+  "description": "Added ability to completely disable all logging to Helicone when using the Python Asynchronous Logging integration, providing enhanced privacy and control options."
+}

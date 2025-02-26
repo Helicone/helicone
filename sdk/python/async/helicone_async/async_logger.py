@@ -12,6 +12,7 @@ from ._constants import SUPPORTED_INSTRUMENTS
 class HeliconeAsyncLogger:
     base_url: str
     api_key: str
+    _logging_enabled: bool = True
 
     def __init__(
         self,
@@ -42,6 +43,7 @@ class HeliconeAsyncLogger:
             should_enrich_metrics=False,
             instruments=SUPPORTED_INSTRUMENTS,
         )
+        self._logging_enabled = True
 
     def disable_content_tracing(self) -> None:
         os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
@@ -51,3 +53,21 @@ class HeliconeAsyncLogger:
 
     def set_properties(self, properties: dict) -> None:
         Traceloop.set_association_properties(properties)
+
+    def disable_logging(self) -> None:
+        """
+        Completely disables all logging by shutting down the Traceloop SDK.
+        After calling this method, no more traces will be sent to Helicone.
+        To resume logging, call init() again.
+        """
+        if self._logging_enabled:
+            Traceloop.shutdown()
+            self._logging_enabled = False
+
+    def enable_logging(self) -> None:
+        """
+        Re-enables logging if it was previously disabled.
+        This reinitializes the Traceloop SDK with the original configuration.
+        """
+        if not self._logging_enabled:
+            self.init()
