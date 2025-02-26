@@ -199,7 +199,7 @@ const EvaluateSVG = () => (
         strokeWidth="1.07407"
       />
       <g filter="url(#filter1_dd_3306_14763)">
-        <g clip-path="url(#clip0_3306_14763)">
+        <g clipPath="url(#clip0_3306_14763)">
           <rect
             x="178"
             y="67.2227"
@@ -616,9 +616,9 @@ const EvaluateSVG = () => (
         width="505.622"
         height="599.63"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -651,9 +651,9 @@ const EvaluateSVG = () => (
         width="468"
         height="562"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -711,8 +711,8 @@ const EvaluateSVG = () => (
         y2="433.93"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#0EA5E9" />
-        <stop offset="1" stop-color="#229C0A" stop-opacity="0.5" />
+        <stop stopColor="#0EA5E9" />
+        <stop offset="1" stopColor="#229C0A" stopOpacity="0.5" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_3306_14763"
@@ -722,8 +722,8 @@ const EvaluateSVG = () => (
         y2="623.223"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#01012E" />
-        <stop offset="1" stop-color="#030394" stop-opacity="0" />
+        <stop stopColor="#01012E" />
+        <stop offset="1" stopColor="#030394" stopOpacity="0" />
       </linearGradient>
       <clipPath id="clip0_3306_14763">
         <rect
