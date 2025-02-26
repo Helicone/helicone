@@ -42,7 +42,10 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
-    if (!isLoading && org?.currentOrg?.has_onboarded) {
+    if (
+      (!isLoading && org?.currentOrg?.has_onboarded) ||
+      (!isLoading && org?.currentOrg?.tier?.toLowerCase() === "demo")
+    ) {
       router.push("/dashboard");
       return;
     }

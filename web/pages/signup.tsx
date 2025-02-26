@@ -73,6 +73,9 @@ const SignUp = () => {
           });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
+            options: {
+              redirectTo: `${origin}/onboarding`,
+            },
           });
           if (error) {
             setNotification(
@@ -89,6 +92,9 @@ const SignUp = () => {
           });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "github",
+            options: {
+              redirectTo: `${origin}/onboarding`,
+            },
           });
           if (error) {
             setNotification(
