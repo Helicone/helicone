@@ -54,5 +54,39 @@ curl \
   --url https://mistral.helicone.ai/chat/completions
 ```
 
+### TypeScript Example
+
+```typescript
+const httpClient = new HTTPClient();
+httpClient.addHook("beforeRequest", async (req) => {
+  req.headers.set("Helicone-Auth", `Bearer ${process.env.HELICONE_API_KEY}`);
+});
+
+const mistral = new Mistral({
+  apiKey: process.env.MISTRAL_API_KEY,
+  serverURL: "https://mistral.helicone.ai",
+  httpClient,
+});
+
+async function run() {
+  const result = await mistral.chat.complete({
+    model: "mistral-small-latest",
+    stream: false,
+    messages: [
+      {
+        content:
+          "Who is the best French painter? Answer in one short sentence.",
+        role: "user",
+      },
+    ],
+  });
+
+  // Handle the result
+  console.log(result);
+}
+
+run();
+```
+
 For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
 And for more information on how to use Mistral AI, see [Mistral AI Docs](https://docs.mistral.ai/).
