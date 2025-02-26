@@ -1,15 +1,5 @@
-import {
-  ArrowPathIcon,
-  ArrowTopRightOnSquareIcon,
-  ArrowsPointingOutIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  TableCellsIcon,
-  TagIcon,
-} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { usePropertyCard } from "./useProperty";
-
 import { useState } from "react";
 import {
   TimeInterval,
@@ -28,6 +18,14 @@ import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 import { SimpleTable } from "../../shared/table/simpleTable";
+
+// ShadCN components
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lucide icons (modern alternative to Heroicons)
+import { Tag, DollarSign, Table2, Clock, ExternalLink } from "lucide-react";
 
 interface PropertyPanelProps {
   property: string;
@@ -102,8 +100,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const cleanedValueData = getPropertyValueData();
 
   return (
-    <div className="flex flex-col space-y-4 mt-4">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+    <div className="flex flex-col">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <ThemedTableHeader
           isFetching={false}
           timeFilter={{
@@ -142,172 +140,183 @@ const PropertyPanel = (props: PropertyPanelProps) => {
           }))}
         />
       </div>
+
       {property === "" ? (
-        <div className="flex flex-col w-full h-96 justify-center items-center">
-          <div className="flex flex-col w-2/5">
-            <TagIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-            <p className="text-xl text-black dark:text-white font-semibold mt-8">
-              No Property Selected
+        <Card className="w-full flex items-center justify-center py-16 rounded-none border-0 shadow-none mt-4">
+          <CardContent className="flex flex-col items-center text-center">
+            <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full mb-6">
+              <Tag className="h-8 w-8 text-sky-500" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No Property Selected</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Please select a property from the sidebar to view its metrics
             </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2">
-              Please select a property to view its metrics
-            </p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex flex-col space-y-4">
-          <ul className="flex flex-col md:flex-row items-center gap-4">
-            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
-              <CurrencyDollarIcon className="h-6 w-6 text-sky-500" />
-              <div className="flex flex-col">
-                <dt className="text-gray-500 text-sm">Cost</dt>
-                {isAnyLoading ? (
-                  <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                    {keyMetrics.totalCost.data?.data
-                      ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
-                      : "$0.00"}
-                  </dd>
-                )}
-              </div>
-            </li>
-            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
-              <TableCellsIcon className="h-6 w-6 text-pink-500" />
-              <div className="flex flex-col">
-                <dt className="text-gray-500 text-sm">Requests</dt>
-                {isAnyLoading ? (
-                  <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                    {+(keyMetrics.totalRequests?.data?.data?.toFixed(2) ?? 0)}
-                  </dd>
-                )}
-              </div>
-            </li>{" "}
-            <li className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4">
-              <ClockIcon className="h-6 w-6 text-violet-500" />
-              <div className="flex flex-col">
-                <dt className="text-gray-500 text-sm">Average Latency / Req</dt>
-                {isAnyLoading ? (
-                  <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                ) : (
-                  <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                    {keyMetrics.averageLatency.data?.data
-                      ? (keyMetrics.averageLatency.data.data / 1000).toFixed(2)
-                      : "n/a"}
-                  </dd>
-                )}
-              </div>
-            </li>
-          </ul>
+        <div className="flex flex-col">
+          <div className="grid grid-cols-1 md:grid-cols-3 mt-4">
+            <Card className="rounded-none border-0 shadow-none">
+              <CardContent className="flex items-center p-4">
+                <div className="bg-sky-50 dark:bg-sky-950 p-3 rounded-full mr-4">
+                  <DollarSign className="h-5 w-5 text-sky-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cost</p>
+                  {isAnyLoading ? (
+                    <Skeleton className="h-7 w-24" />
+                  ) : (
+                    <p className="text-xl font-semibold">
+                      {keyMetrics.totalCost.data?.data
+                        ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
+                        : "$0.00"}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-none border-0 shadow-none">
+              <CardContent className="flex items-center p-4">
+                <div className="bg-pink-50 dark:bg-pink-950 p-3 rounded-full mr-4">
+                  <Table2 className="h-5 w-5 text-pink-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Requests</p>
+                  {isAnyLoading ? (
+                    <Skeleton className="h-7 w-24" />
+                  ) : (
+                    <p className="text-xl font-semibold">
+                      {+(keyMetrics.totalRequests?.data?.data?.toFixed(2) ?? 0)}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-none border-0 shadow-none">
+              <CardContent className="flex items-center p-4">
+                <div className="bg-violet-50 dark:bg-violet-950 p-3 rounded-full mr-4">
+                  <Clock className="h-5 w-5 text-violet-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Average Latency / Req
+                  </p>
+                  {isAnyLoading ? (
+                    <Skeleton className="h-7 w-24" />
+                  ) : (
+                    <p className="text-xl font-semibold">
+                      {keyMetrics.averageLatency.data?.data
+                        ? (keyMetrics.averageLatency.data.data / 1000).toFixed(
+                            2
+                          )
+                        : "n/a"}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {isAnyLoading ? (
             <div className="py-8">
               <LoadingAnimation title="Loading Data..." />
             </div>
           ) : (
-            <SimpleTable
-              className="w-full border rounded"
-              data={cleanedValueData}
-              columns={[
-                {
-                  key: "property_value" as keyof (typeof cleanedValueData)[0],
-                  header: "Value",
-                  render: (propertyValue) => (
-                    <div
-                      className="flex flex-row items-start font-semibold max-w-[200px] 2xl:max-w-[400px] truncate underline hover:cursor-pointer"
-                      onClick={() => {
-                        const value = propertyValue.property_value;
-                        const filterMapIndex = filterMap.findIndex(
-                          (f) => f.label === property
-                        );
-                        const currentAdvancedFilters = encodeURIComponent(
-                          JSON.stringify(
-                            [
-                              {
-                                filterMapIdx: filterMapIndex,
-                                operatorIdx: 0,
-                                value,
-                              },
-                            ]
-                              .map(encodeFilter)
-                              .join("|")
-                          )
-                        );
+            <Card className="rounded-none border-0 shadow-none mt-4">
+              <CardContent className="p-0">
+                <SimpleTable
+                  className="w-full"
+                  data={cleanedValueData}
+                  columns={[
+                    {
+                      key: "property_value" as keyof (typeof cleanedValueData)[0],
+                      header: "Value",
+                      render: (propertyValue) => (
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-semibold max-w-[200px] 2xl:max-w-[400px] truncate flex items-center"
+                          onClick={() => {
+                            const value = propertyValue.property_value;
+                            const filterMapIndex = filterMap.findIndex(
+                              (f) => f.label === property
+                            );
+                            const currentAdvancedFilters = encodeURIComponent(
+                              JSON.stringify({
+                                filter: [
+                                  {
+                                    filterMapIdx: filterMapIndex,
+                                    operatorIdx: 0,
+                                    value,
+                                  },
+                                ]
+                                  .map(encodeFilter)
+                                  .join("|"),
+                              })
+                            );
 
-                        router.push({
-                          pathname: "/requests",
-                          query: {
-                            t: "3m",
-                            filters: currentAdvancedFilters,
-                          },
-                        });
-                      }}
-                    >
-                      {propertyValue.property_value}
-                      <ArrowTopRightOnSquareIcon className="h-4 w-4 inline ml-1 text-gray-700 dark:text-gray-300" />
-                    </div>
-                  ),
-                },
-                {
-                  key: "total_requests" as keyof (typeof cleanedValueData)[0],
-                  header: "Requests",
-                  render: (propertyValue) => propertyValue.total_requests,
-                },
-                {
-                  key: "total_cost" as keyof (typeof cleanedValueData)[0],
-                  header: "Cost",
-                  render: (propertyValue) =>
-                    `$${formatNumber(propertyValue.total_cost, 6)}`,
-                },
-                {
-                  key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
-                  header: "Avg Comp Tokens",
-                  render: (propertyValue) =>
-                    formatNumber(
-                      propertyValue.avg_completion_tokens_per_request,
-                      6
-                    ),
-                },
-                {
-                  key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
-                  header: "Avg Latency",
-                  render: (propertyValue) =>
-                    formatNumber(propertyValue.avg_latency_per_request, 6),
-                },
-                {
-                  key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
-                  header: "Avg Cost",
-                  render: (propertyValue) =>
-                    `$${formatNumber(
-                      propertyValue.average_cost_per_request,
-                      6
-                    )}`,
-                },
-              ]}
-              emptyMessage="No property data available"
-            />
+                            router.push({
+                              pathname: "/requests",
+                              query: {
+                                t: "3m",
+                                filters: currentAdvancedFilters,
+                              },
+                            });
+                          }}
+                        >
+                          {propertyValue.property_value}
+                          <ExternalLink className="h-3 w-3 ml-1 text-muted-foreground" />
+                        </Button>
+                      ),
+                    },
+                    {
+                      key: "total_requests" as keyof (typeof cleanedValueData)[0],
+                      header: "Requests",
+                      render: (propertyValue) => propertyValue.total_requests,
+                    },
+                    {
+                      key: "total_cost" as keyof (typeof cleanedValueData)[0],
+                      header: "Cost",
+                      render: (propertyValue) =>
+                        `$${formatNumber(propertyValue.total_cost, 6)}`,
+                    },
+                    {
+                      key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                      header: "Avg Comp Tokens",
+                      render: (propertyValue) =>
+                        formatNumber(
+                          propertyValue.avg_completion_tokens_per_request,
+                          6
+                        ),
+                    },
+                    {
+                      key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
+                      header: "Avg Latency",
+                      render: (propertyValue) =>
+                        formatNumber(propertyValue.avg_latency_per_request, 6),
+                    },
+                    {
+                      key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
+                      header: "Avg Cost",
+                      render: (propertyValue) =>
+                        `$${formatNumber(
+                          propertyValue.average_cost_per_request,
+                          6
+                        )}`,
+                    },
+                  ]}
+                  emptyMessage="No property data available"
+                />
+              </CardContent>
+            </Card>
           )}
 
-          {!showMore && propertyValueData.length > 10 && (
-            <div className="w-full items-center flex justify-center p-2">
-              <button
-                onClick={() => {
-                  setShowMore(true);
-                  refetch();
-                }}
-                className="text-black dark:text-white border p-2 border-gray-300 bg-white hover:bg-gray-100 dark:border-gray-700 dark:bg-black dark:hover:bg-gray-900 rounded-lg font-semibold flex flex-row gap-2 items-center text-sm"
-              >
-                {isRefetching ? (
-                  <div className="animate-spin h-4 w-4">
-                    <ArrowPathIcon />
-                  </div>
-                ) : (
-                  <ArrowsPointingOutIcon className="h-4 w-4" />
-                )}
-                Show More
-              </button>
+          {propertyValueData.length > 10 && (
+            <div className="flex justify-center mt-4">
+              <Button variant="outline" onClick={() => setShowMore(!showMore)}>
+                {showMore ? "Show Less" : "Show More"}
+              </Button>
             </div>
           )}
         </div>
