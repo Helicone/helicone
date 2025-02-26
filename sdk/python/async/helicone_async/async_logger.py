@@ -59,16 +59,19 @@ class HeliconeAsyncLogger:
         """
         Completely disables all logging by shutting down the Traceloop SDK.
         After calling this method, no more traces will be sent to Helicone.
-        To resume logging, call init() again.
+        To resume logging, call enable_logging() again.
         """
         if self._logging_enabled:
-            self.exporter.shutdown()
+            if self.exporter:
+                self.exporter.shutdown()
             self._logging_enabled = False
 
     def enable_logging(self) -> None:
         """
         Re-enables logging if it was previously disabled.
-        This reinitializes the Traceloop SDK with the original configuration.
+        This reinitializes the Traceloop SDK with a fresh exporter instance.
         """
         if not self._logging_enabled:
-            self.init()
+            # Create a new exporter instance
+            self.exporter.__init__(endpoint=self.base_url, headers={
+                                   "Authorization": f"Bearer {self.api_key}"})
