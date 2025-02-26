@@ -7,7 +7,7 @@ const EvaluateSVG = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <g filter="url(#filter0_dd_3671_13316)">
-      <g clip-path="url(#clip0_3671_13316)">
+      <g clipPath="url(#clip0_3671_13316)">
         <rect x="3" y="2" width="462" height="281" rx="12" fill="#FCFCFC" />
         <rect
           width="461"
@@ -203,9 +203,9 @@ const EvaluateSVG = () => (
         width="468"
         height="287"
         filterUnits="userSpaceOnUse"
-        color-interpolation-filters="sRGB"
+        colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -263,8 +263,8 @@ const EvaluateSVG = () => (
         y2="139.664"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#0EA5E9" />
-        <stop offset="1" stop-color="#229C0A" stop-opacity="0.5" />
+        <stop stopColor="#0EA5E9" />
+        <stop offset="1" stopColor="#229C0A" stopOpacity="0.5" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_3671_13316"
@@ -274,8 +274,8 @@ const EvaluateSVG = () => (
         y2="283"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#01012E" />
-        <stop offset="1" stop-color="#030394" stop-opacity="0" />
+        <stop stopColor="#01012E" />
+        <stop offset="1" stopColor="#030394" stopOpacity="0" />
       </linearGradient>
       <clipPath id="clip0_3671_13316">
         <rect x="3" y="2" width="462" height="281" rx="12" fill="white" />
