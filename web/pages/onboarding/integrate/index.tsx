@@ -2,19 +2,23 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeftRight,
   ArrowRight,
   ExternalLink,
   Waypoints,
+  Loader,
 } from "lucide-react";
 import Link from "next/link";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { useRouter } from "next/navigation";
 
 export default function IntegratePage() {
   const org = useOrg();
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { updateCurrentStep } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
@@ -22,6 +26,11 @@ export default function IntegratePage() {
       updateCurrentStep("INTEGRATION");
     }
   }, [org?.currentOrg?.id]);
+
+  const handleDoItLater = () => {
+    setIsRedirecting(true);
+    router.push("/dashboard");
+  };
 
   return (
     <OnboardingHeader>
@@ -116,11 +125,21 @@ export default function IntegratePage() {
               <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
           </Link>
-          <Link href="/dashboard">
-            <Button variant="secondary" className="w-fit">
-              Do it later
-            </Button>
-          </Link>
+          <Button
+            variant="secondary"
+            className="w-fit"
+            onClick={handleDoItLater}
+            disabled={isRedirecting}
+          >
+            {isRedirecting ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Redirecting...
+              </>
+            ) : (
+              "Do it later"
+            )}
+          </Button>
         </div>
       </div>
     </OnboardingHeader>

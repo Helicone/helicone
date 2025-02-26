@@ -46,7 +46,7 @@ const RateLimitPage = (props: {}) => {
   const { properties, isLoading: propertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
   const org = useOrg();
-  const isPro =
+  const hasAccess =
     org?.currentOrg?.tier === "pro-20240913" ||
     org?.currentOrg?.tier === "pro-20250202" ||
     org?.currentOrg?.tier === "team-20250130" ||
@@ -100,7 +100,9 @@ const RateLimitPage = (props: {}) => {
     });
   };
 
-  const isLoading = propertiesLoading || rateLimitOverTime.isLoading;
+  const isOrgLoading = !org || !org.currentOrg;
+  const isLoading =
+    propertiesLoading || rateLimitOverTime.isLoading || isOrgLoading;
 
   return (
     <>
@@ -108,7 +110,7 @@ const RateLimitPage = (props: {}) => {
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
           <LoadingAnimation height={175} width={175} />
         </div>
-      ) : !isPro &&
+      ) : !hasAccess &&
         !properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
           <FeatureUpgradeCard

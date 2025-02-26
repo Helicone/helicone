@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useHasAccess } from "@/hooks/useHasAccess";
