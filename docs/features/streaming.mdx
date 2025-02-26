@@ -49,3 +49,57 @@ for chunk in await openai.ChatCompletion.acreate(
     if content is not None:
         print(content, end='')
 ```
+
+### Asynchronous Stream Parser
+
+Helicone now provides an improved asynchronous stream parser that enhances performance and reliability when working with streamed responses. This new parser processes stream chunks asynchronously, reducing latency and providing more reliable token counting.
+
+#### Using the Async Stream Parser with Manual Logging
+
+If you're using manual logging with providers like Together AI, you can take advantage of the new async stream parser:
+
+```typescript
+import Together from "together-ai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+export async function main() {
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY!,
+    headers: {},
+  });
+
+  const together = new Together();
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: "Your question here" }],
+    stream: true,
+  } as Together.Chat.CompletionCreateParamsStreaming & { stream: true };
+
+  const response = await together.chat.completions.create(body);
+  const [stream1, stream2] = response.tee();
+
+  // Use the new async stream parser
+  heliconeLogger.logStream(body, async (resultRecorder) => {
+    resultRecorder.attachStream(stream1.toReadableStream());
+  });
+
+  // Process the stream for your application
+  const textDecoder = new TextDecoder();
+  for await (const chunk of stream2.toReadableStream()) {
+    console.log(textDecoder.decode(chunk));
+  }
+}
+```
+
+### Stream Fixes and Improvements
+
+We've made several improvements to our stream handling across different LLM providers:
+
+- Better handling of stream interruptions and reconnections
+- Enhanced error handling for streaming responses
+- Improved compatibility with different LLM provider streaming formats
+- More reliable token counting for streamed content
+
+These improvements ensure a more consistent and reliable streaming experience, especially when working with different LLM providers that implement streaming in various ways.
+
+For information on how to accurately calculate costs when using streaming features, please refer to our [streaming usage guide](/faq/enable-stream-usage).

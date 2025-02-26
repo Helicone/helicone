@@ -14,3 +14,61 @@ base_url="https://together.helicone.ai/v1"
 ```
 
 Please ensure that the base_url is correctly set to ensure successful integration.
+
+## Streaming with Together AI
+
+Helicone now provides enhanced support for streaming with Together AI through our improved asynchronous stream parser. This allows for more efficient and reliable handling of streamed responses.
+
+### Example: Manual Logging with Streaming
+
+Here's an example of how to use Helicone's manual logging with Together AI's streaming functionality:
+
+```typescript
+import Together from "together-ai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+export async function main() {
+  // Initialize the Helicone logger
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY!,
+    headers: {}, // You can add custom headers here
+  });
+
+  // Initialize the Together client
+  const together = new Together();
+
+  // Create your request body
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: "Your question here" }],
+    stream: true,
+  } as Together.Chat.CompletionCreateParamsStreaming & { stream: true };
+
+  // Make the request
+  const response = await together.chat.completions.create(body);
+
+  // Split the stream into two for logging and processing
+  const [stream1, stream2] = response.tee();
+
+  // Log the stream to Helicone using the async stream parser
+  heliconeLogger.logStream(body, async (resultRecorder) => {
+    resultRecorder.attachStream(stream1.toReadableStream());
+  });
+
+  // Process the stream for your application
+  const textDecoder = new TextDecoder();
+  for await (const chunk of stream2.toReadableStream()) {
+    console.log(textDecoder.decode(chunk));
+  }
+
+  return stream2;
+}
+```
+
+This approach allows you to:
+
+1. Log all your Together AI streaming requests to Helicone
+2. Process the stream in your application simultaneously
+3. Benefit from Helicone's improved async stream parser for better performance
+
+For more information on streaming with Helicone, see our [streaming documentation](/features/streaming).

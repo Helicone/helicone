@@ -1,6 +1,6 @@
 ---
 title: "Custom Model Integration"
-sidebarTitle: "Custom Model"
+sidebarTitle: "Manual Logger"
 description: "Integrate any custom LLM, including open-source models like Llama and GPT-Neo, with Helicone. Step-by-step guide for both NodeJS and Curl implementations to connect your proprietary or open-source models."
 "twitter:title": "Custom Model Integration - Helicone OSS LLM Observability"
 ---
@@ -428,3 +428,43 @@ If your model returns token counts in a different format, you can transform the 
 ## Streaming Responses
 
 For streaming responses, token counts should be included in the final message of the stream. If you're experiencing issues with cost calculation in streaming responses, please refer to our [streaming usage guide](https://docs.helicone.ai/faq/enable-stream-usage#incorrect-cost-calculation-while-streaming) for additional configuration options.
+
+### Using the Async Stream Parser
+
+Helicone now provides an improved asynchronous stream parser for more efficient handling of streamed responses. This is particularly useful when working with custom integrations that support streaming.
+
+Here's an example of how to use the async stream parser with a custom integration:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+// Initialize the Helicone logger
+const heliconeLogger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {}, // You can add custom headers here
+});
+
+// Your custom model API call that returns a stream
+const response = await customModelAPI.generateStream(prompt);
+
+// If your API supports splitting the stream
+const [stream1, stream2] = response.tee();
+
+// Log the stream to Helicone using the async stream parser
+heliconeLogger.logStream(requestBody, async (resultRecorder) => {
+  resultRecorder.attachStream(stream1);
+});
+
+// Process the stream for your application
+for await (const chunk of stream2) {
+  console.log(chunk);
+}
+```
+
+The async stream parser offers several benefits:
+
+- Processes stream chunks asynchronously for better performance
+- Reduces latency when handling large streamed responses
+- Provides more reliable token counting for streamed content
+
+For more information on streaming with Helicone, see our [streaming documentation](/features/streaming).
