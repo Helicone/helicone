@@ -66,6 +66,7 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
       <div className="gap-4">
         {sortedMessages.map((message, idx) => {
           const isUser = message.role === "user";
+          const isTranscript = message._type === "audio" && message.content;
           const timestamp = message.timestamp
             ? new Date(message.timestamp).toLocaleTimeString()
             : null;
@@ -79,18 +80,20 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
               } mb-4 w-full`}
             >
               <div className="flex flex-col gap-1 max-w-[80%]">
-                {/* Message Header */}
+                {/* Message Info */}
                 <div
                   className={`flex items-center space-x-2 text-xs text-secondary ${
                     isUser ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <span>{isUser ? "User" : "Assistant"}</span>
+                  <span>{`${isUser ? "User" : "Assistant"} ${
+                    isTranscript ? "(Transcript)" : ""
+                  }`}</span>
                   {timestamp && (
                     <>
-                      <span>•</span>
+                      <span className="text-tertiary">•</span>
                       <ModailityIcon type={messageType} />
-                      <span>•</span>
+                      <span className="text-tertiary">•</span>
                       <span>{timestamp}</span>
                     </>
                   )}
@@ -149,6 +152,11 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 /* -------------------------------------------------------------------------- */
 /*                           Session Features Header                          */
 /* -------------------------------------------------------------------------- */
+type Pill = {
+  type: string;
+  label: string;
+  modality?: string;
+};
 const getPillStyle = (type: string, label?: string) => {
   // Special handling for modalities
   if (type === "modality") {
@@ -221,13 +229,6 @@ const parseSessionUpdate = (
 interface SessionHeaderProps {
   sessionData: SessionUpdateData;
 }
-
-type Pill = {
-  type: string;
-  label: string;
-  modality?: string;
-};
-
 const SessionHeader: React.FC<SessionHeaderProps> = ({ sessionData }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -413,7 +414,6 @@ interface AudioPlayerProps {
   isUserMessage?: boolean; // Whether this is a user message (for styling)
   audioFormat?: string; // Format hint from the API (pcm16)
 }
-
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
   audioData,
   isUserMessage = false,
@@ -426,18 +426,26 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const progressRef = React.useRef<HTMLDivElement>(null);
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
+    if (isPlaying) {
+      // If already playing, just stop
+      if (audioRef.current) {
         audioRef.current.pause();
-      } else {
-        // Reset error state when trying to play
-        setError(null);
-        audioRef.current.play().catch((err) => {
-          setError("Could not play audio");
-          console.error("Audio playback error:", err);
-        });
       }
-      setIsPlaying(!isPlaying);
+      setIsPlaying(false);
+    } else {
+      // Try standard HTML Audio element first
+      if (audioRef.current) {
+        setError(null);
+        audioRef.current.play().catch(() => {
+          console.error("Standard audio playback failed, trying Web Audio API");
+          // If standard playback fails, try Web Audio API
+          playWithWebAudio();
+        });
+        setIsPlaying(true);
+      } else {
+        // Fallback to Web Audio API if audio element not available
+        playWithWebAudio();
+      }
     }
   };
 
@@ -464,14 +472,19 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    return `${minutes < 10 ? "0" : ""}${minutes}:${
+      seconds < 10 ? "0" : ""
+    }${seconds}`;
   };
 
   // Convert PCM16 data to WAV format for browser compatibility
   // PCM16 from OpenAI Realtime API is 16-bit, 24kHz, mono, little-endian
-  const convertPcm16ToWav = (base64PcmData: string): string => {
+  const convertPcm16ToWav = (
+    base64PcmData: string,
+    sampleRate = 24000
+  ): string => {
     try {
-      // Use Buffer to decode base64 to binary data
+      // Use Buffer from 'buffer' package to decode base64 to binary data
       const binaryData = Buffer.from(base64PcmData, "base64");
 
       // Create WAV header (44 bytes)
@@ -509,11 +522,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       // Number of channels (1 for mono)
       headerView.setUint16(22, 1, true);
 
-      // Sample rate (24kHz for OpenAI Realtime API)
-      headerView.setUint32(24, 24000, true);
+      // Sample rate - Use the provided sample rate
+      // Both user and assistant audio from OpenAI Realtime API use 24kHz
+      headerView.setUint32(24, sampleRate, true);
 
       // Byte rate (SampleRate * NumChannels * BitsPerSample/8)
-      headerView.setUint32(28, 24000 * 2, true);
+      headerView.setUint32(28, sampleRate * 2, true);
 
       // Block align (NumChannels * BitsPerSample/8)
       headerView.setUint16(32, 2, true);
@@ -535,8 +549,13 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       wavBytes.set(wavHeader);
       wavBytes.set(new Uint8Array(binaryData), wavHeader.length);
 
-      // Convert back to base64 using Buffer
-      return Buffer.from(wavBytes).toString("base64");
+      // Convert back to base64
+      // Use a browser-compatible approach instead of Buffer
+      return btoa(
+        Array.from(wavBytes)
+          .map((byte) => String.fromCharCode(byte))
+          .join("")
+      );
     } catch (e) {
       console.error("Error converting PCM16 to WAV:", e);
       // Return original data if conversion fails
@@ -549,13 +568,86 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     if (!audioData) return "";
 
     try {
-      const wavData = convertPcm16ToWav(audioData);
+      // OpenAI Realtime API uses 24kHz for both user and assistant audio
+      const sampleRate = 24000;
+      const wavData = convertPcm16ToWav(audioData, sampleRate);
       return `data:audio/wav;base64,${wavData}`;
     } catch (e) {
-      console.error("Error converting PCM16 to WAV:", e);
-      return "";
+      console.error("Error creating audio source:", e);
+
+      // Fallback: try to use the original data directly
+      try {
+        return `data:audio/wav;base64,${audioData}`;
+      } catch (fallbackError) {
+        console.error("Fallback audio source also failed:", fallbackError);
+        setError("Audio format error");
+        return "";
+      }
     }
   }, [audioData]);
+
+  // Alternative playback method using Web Audio API
+  // This can be used if the standard HTML Audio element approach fails
+  const playWithWebAudio = async () => {
+    if (!audioData) return;
+
+    try {
+      setError(null);
+
+      // Decode base64 to binary
+      const binaryString = atob(audioData);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Convert to 16-bit PCM (Int16Array)
+      const pcm16Data = new Int16Array(bytes.buffer);
+
+      // Create audio context
+      const AudioContextClass =
+        window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+
+      // OpenAI Realtime API uses 24kHz for both user and assistant audio
+      const sampleRate = 24000;
+
+      // Create buffer with correct sample rate
+      const audioBuffer = audioContext.createBuffer(
+        1,
+        pcm16Data.length,
+        sampleRate
+      );
+      const channelData = audioBuffer.getChannelData(0);
+
+      // Convert Int16 to Float32 (Web Audio API format)
+      for (let i = 0; i < pcm16Data.length; i++) {
+        // Normalize Int16 (-32768 to 32767) to Float32 (-1.0 to 1.0)
+        channelData[i] = pcm16Data[i] / 32768.0;
+      }
+
+      // Create source and play
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      source.start();
+      setIsPlaying(true);
+
+      // Handle playback end
+      source.onended = () => {
+        setIsPlaying(false);
+      };
+    } catch (error) {
+      console.error("Web Audio API playback error:", error);
+      setError(
+        `Web Audio API error: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+      setIsPlaying(false);
+    }
+  };
 
   // Handle download
   const handleDownload = () => {
@@ -588,18 +680,27 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   // Handle errors
   const handleError = () => {
-    setError("Error loading audio");
+    const errorMessage = audioRef.current?.error
+      ? `Error code: ${audioRef.current.error.code}, message: ${audioRef.current.error.message}`
+      : "Error loading audio";
+
+    console.error("Audio element error:", errorMessage);
+    setError(errorMessage);
     setIsPlaying(false);
   };
 
   return (
-    <div className="mt-3 flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
+      {/* Error Message */}
       {error && (
         <div className="text-xs text-red-500 dark:text-red-400 mb-1">
           {error}
         </div>
       )}
-      <div className="flex items-center gap-3">
+
+      {/* Audio Player */}
+      <div className="flex flex-row items-center justify-center gap-3">
+        {/* Play/Pause Button */}
         <button
           onClick={handlePlayPause}
           className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors ${
@@ -615,26 +716,32 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           )}
         </button>
 
-        <div className="flex-1 flex flex-col gap-1">
+        {/* Progress Bar */}
+        <div
+          ref={progressRef}
+          className={`w-24 h-2 rounded-full cursor-pointer ${progressBgClass} ${
+            error ? "opacity-50" : ""
+          }`}
+          onClick={!error ? handleProgressClick : undefined}
+        >
           <div
-            ref={progressRef}
-            className={`h-2 rounded-full cursor-pointer ${progressBgClass} ${
-              error ? "opacity-50" : ""
-            }`}
-            onClick={!error ? handleProgressClick : undefined}
-          >
-            <div
-              className={`h-full rounded-full ${progressFillClass}`}
-              style={{ width: `${(currentTime / duration) * 100}%` }}
-            />
-          </div>
-
-          <div className="flex justify-between text-xs opacity-80">
-            <span>{formatTime(currentTime)}</span>
-            <span>{duration ? formatTime(duration) : "--:--"}</span>
-          </div>
+            className={`h-full rounded-full ${progressFillClass}`}
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          />
         </div>
 
+        {/* Time */}
+        <div className="flex flex-row gap-1 text-xs text-slate-300">
+          <span className="font-mono w-10 text-start">
+            {formatTime(currentTime)}
+          </span>
+          <span className="text-xs text-slate-300">/</span>
+          <span className="font-mono w-10 text-end">
+            {duration ? formatTime(duration) : "--:--"}
+          </span>
+        </div>
+
+        {/* Download Button */}
         <button
           onClick={handleDownload}
           className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors`}
@@ -645,6 +752,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         </button>
       </div>
 
+      {/* Audio Element */}
       <audio
         ref={audioRef}
         src={audioSrc}

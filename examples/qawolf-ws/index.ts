@@ -25,6 +25,7 @@ const ws = new WebSocket(url, {
     "OpenAI-Beta": "realtime=v1",
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
     "Helicone-Session-Id": `session_${Date.now()}`,
+    "Helicone-User-Id": "qawolf",
   },
 });
 
