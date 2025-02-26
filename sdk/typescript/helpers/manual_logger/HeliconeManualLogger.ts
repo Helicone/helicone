@@ -9,7 +9,8 @@ import {
 export class HeliconeManualLogger {
   private apiKey: string;
   private headers: Record<string, string>;
-  private LOGGING_ENDPOINT: string = "https://api.hconeai.com/custom/v1/log";
+  private LOGGING_ENDPOINT: string =
+    "https://api.worker.helicone.ai/custom/v1/log";
 
   constructor(opts: IHeliconeManualLogger) {
     this.apiKey = opts.apiKey;
