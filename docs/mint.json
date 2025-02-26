@@ -82,8 +82,16 @@
         {
           "group": "Async Logging",
           "pages": [
-            "getting-started/integration-method/custom",
-            "getting-started/integration-method/openllmetry"
+            "getting-started/integration-method/openllmetry",
+            {
+              "group": "Manual Logger",
+              "pages": [
+                "getting-started/integration-method/custom",
+                "getting-started/integration-method/manual-logger-typescript",
+                "getting-started/integration-method/manual-logger-python",
+                "getting-started/integration-method/manual-logger-curl"
+              ]
+            }
           ]
         },
         {
@@ -292,7 +300,8 @@
             "guides/cookbooks/segmentation",
             "guides/cookbooks/github-actions",
             "guides/cookbooks/debugging",
-            "guides/cookbooks/labeling-request-data"
+            "guides/cookbooks/labeling-request-data",
+            "guides/cookbooks/manual-logger-streaming"
           ]
         },
         {

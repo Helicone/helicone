@@ -1,0 +1,319 @@
+---
+title: "Manual Logger - cURL"
+sidebarTitle: "cURL"
+description: "Integrate any custom LLM with Helicone using cURL. Step-by-step guide for direct API integration to connect your proprietary or open-source models."
+"twitter:title": "cURL Manual Logger - Helicone OSS LLM Observability"
+icon: "code"
+iconType: "solid"
+---
+
+# cURL Manual Logger
+
+You can log custom model calls directly to Helicone using cURL or any HTTP client that can make POST requests.
+
+## Request Structure
+
+A typical request will have the following structure:
+
+### Endpoint
+
+```
+POST https://api.worker.helicone.ai/custom/v1/log
+```
+
+### Headers
+
+| Name          | Value              |
+| ------------- | ------------------ |
+| Authorization | Bearer `{API_KEY}` |
+
+Replace `{API_KEY}` with your actual Helicone API Key.
+
+### Body
+
+The request body follows this structure:
+
+```typescript
+export type HeliconeAsyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: "custom-model-nopath";
+  json: {
+    [key: string]: any;
+  };
+  meta: Record<string, string>;
+};
+
+export type ProviderResponse = {
+  json: {
+    [key: string]: any;
+  };
+  textBody?: string;
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
+```
+
+## Example Usage
+
+Here's a complete example of logging a request to a custom model:
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+-H 'Authorization: Bearer your_api_key' \
+-H 'Content-Type: application/json' \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "model": "text-embedding-ada-002",
+      "input": "The food was delicious and the waiter was very friendly.",
+      "encoding_format": "float"
+    },
+    "meta": {
+      "metaKey1": "metaValue1",
+      "metaKey2": "metaValue2"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "responseKey1": "responseValue1",
+      "responseKey2": "responseValue2"
+    },
+    "status": 200,
+    "headers": {
+      "headerKey1": "headerValue1",
+      "headerKey2": "headerValue2"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686244,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+## Token Tracking
+
+Helicone supports token tracking for custom model integrations. To enable this, include a `usage` object in your `providerResponse.json`. Here are the supported formats:
+
+### OpenAI-style Format
+
+```json
+{
+  "providerResponse": {
+    "json": {
+      "usage": {
+        "prompt_tokens": 10,
+        "completion_tokens": 20,
+        "total_tokens": 30
+      }
+      // ... rest of your response
+    }
+  }
+}
+```
+
+### Anthropic-style Format
+
+```json
+{
+  "providerResponse": {
+    "json": {
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 20
+      }
+      // ... rest of your response
+    }
+  }
+}
+```
+
+### Google-style Format
+
+```json
+{
+  "providerResponse": {
+    "json": {
+      "usageMetadata": {
+        "promptTokenCount": 10,
+        "candidatesTokenCount": 20,
+        "totalTokenCount": 30
+      }
+      // ... rest of your response
+    }
+  }
+}
+```
+
+### Alternative Format
+
+```json
+{
+  "providerResponse": {
+    "json": {
+      "prompt_token_count": 10,
+      "generation_token_count": 20
+      // ... rest of your response
+    }
+  }
+}
+```
+
+If your model returns token counts in a different format, you can transform the response to match one of these formats before logging to Helicone. If no token information is provided, Helicone will still log the request but token metrics will not be available.
+
+## Advanced Usage
+
+### Adding Custom Properties
+
+You can add custom properties to your requests by including them in the `meta` field:
+
+```json
+"meta": {
+  "Helicone-Property-User-Id": "user-123",
+  "Helicone-Property-App-Version": "1.2.3",
+  "Helicone-Property-Custom-Field": "custom-value"
+}
+```
+
+### Session Tracking
+
+To group requests into sessions, include a session ID in the `meta` field:
+
+```json
+"meta": {
+  "Helicone-Session-Id": "session-123456"
+}
+```
+
+### User Tracking
+
+To associate requests with specific users, include a user ID in the `meta` field:
+
+```json
+"meta": {
+  "Helicone-User-Id": "user-123456"
+}
+```
+
+### Calculating Timing Information
+
+The timing information should be calculated as follows:
+
+1. Record the start time before making your request to the LLM provider
+2. Record the end time after receiving the response
+3. Convert these times to Unix epoch format (seconds and milliseconds)
+
+Example in JavaScript:
+
+```javascript
+const startTime = new Date();
+// Make your API call
+const endTime = new Date();
+
+const timing = {
+  startTime: {
+    seconds: Math.floor(startTime.getTime() / 1000),
+    milliseconds: startTime.getMilliseconds(),
+  },
+  endTime: {
+    seconds: Math.floor(endTime.getTime() / 1000),
+    milliseconds: endTime.getMilliseconds(),
+  },
+};
+```
+
+## Complete Example with Python Requests
+
+Here's a complete example using Python's `requests` library:
+
+```python
+import requests
+import time
+import json
+
+# Record start time
+start_time = time.time()
+start_ms = int((start_time - int(start_time)) * 1000)
+
+# Make your API call to the LLM provider
+llm_response = requests.post(
+    "https://your-llm-provider.com/generate",
+    json={
+        "model": "your-model",
+        "prompt": "Tell me a story about dragons"
+    },
+    headers={"Authorization": "Bearer your-provider-api-key"}
+)
+
+# Record end time
+end_time = time.time()
+end_ms = int((end_time - int(end_time)) * 1000)
+
+# Prepare the Helicone log request
+helicone_request = {
+    "providerRequest": {
+        "url": "custom-model-nopath",
+        "json": {
+            "model": "your-model",
+            "prompt": "Tell me a story about dragons"
+        },
+        "meta": {
+            "Helicone-User-Id": "user-123",
+            "Helicone-Session-Id": "session-456"
+        }
+    },
+    "providerResponse": {
+        "json": llm_response.json(),
+        "status": llm_response.status_code,
+        "headers": dict(llm_response.headers)
+    },
+    "timing": {
+        "startTime": {
+            "seconds": int(start_time),
+            "milliseconds": start_ms
+        },
+        "endTime": {
+            "seconds": int(end_time),
+            "milliseconds": end_ms
+        }
+    }
+}
+
+# Log to Helicone
+helicone_response = requests.post(
+    "https://api.worker.helicone.ai/custom/v1/log",
+    json=helicone_request,
+    headers={
+        "Authorization": "Bearer your-helicone-api-key",
+        "Content-Type": "application/json"
+    }
+)
+
+print(f"Helicone logging status: {helicone_response.status_code}")
+```
+
+For more examples and detailed usage, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.
