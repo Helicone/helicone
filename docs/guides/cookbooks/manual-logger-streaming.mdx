@@ -1,0 +1,351 @@
+---
+title: "Manual Logger with Streaming"
+description: "Learn how to use Helicone's Manual Logger to track streaming LLM responses"
+---
+
+# Manual Logger with Streaming Support
+
+Helicone's Manual Logger provides powerful capabilities for tracking LLM requests and responses, including streaming responses. This guide will show you how to use the `@helicone/helpers` package to log streaming responses from various LLM providers.
+
+## Installation
+
+First, install the `@helicone/helpers` package:
+
+```bash
+npm install @helicone/helpers
+# or
+yarn add @helicone/helpers
+# or
+pnpm add @helicone/helpers
+```
+
+## Basic Setup
+
+Initialize the HeliconeManualLogger with your API key:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {
+    // Optional headers to include with all requests
+    "Helicone-Property-Environment": "production",
+  },
+});
+```
+
+## Streaming Methods
+
+The HeliconeManualLogger provides three main methods for working with streams:
+
+### 1. logStream
+
+The most flexible method that gives you full control over stream handling:
+
+```typescript
+async logStream<T>(
+  request: HeliconeLogRequest,
+  operation: (resultRecorder: HeliconeStreamResultRecorder) => Promise<T>,
+  additionalHeaders?: Record<string, string>
+): Promise<T>
+```
+
+### 2. logSingleStream
+
+A simplified method for logging a single ReadableStream:
+
+```typescript
+async logSingleStream(
+  request: HeliconeLogRequest,
+  stream: ReadableStream,
+  additionalHeaders?: Record<string, string>
+): Promise<void>
+```
+
+### 3. logSingleRequest
+
+For logging a single request with a response body:
+
+```typescript
+async logSingleRequest(
+  request: HeliconeLogRequest,
+  body: string,
+  additionalHeaders?: Record<string, string>
+): Promise<void>
+```
+
+## Examples with Different LLM Providers
+
+### OpenAI
+
+```typescript
+import OpenAI from "openai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+async function generateStreamingResponse(prompt: string, userId: string) {
+  const requestBody = {
+    model: "gpt-4-turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await openai.chat.completions.create(requestBody);
+
+  // For OpenAI's Node.js SDK, we can use the logSingleStream method
+  const stream = response.toReadableStream();
+  const [streamForUser, streamForLogging] = stream.tee();
+
+  helicone.logSingleStream(requestBody, streamForLogging, {
+    "Helicone-User-Id": userId,
+  });
+
+  return streamForUser;
+}
+```
+
+### Together AI
+
+```typescript
+import Together from "together-ai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+export async function generateWithTogetherAI(prompt: string, userId: string) {
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await together.chat.completions.create(body);
+
+  // Create two copies of the stream
+  const [stream1, stream2] = response.tee();
+
+  // Log the stream with Helicone
+  helicone.logStream(
+    body,
+    async (resultRecorder) => {
+      resultRecorder.attachStream(stream2.toReadableStream());
+      return stream1;
+    },
+    { "Helicone-User-Id": userId }
+  );
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+### Anthropic
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+async function generateWithAnthropic(prompt: string, userId: string) {
+  const requestBody = {
+    model: "claude-3-opus-20240229",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await anthropic.messages.create(requestBody);
+  const stream = response.toReadableStream();
+  const [userStream, loggingStream] = stream.tee();
+
+  helicone.logSingleStream(requestBody, loggingStream, {
+    "Helicone-User-Id": userId,
+  });
+
+  return userStream;
+}
+```
+
+## Next.js API Route Example
+
+Here's how to use the manual logger in a Next.js API route:
+
+```typescript
+// pages/api/generate.ts
+import { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { prompt, userId } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required" });
+  }
+
+  try {
+    const requestBody = {
+      model: "gpt-4-turbo",
+      messages: [{ role: "user", content: prompt }],
+    };
+
+    // For non-streaming responses
+    const response = await helicone.logRequest(
+      requestBody,
+      async (resultRecorder) => {
+        const result = await openai.chat.completions.create(requestBody);
+        resultRecorder.appendResults(result);
+        return result;
+      },
+      { "Helicone-User-Id": userId || "anonymous" }
+    );
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Error generating response:", error);
+    return res.status(500).json({ error: "Failed to generate response" });
+  }
+}
+```
+
+## Next.js App Router with Vercel's `after` Function
+
+For Next.js App Router, you can use Vercel's `after` function to log requests without blocking the response:
+
+```typescript
+// app/api/generate/route.ts
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {
+    "Helicone-Property-appname": "TogetherChat",
+  },
+});
+
+export async function POST(request: Request) {
+  const { question } = await request.json();
+
+  // Example with non-streaming response
+  const nonStreamingBody = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: false,
+  };
+
+  const completion = await together.chat.completions.create(nonStreamingBody);
+
+  // Log non-streaming response after sending the response to the client
+  after(
+    helicone.logSingleRequest(nonStreamingBody, JSON.stringify(completion))
+  );
+
+  // Example with streaming response
+  const streamingBody = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: true,
+  };
+
+  const response = await together.chat.completions.create(streamingBody);
+  const [stream1, stream2] = response.tee();
+
+  // Log streaming response after sending the response to the client
+  after(helicone.logSingleStream(streamingBody, stream2.toReadableStream()));
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+The `after` function from Next.js allows you to perform operations after the response has been sent to the client, which is ideal for logging. This approach ensures that logging doesn't delay the response to the user.
+
+## Logging Custom Events
+
+You can also use the manual logger to log custom events:
+
+```typescript
+// Log a tool usage
+await helicone.logSingleRequest(
+  {
+    _type: "tool",
+    toolName: "calculator",
+    input: { expression: "2 + 2" },
+  },
+  JSON.stringify({ result: 4 }),
+  { "Helicone-User-Id": "user-123" }
+);
+
+// Log a vector database operation
+await helicone.logSingleRequest(
+  {
+    _type: "vector_db",
+    operation: "search",
+    text: "How to make pasta",
+    topK: 3,
+    databaseName: "recipes",
+  },
+  JSON.stringify([
+    { id: "1", content: "Pasta recipe 1", score: 0.95 },
+    { id: "2", content: "Pasta recipe 2", score: 0.87 },
+    { id: "3", content: "Pasta recipe 3", score: 0.82 },
+  ]),
+  { "Helicone-User-Id": "user-123" }
+);
+```
+
+## Advanced Usage: Tracking Time to First Token
+
+The `logStream` method automatically tracks the time to first token, which is a valuable metric for understanding LLM response latency:
+
+```typescript
+helicone.logStream(
+  requestBody,
+  async (resultRecorder) => {
+    // The resultRecorder will automatically track when the first chunk arrives
+    resultRecorder.attachStream(stream);
+    return stream;
+  },
+  { "Helicone-User-Id": userId }
+);
+```
+
+This timing information will be available in your Helicone dashboard, allowing you to monitor and optimize your LLM response times.
+
+## Conclusion
+
+The HeliconeManualLogger provides powerful capabilities for tracking streaming LLM responses across different providers. By using the appropriate method for your use case, you can gain valuable insights into your LLM usage while maintaining the benefits of streaming responses.
