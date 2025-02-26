@@ -1,0 +1,313 @@
+Anthropic has raised the bar with its latest releases: **Claude 3.7 Sonnet** and **Claude Code**. 
+
+These new offerings represent significant advancements in AI reasoning and development assistance that could fundamentally change how developers work with AI tools.
+
+This article dives into both Claude 3.7 and Code, taking a look at **what's new, benchmarks, real-world usage, and how to get started** with them.
+
+We'll explore what makes these releases special and why developers should pay attention. Let's dive in!
+
+## What's New in Claude 3.7 Sonnet?
+
+1. **Hybrid Reasoning Model**
+
+Claude 3.7 Sonnet is the first hybrid reasoning AI on the market. What does this mean? The model can operate in two distinct modes:
+
+- **Standard mode**: Quick responses for everyday tasks
+- **Extended thinking mode**: Deep reasoning for complex problems
+
+<video width="100%" controls autoplay loop className="rounded-xl">
+  <source
+    src="/static/blog/claude-3.7/claude-demo.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+Users have full transparency into the model's thought process.
+
+2. **API access for Reasoning** 
+    
+    Claude 3.7 is available via Anthropic API, AWS Bedrock, and Google Vertex AI, making it one of the few reasoning models accessible via API. 
+
+    Developers can set a "thinking budget" through the API by setting a maximum token limit for reasoning (up to 128K tokens). 
+
+3. **Enhanced Coding Capabilities**
+
+Claude 3.7 Sonnet establishes itself as an industry leader in code generation and understanding. The model:
+
+- Achieves state-of-the-art results on **SWE-bench Verified** (a benchmark for real-world software issues)
+- Excels at **TAU-bench** (which tests AI agents handling complex workflows)
+- Has been recognized as the preferred AI coding assistant by major development platforms including Cursor, Cognition, Vercel, and Replit
+
+4. **Advanced Agentic Abilities**
+
+Claude 3.7 Sonnet demonstrates impressive autonomous capabilities:
+
+- Can independently navigate codebases
+- Performs debugging, refactoring, testing, and code commits
+- Achieves an 81% success rate in online shopping tasks and 58.4% in booking flights
+- Supports GitHub integration for direct repository interaction
+
+5. **Improved Safety and Reduced Refusals**
+
+The new model shows a 45% reduction in unnecessary refusals compared to Claude 3.5, while maintaining strong resistance to <a href="https://www.helicone.ai/blog/preventing-prompt-injection">prompt injection</a> attacks and other adversarial exploits.
+
+6. **Claude Code: A Command-Line AI Assistant**
+
+Claude Code represents a completely new product category for Anthropic—a command-line AI assistant that integrates with development workflows. 
+
+Key features include:
+
+- Repository-wide understanding—reads entire codebases, identifies dependencies, and explains file structures
+- Task automation for search, editing, debugging, and test writing
+- Build debugging that detects issues, fixes them, and retries until builds succeed
+- GitHub integration with commit and push capabilities
+
+## Claude 3.7 Sonnet Benchmarks Results
+
+Anthropic released a series of benchmarks to showcase Claude 3.7 Sonnet's capabilities. Here are the key results and takeaways:
+
+### Claude 3.7 vs Claude 3.5 vs OpenAI o1 & o3 vs DeepSeek R1 vs Grok-3
+
+{/* | Category | Claude 3.7 Sonnet | Claude 3.5 Sonnet | OpenAI o1 | OpenAI o3-mini | DeepSeek R1 | Grok 3 Beta | Best Model |
+|------------------------------|----------------|----------------|-------------|-------------|------------|------------|------------|
+| **SWE-bench Verified (Coding)** | 62.3% (70.3% w/ scaffold) | 49.0% | 48.9% | 49.3% | 49.2% | - | **Claude 3.7** |
+| **TAU-bench (Retail Tool Use)** | 81.2% | 71.5% | 73.5% | - | - | - | **Claude 3.7** |
+| **TAU-bench (Airline Tool Use)** | 58.4% | 48.8% | 54.2% | - | - | - | **Claude 3.7** |
+| **Graduate Reasoning (GPAQ Diamond)** | 78.2% (84.8% parallel) | 65.0% | 75.7% (78.0%) | 79.7% | - | 80.2% (84.6%) | **Grok 3 Beta** |
+| **Multilingual Q&A (MMLU)** | 86.1% | 82.1% | 87.7% | - | 79.5% | - | **OpenAI o1** |
+| **Visual Reasoning (MMMU)** | 75.0% | 70.4% | - | 78.2% | - | 76.0% (78.0%) | **OpenAI o3-mini** |
+| **Math Problem-Solving** | 96.2% | 78.0% | 96.4% | 97.9% | - | - | **OpenAI o3-mini** |
+| **High School Math (AIME 2024)** | 61.3% (80.0% parallel) | 16.0% | 79.2% (83.3%) | - | 79.8% | 83.9% (93.3%) | **Grok 3 Beta** | */}
+
+![Claude 3.7 Official Benchmarks](/static/blog/claude-3.7/claude-3.7-benchmarks.webp)
+
+_Image Source: <a href="https://www.anthropic.com/news/claude-3-7-sonnet">Official Claude Announcement</a>_
+
+### Key Takeaways:
+- Claude 3.7 Sonnet **excels in software engineering and agentic workflows**, outperforming OpenAI, Grok, and DeepSeek in these categories.
+- OpenAI's models **lead in multilingual Q&A, reasoning, and mathematical problem-solving**, with o3-mini dominating in complex math tasks.
+- Grok 3 shows superior performance in **visual reasoning and high school mathematics**.
+- Unsurprisingly, Claude 3.5 Sonnet lags behind in most areas compared to Claude 3.7.
+
+Overall, according to the benchmark results, Claude 3.7 is the **best AI for software engineering and building AI agents**, but isn't the best at math or visual reasoning.
+
+<BottomLine
+  title="Fun Fact 💡"
+  description="Claude 3.5 Sonnet made the most money on OpenAI's SWE-Lancer benchmark—a benchmark testing AI tools' performance on real Upwork tasks."
+/>
+
+## Real-World Performance of Claude 3.7 Sonnet
+
+Benchmarks are one thing—but what do people (especially developers) actually think? Well, generally speaking, Claude 3.7 Sonnet has been nothing short of remarkable. 
+
+Videos are worth a million words so take a look at what users have been creating with Claude 3.7 Sonnet (**all with a single prompt!**):
+
+1. <a href="https://x.com/ozgrozer/status/1894125497379926101">**Stunning 3D City (with Live NPCs)**</a>
+
+<video width="100%" controls autoplay loop className="rounded-xl">
+  <source
+    src="/static/blog/claude-3.7/ozer-3d-city.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+2. <a href="https://x.com/AGI_FromWalmart/status/1894144392145113508">**Animated Weather Cards**</a>
+
+<video width="100%" controls autoplay loop className="rounded-xl">
+  <source
+    src="/static/blog/claude-3.7/delusionals-weather-card.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+3. [Ball in a Rotating Hexagon](https://www.youtube.com/watch?v=a3j4olgIjk8&t=900)
+
+<video width="100%" controls autoplay loop muted className="rounded-xl">
+  <source
+    src="/static/blog/claude-3.7/theo-polygon.mov"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+{/* This can be edited into the one from the grok article for comparison */}
+
+<BottomLine
+  title="Fun Fact 💡"
+  description="The above result was generated by the standard Claude 3.7. Interestingly, the result from the extended thinking mode was broken."
+/>
+
+Users, especially developers, have generally found Claude to be a <a href="https://x.com/SullyOmarr/status/1893757471799308321">great coding companion</a>—the best among all the currently available models.
+
+_“These models often give me the same feeling I had when using ChatGPT-4 for the first time, where I am equally impressed and a little unnerved by what it can do.”_—<a href="https://www.oneusefulthing.org/p/a-new-generation-of-ais-claude-37">Ethan Mollick</a>
+
+## Claude Code
+
+<a href="https://claudecode.me/">Claude Code</a> is a new CLI tool that represents a new approach to AI-assisted development.
+
+Unlike previous AI coding assistants, Claude Code runs in your terminal and directly modifies your local files, reducing the need for complex integrations or extra servers.
+
+Key features include:
+
+### Full Repository Analysis
+
+Claude Code can ingest and understand entire repositories, giving it context about your project's structure, dependencies, and coding patterns. 
+
+This enables it to provide more relevant suggestions and make changes that align with your codebase's style and architecture.
+
+### Automated Task Execution
+
+The tool can:
+- Search through files for relevant code
+- Run terminal commands
+- Edit files across the codebase
+- Debug build failures
+- Write tests based on implementation code
+- Make commits, generate PRs, and perform other tasks on GitHub
+
+It requests permission before making changes so you can oversee the changes being made.
+
+## How to Access Claude 3.7 Sonnet and Claude Code
+
+Claude 3.7 Sonnet is available through multiple channels:
+
+- Claude Pro, Team, and Enterprise plans via <a href="https://claude.ai/chat">Web</a> or <a href="https://claude.ai/download">Apps</a> (note that the free tier does not include extended thinking capabilities)
+- <a href="https://www.anthropic.com/api">Anthropic API</a> - use model string 'claude-3-7-sonnet-20250219'
+- <a href="https://aws.amazon.com/bedrock/claude/">Amazon Bedrock</a>
+- <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude">Google Cloud Vertex AI</a>
+
+### Claude 3.7 Sonnet Pricing
+
+Pricing for Claude 3.7 Sonnet matches that of Claude 3.5 Sonnet:
+- $3 per million input tokens
+- $15 per million output tokens (including thinking tokens)
+
+<CallToAction
+  title="Monitor your Claude app with Helicone ⚡️"
+  description="The easiest way to monitor and debug your Claude AI applications. Start capturing traces in production. Integrate in minutes."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See Docs"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/x#x-ai-integration"
+>
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-x-ai-api-key",  # X AI API key
+    base_url="https://x.helicone.ai/v1/chat/completions"  # Helicone proxy URL for X AI
+)
+
+response = client.chat.completions.create(
+    model="claude-3.7-sonnet",
+    messages=[
+        {"role": "user", "content": "Say this is a test"}
+    ]
+)
+print(response.choices[0].message.content)
+```
+</CallToAction>
+
+## How to Access and Use Claude Code 
+
+**Claude Code** is currently in limited research preview and is available only to a few select users. 
+
+You can join the waitlist <a href="https://console.anthropic.com/code/welcome">here</a>.
+
+### Claude Code Setup Instructions
+
+Before installing, ensure your system meets the following requirements:
+
+#### Claude Code System Requirements
+
+| Component | Minimum Requirement |
+|-----------|--------------------|
+| **OS** | macOS 10.15+, Ubuntu 20.04+/Debian 10+, or Windows (via WSL) |
+| **Hardware** | 4GB RAM minimum |
+| **Software** | Node.js 18+, git 2.23+ (optional) |
+| **Optional Dependencies** | GitHub/GitLab CLI (for PRs), ripgrep (for better search) |
+| **Network** | Internet connection required for authentication and AI processing |
+
+#### How to Install Claude Code
+
+1. **Install via npm**:
+
+   ```sh
+   npm install -g @anthropic-ai/claude-code
+   ```
+2. **Navigate to your project directory**:
+
+   ```sh
+   cd your-project-directory
+   ```
+3. **Start Claude Code**:
+
+   ```sh
+   claude
+   ```
+4. **Authenticate**:
+   - Follow the **one-time OAuth authentication** process via [Anthropic Console](https://console.anthropic.com).
+   - **Billing is required** for activation.
+
+5. **Try a simple command**:
+    ```sh
+    claude "summarize this project"
+    ```
+
+## What's Next for Claude 3.7
+
+The rapid advancement of Claude models suggests an exciting roadmap ahead:
+
+Anthropic's team is likely focused on:
+
+1. **Scaling up reasoning capabilities** - Future Claude models will probably leverage even more compute for deeper thinking.
+2. **Expanding agentic abilities** - The success of Claude Code points to more integrated tools that work autonomously within development environments.
+
+### The Future of AI Software Development
+
+Looking more broadly at AI tools for developers:
+
+1. **AI-native development environments** will become standard, with models that understand code at a fundamental level.
+2. **Continuous integration with AI agents** that automatically maintain and improve codebases.
+3. **Specialized AI assistants** for different development roles will emerge (frontend, backend, DevOps).
+
+## Is Claude 3.7 Sonnet the Future of AI Development?
+
+Claude 3.7 Sonnet and Claude Code represent a significant evolution in AI-assisted development. The combination of deep reasoning capabilities, code understanding, and agentic abilities marks a shift from AI as a simple autocomplete tool to AI as a genuine development partner.
+
+For developers working with complex codebases or tackling challenging problems, the extended thinking capabilities offer a new level of assistance that wasn't previously available.
+
+So, give them a try today, we can't wait to see what you build!
+
+## FAQs
+
+1. **How does Claude 3.7's "extended thinking" feature work?**
+
+Claude 3.7 allows users to set a "thinking budget" of up to 128K tokens. During this thinking phase, the model explores multiple approaches, evaluates potential solutions, and engages in deeper reasoning before providing a response. This thinking is transparent, so users can see the model's reasoning process.
+
+2. **Is Claude Code secure for use with proprietary code?**
+
+Claude Code operates under the same data security policies as other Anthropic products. Code submitted to Claude Code is subject to Anthropic's data retention policies. Claude Code only sends necessary data to the API and doesn't store your entire codebase or train models with your data. 
+
+3. **How does Claude 3.7 compare to other leading AI models for coding tasks?**
+
+Claude 3.7 currently leads in benchmark performance on coding tasks, particularly on SWE-bench Verified and TAU-bench. Its hybrid reasoning capabilities give it an edge in complex software engineering tasks that require a deep understanding of codebases and programming concepts.
+
+4. **What programming languages does Claude 3.7 support?**
+
+Claude 3.7 shows strong performance across widely-used languages including Python, JavaScript, TypeScript, Java, C++, Go, and Rust. It generally performs better with more common languages and frameworks due to their representation in training data.
+
+5. **Do I need special hardware to run Claude Code?**
+
+Claude Code is a command-line tool that runs on standard developer machines. The heavy computational work happens on Anthropic's servers, so local hardware requirements are minimal. However, a stable internet connection is necessary as the tool communicates with Anthropic's API.
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3 Technical Review: Everything You Need to Know</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs OpenAI o1: A Comprehensive Comparison</a>**
+- **<a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet</a>**
+
+<Questions />
