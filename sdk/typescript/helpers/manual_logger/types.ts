@@ -10,6 +10,7 @@ export type ProviderResponse = {
   json: {
     [key: string]: any;
   };
+  textBody?: string;
   status: number;
   headers: Record<string, string>;
 };
@@ -23,6 +24,7 @@ export type Timing = {
     seconds: number;
     milliseconds: number;
   };
+  timeToFirstToken?: number;
 };
 
 export type IHeliconeManualLogger = {
