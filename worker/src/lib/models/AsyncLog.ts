@@ -18,6 +18,7 @@ type ProviderResponse = {
   json: {
     [key: string]: Json;
   };
+  textBody?: string;
   status: number;
   headers: Record<string, string>;
 };
