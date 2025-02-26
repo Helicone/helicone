@@ -13,6 +13,7 @@ class HeliconeAsyncLogger:
     base_url: str
     api_key: str
     _logging_enabled: bool = True
+    exporter: OTLPSpanExporter
 
     def __init__(
         self,
@@ -30,7 +31,7 @@ class HeliconeAsyncLogger:
         self.base_url = base_url
 
     def init(self) -> None:
-        exporter = OTLPSpanExporter(
+        self.exporter = OTLPSpanExporter(
             endpoint=self.base_url,
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
@@ -38,7 +39,7 @@ class HeliconeAsyncLogger:
         os.environ["TRACELOOP_TRACE_CONTENT"] = "true"
 
         Traceloop.init(
-            exporter=exporter,
+            exporter=self.exporter,
             disable_batch=True,
             should_enrich_metrics=False,
             instruments=SUPPORTED_INSTRUMENTS,
@@ -61,7 +62,7 @@ class HeliconeAsyncLogger:
         To resume logging, call init() again.
         """
         if self._logging_enabled:
-            Traceloop.shutdown()
+            self.exporter.shutdown()
             self._logging_enabled = False
 
     def enable_logging(self) -> None:
