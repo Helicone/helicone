@@ -5234,6 +5234,76 @@
 					}
 				]
 			},
+			"ResultSuccess__value-string--cost-number_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"cost": {
+									"type": "number",
+									"format": "double"
+								},
+								"value": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"cost",
+								"value"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__value-string--cost-number_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__value-string--cost-number_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TimeFilterRequest": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess__apiKey-string__": {
 				"properties": {
 					"data": {
@@ -12285,6 +12355,51 @@
 							"schema": {
 								"properties": {},
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/{propertyKey}/top-costs/query": {
+			"post": {
+				"operationId": "GetTopCosts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__value-string--cost-number_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TimeFilterRequest"
 							}
 						}
 					}
