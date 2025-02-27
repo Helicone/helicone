@@ -2,6 +2,7 @@ import { Message } from "@/packages/llm-mapper/types";
 import React from "react";
 import { renderFunctionCall } from "./renderFunctionCall";
 import MarkdownEditor from "@/components/shared/markdownEditor";
+import { JsonRenderer } from "./JsonRenderer";
 
 export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
   if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
@@ -18,7 +19,7 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
               key={index}
               className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
             >
-              {`${tool.name}(${JSON.stringify(tool.arguments, null, 2)})`}
+              {tool.name}(<JsonRenderer data={tool.arguments} />)
             </pre>
           ) : null
         )}
