@@ -1,7 +1,5 @@
 import { Message } from "@/packages/llm-mapper/types";
 import React, { useMemo } from "react";
-import { JsonRenderer } from "./JsonRenderer";
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
 
 export const OpenAIImage: React.FC<{
   imageUrl: string;
@@ -46,11 +44,7 @@ export const FunctionMessage: React.FC<{
           </code>
           {argumentString && (
             <pre className="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-950 p-2 rounded-lg overflow-auto">
-              {isJSON(argumentString) ? (
-                <JsonRenderer data={JSON.parse(argumentString)} />
-              ) : (
-                argumentString
-              )}
+              {argumentString}
             </pre>
           )}
         </div>
