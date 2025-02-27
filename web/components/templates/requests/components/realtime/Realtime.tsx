@@ -1,10 +1,10 @@
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { Buffer } from "buffer";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   PiCaretDownBold,
-  PiCodeBold,
   PiDownloadBold,
+  PiFunctionBold,
   PiGearBold,
   PiMicrophoneBold,
   PiPauseBold,
@@ -23,8 +23,17 @@ type MessageType =
 
 interface RealtimeProps {
   mappedRequest: MappedLLMRequest;
+  realtimeMessageFilter?: string;
+  messageIndexFilter?: {
+    startIndex: number;
+    endIndex?: number;
+  };
 }
-export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
+export const Realtime: React.FC<RealtimeProps> = ({
+  mappedRequest,
+  realtimeMessageFilter,
+  messageIndexFilter,
+}) => {
   // Get all messages sorted by timestamp
   const sortedMessages = [
     ...(mappedRequest.schema.request?.messages || []),
@@ -35,9 +44,7 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
     return timeA - timeB;
   });
 
-  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
-  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
-
+  // Define getMessageType function before using it
   const getMessageType = (message: any): MessageType => {
     if (message._type === "functionCall") return "functionCall";
     if (message._type === "function") return "functionOutput";
@@ -53,11 +60,143 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
     return "text";
   };
 
+  // Get conversation turns - sequences of messages grouped by role changes
+  const conversationTurns = useMemo(() => {
+    const turns: any[][] = [];
+    let currentTurn: any[] = [];
+    let currentRole = "";
+
+    sortedMessages.forEach((message) => {
+      // Skip messages without roles (they won't form turns)
+      if (!message.role) return;
+
+      // If role changes or this is the first message, start a new turn
+      if (
+        currentRole !== message.role ||
+        currentRole === "" ||
+        turns.length === 0
+      ) {
+        if (currentTurn.length > 0) {
+          turns.push(currentTurn);
+        }
+        currentTurn = [message];
+        currentRole = message.role;
+      } else {
+        // Continue current turn with same role
+        currentTurn.push(message);
+      }
+    });
+
+    // Add the last turn if not empty
+    if (currentTurn.length > 0) {
+      turns.push(currentTurn);
+    }
+
+    return turns;
+  }, [sortedMessages]);
+
+  // Filter messages based on the provided filters
+  const filteredMessages = useMemo(() => {
+    // If we have a message index filter, use that first
+    if (messageIndexFilter) {
+      const { startIndex, endIndex } = messageIndexFilter;
+
+      // Filter by conversation turn index
+      if (typeof startIndex === "number") {
+        // Safety check for index out of bounds
+        if (startIndex >= 0 && startIndex < conversationTurns.length) {
+          // If we have both start and end index, get that range of turns
+          if (typeof endIndex === "number" && endIndex >= startIndex) {
+            const safeEndIndex = Math.min(
+              endIndex,
+              conversationTurns.length - 1
+            );
+            return conversationTurns.slice(startIndex, safeEndIndex + 1).flat();
+          }
+
+          // Otherwise just get the single turn at startIndex
+          return conversationTurns[startIndex] || [];
+        } else {
+          console.warn(
+            `Turn index ${startIndex} is out of range (0-${
+              conversationTurns.length - 1
+            })`
+          );
+          // Fall back to showing all messages if index is out of range
+          return sortedMessages;
+        }
+      }
+    }
+
+    // Fall back to role-based filtering if no index filter or index filter is invalid
+    if (realtimeMessageFilter) {
+      return sortedMessages.filter((msg) => {
+        // For "user" filter, show user messages and session updates
+        if (realtimeMessageFilter === "user") {
+          return msg.role === "user" || getMessageType(msg) === "session";
+        }
+        // For "assistant" filter, show assistant messages, function calls/outputs
+        else if (realtimeMessageFilter === "assistant") {
+          return (
+            msg.role === "assistant" ||
+            msg._type === "functionCall" ||
+            msg._type === "function"
+          );
+        }
+        // If an unknown filter is provided, show all messages
+        return true;
+      });
+    }
+
+    // If no filter, return all messages
+    return sortedMessages;
+  }, [
+    sortedMessages,
+    realtimeMessageFilter,
+    messageIndexFilter,
+    conversationTurns,
+  ]);
+
+  // Get information about the active filter for display
+  const filterInfo = useMemo(() => {
+    if (
+      messageIndexFilter &&
+      typeof messageIndexFilter.startIndex === "number"
+    ) {
+      const turnIndex = messageIndexFilter.startIndex;
+      const turn = conversationTurns[turnIndex];
+
+      if (turn) {
+        const roleMessage = turn.find((msg: any) => msg.role);
+        const role = roleMessage?.role || "unknown";
+        return {
+          type: "turn",
+          turnIndex,
+          role,
+          messageCount: turn.length,
+        };
+      }
+    }
+
+    if (realtimeMessageFilter) {
+      return {
+        type: "role",
+        role: realtimeMessageFilter,
+      };
+    }
+
+    return null;
+  }, [messageIndexFilter, realtimeMessageFilter, conversationTurns]);
+
+  // Always get the last session update from all messages, not just filtered ones
+  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
+  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
+
   const ModailityIcon = ({ type }: { type: MessageType }) => {
     const icons = {
       audio: <PiMicrophoneBold size={14} className="text-secondary" />,
-      functionCall: <PiCodeBold size={14} className="text-secondary" />,
-      functionOutput: <PiCodeBold size={14} className="text-secondary" />,
+      functionCall: <PiFunctionBold size={14} className="text-secondary" />,
+      functionOutput: <PiFunctionBold size={14} className="text-secondary" />,
       session: <PiGearBold size={14} className="text-secondary" />,
       text: <PiTextTBold size={14} className="text-secondary" />,
     };
@@ -66,12 +205,56 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
 
   return (
     <div className="w-full flex flex-col gap-4">
+      {/* Filter Indicator */}
+      {filterInfo && (
+        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
+          {filterInfo.type === "turn" ? (
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">
+                Showing Conversation Turn{" "}
+                {filterInfo.turnIndex !== undefined
+                  ? filterInfo.turnIndex + 1
+                  : ""}
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {filterInfo.role === "user" ? "User" : "Assistant"} turn with{" "}
+                {filterInfo.messageCount} message
+                {filterInfo.messageCount !== 1 ? "s" : ""}
+              </span>
+            </div>
+          ) : (
+            <div>
+              <span className="font-medium">
+                Showing {filterInfo.role === "user" ? "User" : "Assistant"}{" "}
+                messages
+              </span>
+              {filterInfo.role === "user" ? (
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {" "}
+                  (includes session configuration)
+                </span>
+              ) : (
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {" "}
+                  (includes function calls and outputs)
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Header Section */}
-      {lastSessionUpdate && <SessionHeader sessionData={lastSessionUpdate} />}
+      {lastSessionUpdate &&
+        (!filterInfo ||
+          filterInfo.role === "user" ||
+          filterInfo.type === "turn") && (
+          <SessionHeader sessionData={lastSessionUpdate} />
+        )}
 
       {/* Messages Section */}
       <div className="gap-4">
-        {sortedMessages.map((message, idx) => {
+        {filteredMessages.map((message, idx) => {
           const isUser = message.role === "user";
           const isTranscript = message._type === "audio" && message.content;
           const timestamp = message.timestamp
@@ -110,7 +293,7 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
                 <div
                   className={`rounded-lg p-3 ${
                     isUser
-                      ? `bg-blue-500 text-white ${
+                      ? `bg-blue-500 dark:bg-blue-700 text-white ${
                           messageType === "session" ||
                           messageType === "functionCall" ||
                           messageType === "functionOutput"
@@ -201,7 +384,7 @@ const getPillStyle = (type: string, label?: string) => {
       };
     case "tool":
       return {
-        icon: <PiCodeBold className="w-3.5 h-3.5" />,
+        icon: <PiFunctionBold className="w-3.5 h-3.5" />,
         className:
           "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
       };
@@ -383,7 +566,8 @@ const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
       <span className="text-yellow-500 dark:text-yellow-400">{name}</span>
       {args && (
         <span className="text-slate-600 dark:text-slate-300">
-          {"({"}
+          <span className="text-yellow-500 dark:text-yellow-400">{"("}</span>
+          {"{"}
           {Object.entries(args).map(([key, value], i) => (
             <span key={key}>
               {i > 0 && ", "}
@@ -391,7 +575,8 @@ const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
               {typeof value === "string" ? `"${value}"` : JSON.stringify(value)}
             </span>
           ))}
-          {"})"}
+          {"}"}
+          <span className="text-yellow-500 dark:text-yellow-400">{")"}</span>
         </span>
       )}
     </div>
@@ -407,11 +592,11 @@ const FunctionOutputContent: React.FC<FunctionOutputContentProps> = ({
   toolCallId,
 }) => {
   return (
-    <div className="font-mono">
-      <span className="text-green-300">
-        {toolCallId ? `[${toolCallId}] ` : ""}
+    <div className="font-mono break-all">
+      <span className="text-green-300 dark:text-green-400">
+        {toolCallId ? `(${toolCallId}) => ` : ""}
       </span>
-      <span className="text-slate-300">{content}</span>
+      <span>{content}</span>
     </div>
   );
 };

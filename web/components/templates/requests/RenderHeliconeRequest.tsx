@@ -20,6 +20,11 @@ type RenderMappedRequestProps = {
   className?: string;
   autoInputs?: any[];
   promptData?: any;
+  realtimeMessageFilter?: string;
+  messageIndexFilter?: {
+    startIndex: number;
+    endIndex?: number;
+  };
 };
 
 export const RenderMappedRequest = (

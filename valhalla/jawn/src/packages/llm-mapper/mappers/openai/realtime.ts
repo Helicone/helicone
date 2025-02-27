@@ -235,7 +235,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
           return msg.content?.response?.instructions
             ? {
                 role: "user",
-                _type: "text",
+                _type: "message",
                 content: msg.content.response.instructions,
                 timestamp: msg.timestamp,
               }
@@ -321,6 +321,21 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "audio",
               content: item.content[0].transcript || "",
               audio_data: item.content[0].audio || null,
+              timestamp: msg.timestamp,
+            };
+          }
+
+          // Handle user-created text items
+          if (
+            item?.type === "message" &&
+            item.content &&
+            Array.isArray(item.content) &&
+            item.content[0]?.type === "input_text"
+          ) {
+            return {
+              role: "user",
+              _type: "message",
+              content: item.content[0].text || "",
               timestamp: msg.timestamp,
             };
           }
