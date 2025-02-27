@@ -99,6 +99,11 @@ export const MODEL_LIST: {
     provider: "openai",
   },
   {
+    value: "gemini-2.0-flash-lite-001",
+    label: "gemini-2.0-flash-lite-001",
+    provider: "google",
+  },
+  {
     value: "gemini-flash-1.5-8b",
     label: "gemini-flash-1.5-8b",
     provider: "google",
