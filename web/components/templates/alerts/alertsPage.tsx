@@ -15,6 +15,7 @@ import { Col } from "@/components/layout/common";
 import { alertTimeWindows } from "./constant";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { IslandContainer } from "@/components/ui/islandContainer";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 interface AlertsPageProps {
   user: User;
@@ -46,9 +47,10 @@ const AlertsPage = (props: AlertsPageProps) => {
     );
   };
 
-  function formatTimeWindow(milliseconds: number): string {
-    // Define the time windows with an index signature
+  const isOrgLoading = !orgContext || !orgContext.currentOrg;
+  const isPageLoading = isLoading || isLoadingSlackChannels || isOrgLoading;
 
+  function formatTimeWindow(milliseconds: number): string {
     let closest = Object.keys(alertTimeWindows).reduce((a, b) => {
       return Math.abs(alertTimeWindows[a] - milliseconds) <
         Math.abs(alertTimeWindows[b] - milliseconds)
@@ -57,6 +59,14 @@ const AlertsPage = (props: AlertsPageProps) => {
     });
 
     return closest;
+  }
+
+  if (isPageLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <LoadingAnimation height={175} width={175} />
+      </div>
+    );
   }
 
   return !isAlertsEnabled() ? (

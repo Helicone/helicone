@@ -920,21 +920,40 @@ WHERE (${builtFilter.filter})`,
       }
 
       const subscription = subscriptionResult.data;
-      const priceId = proProductPrices[productType];
+      const currentPriceId = proProductPrices[productType];
 
-      const alertsItem = subscription.items.data.find(
-        (item) => item.price.id === priceId
+      // First try to find the item by the current price ID
+      let itemToRemove = subscription.items.data.find(
+        (item) => item.price.id === currentPriceId
       );
 
-      if (!alertsItem) {
-        console.log("ALERTS ITEM NOT FOUND");
-        return ok(null); // Alerts product not found in subscription
+      // If not found by current price ID, try to find by product name/type
+      if (!itemToRemove) {
+        itemToRemove = subscription.items.data.find((item) => {
+          const product = item.price.product as Stripe.Product;
+          // Check if the product name or metadata contains the productType
+          return (
+            product.name.toLowerCase().includes(productType.toLowerCase()) ||
+            (product.metadata && product.metadata.type === productType)
+          );
+        });
+      }
+
+      if (!itemToRemove) {
+        console.log(`${productType.toUpperCase()} ITEM NOT FOUND`);
+        return ok(null); // Product not found in subscription
+      }
+
+      // If the item is already set to quantity 0, no need to update
+      if (itemToRemove.quantity !== undefined && itemToRemove.quantity === 0) {
+        console.log(`${productType} is already scheduled for removal`);
+        return ok(null);
       }
 
       const result = await this.stripe.subscriptions.update(subscription.id, {
         items: [
           {
-            id: alertsItem.id,
+            id: itemToRemove.id,
             quantity: 0,
           },
         ],

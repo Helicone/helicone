@@ -12,6 +12,8 @@ from ._constants import SUPPORTED_INSTRUMENTS
 class HeliconeAsyncLogger:
     base_url: str
     api_key: str
+    _logging_enabled: bool = True
+    exporter: OTLPSpanExporter
 
     def __init__(
         self,
@@ -29,7 +31,7 @@ class HeliconeAsyncLogger:
         self.base_url = base_url
 
     def init(self) -> None:
-        exporter = OTLPSpanExporter(
+        self.exporter = OTLPSpanExporter(
             endpoint=self.base_url,
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
@@ -37,11 +39,12 @@ class HeliconeAsyncLogger:
         os.environ["TRACELOOP_TRACE_CONTENT"] = "true"
 
         Traceloop.init(
-            exporter=exporter,
+            exporter=self.exporter,
             disable_batch=True,
             should_enrich_metrics=False,
             instruments=SUPPORTED_INSTRUMENTS,
         )
+        self._logging_enabled = True
 
     def disable_content_tracing(self) -> None:
         os.environ["TRACELOOP_TRACE_CONTENT"] = "false"
@@ -51,3 +54,24 @@ class HeliconeAsyncLogger:
 
     def set_properties(self, properties: dict) -> None:
         Traceloop.set_association_properties(properties)
+
+    def disable_logging(self) -> None:
+        """
+        Completely disables all logging by shutting down the Traceloop SDK.
+        After calling this method, no more traces will be sent to Helicone.
+        To resume logging, call enable_logging() again.
+        """
+        if self._logging_enabled:
+            if self.exporter:
+                self.exporter.shutdown()
+            self._logging_enabled = False
+
+    def enable_logging(self) -> None:
+        """
+        Re-enables logging if it was previously disabled.
+        This reinitializes the Traceloop SDK with a fresh exporter instance.
+        """
+        if not self._logging_enabled:
+            # Create a new exporter instance
+            self.exporter.__init__(endpoint=self.base_url, headers={
+                                   "Authorization": f"Bearer {self.api_key}"})

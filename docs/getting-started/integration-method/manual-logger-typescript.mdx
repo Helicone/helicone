@@ -1,0 +1,508 @@
+---
+title: "Manual Logger - TypeScript"
+sidebarTitle: "TypeScript"
+description: "Integrate any custom LLM with Helicone using the TypeScript Manual Logger. Step-by-step guide for NodeJS implementation to connect your proprietary or open-source models."
+"twitter:title": "TypeScript Manual Logger - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
+---
+
+# TypeScript Manual Logger
+
+Logging calls to custom models is supported via the Helicone NodeJS SDK.
+
+<Tabs>
+<Tab title="Basic Usage">
+<Steps>
+  <Step title="To get started, install the `@helicone/helpers` package">
+  ```bash
+  npm install @helicone/helpers
+  ```
+  </Step>
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```typescript
+  import { HeliconeManualLogger } from "@helicone/helpers";
+
+const heliconeLogger = new HeliconeManualLogger({
+apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+headers: {} // Additional headers to be sent with the request
+});
+
+````
+</Step>
+<Step title="Log your request">
+```typescript
+const reqBody = {
+  model: "text-embedding-ada-002",
+  input: "The food was delicious and the waiter was very friendly.",
+  encoding_format: "float"
+}
+const res = await heliconeLogger.logRequest(
+  reqBody,
+  async (resultRecorder) => {
+    const r = await fetch("https://api.openai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify(reqBody)
+    })
+    const resBody = await r.json();
+    resultRecorder.appendResults(resBody);
+    return resBody; // this will be returned by the logRequest function
+  },
+  {
+   // Additional headers to be sent with the request
+  }
+);
+````
+
+  </Step>
+</Steps>
+</Tab>
+
+<Tab title="Logging Chat Completion">
+<Steps>
+  <Step title="Install dependencies">
+  ```bash
+  npm install @helicone/helpers openai
+  ```
+  </Step>
+  <Step title="Set up the logger and OpenAI client">
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import OpenAI from "openai";
+
+// Initialize the Helicone logger
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+// Initialize the OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
+```
+
+  </Step>
+  <Step title="Using logSingleRequest for non-streaming responses">
+
+```typescript
+// Define your request
+const requestBody = {
+  model: "gpt-4",
+  messages: [
+    { role: "user", content: "Explain quantum computing in simple terms" },
+  ],
+};
+
+// Make the API call
+const response = await openai.chat.completions.create(requestBody);
+
+// Log the request and response to Helicone
+await helicone.logSingleRequest(
+  requestBody,
+  JSON.stringify(response),
+  { "Helicone-User-Id": "user-123" } // Optional additional headers
+);
+
+console.log(response.choices[0].message.content);
+```
+
+  </Step>
+  <Step title="Using logSingleStream for streaming responses">
+
+```typescript
+const streamingRequestBody = {
+  model: "gpt-4",
+  messages: [{ role: "user", content: "Write a short story about AI" }],
+  stream: true,
+};
+
+const streamingResponse = await openai.chat.completions.create(
+  streamingRequestBody
+);
+
+const [streamForUser, streamForLogging] = stream.tee();
+
+helicone.logSingleStream(streamingRequestBody, streamForLogging, {
+  "Helicone-User-Id": "user-123",
+});
+```
+
+  </Step>
+</Steps>
+</Tab>
+
+<Tab title="On Vercel">
+<Steps>
+  <Step title="Install dependencies">
+  ```bash
+  npm install @helicone/helpers together-ai next
+  ```
+
+  </Step>
+  <Step title="Create an API route handler with Together AI">
+  ```typescript
+  // app/api/chat/route.ts
+  import { HeliconeManualLogger } from "@helicone/helpers";
+  import { after } from "next/server";
+  import Together from "together-ai";
+
+export async function POST(request: Request) {
+const { question } = await request.json();
+
+    const together = new Together();
+    const helicone = new HeliconeManualLogger({
+      apiKey: process.env.HELICONE_API_KEY!,
+      loggingEndpoint: "https://api.worker.helicone.ai/oai/v1/log",
+      headers: {
+        "Helicone-Property-appname": "TogetherChat",
+      },
+    });
+
+    const nonStreamingBody = {
+      model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+      messages: [{ role: "user", content: question }],
+      stream: false,
+    } as Together.Chat.CompletionCreateParamsNonStreaming & { stream: false };
+
+    const completion = await together.chat.completions.create(nonStreamingBody);
+
+    after(
+      helicone.logSingleRequest(nonStreamingBody, JSON.stringify(completion), {
+        "Helicone-User-Id": "123",
+      }),
+    );
+
+    const body = {
+      model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+      messages: [{ role: "user", content: question }],
+      stream: true,
+    } as Together.Chat.CompletionCreateParamsStreaming & { stream: true };
+
+    const response = await together.chat.completions.create(body);
+    const [stream1, stream2] = response.tee();
+    after(
+      helicone.logSingleStream(body, stream2.toReadableStream(), {
+        "Helicone-User-Id": "123",
+      }),
+    );
+
+    return new Response(stream1.toReadableStream());
+
+}
+
+````
+
+</Step>
+<Step title="Important note about the `after` function">
+<Warning>
+  The `after` function allows you to perform operations after the response has been sent to the client. This is crucial for logging operations as it ensures they don't delay the response to the user.
+
+  When using this approach:
+  - Logging happens asynchronously after the response is sent
+  - The user experience isn't affected by logging latency
+  - You still capture all the necessary data for observability
+
+  This is especially important for streaming responses where any delay would be noticeable to the user.
+</Warning>
+</Step>
+</Steps>
+</Tab>
+</Tabs>
+
+## API Reference
+
+### HeliconeManualLogger
+
+```typescript
+class HeliconeManualLogger {
+constructor(opts: IHeliconeManualLogger);
+}
+
+type IHeliconeManualLogger = {
+apiKey: string;
+headers?: Record<string, string>;
+loggingEndpoint?: string; // defaults to https://api.hconeai.com/custom/v1/log
+};
+````
+
+### logRequest
+
+```typescript
+logRequest<T>(
+    request: HeliconeLogRequest,
+    operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
+    additionalHeaders?: Record<string, string>
+  ): Promise<T>
+```
+
+#### Parameters
+
+1. `request`: `HeliconeLogRequest` - The request object to log
+
+```typescript
+type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest; // ILogRequest is the type for the request object for custom model logging
+
+// The name and structure of the prompt field depends on the model you are using.
+// Eg: for chat models it is named "messages", for embeddings models it is named "input".
+// Hence, the only enforced type is `model`, you need still add the respective prompt property for your model.
+// You may also add more properties (eg: temperature, stop reason etc)
+type ILogRequest = {
+  model: string;
+  [key: string]: any;
+};
+```
+
+2. `operation`: `(resultRecorder: HeliconeResultRecorder) => Promise<T>` - The operation to be executed and logged
+
+```typescript
+class HeliconeResultRecorder {
+  private results: Record<string, any> = {};
+
+  appendResults(data: Record<string, any>): void {
+    this.results = { ...this.results, ...data };
+  }
+
+  getResults(): Record<string, any> {
+    return this.results;
+  }
+}
+```
+
+3. `additionalHeaders`: `Record<string, string>`
+   - Additional headers to be sent with the request
+   - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
+
+## Available Methods
+
+The `HeliconeManualLogger` class provides several methods for logging different types of requests and responses. Here's a comprehensive overview of each method:
+
+### logRequest
+
+Used for logging non-streaming requests and responses with full control over the operation.
+
+```typescript
+logRequest<T>(
+  request: HeliconeLogRequest,
+  operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
+  additionalHeaders?: Record<string, string>
+): Promise<T>
+```
+
+**Parameters:**
+
+- `request`: The request object to log
+- `operation`: A function that performs the actual API call and records the results
+- `additionalHeaders`: Optional additional headers to include with the log request
+
+**Example:**
+
+```typescript
+const result = await helicone.logRequest(
+  requestBody,
+  async (resultRecorder) => {
+    const response = await llmProvider.createCompletion(requestBody);
+    resultRecorder.appendResults(response);
+    return response;
+  },
+  { "Helicone-User-Id": userId }
+);
+```
+
+### logStream
+
+Used for logging streaming operations with full control over stream handling.
+
+```typescript
+logStream<T>(
+  request: HeliconeLogRequest,
+  operation: (resultRecorder: HeliconeStreamResultRecorder) => Promise<T>,
+  additionalHeaders?: Record<string, string>
+): Promise<T>
+```
+
+**Parameters:**
+
+- `request`: The request object to log
+- `operation`: A function that performs the streaming API call and attaches the stream to the recorder
+- `additionalHeaders`: Optional additional headers to include with the log request
+
+**Example:**
+
+```typescript
+const stream = await helicone.logStream(
+  requestBody,
+  async (resultRecorder) => {
+    const response = await llmProvider.createChatCompletion({
+      stream: true,
+      ...requestBody,
+    });
+    const [stream1, stream2] = response.tee();
+    resultRecorder.attachStream(stream2.toReadableStream());
+    return stream1;
+  },
+  { "Helicone-User-Id": userId }
+);
+```
+
+### logSingleStream
+
+A simplified method for logging a single ReadableStream without needing to manage the operation.
+
+```typescript
+logSingleStream(
+  request: HeliconeLogRequest,
+  stream: ReadableStream,
+  additionalHeaders?: Record<string, string>
+): Promise<void>
+```
+
+**Parameters:**
+
+- `request`: The request object to log
+- `stream`: The ReadableStream to consume and log
+- `additionalHeaders`: Optional additional headers to include with the log request
+
+**Example:**
+
+```typescript
+const response = await llmProvider.createChatCompletion({
+  stream: true,
+  ...requestBody,
+});
+const stream = response.toReadableStream();
+const [streamForUser, streamForLogging] = stream.tee();
+
+helicone.logSingleStream(requestBody, streamForLogging, {
+  "Helicone-User-Id": userId,
+});
+
+return streamForUser;
+```
+
+### logSingleRequest
+
+Used for logging a single request with a response body without needing to manage the operation.
+
+```typescript
+logSingleRequest(
+  request: HeliconeLogRequest,
+  body: string,
+  additionalHeaders?: Record<string, string>
+): Promise<void>
+```
+
+**Parameters:**
+
+- `request`: The request object to log
+- `body`: The response body as a string
+- `additionalHeaders`: Optional additional headers to include with the log request
+
+**Example:**
+
+```typescript
+const response = await llmProvider.createCompletion(requestBody);
+await helicone.logSingleRequest(requestBody, JSON.stringify(response), {
+  "Helicone-User-Id": userId,
+});
+```
+
+## Streaming Examples
+
+### Using the Async Stream Parser
+
+Helicone provides an asynchronous stream parser for efficient handling of streamed responses. This is particularly useful when working with custom integrations that support streaming.
+
+Here's an example of how to use the async stream parser with a custom integration:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+// Initialize the Helicone logger
+const heliconeLogger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {}, // You can add custom headers here
+});
+
+// Your custom model API call that returns a stream
+const response = await customModelAPI.generateStream(prompt);
+
+// If your API supports splitting the stream
+const [stream1, stream2] = response.tee();
+
+// Log the stream to Helicone using the async stream parser
+heliconeLogger.logStream(requestBody, async (resultRecorder) => {
+  resultRecorder.attachStream(stream1);
+});
+
+// Process the stream for your application
+for await (const chunk of stream2) {
+  console.log(chunk);
+}
+```
+
+The async stream parser offers several benefits:
+
+- Processes stream chunks asynchronously for better performance
+- Reduces latency when handling large streamed responses
+- Provides more reliable token counting for streamed content
+
+### Using Vercel's `after` Function with Streaming
+
+When building applications with Next.js App Router on Vercel, you can use the `after` function to log streaming responses without blocking the client response:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+export async function POST(request: Request) {
+  const { prompt } = await request.json();
+
+  const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+  const helicone = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY!,
+  });
+
+  // Example with non-streaming response
+  const nonStreamingBody = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: false,
+  };
+
+  const completion = await together.chat.completions.create(nonStreamingBody);
+
+  // Log non-streaming response after sending the response to the client
+  after(
+    helicone.logSingleRequest(nonStreamingBody, JSON.stringify(completion))
+  );
+
+  // Example with streaming response
+  const streamingBody = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await together.chat.completions.create(streamingBody);
+  const [stream1, stream2] = response.tee();
+
+  // Log streaming response after sending the response to the client
+  after(helicone.logSingleStream(streamingBody, stream2.toReadableStream()));
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+For a comprehensive guide on using the Manual Logger with streaming functionality, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.

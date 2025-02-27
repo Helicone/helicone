@@ -77,14 +77,22 @@
       "pages": [
         {
           "group": "Generic Gateway",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/custom"
-          ]
+          "pages": ["getting-started/integration-method/gateway"]
         },
         {
           "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"]
+          "pages": [
+            "getting-started/integration-method/openllmetry",
+            {
+              "group": "Manual Logger",
+              "pages": [
+                "getting-started/integration-method/custom",
+                "getting-started/integration-method/manual-logger-typescript",
+                "getting-started/integration-method/manual-logger-python",
+                "getting-started/integration-method/manual-logger-curl"
+              ]
+            }
+          ]
         },
         {
           "group": "OpenAI",
@@ -292,7 +300,8 @@
             "guides/cookbooks/segmentation",
             "guides/cookbooks/github-actions",
             "guides/cookbooks/debugging",
-            "guides/cookbooks/labeling-request-data"
+            "guides/cookbooks/labeling-request-data",
+            "guides/cookbooks/manual-logger-streaming"
           ]
         },
         {

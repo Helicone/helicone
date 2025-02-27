@@ -133,18 +133,41 @@ export default function PromptEditor(props: PromptEditorProps) {
 
   // VALIDATION
   // - Can Run
-  const canRun = useMemo(
-    () =>
-      (state?.messages.some(
-        (m) =>
-          typeof m !== "string" &&
-          m.role === "user" &&
-          (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-      ) ??
-        false) &&
-      prompt?.metadata?.createdFromUi !== false,
-    [state?.messages, prompt?.metadata?.createdFromUi]
-  );
+  const canRun = useMemo(() => {
+    // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
+    if (
+      state?.parameters?.provider === "OPENAI" ||
+      state?.parameters?.provider === "ANTHROPIC" ||
+      state?.parameters?.provider === "GOOGLE"
+    ) {
+      return (
+        (state?.messages.some(
+          (m) =>
+            typeof m !== "string" &&
+            (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+        ) ??
+          false) &&
+        prompt?.metadata?.createdFromUi !== false
+      );
+    }
+
+    // For other providers, check if there's at least one user message with non-empty content
+    else
+      return (
+        (state?.messages.some(
+          (m) =>
+            typeof m !== "string" &&
+            m.role === "user" &&
+            (typeof m.content === "string" ? m.content.trim().length > 0 : true)
+        ) ??
+          false) &&
+        prompt?.metadata?.createdFromUi !== false
+      );
+  }, [
+    state?.messages,
+    state?.parameters?.provider,
+    prompt?.metadata?.createdFromUi,
+  ]);
 
   // CALLBACKS
   // - Load Version Data into State

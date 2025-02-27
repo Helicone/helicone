@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect } from "react";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, LogOut } from "lucide-react";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
 import {
@@ -9,6 +9,8 @@ import {
   useOrgOnboarding,
 } from "@/services/hooks/useOrgOnboarding";
 import LoadingAnimation from "../shared/loadingAnimation";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { signOut } from "../shared/utils/utils";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -37,12 +39,16 @@ interface OnboardingHeaderProps {
 export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const router = useRouter();
   const org = useOrg();
+  const supabaseClient = useSupabaseClient();
 
   const { onboardingState, draftPlan, updateCurrentStep, isLoading } =
     useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
-    if (!isLoading && org?.currentOrg?.has_onboarded) {
+    if (
+      (!isLoading && org?.currentOrg?.has_onboarded) ||
+      (!isLoading && org?.currentOrg?.tier?.toLowerCase() === "demo")
+    ) {
       router.push("/dashboard");
       return;
     }
@@ -78,6 +84,13 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     }
   };
 
+  const handleSignOut = () => {
+    supabaseClient.auth.refreshSession();
+    signOut(supabaseClient).then(() => {
+      router.push("/");
+    });
+  };
+
   if (isLoading || !org?.currentOrg?.id || org?.currentOrg?.has_onboarded) {
     return (
       <div className="min-h-screen w-full flex flex-col">
@@ -90,8 +103,8 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
 
   return (
     <>
-      <header className="w-full h-14 px-4 sm:px-16 bg-white border-b border-slate-200 flex items-center justify-between overflow-x-auto">
-        <div className="flex items-center gap-4 min-w-0">
+      <header className="w-full h-14 px-4 sm:px-6 bg-white border-b border-slate-200 flex items-center justify-between">
+        <div className="flex items-center gap-4 overflow-x-auto min-w-0 pr-2 md:pr-0">
           <div className="flex-shrink-0">
             <Image
               src="/static/logo-clear.png"
@@ -103,7 +116,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
           </div>
           <BreadcrumbSeparator />
 
-          <nav className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap pb-1">
+          <nav className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
             {steps.map((step, index) => (
               <React.Fragment key={step.label}>
                 <span
@@ -132,6 +145,15 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
             ))}
           </nav>
         </div>
+
+        <button
+          onClick={handleSignOut}
+          className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 flex-shrink-0 ml-2"
+          aria-label="Sign Out"
+        >
+          <span className="hidden sm:inline">Sign Out</span>
+          <LogOut className="w-3.5 h-3.5" />
+        </button>
       </header>
       {children}
     </>
