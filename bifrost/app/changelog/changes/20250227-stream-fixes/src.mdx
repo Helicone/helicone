@@ -4,11 +4,20 @@ We've made significant improvements to our streaming functionality with two key 
 
 ### Stream Fixes
 
-We've resolved several issues with stream handling across different LLM providers, ensuring more reliable and consistent streaming experiences. These fixes address edge cases and improve compatibility with various streaming implementations.
+We've resolved several issues with stream handling across different LLM providers, ensuring more reliable and consistent streaming experiences. These fixes address edge cases and improve compatibility with various streaming implementations, including:
 
-### Asynchronous Stream Parser
+- Better handling of stream interruptions and reconnections
+- Improved error handling for streaming responses
+- Enhanced compatibility with different LLM provider streaming formats
+- Fixed timing calculations for streamed responses
 
-We've introduced a new asynchronous stream parser that significantly improves performance when working with streamed responses. This new parser processes stream chunks asynchronously, reduces latency, and provides more reliable token counting.
+### New Streaming Methods
+
+The `HeliconeManualLogger` class now includes enhanced methods for working with streams:
+
+- `logStream`: Logs a streaming operation with full control over stream handling
+- `logSingleStream`: Simplified method for logging a single ReadableStream
+- `logSingleRequest`: Logs a single request with a response body
 
 ### Example Usage with Together AI
 

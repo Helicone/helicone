@@ -37,7 +37,7 @@ export class HeliconeManualLogger {
       const result = await operation(resultRecorder);
       const endTime = Date.now();
 
-      this.sendLog(request, resultRecorder.getResults(), {
+      await this.sendLog(request, resultRecorder.getResults(), {
         startTime,
         endTime,
         additionalHeaders,
@@ -50,6 +50,82 @@ export class HeliconeManualLogger {
     }
   }
 
+  /**
+   * Logs a single stream to Helicone
+   * @param request - The request object to log
+   * @param stream - The ReadableStream to consume and log
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns A Promise that resolves when logging is complete
+   */
+  public async logSingleStream(
+    request: HeliconeLogRequest,
+    stream: ReadableStream,
+    additionalHeaders?: Record<string, string>
+  ): Promise<void> {
+    const startTime = Date.now();
+    const resultRecorder = new HeliconeStreamResultRecorder();
+    resultRecorder.attachStream(stream);
+    let firstChunkTimeUnix: number | null = null;
+
+    const streamedData: any[] = [];
+    const decoder = new TextDecoder();
+    for await (const chunk of stream) {
+      if (!firstChunkTimeUnix) {
+        firstChunkTimeUnix = Date.now();
+      }
+      streamedData.push(decoder.decode(chunk));
+    }
+
+    await this.sendLog(request, streamedData.join(""), {
+      startTime,
+      endTime: Date.now(),
+      additionalHeaders,
+    });
+  }
+
+  /**
+   * Logs a single request with a response body to Helicone
+   * @param request - The request object to log
+   * @param body - The response body as a string
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns A Promise that resolves when logging is complete
+   */
+  public async logSingleRequest(
+    request: HeliconeLogRequest,
+    body: string,
+    additionalHeaders?: Record<string, string>
+  ): Promise<void> {
+    const startTime = Date.now();
+
+    await this.sendLog(request, body, {
+      startTime,
+      endTime: Date.now(),
+      additionalHeaders,
+    });
+  }
+
+  /**
+   * Logs a streaming operation to Helicone
+   * @param request - The request object to log
+   * @param operation - The operation which will be executed and logged, with access to a stream recorder
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns The result of the `operation` function
+   *
+   * @example
+   * ```typescript
+   * const response = await llmProvider.createChatCompletion({ stream: true, ... });
+   * const [stream1, stream2] = response.tee();
+   *
+   * helicone.logStream(
+   *   requestBody,
+   *   async (resultRecorder) => {
+   *     resultRecorder.attachStream(stream2.toReadableStream());
+   *     return stream1;
+   *   },
+   *   { "Helicone-User-Id": userId }
+   * );
+   * ```
+   */
   public async logStream<T>(
     request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeStreamResultRecorder) => Promise<T>,
@@ -59,9 +135,9 @@ export class HeliconeManualLogger {
     const resultRecorder = new HeliconeStreamResultRecorder();
     const result = await operation(resultRecorder);
     try {
-      await resultRecorder.getStreamTexts().then((texts) => {
+      await resultRecorder.getStreamTexts().then(async (texts) => {
         const endTime = Date.now();
-        this.sendLog(request, texts.join(""), {
+        await this.sendLog(request, texts.join(""), {
           startTime,
           endTime,
           additionalHeaders,
@@ -151,16 +227,28 @@ export class HeliconeManualLogger {
   }
 }
 
+/**
+ * Recorder for handling and processing streams in Helicone logging
+ * Used to capture and process streaming responses from LLM providers
+ */
 class HeliconeStreamResultRecorder {
   private streams: ReadableStream[] = [];
   firstChunkTimeUnix: number | null = null;
 
   constructor() {}
 
+  /**
+   * Attaches a ReadableStream to be processed
+   * @param stream - The ReadableStream to attach
+   */
   attachStream(stream: ReadableStream): void {
     this.streams.push(stream);
   }
 
+  /**
+   * Processes all attached streams and returns their contents as strings
+   * @returns Promise resolving to an array of strings containing the content of each stream
+   */
   async getStreamTexts(): Promise<string[]> {
     const decoder = new TextDecoder();
     return Promise.all(
@@ -177,13 +265,26 @@ class HeliconeStreamResultRecorder {
     );
   }
 }
+
+/**
+ * Recorder for handling and storing results in Helicone logging
+ * Used to capture non-streaming responses from operations
+ */
 class HeliconeResultRecorder {
   private results: Record<string, any> = {};
 
+  /**
+   * Appends data to the results object
+   * @param data - The data to append to the results
+   */
   appendResults(data: Record<string, any>): void {
     this.results = { ...this.results, ...data };
   }
 
+  /**
+   * Gets the current results
+   * @returns The current results object
+   */
   getResults(): Record<string, any> {
     return this.results;
   }

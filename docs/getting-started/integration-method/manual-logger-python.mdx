@@ -1,0 +1,266 @@
+---
+title: "Manual Logger - Python"
+sidebarTitle: "Python"
+description: "Integrate any custom LLM with Helicone using the Python Manual Logger. Step-by-step guide for Python implementation to connect your proprietary or open-source models."
+"twitter:title": "Python Manual Logger - Helicone OSS LLM Observability"
+icon: "python"
+iconType: "solid"
+---
+
+# Python Manual Logger
+
+Logging calls to custom models is supported via the Helicone Python SDK.
+
+<Steps>
+  <Step title="Install the Helicone helpers package">
+  ```bash
+  pip install helicone-helpers
+  ```
+  </Step>
+
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```python
+  from openai import OpenAI
+  from helicone_helpers import HeliconeManualLogger
+  from helicone_helpers.manual_logger import HeliconeResultRecorder
+
+# Initialize the logger
+
+logger = HeliconeManualLogger(
+api_key="your-helicone-api-key",
+headers={}
+)
+
+# Initialize OpenAI client
+
+client = OpenAI(
+api_key="your-openai-api-key"
+)
+
+````
+</Step>
+
+<Step title="Define your operation and make the request">
+```python
+def chat_completion_operation(result_recorder: HeliconeResultRecorder):
+    response = client.chat.completions.create(
+        **result_recorder.request
+    )
+    import json
+    result_recorder.append_results(json.loads(response.to_json()))
+    return response
+
+# Define your request
+request = {
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello, world!"}]
+}
+
+# Make the request with logging
+result = logger.log_request(
+    provider="openai",  # Specify the provider
+    request=request,
+    operation=chat_completion_operation,
+    additional_headers={
+        "Helicone-Session-Id": "1234567890"  # Optional session tracking
+    }
+)
+
+print(result)
+````
+
+  </Step>
+</Steps>
+
+## API Reference
+
+### HeliconeManualLogger
+
+```python
+class HeliconeManualLogger:
+    def __init__(
+        self,
+        api_key: str,
+        headers: dict = {},
+        logging_endpoint: str = "https://api.hconeai.com"
+    )
+```
+
+### logRequest
+
+```python
+def log_request(
+    self,
+    request: dict,
+    operation: Callable[[HeliconeResultRecorder], T],
+    additional_headers: dict = {},
+    provider: Optional[Union[Literal["openai", "anthropic"], str]] = None,
+) -> T
+```
+
+#### Parameters
+
+1. `request`: A dictionary containing the request parameters
+2. `operation`: A callable that takes a HeliconeResultRecorder and returns a result
+3. `additional_headers`: Optional dictionary of additional headers
+4. `provider`: Optional provider specification ("openai", "anthropic", or None for custom)
+
+### HeliconeResultRecorder
+
+```python
+class HeliconeResultRecorder:
+    def __init__(self, request: dict):
+        """Initialize with request data"""
+
+    def append_results(self, data: dict):
+        """Append results to be logged"""
+
+    def get_results(self) -> dict:
+        """Get all recorded results"""
+```
+
+## Advanced Usage Examples
+
+### Streaming Responses
+
+For streaming responses with Python, you can use the `log_stream` method:
+
+```python
+from helicone_helpers import HeliconeManualLogger
+import openai
+
+# Initialize the logger
+helicone = HeliconeManualLogger(api_key="your-helicone-api-key")
+client = openai.OpenAI(api_key="your-openai-api-key")
+
+# Define your request
+request = {
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Write a story about a robot."}],
+    "stream": True
+}
+
+def stream_operation(result_recorder):
+    # Create a streaming response
+    response = client.chat.completions.create(**request)
+
+    # Process the stream and collect chunks
+    collected_chunks = []
+    for chunk in response:
+        collected_chunks.append(chunk)
+        # You can process each chunk here if needed
+
+    # Record the results
+    result_recorder.append_stream_results(collected_chunks)
+
+    # Return the collected chunks or process them as needed
+    return collected_chunks
+
+# Log the streaming request
+result = helicone.log_stream(
+    request=request,
+    operation=stream_operation,
+    additional_headers={"Helicone-User-Id": "user-123"}
+)
+```
+
+### Using with Anthropic
+
+```python
+from helicone_helpers import HeliconeManualLogger
+import anthropic
+
+# Initialize the logger
+helicone = HeliconeManualLogger(api_key="your-helicone-api-key")
+client = anthropic.Anthropic(api_key="your-anthropic-api-key")
+
+# Define your request
+request = {
+    "model": "claude-3-opus-20240229",
+    "messages": [{"role": "user", "content": "Explain quantum computing"}],
+    "max_tokens": 1000
+}
+
+def anthropic_operation(result_recorder):
+    # Create a response
+    response = client.messages.create(**request)
+
+    # Convert to dictionary for logging
+    response_dict = {
+        "id": response.id,
+        "content": [{"text": block.text, "type": block.type} for block in response.content],
+        "model": response.model,
+        "role": response.role,
+        "usage": {
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens
+        }
+    }
+
+    # Record the results
+    result_recorder.append_results(response_dict)
+
+    return response
+
+# Log the request with Anthropic provider specified
+result = helicone.log_request(
+    provider="anthropic",
+    request=request,
+    operation=anthropic_operation
+)
+```
+
+### Custom Model Integration
+
+For custom models that don't have a specific provider integration:
+
+```python
+from helicone_helpers import HeliconeManualLogger
+import requests
+
+# Initialize the logger
+helicone = HeliconeManualLogger(api_key="your-helicone-api-key")
+
+# Define your request
+request = {
+    "model": "custom-model-name",
+    "prompt": "Generate a poem about nature",
+    "temperature": 0.7
+}
+
+def custom_model_operation(result_recorder):
+    # Make a request to your custom model API
+    response = requests.post(
+        "https://your-custom-model-api.com/generate",
+        json=request,
+        headers={"Authorization": "Bearer your-api-key"}
+    )
+
+    # Parse the response
+    response_data = response.json()
+
+    # Record the results
+    result_recorder.append_results(response_data)
+
+    return response_data
+
+# Log the request with a custom provider
+result = helicone.log_request(
+    provider="custom",  # Or omit this parameter
+    request=request,
+    operation=custom_model_operation,
+    additional_headers={
+        "Helicone-Property-Model-Type": "custom-llm",
+        "Helicone-Property-Application": "poetry-generator"
+    }
+)
+```
+
+For more examples and detailed usage, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.

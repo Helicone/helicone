@@ -50,46 +50,9 @@ for chunk in await openai.ChatCompletion.acreate(
         print(content, end='')
 ```
 
-### Asynchronous Stream Parser
+## Enhanced Streaming Support
 
-Helicone now provides an improved asynchronous stream parser that enhances performance and reliability when working with streamed responses. This new parser processes stream chunks asynchronously, reducing latency and providing more reliable token counting.
-
-#### Using the Async Stream Parser with Manual Logging
-
-If you're using manual logging with providers like Together AI, you can take advantage of the new async stream parser:
-
-```typescript
-import Together from "together-ai";
-import { HeliconeManualLogger } from "@helicone/helpers";
-
-export async function main() {
-  const heliconeLogger = new HeliconeManualLogger({
-    apiKey: process.env.HELICONE_API_KEY!,
-    headers: {},
-  });
-
-  const together = new Together();
-  const body = {
-    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-    messages: [{ role: "user", content: "Your question here" }],
-    stream: true,
-  } as Together.Chat.CompletionCreateParamsStreaming & { stream: true };
-
-  const response = await together.chat.completions.create(body);
-  const [stream1, stream2] = response.tee();
-
-  // Use the new async stream parser
-  heliconeLogger.logStream(body, async (resultRecorder) => {
-    resultRecorder.attachStream(stream1.toReadableStream());
-  });
-
-  // Process the stream for your application
-  const textDecoder = new TextDecoder();
-  for await (const chunk of stream2.toReadableStream()) {
-    console.log(textDecoder.decode(chunk));
-  }
-}
-```
+Helicone now provides significantly improved streaming functionality with several key updates:
 
 ### Stream Fixes and Improvements
 
@@ -99,7 +62,189 @@ We've made several improvements to our stream handling across different LLM prov
 - Enhanced error handling for streaming responses
 - Improved compatibility with different LLM provider streaming formats
 - More reliable token counting for streamed content
+- Accurate timing calculations for streamed responses
 
-These improvements ensure a more consistent and reliable streaming experience, especially when working with different LLM providers that implement streaming in various ways.
+### New Streaming Methods
+
+The `HeliconeManualLogger` class now includes enhanced methods for working with streams:
+
+- **`logStream`**: Logs a streaming operation with full control over stream handling
+- **`logSingleStream`**: Simplified method for logging a single ReadableStream
+- **`logSingleRequest`**: Logs a single request with a response body
+
+### Asynchronous Stream Parser
+
+Our new asynchronous stream parser significantly improves performance when working with streamed responses:
+
+- Processes stream chunks asynchronously for reduced latency
+- Provides more reliable token counting for streamed responses
+- Accurately captures time-to-first-token metrics
+- Efficiently handles multiple concurrent streams
+
+## Using the Enhanced Streaming Features
+
+### OpenAI Streaming Example
+
+```typescript
+import OpenAI from "openai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {
+    "Helicone-Property-Environment": "production",
+  },
+});
+
+async function generateStreamingResponse(prompt: string, userId: string) {
+  const requestBody = {
+    model: "gpt-4-turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await openai.chat.completions.create(requestBody);
+
+  // For OpenAI's Node.js SDK, we can use the logSingleStream method
+  const stream = response.toReadableStream();
+  const [streamForUser, streamForLogging] = stream.tee();
+
+  helicone.logSingleStream(requestBody, streamForLogging, {
+    "Helicone-User-Id": userId,
+  });
+
+  return streamForUser;
+}
+```
+
+### Together AI Streaming Example
+
+```typescript
+import Together from "together-ai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {
+    "Helicone-Property-Environment": "production",
+  },
+});
+
+export async function generateWithTogetherAI(prompt: string, userId: string) {
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await together.chat.completions.create(body);
+
+  // Create two copies of the stream
+  const [stream1, stream2] = response.tee();
+
+  // Log the stream with Helicone
+  helicone.logStream(
+    body,
+    async (resultRecorder) => {
+      resultRecorder.attachStream(stream2.toReadableStream());
+      return stream1;
+    },
+    { "Helicone-User-Id": userId }
+  );
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+### Anthropic Streaming Example
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  headers: {
+    "Helicone-Property-Environment": "production",
+  },
+});
+
+async function generateWithAnthropic(prompt: string, userId: string) {
+  const requestBody = {
+    model: "claude-3-opus-20240229",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await anthropic.messages.create(requestBody);
+  const stream = response.toReadableStream();
+  const [userStream, loggingStream] = stream.tee();
+
+  helicone.logSingleStream(requestBody, loggingStream, {
+    "Helicone-User-Id": userId,
+  });
+
+  return userStream;
+}
+```
+
+## Calculating Costs with Streaming
 
 For information on how to accurately calculate costs when using streaming features, please refer to our [streaming usage guide](/faq/enable-stream-usage).
+
+You can enable accurate cost calculation by either:
+
+1. Including `stream_options: { include_usage: true }` in your request
+2. Adding the `helicone-stream-usage: true` header to your request
+
+This ensures that token usage is properly tracked even when using streaming responses.
+
+## Vercel App Router Integration
+
+When using Next.js App Router with Vercel, you can use the `after` function to log streaming responses without blocking the response to the client:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+export async function POST(request: Request) {
+  const { prompt } = await request.json();
+
+  const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+  const helicone = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY!,
+  });
+
+  // Create a streaming request
+  const requestBody = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  };
+
+  const response = await together.chat.completions.create(requestBody);
+  const [stream1, stream2] = response.tee();
+
+  // Log the stream after sending the response to the client
+  after(helicone.logSingleStream(requestBody, stream2.toReadableStream()));
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+This approach ensures that logging doesn't delay the response to the user, providing the best possible experience while still capturing all the necessary data.
+
+## Learn More
+
+For a comprehensive guide on using the Manual Logger with streaming functionality, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.
