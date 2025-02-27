@@ -1,0 +1,185 @@
+Anthropic surprised everyone with the release of Claude Code—their first agentic coding tool—alongside <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>. 
+
+This CLI tool allows developers to interact directly with Claude through their terminal, manipulating files, running commands, and executing complex coding tasks without leaving their terminal.
+
+Notably, Claude Code is the first tool of its kind from a major AI provider. While similar tools like Aider (which can use Claude) have existed for a while now, having Anthropic directly enter this space signals a possible shift in AI-assisted development.
+
+Let's take a close look at Claude Code and see if it's worth the hype!
+
+## TLDR: What You Need to Know About Claude Code
+
+- **What it is**: A terminal-based AI coding assistant powered by Claude 3.7 Sonnet
+- **Key functions**: Code editing, test creation/execution, Git operations, codebase navigation
+- **Current status**: Research preview (beta)
+- **Cost**: Uses Anthropic API pricing - expect $5-10 per developer per day (can exceed $100/hour for intensive use)
+- **Best use cases**: Code refactoring, debugging, test creation, understanding unfamiliar codebases
+- **Limitations**: Response times can be slow, expenses add up quickly, no direct Windows support (WSL required)
+
+## How Claude Code Works
+
+Claude Code operates as a CLI tool that integrates Claude 3.7 Sonnet directly into your development workflow. 
+
+It communicates directly with the Anthropic API to process your code and queries and execute tasks. 
+
+### Claude Code Architecture & Core Components
+
+The architecture follows a permission-based agent system with several key components:
+
+1. **Context Building**: Scans your project structure to understand code organization.
+2. **Tool Execution**: Uses a set of purpose-built tools to interact with your system. 
+    - **BashTool**: Executes shell commands (requires permission)
+    - **FileEditTool**: Makes targeted file edits
+    - **GrepTool**: Searches for patterns in code
+    - **AgentTool**: Runs sub-agents for complex tasks
+    - **GlobTool**: Finds files matching patterns
+    - **NotebookTools**: Special tools for Jupyter notebooks
+3. **Permission Management**: Implements a tiered approval system for different actions.
+    
+    ![Claude Code Tiered Permission](/static/blog/claude-code/permission-diagram.svg)
+
+    {/* diagram can be improved */}
+
+4. **Code Execution**: Can run commands, tests, and other operations in your environment.
+
+The system uses the Claude 3.7 Sonnet model by default and establishes a direct connection to Anthropic's API without intermediate servers.
+
+## Real-World Performance: Does Claude Code Deliver?
+
+Early reports from developers using Claude Code in production environments have been promising. One Reddit user <a href="https://www.reddit.com/r/singularity/comments/1ixd2gk/anthropics_claude_code_is_accelerating_software/" target="_blank" rel="noopener">shared</a> their experience:
+
+> I've been playing around with it at work today (We have Claude Pro licenses through work, so we can share our codebase with Anthropic) and it's actually quite good! Our codebase is massive, so I'm only working in a specific folder and not allowing it to ingest the full app, and it's still pretty helpful. It's able to find relevant files it needs to understand a particular feature without issue. The CLI is a pretty great experience as well!
+
+This Youtuber [describes](https://www.youtube.com/watch?v=a3j4olgIjk8&t=1110s) how Claude Code successfully refactored his codebase to implement a new error handling pattern across multiple files. 
+
+> holy s**t, it just worked that's pretty cool that's pretty cool I was not sure if that code change would just work like this and it totally did
+
+However, the experience isn't perfect. Users have noted formatting issues and significant waiting times. Response time remains one of the most notable drawbacks compared to IDE-integrated tools like Cursor.
+
+<BottomLine
+  title="Pro Tip 💡"
+  description="Claude Code works great with test-driven development. It can iteratively improve its own code in an effort to fix failing tests."
+/>
+
+## Claude Code Costs
+
+As with anything involving the Anthropic API, costs can accumulate quickly. The pricing model for Claude Code is as follows:
+
+- Input tokens: $3 per million tokens
+- Output tokens: $15 per million tokens (includes thinking tokens)
+
+In practical terms, this translates to:
+
+- Light usage: $5-10 per developer per day
+- Moderate usage: $20-40 per developer per day
+- Intensive usage: Can exceed $100 per hour
+
+💡 **Tips to <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview#manage-costs-effectively" target="_blank" rel="noopener">manage costs</a> effectively**:
+
+- Use `/compact` to reduce context size
+- Break complex tasks into smaller, focused interactions
+- Use `/clear` between unrelated tasks
+- Consider starting with a small pilot group before wider rollout
+
+<CallToAction
+  title="Monitor Your Claude Apps Costs with Helicone ⚡️"
+  description="Track token usage and costs across your Claude apps in production. Get insights into how your users are using your LLM and optimize your spending."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See Documentation"
+  secondaryButtonLink="https://docs.helicone.ai/"
+/>
+
+## Installation & Setup: Getting Started with Claude Code
+
+Setting up Claude Code requires just a few steps:
+
+1. Install via npm:
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+2. Navigate to your project directory:
+```bash
+cd your-project
+```
+
+3. Start Claude Code:
+```bash
+claude
+```
+
+4. Complete the one-time OAuth authentication with your Anthropic Console account
+
+### System Requirements
+
+- **Operating Systems**: macOS 10.15+, Ubuntu 20.04+/Debian 10+, or Windows via WSL
+- **Hardware**: 4GB RAM minimum
+- **Software**: Node.js 18+, git 2.23+ (optional)
+- **Network**: Access to api.anthropic.com, statsig.anthropic.com, and sentry.io
+
+For Windows users, note that Claude Code doesn't run directly in Windows and requires WSL (Windows Subsystem for Linux).
+
+## Claude Code Security & Privacy 
+
+Security is a critical concern when granting an AI tool access to your codebase. Claude Code implements several security measures:
+
+1. **Tiered permission system**: Different operations require different levels of approval
+2. **Direct API connection**: No intermediate servers between your terminal and Anthropic
+3. **Restricted network access**: Only connects to specified domains
+4. **Context awareness**: Maintains all processing within your local environment
+
+However, there are still important privacy considerations:
+
+- ⚠️ Anthropic may use feedback (opt-in) to improve their products but states they will not train models on your code
+- ⚠️ Queries are sent to Anthropic's API for processing
+- ⚠️ Feedback transcripts are stored for 30 days
+
+For organizations with strict security requirements, Anthropic provides a development container reference implementation with enhanced security measures, including custom firewall rules.
+
+## Is Claude Code for you?
+
+Claude Code offers a unique approach to AI-assisted development that will appeal to developers who spend **significant time in the terminal**, work with **large complex codebases**, and need to quickly **understand unfamiliar code**. 
+
+It's particularly valuable for those who perform extensive refactoring operations and are already comfortable with command-line interfaces. 
+
+However, it's not ideal for everyone. Consider alternatives if you **prefer GUI-based interfaces, need instant responses, or have strict budget constraints**. 
+
+But as with anything else, the only way to find out is to try it—if you can get your hands on it, that is! 
+
+---
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code for Developers</a>**
+- **<a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3 Technical Review: Everything You Need to Know</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs OpenAI o1: A Comprehensive Comparison</a>**
+
+---
+
+## FAQs
+
+### Does Claude Code work with any programming language?
+
+Yes, Claude Code works with any programming language that Claude 3.7 Sonnet understands, which includes most major languages.
+
+### Can Claude Code access external APIs or resources?
+
+No, Claude Code cannot directly access external resources. It can only interact with your local filesystem and run commands with your permissions.
+
+### How does token usage compare to using Claude in a web interface?
+
+Claude Code typically uses more tokens because it needs to process larger amounts of context from your codebase.
+
+### Can I use Claude Code with Amazon Bedrock or Google Vertex AI?
+
+Yes, Claude Code supports connections to these services with appropriate configuration. See the official documentation for setup details.
+
+### Is there a free tier for trying Claude Code?
+
+No, Claude Code requires an active billing account on the Anthropic Console.
+
+### How does Claude Code handle sensitive code?
+
+All processing happens through the Anthropic API, subject to their privacy policies. For sensitive projects, consider using the development container with restricted network access.
+
+<Questions />
