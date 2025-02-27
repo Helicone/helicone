@@ -240,6 +240,7 @@ const RequestRow = (props: RequestRowProps) => {
 
   return (
     <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
+      <ModelPill model={request.model} />
       <div className="flex flex-row items-center">
         <ul
           className={clsx(
@@ -375,26 +376,6 @@ const RequestRow = (props: RequestRowProps) => {
         </ul>
       </div>
       <div className="flex flex-col gap-4">
-        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          <div className="flex flex-row items-center space-x-1">
-            <span>Add to Dataset</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => {
-                      setNewDatasetModalOpen(true);
-                    }}
-                    className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-                  >
-                    <PlusIcon className="h-3 w-3 text-gray-500" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Add to Dataset</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
         <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
           Custom Properties{" "}
           <TooltipProvider>
