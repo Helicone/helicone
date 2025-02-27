@@ -1,0 +1,12 @@
+{
+    "title": "Technical Review: Claude 3.7 Sonnet & Claude Code for Developers",
+    "title1": "Technical Review: Claude 3.7 Sonnet",
+    "title2": "Technical Review: Claude Code",
+    "description": "In this blog, we take a deep dive into Claude 3.7 Sonnet's reasoning capabilities and the new Claude Code CLI tool. Does its coding performance stack up against other popular models? Let's find out.",
+    "images": "/static/blog/claude-3.7-benchmarks-and-examples/claude-3.7-sonnet-cover.webp",
+    "time": "12 minute read",
+    "author": "Yusuf Ishola",
+    "date": "February 25, 2024", 
+    "badge": "compare"
+}
+  

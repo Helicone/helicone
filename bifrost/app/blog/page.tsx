@@ -41,7 +41,7 @@ const HEADSHOTS = {
   "Justin Torre": "/static/blog/justintorre-headshot.webp",
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
-  Yusuf: "/static/blog/yusuf-headshot.webp",
+  "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -55,15 +55,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-            name: author,
-            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-          }))
+          name: author,
+          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+        }))
         : [
-            {
-              name: metadata.author || "",
-              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-            },
-          ],
+          {
+            name: metadata.author || "",
+            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+          },
+        ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -209,15 +209,15 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-      dynmaicEntry: {
-        folderName: string;
-      };
+    dynmaicEntry: {
+      folderName: string;
     };
+  };
 
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "claude-3.7",
+      folderName: "claude-3.7-benchmarks-and-examples",
     },
   },
   {
@@ -498,11 +498,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {
