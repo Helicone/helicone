@@ -292,9 +292,6 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     if (date?.from) {
                       let [hours, minutes] = e.target.value.split(":");
-                      if (+hours === 0) {
-                        hours = "12";
-                      }
                       const newFrom = new Date(date.from);
 
                       if (hours && minutes) {
@@ -324,11 +321,9 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     if (date?.to) {
                       let [hours, minutes] = e.target.value.split(":");
-                      if (+hours === 0) {
-                        hours = "12";
-                      }
+                      const newTo = new Date(date.to);
+
                       if (hours && minutes) {
-                        const newTo = new Date(date.to);
                         newTo.setHours(Number(hours), Number(minutes));
                         handleDateChange({ ...date, to: newTo });
                       }
