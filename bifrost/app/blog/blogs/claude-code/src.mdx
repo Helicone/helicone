@@ -6,20 +6,20 @@ Notably, Claude Code is the first tool of its kind from a major AI provider. Whi
 
 Let's take a close look at Claude Code and see if it's worth the hype!
 
-## TLDR: What You Need to Know About Claude Code
+## TL;DR: what you need to know about claude code
 
-- **What it is**: A terminal-based AI coding assistant powered by Claude 3.7 Sonnet
-- **Key functions**: Code editing, test creation/execution, Git operations, codebase navigation
-- **Current status**: Research preview (beta)
-- **Cost**: Uses Anthropic API pricing - expect $5-10 per developer per day (can exceed $100/hour for intensive use)
-- **Best use cases**: Code refactoring, debugging, test creation, understanding unfamiliar codebases
-- **Limitations**: Response times can be slow, expenses add up quickly, no direct Windows support (WSL required)
+| Detail | Description |
+| ------- | ------- |
+| **Claude Code** | A terminal-based AI coding assistant powered by Claude 3.7 Sonnet |
+| **Key Features** | Code editing, test creation/execution, Git operations, codebase navigation |
+| **Access** | Research preview (beta) |
+| **Cost** | Uses Anthropic API pricing - expect $5-10 per developer per day (can exceed $100/hour for intensive use) |
+| **Use Cases** | Code refactoring, debugging, test creation, understanding unfamiliar codebases |
+| **Limitations** | Response times can be slow, expenses add up quickly, no direct Windows support (WSL required) |
 
 ## How Claude Code Works
 
-Claude Code operates as a CLI tool that integrates Claude 3.7 Sonnet directly into your development workflow. 
-
-It communicates directly with the Anthropic API to process your code and queries and execute tasks. 
+Claude Code operates as a CLI tool that integrates Claude 3.7 Sonnet directly into your development workflow. It communicates directly with the Anthropic API to process your code and queries and execute tasks. 
 
 ### Claude Code Architecture & Core Components
 
@@ -27,12 +27,14 @@ The architecture follows a permission-based agent system with several key compon
 
 1. **Context Building**: Scans your project structure to understand code organization.
 2. **Tool Execution**: Uses a set of purpose-built tools to interact with your system. 
-    - **BashTool**: Executes shell commands (requires permission)
-    - **FileEditTool**: Makes targeted file edits
-    - **GrepTool**: Searches for patterns in code
-    - **AgentTool**: Runs sub-agents for complex tasks
-    - **GlobTool**: Finds files matching patterns
-    - **NotebookTools**: Special tools for Jupyter notebooks
+    | Tool | Description |
+    | ---- | ----------- |
+    | **BashTool** | Executes shell commands (requires permission) |
+    | **FileEditTool** | Makes targeted file edits |
+    | **GrepTool** | Searches for patterns in code |
+    | **AgentTool** | Runs sub-agents for complex tasks |
+    | **GlobTool** | Finds files matching patterns |
+    | **NotebookTools** | Special tools for Jupyter notebooks |
 3. **Permission Management**: Implements a tiered approval system for different actions.
     
     ![Claude Code Tiered Permission](/static/blog/claude-code/permission-diagram.svg)
@@ -60,7 +62,7 @@ However, the experience isn't perfect. Users have noted formatting issues and si
   description="Claude Code works great with test-driven development. It can iteratively improve its own code in an effort to fix failing tests."
 />
 
-## Claude Code Costs
+## Claude Code Pricing
 
 As with anything involving the Anthropic API, costs can accumulate quickly. The pricing model for Claude Code is as follows:
 
@@ -69,9 +71,9 @@ As with anything involving the Anthropic API, costs can accumulate quickly. The 
 
 In practical terms, this translates to:
 
-- Light usage: $5-10 per developer per day
-- Moderate usage: $20-40 per developer per day
-- Intensive usage: Can exceed $100 per hour
+- $5-10 per developer per day (Light usage)
+- $20-40 per developer per day (Moderate usage)
+- Can exceed $100 per hour (Intensive usage)
 
 💡 **Tips to <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview#manage-costs-effectively" target="_blank" rel="noopener">manage costs</a> effectively**:
 
@@ -80,35 +82,20 @@ In practical terms, this translates to:
 - Use `/clear` between unrelated tasks
 - Consider starting with a small pilot group before wider rollout
 
-<CallToAction
-  title="Monitor Your Claude Apps Costs with Helicone ⚡️"
-  description="Track token usage and costs across your Claude apps in production. Get insights into how your users are using your LLM and optimize your spending."
-  primaryButtonText="Get Started for Free"
-  primaryButtonLink="https://helicone.ai/signup"
-  secondaryButtonText="See Documentation"
-  secondaryButtonLink="https://docs.helicone.ai/"
-/>
-
-## Installation & Setup: Getting Started with Claude Code
+## Installation & Setup
 
 Setting up Claude Code requires just a few steps:
 
-1. Install via npm:
 ```bash
-npm install -g @anthropic-ai/claude-code
-```
-
-2. Navigate to your project directory:
-```bash
+# Install via npm
+npm install -g @anthropic-ai/claude-code 
+# Navigate to your project directory
 cd your-project
-```
-
-3. Start Claude Code:
-```bash
+# Start Claude Code
 claude
 ```
+Lastly, complete the one-time OAuth authentication with your Anthropic Console account.
 
-4. Complete the one-time OAuth authentication with your Anthropic Console account
 
 ### System Requirements
 
@@ -146,13 +133,20 @@ However, it's not ideal for everyone. Consider alternatives if you **prefer GUI-
 
 But as with anything else, the only way to find out is to try it—if you can get your hands on it, that is! 
 
----
-
 ### You might also like
 
 - **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code for Developers</a>**
 - **<a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3 Technical Review: Everything You Need to Know</a>**
 - **<a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs OpenAI o1: A Comprehensive Comparison</a>**
+
+<CallToAction
+  title="Monitor Your Claude Apps Costs with Helicone ⚡️"
+  description="Track token usage and costs across your Claude apps in production. Get insights into how your users are using your LLM and optimize your spending."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See Documentation"
+  secondaryButtonLink="https://docs.helicone.ai/"
+/>
 
 ---
 
