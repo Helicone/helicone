@@ -29,18 +29,29 @@ type SelectionState = {
   isVariable: boolean;
 } | null;
 
-const sharedTextAreaStyles = {
+const sharedTextAreaStyles: React.CSSProperties = {
   fontFamily: "inherit",
   whiteSpace: "pre-wrap",
   overflowWrap: "break-word",
   lineHeight: "24px",
   fontSize: "16px",
-  margin: 0,
   boxSizing: "border-box",
   overflow: "hidden",
+  height: "100%",
+  width: "100%",
   minHeight: "100%",
+  minWidth: "100%",
   position: "relative",
+  border: "none",
+  outline: "none",
+  margin: 0,
   zIndex: 2,
+  gridColumn: 1,
+  gridRow: 1,
+  paddingTop: "0px",
+  paddingBottom: "0px",
+  paddingLeft: "1rem",
+  paddingRight: "1rem",
 } as const;
 
 interface PromptBoxProps {
@@ -91,6 +102,7 @@ export default function PromptBox({
     end: number;
     isLoading: boolean;
   } | null>(null);
+  const preRef = useRef<HTMLPreElement>(null);
 
   // AUTOCOMPLETE: CANCEL
   const abortCurrentRequest = useCallback(() => {
@@ -631,7 +643,7 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent dark:border-slate-800 caret-black dark:caret-white ${
+      className={`relative h-full w-full group grid grid-cols-1 grid-rows-1 focus-within:border-transparent dark:border-slate-800 caret-black dark:caret-white ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
@@ -642,23 +654,20 @@ export default function PromptBox({
         onKeyDown={handleKeyDown}
         onSelect={handleSelection}
         onBlur={handleBlur}
-        className="col-[1] row-[1] h-full w-full border-none bg-transparent px-4 outline-none"
-        style={{
-          ...sharedTextAreaStyles,
-          color: "transparent",
-          resize: "none",
-        }}
         placeholder="Type your prompt..."
         disabled={disabled}
+        style={sharedTextAreaStyles}
+        className="text-transparent bg-transparent resize-none"
       />
       <pre
         aria-hidden="true"
-        className="pointer-events-none col-[1] row-[1] h-full w-full px-4 selection:bg-blue-200"
-        style={{
-          ...sharedTextAreaStyles,
-        }}
+        ref={preRef}
+        style={sharedTextAreaStyles}
+        className="pointer-events-none selection:bg-blue-200"
       >
         {getColoredText()}
+        {/* Invisible character to ensure proper height when empty */}
+        <span className="invisible">{"\u200B"}</span>
         {suggestionState.suggestion && (
           <>
             <span className="text-tertiary opacity-0 transition-opacity group-focus-within:opacity-100">
