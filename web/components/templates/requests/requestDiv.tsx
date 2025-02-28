@@ -20,6 +20,7 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
 import RequestRow from "./requestRow";
+import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
   open: boolean;
