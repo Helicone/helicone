@@ -1,72 +1,73 @@
-AI models keep _droppin' like it's hot_.
+With <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3</a> released last week and <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a> just days ago, OpenAI up its games with a new model **GPT-4.5** that prioritizes conversational abilities and emotional intelligence over pure reasoning power.
 
-OpenAI has just released **GPT-4.5,** their newest language model that prioritizes conversational abilities and emotional intelligence over pure reasoning power—just days after the release of <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">**Claude 3.7 Sonnet**</a> and <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">**Grok-3**</a>. 
+![GPT-4.5](/static/blog/gpt-4.5/gpt-4.5-cover.webp)
 
 While it hasn't created the excitement of previous releases, GPT-4.5 offers some interesting capabilities that developers should understand before deciding whether to integrate it into their applications.
 
-In this article we explore the new GPT-4.5—its **design, benchmark results, real-world performance, how to access it,** and even share some tips on how to **get the most out of it**.
+In this article, we will explore GPT-4.5's design, benchmarks, and real-world performance, and some tips on how to get the most out of it.
 
-## What's New in GPT-4.5? The Summary
+## "Largest and Most Knowledgeable" Model
 
-GPT-4.5 brings several notable changes that set it apart from previous OpenAI models:
+GPT-4.5 is OpenAI's latest model, described by the company as their "largest and most knowledgeable model yet." Unlike recent releases like **o1** and **o3-mini** that focus on step-by-step reasoning, GPT-4.5 scales up unsupervised learning—which makes it better at conversation but weaker at complex problem-solving.
+
+OpenAI has stated this will be their **<span style={{ color: '#03A9F4' }}>last model without built-in reasoning capabilities</span>**. 
+
+### What's new with GPT-4.5? 
 
 - **Improved Conversational Abilities**: More natural dialogue with concise responses that feel less robotic
-- **Enhanced Emotional Intelligence**: Better at detecting user sentiment and responding appropriately to social cues
-- **Reduced Hallucinations**: 37.1% hallucination rate compared to GPT-4o's 61.8% on factual questions
+- **Emotional Intelligence**: Better at detecting user sentiment and responding appropriately to social cues
+- **Hallucinations Reduced**: From GPT-4o's `61.8%` on factual questions to `37.1%`
 - **Better Knowledge**: 62.5% accuracy on SimpleQA, significantly outperforming both GPT-4o and o1
+
+<BottomLine
+  title="Sam Altman's Take:"
+  description="'It [GPT-4.5] is the first model that feels like talking to a thoughtful person to me' — Sam Altman, OpenAI's CEO"
+/>
+
+### Developer's take
+
+Developers find that GPT-4.5 excels at natural conversation and generating factual content, but struggles with systematic reasoning—at a premium price point. Specifically: 
+
 - **Mixed Reasoning Performance**: Outperforms GPT-4o but falls behind o3-mini on most reasoning tasks
 - **Surprising Coding Skills**: Unexpectedly outperforms o3-mini on the SWE-Lancer benchmark for real-world coding tasks but underperforms on pure coding tasks
 - **Expensive API Pricing**: $75 per million input tokens and $150 per million output tokens
-- **Last Non-Reasoning Model**: OpenAI has stated this will be their final model without built-in reasoning capabilities
 
-<BottomLine
-  title="Bottom line"
-  description="GPT-4.5 excels at natural conversation and factual knowledge but struggles with systematic reasoning—at a premium price point."
-/>
+## GPT-4.5 Pricing vs. Leading Models
 
-## What is GPT-4.5?
+| Feature | **GPT-4.5** | GPT-4o | o3-mini | Claude 3.7 Sonnet |
+|---------|-------------|--------|---------|-------------------|
+| Context Window | **128K tokens** | 128K tokens | 128K tokens | 200K tokens |
+| Max Output | **16,384 tokens** | 4,096 tokens | 4,096 tokens | 4,096 tokens |
+| Input Price | **$75/M tokens** | $5/M tokens | $5/M tokens | $3/M tokens |
+| Output Price | **$150/M tokens** | $15/M tokens | $15/M tokens | $15/M tokens |
+| Training Cutoff | **April 2024** | October 2023 | October 2023 | April 2024 |
+| Specialized For | **Conversation & Knowledge** | General Use | Reasoning | General Use |
+| Vision Support | **✅** | ✅ | ✅ | ✅ |
+| Function Calling | **✅** | ✅ | ✅ | ✅ |
+| JSON Mode | **✅** | ✅ | ✅ | ✅ |
 
-GPT-4.5 is OpenAI's latest model, described by the company as their "largest and most knowledgeable model yet." Unlike recent releases like **o1** and **o3-mini** that focus on step-by-step reasoning, GPT-4.5 scales up unsupervised learning to create a model with:
+This makes GPT-4.5 significantly more expensive than alternatives like GPT-4o and even the pricy <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, reflecting its computational demands.
 
-- Broader knowledge and deeper understanding of the world
-- More natural, concise conversational abilities
-- Higher emotional intelligence and better response to social cues
-- Reduced hallucinations on factual questions
-- Improved ability to follow user intent
 
-> it [GPT-4.5] is the first model that feels like talking to a thoughtful person to me
+### Design and Architecture
 
-— _Sam Altman, OpenAI's CEO_ 
-
-<BottomLine
-  title="Key Point 💡"
-  description="GPT-4.5 represents a different approach to AI advancement—scaling unsupervised learning instead of reasoning capabilities—which makes it better at conversation but weaker at complex problem-solving."
-/>
-
-## ChatGPT 4.5 Design and Architecture
-
-GPT-4.5 differs significantly from reasoning-focused models in its architecture and training approach. 
 
 OpenAI now builds better models by scaling two complementary paradigms:
 
 1. **Reasoning** (o-series models) - Teaches models to think step-by-step before responding
 2. **Unsupervised learning** (GPT series) - Increases world model accuracy and intuition
 
-GPT-4.5 represents an example of scaling the unsupervised learning paradigm. The model was trained on Microsoft Azure AI supercomputers, with architectural and optimization innovations allowing it to process and learn from massive amounts of data.
+GPT-4.5 is an example of scaling the unsupervised learning approach. The model was trained on Microsoft Azure AI supercomputers, with architectural and optimization innovations allowing it to process and learn from massive amounts of data.
 
 ## Benchmark Performance
 
-Now let's get down to the benchmarks!
-
-**TL;DR**: GPT-4.5's excels in **general knowledge and factual accuracy** but shows more **mixed results on reasoning-heavy tasks**.
+Overall, GPT-4.5's **excels in general knowledge and factual accuracy** but shows more **mixed results on reasoning-heavy tasks**.
 
 ### Knowledge and Factuality
 
-On the SimpleQA benchmark, which measures factual accuracy on straightforward but challenging knowledge questions GPT-4.5 leads on **Accuracy** and has the lowest **Hallucination rates** compared to other OpenAI models.
+On the <a href="https://openai.com/index/introducing-gpt-4-5/" target="_blank" rel="noopener">SimpleQA benchmark</a>, which measures factual accuracy on straightforward but challenging knowledge questions GPT-4.5 **<span style={{ color: '#03A9F4' }}>leads on accuracy</span>** and has the **<span style={{ color: '#03A9F4' }}>lowest Hallucination rates</span>** compared to other OpenAI models.
 
-![ChatGPT-4.5 SimpleQA Benchmark](/static/blog/gpt-4.5/simple-qa-benchmark.jpeg)
-
-_Image Source: <a href="https://openai.com/index/introducing-gpt-4-5/" target="_blank" rel="noopener">OpenAI</a>_
+![GPT-4.5 SimpleQA Benchmark](/static/blog/gpt-4.5/simple-qa-benchmark.jpeg)
 
 ### Reasoning Benchmarks
 
@@ -79,10 +80,10 @@ When it comes to tasks that typically benefit from reasoning, GPT-4.5 shows impr
 | MMMLU (multilingual) | 85.1% | 81.5% | 81.1% |
 | MMMU (multimodal) | 74.4% | 69.1% | - |
 
-The results paint a clear picture: while GPT-4.5 significantly **outperforms GPT-4o**, it falls **behind o3-mini** on science and math tasks. 
+The results paint a clear picture: while GPT-4.5 significantly **<span style={{ color: '#03A9F4' }}>outperforms GPT-4o</span>**, it falls **<span style={{ color: '#03A9F4' }}>behind o3-mini</span>** on science and math tasks. 
 
 <BottomLine
-  title="Benchmark Insight 📊"
+  title="Our take 💡"
   description="GPT-4.5 is your best choice for factual knowledge and multilingual applications, but for complex math or science problems, o3-mini remains the superior option."
 />
 
@@ -102,24 +103,60 @@ SWE-Lancer evaluates the ability to understand client requirements, interpret am
 This raises an interesting question: **Could emotional intelligence be beneficial to AI when performing real-world coding tasks?** 
 
 <BottomLine
-  title="Note ℹ️"
+  title="Quick note 💡"
   description="On SWE-Bench Verified, which focuses more on pure coding challenges rather than client-oriented tasks, o3-mini still dominates by quite a margin.
 "
 />
 
-## Human Evaluations and Emotional Intelligence
+## Emotional Intelligence & Human Evaluation 
 
-![ChatGPT-4.5 Emotional Intelligence](/static/blog/gpt-4.5/gpt-4.5-eq.avif)
+<a href="https://openai.com/index/introducing-gpt-4-5/" target="_blank" rel="noopener">OpenAI conducted</a> extensive human evaluations comparing GPT-4.5 to GPT-4o across different types of queries. The results show a strong preference for GPT-4.5:
 
-_Image Source: <a href="https://openai.com/index/introducing-gpt-4-5/" target="_blank" rel="noopener">OpenAI</a>_
-
-OpenAI conducted extensive human evaluations comparing GPT-4.5 to GPT-4o across different types of queries. The results show a strong preference for GPT-4.5:
+![GPT-4.5 Emotional Intelligence](/static/blog/gpt-4.5/gpt-4.5-eq.avif)
 
 - **Professional queries**: 70.8% preferred GPT-4.5
 - **Creative intelligence**: 58.4% preferred GPT-4.5
 - **Everyday queries**: 56.9% preferred GPT-4.5
 
 These human evaluations align with what we've seen in practice: GPT-4.5's responses feel more natural, helpful, and attuned to user needs.
+
+## Real-World Performance
+
+Beyond benchmarks, how does GPT-4.5 perform in actual use? 
+
+Early reception has been mixed, with some interesting strengths and weaknesses emerging.
+
+### The Strawberry Test
+
+A simple but telling test done by <a href="https://x.com/NorthstarBrain/status/1895320959743336514" target="_blank" rel="noopener">Alex Northstar on X</a> reveals GPT-4.5's struggle with basic reasoning. 
+
+![GPT-4.5 Strawberry Test](/static/blog/gpt-4.5/gpt-4.5-strawberry-test.jpeg)
+
+When asked "How many r's are in the word strawberry?", GPT-4.5 incorrectly answers "2", despite there being 3 r's in the word—as most reasoning models would tell you. 
+
+### Mixed Reception 
+
+> Let's pretend that we didn't see it and wait for GPT 5.
+
+This comment (one of the most liked) on OpenAI's release video sums up many developers' reactions. This sentiment reflects the underwhelming nature of the release for those expecting groundbreaking new capabilities.
+
+### GPT-4.5's Unique Strengths 
+
+Despite these limitations, users report that GPT-4.5 excels in several areas:
+
+- **More concise responses**: GPT-4.5 tends to be direct and to the point, avoiding the verbose explanations common in earlier models
+- **Better emotional intelligence**: The model more accurately detects user emotions and responds appropriately
+- **Improved factual reliability**: Fewer hallucinations when answering knowledge-based questions
+- **More natural conversation flow**: Interactions feel less robotic and more human-like
+- **Writing**: GPT-4.5 has been praised as one of the best available models for writing due to its more human-like style
+
+## How to Access GPT-4.5
+
+GPT-4.5 is rolling out gradually due to GPU constraints, but here are all the ways you can access it through:
+
+1. **ChatGPT:** Available now from the model picker for OpenAI ChatGPT Pro users ($200/month).   
+
+2. **API:** Chat Completions API, Assistants API, and Batch API. The API version supports all key features including function calling and JSON mode. GPT-4.5 currently **does not** support Voice Mode, video processing, or screensharing features in ChatGPT.
 
 <CallToAction
   title="Monitor OpenAI Models with Helicone ⚡️"
@@ -147,86 +184,11 @@ print(response.choices[0].message.content)
 ```
 </CallToAction>
 
-## ChatGPT 4.5 Real-World Performance and Reception
-
-Beyond benchmarks, how does GPT-4.5 perform in actual use? 
-
-Early reception has been mixed, with some interesting strengths and weaknesses emerging.
-
-### Mixed Reception
-
-> Let's pretend that we didn't see it and wait for GPT 5.
-
-This comment (one of the most liked) on OpenAI's release video sums up many developers' reactions. This sentiment reflects the underwhelming nature of the release for those expecting groundbreaking new capabilities.
-
-### The Strawberry Test
-
-![ChatGPT-4.5 Strawberry Test](/static/blog/gpt-4.5/gpt-4.5-strawberry-test.jpeg)
-
-_Image Source: <a href="https://x.com/NorthstarBrain/status/1895320959743336514" target="_blank" rel="noopener">Alex Northstar on X</a>_
-
-A simple but telling test reveals GPT-4.5's struggle with basic reasoning. 
-
-When asked "How many r's are in the word strawberry?", GPT-4.5 incorrectly answers "2", despite there being 3 r's in the word—as most reasoning models would tell you. 
-
-### ChatGPT 4.5's Unique Strengths 
-
-Despite these limitations, users report that GPT-4.5 excels in several areas:
-
-- **More concise responses**: GPT-4.5 tends to be direct and to the point, avoiding the verbose explanations common in earlier models
-- **Better emotional intelligence**: The model more accurately detects user emotions and responds appropriately
-- **Improved factual reliability**: Fewer hallucinations when answering knowledge-based questions
-- **More natural conversation flow**: Interactions feel less robotic and more human-like
-- **Writing**: GPT-4.5 has been praised as one of the best available models for writing due to its more human-like style
-
-## How to Access GPT-4.5
-
-GPT-4.5 is rolling out gradually due to GPU constraints, but here are all the ways you can access it:
-
-### Through ChatGPT (Website and Apps)
-
-- **ChatGPT Pro users** ($200/month): Available now - select GPT-4.5 from the model picker
-- **Plus users** ($20/month): Coming next week
-- **Teams, Enterprise, and Education users**: Rolling out in the following weeks
-
-### Through API
-
-GPT-4.5 is available through the following OpenAI APIs:
-
-- Chat Completions API
-- Assistants API
-- Batch API
-
-The API version supports all key features including:
-
-- Function calling and JSON mode
-- Structured outputs
-- System messages
-- Streaming responses
-- Vision capabilities via image inputs
-
-GPT-4.5 currently **does not** support Voice Mode, video processing, or screensharing features in ChatGPT.
-
-### ChatGPT 4.5 API Pricing
-
-- **Input**: $75.00 per million tokens
-- **Output**: $150.00 per million tokens
-- **Cached Input**: $37.50 per million tokens
-
-This makes GPT-4.5 significantly more expensive than alternatives like GPT-4o and even the pricy <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, reflecting its computational demands.
-
-<CallToAction
-  title="Monitor GPT-4.5 Usage with Helicone"
-  description="With GPT-4.5's high token costs, visibility into usage is essential. Helicone provides real-time cost tracking, token usage analytics, and caching to help optimize your implementation."
-  primaryButtonText="Start Monitoring"
-  primaryButtonLink="https://helicone.ai/signup"
-/>
-
-## Developer Guidelines
+## Some guidelines on when to use GPT-4.5
 
 Based on GPT-4.5's strengths and weaknesses, here are practical guidelines for when to use—and when to avoid—this model:
 
-### Best Use Cases for GPT-4.5
+### Best use cases
 
 ✅ **Customer-facing chatbots and assistants**: The improved conversational abilities and emotional intelligence make it excellent for direct user interaction
 
@@ -238,18 +200,23 @@ Based on GPT-4.5's strengths and weaknesses, here are practical guidelines for w
 
 ✅ **Client requirement interpretation**: For understanding ambiguous or emotion-laden specifications
 
-### When to Avoid GPT-4.5
+### When to avoid GPT-4.5
 
-❌ **Scientific or mathematical problem-solving**: o3-mini significantly outperforms GPT-4.5 on GPQA and AIME benchmarks
+🆇 **Scientific or mathematical problem-solving**: o3-mini significantly outperforms GPT-4.5 on GPQA and AIME benchmarks
 
-❌ **Budget-conscious applications**: The high token costs make GPT-4.5 prohibitively expensive for many use cases
+🆇 **Budget-conscious applications**: The high token costs make GPT-4.5 prohibitively expensive for many use cases
 
-❌ **Pure coding challenges**: For systematic programming tasks, o3-mini's reasoning capabilities make it a better choice
+🆇  **Pure coding challenges**: For systematic programming tasks, o3-mini's reasoning capabilities make it a better choice
 
-❌ **Critical applications requiring perfect accuracy**: The "strawberry test" failure demonstrates persistent reasoning limitations
+🆇 **Critical applications requiring perfect accuracy**: The "strawberry test" failure demonstrates persistent reasoning limitations
+
+### Tips for optimization
+
+1. Use function calling for structured outputs to reduce token waste. 
+2. Use a hybrid approach. For example, GPT-4.5 for user-facing components and o3-mini for back-end logic. 
 
 <BottomLine
-  title="Developer Tip 💡"
+  title="A tip for developers 💡"
   description="Consider using GPT-4.5 for front-end, user-facing components—like documentation or support assistance—while keeping reasoning models for back-end logic and complex problem-solving tasks."
 />
 
@@ -257,15 +224,15 @@ Based on GPT-4.5's strengths and weaknesses, here are practical guidelines for w
 
 GPT-4.5's release offers several insights into OpenAI's development strategy and the future of AI:
 
-### The Last Non-Reasoning Model
+### The last non-reasoning model
 
 OpenAI has stated that GPT-4.5 will be their last non-reasoning model. This suggests that future releases will incorporate both strong reasoning capabilities and the improved conversational abilities demonstrated in GPT-4.5.
 
-### Unsupervised Learning Limits?
+### Is unsupervised learning reaching limits?
 
 The modest improvements in GPT-4.5 despite enormous scaling raises questions about whether we're approaching diminishing returns from pure unsupervised learning. This could explain why OpenAI plans to incorporate reasoning in all future models.
 
-### Emotional Intelligence is All You Need?
+### Is Emotional Intelligence all you need?
 
 The SWE-Lancer results suggest that emotional intelligence and reasoning abilities might be key to unlocking greater real-world performance from AI models.
 
@@ -277,13 +244,21 @@ For developers, GPT-4.5 is best suited for applications where user experience an
 
 As OpenAI's final non-reasoning model, GPT-4.5 marks the end of one development path and hints at a future where conversational fluency and systematic reasoning are combined in more powerful and versatile models. */}
 
-### You might also like
+### You might also like: 
 
-- **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code for Developers</a>**
-- **<a href="http://helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code</a>**
+- **<a href="http://helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Benchmarks and Comparison to o1</a>**
 - **<a href="https://www.helicone.ai/blog/openai-deep-research" target="_blank" rel="noopener">OpenAI Deep Research & How it Compares to Perplexity</a>**
 - **<a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3 Technical Review: Everything You Need to Know</a>**
 
+<CallToAction
+  title="Monitor the high costs of GPT-4.5 with Helicone"
+  description="Helicone provides real-time cost tracking, token usage analytics, and caching to help optimize your implementation."
+  primaryButtonText="Start Monitoring for Free"
+  primaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
+  secondaryButtonText="Calculate Costs"
+  secondaryButtonLink="https://helicone.ai/llm-cost"
+/>
 ---
 
 ## FAQs

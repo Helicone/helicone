@@ -217,6 +217,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "gpt-4.5",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "claude-3.7-benchmarks-and-examples",
     },
   },
@@ -498,11 +503,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "llm-observability",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "open-webui-alts",
     },
   },
   {

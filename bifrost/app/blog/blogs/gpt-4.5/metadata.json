@@ -1,11 +1,11 @@
 {
-  "title": "ChatGPT 4.5: Everything Developers Need to Know About OpenAI's New Model",
-  "title1": "ChatGPT 4.5: Everything Developers Need to Know About OpenAI's New Model",
-  "title2": "ChatGPT 4.5: Everything Developers Need to Know About OpenAI's New Model",
-  "description": "This article covers everything you need to know about ChatGPT 4.5. We go over the technical details, benchmarks and real-world reviews",
-  "images": "/static/blog/google-gemini-exp-1206/cover.webp",
-  "time": "5 minute read",
+  "title": "GPT 4.5 Released: Here Are the Benchmarks",
+  "title1": "GPT 4.5 Released: Here Are the Benchmarks",
+  "title2": "GPT 4.5 Released: Here Are the Benchmarks",
+  "description": "This article covers everything you need to know about GPT 4.5. We go over the technical details, benchmarks and real-world reviews and some developer guidelines on when to use it.",
+  "images": "/static/blog/gpt-4.5/gpt-4.5-cover.webp",
+  "time": "10 minute read",
   "author": "Yusuf",
-  "date": "February 28, 2024", 
+  "date": "March 1, 2025", 
   "badge": "news"
 }
