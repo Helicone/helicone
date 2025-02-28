@@ -4,11 +4,13 @@ This CLI tool allows developers to interact directly with Claude through their t
 
 ![Claude Code](/static/blog/claude-code/claude-code.webp)
 
-Notably, Claude Code is the first tool of its kind from a major AI provider. While similar tools like <a href="https://www.cursor.com/" target="_blank" rel="noopener">Cursor</a> and <a href="https://www.aider.chat/" target="_blank" rel="noopener">Aider</a> (which can use Claude) have existed for a while now, having Anthropic directly enter this space signals a possible shift in AI-assisted development.
+Notably, Claude Code is the first tool of its kind from a major AI provider. While similar tools like <a href="https://www.aider.chat/" target="_blank" rel="noopener">Aider</a> (which can use Claude) have existed for a while now, having Anthropic directly enter this space signals a possible shift in AI-assisted development.
 
 Let's take a close look at Claude Code and see if it's worth the hype!
 
-| Overview | Description |
+## Overview
+
+| Aspect | Description |
 | ------- | ------- |
 | **What it is** | A terminal-based AI coding assistant powered by Claude 3.7 Sonnet |
 | **Key Features** | Code editing, test creation/execution, Git operations, codebase navigation |
@@ -45,7 +47,7 @@ The architecture follows a permission-based agent system with several key compon
 
 The system uses the Claude 3.7 Sonnet model by default and establishes a direct connection to Anthropic's API without intermediate servers. No middlemen—just you, your terminal, and Claude's brain.
 
-## Does Claude Code Deliver in Production?
+## Does Claude Code perform well?
 
 Early reports from developers using Claude Code in production environments have been promising. One Reddit user <a href="https://www.reddit.com/r/singularity/comments/1ixd2gk/anthropics_claude_code_is_accelerating_software/" target="_blank" rel="noopener">shared</a> their experience:
 
@@ -100,44 +102,7 @@ Lastly, complete the one-time OAuth authentication with your Anthropic Console a
 
 For system requirements, see the <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview#system-requirements" target="_blank" rel="noopener">official documentation</a>.
 
-## AI Coding Assistant: Claude Code vs. Cursor vs. Aider
-
-Let's face it—AI coding assistants are becoming as essential for many developers. But how does Claude Code stack up against competitors like Cursor and Aider? Let's break it down.
-
-| Feature | Claude Code | Cursor | Aider |
-| ------- | ----------- | ------ | ----- |
-| **Interface** | Terminal-based CLI | Full IDE | Terminal-based CLI |
-| **Base Model** | Claude 3.7 Sonnet | GPT-4o and Claude models | Multiple LLMs (including Claude) |
-| **Setup Complexity** | Simple npm install | Traditional app install | Python package install |
-| **Cost Structure** | Usage-based pricing <br/>(~$5-40/day) | Subscription ($20/month) | Free + API costs |
-| **Best For** | Terminal power users, complex refactoring | IDE users, extensive coding sessions | Git-oriented developers, small edits |
-| **Response Time** | Moderate to slow | Fast | Moderate |
-
-### User Experience Comparison
-
-**Claude Code** offers a streamlined terminal experience for developers who prefer to stay in their command line. Its takes a permission-based approach to give you visibility into the actions being taken on your behalf.
-
-**Cursor**, on the other hand, provides a familiar IDE experience based on VSCode with deeply integrated AI features. The ability to chat within your development environment and instantly apply suggested changes creates a more fluid experience for long coding sessions. Its built-in code generation features often provide faster responses than CLI alternatives.
-
-**Aider** falls between these approaches. It has a Git-oriented CLI that excels at making targeted edits across multiple files. Its minimalist approach focuses on efficient code changes rather than extended conversations, ideal for quick fixes and iterative development.
-
-### Performance and Capability Comparison
-
-**Claude Code** can directly access Claude 3.7 Sonnet, giving it strong reasoning capabilities for complex refactoring tasks. It particularly shines when you need to understand large, unfamiliar codebases or implement architectural changes across multiple files.
-
-**Cursor** uses both GPT and Claude models with optimized prompting and fine-tuned responses for coding tasks. It can retain context between sessions and developers can create custom commands to make it more efficient for day-to-day. 
-
-**Aider**'s strength lies in its Git-oriented workflow. It's great for targeted changes that affect multiple files. Its commit-based approach naturally documents AI changes in your version control system, which can be valuable for team collaboration.
-
-### When to choose each tool
-
-- Choose **Claude Code** for terminal-based work with complex codebases and multi-file refactoring.
-- Choose **Cursor** for a full IDE experience with real-time AI assistance and faster response times.
-- Choose **Aider** for lightweight, Git-oriented workflows with support for multiple LLM backends.
-
-For many developers, using multiple tools for different scenarios may be the optimal approach. You might use Cursor for your day-to-day development, Claude Code for deep dives into unfamiliar code, and Aider for quick Git-tracked changes.
-
-## Claude Code's Security & Privacy 
+## Security & Privacy 
 
 Letting an AI tool access your codebase raises obvious security concerns. Claude Code tackles these with several key measures:
 
@@ -176,7 +141,7 @@ But as with anything else, the only way to find out is to try it—if you can ge
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="See Documentation"
-  secondaryButtonLink="https://docs.helicone.ai/"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/anthropic/javascript"
 />
 
 ---
