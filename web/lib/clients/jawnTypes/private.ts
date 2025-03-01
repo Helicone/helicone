@@ -53,6 +53,7 @@ export interface paths {
   };
   "/v2/experiment/{experimentId}": {
     get: operations["GetExperimentById"];
+    delete: operations["DeleteExperiment"];
   };
   "/v2/experiment/{experimentId}/prompt-version": {
     post: operations["CreateNewPromptVersionForExperiment"];
@@ -2493,6 +2494,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
+        };
+      };
+    };
+  };
+  DeleteExperiment: {
+    parameters: {
+      path: {
+        experimentId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

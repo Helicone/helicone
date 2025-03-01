@@ -9647,6 +9647,39 @@
 			}
 		},
 		"/v2/experiment/{experimentId}": {
+			"delete": {
+				"operationId": "DeleteExperiment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Experiment"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "experimentId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
 			"get": {
 				"operationId": "GetExperimentById",
 				"responses": {

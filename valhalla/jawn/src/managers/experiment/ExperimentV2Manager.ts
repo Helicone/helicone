@@ -110,7 +110,8 @@ export class ExperimentV2Manager extends BaseManager {
       const response = await supabaseServer.client
         .from("experiment_v3")
         .select("*")
-        .eq("organization", this.authParams.organizationId);
+        .eq("organization", this.authParams.organizationId)
+        .order("created_at", { ascending: false });
 
       return ok(response.data ?? []);
     } catch (e) {
@@ -126,6 +127,25 @@ export class ExperimentV2Manager extends BaseManager {
       .eq("organization", this.authParams.organizationId)
       .single();
     return experiment.data ?? null;
+  }
+
+  async deleteExperiment(experimentId: string): Promise<Result<null, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    const result = await supabaseServer.client
+      .from("experiment_v3")
+      .update({ soft_delete: true })
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId);
+
+    if (result.error) {
+      return err("Failed to delete experiment");
+    }
+
+    return ok(null);
   }
 
   // this query needs to be better imo
