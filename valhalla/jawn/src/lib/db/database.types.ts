@@ -758,6 +758,7 @@ export type Database = {
           name: string
           organization: string
           original_prompt_version: string
+          soft_delete: boolean
         }
         Insert: {
           copied_original_prompt_version?: string | null
@@ -767,6 +768,7 @@ export type Database = {
           name: string
           organization: string
           original_prompt_version: string
+          soft_delete?: boolean
         }
         Update: {
           copied_original_prompt_version?: string | null
@@ -776,6 +778,7 @@ export type Database = {
           name?: string
           organization?: string
           original_prompt_version?: string
+          soft_delete?: boolean
         }
         Relationships: [
           {
@@ -2932,14 +2935,6 @@ export type Database = {
             }
             Returns: boolean
           }
-      create_main_org: {
-        Args: {
-          user_id: string
-        }
-        Returns: {
-          organization_id: string
-        }[]
-      }
       date_count:
         | {
             Args: {
@@ -3245,7 +3240,7 @@ export type Database = {
         Args: {
           name: string
         }
-        Returns: unknown
+        Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
