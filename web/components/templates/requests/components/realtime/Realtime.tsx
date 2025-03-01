@@ -1,3 +1,9 @@
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { Buffer } from "buffer";
 import React, { useMemo, useState } from "react";
@@ -6,6 +12,7 @@ import {
   PiDownloadBold,
   PiFunctionBold,
   PiGearBold,
+  PiInfoBold,
   PiMicrophoneBold,
   PiPauseBold,
   PiPlayBold,
@@ -13,6 +20,7 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
+import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
 
 type MessageType =
   | "text"
@@ -23,7 +31,6 @@ type MessageType =
 
 interface RealtimeProps {
   mappedRequest: MappedLLMRequest;
-  realtimeMessageFilter?: string;
   messageIndexFilter?: {
     startIndex: number;
     endIndex?: number;
@@ -31,7 +38,6 @@ interface RealtimeProps {
 }
 export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
-  realtimeMessageFilter,
   messageIndexFilter,
 }) => {
   // Get all messages sorted by timestamp
@@ -95,9 +101,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return turns;
   }, [sortedMessages]);
 
-  // Filter messages based on the provided filters
+  // Filter messages based on the provided index filter
   const filteredMessages = useMemo(() => {
-    // If we have a message index filter, use that first
+    // If we have a message index filter, use that
     if (messageIndexFilter) {
       const { startIndex, endIndex } = messageIndexFilter;
 
@@ -128,34 +134,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
       }
     }
 
-    // Fall back to role-based filtering if no index filter or index filter is invalid
-    if (realtimeMessageFilter) {
-      return sortedMessages.filter((msg) => {
-        // For "user" filter, show user messages and session updates
-        if (realtimeMessageFilter === "user") {
-          return msg.role === "user" || getMessageType(msg) === "session";
-        }
-        // For "assistant" filter, show assistant messages, function calls/outputs
-        else if (realtimeMessageFilter === "assistant") {
-          return (
-            msg.role === "assistant" ||
-            msg._type === "functionCall" ||
-            msg._type === "function"
-          );
-        }
-        // If an unknown filter is provided, show all messages
-        return true;
-      });
-    }
-
     // If no filter, return all messages
     return sortedMessages;
-  }, [
-    sortedMessages,
-    realtimeMessageFilter,
-    messageIndexFilter,
-    conversationTurns,
-  ]);
+  }, [sortedMessages, messageIndexFilter, conversationTurns]);
 
   // Get information about the active filter for display
   const filterInfo = useMemo(() => {
@@ -178,15 +159,8 @@ export const Realtime: React.FC<RealtimeProps> = ({
       }
     }
 
-    if (realtimeMessageFilter) {
-      return {
-        type: "role",
-        role: realtimeMessageFilter,
-      };
-    }
-
     return null;
-  }, [messageIndexFilter, realtimeMessageFilter, conversationTurns]);
+  }, [messageIndexFilter, conversationTurns]);
 
   // Always get the last session update from all messages, not just filtered ones
   const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
@@ -203,54 +177,28 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return icons[type];
   };
 
+  console.log(filteredMessages);
+
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Filter Indicator */}
       {filterInfo && (
         <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
-          {filterInfo.type === "turn" ? (
-            <div className="flex flex-col gap-1">
-              <span className="font-medium">
-                Showing Conversation Turn{" "}
-                {filterInfo.turnIndex !== undefined
-                  ? filterInfo.turnIndex + 1
-                  : ""}
-              </span>
-              <span className="text-sm text-slate-500 dark:text-slate-400">
-                {filterInfo.role === "user" ? "User" : "Assistant"} turn with{" "}
-                {filterInfo.messageCount} message
-                {filterInfo.messageCount !== 1 ? "s" : ""}
-              </span>
-            </div>
-          ) : (
-            <div>
-              <span className="font-medium">
-                Showing {filterInfo.role === "user" ? "User" : "Assistant"}{" "}
-                messages
-              </span>
-              {filterInfo.role === "user" ? (
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {" "}
-                  (includes session configuration)
-                </span>
-              ) : (
-                <span className="text-sm text-slate-500 dark:text-slate-400">
-                  {" "}
-                  (includes function calls and outputs)
-                </span>
-              )}
-            </div>
-          )}
+          <div className="flex flex-col gap-1">
+            <span className="font-medium">
+              Showing Conversation Turn{" "}
+              {filterInfo.turnIndex !== undefined
+                ? filterInfo.turnIndex + 1
+                : ""}
+            </span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {filterInfo.role === "user" ? "User" : "Assistant"} turn with{" "}
+              {filterInfo.messageCount} message
+              {filterInfo.messageCount !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
       )}
-
-      {/* Header Section */}
-      {lastSessionUpdate &&
-        (!filterInfo ||
-          filterInfo.role === "user" ||
-          filterInfo.type === "turn") && (
-          <SessionHeader sessionData={lastSessionUpdate} />
-        )}
 
       {/* Messages Section */}
       <div className="gap-4">
@@ -261,6 +209,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
             ? new Date(message.timestamp).toLocaleTimeString()
             : null;
           const messageType = getMessageType(message);
+          console.log(messageType);
 
           return (
             <div
@@ -293,12 +242,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
                 <div
                   className={`rounded-lg p-3 ${
                     isUser
-                      ? `bg-blue-500 dark:bg-blue-700 text-white ${
+                      ? `${
                           messageType === "session" ||
-                          messageType === "functionCall" ||
-                          messageType === "functionOutput"
-                            ? "border-4 border-blue-400 dark:border-blue-600"
-                            : ""
+                          messageType === "functionCall"
+                            ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                            : messageType === "functionOutput"
+                            ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
+                            : "bg-blue-500 dark:bg-blue-700 text-white"
                         }`
                       : `bg-slate-100 dark:bg-slate-900 ${
                           messageType === "session" ||
@@ -310,11 +260,14 @@ export const Realtime: React.FC<RealtimeProps> = ({
                   }`}
                 >
                   {messageType === "functionCall" && message.tool_calls ? (
-                    <FunctionCallContent toolCalls={message.tool_calls} />
+                    <FunctionCallContent
+                      tool_call_id={message.tool_call_id}
+                      tool_call={message.tool_calls[0]}
+                    />
                   ) : messageType === "functionOutput" ? (
                     <FunctionOutputContent
-                      content={message.content || ""}
-                      toolCallId={message.tool_call_id}
+                      tool_call_id={message.tool_call_id}
+                      tool_call={message.tool_calls[0]}
                     />
                   ) : messageType === "session" ? (
                     <SessionUpdate content={message.content || ""} />
@@ -339,9 +292,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/*                           Session Features Header                          */
-/* -------------------------------------------------------------------------- */
+// Pill Styles
 type Pill = {
   type: string;
   label: string;
@@ -397,6 +348,9 @@ const getPillStyle = (type: string, label?: string) => {
   }
 };
 
+/* -------------------------------------------------------------------------- */
+/*                           Session Features Header                          */
+/* -------------------------------------------------------------------------- */
 type SessionUpdateData = {
   modalities?: string[];
   voice?: string;
@@ -416,82 +370,16 @@ const parseSessionUpdate = (
   }
 };
 
-interface SessionHeaderProps {
-  sessionData: SessionUpdateData;
-}
-const SessionHeader: React.FC<SessionHeaderProps> = ({ sessionData }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const pills: Pill[] = [
-    ...(sessionData.modalities?.map((m) => ({
-      type: "modality",
-      label: m,
-    })) || []),
-    ...(sessionData.voice ? [{ type: "voice", label: sessionData.voice }] : []),
-    ...(sessionData.tools?.map((t) => ({ type: "tool", label: t.name })) || []),
-  ];
-
-  return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 flex flex-col gap-4">
-      <div className="text-xs text-secondary uppercase tracking-wider">
-        Realtime Session Features
-      </div>
-
-      {/* Pills Section */}
-      {pills.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {pills.map(({ type, label }, idx) => {
-            const style = getPillStyle(type, label);
-            return (
-              <span
-                key={`${type}-${idx}`}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 ${style.className}`}
-              >
-                {style.icon}
-                {label}
-              </span>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Instructions Section */}
-      {sessionData.instructions && (
-        <div className="flex flex-col gap-2">
-          <div
-            className="flex items-center gap-2 cursor-pointer select-none hover:underline"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <span className="font-medium text-sm">Instructions</span>
-            <PiCaretDownBold
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
-            />
-          </div>
-          <div
-            className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-in-out ${
-              isExpanded ? "max-h-96 opacity-100" : "max-h-6 opacity-70"
-            }`}
-          >
-            <ReactMarkdown className="prose dark:prose-invert prose-sm text-secondary">
-              {sessionData.instructions}
-            </ReactMarkdown>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 /* -------------------------------------------------------------------------- */
-/*                         Special Message Components                         */
+/*                           Special: Session Update                          */
 /* -------------------------------------------------------------------------- */
 interface SessionUpdateProps {
   content: string;
 }
 const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
   const sessionData = parseSessionUpdate(content);
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!sessionData) {
     return <div className="whitespace-pre-wrap break-words">{content}</div>;
   }
@@ -514,93 +402,137 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
       pills:
         sessionData.tools?.map((t) => ({ type: "tool", label: t.name })) || [],
     },
-    {
-      label: "Instructions",
-      value: sessionData.instructions || null,
-    },
-  ].filter((item) => (item.pills && item.pills.length > 0) || item.value);
+  ].filter((item) => item.pills && item.pills.length > 0);
 
   return (
     <div className="flex flex-col divide-y divide-slate-300">
-      {items.map(({ label, pills, value }) => (
+      {items.map(({ label, pills }) => (
         <div key={label} className="flex flex-row justify-between gap-4 py-2">
           <span className="font-medium">{label}:</span>
-          {pills ? (
-            <div className="flex flex-wrap gap-1.5 justify-end">
-              {pills.map(({ type, label }, idx) => {
-                const { icon, className } = getPillStyle(type, label);
-                return (
-                  <span
-                    key={`${type}-${idx}`}
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${className}`}
-                  >
-                    {icon}
-                    {label}
-                  </span>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-slate-300 truncate max-w-[16rem]">{value}</p>
-          )}
+          <div className="flex flex-wrap gap-1.5 justify-end">
+            {pills.map(({ type, label }, idx) => {
+              const { icon, className } = getPillStyle(type, label);
+              return (
+                <span
+                  key={`${type}-${idx}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${className}`}
+                >
+                  {icon}
+                  {label}
+                </span>
+              );
+            })}
+          </div>
         </div>
       ))}
-    </div>
-  );
-};
 
-interface FunctionCallContentProps {
-  toolCalls: Array<{
-    name: string;
-    arguments: Record<string, any>;
-  }>;
-}
-const FunctionCallContent: React.FC<FunctionCallContentProps> = ({
-  toolCalls,
-}) => {
-  if (!toolCalls?.[0]) return null;
-  const { name, arguments: args } = toolCalls[0];
-
-  return (
-    <div className="font-mono">
-      <span className="text-yellow-500 dark:text-yellow-400">{name}</span>
-      {args && (
-        <span className="text-slate-600 dark:text-slate-300">
-          <span className="text-yellow-500 dark:text-yellow-400">{"("}</span>
-          {"{"}
-          {Object.entries(args).map(([key, value], i) => (
-            <span key={key}>
-              {i > 0 && ", "}
-              {key}:{" "}
-              {typeof value === "string" ? `"${value}"` : JSON.stringify(value)}
-            </span>
-          ))}
-          {"}"}
-          <span className="text-yellow-500 dark:text-yellow-400">{")"}</span>
-        </span>
+      {/* Instructions Section */}
+      {sessionData.instructions && (
+        <div className="flex flex-col gap-2 py-2">
+          <div
+            className="flex items-center gap-2 cursor-pointer select-none hover:underline"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <span className="font-medium">Instructions:</span>
+            <PiCaretDownBold
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+          <div
+            className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+              isExpanded ? "max-h-full opacity-100" : "max-h-6 opacity-70"
+            }`}
+          >
+            <ReactMarkdown className="prose dark:prose-invert prose-sm prose-headings:text-slate-50 prose-p:text-slate-200 prose-strong:text-white prose-em:text-slate-300 prose-li:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-blockquote:text-slate-300 prose-blockquote:border-slate-400 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
+              {sessionData.instructions}
+            </ReactMarkdown>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-interface FunctionOutputContentProps {
-  content: string;
-  toolCallId?: string;
+/* -------------------------------------------------------------------------- */
+/*                           Special: Function Call                           */
+/* -------------------------------------------------------------------------- */
+interface FunctionCallProps {
+  tool_call_id?: string;
+  tool_call: {
+    name: string;
+    arguments: Record<string, any>;
+  };
 }
-const FunctionOutputContent: React.FC<FunctionOutputContentProps> = ({
-  content,
-  toolCallId,
+const FunctionCallContent: React.FC<FunctionCallProps> = ({
+  tool_call_id,
+  tool_call,
 }) => {
+  if (!tool_call) return null;
+
   return (
-    <div className="font-mono break-all">
-      <span className="text-green-300 dark:text-green-400">
-        {toolCallId ? `(${toolCallId}) => ` : ""}
-      </span>
-      <span>{content}</span>
+    <div className="flex flex-col font-mono">
+      <div className="flex flex-row items-center gap-2">
+        {tool_call_id && (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger>
+                <PiInfoBold size={14} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-mono text-xs">{tool_call_id}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        <span className="text-yellow-500 dark:text-yellow-400">
+          {tool_call.name}
+        </span>
+      </div>
+
+      <div className="flex flex-row gap-2">
+        <span className="text-yellow-500 dark:text-yellow-400">{"("}</span>
+        {tool_call.arguments && (
+          <JsonRenderer data={tool_call.arguments} isExpanded={false} />
+        )}
+        <span className="text-yellow-500 dark:text-yellow-400">{")"}</span>
+      </div>
     </div>
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/*                          Special: Function Output                          */
+/* -------------------------------------------------------------------------- */
+interface FunctionOutputProps {
+  tool_call_id?: string;
+  tool_call: {
+    name?: string;
+    arguments: Record<string, any>;
+  };
+}
+const FunctionOutputContent: React.FC<FunctionOutputProps> = ({
+  tool_call_id,
+  tool_call,
+}) => {
+  if (!tool_call) return null;
+
+  return (
+    <div className="flex flex-col font-mono">
+      <div className="flex flex-row items-center gap-2">
+        <span className="text-green-400 dark:text-green-500">
+          {tool_call_id ? `${tool_call_id} =>` : ""}
+        </span>
+      </div>
+      <JsonRenderer data={tool_call.arguments} isExpanded={false} />
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                            Special: Audio Player                           */
+/* -------------------------------------------------------------------------- */
 interface AudioPlayerProps {
   audioData: string; // Base64 encoded audio data
   isUserMessage?: boolean; // Whether this is a user message (for styling)

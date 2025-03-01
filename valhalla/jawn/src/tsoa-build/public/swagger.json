@@ -2583,8 +2583,8 @@
 					"_type": {
 						"type": "string",
 						"enum": [
-							"function",
 							"functionCall",
+							"function",
 							"image",
 							"message",
 							"autoInput",

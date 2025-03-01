@@ -700,7 +700,7 @@ Json: JsonObject;
       role?: string;
       id?: string;
       /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray" | "audio";
+      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;

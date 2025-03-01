@@ -86,7 +86,7 @@ type RealtimeMessage = {
     modalities?: string[]; // ex: ["text", "audio"]
     instructions?: string;
     output?: {
-      type: string; // "message", "function_call", or "function_call_output"
+      type: "message" | "function_call" | "function_call_output";
       id: string; // ex: "item_AzRaB38BlG1R3MJ1Ddevm"
       object: string; // "ex: "realtime.item"
       // Message specific items
@@ -108,9 +108,12 @@ type RealtimeMessage = {
   // With type "conversation.item.create"
   item?: {
     type: string; // "function_call_output" or "message"
+    // For "function_call" and "function_call_output":
+    name?: string; //  ex: "get_weather" (only for "function_call")
     call_id?: string; // ex: "call_123"
     output?: string; // ex: '{"temperature": 72, "conditions": "sunny", "location": "San Francisco"}'
     content?: {
+      // For "message":
       type: string; // "input_audio" or other types
       text?: string; // For "input_text" type: Text input
       audio?: string; // For "input_audio" type: Base64 encoded audio
@@ -294,17 +297,18 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
           return null;
 
         case "conversation.item.create":
-          if (
-            item?.type === "function_call_output" &&
-            item.call_id &&
-            item.output
-          ) {
+          if (item?.type === "function_call_output" && item.output) {
             // -> Assistant: Function call output
             return {
               role: "user",
               _type: "function",
               tool_call_id: item.call_id,
-              content: item.output,
+              tool_calls: [
+                {
+                  name: undefined,
+                  arguments: JSON.parse(item.output),
+                },
+              ],
               timestamp: msg.timestamp,
             };
           }
