@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon, SquareArrowOutUpRight } from "lucide-react";
+import { ChevronDownIcon, SquareArrowOutUpRight, Trash2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
@@ -15,7 +15,14 @@ import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../../../shared/authHeader";
 import useNotification from "../../../../shared/notification/useNotification";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
-import { Dialog } from "../../../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import ExperimentsPreview from "@/components/templates/featurePreview/experimentsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
@@ -27,8 +34,12 @@ const ExperimentsPage = () => {
   const notification = useNotification();
   const { prompts } = usePrompts();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [experimentToDelete, setExperimentToDelete] = useState<string | null>(
+    null
+  );
   const router = useRouter();
-  const { experiments, isLoading } = useExperimentTables();
+  const { experiments, isLoading, deleteExperiment } = useExperimentTables();
   const org = useOrg();
   const hasAccess = useHasAccess("experiments");
   const { setNotification } = useNotification();
@@ -38,6 +49,20 @@ const ExperimentsPage = () => {
   if (isLoading) {
     return <LoadingAnimation title="Loading Experiments" />;
   }
+
+  const handleDeleteExperiment = async () => {
+    if (!experimentToDelete) return;
+
+    try {
+      await deleteExperiment.mutateAsync(experimentToDelete);
+      setNotification("Experiment deleted successfully", "success");
+    } catch (error) {
+      setNotification("Failed to delete experiment", "error");
+    } finally {
+      setDeleteDialogOpen(false);
+      setExperimentToDelete(null);
+    }
+  };
 
   return (
     <>
@@ -89,6 +114,33 @@ const ExperimentsPage = () => {
           prompts={prompts as any}
           onDialogClose={() => setDialogOpen(false)}
         />
+      </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Experiment</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Once deleted, this experiment cannot be recovered. Do you want to
+            delete it?
+          </DialogDescription>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteExperiment}
+              disabled={deleteExperiment.isLoading}
+            >
+              {deleteExperiment.isLoading ? "Deleting..." : "Yes, delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       {org?.currentOrg?.tier === "free" ? (
@@ -174,6 +226,25 @@ const ExperimentsPage = () => {
                 accessorFn: (row) => {
                   return new Date(row.created_at ?? 0).toLocaleString();
                 },
+              },
+              {
+                header: "",
+                accessorKey: "actions",
+                cell: ({ row }) => (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExperimentToDelete(row.original.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                ),
+                enableSorting: false,
+                size: 10,
               },
             ]}
             defaultData={experiments}
