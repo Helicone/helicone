@@ -721,7 +721,7 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative group",
+                                  "p-0 border-r border-slate-200 dark:border-slate-800 h-full relative group",
                                   "w-full max-w-0",
                                   cell.column.getIsLastColumn() && "border-r-0",
                                   (table.getIsSomeRowsSelected() ||
