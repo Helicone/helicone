@@ -738,6 +738,17 @@ export class PromptManager extends BaseManager {
       );
     }
 
+    const createPromptInputKeysResult = await this.createPromptInputKeys(
+      insertVersionResult.data[0].id,
+      JSON.stringify(params.prompt)
+    );
+
+    if (createPromptInputKeysResult.error) {
+      return err(
+        `Failed to create prompt input keys: ${createPromptInputKeysResult.error}`
+      );
+    }
+
     return ok({
       id: promptId,
       prompt_version_id: insertVersionResult.data[0].id,
@@ -816,11 +827,16 @@ export class PromptManager extends BaseManager {
 
       // Helper function to find keys in a string
       const findKeys = (str: string): string[] => {
-        const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+        const regex = /<helicone-prompt-input key=\\?"([^"]+)\\?"\s*\/>/g;
         const matches = str.match(regex);
         return matches
           ? matches.map((match) =>
-              match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+              match
+                .replace(
+                  /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
+                  "$1"
+                )
+                .replace(/\\/g, "")
             )
           : [];
       };
