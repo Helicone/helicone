@@ -111,6 +111,7 @@ export class ExperimentV2Manager extends BaseManager {
         .from("experiment_v3")
         .select("*")
         .eq("organization", this.authParams.organizationId)
+        .eq("soft_delete", false)
         .order("created_at", { ascending: false });
 
       return ok(response.data ?? []);
