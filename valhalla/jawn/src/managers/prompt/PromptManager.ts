@@ -372,6 +372,38 @@ export class PromptManager extends BaseManager {
     return ok(null);
   }
 
+  async removePromptVersionFromExperiment(
+    promptVersionId: string,
+    experimentId: string
+  ): Promise<Result<null, string>> {
+    const promptVersion = await this.getPromptVersion({
+      promptVersionId,
+    });
+
+    if (
+      promptVersion.error ||
+      !promptVersion.data ||
+      promptVersion.data.length === 0
+    ) {
+      return err(`Failed to get prompt version: ${promptVersion.error}`);
+    }
+
+    const result = await dbExecute(
+      `
+    UPDATE prompts_versions
+    SET experiment_id = null
+    WHERE id = $1 AND organization = $2 AND experiment_id = $3
+    `,
+      [promptVersionId, this.authParams.organizationId, experimentId]
+    );
+
+    if (result.error) {
+      return err(`Failed to delete prompt version: ${result.error}`);
+    }
+
+    return ok(null);
+  }
+
   async getPromptVersions(
     filter: FilterNode,
     includeExperimentVersions: boolean = false

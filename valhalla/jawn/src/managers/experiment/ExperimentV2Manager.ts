@@ -258,7 +258,6 @@ export class ExperimentV2Manager extends BaseManager {
       return ok({
         ...experiment.data,
         rows: rows.data,
-        // prompt_versions: promptVersions.data ?? [],
       });
     } catch (e) {
       return err("Failed to get experiment");
@@ -368,6 +367,26 @@ export class ExperimentV2Manager extends BaseManager {
     } catch (e) {
       return err("Failed to create new prompt version for experiment");
     }
+  }
+
+  async deletePromptVersion(
+    experimentId: string,
+    promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("You do not have access to this experiment");
+    }
+
+    const promptManager = new PromptManager(this.authParams);
+    const result = await promptManager.removePromptVersionFromExperiment(
+      promptVersionId,
+      experimentId
+    );
+    if (result.error) {
+      return err("Failed to delete prompt version");
+    }
+    return ok(null);
   }
 
   async getPromptVersionsForExperiment(
