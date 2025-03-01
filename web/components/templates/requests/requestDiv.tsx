@@ -15,12 +15,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePrompt } from "../../../services/hooks/prompts/prompts";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
 import RequestRow from "./requestRow";
+import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
   open: boolean;

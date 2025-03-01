@@ -40,6 +40,8 @@ export const PROVIDER_MODELS = {
     name: "Google",
     openrouterDirectory: "google",
     models: [
+      "gemini-2.0-flash-lite-001",
+      "gemini-2.0-flash-001",
       "gemini-flash-1.5",
       "gemini-flash-1.5-8b",
       "gemini-pro-1.5",
