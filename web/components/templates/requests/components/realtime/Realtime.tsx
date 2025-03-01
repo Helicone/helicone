@@ -1,3 +1,4 @@
+import GlassHeader from "@/components/shared/universal/GlassHeader";
 import {
   Tooltip,
   TooltipContent,
@@ -33,7 +34,7 @@ interface RealtimeProps {
   mappedRequest: MappedLLMRequest;
   messageIndexFilter?: {
     startIndex: number;
-    endIndex?: number;
+    endIndex: number;
   };
 }
 export const Realtime: React.FC<RealtimeProps> = ({
@@ -66,66 +67,28 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return "text";
   };
 
-  // Get conversation turns - sequences of messages grouped by role changes
-  const conversationTurns = useMemo(() => {
-    const turns: any[][] = [];
-    let currentTurn: any[] = [];
-    let currentRole = "";
-
-    sortedMessages.forEach((message) => {
-      // Skip messages without roles (they won't form turns)
-      if (!message.role) return;
-
-      // If role changes or this is the first message, start a new turn
-      if (
-        currentRole !== message.role ||
-        currentRole === "" ||
-        turns.length === 0
-      ) {
-        if (currentTurn.length > 0) {
-          turns.push(currentTurn);
-        }
-        currentTurn = [message];
-        currentRole = message.role;
-      } else {
-        // Continue current turn with same role
-        currentTurn.push(message);
-      }
-    });
-
-    // Add the last turn if not empty
-    if (currentTurn.length > 0) {
-      turns.push(currentTurn);
-    }
-
-    return turns;
-  }, [sortedMessages]);
-
   // Filter messages based on the provided index filter
   const filteredMessages = useMemo(() => {
     // If we have a message index filter, use that
     if (messageIndexFilter) {
       const { startIndex, endIndex } = messageIndexFilter;
 
-      // Filter by conversation turn index
+      // Filter by message index
       if (typeof startIndex === "number") {
         // Safety check for index out of bounds
-        if (startIndex >= 0 && startIndex < conversationTurns.length) {
-          // If we have both start and end index, get that range of turns
+        if (startIndex >= 0 && startIndex < sortedMessages.length) {
+          // If we have both start and end index, get that range of messages
           if (typeof endIndex === "number" && endIndex >= startIndex) {
-            const safeEndIndex = Math.min(
-              endIndex,
-              conversationTurns.length - 1
-            );
-            return conversationTurns.slice(startIndex, safeEndIndex + 1).flat();
+            const safeEndIndex = Math.min(endIndex, sortedMessages.length - 1);
+            return sortedMessages.slice(startIndex, safeEndIndex + 1);
           }
 
-          // Otherwise just get the single turn at startIndex
-          return conversationTurns[startIndex] || [];
+          // Otherwise just get the single message at startIndex
+          return [sortedMessages[startIndex]];
         } else {
           console.warn(
-            `Turn index ${startIndex} is out of range (0-${
-              conversationTurns.length - 1
+            `Message index ${startIndex} is out of range (0-${
+              sortedMessages.length - 1
             })`
           );
           // Fall back to showing all messages if index is out of range
@@ -136,7 +99,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
     // If no filter, return all messages
     return sortedMessages;
-  }, [sortedMessages, messageIndexFilter, conversationTurns]);
+  }, [sortedMessages, messageIndexFilter]);
 
   // Get information about the active filter for display
   const filterInfo = useMemo(() => {
@@ -144,23 +107,19 @@ export const Realtime: React.FC<RealtimeProps> = ({
       messageIndexFilter &&
       typeof messageIndexFilter.startIndex === "number"
     ) {
-      const turnIndex = messageIndexFilter.startIndex;
-      const turn = conversationTurns[turnIndex];
+      const startIndex = messageIndexFilter.startIndex;
+      const endIndex = messageIndexFilter.endIndex;
 
-      if (turn) {
-        const roleMessage = turn.find((msg: any) => msg.role);
-        const role = roleMessage?.role || "unknown";
-        return {
-          type: "turn",
-          turnIndex,
-          role,
-          messageCount: turn.length,
-        };
-      }
+      // Simple filter info that just shows the index range
+      return {
+        startIndex,
+        endIndex,
+        isFiltered: true,
+      };
     }
 
     return null;
-  }, [messageIndexFilter, conversationTurns]);
+  }, [messageIndexFilter]);
 
   // Always get the last session update from all messages, not just filtered ones
   const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
@@ -177,27 +136,21 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return icons[type];
   };
 
-  console.log(filteredMessages);
-
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
       {/* Filter Indicator */}
       {filterInfo && (
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
-          <div className="flex flex-col gap-1">
-            <span className="font-medium">
-              Showing Conversation Turn{" "}
-              {filterInfo.turnIndex !== undefined
-                ? filterInfo.turnIndex + 1
-                : ""}
-            </span>
-            <span className="text-sm text-slate-500 dark:text-slate-400">
-              {filterInfo.role === "user" ? "User" : "Assistant"} turn with{" "}
-              {filterInfo.messageCount} message
-              {filterInfo.messageCount !== 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
+        <GlassHeader className="h-14 px-4 flex-shrink-0">
+          <h2 className="text-secondary underline">
+            {filterInfo.endIndex !== undefined
+              ? filterInfo.endIndex - filterInfo.startIndex === 0
+                ? `Highlighting message ${filterInfo.startIndex + 1}`
+                : `Highlighting messages ${filterInfo.startIndex + 1} through ${
+                    filterInfo.endIndex + 1
+                  }`
+              : `Highlighting message ${filterInfo.startIndex + 1}`}
+          </h2>
+        </GlassHeader>
       )}
 
       {/* Messages Section */}
@@ -214,7 +167,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
           return (
             <div
               key={`${idx}-${message.timestamp}`}
-              className={`flex flex-col ${
+              className={`flex flex-col px-4 pb-4 ${
                 isUser ? "items-end" : "items-start"
               } mb-4 w-full`}
             >
@@ -264,7 +217,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
                       tool_call_id={message.tool_call_id}
                       tool_call={message.tool_calls[0]}
                     />
-                  ) : messageType === "functionOutput" ? (
+                  ) : messageType === "functionOutput" && message.tool_calls ? (
                     <FunctionOutputContent
                       tool_call_id={message.tool_call_id}
                       tool_call={message.tool_calls[0]}
@@ -292,12 +245,6 @@ export const Realtime: React.FC<RealtimeProps> = ({
   );
 };
 
-// Pill Styles
-type Pill = {
-  type: string;
-  label: string;
-  modality?: string;
-};
 const getPillStyle = (type: string, label?: string) => {
   // Special handling for modalities
   if (type === "modality") {

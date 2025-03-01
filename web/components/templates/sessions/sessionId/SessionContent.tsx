@@ -180,7 +180,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           {realtimeData.isRealtime && (
             <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
               <PiBroadcastBold className="h-4 w-4" />
-              Realtime Sessions reconstruct a timeline using approximate
+              Realtime Sessions reconstruct a timeline using connection
               timestamps.
             </div>
           )}

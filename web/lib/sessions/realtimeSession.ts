@@ -60,79 +60,30 @@ export const getRealtimeSimulatedRequests = (
     );
   });
 
-  // First, identify all conversation turns (to get consistent turn indexing)
-  const turns: Message[][] = [];
-  let currentTurn: Message[] = [];
-  let currentRole = "";
-
-  sortedMessages.forEach((message) => {
-    // Skip messages without roles completely (they won't form turns)
-    if (!message.role) return;
-
-    // If role changes or this is the first message, start a new turn
-    if (
-      currentRole !== message.role ||
-      currentRole === "" ||
-      turns.length === 0
-    ) {
-      if (currentTurn.length > 0) {
-        turns.push(currentTurn);
-      }
-      currentTurn = [message];
-      currentRole = message.role;
-    } else {
-      // Continue current turn
-      currentTurn.push(message);
-    }
-  });
-
-  // Add the last turn
-  if (currentTurn.length > 0) {
-    turns.push(currentTurn);
-  }
-
-  // Now create simulated requests based on these turns
-  const simulatedRequests: HeliconeRequest[] = [];
-
-  turns.forEach((turnMessages, turnIndex) => {
-    // Create a simulated request for each turn
-    // Include all previous messages as context
-    const previousMessages =
-      turnIndex > 0
-        ? sortedMessages.slice(0, sortedMessages.indexOf(turnMessages[0]))
-        : [];
-
-    simulatedRequests.push(
-      createSimulatedRequest(
-        realtimeRequest,
-        turnMessages,
-        previousMessages,
-        turnIndex // Use the sequential turn index
-      )
-    );
-  });
-
-  return simulatedRequests;
+  // Create a simulated request for each message
+  return sortedMessages
+    .filter((message) => message.role) // Only include messages with roles
+    .map((message, index) => {
+      return createSimulatedRequest(realtimeRequest, message, index);
+    });
 };
 
 /**
- * Creates a simulated request from a collection of messages in the same turn
+ * Creates a simulated request from a single message
  */
 function createSimulatedRequest(
   originalRequest: HeliconeRequest,
-  turnMessages: Message[],
-  previousMessages: Message[],
-  turnIndex: number
+  message: Message,
+  messageIndex: number
 ): HeliconeRequest {
-  // Create an id for the simulated request based on timestamp and turn index
-  const timestamp =
-    turnMessages[0].timestamp || originalRequest.request_created_at;
+  // Create an id for the simulated request based on timestamp and message index
+  const timestamp = message.timestamp || originalRequest.request_created_at;
   const simulatedId = `${originalRequest.request_id}-${new Date(
     timestamp
-  ).getTime()}-${turnIndex}`;
+  ).getTime()}-${messageIndex}`;
 
   // Determine if this is a user or assistant message
-  const isUser = turnMessages[0].role === "user";
+  const isUser = message.role === "user";
 
   // Create the simulated request object
   return {
@@ -143,11 +94,11 @@ function createSimulatedRequest(
     // Set content based on whether it's a user or assistant message
     request_body: {
       ...originalRequest.request_body,
-      messages: isUser ? [] : previousMessages,
+      messages: isUser ? [] : [message],
     },
     response_body: {
       ...originalRequest.response_body,
-      messages: isUser ? turnMessages : [],
+      messages: isUser ? [message] : [],
     },
     // Add a property to identify this as a simulated realtime request
     properties: {
@@ -155,7 +106,7 @@ function createSimulatedRequest(
       _helicone_simulated_realtime: "true",
       _helicone_realtime_role: isUser ? "user" : "assistant",
       _helicone_realtime_timestamp: timestamp,
-      _helicone_realtime_turn_index: turnIndex.toString(),
+      _helicone_realtime_message_index: messageIndex.toString(),
     },
   };
 }
