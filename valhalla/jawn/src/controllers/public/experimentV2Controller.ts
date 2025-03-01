@@ -266,6 +266,20 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Delete("/{experimentId}/prompt-version/{promptVersionId}")
+  public async deletePromptVersion(
+    @Path() experimentId: string,
+    @Path() promptVersionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deletePromptVersion(
+      experimentId,
+      promptVersionId
+    );
+    return result;
+  }
+
   @Get("/{experimentId}/prompt-versions")
   public async getPromptVersionsForExperiment(
     @Path() experimentId: string,

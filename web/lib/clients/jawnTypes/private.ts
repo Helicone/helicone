@@ -57,6 +57,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/prompt-version": {
     post: operations["CreateNewPromptVersionForExperiment"];
   };
+  "/v2/experiment/{experimentId}/prompt-version/{promptVersionId}": {
+    delete: operations["DeletePromptVersion"];
+  };
   "/v2/experiment/{experimentId}/prompt-versions": {
     get: operations["GetPromptVersionsForExperiment"];
   };
@@ -2517,6 +2520,21 @@ export interface operations {
       };
     };
   };
+  DeletePromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   GetPromptVersionsForExperiment: {
     parameters: {
       path: {
@@ -3238,21 +3256,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  DeletePromptVersion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

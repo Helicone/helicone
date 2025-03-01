@@ -118,6 +118,9 @@ export interface paths {
   "/v2/experiment/{experimentId}/prompt-version": {
     post: operations["CreateNewPromptVersionForExperiment"];
   };
+  "/v2/experiment/{experimentId}/prompt-version/{promptVersionId}": {
+    delete: operations["DeletePromptVersion"];
+  };
   "/v2/experiment/{experimentId}/prompt-versions": {
     get: operations["GetPromptVersionsForExperiment"];
   };
@@ -2877,6 +2880,7 @@ export interface operations {
   DeletePromptVersion: {
     parameters: {
       path: {
+        experimentId: string;
         promptVersionId: string;
       };
     };

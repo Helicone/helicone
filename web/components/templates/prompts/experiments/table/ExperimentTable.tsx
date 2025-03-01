@@ -96,6 +96,7 @@ export function ExperimentTable({
     inputKeysData,
     wrapText,
     deleteSelectedRows,
+    deletePromptVersion,
   } = useExperimentTable(experimentTableId);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -280,6 +281,15 @@ export function ExperimentTable({
                 pv.metadata?.label
                   ? `${pv.metadata?.label}`
                   : `v${pv.major_version}.${pv.minor_version}`
+              }
+              onDeleteColumn={
+                pv.id !== experimentTableQuery?.copied_original_prompt_version
+                  ? () => {
+                      deletePromptVersion.mutate({
+                        promptVersionId: pv.id,
+                      });
+                    }
+                  : undefined
               }
               onForkColumn={() => {
                 setExternallySelectedForkFromPromptVersionId(pv.id);
