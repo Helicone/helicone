@@ -13,7 +13,7 @@ const openai = new OpenAI({
   baseURL: "http://localhost:8787/v1",
   defaultHeaders: {
     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-User-Id": "qa-wolf",
+    "Helicone-User-Id": "qa-wolf2",
   },
 });
 

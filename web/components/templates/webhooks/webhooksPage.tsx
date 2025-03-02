@@ -7,11 +7,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { getUSDateFromString } from "../../shared/utils/utils";
+import { getUSDateFromString, getUSDate } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
 
 // Import ShadcnUI components
@@ -36,7 +36,8 @@ import {
 } from "@/components/ui/tooltip";
 import { PiWebhooksLogo } from "react-icons/pi";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { ExternalLinkIcon } from "lucide-react";
+import { ExternalLinkIcon, XIcon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface WebhooksPageProps {
   user: User;
@@ -51,10 +52,39 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const [webhookError, setWebhookError] = useState<string | undefined>(
     undefined
   );
+  const [showChangelogBanner, setShowChangelogBanner] = useState(true);
 
   const [visibleHmacKeys, setVisibleHmacKeys] = useState<
     Record<string, boolean>
   >({});
+
+  // Check if the banner should be shown (within one week of the current date)
+  useEffect(() => {
+    const bannerKey = "webhooks_changelog_banner_dismissed";
+    const bannerDismissed = localStorage.getItem(bannerKey);
+
+    if (bannerDismissed) {
+      setShowChangelogBanner(false);
+    } else {
+      // Set a timeout to auto-dismiss after one week
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+
+      const timeUntilDismiss = oneWeekFromNow.getTime() - new Date().getTime();
+
+      const timerId = setTimeout(() => {
+        setShowChangelogBanner(false);
+        localStorage.setItem(bannerKey, "true");
+      }, timeUntilDismiss);
+
+      return () => clearTimeout(timerId);
+    }
+  }, []);
+
+  const dismissChangelogBanner = () => {
+    setShowChangelogBanner(false);
+    localStorage.setItem("webhooks_changelog_banner_dismissed", "true");
+  };
 
   const {
     data: webhooks,
@@ -320,6 +350,40 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           isWithinIsland={true}
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
+
+        {showChangelogBanner && (
+          <div className="mx-8">
+            <Alert className="bg-sky-50 border-sky-200 text-sky-800 relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-normal text-sky-600">
+                    {getUSDate(new Date())}
+                  </span>
+                  <span className="text-sky-600 font-normal">|</span>
+                  <AlertDescription className="text-sm">
+                    <span className="font-semibold">Webhook Update:</span>{" "}
+                    We&apos;ve added user_id to webhook payloads.{" "}
+                    <a
+                      href="https://github.com/Helicone/helicone/compare/main"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-600 hover:text-sky-800 underline"
+                    >
+                      View the PR diff
+                    </a>
+                  </AlertDescription>
+                </div>
+                <button
+                  onClick={dismissChangelogBanner}
+                  className="text-sky-500 hover:text-sky-700"
+                  aria-label="Dismiss"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </Alert>
+          </div>
+        )}
 
         <div className="flex justify-between items-center mx-8 mb-2">
           <Button
