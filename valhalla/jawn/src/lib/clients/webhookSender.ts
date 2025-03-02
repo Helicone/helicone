@@ -12,6 +12,7 @@ export type WebhookPayload = {
       bodyUrl?: string; // S3 URL for the request body
       model?: string;
       provider?: string;
+      user_id?: string; // Add user_id at the request level
     };
     response: {
       body: string;
@@ -28,6 +29,23 @@ export type WebhookPayload = {
   };
   webhook: Database["public"]["Tables"]["webhooks"]["Row"];
   orgId: string;
+};
+
+type WebhookData = {
+  request_id: string;
+  request_body: string;
+  response_body: string;
+  user_id?: string;
+  request_response_url?: string;
+  model?: string;
+  provider?: string;
+  metadata?: {
+    cost?: number;
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+    latencyMs?: number;
+  };
 };
 
 export async function sendToWebhook(
@@ -77,15 +95,20 @@ export async function sendToWebhook(
         : body;
 
     // Create the base webhook payload
-    let webHookPayloadObj: any = {
+    const webHookPayloadObj: WebhookData = {
       request_id: payload.request.id,
       request_body: truncateBody(payload.request.body),
       response_body: truncateBody(payload.response.body),
     };
 
+    // Add user_id if available
+    if (payload.request.user_id) {
+      webHookPayloadObj.user_id = payload.request.user_id;
+    }
+
     // Add additional data if includeData is true
     if (includeData) {
-      // Add S3 URL if available - note that this URL contains both request and response data
+      // Add S3 URL if available - this URL contains both request and response data
       if (payload.request.bodyUrl) {
         webHookPayloadObj.request_response_url = payload.request.bodyUrl;
       }

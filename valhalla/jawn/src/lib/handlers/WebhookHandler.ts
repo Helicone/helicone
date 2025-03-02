@@ -96,6 +96,7 @@ export class WebhookHandler extends AbstractLogHandler {
             provider: includeData
               ? context.message.log.request.provider
               : undefined,
+            user_id: context.message.log.request.userId,
           },
           response: {
             body: context.processedLog.response.body,
@@ -140,10 +141,15 @@ export class WebhookHandler extends AbstractLogHandler {
     await Promise.all(
       this.webhookPayloads.map(async (webhookPayload) => {
         try {
-          return await sendToWebhook(
+          // Ensure we're sending the most up-to-date data
+          const result = await sendToWebhook(
             webhookPayload.payload,
             webhookPayload.webhook
           );
+
+          if (result.error) {
+            console.error("Error sending webhook:", result.error);
+          }
         } catch (error: any) {
           Sentry.captureException(error, {
             tags: {

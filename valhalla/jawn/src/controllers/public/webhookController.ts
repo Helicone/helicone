@@ -12,17 +12,8 @@ import {
 } from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import {
-  Eval,
-  EvalManager,
-  ScoreDistribution,
-} from "../../managers/eval/EvalManager";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-
-import { KVCache } from "../../lib/cache/kvCache";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 import crypto from "crypto";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface WebhookData {
   destination: string;
