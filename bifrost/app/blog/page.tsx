@@ -83,7 +83,7 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
   return (
     <Link
       id="regular"
-      className="flex flex-col gap-4 md:gap-6 p-2 md:p-5 w-full bg-white hover:bg-sky-50 border border-transparent hover:border-sky-100 rounded-xl pb-4 md:pb-6 transition-all duration-300"
+      className="flex flex-col gap-4 md:gap-6 p-2 md:p-4 w-full bg-white hover:bg-sky-50 border border-transparent hover:border-sky-100 rounded-xl pb-4 md:pb-6 transition-all duration-300"
       href={blog.href}
     >
       <div className="overflow-hidden rounded-xl relative group aspect-[16/9] w-full">
