@@ -166,7 +166,7 @@ export default async function Home({
                         <img
                           src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
                           alt={`${author}'s headshot`}
-                          className="w-8 h-8 rounded-full hidden md:block"
+                          className="w-8 h-8 rounded-full"
                         />
                         <span className="text-slate-500 text-sm font-medium">
                           {author}
