@@ -83,22 +83,12 @@ export default async function Home({
                       <div className="text-slate-700 text-sm font-medium">
                         {author}
                       </div>
-                      {i === 0 && (
-                        <div className="flex flex-col mt-0.5">
-                          <span className="text-slate-500 text-xs">
-                            {String(metadata.date)}
-                          </span>
-                          <span className="text-slate-500 text-xs">
-                            {String(metadata.time)}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 <img
                   src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
                   alt={`${metadata.author}'s headshot`}
@@ -107,14 +97,6 @@ export default async function Home({
                 <div>
                   <div className="text-slate-700 text-sm font-medium">
                     {metadata.author}
-                  </div>
-                  <div className="flex flex-col mt-0.5">
-                    <span className="text-slate-500 text-xs">
-                      {String(metadata.date)}
-                    </span>
-                    <span className="text-slate-500 text-xs">
-                      {String(metadata.time)}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -154,6 +136,14 @@ export default async function Home({
         </div>
         <article className="prose w-full h-full">
           <h1 className="text-bold text-sky-500">{String(metadata.title)}</h1>
+
+          {/* Desktop date display */}
+          <div className="hidden md:flex items-center gap-2 -mt-4 mb-8">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 text-sm font-medium">{String(metadata.date)}</span>
+              <span className="text-slate-400 text-sm font-medium"> · {String(metadata.time)}</span>
+            </div>
+          </div>
 
           {/* Mobile view for author info */}
           <div className="flex md:hidden items-center gap-2 -mt-8 -mb-6">
