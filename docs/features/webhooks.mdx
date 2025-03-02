@@ -72,3 +72,59 @@ export default async function handler(
   return res.status(200).json({ message: "Webhook received" });
 }
 ```
+
+## Webhook Configuration
+
+When setting up a webhook, you can configure the following options:
+
+1. **Destination URL**: The URL where webhook payloads will be sent.
+2. **Sample Rate**: Control what percentage of requests trigger webhooks (0-100%).
+3. **Property Filters**: Only send webhooks for requests with specific properties.
+4. **Include Data**: Toggle whether to include additional data like costs and S3 links (enabled by default).
+
+### Standard Webhook Payload
+
+By default, webhooks send a minimal payload with just the request ID and truncated request/response bodies:
+
+```json
+{
+  "request_id": "uuid-string",
+  "request_body": "request-body-string",
+  "response_body": "response-body-string"
+}
+```
+
+### Enhanced Webhook Payload
+
+When the `includeData` option is enabled, webhooks include additional useful information:
+
+```json
+{
+  "request_id": "uuid-string",
+  "request_body": "request-body-string",
+  "response_body": "response-body-string",
+  "request_body_url": "https://s3-url-to-full-request-body",
+  "response_body_url": "https://s3-url-to-full-response-body",
+  "model": "gpt-4",
+  "provider": "openai",
+  "metadata": {
+    "cost": 0.0123,
+    "promptTokens": 150,
+    "completionTokens": 50,
+    "totalTokens": 200,
+    "latencyMs": 1200
+  }
+}
+```
+
+The enhanced payload provides:
+
+- **S3 URLs**: Direct links to the full request and response bodies
+- **Model Information**: The model and provider used
+- **Cost Data**: Calculated cost based on token usage
+- **Token Counts**: Prompt, completion, and total token counts
+- **Latency**: Request-to-response time in milliseconds
+
+This additional data makes it easier to track costs and analyze performance without making additional API calls.
+
+## Webhook Security

@@ -5,15 +5,24 @@ import { FeatureFlagStore } from "../stores/FeatureFlagStore";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import { S3Client } from "../shared/db/s3Client";
+import { modelCost } from "../../packages/cost/costCalc";
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
-
+  private s3Client: S3Client;
   private webhookPayloads: WebhookPayload[] = [];
 
   constructor(webhookStore: WebhookStore) {
     super();
     this.webhookStore = webhookStore;
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
   }
 
   async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -30,16 +39,69 @@ export class WebhookHandler extends AbstractLogHandler {
     }
 
     for (const webhook of webhooks.data ?? []) {
+      // Check if we should include additional data
+      const includeData = (webhook.config as any)?.["includeData"] !== false;
+
+      // Calculate cost if needed
+      let metadata = undefined;
+      if (includeData) {
+        const model =
+          context.processedLog.model ?? context.processedLog.request.model;
+
+        if (model && context.usage) {
+          const promptTokens = context.usage.promptTokens || 0;
+          const completionTokens = context.usage.completionTokens || 0;
+          const totalTokens =
+            context.usage.totalTokens || promptTokens + completionTokens;
+
+          // Calculate cost using the costCalc module
+          const cost = modelCost({
+            provider: context.message.log.request.provider || "openai",
+            model: model,
+            sum_prompt_tokens: promptTokens,
+            prompt_cache_write_tokens:
+              context.usage.promptCacheWriteTokens || 0,
+            prompt_cache_read_tokens: context.usage.promptCacheReadTokens || 0,
+            sum_completion_tokens: completionTokens,
+            sum_tokens: totalTokens,
+          });
+
+          // Calculate latency
+          let latencyMs = context.message.log.response.delayMs;
+
+          metadata = {
+            cost,
+            promptTokens,
+            completionTokens,
+            totalTokens,
+            latencyMs,
+          };
+        }
+      }
+
       this.webhookPayloads.push({
         payload: {
           request: {
             id: context.message.log.request.id,
             body: context.processedLog.request.body,
+            bodyUrl: includeData
+              ? await this.getSignedUrl(context.message.log.request.id, orgId)
+              : undefined,
+            model: includeData
+              ? context.processedLog.model ?? context.processedLog.request.model
+              : undefined,
+            provider: includeData
+              ? context.message.log.request.provider
+              : undefined,
           },
           response: {
             body: context.processedLog.response.body,
+            bodyUrl: includeData
+              ? await this.getSignedUrl(context.message.log.request.id, orgId)
+              : undefined,
           },
           properties: context.processedLog.request.properties ?? {},
+          metadata: includeData ? metadata : undefined,
         },
         webhook: webhook,
         orgId,
@@ -47,6 +109,25 @@ export class WebhookHandler extends AbstractLogHandler {
     }
 
     return await super.handle(context);
+  }
+
+  private async getSignedUrl(
+    requestId: string,
+    orgId: string
+  ): Promise<string | undefined> {
+    try {
+      const result = await this.s3Client.getRequestResponseBodySignedUrl(
+        orgId,
+        requestId
+      );
+      return result.data || undefined;
+    } catch (error) {
+      console.error(
+        `Error getting signed URL for request ${requestId}:`,
+        error
+      );
+      return undefined;
+    }
   }
 
   async handleResults(): PromiseGenericResult<string> {

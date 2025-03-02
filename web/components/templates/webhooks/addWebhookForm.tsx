@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
 import { ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
 import { useState } from "react";
@@ -34,6 +35,7 @@ interface AddWebhookFormProps {
       sampleRate: number;
       propertyFilters: { key: string; value: string }[];
     };
+    includeData: boolean;
   }) => void;
   isLoading: boolean;
 }
@@ -42,6 +44,7 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
   const { onSubmit, isLoading } = props;
   const [destination, setDestination] = useState("");
   const [sampleRate, setSampleRate] = useState(100);
+  const [includeData, setIncludeData] = useState(true);
   const [propertyFilters, setPropertyFilters] = useState<
     { key: string; value: string }[]
   >([]);
@@ -103,6 +106,22 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
               variant="secondary"
               onValueChange={(value) => setSampleRate(value[0])}
             />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="include-data"
+                checked={includeData}
+                onCheckedChange={setIncludeData}
+              />
+              <Label htmlFor="include-data">Include Enhanced Data</Label>
+            </div>
+            <p className="text-xs text-muted-foreground ml-7">
+              When enabled, webhooks will include additional data such as costs,
+              token counts, latency metrics, and S3 URLs for request/response
+              bodies.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -203,7 +222,11 @@ const AddWebhookForm = (props: AddWebhookFormProps) => {
         </Button>
         <Button
           onClick={() =>
-            onSubmit({ destination, config: { sampleRate, propertyFilters } })
+            onSubmit({
+              destination,
+              config: { sampleRate, propertyFilters },
+              includeData,
+            })
           }
           disabled={isLoading}
         >

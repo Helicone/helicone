@@ -1,17 +1,30 @@
 import { Database } from "../db/database.types";
 import { createHmac } from "crypto";
 import { PromiseGenericResult, ok } from "../shared/result";
+import { S3Client } from "../shared/db/s3Client";
+import { modelCost } from "../../packages/cost/costCalc";
 
 export type WebhookPayload = {
   payload: {
     request: {
       id: string;
       body: string;
+      bodyUrl?: string; // S3 URL for the request body
+      model?: string;
+      provider?: string;
     };
     response: {
       body: string;
+      bodyUrl?: string; // S3 URL for the response body
     };
     properties: Record<string, string>;
+    metadata?: {
+      cost?: number;
+      promptTokens?: number;
+      completionTokens?: number;
+      totalTokens?: number;
+      latencyMs?: number;
+    };
   };
   webhook: Database["public"]["Tables"]["webhooks"]["Row"];
   orgId: string;
@@ -24,6 +37,7 @@ export async function sendToWebhook(
   try {
     const hmacKey = webhook.hmac_key ?? "";
     const sampleRate = Number((webhook.config as any)?.["sampleRate"] ?? 100);
+    const includeData = (webhook.config as any)?.["includeData"] !== false;
 
     if (isNaN(sampleRate) || sampleRate < 0 || sampleRate > 100) {
       return ok(`Skipping webhook due to invalid sample rate`);
@@ -62,18 +76,47 @@ export async function sendToWebhook(
         ? "Body too large for webhook, please fetch the full request and response from Helicone"
         : body;
 
-    const webHoookPayload = JSON.stringify({
+    // Create the base webhook payload
+    let webHookPayloadObj: any = {
       request_id: payload.request.id,
       request_body: truncateBody(payload.request.body),
       response_body: truncateBody(payload.response.body),
-    });
+    };
+
+    // Add additional data if includeData is true
+    if (includeData) {
+      // Add S3 URLs if available
+      if (payload.request.bodyUrl) {
+        webHookPayloadObj.request_body_url = payload.request.bodyUrl;
+      }
+
+      if (payload.response.bodyUrl) {
+        webHookPayloadObj.response_body_url = payload.response.bodyUrl;
+      }
+
+      // Add model and provider if available
+      if (payload.request.model) {
+        webHookPayloadObj.model = payload.request.model;
+      }
+
+      if (payload.request.provider) {
+        webHookPayloadObj.provider = payload.request.provider;
+      }
+
+      // Add metadata if available
+      if (payload.metadata) {
+        webHookPayloadObj.metadata = payload.metadata;
+      }
+    }
+
+    const webHoookPayload = JSON.stringify(webHookPayloadObj);
 
     const hmac = createHmac("sha256", hmacKey);
     hmac.update(webHoookPayload);
     const hash = hmac.digest("hex");
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2 * 60 * 1000); // 2 minutes timeout
+    const timeoutId = setTimeout(() => controller.abort(), 2 * 60 * 1000);
 
     try {
       const response = await fetch(webhook.destination, {

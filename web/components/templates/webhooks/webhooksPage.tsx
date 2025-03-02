@@ -67,12 +67,17 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   });
 
   const createWebhook = useMutation({
-    mutationFn: async (data: { destination: string; config: any }) => {
+    mutationFn: async (data: {
+      destination: string;
+      config: any;
+      includeData: boolean;
+    }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       return jawn.POST("/v1/webhooks", {
         body: {
           destination: data.destination,
           config: data.config,
+          includeData: data.includeData,
         },
       });
     },
@@ -148,6 +153,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                       createWebhook.mutate({
                         destination: data.destination,
                         config: data.config,
+                        includeData: data.includeData,
                       });
                       setAddWebhookOpen(false);
                     }}
@@ -326,6 +332,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                 createWebhook.mutate({
                   destination: data.destination,
                   config: data.config,
+                  includeData: data.includeData,
                 });
                 setAddWebhookOpen(false);
               }}
