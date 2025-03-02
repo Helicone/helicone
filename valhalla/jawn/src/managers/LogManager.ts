@@ -84,8 +84,8 @@ export class LogManager {
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
-      .setNext(webhookHandler)
-      .setNext(segmentHandler);
+      .setNext(segmentHandler)
+      .setNext(webhookHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {

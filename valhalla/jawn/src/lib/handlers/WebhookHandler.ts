@@ -53,6 +53,12 @@ export class WebhookHandler extends AbstractLogHandler {
     if (this.webhookPayloads.length === 0) {
       return ok("No webhooks to send");
     }
+
+    console.log("Preparing to send webhooks, delaying for 10 seconds...");
+
+    // Add a delay to ensure database operations are complete
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     console.log("Sending to webhooks: ", this.webhookPayloads.length);
 
     await Promise.all(
