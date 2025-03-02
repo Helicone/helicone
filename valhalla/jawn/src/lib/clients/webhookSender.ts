@@ -6,17 +6,16 @@ import { modelCost } from "../../packages/cost/costCalc";
 
 export type WebhookPayload = {
   payload: {
+    signedUrl?: string;
     request: {
       id: string;
       body: string;
-      bodyUrl?: string; // S3 URL for the request body
       model?: string;
       provider?: string;
-      user_id?: string; // Add user_id at the request level
+      user_id?: string;
     };
     response: {
       body: string;
-      bodyUrl?: string; // S3 URL for the response body
     };
     properties: Record<string, string>;
     metadata?: {
@@ -109,8 +108,8 @@ export async function sendToWebhook(
     // Add additional data if includeData is true
     if (includeData) {
       // Add S3 URL if available - this URL contains both request and response data
-      if (payload.request.bodyUrl) {
-        webHookPayloadObj.request_response_url = payload.request.bodyUrl;
+      if (payload.signedUrl) {
+        webHookPayloadObj.request_response_url = payload.signedUrl;
       }
 
       // Add model and provider if available

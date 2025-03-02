@@ -86,10 +86,11 @@ export class WebhookHandler extends AbstractLogHandler {
 
       this.webhookPayloads.push({
         payload: {
+          signedUrl,
           request: {
             id: context.message.log.request.id,
             body: context.processedLog.request.body,
-            bodyUrl: signedUrl,
+
             model: includeData
               ? context.processedLog.model ?? context.processedLog.request.model
               : undefined,
@@ -100,7 +101,6 @@ export class WebhookHandler extends AbstractLogHandler {
           },
           response: {
             body: context.processedLog.response.body,
-            bodyUrl: signedUrl,
           },
           properties: context.processedLog.request.properties ?? {},
           metadata: includeData ? metadata : undefined,
