@@ -69,7 +69,7 @@ export class WebhookHandler extends AbstractLogHandler {
           });
 
           // Calculate latency
-          let latencyMs = context.message.log.response.delayMs;
+          const latencyMs = context.message.log.response.delayMs;
 
           metadata = {
             cost,
