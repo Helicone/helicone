@@ -22,8 +22,11 @@ twitter:title: "Helicone Webhooks: Real-Time LLM Integration & Automation"
 
 Head over to the [webhooks page](https://us.helicone.ai/webhooks) to set up a webhook.
 
-<Frame caption="Webhooks page">
-  <img src="/images/webhooks/ngrok-example.png" alt="Ngrok example" />
+<Frame caption="Webhook configuration UI">
+  <img
+    src="/images/webhooks/webhooks-ui.webp"
+    alt="Webhook configuration interface"
+  />
 </Frame>
 
 Add the webhook URL and select the events you want to trigger on.
@@ -49,6 +52,7 @@ The webhook endpoint is a POST route that accepts the following JSON body:
 The body of the request will contain the following fields:
 
 - `request_id`: The request ID of the request that triggered the webhook.
+- `user_id`: The identifier of the user who made the request (if available).
 - `request_body`: The body of the request that triggered the webhook.
 - `response_body`: The body of the response that triggered the webhook.
 - `request_response_url`: The URL to fetch the full request and response data.
@@ -62,8 +66,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { request_id, request_body, response_body, request_response_url } =
-    req.body;
+  const {
+    request_id,
+    user_id,
+    request_body,
+    response_body,
+    request_response_url,
+  } = req.body;
 
   // STEP 1: Validate the signature of the webhook request
   const hmac = crypto.createHmac("sha256", process.env.HELICONE_WEBHOOK_SECRET);
@@ -74,7 +83,7 @@ export default async function handler(
   }
 
   // STEP 2: Do something with the webhook data
-  console.log(request_id, request_body, response_body);
+  console.log(request_id, user_id, request_body, response_body);
 
   // STEP 3: Optionally fetch the full request/response data if needed
   if (request_response_url) {
@@ -108,6 +117,7 @@ By default, webhooks send a minimal payload with just the request ID and truncat
 ```json
 {
   "request_id": "uuid-string",
+  "user_id": "user-identifier-string", // Only included if set in the original request
   "request_body": "request-body-string",
   "response_body": "response-body-string"
 }
@@ -120,6 +130,7 @@ When the `includeData` option is enabled, webhooks include additional useful inf
 ```json
 {
   "request_id": "uuid-string",
+  "user_id": "user-identifier-string", // Only included if set in the original request
   "request_body": "request-body-string",
   "response_body": "response-body-string",
   "request_response_url": "https://s3-url-containing-full-request-and-response",
@@ -137,6 +148,7 @@ When the `includeData` option is enabled, webhooks include additional useful inf
 
 The enhanced payload provides:
 
+- **User Identifier**: The `user_id` field helps track which user or entity made the request (only included when explicitly set in the original request)
 - **Combined S3 URL**: A single URL that provides access to both the complete request and response data
 - **Model Information**: The model and provider used
 - **Cost Data**: Calculated cost based on token usage
@@ -230,6 +242,83 @@ The combined request/response data is particularly useful for:
 4. **Data Archiving**: Store the complete interaction data for compliance or historical analysis.
 
 ## Webhook Security
+
+Securing your webhook implementation is critical to protect sensitive data and prevent unauthorized access. Follow these best practices:
+
+### Signature Verification
+
+Always validate the webhook signature to ensure requests are coming from Helicone:
+
+```javascript
+import crypto from "crypto";
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(JSON.stringify(payload));
+  const calculatedSignature = hmac.digest("hex");
+
+  return crypto.timingSafeEqual(
+    Buffer.from(calculatedSignature, "hex"),
+    Buffer.from(signature, "hex")
+  );
+}
+
+// In your webhook handler
+const isValid = verifyWebhookSignature(
+  req.body,
+  req.headers["helicone-signature"],
+  process.env.HELICONE_WEBHOOK_SECRET
+);
+
+if (!isValid) {
+  return res.status(401).json({ error: "Invalid signature" });
+}
+```
+
+### Secret Management
+
+- Store your webhook secret securely using environment variables or a secrets manager
+- Never hardcode the secret in your application code
+- Rotate the webhook secret periodically for enhanced security
+
+### HTTPS Only
+
+- Only use HTTPS endpoints for your webhooks
+- Configure proper TLS/SSL settings on your server
+- Ensure certificates are valid and up-to-date
+
+### Rate Limiting
+
+Implement rate limiting on your webhook endpoint to protect against potential abuse:
+
+```javascript
+// Example using Express rate limiter
+const rateLimit = require("express-rate-limit");
+
+const webhookLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many webhook requests, please try again later",
+});
+
+app.post("/webhook", webhookLimiter, (req, res) => {
+  // Your webhook handler
+});
+```
+
+### Access Control
+
+- Restrict access to your webhook processing logic
+- Implement proper authentication for any systems that access webhook data
+- Use the principle of least privilege for services processing webhook data
+
+### Logging and Monitoring
+
+- Log all webhook requests (excluding sensitive data)
+- Monitor for unusual patterns or failed signature verifications
+- Set up alerts for potential security incidents
+
+By implementing these security measures, you can ensure your webhook integration remains secure and reliable.
 
 ## Troubleshooting Webhooks
 
@@ -337,3 +426,132 @@ function analyzeTokenEfficiency(webhookData) {
 ```
 
 By integrating these analytics into your webhook handler, you can gain real-time insights into your LLM usage patterns, costs, and performance metrics.
+
+### User Tracking with user_id
+
+The `user_id` field in webhook payloads enables powerful user-specific analytics and monitoring:
+
+```javascript
+// Example: Track usage by user
+function trackUserUsage(webhookData) {
+  const { user_id, metadata, model } = webhookData;
+
+  if (user_id && metadata) {
+    // Record usage in your database
+    db.recordUserActivity({
+      userId: user_id,
+      requestId: webhookData.request_id,
+      model: model,
+      cost: metadata.cost,
+      tokens: metadata.totalTokens,
+      timestamp: new Date(),
+    });
+
+    // Check if user is approaching usage limits
+    const userUsage = db.getUserMonthlyUsage(user_id);
+    const userLimit = db.getUserLimit(user_id);
+
+    if (userUsage > userLimit * 0.8) {
+      notifications.sendUsageWarning(user_id, userUsage, userLimit);
+    }
+  }
+}
+```
+
+#### Setting the user_id
+
+To ensure the `user_id` is included in your webhook payloads:
+
+1. When making requests through Helicone, include the `Helicone-User-Id` header:
+
+   ```javascript
+   const response = await fetch("https://oai.hconeai.com/v1/chat/completions", {
+     headers: {
+       "Helicone-Auth": "Bearer YOUR_HELICONE_API_KEY",
+       "Helicone-User-Id": "user-123", // This will be included in webhooks
+       // ... other headers
+     },
+     // ... request body
+   });
+   ```
+
+2. Alternatively, include the user ID in your request properties:
+   ```javascript
+   const response = await fetch("https://oai.hconeai.com/v1/chat/completions", {
+     headers: {
+       "Helicone-Auth": "Bearer YOUR_HELICONE_API_KEY",
+       "Helicone-Property-UserId": "user-123", // This will be included in webhooks
+       // ... other headers
+     },
+     // ... request body
+   });
+   ```
+
+> **Important**: The `user_id` field will only be included in webhook payloads when it has been explicitly set using one of the methods above. If no user ID is provided in the original request, this field will be omitted from the webhook payload.
+
+The `user_id` field makes it possible to build user-specific analytics, implement per-user rate limiting, and track usage patterns across your application.
+
+## Fetching Historical Requests
+
+In addition to receiving real-time webhooks, you may need to access historical request data. Helicone provides an API for retrieving past requests:
+
+### Using the Helicone API
+
+You can fetch historical requests using the Helicone API:
+
+```javascript
+async function fetchHistoricalRequests(userId, startDate, endDate) {
+  const response = await fetch("https://api.helicone.ai/v1/request", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    params: {
+      userId: userId,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      // Additional filters as needed
+    },
+  });
+
+  const data = await response.json();
+  return data.requests;
+}
+```
+
+### Common Use Cases for Historical Data
+
+1. **Audit Trails**: Create comprehensive audit logs of all LLM interactions for compliance purposes.
+2. **Usage Reports**: Generate periodic reports on usage patterns and costs.
+3. **Training Data Collection**: Gather high-quality examples for fine-tuning models.
+4. **Retroactive Analysis**: Analyze past interactions to identify patterns or issues.
+
+### Combining Webhooks and Historical Data
+
+For a complete solution, you can use webhooks for real-time processing and the API for historical data:
+
+```javascript
+// Real-time processing via webhook
+app.post("/webhook", async (req, res) => {
+  // Process incoming webhook data
+  processWebhookData(req.body);
+  res.status(200).send("OK");
+});
+
+// Scheduled job for historical analysis
+async function runWeeklyReport() {
+  const endDate = new Date();
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - 7);
+
+  // Fetch last week's data
+  const requests = await fetchHistoricalRequests(null, startDate, endDate);
+
+  // Generate and send report
+  const report = generateUsageReport(requests);
+  await sendReportToStakeholders(report);
+}
+```
+
+This dual approach ensures you have both immediate access to new data and the ability to analyze historical trends.
