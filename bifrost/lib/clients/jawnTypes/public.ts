@@ -1449,6 +1449,7 @@ Json: JsonObject;
     WebhookData: {
       destination: string;
       config: components["schemas"]["Record_string.any_"];
+      includeData?: boolean;
     };
     "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
       data: {

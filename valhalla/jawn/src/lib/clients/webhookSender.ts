@@ -85,13 +85,9 @@ export async function sendToWebhook(
 
     // Add additional data if includeData is true
     if (includeData) {
-      // Add S3 URLs if available
+      // Add S3 URL if available - note that this URL contains both request and response data
       if (payload.request.bodyUrl) {
-        webHookPayloadObj.request_body_url = payload.request.bodyUrl;
-      }
-
-      if (payload.response.bodyUrl) {
-        webHookPayloadObj.response_body_url = payload.response.bodyUrl;
+        webHookPayloadObj.request_response_url = payload.request.bodyUrl;
       }
 
       // Add model and provider if available

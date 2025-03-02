@@ -3761,6 +3761,9 @@
 					},
 					"config": {
 						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"includeData": {
+						"type": "boolean"
 					}
 				},
 				"required": [

@@ -79,14 +79,17 @@ export class WebhookHandler extends AbstractLogHandler {
         }
       }
 
+      // Get the signed URL once if includeData is enabled
+      const signedUrl = includeData
+        ? await this.getSignedUrl(context.message.log.request.id, orgId)
+        : undefined;
+
       this.webhookPayloads.push({
         payload: {
           request: {
             id: context.message.log.request.id,
             body: context.processedLog.request.body,
-            bodyUrl: includeData
-              ? await this.getSignedUrl(context.message.log.request.id, orgId)
-              : undefined,
+            bodyUrl: signedUrl,
             model: includeData
               ? context.processedLog.model ?? context.processedLog.request.model
               : undefined,
@@ -96,9 +99,7 @@ export class WebhookHandler extends AbstractLogHandler {
           },
           response: {
             body: context.processedLog.response.body,
-            bodyUrl: includeData
-              ? await this.getSignedUrl(context.message.log.request.id, orgId)
-              : undefined,
+            bodyUrl: signedUrl,
           },
           properties: context.processedLog.request.properties ?? {},
           metadata: includeData ? metadata : undefined,

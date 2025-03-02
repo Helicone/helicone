@@ -1324,6 +1324,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "destination": {"dataType":"string","required":true},
             "config": {"ref":"Record_string.any_","required":true},
+            "includeData": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
