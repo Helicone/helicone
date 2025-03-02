@@ -122,15 +122,14 @@ When the `includeData` option is enabled, webhooks include additional useful inf
   "request_id": "uuid-string",
   "request_body": "request-body-string",
   "response_body": "response-body-string",
-  "request_body_url": "https://s3-url-to-full-request-body",
-  "response_body_url": "https://s3-url-to-full-response-body",
-  "model": "gpt-4",
+  "request_response_url": "https://s3-url-containing-full-request-and-response",
+  "model": "gpt-3.5-turbo",
   "provider": "openai",
   "metadata": {
-    "cost": 0.0123,
-    "promptTokens": 150,
-    "completionTokens": 50,
-    "totalTokens": 200,
+    "cost": 0.0015,
+    "promptTokens": 10,
+    "completionTokens": 15,
+    "totalTokens": 25,
     "latencyMs": 1200
   }
 }
@@ -138,11 +137,28 @@ When the `includeData` option is enabled, webhooks include additional useful inf
 
 The enhanced payload provides:
 
-- **S3 URLs**: Direct links to the full request and response bodies
+- **Combined S3 URL**: A single URL that provides access to both the complete request and response data
 - **Model Information**: The model and provider used
 - **Cost Data**: Calculated cost based on token usage
 - **Token Counts**: Prompt, completion, and total token counts
 - **Latency**: Request-to-response time in milliseconds
+
+### Metadata Fields Explained
+
+The `metadata` object contains valuable information about the request:
+
+- **cost**: Estimated cost of the request in USD, calculated based on the model's pricing and token usage
+- **promptTokens**: Number of tokens in the prompt/request
+- **completionTokens**: Number of tokens in the completion/response
+- **totalTokens**: Total number of tokens used in the request (promptTokens + completionTokens)
+- **latencyMs**: Time taken to process the request in milliseconds
+
+These metadata fields are particularly useful for:
+
+- Cost tracking and budget management
+- Performance monitoring and optimization
+- Usage analytics and reporting
+- Identifying potential issues with specific requests
 
 This additional data makes it easier to track costs and analyze performance without making additional API calls.
 
@@ -160,8 +176,23 @@ Here's how to fetch and process the data from the `request_response_url`:
 
 ```javascript
 async function processWebhook(webhookData) {
-  // Extract the combined URL from the webhook payload
-  const { request_response_url } = webhookData;
+  // Extract the combined URL and metadata from the webhook payload
+  const { request_response_url, metadata } = webhookData;
+
+  // Process metadata if available
+  if (metadata) {
+    console.log("Request cost:", metadata.cost);
+    console.log("Total tokens:", metadata.totalTokens);
+    console.log("Latency (ms):", metadata.latencyMs);
+
+    // Example: Track costs by model
+    trackModelCost(webhookData.model, metadata.cost);
+
+    // Example: Alert on high latency
+    if (metadata.latencyMs > 5000) {
+      sendLatencyAlert(webhookData.request_id, metadata.latencyMs);
+    }
+  }
 
   if (request_response_url) {
     try {
@@ -236,3 +267,73 @@ The combined request/response data is particularly useful for:
 
 4. **Webhook Monitoring**
    - Monitor webhook deliveries in the Helicone dashboard to identify any patterns of failures or issues.
+
+## Using Webhook Metadata for Analytics
+
+The metadata included in webhook payloads provides valuable insights for monitoring and analyzing your LLM usage. Here are some common ways to leverage this data:
+
+### Cost Tracking
+
+```javascript
+// Example: Aggregate costs by model
+function trackCostsByModel(webhookData) {
+  const { model, metadata } = webhookData;
+  if (model && metadata?.cost) {
+    // Update your database or analytics system
+    db.incrementModelCost(model, metadata.cost);
+
+    // Check against budget limits
+    const currentSpend = db.getModelSpend(model);
+    if (currentSpend > MODEL_BUDGET_LIMITS[model]) {
+      sendBudgetAlert(model, currentSpend);
+    }
+  }
+}
+```
+
+### Performance Monitoring
+
+```javascript
+// Example: Track latency percentiles
+function trackLatency(webhookData) {
+  const { metadata, model } = webhookData;
+  if (metadata?.latencyMs) {
+    // Add to your metrics system
+    metrics.recordLatency(model, metadata.latencyMs);
+
+    // Alert on slow responses
+    if (metadata.latencyMs > LATENCY_THRESHOLDS[model]) {
+      alerts.sendLatencyAlert({
+        model,
+        latency: metadata.latencyMs,
+        requestId: webhookData.request_id,
+        timestamp: new Date(),
+      });
+    }
+  }
+}
+```
+
+### Token Usage Analysis
+
+```javascript
+// Example: Monitor token efficiency
+function analyzeTokenEfficiency(webhookData) {
+  const { metadata } = webhookData;
+  if (metadata?.promptTokens && metadata?.completionTokens) {
+    // Calculate prompt-to-completion ratio
+    const ratio = metadata.promptTokens / metadata.completionTokens;
+
+    // Log for analysis
+    analytics.logTokenRatio(webhookData.request_id, ratio);
+
+    // Identify potentially inefficient prompts
+    if (ratio > 10) {
+      // Example threshold
+      flagInefficientPrompt(webhookData.request_id, ratio);
+    }
+  }
+}
+```
+
+By integrating these analytics into your webhook handler, you can gain real-time insights into your LLM usage patterns, costs, and performance metrics.

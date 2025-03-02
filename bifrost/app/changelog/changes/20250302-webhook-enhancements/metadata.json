@@ -1,4 +1,4 @@
 {
-  "title": "Webhook Enhancements: Combined Request/Response Data",
-  "description": "Improved webhook functionality with a unified request/response URL structure, optimized performance, and enhanced documentation for better integration with external systems."
+  "title": "Webhook Enhancement: Combined Request/Response URL",
+  "description": "Optimized webhook delivery by replacing separate request and response URLs with a single combined URL, improving performance and simplifying integration."
 }
