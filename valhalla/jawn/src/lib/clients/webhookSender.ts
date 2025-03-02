@@ -127,10 +127,10 @@ export async function sendToWebhook(
       }
     }
 
-    const webHoookPayload = JSON.stringify(webHookPayloadObj);
+    const webHookPayload = JSON.stringify(webHookPayloadObj);
 
     const hmac = createHmac("sha256", hmacKey);
-    hmac.update(webHoookPayload);
+    hmac.update(webHookPayload);
     const hash = hmac.digest("hex");
 
     const controller = new AbortController();
@@ -139,7 +139,7 @@ export async function sendToWebhook(
     try {
       const response = await fetch(webhook.destination, {
         method: "POST",
-        body: webHoookPayload,
+        body: webHookPayload,
         headers: {
           "Content-Type": "application/json",
           "Helicone-Signature": hash,
