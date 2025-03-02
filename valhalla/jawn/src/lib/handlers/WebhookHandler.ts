@@ -7,6 +7,7 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { S3Client } from "../shared/db/s3Client";
 import { modelCost } from "../../packages/cost/costCalc";
+import { WebhookConfig } from "../shared/types";
 
 export class WebhookHandler extends AbstractLogHandler {
   private webhookStore: WebhookStore;
@@ -40,7 +41,8 @@ export class WebhookHandler extends AbstractLogHandler {
 
     for (const webhook of webhooks.data ?? []) {
       // Check if we should include additional data
-      const includeData = (webhook.config as any)?.["includeData"] !== false;
+      const config = (webhook.config as WebhookConfig) || {};
+      const includeData = config.includeData !== false;
 
       // Calculate cost if needed
       let metadata = undefined;

@@ -3,6 +3,7 @@ import { createHmac } from "crypto";
 import { PromiseGenericResult, ok } from "../shared/result";
 import { S3Client } from "../shared/db/s3Client";
 import { modelCost } from "../../packages/cost/costCalc";
+import { WebhookConfig } from "../shared/types";
 
 export type WebhookPayload = {
   payload: {
@@ -53,8 +54,9 @@ export async function sendToWebhook(
 ): PromiseGenericResult<string> {
   try {
     const hmacKey = webhook.hmac_key ?? "";
-    const sampleRate = Number((webhook.config as any)?.["sampleRate"] ?? 100);
-    const includeData = (webhook.config as any)?.["includeData"] !== false;
+    const config = (webhook.config as WebhookConfig) || {};
+    const sampleRate = Number(config.sampleRate ?? 100);
+    const includeData = config.includeData !== false;
 
     if (isNaN(sampleRate) || sampleRate < 0 || sampleRate > 100) {
       return ok(`Skipping webhook due to invalid sample rate`);
@@ -64,11 +66,7 @@ export async function sendToWebhook(
       return ok(`Skipping webhook due to sample rate`);
     }
 
-    const propertyFilters = ((webhook.config as any)?.["propertyFilters"] ??
-      []) as {
-      key: string;
-      value: string;
-    }[];
+    const propertyFilters = config.propertyFilters ?? [];
 
     const shouldWebhookProperties = propertyFilters.every(
       (propertyFilter) =>
