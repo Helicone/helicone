@@ -1,0 +1,4 @@
+{
+  "title": "Property Page Enhancements: Average Prompt Tokens & Sorting",
+  "description": "Added average prompt tokens metrics to property pages and implemented backend sorting for improved data analysis with smoother loading transitions."
+}
