@@ -35,9 +35,8 @@ export function FAQ({
   };
 
   return (
-    <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-      {/* <div className="rounded-lg bg-[#F2F9FC] px-6 py-4 border border-[#E3EFF3]"> */}
-      <h2 className="text-2xl font-semibold text-slate-900 mb-2">
+    <section className="w-full max-w-4xl mx-auto my-6">
+      <h2 className="text-xl font-semibold text-slate-800 mb-2">
         {title}
       </h2>
 
@@ -48,28 +47,17 @@ export function FAQ({
               onClick={(e) => handleClick(e, index)}
               className="w-full pt-0 pb-4 cursor-pointer"
             >
-              <h3 className="text-base text-slate-400 font-medium flex items-center">
+              <h3 className="text-base text-slate-900 font-medium flex items-center">
                 <ChevronRightIcon
-                  className={`mr-3 w-4 h-4 transition-transform duration-300 ease-in-out ${openIndices.includes(index) ? "rotate-90" : ""}`}
-                />
-                <span
-                  className="text-slate-900 font-semibold"
-                  dangerouslySetInnerHTML={renderHTML(faq.question)}
-                />
-              </h3>
+                  className={`mr-3 w-4 h-4 text-slate-400 transition-transform duration-300 ease-in-out ${openIndices.includes(index) ? "rotate-90" : ""}`}
+                />{faq.question}</h3>
               <div
                 className={`text-slate-600 text-md ml-8 overflow-hidden transition-all duration-200 ease-in-out ${openIndices.includes(index)
-                  ? "max-h-[500px] opacity-100 mt-3"
+                  ? "max-h-[500px] opacity-100 mt-1"
                   : "max-h-0 opacity-0 mt-0"
                   }`}
               >
-                <div className="pb-1">
-                  {typeof faq.answer === 'string' ? (
-                    <div dangerouslySetInnerHTML={renderHTML(faq.answer)} />
-                  ) : (
-                    faq.answer
-                  )}
-                </div>
+                <p className="text-slate-500 text-md leading-relaxed mb-3">{faq.answer}</p>
               </div>
             </div>
             {index < items.length - 1 && (
@@ -78,7 +66,6 @@ export function FAQ({
           </div>
         ))}
       </div>
-      {/* </div> */}
     </section>
   );
 }
