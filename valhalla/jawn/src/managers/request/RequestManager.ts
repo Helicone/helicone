@@ -14,6 +14,7 @@ import {
   getRequestsCached,
   getRequestsCachedClickhouse,
   getRequestsClickhouse,
+  getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
 import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { costOfPrompt } from "../../packages/cost";
@@ -471,6 +472,13 @@ export class RequestManager extends BaseManager {
           sort,
           isPartOfExperiment,
           isScored
+        )
+      : sort.created_at === "desc"
+      ? await getRequestsClickhouseNoSort(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit
         )
       : await getRequestsClickhouse(
           this.authParams.organizationId,
