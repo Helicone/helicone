@@ -31,7 +31,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -63,7 +62,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Message } from "packages/llm-mapper/types";
+import { LLMRequestBody, Message } from "packages/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -87,20 +86,27 @@ import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
 interface PromptEditorProps {
-  promptId?: string;
-  requestId?: string;
+  promptId?: string; // Prompt Id Mode
+  requestId?: string; // Request Id Mode
+  basePrompt?: {
+    body: LLMRequestBody;
+    metadata: {
+      provider: string;
+      createdFromUi: boolean;
+      inputs?: Record<string, string>;
+    };
+  }; // Playground Mode
 }
-export default function PromptEditor(props: PromptEditorProps) {
-  // PROPS
-  const { promptId, requestId } = props;
-
+export default function PromptEditor({
+  promptId,
+  requestId,
+  basePrompt,
+}: PromptEditorProps) {
   // STATE
   const [state, setState] = useState<PromptState | null>(null);
-  const [isAutoIterateOpen, setIsAutoIterateOpen] = useState(false);
+  const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
-
-  // STREAMING
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
 
@@ -189,7 +195,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       let inputs: StateInputs[] = [];
       let masterVersion: number | undefined;
 
-      // Load data either from request or version
+      // Load prompt data either from: request or version
       if (requestId && requestData?.data) {
         const mappedContent = heliconeRequestToMappedContent(requestData.data);
         const requestBody = mappedContent.schema.request;
@@ -650,7 +656,7 @@ export default function PromptEditor(props: PromptEditorProps) {
   const scrollToBottom = useCallback(() => {
     messagesScrollRef.current?.scrollToBottom();
   }, []);
-  // - BETA: Auto-Improve
+  // - Auto-Improve
   const handleImprove = useCallback(async () => {
     setIsImproving(true);
 
@@ -731,7 +737,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       abortController.current = null;
     }
   }, [state?.messages, updateState, setNotification]);
-  // - BETA: Apply Improvements
+  // - Apply Improvements
   const handleApplyImprovement = useCallback(async () => {
     if (!state?.improvement?.content) return;
 
@@ -782,7 +788,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       await refetchPromptVersions();
 
       setNotification("Successfully applied improvements", "success");
-      setIsAutoIterateOpen(false);
+      setIsAutoImproveOpen(false);
     } catch (error) {
       console.error("Error applying improvements:", error);
       setNotification("Failed to apply improvements", "error");
@@ -795,8 +801,7 @@ export default function PromptEditor(props: PromptEditorProps) {
     refetchPromptVersions,
     setNotification,
   ]);
-
-  // - From Request: Handle Save As Prompt
+  // - From Request or Playground: Handle Save As Prompt
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
@@ -844,6 +849,34 @@ export default function PromptEditor(props: PromptEditorProps) {
       ) {
         // Load from prompt version data
         loadVersionData(promptVersions[0]);
+      } else if (basePrompt) {
+        // Load directly from basePrompt
+        const provider = findClosestProvider(
+          basePrompt.metadata.provider || "OPENAI"
+        );
+        const model = findClosestModel(
+          provider,
+          basePrompt.body.model || "gpt-4o-mini"
+        );
+
+        setState({
+          messages: basePrompt.body.messages || [],
+          parameters: {
+            provider: provider as keyof typeof PROVIDER_MODELS,
+            model: model,
+            temperature: basePrompt.body.temperature ?? 1,
+            tools: basePrompt.body.tools ?? [],
+            reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
+          },
+          inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
+            ([name, value]) => ({
+              name,
+              value: value as string,
+              isValid: isValidVariableName(name),
+            })
+          ),
+          isDirty: false,
+        });
       }
     }
   }, [
@@ -853,6 +886,7 @@ export default function PromptEditor(props: PromptEditorProps) {
     state,
     requestId,
     requestData,
+    basePrompt,
   ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
@@ -907,7 +941,11 @@ export default function PromptEditor(props: PromptEditorProps) {
   // RENDER
   // TODO: Prompt or request not found page (use mutations I think)
   // - Loading Page
-  if (isPromptLoading || isVersionsLoading || !state) {
+  if (
+    (promptId && (isPromptLoading || isVersionsLoading)) ||
+    (requestId && isRequestLoading) ||
+    !state
+  ) {
     return (
       <div className="flex h-screen items-center justify-center">
         <LoadingAnimation title="Loading prompt..." />
@@ -954,12 +992,14 @@ export default function PromptEditor(props: PromptEditorProps) {
             </Link>
           )}
 
-          {/* From Request: Unsaved Changes Indicator */}
-          {requestId && state.isDirty && (
+          {/* From Request or From Playground: Unsaved Changes Indicator */}
+          {(requestId || basePrompt) && state.isDirty && (
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
                 <div className="flex flex-row items-center gap-2 cursor-default">
-                  <div className={`h-2 w-2 rounded-full bg-amber-500`} />
+                  <div
+                    className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                  />
                   <span className="text-sm text-secondary font-semibold">
                     Unsaved Changes
                   </span>
@@ -1001,7 +1041,7 @@ export default function PromptEditor(props: PromptEditorProps) {
           {promptId && (
             <Button
               variant="link"
-              onClick={() => setIsAutoIterateOpen(true)}
+              onClick={() => setIsAutoImproveOpen(true)}
               disabled={state.isDirty}
             >
               <PiBrainBold className="h-4 w-4 mr-2" />
@@ -1009,8 +1049,8 @@ export default function PromptEditor(props: PromptEditorProps) {
             </Button>
           )}
 
-          {/* From Request: Save Changes Button */}
-          {requestId && (
+          {/* From Request or From Playground: Save As Prompt Button */}
+          {(requestId || basePrompt) && (
             <Button
               variant="action"
               size="sm"
@@ -1057,7 +1097,7 @@ export default function PromptEditor(props: PromptEditorProps) {
             )}
             <div
               className={`flex items-center gap-0.5 text-sm ${
-                requestId && !isStreaming
+                (requestId || basePrompt) && !isStreaming
                   ? "text-black opacity-60"
                   : "text-white opacity-60"
               }`}
@@ -1255,9 +1295,9 @@ async function pullPromptAndRunCompletion() {
         <UniversalPopup
           title="Auto-Improve (Beta)"
           width="w-full max-w-7xl"
-          isOpen={isAutoIterateOpen}
+          isOpen={isAutoImproveOpen}
           onClose={() => {
-            setIsAutoIterateOpen(false);
+            setIsAutoImproveOpen(false);
             updateState({ improvement: undefined }, false);
           }}
         >
@@ -1268,7 +1308,7 @@ async function pullPromptAndRunCompletion() {
             messages={state.messages}
             onStartImprove={handleImprove}
             onApplyImprovement={handleApplyImprovement}
-            onCancel={() => setIsAutoIterateOpen(false)}
+            onCancel={() => setIsAutoImproveOpen(false)}
             updateState={(updates) => updateState(updates, false)}
           />
         </UniversalPopup>

@@ -112,6 +112,7 @@ export interface LLMRequestBody {
   stream?: boolean | null;
   presence_penalty?: number | null;
   frequency_penalty?: number | null;
+  reasoning_effort?: "low" | "medium" | "high" | null;
   n?: number | null;
   stop?: string[] | null;
   messages?: Message[] | null;

@@ -110,10 +110,10 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             current: pathname.includes("/datasets"),
           },
           {
-            name: "Playground (New Prompt)",
-            href: "/prompts/new",
+            name: "Playground",
+            href: "/prompts/fromPlayground",
             icon: TestTube2,
-            current: pathname.includes("/playground"),
+            current: pathname.includes("/prompts/fromPlayground"),
           },
         ],
       },
