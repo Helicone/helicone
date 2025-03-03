@@ -1,0 +1,187 @@
+---
+title: "How to Prompt Thinking Models"
+sidebarTitle: "Prompt Thinking Models"
+description: "Learn how to effectively prompt thinking models like DeepSeek R1 and OpenAI o1/o3 for optimal results."
+"twitter:title": "How to Prompt Thinking Models - Helicone Guide"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+## What are thinking models?
+
+Thinking models are LLMs optimized for reasoning and problem-solving. They have built-in Chain-of-Thought capabilities, making them more effective at complex tasks. Key models include:
+
+- DeepSeek R1
+- OpenAI o1/o3
+- Gemini 2.0 Flash
+- LLaMA 3.1
+
+These models handle reasoning internally, requiring simpler prompts and less
+explicit guidance to get optimal results.
+
+## Summary of Do's and Don'ts
+
+- Do use minimal prompting to let the model think independently
+- Do encourage more reasoning for better performance at complex tasks
+- Do use delimiters for clarity to separate distinct parts of input
+- Do use ensembling for highly complex tasks requiring high accuracy
+- Do avoid few-shot and CoT prompting
+- Don't use thinking models for structured outputs unless absolutely necessary
+- Do avoid overloading the model with unnecessary details
+
+## 1. Use Minimal Prompting
+
+Thinking models work best when given **concise, direct, and structured** prompts. Too much information can actually reduce accuracy. The best approach is to state the problem clearly and let the model figure out the steps.
+
+**Good Example:**
+
+```
+What are the main differences between classical and operant conditioning?
+```
+
+**Poor Example:**
+
+```
+In psychology, there are different learning theories. Classical conditioning was discovered by Pavlov, while operant conditioning was developed by Skinner. Could you please explain the difference between classical conditioning and operant conditioning? Make sure to include an example for each.
+```
+
+<Tip>
+  Fewer instructions allow the model to **engage its reasoning process
+  naturally**.
+</Tip>
+
+## 2. Encourage More Reasoning for Complex Tasks
+
+More complex problems benefit from additional reasoning time. Thinking models use **reasoning tokens**, which allow them to internally process a problem before outputting an answer.
+
+By **prompting the model to take its time**, you can improve the quality of the response. However, this also increases token usage, impacting cost.
+
+**Good Example:**
+
+```
+Analyze the economic impact of renewable energy adoption over the next 20 years. Consider factors such as job creation, energy prices, and carbon reduction. Take your time and think through each aspect carefully.
+```
+
+**Poor Example:**
+
+```
+How does renewable energy impact the economy? Answer quickly.
+```
+
+<Tip>
+  Encouraging longer reasoning helps for **multi-step problems**, improving
+  accuracy significantly.
+</Tip>
+
+## 3. Avoid Few-Shot and Chain-of-Thought Prompting
+
+Traditional few-shot (where you give examples) and Chain-of-Thought prompting strategies **reduce performance** for thinking models.
+
+According to research, thinking models performed worse when given few-shot examples. This contrasts with older models, where few-shot learning improved results. Thinking models are already designed to break down problems internally, so explicit step-by-step guidance can interfere with their reasoning.
+
+**Good Example:**
+
+```
+What is the capital of Canada?
+```
+
+**Poor Example:**
+
+```
+Example 1:
+Q: What is the capital of France?
+A: Paris
+
+Example 2:
+Q: What is the capital of Japan?
+A: Tokyo
+
+Now answer this: What is the capital of Canada?
+```
+
+<Tip>
+  For thinking models, **zero-shot prompts worked better than few-shot
+  prompts**.
+</Tip>
+
+### 4. Use Thinking Models for Complex Multi-Step Tasks
+
+Thinking models perform best on tasks that require five or more steps.
+
+When solving problems with 3-5 steps, thinking models offered a **slight improvement** over standard models. For simpler tasks (fewer than 3 steps), performance may actually **degrade** compared to traditional LLMs, because they "overthink."
+
+If a task is highly structured or simple, a regular LLM like GPT-4 may be a better choice.
+
+**Good Example:**
+
+```
+Break down the process of solving a complex physics problem involving momentum conservation. Explain each step clearly and logically.
+```
+
+**Poor Example:**
+
+```
+What is 2+2?
+```
+
+<Tip>
+  To check how many steps a problem requires, you can prompt the web version of
+  a reasoning model to see how many reasoning steps it takes.
+</Tip>
+
+### 5. Use Delimiters to Structure Prompts
+
+For regular LLMs, developers typically use delimiters like triple quotation marks, XML tags, or section titles to clearly define distinct sections of the input. This makes it easier for the model to interpret the information correctly.
+
+Thinking models, however, struggle with structured outputs but can be guided to maintain consistency. If you need a structured response (e.g., JSON, tables, fixed formats), structure your prompt carefully.
+
+**Good Example:**
+
+```
+[Task: Summarize the following text]
+Text: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
+```
+
+**Poor Example:**
+
+```
+Summarize this: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
+```
+
+<Tip>
+  If structured output is critical, you're better off using a standard LLM
+  instead of a thinking model.
+</Tip>
+
+### 6. Use Ensembling for Highly Complex Tasks
+
+For high-stakes or complex problems, ensembling improves performance.
+
+Ensembling involves running multiple prompts (either the same prompt multiple times or variations of the prompt) and aggregating the results. This approach increases accuracy but **raises costs** because multiple queries are required.
+
+**Example of Ensembling:**
+
+```
+# Prompt 1:
+What are the primary causes of climate change? Provide a well-reasoned answer.
+
+# Prompt 2:
+Explain the major contributors to climate change, focusing on human activities and natural factors.
+
+# Prompt 3:
+Explain what causes climate change
+
+<Context>
+# [Response 1 + Response 2]
+</Context>
+```
+
+<Tip>
+  While ensembling boosts performance, it's expensive and should only be used
+  when high accuracy is critical.
+</Tip>
+## Conclusion
+
+Prompting thinking models requires a different mindset and approach compared to traditional LLMs. By following these guidelines, you can optimize your interactions with thinking models and get the best possible responses.
+
+<QuestionsSection />{" "}
