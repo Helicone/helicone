@@ -136,13 +136,13 @@ export default function PromptBox({
     }
   }, [suggestionState.isTyping, value]);
   useEffect(() => {
-    console.log("Suggestion Effect:", {
-      isTyping: suggestionState.isTyping,
-      canShowSuggestions: suggestionState.canShowSuggestions,
-      textLength: value.trim().length,
-      endsWithSpace: /[\s\n]$/.test(value),
-      timeSinceLastType: Date.now() - suggestionState.lastTypingTime,
-    });
+    // console.log("Suggestion Effect:", {
+    //   isTyping: suggestionState.isTyping,
+    //   canShowSuggestions: suggestionState.canShowSuggestions,
+    //   textLength: value.trim().length,
+    //   endsWithSpace: /[\s\n]$/.test(value),
+    //   timeSinceLastType: Date.now() - suggestionState.lastTypingTime,
+    // });
 
     if (
       suggestionState.isTyping ||
@@ -150,19 +150,19 @@ export default function PromptBox({
       value.trim().length < MIN_LENGTH_FOR_SUGGESTIONS ||
       !/[\s\n]$/.test(value)
     ) {
-      console.log("Cancelling suggestions due to:", {
-        isTyping: suggestionState.isTyping,
-        canShowSuggestions: suggestionState.canShowSuggestions,
-        textLength: value.trim().length,
-        endsWithSpace: /[\s\n]$/.test(value),
-      });
+      // console.log("Cancelling suggestions due to:", {
+      //   isTyping: suggestionState.isTyping,
+      //   canShowSuggestions: suggestionState.canShowSuggestions,
+      //   textLength: value.trim().length,
+      //   endsWithSpace: /[\s\n]$/.test(value),
+      // });
       cancelCurrentSuggestion();
       return;
     }
 
     const timeSinceLastType = Date.now() - suggestionState.lastTypingTime;
     if (timeSinceLastType < SUGGESTION_DELAY) {
-      console.log("Not enough time since last type:", timeSinceLastType);
+      // console.log("Not enough time since last type:", timeSinceLastType);
       cancelCurrentSuggestion();
       return;
     }
@@ -177,7 +177,7 @@ export default function PromptBox({
     const fetchAndHandleStream = async () => {
       try {
         const prompt = autoCompletePrompt(value, contextText);
-        console.log("Fetching suggestions for:", value);
+        // console.log("Fetching suggestions for:", value);
 
         const stream = await generateStream(
           {
@@ -198,7 +198,7 @@ export default function PromptBox({
           stream,
           (chunk: string) => {
             accumulatedText += chunk;
-            console.log("Received suggestion:", accumulatedText);
+            // console.log("Received suggestion:", accumulatedText);
             dispatch({
               type: "SET_SUGGESTION",
               payload: cleanSuggestionIfNeeded(value, accumulatedText),
@@ -207,7 +207,7 @@ export default function PromptBox({
           controller.signal
         );
 
-        console.log("Stopped streaming");
+        // console.log("Stopped streaming");
         if (abortControllerRef.current === controller) {
           dispatch({ type: "STOP_STREAMING" });
           abortControllerRef.current = null;
@@ -237,10 +237,10 @@ export default function PromptBox({
     abortCurrentRequest,
   ]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    console.log("KeyDown Event:", {
-      key: e.key,
-      hasSuggestion: !!suggestionState.suggestion,
-    });
+    // console.log("KeyDown Event:", {
+    //   key: e.key,
+    //   hasSuggestion: !!suggestionState.suggestion,
+    // });
 
     // Track undo operation
     if ((e.metaKey || e.ctrlKey) && e.key === "z") {
@@ -276,7 +276,7 @@ export default function PromptBox({
     if (!["Shift", "Control", "Alt", "Meta"].includes(e.key)) {
       // Only cancel if we're not at a word boundary
       if (!/[\s\n]$/.test(value)) {
-        console.log("Cancelling request - not at word boundary");
+        // console.log("Cancelling request - not at word boundary");
         abortCurrentRequest();
       }
       if (!isUndoingRef.current) {
@@ -292,7 +292,7 @@ export default function PromptBox({
     if (!isUndoingRef.current) {
       // Only cancel if we're not at a word boundary
       if (!/[\s\n]$/.test(newValue)) {
-        console.log("Cancelling request - not at word boundary");
+        // console.log("Cancelling request - not at word boundary");
         abortCurrentRequest();
       }
       dispatch({ type: "TYPE" });
