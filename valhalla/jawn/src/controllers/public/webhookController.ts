@@ -12,21 +12,13 @@ import {
 } from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import {
-  Eval,
-  EvalManager,
-  ScoreDistribution,
-} from "../../managers/eval/EvalManager";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-
-import { KVCache } from "../../lib/cache/kvCache";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 import crypto from "crypto";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface WebhookData {
   destination: string;
   config: Record<string, any>;
+  includeData?: boolean;
 }
 
 @Route("/v1/webhooks")
@@ -68,6 +60,9 @@ export class WebhookController extends Controller {
       }
     }
 
+    // Default includeData to true if not specified
+    const includeData = webhookData.includeData !== false;
+
     const result = await dbExecute(
       `INSERT INTO webhooks (is_verified, org_id, txt_record, destination, version, config, hmac_key)
         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -83,6 +78,7 @@ export class WebhookController extends Controller {
             key: propertyFilter.key,
             value: propertyFilter.value,
           })),
+          includeData,
         }),
         newHMACKEY,
       ]

@@ -249,7 +249,9 @@ function getProviderInfo(
     LEMONFOX: "https://api.lemonfox.ai",
     FIREWORKS: "https://api.fireworks.ai",
     PERPLEXITY: "https://api.perplexity.ai",
-    GOOGLE: "https://googleapis.com",
+    // TOODO: Add support for passing in project id and location
+    GOOGLE:
+      "https://googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions",
     OPENROUTER: "https://api.openrouter.ai",
     WISDOMINANUTSHELL: "https://api.wisdominanutshell.academy",
     GROQ: "https://api.groq.com",

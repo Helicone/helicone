@@ -110,7 +110,9 @@ export class ExperimentV2Manager extends BaseManager {
       const response = await supabaseServer.client
         .from("experiment_v3")
         .select("*")
-        .eq("organization", this.authParams.organizationId);
+        .eq("organization", this.authParams.organizationId)
+        .eq("soft_delete", false)
+        .order("created_at", { ascending: false });
 
       return ok(response.data ?? []);
     } catch (e) {
@@ -126,6 +128,25 @@ export class ExperimentV2Manager extends BaseManager {
       .eq("organization", this.authParams.organizationId)
       .single();
     return experiment.data ?? null;
+  }
+
+  async deleteExperiment(experimentId: string): Promise<Result<null, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("Experiment not found");
+    }
+
+    const result = await supabaseServer.client
+      .from("experiment_v3")
+      .update({ soft_delete: true })
+      .eq("id", experimentId)
+      .eq("organization", this.authParams.organizationId);
+
+    if (result.error) {
+      return err("Failed to delete experiment");
+    }
+
+    return ok(null);
   }
 
   // this query needs to be better imo
@@ -258,7 +279,6 @@ export class ExperimentV2Manager extends BaseManager {
       return ok({
         ...experiment.data,
         rows: rows.data,
-        // prompt_versions: promptVersions.data ?? [],
       });
     } catch (e) {
       return err("Failed to get experiment");
@@ -368,6 +388,26 @@ export class ExperimentV2Manager extends BaseManager {
     } catch (e) {
       return err("Failed to create new prompt version for experiment");
     }
+  }
+
+  async deletePromptVersion(
+    experimentId: string,
+    promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const experiment = await this.hasAccessToExperiment(experimentId);
+    if (!experiment) {
+      return err("You do not have access to this experiment");
+    }
+
+    const promptManager = new PromptManager(this.authParams);
+    const result = await promptManager.removePromptVersionFromExperiment(
+      promptVersionId,
+      experimentId
+    );
+    if (result.error) {
+      return err("Failed to delete prompt version");
+    }
+    return ok(null);
   }
 
   async getPromptVersionsForExperiment(

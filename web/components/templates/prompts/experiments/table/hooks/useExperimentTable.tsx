@@ -312,6 +312,27 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const deletePromptVersion = useMutation({
+    mutationFn: async ({ promptVersionId }: { promptVersionId: string }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE(
+        "/v2/experiment/{experimentId}/prompt-version/{promptVersionId}",
+        {
+          params: {
+            path: { experimentId: experimentTableId, promptVersionId },
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentPromptVersions", orgId, experimentTableId],
+      });
+    },
+  });
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -329,5 +350,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     wrapText,
     selectedScoreKey,
     deleteSelectedRows,
+    deletePromptVersion,
   };
 };

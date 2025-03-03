@@ -67,7 +67,7 @@ const SessionNameSelection = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <Card className="py-1 px-2 text-xs mb-1">View doccumentation</Card>
+            <Card className="py-1 px-2 text-xs mb-1">View documentation</Card>
           </TooltipContent>
         </Tooltip>
       </Row>

@@ -372,6 +372,38 @@ export class PromptManager extends BaseManager {
     return ok(null);
   }
 
+  async removePromptVersionFromExperiment(
+    promptVersionId: string,
+    experimentId: string
+  ): Promise<Result<null, string>> {
+    const promptVersion = await this.getPromptVersion({
+      promptVersionId,
+    });
+
+    if (
+      promptVersion.error ||
+      !promptVersion.data ||
+      promptVersion.data.length === 0
+    ) {
+      return err(`Failed to get prompt version: ${promptVersion.error}`);
+    }
+
+    const result = await dbExecute(
+      `
+    UPDATE prompts_versions
+    SET experiment_id = null
+    WHERE id = $1 AND organization = $2 AND experiment_id = $3
+    `,
+      [promptVersionId, this.authParams.organizationId, experimentId]
+    );
+
+    if (result.error) {
+      return err(`Failed to delete prompt version: ${result.error}`);
+    }
+
+    return ok(null);
+  }
+
   async getPromptVersions(
     filter: FilterNode,
     includeExperimentVersions: boolean = false
@@ -738,6 +770,17 @@ export class PromptManager extends BaseManager {
       );
     }
 
+    const createPromptInputKeysResult = await this.createPromptInputKeys(
+      insertVersionResult.data[0].id,
+      JSON.stringify(params.prompt)
+    );
+
+    if (createPromptInputKeysResult.error) {
+      return err(
+        `Failed to create prompt input keys: ${createPromptInputKeysResult.error}`
+      );
+    }
+
     return ok({
       id: promptId,
       prompt_version_id: insertVersionResult.data[0].id,
@@ -816,11 +859,16 @@ export class PromptManager extends BaseManager {
 
       // Helper function to find keys in a string
       const findKeys = (str: string): string[] => {
-        const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+        const regex = /<helicone-prompt-input key=\\?"([^"]+)\\?"\s*\/>/g;
         const matches = str.match(regex);
         return matches
           ? matches.map((match) =>
-              match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+              match
+                .replace(
+                  /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
+                  "$1"
+                )
+                .replace(/\\/g, "")
             )
           : [];
       };

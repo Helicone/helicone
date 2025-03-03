@@ -650,7 +650,11 @@ const RequestRow = (props: RequestRowProps) => {
                   className="flex flex-row items-center space-x-2 truncate"
                   asChild
                 >
-                  <Link href={`/sessions/${sessionData.sessionId}`}>
+                  <Link
+                    href={`/sessions/${encodeURIComponent(
+                      sessionData.sessionId
+                    )}`}
+                  >
                     <span>Session:</span> <span>{sessionData.sessionId}</span>
                   </Link>
                 </Button>

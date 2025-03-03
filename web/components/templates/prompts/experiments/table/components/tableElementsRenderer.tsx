@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -11,7 +13,12 @@ import { cn } from "@/lib/utils";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { PlayIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlaskConicalIcon, GitForkIcon, LightbulbIcon } from "lucide-react";
+import {
+  FlaskConicalIcon,
+  GitForkIcon,
+  LightbulbIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 import { Button } from "../../../../../ui/button";
@@ -404,19 +411,21 @@ const PromptColumnHeader = ({
   onForkColumn,
   onRunColumn,
   promptVersionId,
+  onDeleteColumn,
 }: {
   label: string;
   onForkColumn?: () => void;
   onRunColumn?: () => void;
   promptVersionId: string;
+  onDeleteColumn?: () => void;
 }) => {
   const [labelData, setLabelData] = useState(label);
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(labelData);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const jawnClient = useJawnClient();
-  const queryClient = useQueryClient();
   // Handle saving the label
   const handleSave = async () => {
     setIsEditing(false);
@@ -487,10 +496,49 @@ const PromptColumnHeader = ({
       )}
       {onForkColumn && onRunColumn && (
         <div className="items-center justify-center hidden group-hover:flex">
+          {onDeleteColumn && (
+            <Dialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="mr-2 text-red-500 hover:text-red-600 h-auto w-auto hover:bg-transparent"
+                >
+                  <Trash2Icon className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogTitle>Delete Prompt Version</DialogTitle>
+                <DialogDescription>
+                  Once deleted, this prompt version will no longer be available.
+                  Do you want to delete it?
+                </DialogDescription>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      onDeleteColumn();
+                      setIsDeleteDialogOpen(false);
+                    }}
+                  >
+                    Yes, delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            className="p-0 h-auto w-auto !hover:bg-transparent"
+            className="p-0 h-auto w-auto hover:bg-transparent"
             onClick={onForkColumn}
           >
             <GitForkIcon className="w-4 h-4 text-slate-500" />

@@ -104,7 +104,7 @@ const useGetUnauthorized = (userId: string) => {
     const currentTier = org?.currentOrg?.tier;
 
     if (currentTier === "free") {
-      return Number(count?.data || 0) > 100_000;
+      return Number(count?.data || 0) > 10_000;
     }
 
     if (currentTier === "pro") {

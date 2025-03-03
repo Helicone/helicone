@@ -65,6 +65,17 @@
   }
 }
 
+/* Custom link styling for blog content only */
+.prose a {
+  @apply font-semibold text-sky-500 no-underline;
+  text-decoration: none !important;
+}
+
+.prose a:hover {
+  @apply underline;
+  text-decoration: underline !important;
+}
+
 @keyframes floating {
   0%,
   100% {

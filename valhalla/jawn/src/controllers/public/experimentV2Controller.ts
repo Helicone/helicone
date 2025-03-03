@@ -229,6 +229,23 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Delete("/{experimentId}")
+  public async deleteExperiment(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deleteExperiment(experimentId);
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return result;
+  }
+
   @Get("/{experimentId}")
   public async getExperimentById(
     @Path() experimentId: string,
@@ -263,6 +280,20 @@ export class ExperimentV2Controller extends Controller {
     } else {
       this.setStatus(200);
     }
+    return result;
+  }
+
+  @Delete("/{experimentId}/prompt-version/{promptVersionId}")
+  public async deletePromptVersion(
+    @Path() experimentId: string,
+    @Path() promptVersionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deletePromptVersion(
+      experimentId,
+      promptVersionId
+    );
     return result;
   }
 

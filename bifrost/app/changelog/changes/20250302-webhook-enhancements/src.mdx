@@ -1,0 +1,12 @@
+We've enhanced our webhook functionality to improve integration with external systems:
+
+- **Combined Request/Response URL**: Replaced separate URLs with a single `request_response_url` field that contains both request and response data in one object.
+- **Performance Optimization**: Reduced S3 URL generation calls from two to one per webhook.
+- **Configurable Data Inclusion**: Added `includeData` parameter to the webhook API to control whether enhanced data is included in payloads.
+- **Updated Documentation**: Added examples showing how to work with the combined data structure.
+
+![Webhook configuration interface](/static/changelog/images/20250302-webhooks-ui.webp)
+
+These changes make webhook integration more efficient while maintaining backward compatibility with existing implementations.
+
+For details, see our [updated documentation](https://docs.helicone.ai/features/webhooks#working-with-the-combined-requestresponse-url).

@@ -548,6 +548,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         ...state.parameters,
+        provider: undefined, // TODO: Move provider to the prompt?
         messages: state.messages,
       };
 
