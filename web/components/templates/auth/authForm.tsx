@@ -258,20 +258,45 @@ const AuthForm = (props: AuthFormProps) => {
   const [selectedQuote, setSelectedQuote] = useState(quotes[0]);
   // State to determine whether to show the quote or the image
   const [showQuote, setShowQuote] = useState(false);
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
 
-  // Select a random background style, image, and quote on component mount
   useEffect(() => {
-    const randomBgIndex = Math.floor(Math.random() * backgroundStyles.length);
-    setSelectedBackground(backgroundStyles[randomBgIndex]);
+    const preloadImages = async () => {
+      const imagePromises = centerImages.map((src) => {
+        return new Promise((resolve) => {
+          const img = new window.Image();
+          img.src = src;
+          img.onload = resolve;
+        });
+      });
 
-    const randomImgIndex = Math.floor(Math.random() * centerImages.length);
-    setSelectedImage(centerImages[randomImgIndex]);
+      const quoteImagePromises = quotes.map((quote) => {
+        return new Promise((resolve) => {
+          const img = new window.Image();
+          img.src = quote.image;
+          img.onload = resolve;
+        });
+      });
 
-    const randomQuoteIndex = Math.floor(Math.random() * quotes.length);
-    setSelectedQuote(quotes[randomQuoteIndex]);
+      await Promise.all([...imagePromises, ...quoteImagePromises]);
 
-    // Randomly decide whether to show the quote or the image
-    setShowQuote(Math.random() > 0.5);
+      const randomBgIndex = Math.floor(Math.random() * backgroundStyles.length);
+      setSelectedBackground(backgroundStyles[randomBgIndex]);
+
+      const randomImgIndex = Math.floor(Math.random() * centerImages.length);
+      setSelectedImage(centerImages[randomImgIndex]);
+
+      const randomQuoteIndex = Math.floor(Math.random() * quotes.length);
+      setSelectedQuote(quotes[randomQuoteIndex]);
+
+      // Randomly decide whether to show the quote or the image
+      setShowQuote(Math.random() > 0.5);
+
+      // Mark content as loaded to show it
+      setIsContentLoaded(true);
+    };
+
+    preloadImages();
   }, []);
 
   const router = useRouter();
@@ -373,8 +398,8 @@ const AuthForm = (props: AuthFormProps) => {
         </div>
 
         {/* Center Image - Only shown when showQuote is false */}
-        {!showQuote && (
-          <div className="absolute inset-0 z-10">
+        {!showQuote && isContentLoaded && (
+          <div className="absolute inset-0 z-10 transition-opacity duration-300">
             <Image
               src={selectedImage}
               alt="Helicone Featured Image"
@@ -387,7 +412,7 @@ const AuthForm = (props: AuthFormProps) => {
         )}
 
         {/* Quote - Only shown when showQuote is true */}
-        {showQuote ? (
+        {showQuote && isContentLoaded ? (
           <>
             <div className="relative z-20 space-y-3 w-full">
               <h1 className="text-4xl font-extrabold text-slate-300">&quot;</h1>
