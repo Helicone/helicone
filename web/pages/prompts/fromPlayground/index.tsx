@@ -23,7 +23,7 @@ const defaultBasePrompt = {
   } as LLMRequestBody,
   metadata: {
     provider: "OPENAI",
-    createdFromUi: false,
+    isProduction: true,
     inputs: {
       number: "2",
     },

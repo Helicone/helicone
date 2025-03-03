@@ -1626,6 +1626,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"reasoning_effort": {
+						"type": "string",
+						"enum": [
+							"low",
+							"medium",
+							"high",
+							null
+						],
+						"nullable": true
+					},
 					"n": {
 						"type": "number",
 						"format": "double",

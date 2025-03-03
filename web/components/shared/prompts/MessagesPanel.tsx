@@ -11,6 +11,7 @@ import { Message } from "packages/llm-mapper/types";
 import { useEffect, useRef, useState } from "react";
 import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 
+import Link from "next/link";
 import GlassHeader from "../universal/GlassHeader";
 
 interface MessagesPanelProps {
@@ -169,6 +170,36 @@ export default function MessagesPanel({
           </div>
         );
       })}
+
+      {/* Error comunication */}
+      {messages.length === 0 && (
+        <div className="flex flex-col gap-4 p-4">
+          <div className="flex flex-col gap-4 bg-red-500 rounded-lg p-4 border border-red-100 dark:border-red-900">
+            <h2 className="text-white font-semibold text-lg">
+              Unable to load prompt version...
+            </h2>
+            <div className="bg-slate-200 dark:bg-slate-800 rounded p-4 font-mono text-xs overflow-auto">
+              <pre>
+                {`{
+  "error": "Invalid template",
+  "template": "<helicone-auto-prompt-input idx=0 />"
+}`}
+              </pre>
+            </div>
+            <p className="text-white text-sm">
+              Please load or import a different version to try again.{" "}
+              <Link
+                href="https://docs.helicone.ai/features/prompts/import"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-medium text-white hover:text-blue-300"
+              >
+                Learn more about import formatting.
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Add Message Pair and/or Prefill Message */}
       <div className="flex flex-row gap-4 p-4">

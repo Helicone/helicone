@@ -34,7 +34,11 @@ import {
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  heliconeRequestToMappedContent,
+  MAPPERS,
+} from "@/packages/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
 import {
@@ -92,7 +96,7 @@ interface PromptEditorProps {
     body: LLMRequestBody;
     metadata: {
       provider: string;
-      createdFromUi: boolean;
+      isProduction: boolean;
       inputs?: Record<string, string>;
     };
   }; // Playground Mode
@@ -120,13 +124,13 @@ export default function PromptEditor({
     useGetRequestWithBodies(requestId ?? "");
   // - Prompt Table
   const {
-    prompt,
+    prompt: promptData,
     isLoading: isPromptLoading,
     refetch: refetchPrompt,
   } = usePrompt(promptId ?? "");
   // - Prompt Versions Table
   const {
-    prompts: promptVersions,
+    prompts: promptVersionsData,
     isLoading: isVersionsLoading,
     refetch: refetchPromptVersions,
   } = usePromptVersions(promptId ?? "");
@@ -138,6 +142,11 @@ export default function PromptEditor({
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
 
   // VALIDATION
+  // - Is Imported From Code
+  const isImportedFromCode = useMemo(() => {
+    if (basePrompt) return false;
+    return promptData?.metadata?.createdFromUi !== true;
+  }, [promptData?.metadata?.createdFromUi, basePrompt]);
   // - Can Run
   const canRun = useMemo(() => {
     // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
@@ -153,7 +162,7 @@ export default function PromptEditor({
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
         ) ??
           false) &&
-        prompt?.metadata?.createdFromUi !== false
+        !isImportedFromCode
       );
     }
 
@@ -167,19 +176,16 @@ export default function PromptEditor({
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
         ) ??
           false) &&
-        prompt?.metadata?.createdFromUi !== false
+        !isImportedFromCode
       );
-  }, [
-    state?.messages,
-    state?.parameters?.provider,
-    prompt?.metadata?.createdFromUi,
-  ]);
+  }, [state?.messages, state?.parameters?.provider, isImportedFromCode]);
 
   // CALLBACKS
   // - Load Version Data into State
   const loadVersionData = useCallback(
     (ver: any) => {
       if (!ver && !requestId) return;
+      console.log(isImportedFromCode);
 
       console.log("Loading version row:", ver);
 
@@ -191,47 +197,69 @@ export default function PromptEditor({
         evals?: any[];
         structure?: any;
       } = {};
+
       let stateMessages: Message[] = [];
       let inputs: StateInputs[] = [];
       let masterVersion: number | undefined;
 
-      // Load prompt data either from: request or version
+      // 1. Load prompt either from:
+      // A. Request data
       if (requestId && requestData?.data) {
         const mappedContent = heliconeRequestToMappedContent(requestData.data);
-        const requestBody = mappedContent.schema.request;
 
-        templateData = requestBody;
-        stateMessages = requestBody.messages || [];
-      } else {
-        // 1. Parse the helicone template and metadata columns from the version
-        templateData =
-          typeof ver.helicone_template === "string"
-            ? JSON.parse(ver.helicone_template)
-            : ver.helicone_template || {};
-        metadata =
-          typeof ver.metadata === "string"
-            ? JSON.parse(ver.metadata)
-            : ((ver.metadata || {}) as {
-                provider?: string;
-                isProduction?: boolean;
-                inputs?: Record<string, string>;
-                evals?: any[];
-                structure?: any;
-              });
+        templateData = mappedContent.schema.request;
+        // TODO: Use findClosestProvider and findClosestModel here instead?
+        metadata = {
+          provider: undefined,
+          isProduction: true,
+          inputs: undefined,
+        };
+      }
+      // B. Prompt data
+      else if (promptId && promptData && promptVersionsData) {
+        const versionTemplate = ver.helicone_template;
+        const versionMetadata = ver.metadata;
+
+        // I. Imported from Code
+        if (isImportedFromCode) {
+          const mapperType = getMapperType({
+            model: versionTemplate.model,
+            provider: versionMetadata.provider || "OPENAI",
+          });
+          const mapper = MAPPERS[mapperType];
+          const mappedResult = mapper({
+            request: versionTemplate,
+            response: {
+              choices: [],
+              model: versionTemplate.model,
+            }, // This information is not available
+            statusCode: 200,
+            model: versionTemplate.model,
+          });
+
+          templateData = mappedResult.schema.request;
+          metadata = versionMetadata;
+        } else {
+          // II. Created from UI
+          templateData =
+            typeof versionTemplate === "string"
+              ? JSON.parse(versionTemplate)
+              : versionTemplate || {};
+          metadata =
+            typeof versionMetadata === "string"
+              ? JSON.parse(versionMetadata)
+              : versionMetadata || {};
+        }
 
         // 2. Derive "masterVersion" if needed
         masterVersion =
           metadata?.isProduction === true
             ? ver.major_version
-            : promptVersions?.find(
+            : promptVersionsData?.find(
                 (v) => (v.metadata as { isProduction?: boolean })?.isProduction
               )?.major_version ?? ver.major_version;
 
-        // 3. Convert any messages in the template to StateMessages
-        stateMessages = (templateData.messages ||
-          templateData.content) as Message[];
-
-        // 4.A. First collect all variables and their default values from the metadata inputs
+        // 3.A. First collect all variables and their default values from the metadata inputs
         inputs = Object.entries(metadata?.inputs || {}).map(
           ([name, value]) => ({
             name,
@@ -240,7 +268,7 @@ export default function PromptEditor({
           })
         );
 
-        // 4.B. Extract additional variables contained in message content
+        // 3.B. Extract additional variables contained in message content
         stateMessages.forEach((msg) => {
           const vars = extractVariables(msg.content || "", "helicone");
           vars.forEach((v) => {
@@ -252,7 +280,7 @@ export default function PromptEditor({
           });
         });
 
-        // 4.C. Add message auto-inputs to the list
+        // 3.C. Add message auto-inputs to the list
         stateMessages.forEach((msg) => {
           msg.idx !== undefined &&
             inputs.push({
@@ -263,9 +291,12 @@ export default function PromptEditor({
             });
         });
 
-        // 4.D. Deduplicate variables
+        // 3.D. Deduplicate variables
         inputs = deduplicateVariables(inputs);
       }
+
+      // 4. Typeguard and cast templateData to Message[]
+      stateMessages = (templateData.messages ?? []) as Message[];
 
       // 5. Validate model-provider or closest match or default
       const provider = findClosestProvider(
@@ -295,7 +326,14 @@ export default function PromptEditor({
         isDirty: false,
       });
     },
-    [promptId, promptVersions, requestId, requestData]
+    [
+      promptId,
+      promptData,
+      promptVersionsData,
+      requestId,
+      requestData,
+      isImportedFromCode,
+    ]
   );
   // - Update State
   const updateState = useCallback(
@@ -450,7 +488,7 @@ export default function PromptEditor({
     async (version: any) => {
       if (!version) return;
 
-      const currentProductionVersion = promptVersions?.find(
+      const currentProductionVersion = promptVersionsData?.find(
         (v) => (v.metadata as { isProduction?: boolean })?.isProduction
       );
 
@@ -494,7 +532,7 @@ export default function PromptEditor({
         setNotification("Failed to promote version", "error");
       }
     },
-    [jawnClient, promptVersions, refetchPromptVersions, setNotification]
+    [jawnClient, promptVersionsData, refetchPromptVersions, setNotification]
   );
   // - Handle ID Edit
   const handleIdEdit = useCallback(
@@ -506,7 +544,7 @@ export default function PromptEditor({
           {
             params: {
               path: {
-                promptId: prompt?.id || "",
+                promptId: promptData?.id || "",
               },
             },
             body: {
@@ -524,7 +562,7 @@ export default function PromptEditor({
         await refetchPrompt();
       }
     },
-    [promptId, jawnClient, prompt?.id, refetchPrompt, setNotification]
+    [promptId, jawnClient, promptData?.id, refetchPrompt, setNotification]
   );
   // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
@@ -548,7 +586,7 @@ export default function PromptEditor({
 
     // 3. SAVE: If dirty
     if (promptId && state.isDirty) {
-      const latestVersionId = promptVersions?.[0]?.id;
+      const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // A. Build Helicone Template for Saving
@@ -650,7 +688,7 @@ export default function PromptEditor({
     refetchPromptVersions,
     loadVersionData,
     updateState,
-    promptVersions,
+    promptVersionsData,
   ]);
   // - Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -744,7 +782,7 @@ export default function PromptEditor({
     try {
       const improvedMessages = parseImprovedMessages(state.improvement.content);
 
-      const latestVersionId = promptVersions?.[0]?.id;
+      const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // Build Helicone Template for Saving
@@ -795,7 +833,7 @@ export default function PromptEditor({
     }
   }, [
     state,
-    promptVersions,
+    promptVersionsData,
     jawnClient,
     loadVersionData,
     refetchPromptVersions,
@@ -843,12 +881,12 @@ export default function PromptEditor({
       if (requestId && requestData?.data) {
         loadVersionData(null);
       } else if (
-        promptVersions &&
-        promptVersions.length > 0 &&
+        promptVersionsData &&
+        promptVersionsData.length > 0 &&
         !isVersionsLoading
       ) {
         // Load from prompt version data
-        loadVersionData(promptVersions[0]);
+        loadVersionData(promptVersionsData[0]);
       } else if (basePrompt) {
         // Load directly from basePrompt
         const provider = findClosestProvider(
@@ -882,7 +920,7 @@ export default function PromptEditor({
   }, [
     isVersionsLoading,
     loadVersionData,
-    promptVersions,
+    promptVersionsData,
     state,
     requestId,
     requestData,
@@ -894,7 +932,7 @@ export default function PromptEditor({
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === "Enter" &&
-        prompt?.metadata?.createdFromUi !== false
+        !isImportedFromCode
       ) {
         event.preventDefault();
         handleSaveAndRun();
@@ -903,7 +941,7 @@ export default function PromptEditor({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveAndRun, prompt?.metadata?.createdFromUi]);
+  }, [handleSaveAndRun, isImportedFromCode]);
 
   // HELPERS
   // - Add Messages
@@ -971,10 +1009,10 @@ export default function PromptEditor({
           {/* Version Selector */}
           {promptId && (
             <VersionSelector
-              id={prompt?.user_defined_id || ""}
+              id={promptData?.user_defined_id || ""}
               currentVersion={state.version ?? 0}
               masterVersion={state.masterVersion ?? 0}
-              versions={promptVersions || []}
+              versions={promptVersionsData || []}
               isLoading={isVersionsLoading}
               isDirty={state.isDirty}
               onVersionSelect={loadVersionData}
@@ -1027,7 +1065,7 @@ export default function PromptEditor({
                 <ScrollArea className="h-full">
                   <PromptMetricsTab
                     id={promptId}
-                    promptUserDefinedId={prompt?.user_defined_id || ""}
+                    promptUserDefinedId={promptData?.user_defined_id || ""}
                   />
                 </ScrollArea>
               </DrawerContent>
@@ -1115,7 +1153,7 @@ export default function PromptEditor({
               disabled={newFromPromptVersion.isLoading}
               onClick={async () => {
                 const result = await newFromPromptVersion.mutateAsync({
-                  name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                  name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
                   originalPromptVersion: state.versionId ?? "",
                 });
                 router.push(`/experiments/${result.data?.data?.experimentId}`);
@@ -1133,7 +1171,7 @@ export default function PromptEditor({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={prompt?.metadata?.createdFromUi === false}
+                  disabled={isImportedFromCode}
                   onClick={() => {}}
                 >
                   <PiRocketLaunchBold className="h-4 w-4 mr-2" />
@@ -1181,7 +1219,7 @@ export async function getPrompt(
 
 async function pullPromptAndRunCompletion() {
   const prompt = await getPrompt("${
-    prompt?.user_defined_id || "my-prompt-id"
+    promptData?.user_defined_id || "my-prompt-id"
   }", {
     ${
       state?.inputs
