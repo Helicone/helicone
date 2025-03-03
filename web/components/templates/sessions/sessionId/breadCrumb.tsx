@@ -68,7 +68,7 @@ export const BreadCrumb = ({
             name: "Sessions",
           },
           {
-            href: `/sessions/${sessionId}`,
+            href: `/sessions/${encodeURIComponent(sessionId)}`,
             name: sessionId,
           },
         ]}

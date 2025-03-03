@@ -218,7 +218,10 @@ export default function ThemedTable<T extends { id?: string }>(
       currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
     ) {
       setOnClickElement(
-        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+        () => () =>
+          router.push(
+            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
+          )
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

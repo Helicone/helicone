@@ -58,10 +58,14 @@ export default SessionDetail;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const session_id = options.context.query.session_id;
+  const decodedSessionId =
+    typeof session_id === "string"
+      ? decodeURIComponent(session_id)
+      : session_id;
   return {
     props: {
       user: options.userData.user,
-      session_id,
+      session_id: decodedSessionId,
     },
   };
 });
