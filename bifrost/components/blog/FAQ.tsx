@@ -46,19 +46,19 @@ export function FAQ({
           <div key={index} className="overflow-hidden">
             <div
               onClick={(e) => handleClick(e, index)}
-              className="w-full pt-1 pb-4 cursor-pointer"
+              className="w-full pt-0 pb-4 cursor-pointer"
             >
-              <h4 className="text-slate-400 font-medium flex items-center">
+              <h3 className="text-base text-slate-400 font-medium flex items-center">
                 <ChevronRightIcon
                   className={`mr-3 w-4 h-4 transition-transform duration-300 ease-in-out ${openIndices.includes(index) ? "rotate-90" : ""}`}
                 />
                 <span
-                  className="text-slate-700"
+                  className="text-slate-900 font-semibold"
                   dangerouslySetInnerHTML={renderHTML(faq.question)}
                 />
-              </h4>
+              </h3>
               <div
-                className={`text-slate-500 text-md ml-8 overflow-hidden transition-all duration-200 ease-in-out ${openIndices.includes(index)
+                className={`text-slate-600 text-md ml-8 overflow-hidden transition-all duration-200 ease-in-out ${openIndices.includes(index)
                   ? "max-h-[500px] opacity-100 mt-3"
                   : "max-h-0 opacity-0 mt-0"
                   }`}
