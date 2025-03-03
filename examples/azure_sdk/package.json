@@ -1,0 +1,20 @@
+{
+  "name": "openai-to-anthropic",
+  "version": "1.0.0",
+  "description": "Example of using OpenAI API with Anthropic backend",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.1",
+    "dotenv": "^16.0.3",
+    "https": "^1.0.0",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
