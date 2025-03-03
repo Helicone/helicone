@@ -433,6 +433,7 @@ export class LoggingHandler extends AbstractLogHandler {
       model: context.processedLog.model,
       heliconeTemplate: context.processedLog.request.heliconeTemplate,
       createdAt: context.message.log.request.requestCreatedAt,
+      provider: context.message.log.request.provider,
     };
 
     return promptRecord;

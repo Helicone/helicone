@@ -21,7 +21,7 @@ import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 
-const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
+export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,

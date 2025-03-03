@@ -20,11 +20,6 @@ export interface PromptState {
   improvement?: { reasoning: string; content: string };
 }
 
-export type HeliconeMessage =
-  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
-  | { type: "text"; text: string } // Assistants API - from content: []
-  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []
-
 export interface StateParameters {
   provider: keyof typeof PROVIDER_MODELS;
   model: string;
@@ -57,3 +52,9 @@ export interface PromptVersionReference {
   experiment_id?: string | null;
   updated_at?: string;
 }
+
+// LEGACY: Pre-llm-mapper
+export type HeliconeMessage =
+  | ChatCompletionMessageParam // OpenAI Chat Completion - from messages: []
+  | { type: "text"; text: string } // Assistants API - from content: []
+  | `<helicone-auto-prompt-input idx=${number} />`; // Helicone Auto Prompt Input - from messages: []

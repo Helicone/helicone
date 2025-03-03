@@ -743,6 +743,8 @@ Json: JsonObject;
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      /** @enum {string|null} */
+      reasoning_effort?: "low" | "medium" | "high" | null;
       /** Format: double */
       n?: number | null;
       stop?: string[] | null;
