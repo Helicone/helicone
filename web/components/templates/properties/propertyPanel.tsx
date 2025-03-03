@@ -11,7 +11,6 @@ import {
   SingleFilterDef,
   getPropertyFiltersV2,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import ExportButton from "../../shared/themed/table/exportButton";
 import { UIFilterRow } from "@/services/lib/filters/types";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
@@ -30,6 +29,14 @@ import { Tag, DollarSign, Table2, Clock, ExternalLink } from "lucide-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import PropertyTopCosts from "./propertyTopCosts";
 import { Row } from "@/components/layout/common";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 interface PropertyPanelProps {
   property: string;
@@ -63,11 +70,22 @@ const PropertyPanel = (props: PropertyPanelProps) => {
     end: new Date(),
   });
 
+  // Add state for sorting
+  const [sortConfig, setSortConfig] = useState<{
+    key: string | undefined;
+    direction: "asc" | "desc";
+  }>({
+    key: "total_requests",
+    direction: "desc",
+  });
+
   const { keyMetrics, valueMetrics, refetch, isRefetching, isAnyLoading } =
     usePropertyCard({
       timeFilter,
       property,
       limit: showMore ? 100 : 11,
+      sortKey: sortConfig.key,
+      sortDirection: sortConfig.direction,
     });
 
   const {
@@ -154,6 +172,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               Value: propertyValue.property_value,
               Requests: propertyValue.total_requests,
               Cost: propertyValue.total_cost,
+              "Avg Prompt Tokens": propertyValue.avg_prompt_tokens_per_request,
               "Avg Comp Tokens":
                 propertyValue.avg_completion_tokens_per_request,
               "Avg Latency": propertyValue.avg_latency_per_request,
@@ -188,7 +207,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                     <div>
                       <p className="text-sm text-muted-foreground">Cost</p>
                       {isAnyLoading ? (
-                        <Skeleton className="h-7 w-24" />
+                        <div className="flex items-center space-x-2">
+                          <Skeleton className="h-7 w-24 bg-slate-200 dark:bg-slate-700" />
+                        </div>
                       ) : (
                         <p className="text-xl font-semibold">
                           {keyMetrics.totalCost.data?.data
@@ -208,7 +229,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                     <div>
                       <p className="text-sm text-muted-foreground">Requests</p>
                       {isAnyLoading ? (
-                        <Skeleton className="h-7 w-24" />
+                        <div className="flex items-center space-x-2">
+                          <Skeleton className="h-7 w-24 bg-slate-200 dark:bg-slate-700" />
+                        </div>
                       ) : (
                         <p className="text-xl font-semibold">
                           {
@@ -234,7 +257,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         Average Latency / Req
                       </p>
                       {isAnyLoading ? (
-                        <Skeleton className="h-7 w-24" />
+                        <div className="flex items-center space-x-2">
+                          <Skeleton className="h-7 w-24 bg-slate-200 dark:bg-slate-700" />
+                        </div>
                       ) : (
                         <p className="text-xl font-semibold">
                           {keyMetrics.averageLatency.data?.data
@@ -250,9 +275,68 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               </div>
 
               {isAnyLoading ? (
-                <div className="py-8">
-                  <LoadingAnimation title="Loading Data..." />
-                </div>
+                <Card className="rounded-none border-0 shadow-none mt-4">
+                  <CardContent className="p-0">
+                    <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800 border-t">
+                      <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
+                        <Table className="h-full bg-white dark:bg-black">
+                          <TableHeader>
+                            <TableRow className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm">
+                              {[
+                                "Value",
+                                "Requests",
+                                "Cost",
+                                "Avg Prompt Tokens",
+                                "Avg Comp Tokens",
+                                "Avg Latency",
+                                "Avg Cost",
+                              ].map((header, index) => (
+                                <TableHead
+                                  key={index}
+                                  className={`relative text-[12px] font-semibold text-slate-900 dark:text-slate-100 ${
+                                    index === 0 ? "pl-10" : ""
+                                  }`}
+                                >
+                                  {header}
+                                  {index < 6 && (
+                                    <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                                </TableHead>
+                              ))}
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody className="text-[13px]">
+                            {Array.from({ length: 10 }).map((_, rowIndex) => (
+                              <TableRow key={`skeleton-row-${rowIndex}`}>
+                                {Array.from({ length: 7 }).map(
+                                  (_, colIndex) => (
+                                    <TableCell
+                                      key={`skeleton-cell-${rowIndex}-${colIndex}`}
+                                      className={`py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300 ${
+                                        colIndex === 0 ? "pl-10" : ""
+                                      } ${
+                                        colIndex === 6
+                                          ? "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                          : ""
+                                      }`}
+                                    >
+                                      <Skeleton
+                                        className={`h-5 ${
+                                          colIndex === 0 ? "w-32" : "w-16"
+                                        } bg-slate-200 dark:bg-slate-700`}
+                                      />
+                                    </TableCell>
+                                  )
+                                )}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card className="rounded-none border-0 shadow-none mt-4">
                   <CardContent className="p-0">
@@ -263,6 +347,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         {
                           key: "property_value" as keyof (typeof cleanedValueData)[0],
                           header: "Value",
+                          sortable: true,
                           render: (propertyValue) => (
                             <Button
                               variant="link"
@@ -304,18 +389,31 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         {
                           key: "total_requests" as keyof (typeof cleanedValueData)[0],
                           header: "Requests",
+                          sortable: true,
                           render: (propertyValue) =>
                             propertyValue.total_requests,
                         },
                         {
                           key: "total_cost" as keyof (typeof cleanedValueData)[0],
                           header: "Cost",
+                          sortable: true,
                           render: (propertyValue) =>
                             `$${formatNumber(propertyValue.total_cost, 6)}`,
                         },
                         {
+                          key: "avg_prompt_tokens_per_request" as keyof (typeof cleanedValueData)[0],
+                          header: "Avg Prompt Tokens",
+                          sortable: true,
+                          render: (propertyValue) =>
+                            formatNumber(
+                              propertyValue.avg_prompt_tokens_per_request,
+                              6
+                            ),
+                        },
+                        {
                           key: "avg_completion_tokens_per_request" as keyof (typeof cleanedValueData)[0],
                           header: "Avg Comp Tokens",
+                          sortable: true,
                           render: (propertyValue) =>
                             formatNumber(
                               propertyValue.avg_completion_tokens_per_request,
@@ -325,6 +423,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         {
                           key: "avg_latency_per_request" as keyof (typeof cleanedValueData)[0],
                           header: "Avg Latency",
+                          sortable: true,
                           render: (propertyValue) =>
                             formatNumber(
                               propertyValue.avg_latency_per_request,
@@ -334,6 +433,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         {
                           key: "average_cost_per_request" as keyof (typeof cleanedValueData)[0],
                           header: "Avg Cost",
+                          sortable: true,
                           render: (propertyValue) =>
                             `$${formatNumber(
                               propertyValue.average_cost_per_request,
@@ -342,6 +442,17 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                         },
                       ]}
                       emptyMessage="No property data available"
+                      onSort={(
+                        key: keyof (typeof cleanedValueData)[0] | undefined,
+                        direction: "asc" | "desc"
+                      ) => {
+                        setSortConfig({
+                          key: key as string,
+                          direction,
+                        });
+                      }}
+                      currentSortKey={sortConfig.key}
+                      currentSortDirection={sortConfig.direction}
                     />
                   </CardContent>
                 </Card>

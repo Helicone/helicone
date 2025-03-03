@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   PieChart,
   Pie,
@@ -41,6 +42,35 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
 
   if (!property) {
     return <div>No property selected</div>;
+  }
+
+  // Show skeleton loading while data is being fetched
+  if (topCosts.isLoading) {
+    return (
+      <Card className="rounded-none border-0 shadow-none">
+        <CardContent className="flex flex-col items-center p-6">
+          <Skeleton className="h-8 w-48 mb-6 bg-slate-200 dark:bg-slate-700" />
+          <div className="w-full h-[400px] flex items-center justify-center">
+            <div className="relative w-[300px] h-[300px]">
+              {/* Outer circle skeleton */}
+              <Skeleton className="absolute inset-0 rounded-full bg-slate-200 dark:bg-slate-700" />
+              {/* Inner circle skeleton (for donut chart effect) */}
+              <div className="absolute inset-[80px] rounded-full bg-white dark:bg-black" />
+
+              {/* Legend skeleton items */}
+              <div className="absolute bottom-[-80px] left-0 right-0 flex flex-wrap justify-center gap-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-3 rounded-sm bg-slate-300 dark:bg-slate-600" />
+                    <Skeleton className="h-4 w-20 bg-slate-200 dark:bg-slate-700" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
