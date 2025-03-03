@@ -7,11 +7,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { clsx } from "../clsx";
+import { useState } from "react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 type ColumnConfig<T> = {
   key: keyof T | undefined;
   header: string;
   render: (item: T) => React.ReactNode;
+  sortable?: boolean;
 };
 
 interface SimpleTableProps<T> {
@@ -20,6 +23,11 @@ interface SimpleTableProps<T> {
   emptyMessage?: string;
   onSelect?: (item: T) => void;
   className?: string;
+  defaultSortKey?: keyof T;
+  defaultSortDirection?: "asc" | "desc";
+  onSort?: (key: keyof T | undefined, direction: "asc" | "desc") => void;
+  currentSortKey?: keyof T | string;
+  currentSortDirection?: "asc" | "desc";
 }
 
 export function SimpleTable<T>(props: SimpleTableProps<T>) {
@@ -29,7 +37,60 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
     emptyMessage = "No data available",
     onSelect,
     className,
+    defaultSortKey,
+    defaultSortDirection = "desc",
+    onSort,
+    currentSortKey,
+    currentSortDirection,
   } = props;
+
+  const [internalSortConfig, setInternalSortConfig] = useState<{
+    key: keyof T | undefined;
+    direction: "asc" | "desc";
+  }>({
+    key: defaultSortKey,
+    direction: defaultSortDirection,
+  });
+
+  const sortConfig = onSort
+    ? {
+        key: currentSortKey as keyof T | undefined,
+        direction: currentSortDirection || "desc",
+      }
+    : internalSortConfig;
+
+  const sortedData = onSort
+    ? data
+    : [...data].sort((a, b) => {
+        if (!sortConfig.key) return 0;
+
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue === bValue) return 0;
+
+        const compareResult = aValue < bValue ? -1 : 1;
+        return sortConfig.direction === "asc" ? compareResult : -compareResult;
+      });
+
+  const handleSort = (key: keyof T | undefined) => {
+    if (!key || key === undefined) return;
+
+    const newDirection =
+      sortConfig.key === key && sortConfig.direction === "desc"
+        ? "asc"
+        : "desc";
+
+    if (onSort) {
+      onSort(key, newDirection);
+    } else {
+      setInternalSortConfig({
+        key,
+        direction: newDirection,
+      });
+    }
+  };
+
   return (
     <div
       className={clsx(
@@ -46,10 +107,22 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
                   key={String(column.key || index)}
                   className={clsx(
                     "relative text-[12px] font-semibold text-slate-900 dark:text-slate-100",
-                    index === 0 && "pl-10"
+                    index === 0 && "pl-10",
+                    column.sortable &&
+                      "cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
+                  onClick={() => column.sortable && handleSort(column.key)}
                 >
-                  {column.header}
+                  <div className="flex items-center gap-1">
+                    {column.header}
+                    {column.sortable &&
+                      sortConfig.key === column.key &&
+                      (sortConfig.direction === "asc" ? (
+                        <ArrowUp className="h-3 w-3" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" />
+                      ))}
+                  </div>
                   {index < columns.length - 1 && (
                     <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
                   )}
@@ -59,7 +132,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
             </TableRow>
           </TableHeader>
           <TableBody className="text-[13px]">
-            {data.map((item, index) => (
+            {sortedData.map((item, index) => (
               <TableRow
                 key={`row-${index}`}
                 className={clsx(
@@ -86,7 +159,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
           </TableBody>
         </Table>
       </div>
-      {data.length === 0 && (
+      {sortedData.length === 0 && (
         <div className="bg-white dark:bg-black h-48 w-full border-slate-300 dark:border-slate-700 py-2 px-4 flex items-center justify-center">
           <p className="text-slate-500 dark:text-slate-400">{emptyMessage}</p>
         </div>
