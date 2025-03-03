@@ -236,14 +236,6 @@ The modest improvements in GPT-4.5 despite enormous scaling raises questions abo
 
 The SWE-Lancer results suggest that emotional intelligence and reasoning abilities might be key to unlocking greater real-world performance from AI models.
 
-{/* ## Conclusion
-
-GPT-4.5 represents an interesting step in AI development, focusing on conversational abilities and emotional intelligence rather than pure reasoning power. While it falls short of expectations in some areas—particularly complex reasoning tasks—it offers meaningful improvements in natural conversation, factual accuracy, and human-like interactions.
-
-For developers, GPT-4.5 is best suited for applications where user experience and conversational quality matter more than solving complex problems. Its high costs and reasoning limitations make it a specialized tool rather than a universal upgrade over previous models.
-
-As OpenAI's final non-reasoning model, GPT-4.5 marks the end of one development path and hints at a future where conversational fluency and systematic reasoning are combined in more powerful and versatile models. */}
-
 ### You might also like: 
 
 - **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code</a>**
@@ -259,32 +251,34 @@ As OpenAI's final non-reasoning model, GPT-4.5 marks the end of one development 
   secondaryButtonText="Calculate Costs"
   secondaryButtonLink="https://helicone.ai/llm-cost"
 />
----
 
-## FAQs
-
-### What is the main difference between GPT-4.5 and o3-mini?
-
-GPT-4.5 focuses on conversational abilities and emotional intelligence, while o3-mini excels at step-by-step reasoning for complex problems. GPT-4.5 has better knowledge retrieval and lower hallucination rates, but o3-mini performs better on math, science, and structured coding tasks.
-
-### What is the GPT-4.5's context window?
-
-GPT-4.5 has a context window of 128k tokens with a max output token window of 16,384 tokens.
-
-### Is GPT-4.5 worth the higher cost compared to GPT-4o?
-
-It depends on your use case. For user-facing applications where conversation quality matters, the improvement may justify the cost. For most technical applications, GPT-4o offers better value.
-
-### When will GPT-4.5 be available to all users?
-
-OpenAI is rolling out GPT-4.5 gradually due to GPU constraints. It's currently available to Pro users, with Plus users gaining access next week, followed by Enterprise and Educational users.
-
-### Why does GPT-4.5 still make basic counting errors?
-
-GPT-4.5's architecture focuses on pattern recognition and association rather than explicit reasoning. Without a step-by-step approach to solving problems, it can make errors in tasks that require precise counting or systematic analysis.
-
-### Why did OpenAI develop GPT-4.5 instead of focusing on reasoning capabilities?
-
-OpenAI is pursuing two complementary approaches to AI advancement. While their o-series focuses on reasoning, GPT-4.5 represents their continued exploration of scaled unsupervised learning. This dual-track approach allows them to advance different aspects of AI capabilities simultaneously.
+<FAQ 
+  items={[
+    {
+      question: "What is the main difference between GPT-4.5 and o3-mini?",
+      answer: "GPT-4.5 focuses on conversational abilities and emotional intelligence, while o3-mini excels at step-by-step reasoning for complex problems. GPT-4.5 has better knowledge retrieval and lower hallucination rates, but o3-mini performs better on math, science, and structured coding tasks."
+    },
+    {
+      question: "What is the GPT-4.5's context window?",
+      answer: "GPT-4.5 has a context window of 128k tokens with a max output token window of 16,384 tokens."
+    },
+    {
+      question: "Is GPT-4.5 worth the higher cost compared to GPT-4o?",
+      answer: "It depends on your use case. For user-facing applications where conversation quality matters, the improvement may justify the cost. For most technical applications, GPT-4o offers better value."
+    },
+    {
+      question: "When will GPT-4.5 be available to all users?",
+      answer: "OpenAI is rolling out GPT-4.5 gradually due to GPU constraints. It's currently available to Pro users, with Plus users gaining access next week, followed by Enterprise and Educational users."
+    },
+    {
+      question: "Why does GPT-4.5 still make basic counting errors?",
+      answer: "GPT-4.5's architecture focuses on pattern recognition and association rather than explicit reasoning. Without a step-by-step approach to solving problems, it can make errors in tasks that require precise counting or systematic analysis."
+    },
+    {
+      question: "Why did OpenAI develop GPT-4.5 instead of focusing on reasoning capabilities?",
+      answer: "OpenAI is pursuing two complementary approaches to AI advancement. While their o-series focuses on reasoning, GPT-4.5 represents their continued exploration of scaled unsupervised learning. This dual-track approach allows them to advance different aspects of AI capabilities simultaneously."
+    }
+  ]}
+/>
 
 <Questions />

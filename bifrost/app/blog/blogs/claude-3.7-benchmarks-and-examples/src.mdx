@@ -187,40 +187,41 @@ So, give them a try today, we can't wait to see what you build!
   secondaryButtonLink="https://helicone.ai/signup"
 />
 
----
-
-## FAQs
-
-1. **How does Claude 3.7's "extended thinking" feature work?**
-
-Claude 3.7 allows users to set a "thinking budget" of up to 128K tokens. During this thinking phase, the model explores multiple approaches, evaluates potential solutions, and engages in deeper reasoning before providing a response. This thinking is transparent, so users can see the model's reasoning process.
-
-2. **Is Claude Code secure for use with proprietary code?**
-
-Claude Code operates under the same data security policies as other Anthropic products. Code submitted to Claude Code is subject to Anthropic's data retention policies. Claude Code only sends necessary data to the API and doesn't store your entire codebase or train models with your data. 
-
-3. **How does Claude 3.7 compare to other leading AI models for coding tasks?**
-
-Claude 3.7 currently leads in benchmark performance on coding tasks, particularly on SWE-bench Verified and TAU-bench. Its hybrid reasoning capabilities give it an edge in complex software engineering tasks that require a deep understanding of codebases and programming concepts.
-
-4. **What programming languages does Claude 3.7 support?**
-
-Claude 3.7 shows strong performance across widely-used languages including Python, JavaScript, TypeScript, Java, C++, Go, and Rust. It generally performs better with more common languages and frameworks due to their representation in training data.
-
-5. **Do I need special hardware to run Claude Code?**
-
-Claude Code is a command-line tool that runs on standard developer machines. The heavy computational work happens on Anthropic's servers, so local hardware requirements are minimal. However, a stable internet connection is necessary as the tool communicates with Anthropic's API.
-
-5. **When is Claude 4.0 going to be released?**
-
-There is no official release date for Claude 4.0 yet. While a lot of people expected the next model after Claude 3.5 to be Claude 4.0, Anthropic clearly had different plans. We're just as eager as you to see what 4.0 has in store. 
-
-6. **What is Claude's 3.7's context window?**
-
-Claude 3.7 has a context window of 200k tokens, like Claude 3.5. This allows the model to consider a large amount of information when generating responses.
-
-7. **Can Claude 3.7 access the internet?**
-
-No. Claude 3.7 does not have direct internet access. It also does not possess "Deep Research" abilities unlike most of its competitors.
+<FAQ 
+  items={[
+    {
+      question: "How does Claude 3.7's \"extended thinking\" feature work?",
+      answer: "Claude 3.7 allows users to set a \"thinking budget\" of up to 128K tokens. During this thinking phase, the model explores multiple approaches, evaluates potential solutions, and engages in deeper reasoning before providing a response. This thinking is transparent, so users can see the model's reasoning process."
+    },
+    {
+      question: "Is Claude Code secure for use with proprietary code?",
+      answer: "Claude Code operates under the same data security policies as other Anthropic products. Code submitted to Claude Code is subject to Anthropic's data retention policies. Claude Code only sends necessary data to the API and doesn't store your entire codebase or train models with your data."
+    },
+    {
+      question: "How does Claude 3.7 compare to other leading AI models for coding tasks?",
+      answer: "Claude 3.7 currently leads in benchmark performance on coding tasks, particularly on SWE-bench Verified and TAU-bench. Its hybrid reasoning capabilities give it an edge in complex software engineering tasks that require a deep understanding of codebases and programming concepts."
+    },
+    {
+      question: "What programming languages does Claude 3.7 support?",
+      answer: "Claude 3.7 shows strong performance across widely-used languages including Python, JavaScript, TypeScript, Java, C++, Go, and Rust. It generally performs better with more common languages and frameworks due to their representation in training data."
+    },
+    {
+      question: "Do I need special hardware to run Claude Code?",
+      answer: "Claude Code is a command-line tool that runs on standard developer machines. The heavy computational work happens on Anthropic's servers, so local hardware requirements are minimal. However, a stable internet connection is necessary as the tool communicates with Anthropic's API."
+    },
+    {
+      question: "When is Claude 4.0 going to be released?",
+      answer: "There is no official release date for Claude 4.0 yet. While a lot of people expected the next model after Claude 3.5 to be Claude 4.0, Anthropic clearly had different plans. We're just as eager as you to see what 4.0 has in store."
+    },
+    {
+      question: "What is Claude's 3.7's context window?",
+      answer: "Claude 3.7 has a context window of 200k tokens, like Claude 3.5. This allows the model to consider a large amount of information when generating responses."
+    },
+    {
+      question: "Can Claude 3.7 access the internet?",
+      answer: "No. Claude 3.7 does not have direct internet access. It also does not possess \"Deep Research\" abilities unlike most of its competitors."
+    }
+  ]}
+/>
 
 <Questions />
