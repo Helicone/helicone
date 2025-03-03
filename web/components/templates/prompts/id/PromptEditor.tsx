@@ -156,29 +156,25 @@ export default function PromptEditor({
       state?.parameters?.provider === "GOOGLE"
     ) {
       return (
-        (state?.messages.some(
+        state?.messages.some(
           (m) =>
             typeof m !== "string" &&
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-        ) ??
-          false) &&
-        !isImportedFromCode
+        ) ?? false
       );
     }
 
     // For other providers, check if there's at least one user message with non-empty content
     else
       return (
-        (state?.messages.some(
+        state?.messages.some(
           (m) =>
             typeof m !== "string" &&
             m.role === "user" &&
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-        ) ??
-          false) &&
-        !isImportedFromCode
+        ) ?? false
       );
-  }, [state?.messages, state?.parameters?.provider, isImportedFromCode]);
+  }, [state?.messages, state?.parameters?.provider]);
 
   // CALLBACKS
   // - Load Version Data into State
@@ -584,8 +580,8 @@ export default function PromptEditor({
       variables.map((v) => [v.name, v.value || ""])
     );
 
-    // 3. SAVE: If dirty
-    if (promptId && state.isDirty) {
+    // 3. SAVE: If in promptId mode, not imported from code, and dirty
+    if (promptId && !isImportedFromCode && state.isDirty) {
       const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -689,6 +685,7 @@ export default function PromptEditor({
     loadVersionData,
     updateState,
     promptVersionsData,
+    isImportedFromCode,
   ]);
   // - Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -1076,7 +1073,7 @@ export default function PromptEditor({
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* Auto-Improve Button */}
-          {promptId && (
+          {promptId && !isImportedFromCode && (
             <Button
               variant="link"
               onClick={() => setIsAutoImproveOpen(true)}
@@ -1113,7 +1110,7 @@ export default function PromptEditor({
                 ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                 : ""
             }`}
-            variant={promptId ? "action" : "outline"}
+            variant={promptId && !isImportedFromCode ? "action" : "outline"}
             size="sm"
             disabled={!canRun}
             onClick={handleSaveAndRun}
@@ -1135,7 +1132,7 @@ export default function PromptEditor({
             )}
             <div
               className={`flex items-center gap-0.5 text-sm ${
-                (requestId || basePrompt) && !isStreaming
+                (requestId || basePrompt || isImportedFromCode) && !isStreaming
                   ? "text-black opacity-60"
                   : "text-white opacity-60"
               }`}
@@ -1278,7 +1275,7 @@ async function pullPromptAndRunCompletion() {
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
-              <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
+              <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
                   response={state.response || ""}
                   onAddToMessages={() =>

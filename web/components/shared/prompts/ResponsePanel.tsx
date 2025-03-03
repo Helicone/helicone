@@ -30,7 +30,7 @@ export default function ResponsePanel({
   }, [response]);
 
   return (
-    <div className="h-full flex flex-col group">
+    <div className="flex flex-col group">
       {/* Header */}
       <GlassHeader className="h-14 px-4 flex-shrink-0">
         <h2 className="font-semibold text-secondary">Response</h2>

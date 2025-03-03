@@ -194,7 +194,7 @@ export default function MessagesPanel({
                 rel="noopener noreferrer"
                 className="underline font-medium text-white hover:text-blue-300"
               >
-                Learn more about import formatting.
+                Learn more about importing from code.
               </Link>
             </p>
           </div>
