@@ -14,7 +14,7 @@ export function FAQ({
   title = "Frequently Asked Questions",
   items,
 }: FAQProps) {
-  const [open, setOpen] = useState(-1);
+  const [openIndices, setOpenIndices] = useState<number[]>([]);
 
   // Function to safely render HTML content
   const renderHTML = (content: string) => {
@@ -26,47 +26,57 @@ export function FAQ({
       e.stopPropagation();
       return;
     }
-    setOpen((prev) => (prev === index ? -1 : index));
+    setOpenIndices((prev) => {
+      if (prev.includes(index)) {
+        return prev.filter((i) => i !== index);
+      }
+      return [...prev, index];
+    });
   };
 
   return (
-    <div className="flex flex-col w-full bg-sky-50/50 rounded-2xl px-8 md:px-12 pt-6 pb-8 md:pb-12">
-      <h2 className="text-[32px] md:text-4xl font-bold text-left mb-6 mt-3">
+    <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
+      {/* <div className="rounded-lg bg-[#F2F9FC] px-6 py-4 border border-[#E3EFF3]"> */}
+      <h2 className="text-2xl font-semibold text-slate-900 mb-6">
         {title}
       </h2>
 
-      <div className="flex flex-col items-center gap-3 w-full">
+      <div className="flex flex-col">
         {items.map((faq, index) => (
-          <div
-            onClick={(e) => handleClick(e, index)}
-            key={index}
-            className="w-full py-2.5 px-3 border-2 border-sky-100 rounded-xl cursor-pointer bg-white"
-          >
-            <h3 className="text-base font-bold flex items-center">
-              <ChevronRightIcon
-                className={`mx-3 w-6 h-6 transition-transform ${
-                  open === index ? "rotate-90" : ""
-                }`}
-              />
-              <span 
-                className="text-gray-500"
-                dangerouslySetInnerHTML={renderHTML(faq.question)}
-              />
-            </h3>
+          <div key={index}>
             <div
-              className={`text-gray-500 text-sm ${
-                open === index ? "block mt-2 ml-12" : "hidden"
-              }`}
+              onClick={(e) => handleClick(e, index)}
+              className="w-full px-4 pt-1 pb-4 cursor-pointer"
             >
-              {typeof faq.answer === 'string' ? (
-                <div dangerouslySetInnerHTML={renderHTML(faq.answer)} />
-              ) : (
-                faq.answer
-              )}
+              <h4 className="text-slate-500 font-medium flex items-center">
+                <ChevronRightIcon
+                  className={`mr-3 w-4 h-4 transition-transform duration-300 ease-in-out ${openIndices.includes(index) ? "rotate-90" : ""}`}
+                />
+                <span
+                  className="text-slate-700"
+                  dangerouslySetInnerHTML={renderHTML(faq.question)}
+                />
+              </h4>
+              <div
+                className={`text-slate-500 text-sm ml-8 duration-200 ease-in-out ${openIndices.includes(index)
+                  ? "max-h-96 opacity-100 mt-3"
+                  : "max-h-0 opacity-0 mt-0"
+                  }`}
+              >
+                {typeof faq.answer === 'string' ? (
+                  <div dangerouslySetInnerHTML={renderHTML(faq.answer)} />
+                ) : (
+                  faq.answer
+                )}
+              </div>
             </div>
+            {index < items.length && (
+              <div className="border-b border-slate-200 mx-4"></div>
+            )}
           </div>
         ))}
       </div>
-    </div>
+      {/* </div> */}
+    </section>
   );
 }
