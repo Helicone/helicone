@@ -114,7 +114,7 @@ const SessionDetails = ({
             },
           }}
           onRowSelect={(row) => {
-            router.push(`/sessions/${row.session_id}`);
+            router.push(`/sessions/${encodeURIComponent(row.session_id)}`);
           }}
         />
       </TabsContent>
