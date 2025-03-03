@@ -82,51 +82,28 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
 
   return (
     <Link
-      id="featured"
-      className="flex flex-col gap-6 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2 md:col-span-1"
+      id="regular"
+      className="flex flex-col gap-4 md:gap-6 p-2 md:p-4 w-full bg-white hover:bg-sky-50 border border-transparent hover:border-sky-100 rounded-xl pb-4 md:pb-6 transition-all duration-300"
       href={blog.href}
     >
-      <Image
-        src={blog.imageUrl}
-        alt={blog.imageAlt || blog.title}
-        width={400}
-        height={300}
-        objectFit="cover"
-        className="rounded-lg h-60 w-full border border-gray-300"
-      />
+      <div className="overflow-hidden rounded-xl relative group aspect-[16/9] w-full">
+        <Image
+          src={blog.imageUrl}
+          alt={blog.imageAlt || blog.title}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          style={{ objectFit: "cover" }}
+          className="rounded-xl object-cover transform group-hover:scale-105 transition-transform duration-300"
+        />
+      </div>
 
-      <div className="w-full h-fit rounded-lg flex flex-col space-y-2 text-left">
-        <div className="flex items-center gap-2">
-          <span
-            className={clsx(
-              "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset"
-            )}
-          >
-            {blog.badgeText.toLowerCase()}
-          </span>
-          <span className="text-gray-400 text-sm">-</span>
-          <span className="text-gray-400 text-sm">{blog.time}</span>
-        </div>
-        <h2 className="font-semibold text-lg pt-2">{blog.title}</h2>
-        <p className="text-gray-500 text-sm">{blog.description}</p>
-        <div className="flex flex-row justify-between gap-4 items-center py-4">
-          <div className={clsx("flex items-center space-x-3 bottom-0")}>
-            {blog.authors.map((author, i) => (
-              <div className="flex items-center space-x-2" key={i}>
-                <img
-                  className="inline-block h-8 w-8 rounded-full"
-                  src={author.imageUrl}
-                  alt={author.imageAlt || ""}
-                />
-                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  {author.name}
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 pr-4">
-            <time>{blog.date}</time>
-          </p>
+      <div className="w-full h-fit flex flex-col space-y-2 text-left px-1 md:px-0">
+        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">{blog.title}</h2>
+        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">{blog.description}</p>
+        <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
+          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>•</span>
+          <span>{blog.date}</span>
         </div>
       </div>
     </Link>
@@ -142,50 +119,52 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
   return (
     <Link
       id="featured"
-      className="flex flex-col md:flex-row items-start gap-8 w-full hover:bg-sky-50 rounded-lg p-8 col-span-2"
+      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 w-full bg-white md:bg-sky-50 hover:bg-sky-50 md:hover:bg-sky-100 rounded-xl p-2 md:p-6 border border-transparent md:border-sky-100 transition-all duration-300 mb-4 md:mb-6"
       href={blog.href}
     >
-      <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-4 text-left order-2 md:order-1">
-        <div className="flex items-center gap-2">
-          <span className="bg-blue-50 text-blue-700 ring-blue-200 w-max items-center rounded-lg px-2 py-1 -my-1 text-sm font-medium ring-1 ring-inset">
+      <div className="w-full md:w-1/2 overflow-hidden rounded-xl order-1 group aspect-[16/9] md:h-72 relative">
+        <Image
+          src={blog.imageUrl}
+          alt={blog.imageAlt || blog.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority={true}
+          style={{ objectFit: "cover" }}
+          className="rounded-lg transform group-hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+      <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-2 md:space-y-4 text-left order-2 md:mt-4 px-1 md:px-6">
+        <div className="hidden md:flex items-center">
+          <span className="bg-sky-200 text-sky-700 w-max items-center rounded-full px-3 py-1 text-sm font-medium">
             {blog.badgeText.toLowerCase()}
           </span>
-          <span className="text-gray-400 text-sm">-</span>
-          <span className="text-gray-400 text-sm">{blog.time}</span>
         </div>
 
-        <h2 className="font-semibold text-3xl pt-2">{blog.title}</h2>
-        <p className="text-gray-500 text-base">{blog.description}</p>
-        <div className="flex flex-row justify-between gap-4 items-center py-4">
-          <div className={clsx("flex items-center space-x-3 bottom-0")}>
+        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2 md:line-clamp-none">{blog.title}</h2>
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-3">{blog.description}</p>
+
+        <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
+          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>•</span>
+          <span>{blog.date}</span>
+        </div>
+
+        <div className="hidden md:flex md:flex-row md:justify-between md:gap-4 md:items-center md:py-4">
+          <div className="flex flex-wrap gap-2">
             {blog.authors.map((author, i) => (
               <div className="flex items-center space-x-2" key={i}>
                 <img
-                  className="inline-block h-10 w-10 rounded-full"
+                  className="inline-block h-8 w-8 rounded-full"
                   src={author.imageUrl}
                   alt={author.imageAlt || ""}
                 />
-                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                  {author.name}
-                </p>
+                <span className="text-slate-500 text-sm">{author.name}</span>
               </div>
             ))}
           </div>
-          <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900 pr-4">
-            <time>{blog.date}</time>
-          </p>
+          <span className="text-slate-400 text-sm">{blog.date}</span>
         </div>
       </div>
-      <img
-        src={blog.imageUrl}
-        alt={blog.imageAlt || blog.title}
-        width={600}
-        height={400}
-        style={{
-          objectFit: "cover",
-        }}
-        className="rounded-lg h-72 w-full md:w-1/2 border border-gray-300 order-1 md:order-2"
-      />
     </Link>
   );
 };
@@ -511,21 +490,9 @@ const blogContent: BlogStructure[] = [
     },
   },
   {
-    title: "Compare: The Best LangSmith Alternatives & Competitors",
-    description:
-      "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
-    badgeText: "compare",
-    date: "July 10, 2024",
-    href: "/blog/best-langsmith-alternatives",
-    imageUrl: "/static/blog/best-langsmith-alternatives/langsmith-cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "8 minute read",
+    dynmaicEntry: {
+      folderName: "best-langsmith-alternatives",
+    },
   },
   {
     title:
@@ -867,25 +834,16 @@ const blogContent: BlogStructure[] = [
 
 const Blog = async () => {
   return (
-    <div className="w-full bg-white h-full antialiased relative text-black">
-      <div className="relative w-full flex flex-col space-y-4 mx-auto max-w-5xl h-full py-16 items-center text-center px-2 sm:px-2 lg:px-0">
-        <Image
-          src={"/static/pricing/bouncing-cube.webp"}
-          alt={"bouncing-cube"}
-          width={200}
-          height={100}
-        />
-        <h1 className="text-5xl font-bold text-gray-900 pt-4">
-          The Helicone Blog
-        </h1>
-        <p className="text-lg text-gray-700">
-          Thoughts about the future of AI - from the team helping to build it.
-        </p>
-        <div className="border-b border-gray-300 py-4 w-full flex items-center justify-center"></div>
-        <div className="grid grid-cols-2 space-y-8">
+    <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
+      <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
           {blogContent.map((blog, i) => {
             if (i === 0) {
-              return <FeaturedBlogPost blog={blog} key={i} />;
+              return (
+                <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full" key={i}>
+                  <FeaturedBlogPost blog={blog} />
+                </div>
+              );
             } else {
               return <RegularBlogPost blog={blog} key={i} />;
             }
