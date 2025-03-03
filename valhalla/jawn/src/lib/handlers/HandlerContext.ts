@@ -125,6 +125,7 @@ export type PromptRecord = {
   model?: string;
   heliconeTemplate: TemplateWithInputs;
   createdAt: Date;
+  provider?: Provider;
 };
 
 export type ExperimentCellValue = {
