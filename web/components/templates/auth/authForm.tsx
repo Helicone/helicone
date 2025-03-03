@@ -173,8 +173,8 @@ const AuthForm = (props: AuthFormProps) => {
 
   // Array of images to randomly select from
   const centerImages = [
-    "/static/onboarding-design-1.webp",
-    "/static/onboarding-design-2.webp",
+    "/static/onboarding-design-1.svg",
+    "/static/onboarding-design-2.svg",
   ];
 
   // Array of quotes to randomly select from
@@ -358,7 +358,7 @@ const AuthForm = (props: AuthFormProps) => {
               className="flex items-center"
             >
               <Image
-                src="/static/productoftheday.webp"
+                src="/static/product-of-the-day.svg"
                 alt="#1 Product of the Day"
                 width={120}
                 height={26}
