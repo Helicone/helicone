@@ -13,7 +13,7 @@ import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 
 import GlassHeader from "../universal/GlassHeader";
 
-interface MessagesPanelPrompts {
+interface MessagesPanelProps {
   messages: Message[];
   onMessageChange: (index: number, content: string) => void;
   onAddMessagePair: () => void;
@@ -24,7 +24,6 @@ interface MessagesPanelPrompts {
   isPrefillSupported: boolean;
   scrollToBottom?: () => void;
 }
-
 export default function MessagesPanel({
   messages,
   onMessageChange,
@@ -35,7 +34,7 @@ export default function MessagesPanel({
   variables,
   isPrefillSupported,
   scrollToBottom,
-}: MessagesPanelPrompts) {
+}: MessagesPanelProps) {
   // STATES AND REFERENCES
   const [hoveredTrashIdx, setHoveredTrashIdx] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
