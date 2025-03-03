@@ -330,9 +330,10 @@ await helicone.logSingleRequest(
 
 ## Advanced Usage: Tracking Time to First Token
 
-The `logStream` method automatically tracks the time to first token, which is a valuable metric for understanding LLM response latency:
+The `logStream` and `logSingleStream` methods automatically track the time to first token, which is a valuable metric for understanding LLM response latency:
 
 ```typescript
+// Using logStream
 helicone.logStream(
   requestBody,
   async (resultRecorder) => {
@@ -342,6 +343,9 @@ helicone.logStream(
   },
   { "Helicone-User-Id": userId }
 );
+
+// Using logSingleStream
+helicone.logSingleStream(requestBody, stream, { "Helicone-User-Id": userId });
 ```
 
 This timing information will be available in your Helicone dashboard, allowing you to monitor and optimize your LLM response times.
