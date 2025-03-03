@@ -31,6 +31,7 @@ export const usePromptVersions = (promptId: string) => {
         },
       });
     },
+    enabled: !!promptId && !!org?.currentOrg?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -117,6 +118,7 @@ export const usePrompt = (id: string) => {
         },
       });
     },
+    enabled: !!id && !!org?.currentOrg?.id,
     refetchOnWindowFocus: false,
   });
 
