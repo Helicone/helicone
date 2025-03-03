@@ -135,6 +135,26 @@ export class LogStore {
           }
         }
 
+        if (
+          payload.orgsToMarkAsOnboarded &&
+          payload.orgsToMarkAsOnboarded.size > 0
+        ) {
+          try {
+            for (const orgId of payload.orgsToMarkAsOnboarded) {
+              await t.none(
+                `UPDATE organization SET has_onboarded = true WHERE id = $1 AND has_onboarded = false`,
+                [orgId]
+              );
+            }
+          } catch (error) {
+            console.error(
+              "Error updating organization onboarding status:",
+              error
+            );
+            // Don't fail the transaction if onboarding update fails
+          }
+        }
+
         if (payload.assets && payload.assets.length > 0) {
           const insertResponse =
             pgp.helpers.insert(payload.assets, assetColumns) + onConflictAsset;
