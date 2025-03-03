@@ -37,7 +37,7 @@ export function FAQ({
   return (
     <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
       {/* <div className="rounded-lg bg-[#F2F9FC] px-6 py-4 border border-[#E3EFF3]"> */}
-      <h2 className="text-2xl font-semibold text-slate-900 mb-6">
+      <h2 className="text-2xl font-semibold text-slate-900 mb-2">
         {title}
       </h2>
 
