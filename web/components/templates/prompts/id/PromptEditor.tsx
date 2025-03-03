@@ -144,9 +144,19 @@ export default function PromptEditor({
   // VALIDATION
   // - Is Imported From Code
   const isImportedFromCode = useMemo(() => {
+    // Case 1: If we're in playground mode (basePrompt exists), it's not imported from code
     if (basePrompt) return false;
-    return promptData?.metadata?.createdFromUi !== true;
-  }, [promptData?.metadata?.createdFromUi, basePrompt]);
+
+    // Case 2: If we're in request mode, it's not imported from code
+    if (requestId) return false;
+
+    // Case 3: If prompt data is still loading or not available, we don't know yet
+    if (isPromptLoading || !promptData) return null;
+
+    // Case 4: If we have metadata, check the createdFromUi flag
+    // Explicitly imported from code if createdFromUi is NOT true
+    return promptData.metadata?.createdFromUi !== true;
+  }, [promptData, isPromptLoading, basePrompt, requestId]);
   // - Can Run
   const canRun = useMemo(() => {
     // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
@@ -181,9 +191,25 @@ export default function PromptEditor({
   const loadVersionData = useCallback(
     (ver: any) => {
       if (!ver && !requestId) return;
-      console.log(isImportedFromCode);
 
-      console.log("Loading version row:", ver);
+      // Ensure we have full knowledge of isImportedFromCode before proceeding
+      if (promptId && isImportedFromCode === null) {
+        console.log(
+          "Cannot load version data: isImportedFromCode is not yet determined"
+        );
+        return;
+      }
+
+      console.log(
+        `Loading ${
+          isImportedFromCode === true
+            ? "imported"
+            : isImportedFromCode === false
+            ? "created"
+            : "unknown"
+        } version row:`,
+        ver
+      );
 
       let templateData: any = {};
       let metadata: {
@@ -217,7 +243,7 @@ export default function PromptEditor({
         const versionMetadata = ver.metadata;
 
         // I. Imported from Code
-        if (isImportedFromCode) {
+        if (isImportedFromCode === true) {
           const mapperType = getMapperType({
             model: versionTemplate.model,
             provider: versionMetadata.provider || "OPENAI",
@@ -581,7 +607,7 @@ export default function PromptEditor({
     );
 
     // 3. SAVE: If in promptId mode, not imported from code, and dirty
-    if (promptId && !isImportedFromCode && state.isDirty) {
+    if (promptId && isImportedFromCode === false && state.isDirty) {
       const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -874,6 +900,11 @@ export default function PromptEditor({
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
+    // Don't proceed with loading if we don't know whether the prompt is imported from code yet
+    if (promptId && isImportedFromCode === null) {
+      return;
+    }
+
     if (!state) {
       if (requestId && requestData?.data) {
         loadVersionData(null);
@@ -922,6 +953,8 @@ export default function PromptEditor({
     requestId,
     requestData,
     basePrompt,
+    promptId,
+    isImportedFromCode,
   ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
@@ -929,7 +962,7 @@ export default function PromptEditor({
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === "Enter" &&
-        !isImportedFromCode
+        isImportedFromCode === false
       ) {
         event.preventDefault();
         handleSaveAndRun();
@@ -979,11 +1012,18 @@ export default function PromptEditor({
   if (
     (promptId && (isPromptLoading || isVersionsLoading)) ||
     (requestId && isRequestLoading) ||
+    (promptId && isImportedFromCode === null) ||
     !state
   ) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <LoadingAnimation title="Loading prompt..." />
+        <LoadingAnimation
+          title={
+            promptId && isImportedFromCode === null
+              ? "Determining prompt source..."
+              : "Loading prompt..."
+          }
+        />
       </div>
     );
   }
@@ -1073,7 +1113,7 @@ export default function PromptEditor({
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* Auto-Improve Button */}
-          {promptId && !isImportedFromCode && (
+          {promptId && isImportedFromCode === false && (
             <Button
               variant="link"
               onClick={() => setIsAutoImproveOpen(true)}
@@ -1085,7 +1125,7 @@ export default function PromptEditor({
           )}
 
           {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
-          {(requestId || basePrompt || isImportedFromCode) && (
+          {(requestId || basePrompt || isImportedFromCode === true) && (
             <Button
               variant="action"
               size="sm"
@@ -1110,7 +1150,9 @@ export default function PromptEditor({
                 ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                 : ""
             }`}
-            variant={promptId && !isImportedFromCode ? "action" : "outline"}
+            variant={
+              promptId && isImportedFromCode === false ? "action" : "outline"
+            }
             size="sm"
             disabled={!canRun}
             onClick={handleSaveAndRun}
@@ -1132,7 +1174,8 @@ export default function PromptEditor({
             )}
             <div
               className={`flex items-center gap-0.5 text-sm ${
-                (requestId || basePrompt || isImportedFromCode) && !isStreaming
+                (requestId || basePrompt || isImportedFromCode === true) &&
+                !isStreaming
                   ? "text-black opacity-60"
                   : "text-white opacity-60"
               }`}
@@ -1168,7 +1211,7 @@ export default function PromptEditor({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={isImportedFromCode}
+                  disabled={isImportedFromCode === true}
                   onClick={() => {}}
                 >
                   <PiRocketLaunchBold className="h-4 w-4 mr-2" />
