@@ -31,11 +31,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  heliconeRequestToMappedContent,
+  MAPPERS,
+} from "@/packages/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
 import {
@@ -63,7 +66,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Message } from "packages/llm-mapper/types";
+import { LLMRequestBody, Message } from "packages/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -87,20 +90,27 @@ import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
 interface PromptEditorProps {
-  promptId?: string;
-  requestId?: string;
+  promptId?: string; // Prompt Id Mode
+  requestId?: string; // Request Id Mode
+  basePrompt?: {
+    body: LLMRequestBody;
+    metadata: {
+      provider: string;
+      isProduction: boolean;
+      inputs?: Record<string, string>;
+    };
+  }; // Playground Mode
 }
-export default function PromptEditor(props: PromptEditorProps) {
-  // PROPS
-  const { promptId, requestId } = props;
-
+export default function PromptEditor({
+  promptId,
+  requestId,
+  basePrompt,
+}: PromptEditorProps) {
   // STATE
   const [state, setState] = useState<PromptState | null>(null);
-  const [isAutoIterateOpen, setIsAutoIterateOpen] = useState(false);
+  const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
-
-  // STREAMING
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
 
@@ -114,13 +124,13 @@ export default function PromptEditor(props: PromptEditorProps) {
     useGetRequestWithBodies(requestId ?? "");
   // - Prompt Table
   const {
-    prompt,
+    prompt: promptData,
     isLoading: isPromptLoading,
     refetch: refetchPrompt,
   } = usePrompt(promptId ?? "");
   // - Prompt Versions Table
   const {
-    prompts: promptVersions,
+    prompts: promptVersionsData,
     isLoading: isVersionsLoading,
     refetch: refetchPromptVersions,
   } = usePromptVersions(promptId ?? "");
@@ -132,6 +142,11 @@ export default function PromptEditor(props: PromptEditorProps) {
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
 
   // VALIDATION
+  // - Is Imported From Code
+  const isImportedFromCode = useMemo(() => {
+    if (basePrompt) return false;
+    return promptData?.metadata?.createdFromUi !== true;
+  }, [promptData?.metadata?.createdFromUi, basePrompt]);
   // - Can Run
   const canRun = useMemo(() => {
     // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
@@ -141,39 +156,32 @@ export default function PromptEditor(props: PromptEditorProps) {
       state?.parameters?.provider === "GOOGLE"
     ) {
       return (
-        (state?.messages.some(
+        state?.messages.some(
           (m) =>
             typeof m !== "string" &&
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-        ) ??
-          false) &&
-        prompt?.metadata?.createdFromUi !== false
+        ) ?? false
       );
     }
 
     // For other providers, check if there's at least one user message with non-empty content
     else
       return (
-        (state?.messages.some(
+        state?.messages.some(
           (m) =>
             typeof m !== "string" &&
             m.role === "user" &&
             (typeof m.content === "string" ? m.content.trim().length > 0 : true)
-        ) ??
-          false) &&
-        prompt?.metadata?.createdFromUi !== false
+        ) ?? false
       );
-  }, [
-    state?.messages,
-    state?.parameters?.provider,
-    prompt?.metadata?.createdFromUi,
-  ]);
+  }, [state?.messages, state?.parameters?.provider]);
 
   // CALLBACKS
   // - Load Version Data into State
   const loadVersionData = useCallback(
     (ver: any) => {
       if (!ver && !requestId) return;
+      console.log(isImportedFromCode);
 
       console.log("Loading version row:", ver);
 
@@ -185,47 +193,69 @@ export default function PromptEditor(props: PromptEditorProps) {
         evals?: any[];
         structure?: any;
       } = {};
+
       let stateMessages: Message[] = [];
       let inputs: StateInputs[] = [];
       let masterVersion: number | undefined;
 
-      // Load data either from request or version
+      // 1. Load prompt either from:
+      // A. Request data
       if (requestId && requestData?.data) {
         const mappedContent = heliconeRequestToMappedContent(requestData.data);
-        const requestBody = mappedContent.schema.request;
 
-        templateData = requestBody;
-        stateMessages = requestBody.messages || [];
-      } else {
-        // 1. Parse the helicone template and metadata columns from the version
-        templateData =
-          typeof ver.helicone_template === "string"
-            ? JSON.parse(ver.helicone_template)
-            : ver.helicone_template || {};
-        metadata =
-          typeof ver.metadata === "string"
-            ? JSON.parse(ver.metadata)
-            : ((ver.metadata || {}) as {
-                provider?: string;
-                isProduction?: boolean;
-                inputs?: Record<string, string>;
-                evals?: any[];
-                structure?: any;
-              });
+        templateData = mappedContent.schema.request;
+        // TODO: Use findClosestProvider and findClosestModel here instead?
+        metadata = {
+          provider: undefined,
+          isProduction: true,
+          inputs: undefined,
+        };
+      }
+      // B. Prompt data
+      else if (promptId && promptData && promptVersionsData) {
+        const versionTemplate = ver.helicone_template;
+        const versionMetadata = ver.metadata;
+
+        // I. Imported from Code
+        if (isImportedFromCode) {
+          const mapperType = getMapperType({
+            model: versionTemplate.model,
+            provider: versionMetadata.provider || "OPENAI",
+          });
+          const mapper = MAPPERS[mapperType];
+          const mappedResult = mapper({
+            request: versionTemplate,
+            response: {
+              choices: [],
+              model: versionTemplate.model,
+            }, // This information is not available
+            statusCode: 200,
+            model: versionTemplate.model,
+          });
+
+          templateData = mappedResult.schema.request;
+          metadata = versionMetadata;
+        } else {
+          // II. Created from UI
+          templateData =
+            typeof versionTemplate === "string"
+              ? JSON.parse(versionTemplate)
+              : versionTemplate || {};
+          metadata =
+            typeof versionMetadata === "string"
+              ? JSON.parse(versionMetadata)
+              : versionMetadata || {};
+        }
 
         // 2. Derive "masterVersion" if needed
         masterVersion =
           metadata?.isProduction === true
             ? ver.major_version
-            : promptVersions?.find(
+            : promptVersionsData?.find(
                 (v) => (v.metadata as { isProduction?: boolean })?.isProduction
               )?.major_version ?? ver.major_version;
 
-        // 3. Convert any messages in the template to StateMessages
-        stateMessages = (templateData.messages ||
-          templateData.content) as Message[];
-
-        // 4.A. First collect all variables and their default values from the metadata inputs
+        // 3.A. First collect all variables and their default values from the metadata inputs
         inputs = Object.entries(metadata?.inputs || {}).map(
           ([name, value]) => ({
             name,
@@ -234,7 +264,7 @@ export default function PromptEditor(props: PromptEditorProps) {
           })
         );
 
-        // 4.B. Extract additional variables contained in message content
+        // 3.B. Extract additional variables contained in message content
         stateMessages.forEach((msg) => {
           const vars = extractVariables(msg.content || "", "helicone");
           vars.forEach((v) => {
@@ -246,7 +276,7 @@ export default function PromptEditor(props: PromptEditorProps) {
           });
         });
 
-        // 4.C. Add message auto-inputs to the list
+        // 3.C. Add message auto-inputs to the list
         stateMessages.forEach((msg) => {
           msg.idx !== undefined &&
             inputs.push({
@@ -257,9 +287,12 @@ export default function PromptEditor(props: PromptEditorProps) {
             });
         });
 
-        // 4.D. Deduplicate variables
+        // 3.D. Deduplicate variables
         inputs = deduplicateVariables(inputs);
       }
+
+      // 4. Typeguard and cast templateData to Message[]
+      stateMessages = (templateData.messages ?? []) as Message[];
 
       // 5. Validate model-provider or closest match or default
       const provider = findClosestProvider(
@@ -289,7 +322,14 @@ export default function PromptEditor(props: PromptEditorProps) {
         isDirty: false,
       });
     },
-    [promptId, promptVersions, requestId, requestData]
+    [
+      promptId,
+      promptData,
+      promptVersionsData,
+      requestId,
+      requestData,
+      isImportedFromCode,
+    ]
   );
   // - Update State
   const updateState = useCallback(
@@ -444,7 +484,7 @@ export default function PromptEditor(props: PromptEditorProps) {
     async (version: any) => {
       if (!version) return;
 
-      const currentProductionVersion = promptVersions?.find(
+      const currentProductionVersion = promptVersionsData?.find(
         (v) => (v.metadata as { isProduction?: boolean })?.isProduction
       );
 
@@ -488,7 +528,7 @@ export default function PromptEditor(props: PromptEditorProps) {
         setNotification("Failed to promote version", "error");
       }
     },
-    [jawnClient, promptVersions, refetchPromptVersions, setNotification]
+    [jawnClient, promptVersionsData, refetchPromptVersions, setNotification]
   );
   // - Handle ID Edit
   const handleIdEdit = useCallback(
@@ -500,7 +540,7 @@ export default function PromptEditor(props: PromptEditorProps) {
           {
             params: {
               path: {
-                promptId: prompt?.id || "",
+                promptId: promptData?.id || "",
               },
             },
             body: {
@@ -518,7 +558,7 @@ export default function PromptEditor(props: PromptEditorProps) {
         await refetchPrompt();
       }
     },
-    [promptId, jawnClient, prompt?.id, refetchPrompt, setNotification]
+    [promptId, jawnClient, promptData?.id, refetchPrompt, setNotification]
   );
   // - Save &/Or Run
   const handleSaveAndRun = useCallback(async () => {
@@ -540,9 +580,9 @@ export default function PromptEditor(props: PromptEditorProps) {
       variables.map((v) => [v.name, v.value || ""])
     );
 
-    // 3. SAVE: If dirty
-    if (promptId && state.isDirty) {
-      const latestVersionId = promptVersions?.[0]?.id;
+    // 3. SAVE: If in promptId mode, not imported from code, and dirty
+    if (promptId && !isImportedFromCode && state.isDirty) {
+      const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // A. Build Helicone Template for Saving
@@ -644,13 +684,14 @@ export default function PromptEditor(props: PromptEditorProps) {
     refetchPromptVersions,
     loadVersionData,
     updateState,
-    promptVersions,
+    promptVersionsData,
+    isImportedFromCode,
   ]);
   // - Scroll to bottom
   const scrollToBottom = useCallback(() => {
     messagesScrollRef.current?.scrollToBottom();
   }, []);
-  // - BETA: Auto-Improve
+  // - Auto-Improve
   const handleImprove = useCallback(async () => {
     setIsImproving(true);
 
@@ -731,14 +772,14 @@ export default function PromptEditor(props: PromptEditorProps) {
       abortController.current = null;
     }
   }, [state?.messages, updateState, setNotification]);
-  // - BETA: Apply Improvements
+  // - Apply Improvements
   const handleApplyImprovement = useCallback(async () => {
     if (!state?.improvement?.content) return;
 
     try {
       const improvedMessages = parseImprovedMessages(state.improvement.content);
 
-      const latestVersionId = promptVersions?.[0]?.id;
+      const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // Build Helicone Template for Saving
@@ -782,21 +823,20 @@ export default function PromptEditor(props: PromptEditorProps) {
       await refetchPromptVersions();
 
       setNotification("Successfully applied improvements", "success");
-      setIsAutoIterateOpen(false);
+      setIsAutoImproveOpen(false);
     } catch (error) {
       console.error("Error applying improvements:", error);
       setNotification("Failed to apply improvements", "error");
     }
   }, [
     state,
-    promptVersions,
+    promptVersionsData,
     jawnClient,
     loadVersionData,
     refetchPromptVersions,
     setNotification,
   ]);
-
-  // - From Request: Handle Save As Prompt
+  // - From Request or Playground: Handle Save As Prompt
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
@@ -838,21 +878,50 @@ export default function PromptEditor(props: PromptEditorProps) {
       if (requestId && requestData?.data) {
         loadVersionData(null);
       } else if (
-        promptVersions &&
-        promptVersions.length > 0 &&
+        promptVersionsData &&
+        promptVersionsData.length > 0 &&
         !isVersionsLoading
       ) {
         // Load from prompt version data
-        loadVersionData(promptVersions[0]);
+        loadVersionData(promptVersionsData[0]);
+      } else if (basePrompt) {
+        // Load directly from basePrompt
+        const provider = findClosestProvider(
+          basePrompt.metadata.provider || "OPENAI"
+        );
+        const model = findClosestModel(
+          provider,
+          basePrompt.body.model || "gpt-4o-mini"
+        );
+
+        setState({
+          messages: basePrompt.body.messages || [],
+          parameters: {
+            provider: provider as keyof typeof PROVIDER_MODELS,
+            model: model,
+            temperature: basePrompt.body.temperature ?? 1,
+            tools: basePrompt.body.tools ?? [],
+            reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
+          },
+          inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
+            ([name, value]) => ({
+              name,
+              value: value as string,
+              isValid: isValidVariableName(name),
+            })
+          ),
+          isDirty: false,
+        });
       }
     }
   }, [
     isVersionsLoading,
     loadVersionData,
-    promptVersions,
+    promptVersionsData,
     state,
     requestId,
     requestData,
+    basePrompt,
   ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
@@ -860,7 +929,7 @@ export default function PromptEditor(props: PromptEditorProps) {
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === "Enter" &&
-        prompt?.metadata?.createdFromUi !== false
+        !isImportedFromCode
       ) {
         event.preventDefault();
         handleSaveAndRun();
@@ -869,7 +938,7 @@ export default function PromptEditor(props: PromptEditorProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveAndRun, prompt?.metadata?.createdFromUi]);
+  }, [handleSaveAndRun, isImportedFromCode]);
 
   // HELPERS
   // - Add Messages
@@ -907,7 +976,11 @@ export default function PromptEditor(props: PromptEditorProps) {
   // RENDER
   // TODO: Prompt or request not found page (use mutations I think)
   // - Loading Page
-  if (isPromptLoading || isVersionsLoading || !state) {
+  if (
+    (promptId && (isPromptLoading || isVersionsLoading)) ||
+    (requestId && isRequestLoading) ||
+    !state
+  ) {
     return (
       <div className="flex h-screen items-center justify-center">
         <LoadingAnimation title="Loading prompt..." />
@@ -933,10 +1006,10 @@ export default function PromptEditor(props: PromptEditorProps) {
           {/* Version Selector */}
           {promptId && (
             <VersionSelector
-              id={prompt?.user_defined_id || ""}
+              id={promptData?.user_defined_id || ""}
               currentVersion={state.version ?? 0}
               masterVersion={state.masterVersion ?? 0}
-              versions={promptVersions || []}
+              versions={promptVersionsData || []}
               isLoading={isVersionsLoading}
               isDirty={state.isDirty}
               onVersionSelect={loadVersionData}
@@ -954,12 +1027,14 @@ export default function PromptEditor(props: PromptEditorProps) {
             </Link>
           )}
 
-          {/* From Request: Unsaved Changes Indicator */}
-          {requestId && state.isDirty && (
+          {/* From Request or From Playground: Unsaved Changes Indicator */}
+          {(requestId || basePrompt) && state.isDirty && (
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
                 <div className="flex flex-row items-center gap-2 cursor-default">
-                  <div className={`h-2 w-2 rounded-full bg-amber-500`} />
+                  <div
+                    className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                  />
                   <span className="text-sm text-secondary font-semibold">
                     Unsaved Changes
                   </span>
@@ -987,7 +1062,7 @@ export default function PromptEditor(props: PromptEditorProps) {
                 <ScrollArea className="h-full">
                   <PromptMetricsTab
                     id={promptId}
-                    promptUserDefinedId={prompt?.user_defined_id || ""}
+                    promptUserDefinedId={promptData?.user_defined_id || ""}
                   />
                 </ScrollArea>
               </DrawerContent>
@@ -998,24 +1073,24 @@ export default function PromptEditor(props: PromptEditorProps) {
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* Auto-Improve Button */}
-          {promptId && (
+          {promptId && !isImportedFromCode && (
             <Button
               variant="link"
-              onClick={() => setIsAutoIterateOpen(true)}
-              disabled={state.isDirty}
+              onClick={() => setIsAutoImproveOpen(true)}
+              disabled={state.isDirty || !canRun}
             >
               <PiBrainBold className="h-4 w-4 mr-2" />
               Auto-Improve
             </Button>
           )}
 
-          {/* From Request: Save Changes Button */}
-          {requestId && (
+          {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
+          {(requestId || basePrompt || isImportedFromCode) && (
             <Button
               variant="action"
               size="sm"
               onClick={handleSaveAsPrompt}
-              disabled={isCreatingPrompt}
+              disabled={isCreatingPrompt || state.messages.length === 0}
             >
               {isCreatingPrompt ? (
                 <>
@@ -1035,7 +1110,7 @@ export default function PromptEditor(props: PromptEditorProps) {
                 ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                 : ""
             }`}
-            variant={promptId ? "action" : "outline"}
+            variant={promptId && !isImportedFromCode ? "action" : "outline"}
             size="sm"
             disabled={!canRun}
             onClick={handleSaveAndRun}
@@ -1057,7 +1132,7 @@ export default function PromptEditor(props: PromptEditorProps) {
             )}
             <div
               className={`flex items-center gap-0.5 text-sm ${
-                requestId && !isStreaming
+                (requestId || basePrompt || isImportedFromCode) && !isStreaming
                   ? "text-black opacity-60"
                   : "text-white opacity-60"
               }`}
@@ -1075,7 +1150,7 @@ export default function PromptEditor(props: PromptEditorProps) {
               disabled={newFromPromptVersion.isLoading}
               onClick={async () => {
                 const result = await newFromPromptVersion.mutateAsync({
-                  name: `${prompt?.user_defined_id}_V${state.version}.${state.versionId}`,
+                  name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
                   originalPromptVersion: state.versionId ?? "",
                 });
                 router.push(`/experiments/${result.data?.data?.experimentId}`);
@@ -1093,7 +1168,7 @@ export default function PromptEditor(props: PromptEditorProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={prompt?.metadata?.createdFromUi === false}
+                  disabled={isImportedFromCode}
                   onClick={() => {}}
                 >
                   <PiRocketLaunchBold className="h-4 w-4 mr-2" />
@@ -1141,7 +1216,7 @@ export async function getPrompt(
 
 async function pullPromptAndRunCompletion() {
   const prompt = await getPrompt("${
-    prompt?.user_defined_id || "my-prompt-id"
+    promptData?.user_defined_id || "my-prompt-id"
   }", {
     ${
       state?.inputs
@@ -1200,7 +1275,7 @@ async function pullPromptAndRunCompletion() {
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
-              <CustomScrollbar className="h-full bg-slate-50 dark:bg-slate-950">
+              <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
                   response={state.response || ""}
                   onAddToMessages={() =>
@@ -1255,9 +1330,9 @@ async function pullPromptAndRunCompletion() {
         <UniversalPopup
           title="Auto-Improve (Beta)"
           width="w-full max-w-7xl"
-          isOpen={isAutoIterateOpen}
+          isOpen={isAutoImproveOpen}
           onClose={() => {
-            setIsAutoIterateOpen(false);
+            setIsAutoImproveOpen(false);
             updateState({ improvement: undefined }, false);
           }}
         >
@@ -1268,7 +1343,7 @@ async function pullPromptAndRunCompletion() {
             messages={state.messages}
             onStartImprove={handleImprove}
             onApplyImprovement={handleApplyImprovement}
-            onCancel={() => setIsAutoIterateOpen(false)}
+            onCancel={() => setIsAutoImproveOpen(false)}
             updateState={(updates) => updateState(updates, false)}
           />
         </UniversalPopup>
