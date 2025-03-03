@@ -43,12 +43,12 @@ export function FAQ({
 
       <div className="flex flex-col">
         {items.map((faq, index) => (
-          <div key={index}>
+          <div key={index} className="overflow-hidden">
             <div
               onClick={(e) => handleClick(e, index)}
-              className="w-full px-4 pt-1 pb-4 cursor-pointer"
+              className="w-full pt-1 pb-4 cursor-pointer"
             >
-              <h4 className="text-slate-500 font-medium flex items-center">
+              <h4 className="text-slate-400 font-medium flex items-center">
                 <ChevronRightIcon
                   className={`mr-3 w-4 h-4 transition-transform duration-300 ease-in-out ${openIndices.includes(index) ? "rotate-90" : ""}`}
                 />
@@ -58,20 +58,22 @@ export function FAQ({
                 />
               </h4>
               <div
-                className={`text-slate-500 text-sm ml-8 duration-200 ease-in-out ${openIndices.includes(index)
-                  ? "max-h-96 opacity-100 mt-3"
+                className={`text-slate-500 text-md ml-8 overflow-hidden transition-all duration-200 ease-in-out ${openIndices.includes(index)
+                  ? "max-h-[500px] opacity-100 mt-3"
                   : "max-h-0 opacity-0 mt-0"
                   }`}
               >
-                {typeof faq.answer === 'string' ? (
-                  <div dangerouslySetInnerHTML={renderHTML(faq.answer)} />
-                ) : (
-                  faq.answer
-                )}
+                <div className="pb-1">
+                  {typeof faq.answer === 'string' ? (
+                    <div dangerouslySetInnerHTML={renderHTML(faq.answer)} />
+                  ) : (
+                    faq.answer
+                  )}
+                </div>
               </div>
             </div>
-            {index < items.length && (
-              <div className="border-b border-slate-200 mx-4"></div>
+            {index < items.length - 1 && (
+              <div className="border-b border-slate-200"></div>
             )}
           </div>
         ))}
