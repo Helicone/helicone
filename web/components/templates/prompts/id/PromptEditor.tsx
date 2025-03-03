@@ -1080,20 +1080,20 @@ export default function PromptEditor({
             <Button
               variant="link"
               onClick={() => setIsAutoImproveOpen(true)}
-              disabled={state.isDirty}
+              disabled={state.isDirty || !canRun}
             >
               <PiBrainBold className="h-4 w-4 mr-2" />
               Auto-Improve
             </Button>
           )}
 
-          {/* From Request or From Playground: Save As Prompt Button */}
-          {(requestId || basePrompt) && (
+          {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
+          {(requestId || basePrompt || isImportedFromCode) && (
             <Button
               variant="action"
               size="sm"
               onClick={handleSaveAsPrompt}
-              disabled={isCreatingPrompt}
+              disabled={isCreatingPrompt || state.messages.length === 0}
             >
               {isCreatingPrompt ? (
                 <>
