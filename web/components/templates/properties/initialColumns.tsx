@@ -21,6 +21,7 @@ export const INITIAL_COLUMNS: ColumnDef<{
   property_value: string;
   total_requests: number;
   active_since: string;
+  avg_prompt_tokens_per_request: number;
   avg_completion_tokens_per_request: number;
   avg_latency_per_request: number;
   total_cost: number;
@@ -35,6 +36,12 @@ export const INITIAL_COLUMNS: ColumnDef<{
     accessorKey: "total_requests",
     header: "Requests",
     cell: (info) => info.getValue(),
+  },
+  {
+    accessorKey: "avg_prompt_tokens_per_request",
+    header: "Avg Prompt Tokens / Req",
+    cell: (info) => `${formatNumber(Number(info.getValue()))}`,
+    minSize: 250,
   },
   {
     accessorKey: "avg_completion_tokens_per_request",
