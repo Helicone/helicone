@@ -80,7 +80,9 @@ export class HeliconeManualLogger {
       startTime,
       endTime: Date.now(),
       additionalHeaders,
-      timeToFirstToken: firstChunkTimeUnix ? firstChunkTimeUnix - startTime : undefined,
+      timeToFirstToken: firstChunkTimeUnix
+        ? firstChunkTimeUnix - startTime
+        : undefined,
     });
   }
 
