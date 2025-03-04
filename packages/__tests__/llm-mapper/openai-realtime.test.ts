@@ -1,4 +1,4 @@
-import { mapRealtimeRequest } from "./realtime";
+import { mapRealtimeRequest } from "../../llm-mapper/mappers/openai/realtime";
 
 describe("mapRealtimeRequest", () => {
   it("should map audio data for user messages", () => {
