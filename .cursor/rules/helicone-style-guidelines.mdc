@@ -1,0 +1,354 @@
+---
+description: Helicone Style Guidelines
+globs: *.tsx
+alwaysApply: false
+---
+# Helicone Design System Guidelines
+
+## Core Principles
+1. Use semantic HTML elements
+2. Use CSS variables for colors
+3. Use typography components for consistent text styling
+4. Use Tailwind's spacing scale
+5. Use lucide-react for icons
+
+## Typography System
+
+### Usage Patterns
+```tsx
+// ✅ Do this
+import { H1, P, Small, Muted } from "@/components/ui/typography"
+
+<H1>Page Title</H1>
+<P>Regular paragraph</P>
+<Small>Helper text</Small>
+<Muted>Secondary text</Muted>
+
+// ❌ Don't do this
+<h1 className="text-4xl font-bold">Raw Styles</h1>
+<H1 className="text-3xl">Overriding Typography</H1>
+<P className="text-sm">Wrong Size</P>
+```
+
+### Available Components
+```tsx
+// Headings
+<H1>              // Main page titles
+<H1Large>         // Hero sections
+<H2>              // Section headers
+<H3>              // Subsection headers
+<H4>              // Card titles
+
+// Body Text
+<P>               // Regular paragraphs
+<Lead>            // Introduction text
+<Large>           // Emphasized body text
+<Small>           // Helper text
+<Muted>           // Secondary text
+
+// Special Elements
+<Blockquote>      // Quotations
+<Code>            // Inline code
+<List>            // Unordered lists
+
+// Table Elements
+<TableHead>       // Table headers
+<TableCell>       // Table cells
+```
+
+### Typography Scale
+| Component | Size | Line Height | Weight | Usage |
+|-----|---|----|---|----|
+| H1 | text-3xl (30px) / lg:text-4xl (36px) | leading-10 (40px) | semibold | Main page titles |
+| H1Large | text-5xl (48px) | leading-10 (40px) | extrabold | Hero sections |
+| H2 | text-3xl (30px) | leading-9 (36px) | semibold | Section headers |
+| H3 | text-2xl (24px) | leading-8 (32px) | semibold | Subsection headers |
+| H4 | text-xl (20px) | leading-7 (28px) | semibold | Card titles |
+| Lead | text-xl (20px) | leading-7 (28px) | normal | Introduction text |
+| P | text-base (16px) | leading-7 (28px) | normal | Body text |
+| Small | text-sm (14px) | leading-4 (16px) | medium | Helper text |
+| Muted | text-sm (14px) | leading-none | normal | Secondary text |
+
+## Color System
+
+### Usage Patterns
+```tsx
+// 1. Use CSS variables for colors
+✅ text-[hsl(var(--foreground))]
+✅ bg-[hsl(var(--background))]
+✅ border-[hsl(var(--border))]
+
+// ❌ Don't use raw colors
+❌ text-slate-900
+❌ bg-white
+```
+
+### Color Variables
+```css
+/* Text Colors */
+text-[hsl(var(--foreground))]        // Primary text
+text-[hsl(var(--muted-foreground))]  // Secondary text
+text-[hsl(var(--accent-foreground))] // Accent text
+
+/* Background Colors */
+bg-[hsl(var(--background))]          // Page background
+bg-[hsl(var(--card))]               // Card background
+bg-[hsl(var(--muted))]              // Muted background
+
+/* Border Colors */
+border-[hsl(var(--border))]          // Default borders
+border-[hsl(var(--input))]          // Form inputs
+```
+
+## Color Reference Values
+
+### Primary Colors
+```css
+/* Light Mode */
+--primary: #0EA5E9 (sky-500)
+--primary-dark: #0284C7 (sky-600)
+--primary-foreground: #F0F9FF (sky-50)
+
+/* Dark Mode */
+--primary: #0284C7 (sky-600)
+--primary-foreground: #083344 (sky-950)
+```
+
+### Background Colors
+```css
+/* Light Mode */
+--background: #FFFFFF (white)
+--foreground: #0F172A (slate-900)
+
+/* Dark Mode */
+--background: #020617 (slate-950)
+--foreground: #F8FAFC (slate-50)
+```
+
+### Accent Colors
+```css
+/* Light Mode */
+--accent: #F1F5F9 (slate-100)
+--accent-foreground: #0F172A (slate-900)
+
+/* Dark Mode */
+--accent: #1E293B (slate-800)
+--accent-foreground: #F8FAFC (slate-50)
+```
+
+### UI Component Colors
+```css
+/* Light Mode */
+--card: #FFFFFF (white)
+--card-foreground: #020617 (slate-950)
+--popover: #FFFFFF (white)
+--popover-foreground: #020617 (slate-950)
+--border: #E2E8F0 (slate-200)
+--input: #E2E8F0 (slate-200)
+--ring: #0F172A (slate-900)
+
+/* Dark Mode */
+--card: #020617 (slate-950)
+--card-foreground: #F8FAFC (slate-50)
+--popover: #020617 (slate-950)
+--popover-foreground: #F8FAFC (slate-50)
+--border: #1E293B (slate-800)
+--input: #1E293B (slate-800)
+--ring: #CBD5E1 (slate-300)
+```
+
+### Semantic Colors
+```css
+/* Light Mode */
+--muted: #F1F5F9 (slate-100)
+--muted-foreground: #64748B (slate-500)
+--secondary: #F1F5F9 (slate-100)
+--secondary-foreground: #0F172A (slate-900)
+--destructive: #DC2626 (red-600)
+--destructive-foreground: #450A0A (red-950)
+--confirmative: #16A34A (green-600)
+--confirmative-foreground: #052E16 (green-950)
+
+/* Dark Mode */
+--muted: #1E293B (slate-800)
+--muted-foreground: #94A3B8 (slate-400)
+--secondary: #1E293B (slate-800)
+--secondary-foreground: #F8FAFC (slate-50)
+--destructive: #7F1D1D (red-900)
+--destructive-foreground: #FEF2F2 (red-50)
+--confirmative: #14532D (green-900)
+--confirmative-foreground: #F0FDF4 (green-50)
+```
+
+### Sidebar Colors
+```css
+/* Light Mode */
+--sidebar-background: #F8FAFC (slate-50)
+--sidebar-foreground: #334155 (slate-700)
+--sidebar-border: #E2E8F0 (slate-200)
+--sidebar-primary: #0C4A6E (sky-900)
+--sidebar-primary-foreground: #F0F9FF (sky-50)
+--sidebar-accent: #F1F5F9 (slate-100)
+--sidebar-accent-foreground: #0F172A (slate-900)
+--sidebar-ring: #94A3B8 (slate-400)
+
+/* Dark Mode */
+--sidebar-background: #0F172A (slate-900)
+--sidebar-foreground: #F1F5F9 (slate-100)
+--sidebar-border: #1E293B (slate-800)
+--sidebar-primary: #0369A1 (sky-700)
+--sidebar-primary-foreground: #FFFFFF (white)
+--sidebar-accent: #1E293B (slate-800)
+--sidebar-accent-foreground: #F1F5F9 (slate-100)
+--sidebar-ring: #CBD5E1 (slate-300)
+```
+
+### Chart Colors
+```css
+/* Light Mode */
+--chart-1: #2A9D90
+--chart-2: #E76E50
+--chart-3: #274754
+--chart-4: #E8C468
+--chart-5: #F4A462
+
+/* Dark Mode */
+--chart-1: #2662D9
+--chart-2: #E23670
+--chart-3: #E88C30
+--chart-4: #AF57DB
+--chart-5: #2EB88A
+```
+
+## Layout Best Practices
+
+### Spacing
+```tsx
+// 1. Use Tailwind's spacing scale with flex + gap
+✅ <div className="flex flex-col gap-2">  // Related items (0.5rem)
+✅ <div className="flex flex-col gap-4">  // Content blocks (1rem)
+✅ <div className="flex flex-col gap-6">  // Sections (1.5rem)
+
+// 2. Use flex + gap for horizontal layouts
+✅ <div className="flex gap-4">
+✅ <div className="flex items-center gap-2">
+
+// ❌ Don't use space-y or margins for spacing
+❌ <div className="space-y-4">
+❌ <div className="flex [&>*+*]:ml-4">
+❌ <div className="p-[5px]">
+```
+
+### Flexbox & Grid
+```tsx
+// 1. Use flex + gap
+✅ <div className="flex gap-4">
+✅ <div className="flex flex-col gap-6">
+
+// 2. Use grid + gap
+✅ <div className="grid grid-cols-3 gap-4">
+
+// ❌ Don't use margins for spacing
+❌ <div className="flex [&>*+*]:ml-4">
+❌ <div className="space-y-4">
+```
+
+### Container Patterns
+```tsx
+// Page Container
+✅ <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+// Card Container
+✅ <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+
+// Form Groups
+✅ <div className="flex flex-col gap-4">
+```
+
+### Icons
+```tsx
+// 1. Import from lucide-react
+import { ChevronRight, Settings, Info } from "lucide-react"
+
+// 2. Standard Icon Sizes
+// xs: 12px - For very small icons in dense UI
+// sm: 14px - For small icons in buttons and forms
+// default: 16px - Default size for most icons
+// lg: 20px - For larger icons in headers or cards
+// xl: 24px - For hero sections or large UI elements
+
+// 3. Use Lucide size prop consistently
+✅ <Info size={16} />  // Default size
+✅ <Settings size={20} />  // Large size
+✅ <ChevronRight size={14} />  // Small size
+
+// ❌ Don't use className for sizing
+❌ <Info className="h-4 w-4" />  // Use size prop instead
+❌ <Settings className="w-[18px] h-[18px]" />  // Use size prop instead
+
+```
+
+### Component Variants
+```tsx
+// 1. Use built-in variants instead of custom wrappers
+✅ <Button variant="action">Create Organization</Button>
+✅ <Button variant="outline" size="sm">Cancel</Button>
+
+// ❌ Don't wrap components unnecessarily
+❌ <div className="w-full">
+    <Button>Create Organization</Button>
+  </div>
+❌ <div className="text-white">
+    <Button>Create Organization</Button>
+  </div>
+
+// 2. Use size variants for consistent sizing
+✅ <Button size="sm">Small Button</Button>
+✅ <Button size="default">Default Button</Button>
+✅ <Button size="lg">Large Button</Button>
+
+// 3. Use asPill for rounded buttons
+✅ <Button asPill>Rounded Button</Button>
+
+// 4. Combine variants appropriately
+✅ <Button variant="action" size="lg" asPill>Create Account</Button>
+```
+
+### Page Layout
+```tsx
+<article className="flex flex-col gap-6">
+  <H1>Welcome to Helicone</H1>
+  <Lead>
+    Monitor and analyze your LLM usage
+  </Lead>
+  
+  <section className="flex flex-col gap-4">
+    <H2>Features</H2>
+    <P>Detailed explanation of features...</P>
+    
+    <div className="grid grid-cols-3 gap-6">
+      {features.map(feature => (
+        <div key={feature.id} className="flex flex-col gap-2">
+          <H3>{feature.title}</H3>
+          <Muted>{feature.description}</Muted>
+        </div>
+      ))}
+    </div>
+  </section>
+</article>
+```
+
+### Card Pattern
+```tsx
+<Card>
+  <CardHeader>
+    <H4>Usage Statistics</H4>
+    <Small className="text-[hsl(var(--muted-foreground))]">
+      Last 30 days
+    </Small>
+  </CardHeader>
+  <CardContent>
+    <P>Card content...</P>
+  </CardContent>
+</Card>
+```

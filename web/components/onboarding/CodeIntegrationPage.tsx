@@ -30,6 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/lib/result";
 import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { H1, Small, Muted } from "@/components/ui/typography";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -208,11 +209,11 @@ export function CodeIntegrationPage({
         <main className="w-full">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold">{title}</h1>
-              <p className="text-sm text-slate-500">{description}</p>
+              <H1>{title}</H1>
+              <Muted>{description}</Muted>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <Tabs
                   value={provider}
@@ -233,17 +234,17 @@ export function CodeIntegrationPage({
                 >
                   <Button
                     variant="link"
-                    className="flex items-center gap-2 text-sky-500"
+                    className="flex items-center gap-2 text-[hsl(var(--primary))]"
                   >
                     Other providers
-                    <ExternalLink className="h-4 w-4" />
+                    <ExternalLink size={16} />
                   </Button>
                 </Link>
               </div>
 
-              <div className="border rounded-lg overflow-hidden">
+              <div className="rounded-lg border border-[hsl(var(--border))] overflow-hidden">
                 {availableLanguages.length > 1 && (
-                  <div className="flex gap-4 p-3 bg-[#24292e] border-b">
+                  <div className="flex gap-4 p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
                     {availableLanguages.map((lang) => (
                       <button
                         key={lang}
@@ -251,7 +252,7 @@ export function CodeIntegrationPage({
                         className={`text-sm font-medium relative px-1 ${
                           language === lang
                             ? "text-white after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
-                            : "text-gray-400 hover:text-gray-300"
+                            : "text-[hsl(var(--muted-foreground))] hover:text-white"
                         }`}
                       >
                         {lang === "typescript"
@@ -270,7 +271,7 @@ export function CodeIntegrationPage({
                   />
                   <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
                     {copied && (
-                      <span className="text-sm text-gray-300 bg-gray-700 px-2 h-8 flex items-center rounded">
+                      <span className="text-sm text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))] px-2 h-8 flex items-center rounded">
                         Copied!
                       </span>
                     )}
@@ -284,13 +285,9 @@ export function CodeIntegrationPage({
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}
-                      className="bg-gray-700 hover:bg-gray-600 text-gray-300 rounded p-2"
+                      className="bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted-foreground))] text-[hsl(var(--muted-foreground))] rounded p-2"
                     >
-                      {copied ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
+                      {copied ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   </div>
                 </div>
@@ -298,31 +295,37 @@ export function CodeIntegrationPage({
             </div>
 
             {hasEvent?.data ? (
-              <Alert className="bg-green-50 border-green-100 p-4 rounded-md">
+              <Alert className="bg-[hsl(var(--confirmative))]/10 border-[hsl(var(--confirmative))]/20 p-4">
                 <div className="flex items-start gap-4">
-                  <Check className="h-6 w-6 text-green-600" />
+                  <Check
+                    size={20}
+                    className="text-[hsl(var(--confirmative))]"
+                  />
                   <div className="flex flex-col gap-1">
-                    <p className="text-green-900 text-sm font-medium leading-none">
+                    <Small className="text-[hsl(var(--confirmative))]">
                       Event received successfully!
-                    </p>
-                    <p className="text-green-600 text-sm leading-5">
+                    </Small>
+                    <Muted className="text-[hsl(var(--confirmative))]/80">
                       Great job! Let&apos;s head to your dashboard.
-                    </p>
+                    </Muted>
                   </div>
                 </div>
               </Alert>
             ) : (
-              <Card className="p-4 bg-sky-50 border-sky-100">
+              <Card className="bg-[hsl(var(--primary))]/10 border-[hsl(var(--primary))]/20 p-4">
                 <div className="flex items-start gap-4">
-                  <Loader className="h-6 w-6 text-sky-500 animate-spin" />
+                  <Loader
+                    size={20}
+                    className="text-[hsl(var(--primary))] animate-spin"
+                  />
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium text-sky-900 leading-[14px]">
+                    <Small className="text-[hsl(var(--primary))]">
                       Listening for events...
-                    </p>
-                    <p className="text-sm text-sky-500 leading-tight">
+                    </Small>
+                    <Muted className="text-[hsl(var(--primary))]/80">
                       Elapsed time: {Math.floor(elapsedTime / 60)}:
                       {String(elapsedTime % 60).padStart(2, "0")}
-                    </p>
+                    </Muted>
                   </div>
                 </div>
               </Card>
@@ -333,7 +336,10 @@ export function CodeIntegrationPage({
                 <DropdownMenuTrigger asChild>
                   <Button variant="link" className="w-fit group">
                     Need some help?
-                    <ChevronDown className="ml-2 h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                    <ChevronDown
+                      size={16}
+                      className="ml-2 transition-transform group-data-[state=open]:rotate-180"
+                    />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -343,7 +349,7 @@ export function CodeIntegrationPage({
                       target="_blank"
                       className="flex items-center"
                     >
-                      <BookOpen className="mr-2 h-4 w-4" />
+                      <BookOpen size={16} className="mr-2" />
                       Documentation
                     </Link>
                   </DropdownMenuItem>
@@ -353,7 +359,7 @@ export function CodeIntegrationPage({
                       target="_blank"
                       className="flex items-center"
                     >
-                      <MessageSquare className="mr-2 h-4 w-4" />
+                      <MessageSquare size={16} className="mr-2" />
                       Ask us on Discord
                     </Link>
                   </DropdownMenuItem>
@@ -363,7 +369,7 @@ export function CodeIntegrationPage({
                       className="flex items-center"
                       target="_blank"
                     >
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail size={16} className="mr-2" />
                       Contact Us
                     </Link>
                   </DropdownMenuItem>
@@ -378,7 +384,7 @@ export function CodeIntegrationPage({
             >
               {isRedirecting ? (
                 <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader size={16} className="mr-2 animate-spin" />
                   Redirecting...
                 </>
               ) : (

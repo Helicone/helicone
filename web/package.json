@@ -80,7 +80,8 @@
     "next": "^14.2.23",
     "next-runtime-env": "^1.7.1",
     "next-sitemap": "^4.2.3",
-    "next-themes": "^0.3.0",
+    "next-themes": "^0.4.4",
+    "octokit": "^3.1.2",
     "openai": "^4.78.1",
     "openapi-fetch": "^0.9.3",
     "papaparse": "^5.5.2",
@@ -105,11 +106,10 @@
     "react-simple-code-editor": "^0.13.1",
     "recharts": "^2.13.3",
     "rss-parser": "^3.13.0",
-    "stripe": "^17.6.0",
     "string-similarity-js": "^2.1.4",
+    "stripe": "^17.6.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.1.2",
-    "octokit": "^3.1.2",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
