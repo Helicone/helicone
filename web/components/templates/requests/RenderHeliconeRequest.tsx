@@ -6,10 +6,10 @@ import { useMemo } from "react";
 import { Assistant } from "./components/assistant/Assistant";
 import { Chat } from "./components/chatComponent/chat";
 import { Completion } from "./components/completion";
-import { ErrorMessage } from "./components/error/ErrorMessage";
 import { Realtime } from "./components/realtime/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
+import { ErrorMessage } from "./components/error/ErrorMessage";
 
 type RenderMappedRequestProps = {
   selectedProperties?: Record<string, string>;
@@ -20,11 +20,6 @@ type RenderMappedRequestProps = {
   className?: string;
   autoInputs?: any[];
   promptData?: any;
-  realtimeMessageFilter?: string;
-  messageIndexFilter?: {
-    startIndex: number;
-    endIndex: number;
-  };
 };
 
 export const RenderMappedRequest = (

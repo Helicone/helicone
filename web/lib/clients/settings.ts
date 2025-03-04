@@ -17,12 +17,3 @@ export async function getAnthropicKeyFromAdmin(): Promise<string | undefined> {
 
   return (data?.[0]?.settings as { apiKey?: string })?.apiKey;
 }
-
-export async function getOpenRouterKeyFromAdmin(): Promise<string | undefined> {
-  const { data } = await getSupabaseServer()
-    .from("helicone_settings")
-    .select("*")
-    .eq("name", "openrouter:apiKey");
-
-  return (data?.[0]?.settings as { apiKey?: string })?.apiKey;
-}

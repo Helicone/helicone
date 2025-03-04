@@ -690,7 +690,6 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
-      audio_data?: string;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -700,7 +699,7 @@ Json: JsonObject;
       role?: string;
       id?: string;
       /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
+      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
     };
     Tool: {
       name: string;
@@ -2208,7 +2207,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
