@@ -473,34 +473,33 @@ export class LogStore {
   filterDuplicateResponses(
     entries: Database["public"]["Tables"]["response"]["Insert"][]
   ) {
-    if (!entries) {
-      return [];
-    }
-
-    // Creating a map to store unique response records based on the request ID
-    const uniqueResponses: Map<
+    const entryMap = new Map<
       string,
       Database["public"]["Tables"]["response"]["Insert"]
-    > = new Map();
+    >();
 
-    for (const response of entries) {
-      // Use request + helicone_org_id as the key for uniqueness
-      const key = `${response.request}:${response.helicone_org_id}`;
-
-      // If this is a new unique key or the timestamp is newer, update the map
-      if (
-        !uniqueResponses.has(key) ||
-        (response.created_at &&
-          uniqueResponses.get(key)?.created_at &&
-          new Date(response.created_at as string) >
-            new Date(uniqueResponses.get(key)!.created_at as string))
-      ) {
-        uniqueResponses.set(key, response);
+    entries.forEach((entry) => {
+      if (!entry.request) {
+        return;
       }
-    }
 
-    // Convert the map values back to an array
-    return Array.from(uniqueResponses.values());
+      const existingEntry = entryMap.get(entry.request);
+
+      // No existing entry, add it
+      if (!existingEntry || !existingEntry.created_at) {
+        entryMap.set(entry.request, entry);
+        return;
+      }
+
+      if (
+        entry.created_at &&
+        new Date(entry.created_at) < new Date(existingEntry.created_at)
+      ) {
+        entryMap.set(entry.request, entry);
+      }
+    });
+
+    return Array.from(entryMap.values());
   }
 
   filterDuplicateSearchRecords(
