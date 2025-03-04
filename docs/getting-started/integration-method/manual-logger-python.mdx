@@ -89,11 +89,21 @@ class HeliconeManualLogger:
         self,
         api_key: str,
         headers: dict = {},
-        logging_endpoint: str = "https://api.hconeai.com"
+        logging_endpoint: str = "https://api.worker.helicone.ai"
     )
 ```
 
-### logRequest
+### LoggingOptions
+
+```python
+class LoggingOptions(TypedDict, total=False):
+    start_time: float
+    end_time: float
+    additional_headers: Dict[str, str]
+    time_to_first_token_ms: Optional[float]
+```
+
+### log_request
 
 ```python
 def log_request(
@@ -112,6 +122,25 @@ def log_request(
 3. `additional_headers`: Optional dictionary of additional headers
 4. `provider`: Optional provider specification ("openai", "anthropic", or None for custom)
 
+### send_log
+
+```python
+def send_log(
+    self,
+    provider: Optional[str],
+    request: dict,
+    response: Union[dict, str],
+    options: LoggingOptions
+)
+```
+
+#### Parameters
+
+1. `provider`: Optional provider specification ("openai", "anthropic", or None for custom)
+2. `request`: A dictionary containing the request parameters
+3. `response`: Either a dictionary or string response to log
+4. `options`: A LoggingOptions dictionary with timing information
+
 ### HeliconeResultRecorder
 
 ```python
@@ -128,13 +157,54 @@ class HeliconeResultRecorder:
 
 ## Advanced Usage Examples
 
-### Streaming Responses
+### Direct Logging with String Response
 
-For streaming responses with Python, you can use the `log_stream` method:
+For direct logging of string responses:
 
 ```python
-from helicone_helpers import HeliconeManualLogger
+import time
+from helicone_helpers import HeliconeManualLogger, LoggingOptions
+
+# Initialize the logger
+helicone = HeliconeManualLogger(api_key="your-helicone-api-key")
+
+# Log a request with a string response
+start_time = time.time()
+
+# Your request data
+request = {
+    "model": "custom-model",
+    "prompt": "Tell me a joke"
+}
+
+# Your response as a string
+response = "Why did the chicken cross the road? To get to the other side!"
+
+# Log after some processing time
+end_time = time.time()
+
+# Send the log with timing information
+helicone.send_log(
+    provider=None,  # Custom provider
+    request=request,
+    response=response,  # String response
+    options=LoggingOptions(
+        start_time=start_time,
+        end_time=end_time,
+        additional_headers={"Helicone-User-Id": "user-123"},
+        time_to_first_token_ms=150  # Optional time to first token in milliseconds
+    )
+)
+```
+
+### Streaming Responses
+
+For streaming responses with Python, you can use the `log_request` method with time to first token tracking:
+
+```python
+from helicone_helpers import HeliconeManualLogger, LoggingOptions
 import openai
+import time
 
 # Initialize the logger
 helicone = HeliconeManualLogger(api_key="your-helicone-api-key")
@@ -148,23 +218,38 @@ request = {
 }
 
 def stream_operation(result_recorder):
+    start_time = time.time()
+    first_token_time = None
+
     # Create a streaming response
     response = client.chat.completions.create(**request)
 
     # Process the stream and collect chunks
     collected_chunks = []
-    for chunk in response:
+    for i, chunk in enumerate(response):
+        if i == 0 and first_token_time is None:
+            first_token_time = time.time()
+
         collected_chunks.append(chunk)
         # You can process each chunk here if needed
 
-    # Record the results
-    result_recorder.append_stream_results(collected_chunks)
+    # Calculate time to first token in milliseconds
+    time_to_first_token = None
+    if first_token_time:
+        time_to_first_token = (first_token_time - start_time) * 1000  # convert to ms
+
+    # Record the results with timing information
+    result_recorder.append_results({
+        "chunks": [c.model_dump() for c in collected_chunks],
+        "time_to_first_token_ms": time_to_first_token
+    })
 
     # Return the collected chunks or process them as needed
     return collected_chunks
 
 # Log the streaming request
-result = helicone.log_stream(
+result = helicone.log_request(
+    provider="openai",
     request=request,
     operation=stream_operation,
     additional_headers={"Helicone-User-Id": "user-123"}
@@ -251,16 +336,68 @@ def custom_model_operation(result_recorder):
 
     return response_data
 
-# Log the request with a custom provider
+# Log the request with no specific provider
 result = helicone.log_request(
-    provider="custom",  # Or omit this parameter
+    provider=None,  # No specific provider
     request=request,
-    operation=custom_model_operation,
-    additional_headers={
-        "Helicone-Property-Model-Type": "custom-llm",
-        "Helicone-Property-Application": "poetry-generator"
-    }
+    operation=custom_model_operation
 )
 ```
 
 For more examples and detailed usage, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.
+
+### Direct Stream Logging
+
+For direct control over streaming responses, you can use the `send_log` method to manually track time to first token:
+
+```python
+import time
+from helicone_helpers import HeliconeManualLogger, LoggingOptions
+import openai
+
+# Initialize the logger and client
+helicone_logger = HeliconeManualLogger(api_key="your-helicone-api-key")
+client = openai.OpenAI(api_key="your-openai-api-key")
+
+# Define your request
+request_body = {
+    "model": "gpt-3.5-turbo",
+    "messages": [{"role": "user", "content": "Write a story about a robot"}],
+    "stream": True,
+    "stream_options": {
+        "include_usage": True
+    }
+}
+
+# Create the streaming response
+stream = client.chat.completions.create(**request_body)
+
+# Track time to first token
+chunks = []
+time_to_first_token_ms = None
+start_time = time.time()
+
+# Process the stream
+for i, chunk in enumerate(stream):
+    # Record time to first token on first chunk
+    if i == 0 and not time_to_first_token_ms:
+        time_to_first_token_ms = (time.time() - start_time) * 1000
+
+    # Store chunks (you might want to process them differently)
+    chunks.append(chunk.model_dump_json())
+
+# Log the complete interaction with timing information
+helicone_logger.send_log(
+    provider="openai",
+    request=request_body,
+    response="\n".join(chunks),  # Join chunks or process as needed
+    options=LoggingOptions(
+        start_time=start_time,
+        end_time=time.time(),
+        additional_headers={"Helicone-User-Id": "user-123"},
+        time_to_first_token_ms=time_to_first_token_ms
+    )
+)
+```
+
+This approach gives you complete control over the streaming process while still capturing important metrics like time to first token.
