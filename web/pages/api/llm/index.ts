@@ -1,12 +1,38 @@
 import { GenerateParams } from "@/lib/api/llm/generate";
+import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1/",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+// Cache for the OpenAI client to avoid recreating it on every request
+let openaiClient: OpenAI | null = null;
+let isOnPrem = false;
+
+// Function to get or create the OpenAI client
+async function getOpenAIClient(): Promise<OpenAI> {
+  // Return cached client if available
+  if (openaiClient) {
+    return openaiClient;
+  }
+
+  // Get API key from environment or admin settings
+  let apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    // apiKey = (await getOpenRouterKeyFromAdmin()) || "";
+    apiKey = (await getOpenAIKeyFromAdmin()) || "";
+    isOnPrem = true;
+  }
+
+  // Create and cache the client
+  openaiClient = new OpenAI({
+    baseURL: isOnPrem
+      ? "https://api.openai.com/v1/"
+      : "https://openrouter.ai/api/v1/",
+    apiKey: apiKey,
+  });
+
+  return openaiClient;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,16 +43,21 @@ export default async function handler(
   }
 
   try {
+    // Get or initialize the OpenAI client
+    const openai = await getOpenAIClient();
+
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
 
     const response = await openai.chat.completions.create(
       {
-        provider: {
-          sort: "throughput",
-          order: ["Fireworks"],
-        },
-        model: params.model,
+        provider: isOnPrem
+          ? undefined
+          : {
+              sort: "throughput",
+              order: ["Fireworks"],
+            },
+        model: isOnPrem ? params.model.split("/")[1] : params.model,
         messages: params.messages,
         temperature: params.temperature,
         max_tokens: params.maxTokens,
@@ -35,6 +66,7 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
+        reasoning_effort: params.reasoningEffort,
         include_reasoning: params.includeReasoning,
         ...(params.schema && {
           response_format: zodResponseFormat(params.schema, "result"),

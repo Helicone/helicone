@@ -6,20 +6,22 @@ export type LlmType = "chat" | "completion";
 
 export type Message = {
   _type:
-    | "function" // This is the same as function (openai) or tool_use (anthropic)
-    | "functionCall" // This is the same as tool_use (openai) or tool_result (anthropic)
+    | "functionCall" // The request for a function call: function (openai) or tool_use (anthropic)
+    | "function" // The result of a function call to give: tool (openai) or tool_result (anthropic)
     | "image"
     | "message"
     | "autoInput"
-    | "contentArray";
+    | "contentArray"
+    | "audio";
   id?: string;
   role?: string;
   name?: string;
   content?: string;
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
-  timestamp?: string;
+  timestamp?: string; // TODO: Remove when sessions have this data?
   image_url?: string;
+  audio_data?: string; // Base64 encoded audio data
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
 };
