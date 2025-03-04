@@ -125,8 +125,8 @@ export const handleToolResponse = (msg: any): Message => {
 export const formatStreamingToolCalls = (toolCalls: ToolCall[]): string => {
   return toolCalls
     .map((tool: ToolCall) => {
-      const args = parseFunctionArguments(tool.function.arguments);
-      return `${tool.function.name}(${JSON.stringify(args)})`;
+      const args = parseFunctionArguments(tool.function?.arguments);
+      return `${tool.function?.name}(${JSON.stringify(args)})`;
     })
     .join("\n");
 };

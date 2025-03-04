@@ -59,6 +59,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
+      if (typeof context.processedLog.response.model !== "string") {
+        context.processedLog.response.model = "unknown";
+      }
       const definedModel =
         calculateModel(
           context.processedLog.request.model,
@@ -94,7 +97,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       );
 
       context.processedLog.response.model = responseModel;
-      context.processedLog.model = model;
+      if (typeof model === "string") {
+        context.processedLog.model = model;
+      }
 
       // Set usage
       const usage =

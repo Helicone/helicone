@@ -98,6 +98,23 @@ export class LoggingHandler extends AbstractLogHandler {
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
+      // Sanitize request_body to prevent JSON parsing errors in Clickhouse
+      // Special handling for the request_body field which often contains nested JSON with escape sequences
+      const sanitizedRequestResponseVersionedCHMapped =
+        this.sanitizeJsonEscapeSequences(requestResponseVersionedCHMapped);
+
+      // Special handling for request_body to ensure it's properly sanitized
+      if (
+        typeof sanitizedRequestResponseVersionedCHMapped.request_body ===
+        "string"
+      ) {
+        sanitizedRequestResponseVersionedCHMapped.request_body =
+          sanitizedRequestResponseVersionedCHMapped.request_body.replace(
+            /[\uD800-\uDFFF]/g,
+            "\uFFFD"
+          );
+      }
+
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
@@ -127,7 +144,7 @@ export class LoggingHandler extends AbstractLogHandler {
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
-        requestResponseVersionedCHMapped
+        sanitizedRequestResponseVersionedCHMapped
       );
 
       return await super.handle(context);
@@ -677,4 +694,29 @@ export class LoggingHandler extends AbstractLogHandler {
     const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
     return !nonVectorizedModels.has(model);
   };
+
+  /**
+   * Sanitizes JSON data by removing invalid escape sequences
+   * This is needed to fix the "missing second part of surrogate pair" error
+   * @param obj - The object to sanitize
+   * @returns A sanitized copy of the object
+   */
+  private sanitizeJsonEscapeSequences<T>(obj: T): T {
+    // Create a deep copy of the object through serialization
+    // and replace any invalid surrogate pairs
+    try {
+      const sanitizedJson = JSON.stringify(obj, (_, value) => {
+        if (typeof value === "string") {
+          // Replace any lone surrogate halves with the Unicode replacement character (U+FFFD)
+          return value.replace(/[\uD800-\uDFFF]/g, "\uFFFD");
+        }
+        return value;
+      });
+      return JSON.parse(sanitizedJson);
+    } catch (error) {
+      // If any error occurs during sanitization, return the original object
+      console.warn("Failed to sanitize JSON data:", error);
+      return obj;
+    }
+  }
 }
