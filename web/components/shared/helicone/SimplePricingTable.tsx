@@ -13,6 +13,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { useUpgradePlan } from "@/hooks/useUpgradePlan";
+import { H2, Small } from "@/components/ui/typography";
 
 interface PricingTier {
   name: string;
@@ -156,7 +157,8 @@ export default function SimplePricingComparisonTable() {
       ctaText: "Get started",
       ctaHref: "https://us.helicone.ai/signup",
       badge: "CURRENT PLAN",
-      badgeClass: "bg-slate-100 text-slate-500 px-2 py-1 font-normal text-sm",
+      badgeClass:
+        "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] px-2 py-1 font-normal text-sm",
       showCTA: false,
     },
     {
@@ -168,7 +170,7 @@ export default function SimplePricingComparisonTable() {
       isPrimary: true,
       badge: "POPULAR",
       badgeClass:
-        "bg-[#0ca5ea] text-white border-2 border-[#0ca5ea] rounded-full",
+        "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-2 border-[hsl(var(--primary))] rounded-full",
       showCTA: true,
       onCtaClick: () => setIsUpgradeDialogOpen(true),
     },
@@ -180,7 +182,7 @@ export default function SimplePricingComparisonTable() {
       ctaHref: "https://us.helicone.ai/settings/billing",
       badge: "BEST VALUE",
       badgeClass:
-        "bg-slate-200 text-slate-500 border-2 border-slate-200 rounded-full",
+        "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border-2 border-[hsl(var(--border))] rounded-full",
       showCTA: true,
       onCtaClick: () => handleUpgradeTeam(),
     },
@@ -188,57 +190,63 @@ export default function SimplePricingComparisonTable() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-black text-4xl font-bold">Compare plans</h2>
+      <H2>Compare plans</H2>
       <div className="rounded-xl">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-50 hover:bg-slate-50 border-none align-top">
-              <TableHead className="min-w-[180px] p-6 bg-white rounded-tl-xl" />
+            <TableRow className="bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))] border-none align-top">
+              <TableHead className="min-w-[180px] p-6 bg-[hsl(var(--background))] rounded-tl-xl" />
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
                   className={`px-6 py-[18px] align-top ${
-                    tier.isPrimary ? "bg-sky-50" : "bg-white"
+                    tier.isPrimary
+                      ? "bg-[hsl(var(--accent))]"
+                      : "bg-[hsl(var(--background))]"
                   } 
                     ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
                   <div className="flex md:flex-col flex-col gap-5">
-                    <div className="text-slate-900 text-xl font-semibold">
+                    <div className="text-[hsl(var(--foreground))] text-xl font-semibold">
                       {tier.name}
                     </div>
                     <div className="flex md:justify-between md:items-center md:gap-12 gap-4 md:flex-row flex-col">
                       <div className={tier.priceDetail ? "w-[116px]" : ""}>
                         <span
                           className={`${
-                            tier.isPrimary ? "text-sky-900" : "text-slate-900"
+                            tier.isPrimary
+                              ? "text-[hsl(var(--primary))]"
+                              : "text-[hsl(var(--foreground))]"
                           } text-xl font-bold`}
                         >
                           {tier.price}
                         </span>
                         {tier.priceDetail && (
-                          <span className="text-slate-400 text-base font-normal">
+                          <span className="text-[hsl(var(--muted-foreground))] text-base font-normal">
                             {tier.priceDetail}
                           </span>
                         )}
                       </div>
                       <div className={cn("px-3 shrink-0", tier.badgeClass)}>
-                        <div className="text-center text-sm font-normal whitespace-nowrap">
+                        <Small className="text-center whitespace-nowrap">
                           {tier.badge}
-                        </div>
+                        </Small>
                       </div>
                     </div>
-                    {tier.showCTA && tier.ctaHref && tier.ctaText && (
-                      <Button
-                        onClick={tier.onCtaClick}
-                        className={`w-full text-sm font-medium ${
-                          tier.isPrimary
-                            ? "bg-[#0ca5ea] text-white hover:bg-[#0ca5ea]/90"
-                            : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                        }`}
-                      >
-                        {tier.ctaText}
-                      </Button>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      {tier.showCTA && tier.ctaHref && tier.ctaText && (
+                        <Button
+                          onClick={tier.onCtaClick}
+                          className={`w-full text-sm font-medium ${
+                            tier.isPrimary
+                              ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90"
+                              : "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]/90"
+                          }`}
+                        >
+                          {tier.ctaText}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </TableHead>
               ))}
@@ -249,26 +257,26 @@ export default function SimplePricingComparisonTable() {
             <TableBody key={group.title} className="relative">
               {group.features.map((feature, featureIndex) => (
                 <Fragment key={feature.name}>
-                  <TableRow className="hover:bg-white">
+                  <TableRow className="hover:bg-[hsl(var(--background))]">
                     <TableCell
                       className={`w-[180px] px-6 py-3 ${
                         featureIndex === group.features.length - 1
-                          ? "border-b"
+                          ? "border-b border-[hsl(var(--border))]"
                           : ""
                       }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-500 text-sm font-normal">
+                          <span className="text-[hsl(var(--muted-foreground))] text-sm font-normal">
                             {feature.name}
                           </span>
                           {feature.tooltip === "usage" && (
                             <button
                               onClick={() => setShowUsageTiers(!showUsageTiers)}
-                              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                              className="p-1 hover:bg-[hsl(var(--muted))] rounded-full transition-colors"
                             >
                               <ChevronDownIcon
-                                className={`w-4 h-4 text-slate-400 transition-transform ${
+                                className={`w-4 h-4 text-[hsl(var(--muted-foreground))] transition-transform ${
                                   showUsageTiers ? "rotate-180" : ""
                                 }`}
                               />
@@ -280,10 +288,10 @@ export default function SimplePricingComparisonTable() {
                             <Table className="w-full">
                               <TableHeader>
                                 <TableRow className="hover:bg-transparent">
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                  <TableHead className="text-[hsl(var(--muted-foreground))] font-medium px-0 py-1">
                                     Logs per month
                                   </TableHead>
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                  <TableHead className="text-[hsl(var(--muted-foreground))] font-medium px-0 py-1 text-right">
                                     Rate per log
                                   </TableHead>
                                 </TableRow>
@@ -294,13 +302,13 @@ export default function SimplePricingComparisonTable() {
                                     key={i}
                                     className="hover:bg-transparent"
                                   >
-                                    <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                    <TableCell className="px-0 py-1 text-sm text-[hsl(var(--muted-foreground))]">
                                       {tier.min.toLocaleString()} -{" "}
                                       {tier.max === Infinity
                                         ? "∞"
                                         : tier.max.toLocaleString()}
                                     </TableCell>
-                                    <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                    <TableCell className="px-0 py-1 text-right text-sm text-[hsl(var(--muted-foreground))]">
                                       ${tier.rate.toFixed(5)}
                                     </TableCell>
                                   </TableRow>
@@ -320,19 +328,19 @@ export default function SimplePricingComparisonTable() {
                       <TableCell
                         key={index}
                         className={`px-6 py-3 ${
-                          index === 1 ? "bg-sky-50" : ""
+                          index === 1 ? "bg-[hsl(var(--accent))]" : ""
                         } ${
                           featureIndex === group.features.length - 1
-                            ? "border-b"
+                            ? "border-b border-[hsl(var(--border))]"
                             : ""
                         }`}
                       >
                         {typeof value === "string" ? (
-                          <div className="text-slate-500 text-sm font-normal">
+                          <div className="text-[hsl(var(--muted-foreground))] text-sm font-normal">
                             {value}
                           </div>
                         ) : value === true ? (
-                          <CheckIcon className="w-5 h-5 text-slate-500" />
+                          <CheckIcon className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
                         ) : null}
                       </TableCell>
                     ))}

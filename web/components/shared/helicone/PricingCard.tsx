@@ -29,10 +29,11 @@ export const PricingCard = ({
 }: PricingCardProps) => {
   const variants = {
     default: {
-      container: "bg-slate-100",
-      title: "text-slate-900",
-      price: "text-slate-900",
-      badge: "bg-slate-100 text-slate-500",
+      container: "bg-[hsl(var(--sidebar-accent))]",
+      title: "text-[hsl(var(--sidebar-accent-foreground))]",
+      price: "text-[hsl(var(--sidebar-accent-foreground))]",
+      badge:
+        "bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]",
       icon: (
         <svg
           width="24"
@@ -41,7 +42,7 @@ export const PricingCard = ({
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle cx="10" cy="10" r="7.5" fill="black" />
+          <circle cx="10" cy="10" r="7.5" fill="currentColor" />
           <path
             d="M7.5 10L9.16667 11.6667L12.5 8.33334"
             stroke="white"
@@ -53,10 +54,12 @@ export const PricingCard = ({
       ),
     },
     highlighted: {
-      container: "bg-sky-50 border-2 border-sky-500",
-      title: "text-sky-900",
-      price: "text-sky-900",
-      badge: "bg-sky-500 text-white border-2 border-sky-500 rounded-full",
+      container:
+        "bg-[hsl(var(--primary)/0.1)] border-2 border-[hsl(var(--primary))]",
+      title: "text-[hsl(var(--primary))]",
+      price: "text-[hsl(var(--primary))]",
+      badge:
+        "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-2 border-[hsl(var(--primary))] rounded-full",
       icon: (
         <svg
           width="24"
@@ -76,11 +79,11 @@ export const PricingCard = ({
       ),
     },
     outlined: {
-      container: "bg-slate-50 border-2 border-slate-200",
-      title: "text-slate-900",
-      price: "text-slate-900",
+      container: "bg-[hsl(var(--card))] border-2 border-[hsl(var(--border))]",
+      title: "text-[hsl(var(--foreground))]",
+      price: "text-[hsl(var(--foreground))]",
       badge:
-        "bg-slate-200 text-slate-500 border-2 border-slate-200 rounded-full",
+        "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] border-2 border-[hsl(var(--border))] rounded-full",
       icon: (
         <svg
           width="24"

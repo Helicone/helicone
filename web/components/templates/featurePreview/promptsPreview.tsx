@@ -5,6 +5,7 @@ import { useFeatureTrial } from "@/hooks/useFeatureTrial";
 import { useMemo, useState } from "react";
 import FeaturePreview, { PricingPlan } from "../featurePreview/featurePreview";
 import { Feature } from "../featurePreview/featurePreviewSection";
+import { H1, Lead } from "@/components/ui/typography";
 
 type PromptPricingPlanName = "Prompt" | "Pro + Prompt" | "Team Bundle";
 

@@ -84,19 +84,19 @@ export const DatasetVisual = ({
   }
 
   return (
-    <div className="w-full w-full bg-white rounded-xl border border-slate-200 flex flex-col">
+    <div className="w-full w-full bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] flex flex-col">
       <div className="p-2">
-        <div className="border border-slate-200 rounded-lg overflow-hidden">
+        <div className="border border-[hsl(var(--border))] rounded-lg overflow-hidden">
           <Table className="table-auto [&_tr:last-child_td]:border-b-0 [&_th:first-child]:rounded-tl-lg [&_th:last-child]:rounded-tr-lg border-collapse">
             <TableHeader>
               <TableRow>
-                <TableHead className="h-8 px-4 py-2 bg-slate-50 text-md font-semibold text-black border-b border-r border-slate-200">
+                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-r border-[hsl(var(--border))]">
                   Name
                 </TableHead>
-                <TableHead className="h-8 px-4 py-2 bg-slate-50 text-md font-semibold text-black border-b border-r border-slate-200">
+                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-r border-[hsl(var(--border))]">
                   Created At
                 </TableHead>
-                <TableHead className="h-8 px-4 py-2 bg-slate-50 text-md font-semibold text-black border-b border-slate-200">
+                <TableHead className="h-8 px-4 py-2 bg-[hsl(var(--muted))] text-md font-semibold text-[hsl(var(--foreground))] border-b border-[hsl(var(--border))]">
                   Rows
                 </TableHead>
               </TableRow>
@@ -104,13 +104,13 @@ export const DatasetVisual = ({
             <TableBody>
               {displayData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="p-2 px-4 h-8 text-slate-600 font-light text-md border-r border-slate-200">
+                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md border-r border-[hsl(var(--border))]">
                     {row.name}
                   </TableCell>
-                  <TableCell className="p-2 px-4 h-8 text-slate-600 font-light text-md border-r border-slate-200">
+                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md border-r border-[hsl(var(--border))]">
                     {row.createdAt}
                   </TableCell>
-                  <TableCell className="p-2 px-4 h-8 text-slate-600 font-light text-md">
+                  <TableCell className="p-2 px-4 h-8 text-[hsl(var(--muted-foreground))] font-light text-md">
                     {row.rows}
                   </TableCell>
                 </TableRow>
@@ -118,18 +118,18 @@ export const DatasetVisual = ({
             </TableBody>
           </Table>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[hsl(var(--background))] to-transparent pointer-events-none" />
       </div>
 
       {/* Action Buttons */}
       {!hideButtons && (
         <div className="w-full h-full pb-2 px-2 -mt-6 z-10">
-          <div className="w-full h-full py-2 bg-blue-500 rounded-2xl px-2">
+          <div className="w-full h-full py-2 bg-[hsl(var(--primary))] rounded-2xl px-2">
             <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="ghost"
                 size="lg"
-                className="flex-1 basis-0 text-white bg-[#77A8F9] font-bold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
+                className="flex-1 basis-0 text-[hsl(var(--primary-foreground))] bg-[hsl(var(--primary))]/80 font-semibold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
               >
                 <BeakerIcon className="w-5 h-5 mr-2 shrink-0" />
                 Experiment
@@ -137,7 +137,7 @@ export const DatasetVisual = ({
               <Button
                 variant="ghost"
                 size="lg"
-                className="flex-1 basis-0 text-white font-bold text-sm bg-[#77A8F9] rounded-xl p-6 md:text-lg pointer-events-none"
+                className="flex-1 basis-0 text-[hsl(var(--primary-foreground))] font-semibold text-sm bg-[hsl(var(--primary))]/80 rounded-xl p-6 md:text-lg pointer-events-none"
               >
                 <SparklesIcon className="w-5 h-5 mr-2 shrink-0" />
                 Fine-tune
@@ -145,7 +145,7 @@ export const DatasetVisual = ({
               <Button
                 variant="secondary"
                 size="lg"
-                className="flex-1 basis-0 bg-white text-[#3c82f6] font-bold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
+                className="flex-1 basis-0 bg-[hsl(var(--background))] text-[hsl(var(--primary))] font-semibold text-sm rounded-xl p-6 md:text-lg pointer-events-none"
               >
                 <DownloadIcon className="w-5 h-5 mr-2 shrink-0" />
                 Export

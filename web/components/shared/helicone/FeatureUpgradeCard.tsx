@@ -257,25 +257,6 @@ export const PRO_FEATURES: Record<string, Feature> = {
     },
     imageAlt: "Alert notification interface",
   },
-  vault: {
-    variant: "bullets-cta",
-    title: "Secure Key Management",
-    subtitles: [
-      "Securely store and manage your API keys",
-      "Create proxy keys with custom rate limits",
-      "Centralized key management for your team",
-    ] as string[],
-    media: {
-      type: "image",
-      src: "/static/featureUpgrade/vault-preview.webp",
-    },
-    imageAlt: "Vault key management interface",
-    cta: {
-      text: "View docs",
-      link: "https://docs.helicone.ai/features/vault",
-      variant: "outline",
-    },
-  },
 } as const satisfies Record<string, Feature>;
 
 export type ProFeatureKey = keyof typeof PRO_FEATURES;

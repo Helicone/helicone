@@ -2,6 +2,7 @@ import { BulletListItem } from "@/components/ui/bullet-list";
 import { BulletList } from "@/components/ui/bullet-list";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { H2, P, Lead } from "@/components/ui/typography";
 
 export type Feature = {
   title: string;
@@ -40,13 +41,12 @@ const FeaturePreviewSection = ({
   onStartTrial,
 }: FeaturePreviewSectionProps) => {
   return (
-    <div className="bg-[#ecf6fc] rounded-[35.22px] shadow-[14.889px_4.581px_19.088px_0px_rgba(0,0,0,0.10)] border border-white p-[18px]">
-      <div className="bg-white rounded-3xl relative">
-        {/* Reduced padding-top from pt-20 to pt-10 */}
+    <div className=" rounded-[35.22px] p-[18px]">
+      <div className=" rounded-3xl relative">
         <div className="w-[500px] mx-auto pt-10 mb-20">
-          <h2 className="text-center text-[#031727] text-3xl font-medium leading-[48px] tracking-tight">
+          <H2 className="text-center text-[hsl(var(--foreground))] text-3xl font-medium leading-[48px] tracking-tight">
             {pageTitle}
-          </h2>
+          </H2>
         </div>
 
         {/* Features List */}
@@ -85,19 +85,19 @@ const FeaturePreviewSection = ({
 
           {/* Bottom CTA Section */}
           {showCTA && (
-            <div className="mb-24 py-10 bg-[#f2f9fc] rounded-2xl flex-col justify-start items-center gap-6 flex">
+            <div className="mb-24 py-10 bg-[hsl(var(--primary)/0.05)] rounded-2xl flex-col justify-start items-center gap-6 flex">
               {quote && (
-                <h2 className="mx-24 text-3xl tracking-tight leading-relaxed md:leading-relaxed font-medium text-slate-400">
+                <Lead className="mx-24 text-3xl tracking-tight leading-relaxed md:leading-relaxed font-medium text-[hsl(var(--muted-foreground))]">
                   {quote.prefix}{" "}
-                  <span className="text-slate-700 font-semibold">
+                  <span className="text-[hsl(var(--foreground))] font-semibold">
                     {quote.highlight}
                   </span>{" "}
                   {quote.suffix}
-                </h2>
+                </Lead>
               )}
               <Button
                 onClick={onStartTrial}
-                className="text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5"
+                className="text-[hsl(var(--primary-foreground))] text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1 bg-[hsl(var(--primary))] rounded-xl justify-center items-center gap-2.5"
                 variant="action"
               >
                 Start 7-day free trial
@@ -159,7 +159,7 @@ const FeatureMedia = ({
   return (
     <img
       loading="lazy"
-      className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-slate-200 object-cover"
+      className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-[hsl(var(--border))] object-cover"
       src={media.src}
       alt={imageAlt}
     />
@@ -184,12 +184,15 @@ const FeatureText = ({
   return (
     <div className="flex flex-col justify-between gap-8">
       <div className="flex flex-col">
-        <div className="text-slate-700 text-2xl font-medium whitespace-pre-line">
+        <H2 className="text-[hsl(var(--foreground))] text-2xl font-medium whitespace-pre-line">
           {title}
-        </div>
+        </H2>
         <BulletList>
           {description.map((text, index) => (
-            <BulletListItem className="text-slate-500 font-normal" key={index}>
+            <BulletListItem
+              className="text-[hsl(var(--muted-foreground))] font-normal"
+              key={index}
+            >
               {text}
             </BulletListItem>
           ))}
@@ -200,7 +203,7 @@ const FeatureText = ({
           {ctaLink ? (
             <a href={ctaLink}>
               <Button
-                className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
+                className="text-[hsl(var(--primary-foreground))] text-md font-medium h-[40px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-lg justify-center items-center gap-2.5"
                 variant="action"
               >
                 {ctaText}
@@ -209,7 +212,7 @@ const FeatureText = ({
           ) : (
             <Button
               onClick={scrollToTop}
-              className="text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5"
+              className="text-[hsl(var(--primary-foreground))] text-md font-medium h-[40px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-lg justify-center items-center gap-2.5"
               variant="action"
             >
               {ctaText}
