@@ -1,17 +1,3 @@
-/**
- * LoggingHandler - Handles processing, sanitizing, and transformation of log data
- * before sending it to storage (Postgres, Clickhouse, S3).
- *
- * Data sanitization responsibilities:
- * 1. JSON escape sequences: Handles invalid Unicode surrogate pairs using sanitizeJsonEscapeSequences
- * 2. Integer overflow: Prevents PostgreSQL integer overflow using sanitizeDelayMs
- * 3. Content length: Limits text length to prevent database issues
- *
- * This class follows the Single Responsibility Principle by implementing data
- * sanitization and transformation at the mapping layer, before the data is passed
- * to the storage layer (LogStore, ClickhouseWrapper, etc.).
- */
-
 import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
