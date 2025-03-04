@@ -134,6 +134,9 @@ export async function sendToWebhook(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2 * 60 * 1000);
 
+    // sleep for 30 seconds before sending the webhook to allow for the request to be logged in clickhouse
+    await new Promise((resolve) => setTimeout(resolve, 30_000));
+
     try {
       const response = await fetch(webhook.destination, {
         method: "POST",
