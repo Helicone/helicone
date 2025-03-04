@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export type MemberRole = "admin" | "member";
 
@@ -82,8 +83,8 @@ export const MembersTable = ({
             <div className="flex items-center gap-2.5">
               <span>{email}</span>
               {email === ownerEmail ? (
-                <div className="px-1.5 bg-slate-100 rounded">
-                  <span className="text-slate-700 text-xs font-medium">
+                <div className="px-1.5 bg-[hsl(var(--muted))] rounded">
+                  <span className="text-[hsl(var(--foreground))] text-xs font-medium">
                     YOU
                   </span>
                 </div>
@@ -113,16 +114,15 @@ export const MembersTable = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onRemoveMember(email)}
-                className="h-8 w-8 p-0 hover:bg-slate-100"
               >
-                <X className="h-4 w-4 text-slate-500" />
+                <X className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
               </Button>
             </div>
           );
         },
       },
     ],
-    [ownerEmail, onRemoveMember] // Add dependencies here
+    [ownerEmail, onRemoveMember]
   );
 
   // Memoize table data
@@ -162,7 +162,6 @@ export const MembersTable = ({
   };
 
   const handleInvite = () => {
-    // Validate form and check for duplicates
     const isValid = validateForm(newMemberForm);
     const isDuplicate = members.some((m) => m.email === newMemberForm.email);
 
@@ -182,16 +181,16 @@ export const MembersTable = ({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-medium text-slate-800">Members</h2>
+        <h2 className="text-sm font-medium text-[hsl(var(--foreground))]">
+          Members
+        </h2>
         <Button variant="outline" size="xs" onClick={() => setIsOpen(true)}>
-          <div className="flex items-center gap-2">
-            <Plus className="h-4 w-4 text-slate-700" />
-            <span className="text-slate-900">Invite</span>
-          </div>
+          <Plus className="h-4 w-4 mr-2" />
+          Invite
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border border-[hsl(var(--border))]">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -227,7 +226,7 @@ export const MembersTable = ({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-[hsl(var(--muted-foreground))]"
                 >
                   No members.
                 </TableCell>
@@ -241,17 +240,17 @@ export const MembersTable = ({
         <DialogContent className="p-6 gap-2 w-62">
           <div className="flex flex-col gap-4">
             <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-slate-900">
+              <DialogTitle className="text-lg font-semibold text-[hsl(var(--foreground))]">
                 Invite a member
               </DialogTitle>
-              <DialogDescription className="text-sm text-slate-500">
+              <DialogDescription className="text-sm text-[hsl(var(--muted-foreground))]">
                 New members will receive an email to join your organization.
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="w-20 text-black text-sm font-normal">
+                <label className="w-20 text-[hsl(var(--foreground))] text-sm font-normal">
                   Email
                 </label>
                 <div className="flex-1 flex flex-col gap-1">
@@ -264,21 +263,23 @@ export const MembersTable = ({
                         email: e.target.value,
                       }));
                     }}
-                    className={`flex-1 ${
-                      emailError
-                        ? "border-red-500 focus-visible:ring-red-500"
-                        : ""
-                    }`}
+                    className={cn(
+                      "flex-1",
+                      emailError &&
+                        "border-[hsl(var(--destructive))] focus-visible:ring-[hsl(var(--destructive))]"
+                    )}
                     placeholder="Email"
                   />
                   {emailError && (
-                    <span className="text-red-500 text-xs">{emailError}</span>
+                    <span className="text-[hsl(var(--destructive))] text-xs">
+                      {emailError}
+                    </span>
                   )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="w-20 text-black text-sm font-normal">
+                <label className="w-20 text-[hsl(var(--foreground))] text-sm font-normal">
                   Role
                 </label>
                 <Select
@@ -299,11 +300,8 @@ export const MembersTable = ({
             </div>
 
             <div className="flex justify-end gap-2 mt-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancel
-              </Button>
               <Button
-                className="bg-sky-700 hover:bg-sky-800"
+                variant="default"
                 onClick={handleInvite}
                 disabled={!newMemberForm.email}
               >

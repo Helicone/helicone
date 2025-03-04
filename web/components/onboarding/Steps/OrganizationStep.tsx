@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { useDraftOnboardingStore } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { cn } from "@/lib/utils";
 
 export const OrganizationStep = () => {
   const orgId = useOrg()?.currentOrg?.id ?? "";
@@ -20,22 +21,24 @@ export const OrganizationStep = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-slate-800">Organization</h2>
+        <h2 className="text-[hsl(var(--foreground))]">Organization</h2>
         <Input
           type="text"
           value={draftName}
           onChange={handleNameChange}
           placeholder="My Organization"
-          className={`text-sm placeholder:text-gray-300 ${
-            error ? "border-red-500 text-red-500" : ""
-          }`}
+          className={cn(
+            "text-sm placeholder:text-[hsl(var(--muted-foreground))]",
+            error &&
+              "border-[hsl(var(--destructive))] text-[hsl(var(--destructive))]"
+          )}
         />
         {error ? (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-[hsl(var(--destructive))]">{error}</p>
         ) : draftName ? (
-          <p className="text-sm font-light text-slate-400">
+          <p className="text-sm font-light text-[hsl(var(--muted-foreground))]">
             Don&apos;t worry, you can rename your organization later.
           </p>
         ) : null}
