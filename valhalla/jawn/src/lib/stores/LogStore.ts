@@ -473,33 +473,53 @@ export class LogStore {
   filterDuplicateResponses(
     entries: Database["public"]["Tables"]["response"]["Insert"][]
   ) {
-    const entryMap = new Map<
+    if (!entries) {
+      return [];
+    }
+
+    // Creating a map to store unique response records based on the request ID
+    const uniqueResponses: Map<
       string,
       Database["public"]["Tables"]["response"]["Insert"]
-    >();
+    > = new Map();
 
-    entries.forEach((entry) => {
-      if (!entry.request) {
-        return;
+    for (const response of entries) {
+      // Validate delay_ms to prevent integer overflow
+      if (response.delay_ms && typeof response.delay_ms === "number") {
+        // PostgreSQL integer (INT) max value is 2,147,483,647
+        const MAX_SAFE_INT = 2147483647;
+        if (response.delay_ms > MAX_SAFE_INT) {
+          console.warn(
+            `Capping delay_ms value from ${response.delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`
+          );
+          response.delay_ms = MAX_SAFE_INT;
+        } else if (response.delay_ms < -MAX_SAFE_INT) {
+          console.warn(
+            `Capping negative delay_ms value from ${
+              response.delay_ms
+            } to ${-MAX_SAFE_INT} to prevent integer overflow`
+          );
+          response.delay_ms = -MAX_SAFE_INT;
+        }
       }
 
-      const existingEntry = entryMap.get(entry.request);
+      // Use request + helicone_org_id as the key for uniqueness
+      const key = `${response.request}:${response.helicone_org_id}`;
 
-      // No existing entry, add it
-      if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.request, entry);
-        return;
-      }
-
+      // If this is a new unique key or the timestamp is newer, update the map
       if (
-        entry.created_at &&
-        new Date(entry.created_at) < new Date(existingEntry.created_at)
+        !uniqueResponses.has(key) ||
+        (response.created_at &&
+          uniqueResponses.get(key)?.created_at &&
+          new Date(response.created_at as string) >
+            new Date(uniqueResponses.get(key)!.created_at as string))
       ) {
-        entryMap.set(entry.request, entry);
+        uniqueResponses.set(key, response);
       }
-    });
+    }
 
-    return Array.from(entryMap.values());
+    // Convert the map values back to an array
+    return Array.from(uniqueResponses.values());
   }
 
   filterDuplicateSearchRecords(

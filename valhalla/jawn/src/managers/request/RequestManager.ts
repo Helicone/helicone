@@ -137,6 +137,14 @@ export class RequestManager extends BaseManager {
     }
 
     const requestFromPostgres = requestPostgres.data?.[0];
+    const gt = deltaTime(
+      new Date(requestFromPostgres?.request_created_at!),
+      -(24 * 60 * 7)
+    );
+    const lt = deltaTime(
+      new Date(requestFromPostgres?.request_created_at!),
+      24 * 60 * 7
+    );
     const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
         left: {
@@ -160,20 +168,14 @@ export class RequestManager extends BaseManager {
           right: {
             request_response_rmt: {
               request_created_at: {
-                gt: deltaTime(
-                  new Date(requestFromPostgres?.request_created_at!),
-                  -10
-                ),
+                gt: gt,
               },
             },
           },
           left: {
             request_response_rmt: {
               request_created_at: {
-                lt: deltaTime(
-                  new Date(requestFromPostgres?.request_created_at!),
-                  10
-                ),
+                lt: lt,
               },
             },
           },
