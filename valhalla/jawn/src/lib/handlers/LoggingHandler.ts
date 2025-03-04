@@ -433,6 +433,7 @@ export class LoggingHandler extends AbstractLogHandler {
       model: context.processedLog.model,
       heliconeTemplate: context.processedLog.request.heliconeTemplate,
       createdAt: context.message.log.request.requestCreatedAt,
+      provider: context.message.log.request.provider,
     };
 
     return promptRecord;
@@ -489,7 +490,7 @@ export class LoggingHandler extends AbstractLogHandler {
       proxy_key_id:
         request.heliconeProxyKeyId ?? "00000000-0000-0000-0000-000000000000",
       threat: request.threat ?? false,
-      time_to_first_token: response.timeToFirstToken ?? 0,
+      time_to_first_token: Math.round(response.timeToFirstToken ?? 0),
       target_url: request.targetUrl ?? "",
       provider: request.provider ?? "",
       country_code: request.countryCode ?? "",

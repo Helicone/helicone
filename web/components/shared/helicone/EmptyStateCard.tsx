@@ -232,13 +232,13 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
       } as EmptyStateFeature);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center max-w-7xl md:px-24 px-4 mx-auto py-14 flex flex-col gap-16">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="flex flex-col gap-2">
-          <h3 className="text-2xl font-semibold text-slate-900">
+    <div className="w-full h-full flex flex-col items-center justify-center max-w-7xl mx-auto py-14 space-y-16 px-4 md:px-24">
+      <div className="flex flex-col items-center text-center space-y-6">
+        <div className="flex flex-col space-y-2">
+          <h3 className="text-2xl leading-8 font-semibold tracking-tight text-[hsl(var(--foreground))]">
             {featureDefaults?.title}
           </h3>
-          <p className="text-slate-500 text-lg max-w-2xl">
+          <p className="text-xl leading-7 font-normal text-[hsl(var(--muted-foreground))] max-w-2xl">
             {featureDefaults?.description}
           </p>
         </div>
@@ -249,9 +249,12 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
               href={featureDefaults?.cta?.primary?.link ?? ""}
               target="_blank"
             >
-              <Button variant="action" className="gap-2">
+              <Button
+                variant="default"
+                className="gap-2 bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]"
+              >
                 {featureDefaults?.cta?.primary?.text}
-                <SquareArrowOutUpRight className="w-4 h-4" />
+                <SquareArrowOutUpRight className="h-4 w-4" />
               </Button>
             </Link>
           )}
@@ -260,9 +263,12 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
               href={featureDefaults?.cta?.secondary?.link ?? ""}
               target="_blank"
             >
-              <Button variant="outline" className="gap-2">
+              <Button
+                variant="outline"
+                className="gap-2 border-[hsl(var(--border))] bg-background hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]"
+              >
                 {featureDefaults?.cta?.secondary?.text}
-                <SquareArrowOutUpRight className="w-4 h-4" />
+                <SquareArrowOutUpRight className="h-4 w-4" />
               </Button>
             </Link>
           )}
@@ -271,7 +277,7 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
 
       {featureDefaults?.featureImage &&
         (featureDefaults.featureImage.type === "video" ? (
-          <div className="max-w-6xl overflow-hidden relative border-2 border-slate-200 rounded-lg object-contain">
+          <div className="max-w-6xl overflow-hidden relative rounded-lg border border-[hsl(var(--border))] object-contain">
             <video
               className="w-full max-h-[500px] object-contain"
               src={featureDefaults.featureImage.content as string}
@@ -292,7 +298,7 @@ export const EmptyStateCard: React.FC<{ feature: EmptyStateFeatureKey }> = ({
           <img
             src={featureDefaults.featureImage.content as string}
             alt={featureDefaults.title}
-            className="w-full max-w-2xl  xl:max-w-6xl h-auto rounded-lg"
+            className="w-full max-w-2xl xl:max-w-6xl h-auto rounded-lg"
           />
         ))}
     </div>

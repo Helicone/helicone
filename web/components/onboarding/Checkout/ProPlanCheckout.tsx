@@ -44,9 +44,9 @@ export const ProPlanCheckout = ({
       leftPanel={
         <Card className="w-full rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="flex items-center gap-2 p-6 bg-slate-100">
+          <div className="flex items-center gap-2 p-6 bg-[hsl(var(--muted))]">
             <div className="flex items-center gap-2 w-full h-full">
-              <div className="flex items-center justify-center rounded-md bg-card shadow bg-white border border-slate-200">
+              <div className="flex items-center justify-center rounded-md bg-[hsl(var(--card))] shadow border border-[hsl(var(--border))]">
                 <div className="flex h-12 w-12 items-center justify-center">
                   <Image
                     src="/static/logo-clear.png"
@@ -60,12 +60,14 @@ export const ProPlanCheckout = ({
 
               <div className="flex flex-row w-full">
                 <div className="flex flex-col items-start justify-between w-full">
-                  <h3 className="text-lg font-semibold text-slate-900 ">
+                  <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
                     Helicone Pro
                   </h3>
                   <div className="flex items-center gap-1">
-                    <Gift className="h-4 w-4 text-slate-500" />
-                    <span className="text-sdm text-slate-500">Add-ons</span>
+                    <Gift className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+                    <span className="text-sm text-[hsl(var(--muted-foreground))]">
+                      Add-ons
+                    </span>
                   </div>
                 </div>
 
@@ -79,7 +81,7 @@ export const ProPlanCheckout = ({
           </div>
 
           {/* Features */}
-          <div className="border-t p-6">
+          <div className="border-t border-[hsl(var(--border))] p-6">
             <div className="flex flex-col gap-3">
               {ADDONS.map((addon) => (
                 <div key={addon.id} className="flex items-center gap-4">
@@ -91,8 +93,10 @@ export const ProPlanCheckout = ({
                     }
                   />
                   <div className="flex flex-col gap-1.5">
-                    <h4 className="text-sm font-medium">{addon.name}</h4>
-                    <p className="text-sm text-slate-500">
+                    <h4 className="text-sm font-medium text-[hsl(var(--foreground))]">
+                      {addon.name}
+                    </h4>
+                    <p className="text-sm text-[hsl(var(--muted-foreground))]">
                       {addon.description}
                     </p>
                   </div>
@@ -102,8 +106,8 @@ export const ProPlanCheckout = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-slate-100 py-3 px-6">
-            <p className="text-sm text-slate-500 text-center">
+          <div className="bg-[hsl(var(--muted))] py-3 px-6">
+            <p className="text-sm text-[hsl(var(--muted-foreground))] text-center">
               All features are included in the trial!
             </p>
           </div>
@@ -111,12 +115,14 @@ export const ProPlanCheckout = ({
       }
     >
       {isUpdating && !clientSecret && (
-        <div className="h-[600px] w-full bg-white border rounded-lg flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
-            <p className="text-sm text-slate-600">Updating checkout...</p>
+        <Card className="h-[600px] w-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div>
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">
+              Updating checkout...
+            </p>
           </div>
-        </div>
+        </Card>
       )}
     </CheckoutLayout>
   );

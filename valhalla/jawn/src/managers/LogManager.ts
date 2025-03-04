@@ -15,7 +15,7 @@ import { S3Client } from "../lib/shared/db/s3Client";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import * as Sentry from "@sentry/node";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
-import { KafkaProducer } from "../lib/clients/KafkaProducer";
+import { KAFKA_ENABLED, KafkaProducer } from "../lib/clients/KafkaProducer";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { WebhookStore } from "../lib/stores/WebhookStore";
 import { supabaseServer } from "../lib/db/supabase";
@@ -122,32 +122,35 @@ export class LogManager {
               `Reproducing error for request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
             );
           }
-          const kafkaProducer = new KafkaProducer();
-          const res = await kafkaProducer.sendMessages(
-            [logMessage],
-            "request-response-logs-prod-dlq"
-          );
+          if (KAFKA_ENABLED) {
+            const kafkaProducer = new KafkaProducer();
 
-          if (res.error) {
-            Sentry.captureException(new Error(res.error), {
-              tags: {
-                type: "KafkaError",
-                topic: "request-response-logs-prod-dlq",
-              },
-              extra: {
-                requestId: logMessage.log.request.id,
-                responseId: logMessage.log.response.id,
-                orgId: handlerContext.orgParams?.id ?? "",
-                batchId: batchContext.batchId,
-                partition: batchContext.partition,
-                offset: batchContext.lastOffset,
-                messageCount: batchContext.messageCount,
-              },
-            });
-
-            console.error(
-              `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+            const res = await kafkaProducer.sendMessages(
+              [logMessage],
+              "request-response-logs-prod-dlq"
             );
+
+            if (res.error) {
+              Sentry.captureException(new Error(res.error), {
+                tags: {
+                  type: "KafkaError",
+                  topic: "request-response-logs-prod-dlq",
+                },
+                extra: {
+                  requestId: logMessage.log.request.id,
+                  responseId: logMessage.log.response.id,
+                  orgId: handlerContext.orgParams?.id ?? "",
+                  batchId: batchContext.batchId,
+                  partition: batchContext.partition,
+                  offset: batchContext.lastOffset,
+                  messageCount: batchContext.messageCount,
+                },
+              });
+
+              console.error(
+                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+              );
+            }
           }
         }
       })
@@ -207,25 +210,27 @@ export class LogManager {
         }`
       );
 
-      const kafkaProducer = new KafkaProducer();
-      const kafkaResult = await kafkaProducer.sendMessages(
-        logMessages,
-        "request-response-logs-prod-dlq"
-      );
+      if (KAFKA_ENABLED) {
+        const kafkaProducer = new KafkaProducer();
+        const kafkaResult = await kafkaProducer.sendMessages(
+          logMessages,
+          "request-response-logs-prod-dlq"
+        );
 
-      if (kafkaResult.error) {
-        Sentry.captureException(new Error(kafkaResult.error), {
-          tags: {
-            type: "KafkaError",
-            topic: "request-response-logs-prod-dlq",
-          },
-          extra: {
-            batchId: batchContext.batchId,
-            partition: batchContext.partition,
-            offset: batchContext.lastOffset,
-            messageCount: batchContext.messageCount,
-          },
-        });
+        if (kafkaResult.error) {
+          Sentry.captureException(new Error(kafkaResult.error), {
+            tags: {
+              type: "KafkaError",
+              topic: "request-response-logs-prod-dlq",
+            },
+            extra: {
+              batchId: batchContext.batchId,
+              partition: batchContext.partition,
+              offset: batchContext.lastOffset,
+              messageCount: batchContext.messageCount,
+            },
+          });
+        }
       }
     }
   }

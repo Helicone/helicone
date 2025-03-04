@@ -26,7 +26,9 @@ async function handler(
     filter,
     timeFilter,
     userData.orgId,
-    req.body.limit
+    req.body.limit,
+    req.body.sortKey,
+    req.body.sortDirection
   );
   res.status(200).json(metrics);
 }

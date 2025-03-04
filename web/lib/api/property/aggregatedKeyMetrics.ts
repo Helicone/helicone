@@ -12,7 +12,9 @@ export async function getAggregatedKeyMetrics(
     end: Date;
   },
   org_id: string,
-  limit: number
+  limit: number,
+  sortKey?: string,
+  sortDirection?: "asc" | "desc"
 ) {
   const { filter: filterString, argsAcc } =
     await buildFilterWithAuthClickHousePropertiesV2({
@@ -24,12 +26,34 @@ export async function getAggregatedKeyMetrics(
       },
       argsAcc: [],
     });
+
+  // Default sort is by total_requests DESC
+  let orderByClause = "ORDER BY total_requests DESC";
+
+  // Map frontend sort keys to database column names
+  const sortKeyMap: Record<string, string> = {
+    property_value: "property_value",
+    total_requests: "total_requests",
+    total_cost: "total_cost",
+    avg_prompt_tokens_per_request: "avg_prompt_tokens_per_request",
+    avg_completion_tokens_per_request: "avg_completion_tokens_per_request",
+    avg_latency_per_request: "avg_latency_per_request",
+    average_cost_per_request: "total_cost / total_requests",
+  };
+
+  // If sortKey is provided and valid, use it for ordering
+  if (sortKey && sortKeyMap[sortKey]) {
+    const direction = sortDirection === "asc" ? "ASC" : "DESC";
+    orderByClause = `ORDER BY ${sortKeyMap[sortKey]} ${direction}`;
+  }
+
   const query = `
   SELECT 
     value AS property_value,
     count(*) AS total_requests,
     min(request_response_rmt.request_created_at) AS active_since,
     sum(request_response_rmt.completion_tokens) / count(*) AS avg_completion_tokens_per_request,
+    sum(request_response_rmt.prompt_tokens) / count(*) AS avg_prompt_tokens_per_request,
     sum(request_response_rmt.latency) / count(*) AS avg_latency_per_request,
     ${clickhousePriceCalc("request_response_rmt")} AS total_cost
   FROM request_response_rmt
@@ -38,7 +62,7 @@ export async function getAggregatedKeyMetrics(
     ${filterString}
   )
   GROUP BY value
-  ORDER BY total_requests DESC
+  ${orderByClause}
   LIMIT ${limit}
 `;
 
@@ -47,31 +71,23 @@ export async function getAggregatedKeyMetrics(
     total_requests: number;
     active_since: string;
     avg_completion_tokens_per_request: number;
+    avg_prompt_tokens_per_request: number;
     avg_latency_per_request: number;
     total_cost: number;
   }>(query, argsAcc);
 
   return resultMap(res, (d) => {
-    return (
-      d
-        .map((r) => {
-          return {
-            property_value: r.property_value,
-            total_requests: +r.total_requests,
-            active_since: r.active_since,
-            avg_completion_tokens_per_request:
-              +r.avg_completion_tokens_per_request,
-            avg_latency_per_request: +r.avg_latency_per_request,
-            total_cost: +r.total_cost,
-          };
-        })
-        // sort by total requests and then by cost if its tied
-        .sort((a, b) => {
-          if (a.total_requests === b.total_requests) {
-            return a.total_cost - b.total_cost;
-          }
-          return b.total_requests - a.total_requests;
-        })
-    );
+    return d.map((r) => {
+      return {
+        property_value: r.property_value,
+        total_requests: +r.total_requests,
+        active_since: r.active_since,
+        avg_completion_tokens_per_request: +r.avg_completion_tokens_per_request,
+        avg_prompt_tokens_per_request: +r.avg_prompt_tokens_per_request,
+        avg_latency_per_request: +r.avg_latency_per_request,
+        total_cost: +r.total_cost,
+      };
+    });
+    // Remove the frontend sorting since we're now sorting in the database
   });
 }
