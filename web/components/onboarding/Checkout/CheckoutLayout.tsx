@@ -48,7 +48,7 @@ export const CheckoutLayout = ({
   }, [clientSecret]);
 
   return (
-    <div className="flex flex-col space-y-8">
+    <div className="flex flex-col gap-8">
       {header}
 
       <div className={`flex flex-col ${fullWidth ? "" : "md:flex-row"} gap-8`}>
@@ -63,10 +63,10 @@ export const CheckoutLayout = ({
           {clientSecret && (
             <>
               {isLoading && (
-                <div className="h-[600px] w-full bg-white border rounded-lg flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
-                    <p className="text-sm text-slate-600">
+                <div className="h-[600px] w-full bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div>
+                    <p className="text-sm text-[hsl(var(--muted-foreground))]">
                       Initializing checkout...
                     </p>
                   </div>
@@ -80,7 +80,7 @@ export const CheckoutLayout = ({
                 >
                   <EmbeddedCheckout
                     key={`checkout-${key}`}
-                    className="h-[600px] w-full bg-white"
+                    className="h-[600px] w-full bg-[hsl(var(--card))]"
                   />
                 </EmbeddedCheckoutProvider>
               )}

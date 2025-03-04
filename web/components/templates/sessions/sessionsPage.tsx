@@ -182,12 +182,12 @@ const SessionsPage = (props: SessionsPageProps) => {
               </Row>
             </>
           ) : (
-            <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
+            <div className="flex flex-col w-full min-h-screen items-center bg-[hsl(var(--background))]">
               <EmptyStateCard feature="sessions" />
             </div>
           )
         ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-[hsl(var(--background))]">
             <FeatureUpgradeCard
               title="Sessions"
               featureImage={{

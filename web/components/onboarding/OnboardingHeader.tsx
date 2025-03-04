@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useEffect } from "react";
-import { ChevronRightIcon, LogOut } from "lucide-react";
+import { ChevronRightIcon, LogOut, Sun, Moon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useOrg } from "../layout/org/organizationContext";
 import {
@@ -11,6 +11,7 @@ import {
 import LoadingAnimation from "../shared/loadingAnimation";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { signOut } from "../shared/utils/utils";
+import { useTheme } from "next-themes";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -18,7 +19,7 @@ const BreadcrumbSeparator = () => (
     height="15"
     viewBox="0 0 9 15"
     fill="none"
-    className="text-slate-200"
+    className="text-[hsl(var(--muted-foreground))]"
   >
     <path d="M1 0V15" stroke="currentColor" />
   </svg>
@@ -40,6 +41,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const router = useRouter();
   const org = useOrg();
   const supabaseClient = useSupabaseClient();
+  const { theme, setTheme } = useTheme();
 
   const { onboardingState, draftPlan, updateCurrentStep, isLoading } =
     useOrgOnboarding(org?.currentOrg?.id ?? "");
@@ -91,6 +93,10 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     });
   };
 
+  const handleThemeChange = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   if (isLoading || !org?.currentOrg?.id || org?.currentOrg?.has_onboarded) {
     return (
       <div className="min-h-screen w-full flex flex-col">
@@ -102,14 +108,13 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   }
 
   return (
-    <>
-      <header className="w-full h-14 px-4 sm:px-6 bg-white border-b border-slate-200 flex items-center justify-between">
+    <div className="min-h-screen w-full flex flex-col bg-[hsl(var(--background))]">
+      <header className="w-full h-14 px-4 sm:px-6 bg-[hsl(var(--background))] border-b border-[hsl(var(--border))] flex items-center justify-between">
         <div className="flex items-center gap-4 overflow-x-auto min-w-0 pr-2 md:pr-0">
           <div className="flex-shrink-0">
             <Image
-              src="/static/logo-clear.png"
+              src="/static/helicone-icon.svg"
               alt="Helicone Logo"
-              className="rounded-xl"
               width={20}
               height={20}
             />
@@ -123,9 +128,10 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
                   className={cn(
                     "text-sm font-normal flex-shrink-0",
                     onboardingState?.currentStep === step.step
-                      ? "text-slate-900"
-                      : "text-slate-500",
-                    index < currentStepIndex && "hover:text-slate-700"
+                      ? "text-[hsl(var(--foreground))]"
+                      : "text-[hsl(var(--muted-foreground))]",
+                    index < currentStepIndex &&
+                      "hover:text-[hsl(var(--foreground))]"
                   )}
                   onClick={() => {
                     if (index < currentStepIndex) {
@@ -139,23 +145,32 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
                   {step.label}
                 </span>
                 {index < steps.length - 1 && (
-                  <ChevronRightIcon className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <ChevronRightIcon className="w-4 h-4 text-[hsl(var(--muted-foreground))] flex-shrink-0" />
                 )}
               </React.Fragment>
             ))}
           </nav>
         </div>
 
-        <button
-          onClick={handleSignOut}
-          className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 flex-shrink-0 ml-2"
-          aria-label="Sign Out"
-        >
-          <span className="hidden sm:inline">Sign Out</span>
-          <LogOut className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] flex items-center gap-1 flex-shrink-0"
+            aria-label="Sign Out"
+          >
+            <span className="hidden sm:inline">Sign Out</span>
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleThemeChange}
+            className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
       </header>
       {children}
-    </>
+    </div>
   );
 };

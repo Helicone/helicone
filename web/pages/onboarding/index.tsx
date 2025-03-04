@@ -15,6 +15,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
+import { H1, Muted } from "@/components/ui/typography";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -100,8 +101,10 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen w-full flex flex-col items-center">
         <OnboardingHeader />
-        <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-12">
-          <div className="animate-pulse">Loading...</div>
+        <div className="mx-auto w-full max-w-md px-4 mt-12">
+          <div className="flex flex-col gap-4">
+            <div className="animate-pulse">Loading...</div>
+          </div>
         </div>
       </div>
     );
@@ -109,54 +112,57 @@ export default function OnboardingPage() {
 
   return (
     <OnboardingHeader>
-      <div className="flex flex-col gap-4 w-full max-w-md px-4 mt-12 mx-auto">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold">Welcome to Helicone! 👋</h1>
-          <div className="text-sm font-light text-slate-500">
-            {isSubscribed
-              ? "Update your organization name below."
-              : "Glad to have you here. Create your first organization."}
+      <div className="mx-auto w-full max-w-md px-4 mt-12">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <H1>Welcome to Helicone! 👋</H1>
+            <Muted>
+              {isSubscribed
+                ? "Update your organization name below."
+                : "Glad to have you here. Create your first organization."}
+            </Muted>
           </div>
-        </div>
 
-        <OrganizationStep />
+          <OrganizationStep />
 
-        {!isSubscribed && (
-          <>
-            <PlanStep onPlanChange={handlePlanChange} />
+          {!isSubscribed && (
+            <>
+              <PlanStep onPlanChange={handlePlanChange} />
 
-            {!isLoading && draftPlan !== "free" && (
-              <MembersTable
-                members={draftMembers}
-                onAddMember={handleAddMember}
-                onRemoveMember={handleRemoveMember}
-                ownerEmail={user?.email ?? ""}
-              />
-            )}
-          </>
-        )}
+              {!isLoading && draftPlan !== "free" && (
+                <MembersTable
+                  members={draftMembers}
+                  onAddMember={handleAddMember}
+                  onRemoveMember={handleRemoveMember}
+                  ownerEmail={user?.email ?? ""}
+                />
+              )}
+            </>
+          )}
 
-        {isSubscribed && (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Already subscribed! You can update your organization name here.
-              Visit settings for plan or member changes.
-            </AlertDescription>
-          </Alert>
-        )}
+          {isSubscribed && (
+            <Alert className="bg-[hsl(var(--muted))] border-[hsl(var(--border))]">
+              <Info size={16} />
+              <AlertDescription className="text-[hsl(var(--muted-foreground))]">
+                Already subscribed! You can update your organization name here.
+                Visit settings for plan or member changes.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        <div className="flex justify-end">
-          <Button
-            variant="action"
-            className="w-full"
-            onClick={handleOrganizationSubmit}
-            disabled={!draftName}
-          >
-            {onboardingState?.name && onboardingState.name !== "My Organization"
-              ? "Update organization"
-              : "Create organization"}
-          </Button>
+          <div className="flex justify-end">
+            <Button
+              variant="action"
+              className="w-full"
+              onClick={handleOrganizationSubmit}
+              disabled={!draftName}
+            >
+              {onboardingState?.name &&
+              onboardingState.name !== "My Organization"
+                ? "Update organization"
+                : "Create organization"}
+            </Button>
+          </div>
         </div>
       </div>
     </OnboardingHeader>

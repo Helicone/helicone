@@ -2,6 +2,7 @@ import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef, useEffect } from "react";
 import Link from "next/link";
+import { H2, H3, H4, P, Small } from "@/components/ui/typography";
 
 // Base feature properties that all variants share
 interface BaseFeature {
@@ -170,8 +171,8 @@ export const CtaButton = ({
 }) => {
   const buttonStyles = {
     primary:
-      "text-white text-md font-medium h-[40px] px-6 py-1.5 bg-[#0da5e8] rounded-lg justify-center items-center gap-2.5",
-    outline: "gap-2 w-fit text-slate-500",
+      "text-[hsl(var(--primary-foreground))] text-md font-medium h-[40px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-lg justify-center items-center gap-2.5",
+    outline: "gap-2 w-fit text-[hsl(var(--muted-foreground))]",
   };
 
   return (
@@ -199,34 +200,20 @@ const FeatureText = ({
     return (
       <div className="w-full flex-col flex gap-4 md:gap-8 max-w-xl flex-1">
         <div className="h-full flex-col justify-start items-start gap-1 flex">
-          <div
-            className={`text-slate-700 text-2xl font-medium whitespace-pre-line ${
-              isHighlighted
-                ? "text-slate-900 text-3xl font-semibold leading-normal"
-                : ""
-            }`}
-          >
-            {feature.title}
-          </div>
-          <p className="w-full text-slate-500 text-md font-normal leading-relaxed">
-            {feature.subtitle}
-          </p>
+          {feature.title && (
+            <H2 className="whitespace-pre-line">{feature.title}</H2>
+          )}
+          <P className="w-full leading-relaxed">{feature.subtitle}</P>
         </div>
 
         <div className="flex flex-row gap-4 md:gap-16">
           {feature.sections.map((section, index) => (
             <div key={index} className="flex-col w-full gap-4 flex">
               <div className="w-full flex-col gap-1 flex">
-                <h4
-                  className={`${
-                    isHighlighted ? "text-slate-900" : "text-slate-700"
-                  } text-md font-medium leading-normal`}
-                >
-                  {section.title}
-                </h4>
-                <p className="text-slate-500 text-sm font-normal leading-relaxed">
+                <H4>{section.title}</H4>
+                <Small className="text-[hsl(var(--muted-foreground))] leading-relaxed">
                   {section.description}
-                </p>
+                </Small>
               </div>
               <CtaButton
                 variant="outline"
@@ -244,25 +231,22 @@ const FeatureText = ({
   return (
     <div className="flex flex-col justify-between gap-8">
       <div className="flex flex-col">
-        <div
-          className={`text-slate-700 text-2xl font-medium whitespace-pre-line ${
-            isHighlighted
-              ? "text-slate-900 text-3xl font-semibold leading-normal"
-              : ""
-          }`}
-        >
-          {feature.title}
-        </div>
+        {feature.title && (
+          <H3 className="whitespace-pre-line">{feature.title}</H3>
+        )}
         <ul className="mt-4 space-y-3">
           {feature.subtitles.map((text, index) => (
-            <li key={index} className="flex gap-3 text-slate-500">
-              <CheckIcon className="w-4 h-4 text-green-500 flex-shrink-0 translate-y-[0.25em]" />
+            <li
+              key={index}
+              className="flex gap-3 text-[hsl(var(--muted-foreground))]"
+            >
+              <CheckIcon className="w-4 h-4 text-[hsl(var(--confirmative))] flex-shrink-0 translate-y-[0.25em]" />
               <span>{text}</span>
             </li>
           ))}
         </ul>
       </div>
-      {feature.variant === "bullets-cta" && (
+      {feature.variant === "bullets-cta" && feature.cta && (
         <div className="mt-auto">
           <CtaButton
             variant={feature.cta.variant}

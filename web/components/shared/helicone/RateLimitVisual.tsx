@@ -5,12 +5,12 @@ export const RateLimitVisual = () => {
   const code = `"Helicone-RateLimit-Policy": "10;w=1000;u=cents;s=user"`;
 
   return (
-    <div className="w-full md:w-[568.25px] h-[346.64px] relative rounded-xl">
+    <div className="w-full md:w-[568.25px] h-[346.64px] relative rounded-xl bg-[hsl(var(--card))]">
       {/* Background Image with floating elements */}
       <img
         src="/static/featureUpgrade/custom-rate-limit.webp"
         alt="Rate limit background"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover rounded-xl"
       />
 
       {/* Code Block Overlay */}
@@ -23,7 +23,7 @@ export const RateLimitVisual = () => {
           minHeight={false}
           maxHeight={false}
           textSize="md"
-          className="bg-[#1a1b26] rounded-lg [&_pre]:py-4"
+          className="bg-[hsl(var(--card))] rounded-lg [&_pre]:py-4"
           marginTop={false}
         />
       </div>
