@@ -2,7 +2,7 @@ import { BulletListItem } from "@/components/ui/bullet-list";
 import { BulletList } from "@/components/ui/bullet-list";
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { H2, P, Lead } from "@/components/ui/typography";
+import { H2, Lead } from "@/components/ui/typography";
 
 export type Feature = {
   title: string;
