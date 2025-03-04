@@ -2550,6 +2550,9 @@
 						"type": "number",
 						"format": "double"
 					},
+					"audio_data": {
+						"type": "string"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -2580,12 +2583,13 @@
 					"_type": {
 						"type": "string",
 						"enum": [
-							"function",
 							"functionCall",
+							"function",
 							"image",
 							"message",
 							"autoInput",
-							"contentArray"
+							"contentArray",
+							"audio"
 						]
 					}
 				},
