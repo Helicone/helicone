@@ -484,25 +484,6 @@ export class LogStore {
     > = new Map();
 
     for (const response of entries) {
-      // Validate delay_ms to prevent integer overflow
-      if (response.delay_ms && typeof response.delay_ms === "number") {
-        // PostgreSQL integer (INT) max value is 2,147,483,647
-        const MAX_SAFE_INT = 2147483647;
-        if (response.delay_ms > MAX_SAFE_INT) {
-          console.warn(
-            `Capping delay_ms value from ${response.delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`
-          );
-          response.delay_ms = MAX_SAFE_INT;
-        } else if (response.delay_ms < -MAX_SAFE_INT) {
-          console.warn(
-            `Capping negative delay_ms value from ${
-              response.delay_ms
-            } to ${-MAX_SAFE_INT} to prevent integer overflow`
-          );
-          response.delay_ms = -MAX_SAFE_INT;
-        }
-      }
-
       // Use request + helicone_org_id as the key for uniqueness
       const key = `${response.request}:${response.helicone_org_id}`;
 
