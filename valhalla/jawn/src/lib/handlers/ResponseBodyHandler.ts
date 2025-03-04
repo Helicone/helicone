@@ -97,7 +97,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.processedLog.model = model;
 
       // Set usage
-      const usage = processedResponseBody.data?.usage ?? {};
+      const usage =
+        processedResponseBody.data?.usage ??
+        processedResponseBody.data?.processedBody?.usage ??
+        {};
       context.usage.completionTokens = usage.completionTokens;
       context.usage.promptTokens = usage.promptTokens;
       context.usage.totalTokens = usage.totalTokens;
