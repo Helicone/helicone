@@ -10,7 +10,7 @@ class LoggingOptions(TypedDict, total=False):
     start_time: float
     end_time: float
     additional_headers: Dict[str, str]
-    time_to_first_token: Optional[float]
+    time_to_first_token_ms: Optional[float]
 
 
 class HeliconeResultRecorder:
@@ -30,7 +30,7 @@ class HeliconeManualLogger:
     headers: dict
     logging_endpoint: str
 
-    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.hconeai.com"):
+    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.worker.helicone.ai"):
         self.api_key = api_key
         self.headers = dict(headers)
         self.logging_endpoint = logging_endpoint
@@ -138,10 +138,12 @@ class HeliconeManualLogger:
         }
 
         try:
-            requests.post(
+            result = requests.post(
                 self.__get_logging_endpoint(provider),
                 json=fetch_options["body"],
                 headers=fetch_options["headers"]
             )
+            if result.status_code != 200:
+                print("Error making request to Helicone log endpoint:", result.text)
         except Exception as e:
             print("Error making request to Helicone log endpoint:", e)
