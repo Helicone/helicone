@@ -6082,7 +6082,8 @@
 					"kafka:orgs-to-dlq",
 					"azure:experiment",
 					"openai:apiKey",
-					"anthropic:apiKey"
+					"anthropic:apiKey",
+					"openrouter:apiKey"
 				],
 				"nullable": false
 			},

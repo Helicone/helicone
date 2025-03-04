@@ -1,12 +1,33 @@
 import { GenerateParams } from "@/lib/api/llm/generate";
+import { getOpenRouterKeyFromAdmin } from "@/lib/clients/settings";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1/",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+// Cache for the OpenAI client to avoid recreating it on every request
+let openaiClient: OpenAI | null = null;
+
+// Function to get or create the OpenAI client
+async function getOpenAIClient(): Promise<OpenAI> {
+  // Return cached client if available
+  if (openaiClient) {
+    return openaiClient;
+  }
+
+  // Get API key from environment or admin settings
+  let apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    apiKey = (await getOpenRouterKeyFromAdmin()) || "";
+  }
+
+  // Create and cache the client
+  openaiClient = new OpenAI({
+    baseURL: "https://openrouter.ai/api/v1/",
+    apiKey: apiKey,
+  });
+
+  return openaiClient;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,6 +38,9 @@ export default async function handler(
   }
 
   try {
+    // Get or initialize the OpenAI client
+    const openai = await getOpenAIClient();
+
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
 
