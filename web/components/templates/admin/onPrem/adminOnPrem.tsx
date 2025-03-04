@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnthropicSettings } from "./AnthropicSettings";
 import { AzureSettings } from "./AzureSettings";
 import { OpenAISettings } from "./OpenAISettings";
-import { OpenRouterSettings } from "./OpenRouterSettings";
 interface AdminOnPremPageProps {}
 
 export interface AzureExperiment {
@@ -22,7 +21,6 @@ export const AdminOnPremPage = (props: AdminOnPremPageProps) => {
             <TabsTrigger value="azure">Azure</TabsTrigger>
             <TabsTrigger value="openai">OpenAI</TabsTrigger>
             <TabsTrigger value="anthropic">Anthropic</TabsTrigger>
-            <TabsTrigger value="openrouter">OpenRouter</TabsTrigger>
           </TabsList>
 
           <TabsContent value="azure">
@@ -35,10 +33,6 @@ export const AdminOnPremPage = (props: AdminOnPremPageProps) => {
 
           <TabsContent value="anthropic">
             <AnthropicSettings />
-          </TabsContent>
-
-          <TabsContent value="openrouter">
-            <OpenRouterSettings />
           </TabsContent>
         </Tabs>
       </div>

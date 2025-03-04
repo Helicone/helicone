@@ -47,7 +47,7 @@ export default function ParametersPanel({
       provider: validProvider ?? "OPENAI",
       model:
         PROVIDER_MODELS?.[validProvider as keyof typeof PROVIDER_MODELS]
-          ?.models[0].name ?? "gpt-4o-mini",
+          ?.models[0].name ?? "gpt-4o",
     });
   };
 
