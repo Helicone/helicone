@@ -98,6 +98,23 @@ export class LoggingHandler extends AbstractLogHandler {
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
+      // Sanitize request_body to prevent JSON parsing errors in Clickhouse
+      // Special handling for the request_body field which often contains nested JSON with escape sequences
+      const sanitizedRequestResponseVersionedCHMapped =
+        this.sanitizeJsonEscapeSequences(requestResponseVersionedCHMapped);
+
+      // Special handling for request_body to ensure it's properly sanitized
+      if (
+        typeof sanitizedRequestResponseVersionedCHMapped.request_body ===
+        "string"
+      ) {
+        sanitizedRequestResponseVersionedCHMapped.request_body =
+          sanitizedRequestResponseVersionedCHMapped.request_body.replace(
+            /[\uD800-\uDFFF]/g,
+            "\uFFFD"
+          );
+      }
+
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
@@ -127,7 +144,7 @@ export class LoggingHandler extends AbstractLogHandler {
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
-        requestResponseVersionedCHMapped
+        sanitizedRequestResponseVersionedCHMapped
       );
 
       return await super.handle(context);
@@ -510,12 +527,77 @@ export class LoggingHandler extends AbstractLogHandler {
     return requestResponseLog;
   }
 
+  /**
+   * Sanitizes delay_ms to prevent PostgreSQL integer overflow
+   * PostgreSQL integer (INT) max value is 2,147,483,647
+   * @param delay_ms - The delay value to sanitize
+   * @returns A sanitized delay value that won't cause integer overflow
+   */
+  private sanitizeDelayMs(
+    delay_ms: number | null | undefined
+  ): number | null | undefined {
+    if (delay_ms === null || delay_ms === undefined) {
+      return delay_ms;
+    }
+
+    if (typeof delay_ms !== "number") {
+      return delay_ms;
+    }
+
+    // PostgreSQL integer (INT) max value is 2,147,483,647
+    const MAX_SAFE_INT = 2147483647;
+
+    if (delay_ms > MAX_SAFE_INT) {
+      console.warn(
+        `Capping delay_ms value from ${delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`
+      );
+      return MAX_SAFE_INT;
+    }
+
+    if (delay_ms < -MAX_SAFE_INT) {
+      console.warn(
+        `Capping negative delay_ms value from ${delay_ms} to ${-MAX_SAFE_INT} to prevent integer overflow`
+      );
+      return -MAX_SAFE_INT;
+    }
+
+    return delay_ms;
+  }
+
+  /**
+   * Sanitizes JSON data by removing invalid escape sequences
+   * This is needed to fix the "missing second part of surrogate pair" error
+   * @param obj - The object to sanitize
+   * @returns A sanitized copy of the object
+   */
+  private sanitizeJsonEscapeSequences<T>(obj: T): T {
+    // Create a deep copy of the object through serialization
+    // and replace any invalid surrogate pairs
+    try {
+      const sanitizedJson = JSON.stringify(obj, (_, value) => {
+        if (typeof value === "string") {
+          // Replace any lone surrogate halves with the Unicode replacement character (U+FFFD)
+          return value.replace(/[\uD800-\uDFFF]/g, "\uFFFD");
+        }
+        return value;
+      });
+      return JSON.parse(sanitizedJson);
+    } catch (error) {
+      // If any error occurs during sanitization, return the original object
+      console.warn("Failed to sanitize JSON data:", error);
+      return obj;
+    }
+  }
+
   mapResponse(
     context: HandlerContext
   ): Database["public"]["Tables"]["response"]["Insert"] {
     const response = context.message.log.response;
     const processedResponse = context.processedLog.response;
     const orgParams = context.orgParams;
+
+    // Sanitize delay_ms to prevent PostgreSQL integer overflow
+    const sanitizedDelayMs = this.sanitizeDelayMs(response.delayMs);
 
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
@@ -529,7 +611,7 @@ export class LoggingHandler extends AbstractLogHandler {
       prompt_cache_write_tokens: context.usage.promptCacheWriteTokens,
       prompt_cache_read_tokens: context.usage.promptCacheReadTokens,
       time_to_first_token: response.timeToFirstToken,
-      delay_ms: response.delayMs,
+      delay_ms: sanitizedDelayMs,
       created_at: response.responseCreatedAt.toISOString(),
     };
 
