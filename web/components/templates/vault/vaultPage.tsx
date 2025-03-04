@@ -123,7 +123,6 @@ const VaultPage = ({
           icon={
             <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
           }
-          highlightedFeature="vault"
         />
       </div>
     );
