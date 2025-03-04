@@ -1,13 +1,13 @@
 ---
 description: Helicone Style Guidelines
-globs: *.tsx
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 # Helicone Design System Guidelines
 
 ## Core Principles
 1. Use semantic HTML elements
-2. Use CSS variables for colors
+2. Use Tailwind utility classes for colors
 3. Use typography components for consistent text styling
 4. Use Tailwind's spacing scale
 5. Use lucide-react for icons
@@ -73,151 +73,159 @@ import { H1, P, Small, Muted } from "@/components/ui/typography"
 
 ### Usage Patterns
 ```tsx
-// 1. Use CSS variables for colors
-✅ text-[hsl(var(--foreground))]
-✅ bg-[hsl(var(--background))]
-✅ border-[hsl(var(--border))]
+// 1. Use Tailwind utility classes for colors
+✅ text-foreground
+✅ bg-background
+✅ border-border
+
+// 2. Use foreground variants for text on colored backgrounds
+✅ bg-primary text-primary-foreground
+✅ bg-destructive text-destructive-foreground
+
+// ❌ Don't use CSS variables directly
+❌ text-[hsl(var(--foreground))]
+❌ bg-[hsl(var(--background))]
 
 // ❌ Don't use raw colors
 ❌ text-slate-900
 ❌ bg-white
 ```
 
-### Color Variables
-```css
+### Color Utility Classes
+```tsx
 /* Text Colors */
-text-[hsl(var(--foreground))]        // Primary text
-text-[hsl(var(--muted-foreground))]  // Secondary text
-text-[hsl(var(--accent-foreground))] // Accent text
+text-foreground              // Primary text
+text-muted-foreground        // Secondary text
+text-accent-foreground       // Accent text
 
 /* Background Colors */
-bg-[hsl(var(--background))]          // Page background
-bg-[hsl(var(--card))]               // Card background
-bg-[hsl(var(--muted))]              // Muted background
+bg-background                // Page background
+bg-card                      // Card background
+bg-muted                     // Muted background
 
 /* Border Colors */
-border-[hsl(var(--border))]          // Default borders
-border-[hsl(var(--input))]          // Form inputs
+border-border                // Default borders
+border-input                 // Form inputs
+ring-ring                    // Focus rings
 ```
 
 ## Color Reference Values
 
 ### Primary Colors
-```css
+```tsx
 /* Light Mode */
---primary: #0EA5E9 (sky-500)
---primary-dark: #0284C7 (sky-600)
---primary-foreground: #F0F9FF (sky-50)
+bg-primary                   // #0EA5E9 (sky-500)
+text-primary-foreground      // #F0F9FF (sky-50)
 
 /* Dark Mode */
---primary: #0284C7 (sky-600)
---primary-foreground: #083344 (sky-950)
+bg-primary                   // #0284C7 (sky-600)
+text-primary-foreground      // #083344 (sky-950)
 ```
 
 ### Background Colors
-```css
+```tsx
 /* Light Mode */
---background: #FFFFFF (white)
---foreground: #0F172A (slate-900)
+bg-background                // #FFFFFF (white)
+text-foreground              // #0F172A (slate-900)
 
 /* Dark Mode */
---background: #020617 (slate-950)
---foreground: #F8FAFC (slate-50)
+bg-background                // #020617 (slate-950)
+text-foreground              // #F8FAFC (slate-50)
 ```
 
 ### Accent Colors
-```css
+```tsx
 /* Light Mode */
---accent: #F1F5F9 (slate-100)
---accent-foreground: #0F172A (slate-900)
+bg-accent                    // #F1F5F9 (slate-100)
+text-accent-foreground       // #0F172A (slate-900)
 
 /* Dark Mode */
---accent: #1E293B (slate-800)
---accent-foreground: #F8FAFC (slate-50)
+bg-accent                    // #1E293B (slate-800)
+text-accent-foreground       // #F8FAFC (slate-50)
 ```
 
 ### UI Component Colors
-```css
+```tsx
 /* Light Mode */
---card: #FFFFFF (white)
---card-foreground: #020617 (slate-950)
---popover: #FFFFFF (white)
---popover-foreground: #020617 (slate-950)
---border: #E2E8F0 (slate-200)
---input: #E2E8F0 (slate-200)
---ring: #0F172A (slate-900)
+bg-card                      // #FFFFFF (white)
+text-card-foreground         // #020617 (slate-950)
+bg-popover                   // #FFFFFF (white)
+text-popover-foreground      // #020617 (slate-950)
+border-border                // #E2E8F0 (slate-200)
+border-input                 // #E2E8F0 (slate-200)
+ring-ring                    // #0F172A (slate-900)
 
 /* Dark Mode */
---card: #020617 (slate-950)
---card-foreground: #F8FAFC (slate-50)
---popover: #020617 (slate-950)
---popover-foreground: #F8FAFC (slate-50)
---border: #1E293B (slate-800)
---input: #1E293B (slate-800)
---ring: #CBD5E1 (slate-300)
+bg-card                      // #020617 (slate-950)
+text-card-foreground         // #F8FAFC (slate-50)
+bg-popover                   // #020617 (slate-950)
+text-popover-foreground      // #F8FAFC (slate-50)
+border-border                // #1E293B (slate-800)
+border-input                 // #1E293B (slate-800)
+ring-ring                    // #CBD5E1 (slate-300)
 ```
 
 ### Semantic Colors
-```css
+```tsx
 /* Light Mode */
---muted: #F1F5F9 (slate-100)
---muted-foreground: #64748B (slate-500)
---secondary: #F1F5F9 (slate-100)
---secondary-foreground: #0F172A (slate-900)
---destructive: #DC2626 (red-600)
---destructive-foreground: #450A0A (red-950)
---confirmative: #16A34A (green-600)
---confirmative-foreground: #052E16 (green-950)
+bg-muted                     // #F1F5F9 (slate-100)
+text-muted-foreground        // #64748B (slate-500)
+bg-secondary                 // #F1F5F9 (slate-100)
+text-secondary-foreground    // #0F172A (slate-900)
+bg-destructive               // #DC2626 (red-600)
+text-destructive-foreground  // #450A0A (red-950)
+bg-confirmative              // #16A34A (green-600)
+text-confirmative-foreground // #052E16 (green-950)
 
 /* Dark Mode */
---muted: #1E293B (slate-800)
---muted-foreground: #94A3B8 (slate-400)
---secondary: #1E293B (slate-800)
---secondary-foreground: #F8FAFC (slate-50)
---destructive: #7F1D1D (red-900)
---destructive-foreground: #FEF2F2 (red-50)
---confirmative: #14532D (green-900)
---confirmative-foreground: #F0FDF4 (green-50)
+bg-muted                     // #1E293B (slate-800)
+text-muted-foreground        // #94A3B8 (slate-400)
+bg-secondary                 // #1E293B (slate-800)
+text-secondary-foreground    // #F8FAFC (slate-50)
+bg-destructive               // #7F1D1D (red-900)
+text-destructive-foreground  // #FEF2F2 (red-50)
+bg-confirmative              // #14532D (green-900)
+text-confirmative-foreground // #F0FDF4 (green-50)
 ```
 
 ### Sidebar Colors
-```css
+```tsx
 /* Light Mode */
---sidebar-background: #F8FAFC (slate-50)
---sidebar-foreground: #334155 (slate-700)
---sidebar-border: #E2E8F0 (slate-200)
---sidebar-primary: #0C4A6E (sky-900)
---sidebar-primary-foreground: #F0F9FF (sky-50)
---sidebar-accent: #F1F5F9 (slate-100)
---sidebar-accent-foreground: #0F172A (slate-900)
---sidebar-ring: #94A3B8 (slate-400)
+bg-sidebar-background        // #F8FAFC (slate-50)
+text-sidebar-foreground      // #334155 (slate-700)
+border-sidebar-border        // #E2E8F0 (slate-200)
+bg-sidebar-primary           // #0C4A6E (sky-900)
+text-sidebar-primary-foreground // #F0F9FF (sky-50)
+bg-sidebar-accent            // #F1F5F9 (slate-100)
+text-sidebar-accent-foreground // #0F172A (slate-900)
+ring-sidebar-ring            // #94A3B8 (slate-400)
 
 /* Dark Mode */
---sidebar-background: #0F172A (slate-900)
---sidebar-foreground: #F1F5F9 (slate-100)
---sidebar-border: #1E293B (slate-800)
---sidebar-primary: #0369A1 (sky-700)
---sidebar-primary-foreground: #FFFFFF (white)
---sidebar-accent: #1E293B (slate-800)
---sidebar-accent-foreground: #F1F5F9 (slate-100)
---sidebar-ring: #CBD5E1 (slate-300)
+bg-sidebar-background        // #0F172A (slate-900)
+text-sidebar-foreground      // #F1F5F9 (slate-100)
+border-sidebar-border        // #1E293B (slate-800)
+bg-sidebar-primary           // #0369A1 (sky-700)
+text-sidebar-primary-foreground // #FFFFFF (white)
+bg-sidebar-accent            // #1E293B (slate-800)
+text-sidebar-accent-foreground // #F1F5F9 (slate-100)
+ring-sidebar-ring            // #CBD5E1 (slate-300)
 ```
 
 ### Chart Colors
-```css
+```tsx
 /* Light Mode */
---chart-1: #2A9D90
---chart-2: #E76E50
---chart-3: #274754
---chart-4: #E8C468
---chart-5: #F4A462
+bg-chart-1                   // #2A9D90
+bg-chart-2                   // #E76E50
+bg-chart-3                   // #274754
+bg-chart-4                   // #E8C468
+bg-chart-5                   // #F4A462
 
 /* Dark Mode */
---chart-1: #2662D9
---chart-2: #E23670
---chart-3: #E88C30
---chart-4: #AF57DB
---chart-5: #2EB88A
+bg-chart-1                   // #2662D9
+bg-chart-2                   // #E23670
+bg-chart-3                   // #E88C30
+bg-chart-4                   // #AF57DB
+bg-chart-5                   // #2EB88A
 ```
 
 ## Layout Best Practices
@@ -259,7 +267,7 @@ border-[hsl(var(--input))]          // Form inputs
 ✅ <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
 // Card Container
-✅ <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+✅ <div className="rounded-lg border border-border bg-card text-card-foreground">
 
 // Form Groups
 ✅ <div className="flex flex-col gap-4">
@@ -343,7 +351,7 @@ import { ChevronRight, Settings, Info } from "lucide-react"
 <Card>
   <CardHeader>
     <H4>Usage Statistics</H4>
-    <Small className="text-[hsl(var(--muted-foreground))]">
+    <Small className="text-muted-foreground">
       Last 30 days
     </Small>
   </CardHeader>
