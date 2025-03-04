@@ -48,4 +48,11 @@ export class KVCache {
       );
     }
   }
+
+  async del(key: string): Promise<void> {
+    this.cache.delete(key);
+    if (this.redisClient) {
+      await this.redisClient.del(key);
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useHasAccess } from "@/hooks/useHasAccess";
@@ -10,21 +10,75 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 const PropertiesPage = (props: {}) => {
-  const { properties, isLoading: isPropertiesLoading } =
-    useGetPropertiesV2(getPropertyFiltersV2);
+  const {
+    properties,
+    isLoading: isPropertiesLoading,
+    refetch,
+  } = useGetPropertiesV2(getPropertyFiltersV2);
+
+  // Create a local copy of properties so we can immediately update the UI.
+  const [localProperties, setLocalProperties] = useState<string[]>([]);
+  useEffect(() => {
+    setLocalProperties(properties);
+  }, [properties]);
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
   const hasAccess = useHasAccess("properties");
+  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
   const hasAccessToProperties = useMemo(() => {
     return (
       hasAccess ||
-      (properties.length > 0 &&
+      (localProperties.length > 0 &&
         new Date().getTime() < new Date("2024-09-27").getTime())
     );
-  }, [hasAccess, properties.length]);
+  }, [hasAccess, localProperties.length]);
+
+  const handleDeleteProperty = async () => {
+    console.log("Deleting property:", propertyToDelete);
+    if (!propertyToDelete) return;
+
+    try {
+      const jawn = getJawnClient();
+      await jawn.POST("/v1/property/update", {
+        body: {
+          property_name: propertyToDelete,
+          hidden: true,
+        },
+      });
+
+      // Clear the selected property if it was hidden
+      if (selectedProperty === propertyToDelete) {
+        setSelectedProperty("");
+      }
+
+      // Immediately update the local properties by filtering out the deleted property.
+      setLocalProperties((prev) =>
+        prev.filter((prop) => prop !== propertyToDelete)
+      );
+
+      // Optionally, refetch to ensure consistency with the backend.
+      await refetch();
+    } catch (error) {
+      console.error("Failed to hide property:", error);
+    } finally {
+      setPropertyToDelete(null);
+    }
+  };
 
   if (isPropertiesLoading) {
     return (
@@ -35,7 +89,6 @@ const PropertiesPage = (props: {}) => {
               <h3 className="font-semibold text-lg text-black dark:text-white p-4">
                 Your Properties
               </h3>
-
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-3">
                   {Array.from({ length: 8 }).map((_, i) => (
@@ -48,7 +101,6 @@ const PropertiesPage = (props: {}) => {
               </ScrollArea>
             </CardContent>
           </Card>
-
           <div className="w-full flex flex-col pt-2">
             <Card className="rounded-none border-0 shadow-none">
               <CardContent className="flex flex-col items-center justify-center py-16">
@@ -76,7 +128,7 @@ const PropertiesPage = (props: {}) => {
     );
   }
 
-  if (properties.length === 0) {
+  if (localProperties.length === 0) {
     return (
       <div className="flex flex-col w-full min-h-screen items-center bg-slate-50 dark:bg-gray-900">
         <EmptyStateCard feature="properties" />
@@ -92,31 +144,64 @@ const PropertiesPage = (props: {}) => {
             <h3 className="font-semibold text-lg text-black dark:text-white p-4">
               Your Properties
             </h3>
-
             <ScrollArea className="h-full">
               <div>
-                {properties.map((property, i) => (
-                  <Button
-                    key={i}
-                    variant={
-                      selectedProperty === property ? "default" : "ghost"
-                    }
-                    className="w-full justify-start font-medium h-auto py-3 rounded-none"
-                    onClick={() => setSelectedProperty(property)}
-                  >
-                    <Tag className="h-4 w-4 mr-2" />
-                    <span className="truncate">{property}</span>
-                  </Button>
+                {localProperties.map((property, i) => (
+                  <div key={i} className="group relative">
+                    <Button
+                      variant={
+                        selectedProperty === property ? "default" : "ghost"
+                      }
+                      className="w-full justify-start font-medium h-auto py-3 rounded-none"
+                      onClick={() => setSelectedProperty(property)}
+                    >
+                      <Tag className="h-4 w-4 mr-2" />
+                      <span className="truncate">{property}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPropertyToDelete(property);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
           </CardContent>
         </Card>
-
         <div className="w-full flex flex-col pt-2">
           <PropertyPanel property={selectedProperty} />
         </div>
       </div>
+      <AlertDialog
+        open={!!propertyToDelete}
+        onOpenChange={() => setPropertyToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Property</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the property "{propertyToDelete}"?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProperty}
+              className="bg-destructive bg-red-500 text-white hover:bg-red-400 transition-colors"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

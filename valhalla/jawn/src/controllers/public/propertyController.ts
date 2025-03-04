@@ -36,8 +36,7 @@ const kvCache = new KVCache(60 * 1000); // 5 minutes
 export class PropertyController extends Controller {
   @Post("query")
   public async getProperties(
-    @Body()
-    requestBody: {},
+    @Body() requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ) {
     const builtFilter = await buildFilterWithAuthClickHouse({
@@ -46,13 +45,22 @@ export class PropertyController extends Controller {
       filter: "all",
     });
 
+    // Modified query to ensure properties with hidden=true are excluded
     const query = `
-    SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-    FROM request_response_rmt
-    WHERE (
-      ${builtFilter.filter}
+    SELECT DISTINCT 
+      property_key as property
+    FROM (
+      SELECT 
+        arrayJoin(mapKeys(properties)) as property_key,
+        properties[property_key] as value,
+        properties[concat(property_key, '.hidden')] as is_hidden
+      FROM request_response_rmt
+      WHERE (${builtFilter.filter})
     )
-  `;
+    WHERE (is_hidden IS NULL OR is_hidden != 'true')
+    AND property_key NOT LIKE '%.hidden'
+    ORDER BY property
+    `;
 
     return await cacheResultCustom(
       "v1/property/query" + request.authParams.organizationId,
@@ -156,5 +164,67 @@ export class PropertyController extends Controller {
 
       return topCosts;
     });
+  }
+  @Post("update")
+  public async updatePropertyVisibility(
+    @Body() requestBody: { property_name: string; hidden: boolean },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const { property_name, hidden } = requestBody;
+    const orgId = request.authParams.organizationId;
+
+    // Debug query to inspect the current properties for the given property
+    const debugQuery = `
+      SELECT 
+        properties,
+        properties['${property_name}'] AS value,
+        properties['${property_name}.hidden'] AS is_hidden
+      FROM request_response_rmt
+      WHERE organization_id = '${orgId}'
+        AND has(properties, '${property_name}')
+      LIMIT 5;
+    `;
+
+    // Log pre-update debug values
+    console.log(
+      "Pre-update debug values:",
+      await dbQueryClickhouse(debugQuery, [])
+    );
+
+    // Use mapConcat with map() to merge in the hidden field for the property.
+    const updateQuery = `
+      ALTER TABLE request_response_rmt
+      UPDATE properties = mapConcat(
+        properties, 
+        map('${property_name}.hidden', '${hidden.toString()}')
+      )
+      WHERE organization_id = '${orgId}'
+        AND has(properties, '${property_name}')
+    `;
+
+    console.log("Executing update query:", updateQuery);
+
+    try {
+      await dbQueryClickhouse(updateQuery, []);
+      await kvCache.del("v1/property/query" + orgId);
+
+      // Post-update debug: verify that the hidden field was added
+      const postUpdateDebug = await dbQueryClickhouse(debugQuery, []);
+      console.log("Post-update debug values:", postUpdateDebug);
+
+      // Optionally, retrieve updated properties to check that the property is now hidden in the frontend
+      const properties = await this.getProperties({}, request);
+      console.log("Properties returned by getProperties:", properties);
+
+      return {
+        properties,
+        success: true,
+        message: "Property visibility updated successfully",
+      };
+    } catch (error) {
+      console.error("Error executing ClickHouse query:", updateQuery);
+      console.error(error);
+      throw error;
+    }
   }
 }

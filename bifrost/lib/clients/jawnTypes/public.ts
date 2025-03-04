@@ -290,6 +290,9 @@ export interface paths {
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
+  "/v1/property/update": {
+    post: operations["UpdatePropertyVisibility"];
+  };
   "/v1/public/pi/get-api-key": {
     post: operations["GetApiKey"];
   };
@@ -4223,6 +4226,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__value-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdatePropertyVisibility: {
+    requestBody: {
+      content: {
+        "application/json": {
+          hidden: boolean;
+          property_name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            message: string;
+            success: boolean;
+            properties: components["schemas"]["Result_Property-Array.string_"];
+          };
         };
       };
     };

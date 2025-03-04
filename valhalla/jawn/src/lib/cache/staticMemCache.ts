@@ -55,6 +55,10 @@ export class InMemoryCache {
       this.cache.delete(key);
     }
   }
+
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
 }
 
 class ProviderKeyCache extends InMemoryCache {

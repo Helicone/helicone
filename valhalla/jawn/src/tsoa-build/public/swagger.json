@@ -12339,6 +12339,70 @@
 				}
 			}
 		},
+		"/v1/property/update": {
+			"post": {
+				"operationId": "UpdatePropertyVisibility",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										},
+										"success": {
+											"type": "boolean"
+										},
+										"properties": {
+											"$ref": "#/components/schemas/Result_Property-Array.string_"
+										}
+									},
+									"required": [
+										"message",
+										"success",
+										"properties"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"hidden": {
+										"type": "boolean"
+									},
+									"property_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"hidden",
+									"property_name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/public/pi/get-api-key": {
 			"post": {
 				"operationId": "GetApiKey",
