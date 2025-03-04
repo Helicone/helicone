@@ -20,6 +20,7 @@ export interface OrgParams {
   tier: string;
   id: string;
   percentLog: number;
+  has_onboarded: boolean;
 }
 
 type OrgResult = PromiseGenericResult<OrgParams>;
@@ -250,6 +251,7 @@ export class SupabaseConnector {
       tier: data.tier ?? "free",
       id: data.id ?? "",
       percentLog: data.percent_to_log ?? 100_000,
+      has_onboarded: data.has_onboarded ?? false,
     };
 
     return ok(orgResult);
