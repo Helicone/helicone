@@ -1,31 +1,34 @@
-import { useRef, useState, useEffect, useMemo } from "react";
-import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
-import { Row } from "../../../../layout/common/row";
-import StatusBadge from "../../../requests/statusBadge";
-import { clsx } from "../../../../shared/clsx";
+import { useOrg } from "@/components/layout/org/organizationContext";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { Row } from "../../../../layout/common/row";
+import { clsx } from "../../../../shared/clsx";
+import StatusBadge from "../../../requests/statusBadge";
 
-const bgColor = {
-  LLM: "bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200 ",
-  tool: "bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-200 ",
-  vector_db:
-    "bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-200 ",
-};
-
-const NAME_FOR = {
-  tool: (node: TreeNodeData) => node.trace?.request.model.split(":")[1],
-  vector_db: (node: TreeNodeData) =>
-    (node.trace?.request.raw.request as any).operation ??
-    node.trace?.request.model,
-  LLM: (node: TreeNodeData) => node.trace?.request.model,
+// Unified data structure for request types
+const REQUEST_TYPE_CONFIG = {
+  LLM: {
+    bgColor: "bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200",
+    displayName: "LLM",
+  },
+  tool: {
+    bgColor:
+      "bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-200",
+    displayName: "Tool",
+  },
+  vector_db: {
+    bgColor:
+      "bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-200",
+    displayName: "Vector DB",
+  },
 };
 
 export function RequestNode(props: {
@@ -98,6 +101,20 @@ export function RequestNode(props: {
     ? "vector_db"
     : "LLM";
 
+  // Get the actual model name for display
+  const getModelName = () => {
+    if (type === "tool") {
+      return node.trace?.request.model.split(":")[1];
+    } else if (type === "vector_db") {
+      return (
+        (node.trace?.request.raw.request as any).operation ??
+        node.trace?.request.model
+      );
+    } else {
+      return node.trace?.request.model;
+    }
+  };
+
   return (
     <div
       className={clsx(
@@ -117,10 +134,14 @@ export function RequestNode(props: {
           <div
             className={clsx(
               "flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md whitespace-nowrap",
-              bgColor[type as keyof typeof bgColor]
+              REQUEST_TYPE_CONFIG[type as keyof typeof REQUEST_TYPE_CONFIG]
+                .bgColor
             )}
           >
-            {type}
+            {
+              REQUEST_TYPE_CONFIG[type as keyof typeof REQUEST_TYPE_CONFIG]
+                .displayName
+            }
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -128,7 +149,7 @@ export function RequestNode(props: {
                 ref={modelRef}
                 className="flex-grow flex-shrink-1 max-w-[200px] min-w-[100px] bg-transparent dark:bg-transparent dark:border-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1 text-xs font-medium rounded-md truncate"
               >
-                {label ?? NAME_FOR[type as keyof typeof NAME_FOR](node)}
+                {label ?? getModelName()}
               </div>
             </TooltipTrigger>
             {isTruncated && (
