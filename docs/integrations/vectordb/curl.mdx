@@ -7,11 +7,13 @@ iconType: "solid"
 ---
 
 ## Request Structure
+
 A typical request will have the following structure:
 
 ### Endpoint
+
 ```
-POST https://api.us.helicone.ai/custom/v1/log
+POST https://api.worker.helicone.ai/custom/v1/log
 ```
 
 ### Headers
@@ -23,6 +25,7 @@ POST https://api.us.helicone.ai/custom/v1/log
 Replace `{API_KEY}` with your actual API Key.
 
 ### Body
+
 ```typescript
 export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -33,17 +36,16 @@ export type HeliconeAsyncLogRequest = {
 export type ProviderRequest = {
   url: "custom-model-nopath";
   json: {
-    _type: "vector_db"; 
-    operation: "search" | "insert" | "delete" | "update"; 
+    _type: "vector_db";
+    operation: "search" | "insert" | "delete" | "update";
     text?: string;
     vector?: number[];
     topK?: number;
     filter?: object;
     databaseName?: string;
-  [key: string]: any; 
+    [key: string]: any;
   };
   meta: Record<string, string>;
-  
 };
 
 export type ProviderResponse = {
@@ -69,8 +71,9 @@ export type Timing = {
 ```
 
 ## Example Usage
+
 ```
-curl -X POST https://api.us.helicone.ai/custom/v1/log \
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
 -H 'Authorization: Bearer your_api_key' \
 -H 'Content-Type: application/json' \
 -d '{
@@ -79,23 +82,27 @@ curl -X POST https://api.us.helicone.ai/custom/v1/log \
     "json": {
       "_type": "vector_db",
       "operation": "search",
-      ... // other data about the vector db request here
+      "text": "sample query text",
+      "topK": 3,
+      "databaseName": "sample_vector_db"
     },
     "meta": {
-      "metaKey1": "metaValue1",
-      "metaKey2": "metaValue2"
+      "source": "test_integration",
+      "environment": "development"
     }
   },
   "providerResponse": {
     "json": {
       "_type": "vector_db",
-      "responseKey1": "responseValue1",
-      "responseKey2": "responseValue2"
+      "results": [
+        {"id": "doc1", "score": 0.92, "content": "Sample document 1"},
+        {"id": "doc2", "score": 0.85, "content": "Sample document 2"},
+        {"id": "doc3", "score": 0.78, "content": "Sample document 3"}
+      ]
     },
     "status": 200,
     "headers": {
-      "headerKey1": "headerValue1",
-      "headerKey2": "headerValue2"
+      "content-type": "application/json"
     }
   },
   "timing": {

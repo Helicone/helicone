@@ -1206,4 +1206,221 @@ export class AdminController extends Controller {
       throw new Error(updateError.message);
     }
   }
+
+  @Post("/top-orgs-over-time")
+  public async getTopOrgsOverTime(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      timeRange: string;
+      limit: number;
+      groupBy?: string;
+    }
+  ): Promise<{
+    organizations: Array<{
+      organization_id: string;
+      organization_name: string;
+      data: Array<{
+        time: string;
+        request_count: number;
+      }>;
+    }>;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Parse time range from string to interval
+    const parseTimeRange = (rangeStr: string): string => {
+      // Maps from UI friendly names to ClickHouse interval strings
+      switch (rangeStr) {
+        case "10 minutes":
+          return "10 minute";
+        case "30 minutes":
+          return "30 minute";
+        case "1 hour":
+          return "1 hour";
+        case "3 hours":
+          return "3 hour";
+        case "12 hours":
+          return "12 hour";
+        case "1 day":
+          return "1 day";
+        case "3 days":
+          return "3 day";
+        case "7 days":
+          return "7 day";
+        case "14 days":
+          return "14 day";
+        case "30 days":
+          return "30 day";
+        default:
+          return "1 day";
+      }
+    };
+
+    const timeRangeInterval = parseTimeRange(body.timeRange || "1 day");
+    const limit = body.limit || 10;
+    let groupBy = body.groupBy;
+
+    // Automatically set appropriate groupBy based on timeRange if not provided
+    if (!groupBy) {
+      if (
+        timeRangeInterval === "10 minute" ||
+        timeRangeInterval === "30 minute" ||
+        timeRangeInterval === "1 hour"
+      ) {
+        groupBy = "minute";
+      } else if (
+        timeRangeInterval === "3 hour" ||
+        timeRangeInterval === "12 hour" ||
+        timeRangeInterval === "1 day"
+      ) {
+        groupBy = "10 minute";
+      } else if (
+        timeRangeInterval === "3 day" ||
+        timeRangeInterval === "7 day"
+      ) {
+        groupBy = "hour";
+      } else if (timeRangeInterval === "14 day") {
+        groupBy = "6 hour";
+      } else {
+        groupBy = "day";
+      }
+    }
+
+    // Function to get appropriate ClickHouse time function based on groupBy
+    const getClickhouseTimeFunction = (groupBy: string) => {
+      switch (groupBy) {
+        case "minute":
+          return "toStartOfMinute";
+        case "10 minute":
+          return `toStartOfInterval(request_created_at, INTERVAL 10 minute)`;
+        case "hour":
+          return "toStartOfHour";
+        case "6 hour":
+          return `toStartOfInterval(request_created_at, INTERVAL 6 hour)`;
+        case "day":
+          return "toStartOfDay";
+        case "week":
+          return "toStartOfWeek";
+        default:
+          return "toStartOfHour";
+      }
+    };
+
+    // Get the appropriate time function for the SQL query
+    const timeFunction = getClickhouseTimeFunction(groupBy);
+
+    // Step 1: Get the top organizations by total request count
+    const topOrgsQuery = `
+      SELECT 
+          organization_id,
+          COUNT(request_id) as request_count
+      FROM 
+          request_response_rmt
+      WHERE
+          request_created_at > now() - interval '${timeRangeInterval}'
+          AND request_created_at < now()
+      GROUP BY 
+          organization_id
+      ORDER BY 
+          request_count DESC
+      LIMIT ${limit}
+    `;
+
+    const topOrgsResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      request_count: string;
+    }>(topOrgsQuery, []);
+
+    if (!topOrgsResult.data || topOrgsResult.data.length === 0) {
+      return { organizations: [] };
+    }
+
+    const orgIds = topOrgsResult.data.map((org) => org.organization_id);
+
+    // Step 2: Fetch organization names
+    const orgNamesQuery = `
+      SELECT id, name FROM organization WHERE id IN (${orgIds
+        .map((id) => `'${id}'`)
+        .join(",")})
+    `;
+
+    const orgNamesResult = await dbExecute<{
+      id: string;
+      name: string;
+    }>(orgNamesQuery, []);
+
+    const orgNameMap = new Map<string, string>();
+    if (orgNamesResult.data) {
+      orgNamesResult.data.forEach((org) => {
+        orgNameMap.set(org.id, org.name);
+      });
+    }
+
+    // Step 3: Get time series data for each organization with the appropriate grouping
+    const timeSeriesQuery =
+      groupBy === "10 minute" || groupBy === "6 hour"
+        ? `
+        SELECT 
+            organization_id,
+            COUNT(request_id) as request_count, 
+            toString(${timeFunction}) as time
+        FROM 
+            request_response_rmt
+        WHERE
+            request_created_at > now() - interval '${timeRangeInterval}'
+            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
+        GROUP BY 
+            organization_id, 
+            time
+        ORDER BY
+            organization_id,
+            time
+      `
+        : `
+        SELECT 
+            organization_id,
+            COUNT(request_id) as request_count, 
+            toString(${timeFunction}(request_created_at)) as time
+        FROM 
+            request_response_rmt
+        WHERE
+            request_created_at > now() - interval '${timeRangeInterval}'
+            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
+        GROUP BY 
+            organization_id, 
+            time
+        ORDER BY
+            organization_id,
+            time
+      `;
+
+    const timeSeriesResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      request_count: string;
+      time: string;
+    }>(timeSeriesQuery, []);
+
+    if (!timeSeriesResult.data) {
+      return { organizations: [] };
+    }
+
+    // Step 4: Combine the data
+    const organizations = orgIds.map((orgId) => {
+      const orgData = timeSeriesResult
+        .data!.filter((point) => point.organization_id === orgId)
+        .map((point) => ({
+          time: point.time,
+          request_count: parseInt(point.request_count, 10),
+        }));
+
+      return {
+        organization_id: orgId,
+        organization_name: orgNameMap.get(orgId) || orgId,
+        data: orgData,
+      };
+    });
+
+    return { organizations };
+  }
 }

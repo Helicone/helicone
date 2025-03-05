@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  /* 
+  * Color System
+  * These CSS variables are also available through Tailwind's utility classes.
+  * For example:
+  * - text-primary for text color
+  * - bg-primary for background color
+  * - border-primary for border color
+  * - text-primary-foreground for text on primary background
+  * - bg-muted for muted background
+  * - text-muted-foreground for muted text
+  */
   :root {
     /* Background Colors */
     --background: 0 0% 100%;
@@ -118,6 +129,13 @@
     --confirmative-foreground: 138 76% 97%;
   }
 }
+
+/* 
+* The classes below can now be replaced with Tailwind utility classes:
+* .text-primary -> text-foreground
+* .text-secondary -> text-muted-foreground
+* .text-tertiary -> text-muted-foreground with opacity
+*/
 
 .glass {
   @apply backdrop-blur-md bg-white/[.3333] dark:bg-slate-950/[.3333];

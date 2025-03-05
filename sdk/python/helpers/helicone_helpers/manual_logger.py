@@ -60,7 +60,7 @@ class HeliconeManualLogger:
             result = operation(result_recorder)
             end_time = time.time()
 
-            self.__send_log(provider, request, result_recorder.get_results(), {
+            self.send_log(provider, request, result_recorder.get_results(), {
                 "start_time": start_time,
                 "end_time": end_time,
                 "additional_headers": additional_headers
