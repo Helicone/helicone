@@ -1,8 +1,6 @@
-import { Database } from "../db/database.types";
 import { createHmac } from "crypto";
+import { Database } from "../db/database.types";
 import { PromiseGenericResult, ok } from "../shared/result";
-import { S3Client } from "../shared/db/s3Client";
-import { modelCost } from "../../packages/cost/costCalc";
 import { WebhookConfig } from "../shared/types";
 
 export type WebhookPayload = {
