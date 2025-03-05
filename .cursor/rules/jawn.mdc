@@ -1,0 +1,72 @@
+---
+description: 
+globs: *.ts
+alwaysApply: false
+---
+# Helicone Jawn Controller and TanStack Query Integration
+
+## Controller Pattern
+- Jawn controllers (`valhalla/jawn/src/controllers/`) follow a RESTful design with standard HTTP methods
+- Controllers use decorators like `@Route`, `@Get`, `@Post`, etc. from TSOA
+- Controllers accept `JawnAuthenticatedRequest` and return `Result<T, string>`
+- Required parameters should come before optional parameters in controller methods
+
+## Manager Pattern
+- Each controller has a corresponding manager (`valhalla/jawn/src/managers/`)
+- Managers extend `BaseManager` and handle database operations
+- Managers receive `authParams` from the controller request
+- Use `dbExecute` for database operations and wrap results in `Result<T, string>`
+
+## Frontend Hooks with TanStack Query
+- Use `useJawnClient()` to interact with Jawn controllers
+- Implement custom hooks with TanStack Query for data fetching and mutations
+- For GET requests:
+  ```typescript
+  const query = useQuery({
+    queryKey: ['resource', id],
+    queryFn: async () => {
+      const response = await jawn.GET('/v1/resource/{id}', {
+        params: { path: { id } }
+      });
+      if (response.error) throw response.error;
+      return response.data;
+    }
+  });
+  ```
+
+- For mutations:
+  ```typescript
+  const mutation = useMutation({
+    mutationFn: async (input) => {
+      const response = await jawn.POST('/v1/resource', {
+        body: input
+      });
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['resource'] });
+    }
+  });
+  ```
+
+## Type Definitions
+- Define request and response interfaces in the controller file
+- Use proper typing with TanStack Query
+- Handle Jawn response structure properly with error checking
+
+## URL State Management
+- Use URL parameters for persisting filter state between pages
+- Update URL when filter changes with `useSearchParams` from Next.js
+
+## Database Schema
+- Tables follow snake_case naming
+- Use proper indexes for performance
+- Implement proper RLS policies for security
+- Create functions for specialized operations (e.g., incrementing versions)
+
+## Enhanced Filters Specifics
+- Filters support both simple queries and complex logical expressions
+- Filters can be persisted, shared, and reused
+- Support both legacy and enhanced filter systems for backward compatibility
