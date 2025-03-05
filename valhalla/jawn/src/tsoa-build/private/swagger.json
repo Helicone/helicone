@@ -4017,6 +4017,135 @@
 			"OnboardingStatus": {
 				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
+			"GitHubIntegration": {
+				"properties": {
+					"updated_at": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"recent_logs": {
+						"items": {},
+						"type": "array"
+					},
+					"pr_url": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					},
+					"completed": {
+						"type": "boolean"
+					},
+					"progress": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"repository_url": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"updated_at",
+					"created_at",
+					"recent_logs",
+					"completed",
+					"progress",
+					"status",
+					"repository_url",
+					"organization_id",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_GitHubIntegration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/GitHubIntegration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_GitHubIntegration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_GitHubIntegration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"GitHubIntegrationParams": {
+				"properties": {
+					"github_token": {
+						"type": "string"
+					},
+					"repository_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"github_token",
+					"repository_url"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_GitHubIntegration-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/GitHubIntegration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_GitHubIntegration-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_GitHubIntegration-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"HeliconeMeta": {
 				"properties": {
 					"heliconeManualAccessKey": {
@@ -10182,6 +10311,190 @@
 									"has_onboarded",
 									"name",
 									"onboarding_status"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/github-integration": {
+			"post": {
+				"operationId": "CreateGitHubIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_GitHubIntegration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GitHubIntegrationParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "ListGitHubIntegrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_GitHubIntegration-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/github-integration/{integrationId}": {
+			"get": {
+				"operationId": "GetGitHubIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_GitHubIntegration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/github-integration/{integrationId}/status": {
+			"post": {
+				"operationId": "UpdateGitHubIntegrationStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_GitHubIntegration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"recentLogs": {
+										"items": {},
+										"type": "array"
+									},
+									"prUrl": {
+										"type": "string"
+									},
+									"error": {
+										"type": "string"
+									},
+									"completed": {
+										"type": "boolean"
+									},
+									"progress": {
+										"type": "number",
+										"format": "double"
+									},
+									"status": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"progress",
+									"status"
 								],
 								"type": "object"
 							}

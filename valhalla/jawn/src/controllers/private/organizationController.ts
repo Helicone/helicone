@@ -22,6 +22,8 @@ import {
   OrganizationMember,
   OrganizationOwner,
   UpdateOrganizationParams,
+  GitHubIntegration,
+  GitHubIntegrationParams,
 } from "../../managers/organization/OrganizationManager";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
@@ -441,5 +443,125 @@ export class OrganizationController extends Controller {
       this.setStatus(201);
       return ok(null);
     }
+  }
+
+  // GitHub Integration Endpoints
+  @Post("/{organizationId}/github-integration")
+  public async createGitHubIntegration(
+    @Body() requestBody: GitHubIntegrationParams,
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<GitHubIntegration, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    // Check if Greptile API key is configured
+    if (!process.env.GREPTILE_API_KEY) {
+      this.setStatus(500);
+      return err("Greptile API key not configured");
+    }
+
+    const result = await organizationManager.createGitHubIntegration(
+      organizationId,
+      requestBody
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    if (!result.data) {
+      this.setStatus(500);
+      return err("Failed to create GitHub integration");
+    }
+
+    this.setStatus(201);
+    return ok(result.data);
+  }
+
+  @Get("/{organizationId}/github-integration")
+  public async listGitHubIntegrations(
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<GitHubIntegration[], string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.listGitHubIntegrations(
+      organizationId
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    if (!result.data) {
+      return ok([]);
+    }
+
+    return ok(result.data);
+  }
+
+  @Get("/github-integration/{integrationId}")
+  public async getGitHubIntegration(
+    @Path() integrationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<GitHubIntegration, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.getGitHubIntegration(
+      integrationId
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    if (!result.data) {
+      this.setStatus(404);
+      return err("GitHub integration not found");
+    }
+
+    return ok(result.data);
+  }
+
+  @Post("/github-integration/{integrationId}/status")
+  public async updateGitHubIntegrationStatus(
+    @Body()
+    requestBody: {
+      status: string;
+      progress: number;
+      completed?: boolean;
+      error?: string;
+      prUrl?: string;
+      recentLogs?: any[];
+    },
+    @Path() integrationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<GitHubIntegration, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateGitHubIntegrationStatus(
+      integrationId,
+      requestBody.status,
+      requestBody.progress,
+      requestBody.completed,
+      requestBody.error,
+      requestBody.prUrl,
+      requestBody.recentLogs
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    if (!result.data) {
+      this.setStatus(404);
+      return err("GitHub integration not found");
+    }
+
+    return ok(result.data);
   }
 }

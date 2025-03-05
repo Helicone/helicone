@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Waypoints,
   Loader,
+  Github,
 } from "lucide-react";
 import Link from "next/link";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
@@ -109,6 +110,48 @@ export default function IntegratePage() {
                   </ul>
                   <Badge variant="helicone-sky" className="w-fit">
                     Recommended
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+          </Link>
+
+          {/* GitHub Integration Card */}
+          <Link href="/onboarding/integrate/github" className="flex-1">
+            <Card className="h-full transition-colors hover:bg-[hsl(var(--muted))]">
+              <div className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-[hsl(var(--muted))] rounded-md border border-[hsl(var(--border))]">
+                    <Github
+                      size={20}
+                      className="text-[hsl(var(--foreground))]"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1">
+                    <H4>GitHub</H4>
+                    <Muted>Automatic PR integration.</Muted>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:flex"
+                  >
+                    <ArrowRight size={16} />
+                  </Button>
+                </div>
+              </div>
+              <div className="border-t border-[hsl(var(--border))] p-4">
+                <div className="flex flex-col gap-2.5">
+                  <ul className="text-sm text-[hsl(var(--muted-foreground))] ml-4 list-disc list-inside">
+                    <li>Connect your GitHub repository</li>
+                    <li>AI-powered code analysis</li>
+                    <li>Automatic PR creation</li>
+                  </ul>
+                  <Badge
+                    variant="outline"
+                    className="w-fit bg-[hsl(var(--muted))]"
+                  >
+                    New
                   </Badge>
                 </div>
               </div>

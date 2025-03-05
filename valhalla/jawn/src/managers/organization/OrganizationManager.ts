@@ -4,6 +4,7 @@ import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
+import { GitHubIntegrationService } from "../../services/github/GitHubIntegrationService";
 
 export type NewOrganizationParams =
   Database["public"]["Tables"]["organization"]["Insert"];
@@ -59,6 +60,25 @@ export type OrganizationMember = {
 export type OrganizationOwner = {
   email: string;
   tier: string;
+};
+
+export type GitHubIntegration = {
+  id: string;
+  organization_id: string;
+  repository_url: string;
+  status: string;
+  progress: number;
+  completed: boolean;
+  error?: string;
+  pr_url?: string;
+  recent_logs: any[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type GitHubIntegrationParams = {
+  repository_url: string;
+  github_token: string;
 };
 
 export type OnboardingStatus = Partial<{
@@ -485,5 +505,163 @@ export class OrganizationManager extends BaseManager {
     }
 
     return ok(data);
+  }
+
+  // GitHub Integration Methods
+  async createGitHubIntegration(
+    organizationId: string,
+    params: GitHubIntegrationParams
+  ): Promise<Result<GitHubIntegration, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
+      organizationId,
+      this.authParams.userId
+    );
+
+    if (!hasAccess) {
+      return err("User does not have access to this organization");
+    }
+
+    // Get Greptile API key from environment
+    const greptileApiKey = process.env.GREPTILE_API_KEY;
+    if (!greptileApiKey) {
+      return err("Greptile API key not configured");
+    }
+
+    // Create the integration record in the database
+    const createResult = await this.organizationStore.createGitHubIntegration(
+      organizationId,
+      params.repository_url
+    );
+
+    if (createResult.error || !createResult.data) {
+      return err(createResult.error || "Failed to create GitHub integration");
+    }
+
+    // Start the integration process in the background
+    this.processGitHubIntegration(
+      createResult.data.id,
+      params.repository_url,
+      params.github_token
+    ).catch((error) => {
+      console.error("Error processing GitHub integration:", error);
+    });
+
+    return ok(createResult.data);
+  }
+
+  async getGitHubIntegration(
+    integrationId: string
+  ): Promise<Result<GitHubIntegration, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    return this.organizationStore.getGitHubIntegration(
+      integrationId,
+      this.authParams.userId
+    );
+  }
+
+  async listGitHubIntegrations(
+    organizationId: string
+  ): Promise<Result<GitHubIntegration[], string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
+      organizationId,
+      this.authParams.userId
+    );
+
+    if (!hasAccess) {
+      return err("User does not have access to this organization");
+    }
+
+    return this.organizationStore.listGitHubIntegrations(organizationId);
+  }
+
+  async updateGitHubIntegrationStatus(
+    integrationId: string,
+    status: string,
+    progress: number,
+    completed: boolean = false,
+    error?: string,
+    prUrl?: string,
+    recentLogs?: any[]
+  ): Promise<Result<GitHubIntegration, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    return this.organizationStore.updateGitHubIntegrationStatus(
+      integrationId,
+      this.authParams.userId,
+      status,
+      progress,
+      completed,
+      error,
+      prUrl,
+      recentLogs
+    );
+  }
+
+  // Process GitHub integration in the background
+  private async processGitHubIntegration(
+    integrationId: string,
+    repositoryUrl: string,
+    githubToken: string
+  ): Promise<void> {
+    try {
+      // Get the integration from the database
+      const getResult = await this.organizationStore.getGitHubIntegrationById(
+        integrationId
+      );
+      if (getResult.error || !getResult.data) {
+        console.error("Integration not found:", integrationId);
+        return;
+      }
+
+      // Create a GitHub integration service
+      const gitHubIntegrationService = new GitHubIntegrationService(
+        // Update status callback
+        async (
+          integrationId: string,
+          status: string,
+          progress: number,
+          completed: boolean = false,
+          error?: string,
+          prUrl?: string
+        ) => {
+          await this.organizationStore.updateGitHubIntegrationStatusInternal(
+            integrationId,
+            status,
+            progress,
+            completed,
+            error,
+            prUrl
+          );
+        },
+        // Add log callback
+        async (integrationId: string, message: string) => {
+          await this.organizationStore.addGitHubIntegrationLog(
+            integrationId,
+            message
+          );
+        }
+      );
+
+      // Process the integration
+      await gitHubIntegrationService.processIntegration(
+        integrationId,
+        repositoryUrl,
+        githubToken
+      );
+    } catch (error: any) {
+      console.error("Error processing GitHub integration:", error);
+      await this.organizationStore.updateGitHubIntegrationStatusInternal(
+        integrationId,
+        "Error",
+        100,
+        true,
+        error.message || "Unknown error"
+      );
+    }
   }
 }

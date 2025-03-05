@@ -277,6 +277,16 @@ export interface paths {
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
   };
+  "/v1/organization/{organizationId}/github-integration": {
+    get: operations["ListGitHubIntegrations"];
+    post: operations["CreateGitHubIntegration"];
+  };
+  "/v1/organization/github-integration/{integrationId}": {
+    get: operations["GetGitHubIntegration"];
+  };
+  "/v1/organization/github-integration/{integrationId}/status": {
+    post: operations["UpdateGitHubIntegrationStatus"];
+  };
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
@@ -1403,6 +1413,36 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    GitHubIntegration: {
+      updated_at: string;
+      created_at: string;
+      recent_logs: unknown[];
+      pr_url?: string;
+      error?: string;
+      completed: boolean;
+      /** Format: double */
+      progress: number;
+      status: string;
+      repository_url: string;
+      organization_id: string;
+      id: string;
+    };
+    ResultSuccess_GitHubIntegration_: {
+      data: components["schemas"]["GitHubIntegration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_GitHubIntegration.string_": components["schemas"]["ResultSuccess_GitHubIntegration_"] | components["schemas"]["ResultError_string_"];
+    GitHubIntegrationParams: {
+      github_token: string;
+      repository_url: string;
+    };
+    "ResultSuccess_GitHubIntegration-Array_": {
+      data: components["schemas"]["GitHubIntegration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_GitHubIntegration-Array.string_": components["schemas"]["ResultSuccess_GitHubIntegration-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
       heliconeManualAccessKey?: string;
       lytixHost?: string;
@@ -3834,6 +3874,84 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  ListGitHubIntegrations: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GitHubIntegration-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateGitHubIntegration: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GitHubIntegrationParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GitHubIntegration.string_"];
+        };
+      };
+    };
+  };
+  GetGitHubIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GitHubIntegration.string_"];
+        };
+      };
+    };
+  };
+  UpdateGitHubIntegrationStatus: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          recentLogs?: unknown[];
+          prUrl?: string;
+          error?: string;
+          completed?: boolean;
+          /** Format: double */
+          progress: number;
+          status: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GitHubIntegration.string_"];
         };
       };
     };

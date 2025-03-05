@@ -6,6 +6,8 @@ import {
   OrganizationMember,
   OrganizationOwner,
   UpdateOrganizationParams,
+  GitHubIntegration,
+  GitHubIntegrationParams,
 } from "../../managers/organization/OrganizationManager";
 import { hashAuth } from "../../utils/hash";
 import { supabaseServer } from "../db/supabase";
@@ -15,6 +17,7 @@ import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
+import { GitHubIntegrationService } from "../../services/github/GitHubIntegrationService";
 
 export class OrganizationStore extends BaseStore {
   async createNewOrganization(
@@ -480,5 +483,310 @@ export class OrganizationStore extends BaseStore {
     }
 
     return ok(result.data[0].id);
+  }
+
+  // GitHub Integration Methods
+  async createGitHubIntegration(
+    organizationId: string,
+    repositoryUrl: string
+  ): Promise<Result<GitHubIntegration, string>> {
+    try {
+      // Use raw SQL query instead of Supabase client
+      const query = `
+        INSERT INTO github_integration (
+          organization_id, repository_url, status, progress, completed
+        ) VALUES (
+          $1, $2, $3, $4, $5
+        )
+        RETURNING *
+      `;
+
+      const { data, error } = await dbExecute<GitHubIntegration>(query, [
+        organizationId,
+        repositoryUrl,
+        "Initializing",
+        0,
+        false,
+      ]);
+
+      if (error || !data || data.length === 0) {
+        return err("Failed to create GitHub integration");
+      }
+
+      return ok(data[0]);
+    } catch (error: any) {
+      console.error("Error creating GitHub integration:", error);
+      return err("Failed to create GitHub integration");
+    }
+  }
+
+  async getGitHubIntegration(
+    integrationId: string,
+    userId: string
+  ): Promise<Result<GitHubIntegration, string>> {
+    try {
+      // First get the integration
+      const query = `
+        SELECT * FROM github_integration
+        WHERE id = $1
+      `;
+
+      const { data, error } = await dbExecute<GitHubIntegration>(query, [
+        integrationId,
+      ]);
+
+      if (error || !data || data.length === 0) {
+        return err("Integration not found");
+      }
+
+      const integration = data[0];
+
+      // Check if the user has access to this integration
+      const hasAccess = await this.checkUserBelongsToOrg(
+        integration.organization_id,
+        userId
+      );
+
+      if (!hasAccess) {
+        return err("User does not have access to this integration");
+      }
+
+      return ok(integration);
+    } catch (error: any) {
+      console.error("Error getting GitHub integration:", error);
+      return err("Failed to get GitHub integration");
+    }
+  }
+
+  async getGitHubIntegrationById(
+    integrationId: string
+  ): Promise<Result<GitHubIntegration, string>> {
+    try {
+      // Get the integration without access check
+      const query = `
+        SELECT * FROM github_integration
+        WHERE id = $1
+      `;
+
+      const { data, error } = await dbExecute<GitHubIntegration>(query, [
+        integrationId,
+      ]);
+
+      if (error || !data || data.length === 0) {
+        return err("Integration not found");
+      }
+
+      return ok(data[0]);
+    } catch (error: any) {
+      console.error("Error getting GitHub integration by ID:", error);
+      return err("Failed to get GitHub integration");
+    }
+  }
+
+  async listGitHubIntegrations(
+    organizationId: string
+  ): Promise<Result<GitHubIntegration[], string>> {
+    try {
+      // Use raw SQL query
+      const query = `
+        SELECT * FROM github_integration
+        WHERE organization_id = $1
+        ORDER BY created_at DESC
+      `;
+
+      const { data, error } = await dbExecute<GitHubIntegration>(query, [
+        organizationId,
+      ]);
+
+      if (error) {
+        return err("Failed to list GitHub integrations");
+      }
+
+      return ok(data || []);
+    } catch (error: any) {
+      console.error("Error listing GitHub integrations:", error);
+      return err("Failed to list GitHub integrations");
+    }
+  }
+
+  async updateGitHubIntegrationStatus(
+    integrationId: string,
+    userId: string,
+    status: string,
+    progress: number,
+    completed: boolean = false,
+    error?: string,
+    prUrl?: string,
+    recentLogs?: any[]
+  ): Promise<Result<GitHubIntegration, string>> {
+    try {
+      // First get the integration
+      const getQuery = `
+        SELECT * FROM github_integration
+        WHERE id = $1
+      `;
+
+      const { data: integrationData, error: getError } =
+        await dbExecute<GitHubIntegration>(getQuery, [integrationId]);
+
+      if (getError || !integrationData || integrationData.length === 0) {
+        return err("Integration not found");
+      }
+
+      const integration = integrationData[0];
+
+      // Check if the user has access to this integration
+      const hasAccess = await this.checkUserBelongsToOrg(
+        integration.organization_id,
+        userId
+      );
+
+      if (!hasAccess) {
+        return err("User does not have access to this integration");
+      }
+
+      // If the integration is already completed, don't update it
+      if (integration.completed) {
+        return ok(integration);
+      }
+
+      // Update the integration status
+      return this.updateGitHubIntegrationStatusInternal(
+        integrationId,
+        status,
+        progress,
+        completed,
+        error,
+        prUrl,
+        recentLogs
+      );
+    } catch (error: any) {
+      console.error("Error updating GitHub integration status:", error);
+      return err("Failed to update GitHub integration status");
+    }
+  }
+
+  // Update integration status without access checks
+  async updateGitHubIntegrationStatusInternal(
+    integrationId: string,
+    status: string,
+    progress: number,
+    completed: boolean = false,
+    error?: string,
+    prUrl?: string,
+    recentLogs?: any[]
+  ): Promise<Result<GitHubIntegration, string>> {
+    try {
+      // Get current integration to check if it's already completed
+      const getQuery = `
+        SELECT * FROM github_integration
+        WHERE id = $1
+      `;
+
+      const { data, error: getError } = await dbExecute<GitHubIntegration>(
+        getQuery,
+        [integrationId]
+      );
+
+      if (getError || !data || data.length === 0) {
+        return err("Integration not found");
+      }
+
+      const integration = data[0];
+
+      // If the integration is already completed, don't update it
+      if (integration.completed) {
+        return ok(integration);
+      }
+
+      // Prepare logs
+      let logs = recentLogs;
+      if (!logs && integration.recent_logs) {
+        logs = [...integration.recent_logs];
+        if (
+          status !== integration.status ||
+          progress !== integration.progress
+        ) {
+          logs.push(`Status updated: ${status} (${progress}%)`);
+          if (logs.length > 20) {
+            logs.shift(); // Keep only the most recent 20 logs
+          }
+        }
+      }
+
+      // Update the integration status
+      const updateQuery = `
+        UPDATE github_integration
+        SET 
+          status = $1,
+          progress = $2,
+          completed = $3,
+          error = $4,
+          pr_url = $5,
+          recent_logs = $6
+        WHERE id = $7
+        RETURNING *
+      `;
+
+      const { data: updatedData, error: updateError } =
+        await dbExecute<GitHubIntegration>(updateQuery, [
+          status,
+          progress,
+          completed,
+          error || null,
+          prUrl || null,
+          JSON.stringify(logs || []),
+          integrationId,
+        ]);
+
+      if (updateError || !updatedData || updatedData.length === 0) {
+        return err("Failed to update integration status");
+      }
+
+      return ok(updatedData[0]);
+    } catch (error: any) {
+      console.error("Error updating GitHub integration status:", error);
+      return err("Failed to update GitHub integration status");
+    }
+  }
+
+  // Add a log message to the integration
+  async addGitHubIntegrationLog(
+    integrationId: string,
+    message: string
+  ): Promise<Result<null, string>> {
+    try {
+      // Get current logs
+      const { data: integrationData } = await dbExecute<GitHubIntegration>(
+        `SELECT * FROM github_integration WHERE id = $1`,
+        [integrationId]
+      );
+
+      if (!integrationData || integrationData.length === 0) {
+        return err("Integration not found");
+      }
+
+      const integration = integrationData[0];
+
+      // Add log to recent_logs
+      const logs = [...(integration.recent_logs || []), message];
+      if (logs.length > 20) {
+        logs.shift(); // Keep only the most recent 20 logs
+      }
+
+      // Update logs in the database
+      await dbExecute(
+        `UPDATE github_integration SET recent_logs = $1 WHERE id = $2`,
+        [JSON.stringify(logs), integrationId]
+      );
+
+      // Log to console as well
+      console.log(`[${integrationId}] ${message}`);
+
+      return ok(null);
+    } catch (error: any) {
+      console.error("Error adding GitHub integration log:", error);
+      return err("Failed to add log");
+    }
   }
 }
