@@ -278,6 +278,24 @@ export interface paths {
   "/v1/stripe/webhook": {
     post: operations["HandleStripeWebhook"];
   };
+  "/v1/saved-filters": {
+    /** @description Get all saved filters for the current organization */
+    get: operations["GetSavedFilters"];
+    /** @description Create a new saved filter */
+    post: operations["CreateSavedFilter"];
+  };
+  "/v1/saved-filters/{filterId}": {
+    /** @description Get a saved filter by ID */
+    get: operations["GetSavedFilterById"];
+    /** @description Update a saved filter */
+    put: operations["UpdateSavedFilter"];
+    /** @description Delete a saved filter */
+    delete: operations["DeleteSavedFilter"];
+  };
+  "/v1/saved-filters/{filterId}/use": {
+    /** @description Update the last_used timestamp of a saved filter */
+    post: operations["UpdateLastUsed"];
+  };
   "/v1/public/status/provider": {
     get: operations["GetAllProviderStatus"];
   };
@@ -1702,6 +1720,38 @@ Json: JsonObject;
         /** Format: double */
         completion_token: number;
       };
+    };
+    SavedFilter: {
+      id: string;
+      organization_id: string;
+      name?: string;
+      filter: unknown;
+      created_at: string;
+      last_used: string;
+      created_by?: string;
+      is_global: boolean;
+    };
+    "ResultSuccess_SavedFilter-Array_": {
+      data: components["schemas"]["SavedFilter"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SavedFilter-Array.string_": components["schemas"]["ResultSuccess_SavedFilter-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_SavedFilter_: {
+      data: components["schemas"]["SavedFilter"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SavedFilter.string_": components["schemas"]["ResultSuccess_SavedFilter_"] | components["schemas"]["ResultError_string_"];
+    CreateSavedFilterRequest: {
+      name?: string;
+      filter: unknown;
+      is_global?: boolean;
+    };
+    UpdateSavedFilterRequest: {
+      name?: string;
+      filter?: unknown;
+      is_global?: boolean;
     };
     MetricsData: {
       /** Format: double */
@@ -4162,6 +4212,102 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  /** @description Get all saved filters for the current organization */
+  GetSavedFilters: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SavedFilter-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Create a new saved filter */
+  CreateSavedFilter: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedFilterRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get a saved filter by ID */
+  GetSavedFilterById: {
+    parameters: {
+      path: {
+        filterId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SavedFilter.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update a saved filter */
+  UpdateSavedFilter: {
+    parameters: {
+      path: {
+        filterId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSavedFilterRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a saved filter */
+  DeleteSavedFilter: {
+    parameters: {
+      path: {
+        filterId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update the last_used timestamp of a saved filter */
+  UpdateLastUsed: {
+    parameters: {
+      path: {
+        filterId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
       };
     };
   };

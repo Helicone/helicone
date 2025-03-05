@@ -13,3 +13,11 @@ name = "helicone-heartbeat-prod"
 binding = "HYPERDRIVE"
 id = "e5d49fcb7b0942e7b0ec8f4c27c322e7"
 localConnectionString = "postgresql://postgres:postgres@localhost:54322/postgres"
+
+[env.production-eu]
+name = "helicone-heartbeat-prod-eu"
+
+[[env.production-eu.hyperdrive]]
+binding = "HYPERDRIVE"
+id = "c5bb8677be2a4185bee7f4f0207057bf"
+localConnectionString = "postgresql://postgres:postgres@localhost:54322/postgres"

@@ -4733,6 +4733,134 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SavedFilter": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"filter": {},
+					"created_at": {
+						"type": "string"
+					},
+					"last_used": {
+						"type": "string"
+					},
+					"created_by": {
+						"type": "string"
+					},
+					"is_global": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"organization_id",
+					"filter",
+					"created_at",
+					"last_used",
+					"is_global"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SavedFilter-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/SavedFilter"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SavedFilter-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SavedFilter-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_SavedFilter_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SavedFilter"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SavedFilter.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SavedFilter_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateSavedFilterRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"filter": {},
+					"is_global": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateSavedFilterRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"filter": {},
+					"is_global": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"MetricsData": {
 				"properties": {
 					"totalRequests": {
@@ -12190,6 +12318,218 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/saved-filters": {
+			"get": {
+				"operationId": "GetSavedFilters",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SavedFilter-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all saved filters for the current organization",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateSavedFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new saved filter",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedFilterRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/saved-filters/{filterId}": {
+			"get": {
+				"operationId": "GetSavedFilterById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SavedFilter.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a saved filter by ID",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "filterId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSavedFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a saved filter",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "filterId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateSavedFilterRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSavedFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a saved filter",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "filterId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/saved-filters/{filterId}/use": {
+			"post": {
+				"operationId": "UpdateLastUsed",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update the last_used timestamp of a saved filter",
+				"tags": [
+					"SavedFilters"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "filterId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/public/status/provider": {

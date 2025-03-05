@@ -16,16 +16,20 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   HELICONE_API_KEY: string;
   HEARTBEAT_URLS_JSON: string;
+
+  // dead variables??
+  STRIPE_WEBHOOK_SECRET: string;
+  SUPABASE_DATEBASE_URL: string;
+  SUPABASE_DATABASE_SSL: string;
+  ENVIRONMENT: string;
+
+  // Environment variables to change per region
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
   STRIPE_API_KEY: string;
-  STRIPE_WEBHOOK_SECRET: string;
-  SUPABASE_DATEBASE_URL: string;
-  SUPABASE_DATABASE_SSL: string;
-  ENVIRONMENT: string;
   HYPERDRIVE: Hyperdrive;
 }
 
@@ -48,7 +52,7 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<void> {
-    if (controller.cron === "* * * * *") {
+    if (controller.cron === "* * * * *" && env.HEARTBEAT_URLS_JSON) {
       const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
 
       const heartBeatPromises = heartBeats.map(async (item) => {
