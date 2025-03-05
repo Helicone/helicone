@@ -7,12 +7,19 @@ iconType: "solid"
 ---
 
 ## Request Structure
+
 A typical request will have the following structure:
 
 ### Endpoint
+
 ```
-POST https://api.us.helicone.ai/custom/v1/log
+POST https://api.worker.helicone.ai/custom/v1/log
 ```
+
+> **Note:** The endpoint may vary depending on your Helicone setup. If the above endpoint doesn't work, you can also try:
+>
+> - `https://api.us.helicone.ai/custom/v1/log`
+> - `https://api.helicone.ai/custom/v1/log`
 
 ### Headers
 
@@ -23,6 +30,7 @@ POST https://api.us.helicone.ai/custom/v1/log
 Replace `{API_KEY}` with your actual API Key.
 
 ### Body
+
 ```typescript
 export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
@@ -33,13 +41,12 @@ export type HeliconeAsyncLogRequest = {
 export type ProviderRequest = {
   url: "custom-model-nopath";
   json: {
-    _type: "tool"; 
-    toolName: string; 
+    _type: "tool";
+    toolName: string;
     input: any;
-    [key: string]: any; 
+    [key: string]: any;
   };
   meta: Record<string, string>;
-  
 };
 
 export type ProviderResponse = {
@@ -66,8 +73,9 @@ export type Timing = {
 ```
 
 ## Example Usage
+
 ```bash
-curl -X POST https://api.us.helicone.ai/custom/v1/log \
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
 -H 'Authorization: Bearer your_api_key' \
 -H 'Content-Type: application/json' \
 -d '{
@@ -75,26 +83,34 @@ curl -X POST https://api.us.helicone.ai/custom/v1/log \
     "url": "custom-model-nopath",
     "json": {
       "_type": "tool",
-      "toolName": "toolName",
-      "input": "input",
-      ... // other data about the vector db request here
+      "toolName": "weather_api",
+      "input": {
+        "location": "San Francisco",
+        "units": "celsius"
+      }
     },
     "meta": {
-      "metaKey1": "metaValue1",
-      "metaKey2": "metaValue2"
+      "user_id": "user_123",
+      "session_id": "session_456",
+      "environment": "production"
     }
   },
   "providerResponse": {
     "json": {
       "_type": "tool",
-      "toolName": "toolName",
-      "responseKey1": "responseValue1",
-      "responseKey2": "responseValue2"
+      "toolName": "weather_api",
+      "temperature": 18.5,
+      "conditions": "Partly Cloudy",
+      "humidity": 72,
+      "wind": {
+        "speed": 12,
+        "direction": "NW"
+      }
     },
     "status": 200,
     "headers": {
-      "headerKey1": "headerValue1",
-      "headerKey2": "headerValue2"
+      "content-type": "application/json",
+      "cache-control": "max-age=300"
     }
   },
   "timing": {
@@ -103,7 +119,7 @@ curl -X POST https://api.us.helicone.ai/custom/v1/log \
       "milliseconds": 500
     },
     "endTime": {
-      "seconds": 1625686244,
+      "seconds": 1625686223,
       "milliseconds": 750
     }
   }
