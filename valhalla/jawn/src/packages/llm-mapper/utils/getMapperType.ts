@@ -70,6 +70,10 @@ export const getMapperType = ({
     return "openai-chat";
   }
 
+  if (typeof model !== "string") {
+    return "openai-chat";
+  }
+
   if (model.includes("deepseek")) {
     return "openai-chat";
   }

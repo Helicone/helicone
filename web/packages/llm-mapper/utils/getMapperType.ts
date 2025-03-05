@@ -25,11 +25,6 @@ export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
 ) => {
-  const modelVersion =
-    (!model || model === "unknown") &&
-    heliconeRequest.response_body?.modelVersion
-      ? heliconeRequest.response_body.modelVersion
-      : model;
   if (heliconeRequest.request_body?._type === "vector_db") {
     return "vector-db";
   }
@@ -72,6 +67,10 @@ export const getMapperType = ({
   isAssistant?: boolean;
 }): MapperType => {
   if (!model) {
+    return "openai-chat";
+  }
+
+  if (typeof model !== "string") {
     return "openai-chat";
   }
 
