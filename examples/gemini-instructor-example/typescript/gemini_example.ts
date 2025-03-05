@@ -21,10 +21,6 @@ async function makeGeminiRequest(
       "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
       "Helicone-Target-Url": "https://generativelanguage.googleapis.com",
       "Helicone-User-Id": USER_ID,
-      "Helicone-Property-App": "cursor-extension-cursorrules",
-      "Helicone-Property-AnalyticsPermission": analyticsPermission
-        ? "true"
-        : "false",
     } as Record<string, string>,
     body: {
       contents: [
