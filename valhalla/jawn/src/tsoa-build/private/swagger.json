@@ -4100,6 +4100,12 @@
 			},
 			"GitHubIntegrationParams": {
 				"properties": {
+					"selected_features": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
 					"github_token": {
 						"type": "string"
 					},

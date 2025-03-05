@@ -17,7 +17,7 @@ import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
-import { GitHubIntegrationService } from "../../services/github/GitHubIntegrationService";
+import { GitHubIntegrationService } from "../../managers/organization/GitHubIntegrationService";
 
 export class OrganizationStore extends BaseStore {
   async createNewOrganization(

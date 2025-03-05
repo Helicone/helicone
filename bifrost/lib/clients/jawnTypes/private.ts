@@ -1434,6 +1434,7 @@ Json: JsonObject;
     };
     "Result_GitHubIntegration.string_": components["schemas"]["ResultSuccess_GitHubIntegration_"] | components["schemas"]["ResultError_string_"];
     GitHubIntegrationParams: {
+      selected_features?: string[];
       github_token: string;
       repository_url: string;
     };

@@ -5,20 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
-  "inline-flex items-center justify-center rounded-md font-semibold leading-none",
+  "inline-flex items-center justify-center font-medium leading-none",
   {
     variants: {
       variant: {
-        default: "text-sm font-medium text-slate-800",
+        default: "text-sm text-foreground",
+        form: "text-sm text-foreground block mb-2",
         badge: [
-          "h-5 px-2.5 py-0.5 bg-sky-500 text-xs text-sky-50",
+          "h-5 px-2.5 py-0.5 bg-primary text-xs text-primary-foreground rounded-md",
           "shadow shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)]",
-          "border border-white/0 gap-2.5",
+          "border border-transparent gap-2.5",
         ],
         action: [
-          "bg-sky-600 hover:bg-sky-700 text-white h-11 w-full",
+          "bg-primary hover:bg-primary/90 text-primary-foreground h-11 w-full rounded-md",
           "shadow shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)]",
-          "border border-white/0 gap-2.5",
+          "border border-transparent gap-2.5",
         ],
       },
     },

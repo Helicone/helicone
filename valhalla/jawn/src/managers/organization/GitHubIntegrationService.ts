@@ -1,6 +1,8 @@
 import { applyPatch, parsePatch } from "diff";
-import { GitHubIntegration } from "../../managers/organization/OrganizationManager";
+import { GitHubIntegration } from "./OrganizationManager";
 import { Octokit } from "octokit";
+import * as fs from "fs";
+import * as path from "path";
 import {
   sanitizeFilePath,
   sanitizeDiffContent,
@@ -11,7 +13,9 @@ import {
   createSimpleDiff,
   fixInvalidHunks,
   fixUnknownLineErrors,
+  fixHunkLineCounts,
 } from "../../utils/diffSanitizer";
+import { FeaturePromptService, HeliconeFeature } from "./FeaturePromptService";
 
 // Greptile API base URL
 const GREPTILE_API_BASE = "https://api.greptile.com/v2";
@@ -34,6 +38,8 @@ export class GitHubIntegrationService {
     message: string
   ) => Promise<void>;
 
+  private featurePromptService: FeaturePromptService;
+
   constructor(
     updateStatusCallback: (
       integrationId: string,
@@ -47,6 +53,7 @@ export class GitHubIntegrationService {
   ) {
     this.updateStatusCallback = updateStatusCallback;
     this.addLogCallback = addLogCallback;
+    this.featurePromptService = new FeaturePromptService();
   }
 
   // Helper method to update status
@@ -77,7 +84,8 @@ export class GitHubIntegrationService {
   public async processIntegration(
     integrationId: string,
     repositoryUrl: string,
-    githubToken: string
+    githubToken: string,
+    selectedFeatures?: string[]
   ): Promise<void> {
     try {
       // Update status to initializing
@@ -166,7 +174,8 @@ export class GitHubIntegrationService {
       const queryResults = await this.queryForHeliconeIntegration(
         repoId!,
         githubToken,
-        integrationId
+        integrationId,
+        selectedFeatures
       );
 
       // Create a pull request with the changes
@@ -390,7 +399,8 @@ export class GitHubIntegrationService {
   private async queryForHeliconeIntegration(
     repoId: string,
     githubToken: string,
-    integrationId: string
+    integrationId: string,
+    selectedFeatures?: string[]
   ): Promise<any> {
     try {
       await this.addLog(
@@ -402,47 +412,26 @@ export class GitHubIntegrationService {
       const decodedRepoId = decodeURIComponent(repoId);
       const [remote, branch, repository] = decodedRepoId.split(":");
 
-      // Construct the prompt for Greptile with improved formatting instructions
-      const promptContent = `Analyze this codebase and suggest changes to integrate Helicone for monitoring LLM API calls.
+      // Convert selectedFeatures to HeliconeFeature objects for the FeaturePromptService
+      const features: HeliconeFeature[] =
+        selectedFeatures?.map((id) => ({
+          id,
+          name: this.getFeatureName(id),
+          description: "",
+          promptFile: `helicone${
+            id.charAt(0).toUpperCase() +
+            id.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+          }.md`,
+        })) || [];
 
-IMPORTANT: Your response MUST include code changes in the standard unified diff format. Follow these strict formatting rules:
-1. Each diff block must start with \`\`\`diff and end with \`\`\`
-2. File paths must use the format: --- a/path/to/file.ext and +++ b/path/to/file.ext
-3. Each hunk header must follow the format: @@ -start,count +start,count @@
-4. Every line within a hunk MUST start with one of these characters:
-   - '+' for added lines
-   - '-' for removed lines
-   - ' ' (space) for context lines
-5. Do not include any lines without these prefixes within a hunk
-6. Ensure there are no trailing spaces or empty lines at the end of the diff
+      await this.addLog(
+        integrationId,
+        `Generating prompt with ${features.length} selected features`
+      );
 
-Example of a properly formatted diff:
-\`\`\`diff
---- a/path/to/file.js
-+++ b/path/to/file.js
-@@ -1,5 +1,7 @@
- // Existing line as context
--// Line to remove
-+// Line to add
-+// Another line to add
- // Another context line
-\`\`\`
-
-For Helicone integration, look for:
-1. API calls to LLM providers (OpenAI, Anthropic, etc.)
-2. Places where headers can be added for Helicone tracking
-3. Configuration files where Helicone API keys can be added
-
-Suggest minimal, focused changes to add Helicone integration. Provide separate diffs for each file.
-
-Also, specify any environment variables that need to be added, like this:
-
-Make sure to add the necessary environment variables:
-\`\`\`env
-HELICONE_API_KEY=your_helicone_api_key
-\`\`\`
-
-Begin your response with a brief overview of the changes needed to integrate Helicone.`;
+      // Generate the prompt using FeaturePromptService's provider-specific method
+      const promptContent =
+        this.featurePromptService.generateProviderSpecificPrompt(features);
 
       // Make the request to Greptile using the correct API structure
       const response = await fetch(`${GREPTILE_API_BASE}/query`, {
@@ -508,17 +497,6 @@ Begin your response with a brief overview of the changes needed to integrate Hel
       );
       throw error;
     }
-  }
-
-  // Helper function to chunk a string into smaller pieces
-  private chunkString(str: string, length: number): string[] {
-    const chunks = [];
-    let i = 0;
-    while (i < str.length) {
-      chunks.push(str.substring(i, i + length));
-      i += length;
-    }
-    return chunks;
   }
 
   // Create a pull request with Helicone integration
@@ -671,8 +649,10 @@ Begin your response with a brief overview of the changes needed to integrate Hel
 
           try {
             // Apply multiple sanitization steps to ensure the diff is valid
-            const sanitizedDiff = fixUnknownLineErrors(
-              fixInvalidHunks(sanitizeDiffContent(diffContent))
+            const sanitizedDiff = fixHunkLineCounts(
+              fixUnknownLineErrors(
+                fixInvalidHunks(sanitizeDiffContent(diffContent))
+              )
             );
 
             // Parse the unified diff
@@ -733,8 +713,10 @@ Begin your response with a brief overview of the changes needed to integrate Hel
 
           try {
             // Apply multiple sanitization steps to ensure the diff is valid
-            const sanitizedDiff = fixUnknownLineErrors(
-              fixInvalidHunks(sanitizeDiffContent(diffContent))
+            const sanitizedDiff = fixHunkLineCounts(
+              fixUnknownLineErrors(
+                fixInvalidHunks(sanitizeDiffContent(diffContent))
+              )
             );
 
             // Parse the unified diff
@@ -927,26 +909,22 @@ For more information, visit the [Helicone documentation](https://docs.helicone.a
     }
   }
 
-  // Apply a simple diff to a file
-  private applySimpleDiff(
-    originalContent: string,
-    diffContent: string
-  ): string {
-    try {
-      // Extract all added lines from the diff
-      const addedLines = extractAddedLines(diffContent);
-
-      if (addedLines.length === 0) {
-        // If no added lines were found, return the original content
-        return originalContent;
-      }
-
-      // Return the added lines as the new content
-      return addedLines.join("\n");
-    } catch (error) {
-      console.error("Error applying simple diff:", error);
-      // If all else fails, return the original content
-      return originalContent;
-    }
+  // Helper method to get feature name from ID
+  private getFeatureName(featureId: string): string {
+    const nameMap: Record<string, string> = {
+      prompts: "Prompts",
+      sessions: "Sessions",
+      "custom-properties": "Custom Properties",
+      "user-metrics": "User Metrics",
+      caching: "Caching",
+      retries: "Retries",
+      "rate-limits": "Custom Rate Limits",
+      security: "LLM Security",
+    };
+    return (
+      nameMap[featureId] ||
+      featureId.charAt(0).toUpperCase() +
+        featureId.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    );
   }
 }

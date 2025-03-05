@@ -310,3 +310,80 @@ export function fixUnknownLineErrors(diffContent: string): string {
 
   return sanitizedLines.join("\n");
 }
+
+/**
+ * Fixes the "Added line count did not match for hunk" error by recalculating
+ * the line counts in hunk headers based on the actual content.
+ */
+export function fixHunkLineCounts(diffContent: string): string {
+  const lines = diffContent.split("\n");
+  const result = [];
+
+  let currentHunkStart = -1;
+  let addedLines = 0;
+  let removedLines = 0;
+  let contextLines = 0;
+
+  // First pass: find hunks and count lines
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith("@@ ")) {
+      // If we were processing a hunk, fix its header
+      if (currentHunkStart >= 0) {
+        const hunkHeader = lines[currentHunkStart];
+        const match = hunkHeader.match(/@@ -(\d+),(\d+) \+(\d+),(\d+) @@/);
+
+        if (match) {
+          const startOriginal = parseInt(match[1]);
+          const startNew = parseInt(match[3]);
+
+          // The original line count should be context + removed lines
+          const originalLines = contextLines + removedLines;
+          // The new line count should be context + added lines
+          const newLines = contextLines + addedLines;
+
+          // Replace the header with corrected line counts
+          const newHeader = `@@ -${startOriginal},${originalLines} +${startNew},${newLines} @@`;
+          result[currentHunkStart] = newHeader;
+        }
+      }
+
+      // Start a new hunk
+      currentHunkStart = result.length;
+      addedLines = 0;
+      removedLines = 0;
+      contextLines = 0;
+    } else if (line.startsWith("+") && !line.startsWith("+++")) {
+      addedLines++;
+    } else if (line.startsWith("-") && !line.startsWith("---")) {
+      removedLines++;
+    } else if (line.startsWith(" ")) {
+      contextLines++;
+    }
+
+    result.push(line);
+  }
+
+  // Fix the last hunk if there was one
+  if (currentHunkStart >= 0) {
+    const hunkHeader = result[currentHunkStart];
+    const match = hunkHeader.match(/@@ -(\d+),(\d+) \+(\d+),(\d+) @@/);
+
+    if (match) {
+      const startOriginal = parseInt(match[1]);
+      const startNew = parseInt(match[3]);
+
+      // The original line count should be context + removed lines
+      const originalLines = contextLines + removedLines;
+      // The new line count should be context + added lines
+      const newLines = contextLines + addedLines;
+
+      // Replace the header with corrected line counts
+      const newHeader = `@@ -${startOriginal},${originalLines} +${startNew},${newLines} @@`;
+      result[currentHunkStart] = newHeader;
+    }
+  }
+
+  return result.join("\n");
+}

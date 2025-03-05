@@ -4,7 +4,7 @@ import { AuthParams, supabaseServer } from "../../lib/db/supabase";
 import { ok, err, Result } from "../../lib/shared/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
-import { GitHubIntegrationService } from "../../services/github/GitHubIntegrationService";
+import { GitHubIntegrationService } from "./GitHubIntegrationService";
 
 export type NewOrganizationParams =
   Database["public"]["Tables"]["organization"]["Insert"];
@@ -79,6 +79,7 @@ export type GitHubIntegration = {
 export type GitHubIntegrationParams = {
   repository_url: string;
   github_token: string;
+  selected_features?: string[];
 };
 
 export type OnboardingStatus = Partial<{
@@ -543,7 +544,8 @@ export class OrganizationManager extends BaseManager {
     this.processGitHubIntegration(
       createResult.data.id,
       params.repository_url,
-      params.github_token
+      params.github_token,
+      params.selected_features
     ).catch((error) => {
       console.error("Error processing GitHub integration:", error);
     });
@@ -606,7 +608,8 @@ export class OrganizationManager extends BaseManager {
   private async processGitHubIntegration(
     integrationId: string,
     repositoryUrl: string,
-    githubToken: string
+    githubToken: string,
+    selectedFeatures?: string[]
   ): Promise<void> {
     try {
       // Get the integration from the database
@@ -651,7 +654,8 @@ export class OrganizationManager extends BaseManager {
       await gitHubIntegrationService.processIntegration(
         integrationId,
         repositoryUrl,
-        githubToken
+        githubToken,
+        selectedFeatures
       );
     } catch (error: any) {
       console.error("Error processing GitHub integration:", error);
