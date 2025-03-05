@@ -19,7 +19,10 @@ import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
+import CostPill from "./costPill";
 import RequestRow from "./requestRow";
+import StatusBadge from "./statusBadge";
+import { formatNumber } from "../../shared/utils/formatNumber";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
@@ -115,7 +118,7 @@ const RequestDiv = (props: RequestDivProps) => {
       setOpen={setOpenHandler}
       actions={
         <div className="w-full flex flex-row justify-between items-center">
-          <div className="flex flex-row items-center space-x-2">
+          {/* <div className="flex flex-row items-center space-x-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
@@ -168,7 +171,6 @@ const RequestDiv = (props: RequestDivProps) => {
               </TooltipTrigger>
               <TooltipContent>Experiment</TooltipContent>
             </Tooltip>
-
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -185,39 +187,78 @@ const RequestDiv = (props: RequestDivProps) => {
               </TooltipTrigger>
               <TooltipContent>Copy</TooltipContent>
             </Tooltip>
-          </div>
-          {(hasPrevious || hasNext) && (
-            <div className="flex flex-row items-center space-x-1.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onPrevHandler}
-                    disabled={!hasPrevious}
-                    className={clsx(
-                      !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
-                    )}
-                  >
-                    <ArrowUpIcon className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Previous</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onNextHandler}
-                    disabled={!hasNext}
-                    className={clsx(
-                      !hasNext && "opacity-50 hover:cursor-not-allowed",
-                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
-                    )}
-                  >
-                    <ArrowDownIcon className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Next</TooltipContent>
-              </Tooltip>
+          </div> */}
+
+          {request && (
+            <div className="flex flex-row items-center space-x-2">
+              {/* Cost Badge */}
+              <div className="flex items-center">
+                {request.heliconeMetadata.cost !== null &&
+                  request.heliconeMetadata.cost !== undefined &&
+                  request.heliconeMetadata.cost > 0 ? (
+                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-slate-400/20">
+                    ${formatNumber(request.heliconeMetadata.cost)}
+                  </span>
+                ) : request.heliconeMetadata.status.statusType === "success" ? (
+                  <CostPill />
+                ) : (
+                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-slate-400/20">
+                    N/A
+                  </span>
+                )}
+              </div>
+
+              {/* Latency Badge */}
+              <div className="flex items-center">
+                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-slate-400/20">
+                  {Number(request.heliconeMetadata.latency) / 1000}s
+                </span>
+              </div>
+
+              {/* Status Badge */}
+              <div className="flex items-center">
+                <StatusBadge
+                  statusType={request.heliconeMetadata.status.statusType}
+                  errorCode={request.heliconeMetadata.status.code}
+                  className="text-xs"
+                />
+              </div>
+
+              {/* Navigation buttons if needed */}
+              {/* {(hasPrevious || hasNext) && (
+                <div className="flex flex-row items-center space-x-1.5 ml-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={onPrevHandler}
+                        disabled={!hasPrevious}
+                        className={clsx(
+                          !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                          "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                        )}
+                      >
+                        <ArrowUpIcon className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Previous</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={onNextHandler}
+                        disabled={!hasNext}
+                        className={clsx(
+                          !hasNext && "opacity-50 hover:cursor-not-allowed",
+                          "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                        )}
+                      >
+                        <ArrowDownIcon className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Next</TooltipContent>
+                  </Tooltip>
+                </div>
+              )} */}
             </div>
           )}
         </div>
