@@ -146,4 +146,44 @@ describe("mapGeminiPro", () => {
       },
     });
   });
+
+  it("should extract model from modelVersion when model is unknown", () => {
+    const result = mapGeminiPro({
+      request: {
+        contents: [
+          {
+            parts: [
+              {
+                text: "List 3 classic sci-fi movies from the 1980s.",
+              },
+            ],
+            role: "user",
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
+      },
+      response: {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: '{"movies":[{"title":"Blade Runner","year":1982,"director":"Ridley Scott","rating":8.1}]}',
+                },
+              ],
+              role: "model",
+            },
+          },
+        ],
+        modelVersion: "gemini-2.0-flash",
+      },
+      statusCode: 200,
+      model: "unknown",
+    });
+
+    expect(result.schema.request.model).toBe("gemini-2.0-flash");
+    expect(result.schema.response?.model).toBe("gemini-2.0-flash");
+  });
 });
