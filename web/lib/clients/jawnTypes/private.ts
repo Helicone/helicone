@@ -367,6 +367,9 @@ export interface paths {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
   };
+  "/v1/admin/top-orgs-over-time": {
+    post: operations["GetTopOrgsOverTime"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -4509,6 +4512,36 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetTopOrgsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": {
+          groupBy?: string;
+          /** Format: double */
+          limit: number;
+          timeRange: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: {
+                data: {
+                    /** Format: double */
+                    request_count: number;
+                    time: string;
+                  }[];
+                organization_name: string;
+                organization_id: string;
+              }[];
+          };
+        };
       };
     };
   };
