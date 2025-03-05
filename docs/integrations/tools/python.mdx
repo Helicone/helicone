@@ -10,45 +10,71 @@ The `HeliconeManualLogger` class can be used to log any external tools used in y
 
 <Steps>
   <Step title="To get started, install the `helicone-helpers` package">
+  
   ```bash
   pip install helicone-helpers
   ```
+  
   </Step>
   <Step title="Create a new HeliconeManualLogger instance">
-  ```python
-  from helicone_helpers import HeliconeManualLogger
 
-  heliconeLogger = HeliconeManualLogger(
-    api_key="your-helicone-api-key", # Can be set as env variable
-    headers={} # Additional headers to be sent with the request
-  );
-  ```
+```python
+from helicone_helpers import HeliconeManualLogger
+
+heliconeLogger = HeliconeManualLogger(
+  api_key="your-helicone-api-key", # Can be set as env variable
+  headers={} # Additional headers to be sent with the request
+);
+```
+
   </Step>
   <Step title="Log your request">
-  ```python
-  def tool_call_operation(result_recorder: HeliconeResultRecorder):
-      # your tool call here
-      # you can access the request using result_recorder.request
-      result_recorder.appendResults({
-        ... # The results of the operation (this will be logged to Helicone)
-      })
-      return results # this will be returned by the logRequest function
 
-  res = heliconeLogger.logRequest(
-    request={
-      _type: "tool",
-      toolName: "...", # The name of the tool used
-      input: ..., # The input to the tool
-      # other data which you want to store about the tool call
-    },
-    operation=tool_call_operation,
-    additional_headers={
-      # Additional headers to be sent with the request
+```python
+# Simple example: Calculator tool
+def calculator_operation(result_recorder):
+    # Access the input from the request
+    operation = result_recorder.request["input"]["operation"]
+    x = result_recorder.request["input"]["x"]
+    y = result_recorder.request["input"]["y"]
+
+    # Perform the calculation
+    if operation == "add":
+        result = x + y
+    elif operation == "subtract":
+        result = x - y
+    elif operation == "multiply":
+        result = x * y
+    elif operation == "divide":
+        result = x / y if y != 0 else "Error: Division by zero"
+    else:
+        result = "Error: Unknown operation"
+
+    # Log the result to Helicone
+    result_recorder.append_results({"result": result})
+    return {"result": result}
+
+# Log the request with Helicone
+res = heliconeLogger.log_request(
+  request={
+    "_type": "tool",
+    "toolName": "calculator",
+    "input": {
+      "operation": "add",
+      "x": 5,
+      "y": 3
     }
-  );
-  ```
-</Step>
+  },
+  operation=calculator_operation
+)
+
+print(res)  # Output: {'result': 8}
+```
+
+  </Step>
 </Steps>
+
+For more complex examples including weather APIs, database queries, and document search, check out our [full examples on GitHub](https://github.com/Helicone/helicone/tree/main/examples/tools/python).
 
 ## API Reference
 
@@ -75,7 +101,8 @@ log_request(
 
 #### Parameters
 
-1. `request`:  - The request object to log
+1. `request`: - The request object to log
+
 ```python
 {
   _type: "tool";
@@ -86,6 +113,7 @@ log_request(
 ```
 
 2. `operation`: `Callable[[HeliconeResultRecorder], T]` - The operation to be executed and logged
+
 ```python
 class HeliconeResultRecorder:
     def __init__(self, request: dict):
@@ -100,7 +128,5 @@ class HeliconeResultRecorder:
 ```
 
 3. `additionalHeaders`: `dict`
-    - Additional headers to be sent with the request
-    - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
-
-
+   - Additional headers to be sent with the request
+   - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
