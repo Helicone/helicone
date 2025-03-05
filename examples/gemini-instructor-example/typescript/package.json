@@ -1,0 +1,19 @@
+{
+  "name": "gemini-helicone-example",
+  "version": "1.0.0",
+  "description": "Simple example showing how to use Gemini with Helicone gateway",
+  "main": "dist/gemini_example.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node gemini_example.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
