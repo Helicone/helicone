@@ -28,24 +28,38 @@ class MovieList(BaseModel):
     movies: List[Movie] = Field(description="List of movies")
 
 
-def setup_gemini_client(user_id: Optional[str] = None) -> Any:
-    """Configure the Gemini client with Helicone integration
-
-    Args:
-        user_id: Optional user ID to associate with requests
-
-    Returns:
-        An instructor-wrapped Gemini client
-    """
-    # Configure the Gemini client
+def setup_gemini_client(
+        user_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        session_name: Optional[str] = None,
+        session_path: Optional[str] = None,
+        custom_properties: Optional[dict] = None,
+        other_metadata: Optional[dict] = None
+) -> Any:
     metadata: List[Tuple[str, str]] = [
         ("helicone-auth", f"Bearer {HELICONE_API_KEY}"),
         ("helicone-target-url", "https://generativelanguage.googleapis.com"),
     ]
 
-    # Add user_id if provided
     if user_id:
         metadata.append(("helicone-user-id", user_id))
+
+    if session_id:
+        metadata.append(("helicone-session-id", session_id))
+
+    if session_name:
+        metadata.append(("helicone-session-name", session_name))
+
+    if session_path:
+        metadata.append(("helicone-session-path", session_path))
+
+    if custom_properties:
+        for key, value in custom_properties.items():
+            metadata.append(("helicone-property-{key}", value))
+
+    if other_metadata:
+        for key, value in other_metadata.items():
+            metadata.append((key, value))
 
     genai.configure(
         api_key=GEMINI_API_KEY,
@@ -56,7 +70,6 @@ def setup_gemini_client(user_id: Optional[str] = None) -> Any:
         transport="rest",
     )
 
-    # Create the Gemini model with instructor
     gemini_client = instructor.from_gemini(
         genai.GenerativeModel(
             model_name="gemini-2.0-flash",
@@ -119,11 +132,22 @@ def main() -> None:
 
     print("\n=== Running with user_id ===")
     # Set up the client with user_id
-    client_with_user_id = setup_gemini_client(user_id=USER_ID)
+    client_with_properties = setup_gemini_client(user_id=USER_ID,
+                                                 custom_properties={
+                                                     "job": "customer_support Chat",
+                                                     "job_id": "1234567890",
+                                                     "job_name": "Customer Support Chat",
+                                                     "job_status": "in_progress",
+                                                     "job_type": "customer_support",
+                                                 },
+                                                 session_id="1234567890",
+                                                 session_name="Customer Support Chat",
+                                                 session_path="/support/tickets/123",
+                                                 )
 
     # Run with user_id
     response_with_user_id: MovieList = run_completion(
-        client=client_with_user_id,
+        client=client_with_properties,
         system_msg=system_message,
         human_msg=user_message,
         output_structure=MovieList
