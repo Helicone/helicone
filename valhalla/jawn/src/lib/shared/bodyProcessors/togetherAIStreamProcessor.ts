@@ -1,7 +1,7 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { isParseInputJson } from "./helpers";
+import { isParseInputJson, mapLines } from "./helpers";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -30,15 +30,7 @@ export class TogetherAIStreamProcessor implements IBodyProcessor {
       .filter((line) => line !== "")
       .filter((line) => !NON_DATA_LINES.includes(line));
 
-    const data = lines.map((line, i) => {
-      if (i === lines.length - 1) return {};
-      try {
-        return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
-        console.log("Error parsing line TogetherAI", line);
-        return err({ msg: `Error parsing line`, line });
-      }
-    });
+    const data = mapLines(lines, "togetherai");
 
     try {
       const usage = await getUsage(data);

@@ -3,7 +3,7 @@ import { consolidateTextFields } from "../../../utils/streamParser";
 import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { isParseInputJson } from "./helpers";
+import { isParseInputJson, mapLines } from "./helpers";
 import { NON_DATA_LINES } from "./openAIStreamProcessor";
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
@@ -19,19 +19,13 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
     const { responseBody, requestBody, requestModel, modelOverride } =
       parseInput;
     const model = calculateModel(requestModel, undefined, modelOverride);
-    const lines = responseBody
-      .split("\n")
-      .filter((line) => line !== "")
-      .filter((line) => !NON_DATA_LINES.includes(line))
-      .map((line) => {
-        try {
-          return JSON.parse(line.replace("data:", ""));
-        } catch (e) {
-          console.error("Error parsing line Anthropic", line);
-          return {};
-        }
-      })
-      .filter((line) => line !== null);
+    const lines = mapLines(
+      responseBody
+        .split("\n")
+        .filter((line) => line !== "")
+        .filter((line) => !NON_DATA_LINES.includes(line)),
+      "anthropic"
+    ).filter((line) => line !== null);
 
     try {
       if (model?.includes("claude-3")) {
@@ -55,8 +49,10 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
                 processedBody?.usage?.input_tokens +
                 processedBody?.usage?.output_tokens,
               promptTokens: processedBody?.usage?.input_tokens,
-              promptCacheWriteTokens: processedBody?.usage?.cache_creation_input_tokens,
-              promptCacheReadTokens: processedBody?.usage?.cache_read_input_tokens,
+              promptCacheWriteTokens:
+                processedBody?.usage?.cache_creation_input_tokens,
+              promptCacheReadTokens:
+                processedBody?.usage?.cache_read_input_tokens,
               completionTokens: processedBody?.usage?.output_tokens,
               heliconeCalculated: true,
             },
