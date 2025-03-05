@@ -116,7 +116,10 @@ export const getMapperType = ({
     return "openai-assistant";
   }
 
-  if (model && model.toLowerCase().includes("gemini")) {
+  if (
+    model &&
+    (model.toLowerCase().includes("gemini") || provider === "GOOGLE")
+  ) {
     if (provider === "OPENAI") {
       return "openai-chat";
     }
