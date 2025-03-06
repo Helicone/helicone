@@ -54,6 +54,7 @@ import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -186,9 +187,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       } else {
         return {
           type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
+          filter: `${filterMap[node.filterMapIdx].label}:${filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+            }:${encodeURIComponent(node.value)}`,
         };
       }
     };
@@ -612,9 +612,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     "requests",
     organizationLayout
       ? {
-          data: organizationLayout,
-          error: null,
-        }
+        data: organizationLayout,
+        error: null,
+      }
       : undefined
   );
 
@@ -645,241 +645,256 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   return (
     <>
-      <div className="h-screen flex flex-col">
-        <div className="mx-10">
-          <StreamWarning
-            requestWithStreamUsage={requestWithoutStream !== undefined}
-          />
-        </div>
-        {!isCached && userId === undefined && (
-          <AuthHeader
-            title={isCached ? "Cached Requests" : "Requests"}
-            headerActions={
-              <div className="flex flex-row gap-2 items-center">
-                <button
-                  onClick={() => {
-                    refetch();
-                  }}
-                  className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-                >
-                  <ArrowPathIcon
-                    className={clsx(
-                      isDataLoading || isRefetching ? "animate-spin" : "",
-                      "h-4 w-4 inline duration-500 ease-in-out"
-                    )}
-                  />
-                </button>
-                <Button
-                  variant="ghost"
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={25} minSize={25}>
+          <div className="h-screen flex flex-col">
+            <div className="mx-10">
+              <StreamWarning
+                requestWithStreamUsage={requestWithoutStream !== undefined}
+              />
+            </div>
+            {!isCached && userId === undefined && (
+              <AuthHeader
+                title={isCached ? "Cached Requests" : "Requests"}
+                headerActions={
+                  <div className="flex flex-row gap-2 items-center">
+                    <button
+                      onClick={() => {
+                        refetch();
+                      }}
+                      className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+                    >
+                      <ArrowPathIcon
+                        className={clsx(
+                          isDataLoading || isRefetching ? "animate-spin" : "",
+                          "h-4 w-4 inline duration-500 ease-in-out"
+                        )}
+                      />
+                    </button>
+                    <Button
+                      variant="ghost"
+                      className={clsx(
+                        "flex flex-row gap-2 items-center",
+                        isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+                      )}
+                      size="sm_sleek"
+                      onClick={() => setIsLive(!isLive)}
+                    >
+                      <div
+                        className={clsx(
+                          isLive ? "bg-green-500" : "bg-slate-500",
+                          "h-2 w-2 rounded-full"
+                        )}
+                      ></div>
+                      <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                        {isLive ? "Live" : "Start Live"}
+                      </span>
+                    </Button>
+                  </div>
+                }
+              />
+            )}
+
+            {/* TABLE */}
+            {unauthorized ? (
+              <UnauthorizedView currentTier={currentTier || ""} />
+            ) : (
+              <div className="flex flex-col h-full overflow-hidden sentry-mask-me">
+                <div
                   className={clsx(
-                    "flex flex-row gap-2 items-center",
-                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+                    isShiftPressed && "no-select",
+                    "flex-grow overflow-auto"
                   )}
-                  size="sm_sleek"
-                  onClick={() => setIsLive(!isLive)}
                 >
-                  <div
-                    className={clsx(
-                      isLive ? "bg-green-500" : "bg-slate-500",
-                      "h-2 w-2 rounded-full"
-                    )}
-                  ></div>
-                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                    {isLive ? "Live" : "Start Live"}
-                  </span>
-                </Button>
-              </div>
-            }
-          />
-        )}
-        {/* Add this wrapper */}
-        {unauthorized ? (
-          <UnauthorizedView currentTier={currentTier || ""} />
-        ) : (
-          <div className="flex flex-col h-full overflow-hidden sentry-mask-me">
-            <div
-              className={clsx(
-                isShiftPressed && "no-select",
-                "flex-grow overflow-auto"
-              )}
-            >
-              <ThemedTable
-                id="requests-table"
-                highlightedIds={
-                  selectedData && open ? [selectedData.id] : selectedIds
-                }
-                showCheckboxes={selectMode}
-                defaultData={requests}
-                defaultColumns={columnsWithProperties}
-                skeletonLoading={isDataLoading}
-                dataLoading={isBodyLoading}
-                sortable={sort}
-                advancedFilters={{
-                  filterMap: filterMap,
-                  filters: advancedFilters,
-                  setAdvancedFilters: onSetAdvancedFiltersHandler,
-                  searchPropertyFilters: searchPropertyFilters,
-                  show: userId ? false : true,
-                }}
-                savedFilters={
-                  organizationLayoutAvailable
-                    ? {
-                        currentFilter: currFilter ?? undefined,
-                        filters:
-                          transformedFilters && orgLayout?.data?.id
-                            ? transformedFilters
-                            : undefined,
-                        onFilterChange: onLayoutFilterChange,
-                        onSaveFilterCallback: async () => {
-                          await orgLayoutRefetch();
-                        },
-                        layoutPage: "requests",
-                      }
-                    : undefined
-                }
-                exportData={requests.map((request) => {
-                  const flattenedRequest: any = {};
-                  Object.entries(request).forEach(([key, value]) => {
-                    // key is properties and value is not null
-                    if (
-                      key === "customProperties" &&
-                      value !== null &&
-                      value !== undefined
-                    ) {
-                      Object.entries(value).forEach(([key, value]) => {
-                        if (value !== null) {
+                  <ThemedTable
+                    id="requests-table"
+                    highlightedIds={
+                      selectedData && open ? [selectedData.id] : selectedIds
+                    }
+                    showCheckboxes={selectMode}
+                    defaultData={requests}
+                    defaultColumns={columnsWithProperties}
+                    skeletonLoading={isDataLoading}
+                    dataLoading={isBodyLoading}
+                    sortable={sort}
+                    advancedFilters={{
+                      filterMap: filterMap,
+                      filters: advancedFilters,
+                      setAdvancedFilters: onSetAdvancedFiltersHandler,
+                      searchPropertyFilters: searchPropertyFilters,
+                      show: userId ? false : true,
+                    }}
+                    savedFilters={
+                      organizationLayoutAvailable
+                        ? {
+                          currentFilter: currFilter ?? undefined,
+                          filters:
+                            transformedFilters && orgLayout?.data?.id
+                              ? transformedFilters
+                              : undefined,
+                          onFilterChange: onLayoutFilterChange,
+                          onSaveFilterCallback: async () => {
+                            await orgLayoutRefetch();
+                          },
+                          layoutPage: "requests",
+                        }
+                        : undefined
+                    }
+                    exportData={requests.map((request) => {
+                      const flattenedRequest: any = {};
+                      Object.entries(request).forEach(([key, value]) => {
+                        // key is properties and value is not null
+                        if (
+                          key === "customProperties" &&
+                          value !== null &&
+                          value !== undefined
+                        ) {
+                          Object.entries(value).forEach(([key, value]) => {
+                            if (value !== null) {
+                              flattenedRequest[key] = value;
+                            }
+                          });
+                        } else {
                           flattenedRequest[key] = value;
                         }
                       });
-                    } else {
-                      flattenedRequest[key] = value;
+                      return flattenedRequest;
+                    })}
+                    timeFilter={{
+                      currentTimeFilter: timeRange,
+                      defaultValue: "1m",
+                      onTimeSelectHandler: onTimeSelectHandler,
+                    }}
+                    onRowSelect={(row, index) => {
+                      onRowSelectHandler(row, index);
+                    }}
+                    makeCard={
+                      userId
+                        ? undefined
+                        : (row) => {
+                          return (
+                            <RequestCard request={row} properties={properties} />
+                          );
+                        }
                     }
-                  });
-                  return flattenedRequest;
-                })}
-                timeFilter={{
-                  currentTimeFilter: timeRange,
-                  defaultValue: "1m",
-                  onTimeSelectHandler: onTimeSelectHandler,
-                }}
-                onRowSelect={(row, index) => {
-                  onRowSelectHandler(row, index);
-                }}
-                makeCard={
-                  userId
-                    ? undefined
-                    : (row) => {
-                        return (
-                          <RequestCard request={row} properties={properties} />
-                        );
-                      }
-                }
-                makeRow={
-                  userId
-                    ? undefined
-                    : {
-                        properties: properties,
-                      }
-                }
-                customButtons={[
-                  <div key={"dataset-button"}>
-                    <DatasetButton
-                      datasetMode={selectMode}
-                      setDatasetMode={toggleSelectMode}
-                      items={[]}
-                      onAddToDataset={() => {}}
-                      renderModal={undefined}
-                    />
-                  </div>,
-                ]}
-                onSelectAll={selectAll}
-                selectedIds={selectedIds}
-                rightPanel={
-                  open ? (
-                    <RequestDiv
-                      open={open}
-                      setOpen={setOpen}
-                      request={selectedData}
-                      properties={properties}
-                      hasPrevious={
-                        selectedDataIndex !== undefined && selectedDataIndex > 0
-                      }
-                      hasNext={
-                        selectedDataIndex !== undefined &&
-                        selectedDataIndex < requests.length - 1
-                      }
-                      onPrevHandler={() => {
-                        if (
-                          selectedDataIndex !== undefined &&
-                          selectedDataIndex > 0
-                        ) {
-                          setSelectedDataIndex(selectedDataIndex - 1);
-                          setSelectedData(requests[selectedDataIndex - 1]);
-                          searchParams.set(
-                            "requestId",
-                            requests[selectedDataIndex - 1].id
-                          );
+                    makeRow={
+                      userId
+                        ? undefined
+                        : {
+                          properties: properties,
                         }
-                      }}
-                      onNextHandler={() => {
-                        if (
-                          selectedDataIndex !== undefined &&
-                          selectedDataIndex < requests.length - 1
-                        ) {
-                          setSelectedDataIndex(selectedDataIndex + 1);
-                          setSelectedData(requests[selectedDataIndex + 1]);
-                          searchParams.set(
-                            "requestId",
-                            requests[selectedDataIndex + 1].id
-                          );
-                        }
-                      }}
-                    />
-                  ) : undefined
-                }
-              >
-                {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-                    <div className="flex flex-row gap-2 items-center">
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                        Request Selection:
-                      </span>
-                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
-                        {selectedIds.length} selected
-                      </span>
-                    </div>
-                    {selectedIds.length > 0 && (
-                      <ProFeatureWrapper featureName="Datasets">
-                        <GenericButton
-                          onClick={() => {
-                            setModalOpen(true);
-                          }}
-                          icon={
-                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                          }
-                          text="Add to dataset"
+                    }
+                    customButtons={[
+                      <div key={"dataset-button"}>
+                        <DatasetButton
+                          datasetMode={selectMode}
+                          setDatasetMode={toggleSelectMode}
+                          items={[]}
+                          onAddToDataset={() => { }}
+                          renderModal={undefined}
                         />
-                      </ProFeatureWrapper>
+                      </div>,
+                    ]}
+                    onSelectAll={selectAll}
+                    selectedIds={selectedIds}
+                    rightPanel={
+                      undefined
+                    }
+                  >
+                    {selectMode && (
+                      <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
+                        <div className="flex flex-row gap-2 items-center">
+                          <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                            Request Selection:
+                          </span>
+                          <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                            {selectedIds.length} selected
+                          </span>
+                        </div>
+                        {selectedIds.length > 0 && (
+                          <ProFeatureWrapper featureName="Datasets">
+                            <GenericButton
+                              onClick={() => {
+                                setModalOpen(true);
+                              }}
+                              icon={
+                                <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                              }
+                              text="Add to dataset"
+                            />
+                          </ProFeatureWrapper>
+                        )}
+                      </Row>
                     )}
-                  </Row>
-                )}
-              </ThemedTable>
-            </div>
+                  </ThemedTable>
+                </div>
 
-            <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
-              <TableFooter
-                currentPage={page}
-                pageSize={pageSize}
-                isCountLoading={isCountLoading}
-                count={count || 0}
-                onPageChange={(n) => handlePageChange(n)}
-                onPageSizeChange={(n) => setCurrentPageSize(n)}
-                pageSizeOptions={[25, 50, 100, 250, 500]}
-              />
-            </div>
+                <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+                  <TableFooter
+                    currentPage={page}
+                    pageSize={pageSize}
+                    isCountLoading={isCountLoading}
+                    count={count || 0}
+                    onPageChange={(n) => handlePageChange(n)}
+                    onPageSizeChange={(n) => setCurrentPageSize(n)}
+                    pageSizeOptions={[25, 50, 100, 250, 500]}
+                  />
+                </div>
+              </div>
+            )}
           </div>
+        </ResizablePanel>
+
+
+
+        {open && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={25} minSize={25}>
+              <RequestDiv
+                open={open}
+                setOpen={setOpen}
+                request={selectedData}
+                properties={properties}
+                hasPrevious={
+                  selectedDataIndex !== undefined && selectedDataIndex > 0
+                }
+                hasNext={
+                  selectedDataIndex !== undefined &&
+                  selectedDataIndex < requests.length - 1
+                }
+                onPrevHandler={() => {
+                  if (
+                    selectedDataIndex !== undefined &&
+                    selectedDataIndex > 0
+                  ) {
+                    setSelectedDataIndex(selectedDataIndex - 1);
+                    setSelectedData(requests[selectedDataIndex - 1]);
+                    searchParams.set(
+                      "requestId",
+                      requests[selectedDataIndex - 1].id
+                    );
+                  }
+                }}
+                onNextHandler={() => {
+                  if (
+                    selectedDataIndex !== undefined &&
+                    selectedDataIndex < requests.length - 1
+                  ) {
+                    setSelectedDataIndex(selectedDataIndex + 1);
+                    setSelectedData(requests[selectedDataIndex + 1]);
+                    searchParams.set(
+                      "requestId",
+                      requests[selectedDataIndex + 1].id
+                    );
+                  }
+                }}
+              />
+            </ResizablePanel>
+          </>
         )}
-      </div>
+
+      </ResizablePanelGroup>
 
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset

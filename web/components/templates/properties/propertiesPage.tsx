@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useHasAccess } from "@/hooks/useHasAccess";
@@ -10,13 +10,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/router";
 
 const PropertiesPage = (props: {}) => {
+  const router = useRouter();
+  const { property } = router.query;
+
   const { properties, isLoading: isPropertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
   const hasAccess = useHasAccess("properties");
+
+  // Set the selected property from the query param when properties are loaded
+  useEffect(() => {
+    if (property && typeof property === 'string' && properties.includes(property)) {
+      setSelectedProperty(property);
+    } else if (properties.length > 0 && !selectedProperty) {
+      setSelectedProperty(properties[0]);
+    }
+  }, [property, properties, selectedProperty]);
+
+  // Update the URL when the selected property changes
+  const handlePropertySelect = (prop: string) => {
+    setSelectedProperty(prop);
+    router.push({
+      pathname: '/properties',
+      query: { property: prop }
+    }, undefined, { shallow: true });
+  };
 
   const hasAccessToProperties = useMemo(() => {
     return (
@@ -102,7 +124,7 @@ const PropertiesPage = (props: {}) => {
                       selectedProperty === property ? "default" : "ghost"
                     }
                     className="w-full justify-start font-medium h-auto py-3 rounded-none"
-                    onClick={() => setSelectedProperty(property)}
+                    onClick={() => handlePropertySelect(property)}
                   >
                     <Tag className="h-4 w-4 mr-2" />
                     <span className="truncate">{property}</span>

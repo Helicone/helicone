@@ -10,8 +10,11 @@ import {
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import {
   ArrowPathIcon,
+  EllipsisHorizontalIcon,
   MinusIcon,
   PlusIcon,
+  CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -147,11 +150,11 @@ const RequestRow = (props: RequestRowProps) => {
         setCurrentProperties(
           currentProperties
             ? [
-                ...currentProperties,
-                {
-                  [key]: value,
-                },
-              ]
+              ...currentProperties,
+              {
+                [key]: value,
+              },
+            ]
             : [{ [key]: value }]
         );
 
@@ -215,12 +218,12 @@ const RequestRow = (props: RequestRowProps) => {
         setCurrentScores(
           currentScores
             ? {
-                ...currentScores,
-                [key]: value,
-              }
+              ...currentScores,
+              [key]: value,
+            }
             : {
-                [key]: value,
-              }
+              [key]: value,
+            }
         );
 
         setIsScoresAdding(false);
@@ -239,470 +242,367 @@ const RequestRow = (props: RequestRowProps) => {
   const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-full space-y-8 pb-72 sentry-mask-me">
-      <div className="flex flex-row items-center">
-        <ul
-          className={clsx(
-            wFull && "2xl:grid-cols-4 2xl:gap-5",
-            "grid grid-cols-1 gap-x-4 divide-y divide-gray-300 dark:divide-gray-700 justify-between text-sm w-full"
-          )}
-        >
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Created At
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              {getUSDateFromString(request.heliconeMetadata.createdAt)}
-            </p>
-          </li>
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Model
-            </p>
-            <div className="">
-              <ModelPill model={request.model} />
-            </div>
-          </li>
-          {request.heliconeMetadata.status.statusType === "success" && (
-            <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">
-                Prompt Tokens
-              </p>
-              <div className="flex flex-row items-center space-x-1">
-                <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.heliconeMetadata.promptTokens &&
-                  request.heliconeMetadata.promptTokens >= 0
-                    ? request.heliconeMetadata.promptTokens
-                    : "not found"}
-                </p>
-              </div>
-            </li>
-          )}
-          {request.heliconeMetadata.status.statusType === "success" && (
-            <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">
-                Completion Tokens
-              </p>
-              <div className="flex flex-row items-center space-x-1">
-                <p className="text-gray-700 truncate dark:text-gray-300">
-                  {request.heliconeMetadata.completionTokens &&
-                  request.heliconeMetadata.completionTokens >= 0
-                    ? request.heliconeMetadata.completionTokens
-                    : "not found"}
-                </p>
-              </div>
-            </li>
-          )}
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Latency
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              <span>{Number(request.heliconeMetadata.latency) / 1000}s</span>
-            </p>
-          </li>
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Cost
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              {request.heliconeMetadata.cost !== null &&
-              request.heliconeMetadata.cost !== undefined
-                ? `$${formatNumber(request.heliconeMetadata.cost)}`
-                : request.heliconeMetadata.status.statusType === "success"
-                ? "Calculating..."
-                : "N/A"}
-            </p>
-          </li>
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Status
-            </p>
-            <StatusBadge
-              statusType={request.heliconeMetadata.status.statusType}
-              errorCode={request.heliconeMetadata.status.code}
-            />
-          </li>
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              User
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              {request.heliconeMetadata.user}
-            </p>
-          </li>
-          <li className="flex flex-row justify-between items-center py-2 gap-4">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Path
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              {getPathName(request.heliconeMetadata.path)}
-            </p>
-          </li>
-          {displayPreview && (
-            <li className="flex flex-row justify-between items-center py-2 gap-4">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">
-                ID
-              </p>
-              <p className="text-gray-700 dark:text-gray-300 truncate">
-                {request.id}
-              </p>
-            </li>
-          )}
-          {request.schema.request.temperature !== undefined &&
-            request.schema.request.temperature !== null && (
-              <li className="flex flex-row justify-between items-center py-2">
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  Temperature
-                </p>
-                <p className="text-gray-700 dark:text-gray-300 truncate">
-                  {Number(request.schema.request.temperature || 0).toFixed(2)}
-                </p>
-              </li>
-            )}
+    <div className="flex flex-col h-full sentry-mask-me">
 
-          {request.heliconeMetadata.timeToFirstToken !== undefined &&
-            request.heliconeMetadata.timeToFirstToken !== null && (
-              <li className="flex flex-row justify-between items-center py-2">
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
-                  Time to First Token
-                </p>
-                <p className="text-gray-700 dark:text-gray-300 truncate">
-                  {request.heliconeMetadata.timeToFirstToken}ms
-                </p>
-              </li>
-            )}
-        </ul>
-      </div>
-      <div className="flex flex-col gap-4">
-        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          <div className="flex flex-row items-center space-x-1">
-            <span>Add to Dataset</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => {
-                      setNewDatasetModalOpen(true);
-                    }}
-                    className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-                  >
-                    <PlusIcon className="h-3 w-3 text-gray-500" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Add to Dataset</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      <div className="flex flex-col w-full gap-1">
+
+        {/* Header with model name */}
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-base font-medium leading-normal text-sidebar-foreground">
+            {request.model}
+          </h2>
+          <Button variant="ghost" size="sm">
+            <EllipsisHorizontalIcon className="h-4 w-4" />
+          </Button>
+          {/* {request.heliconeMetadata.user && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {request.heliconeMetadata.user}
+            </span>
+          )}
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {getPathName(request.heliconeMetadata.path)}
+          </span> */}
+        </div>
+
+        {/* Quick Actions: User, Prompt, Sessions */}
+        <div className="flex items-center justify-start gap-2">
+          {request.heliconeMetadata.user && (
+            <Button variant="ghost" size="xs" className="px-2 py-1">
+              <span className="text-xs font-normal leading-none text-base-foreground truncate">
+                {request.heliconeMetadata.user}
+              </span>
+            </Button>
+          )}
+          {request.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] && (
+            <Button variant="ghost" size="xs" className="px-2 py-1">
+              <span className="text-xs font-normal leading-none text-base-foreground truncate">
+                {request.heliconeMetadata.customProperties?.[
+                  "Helicone-Prompt-Id"
+                ] as string}
+              </span>
+            </Button>
+          )}
+          {request.heliconeMetadata.customProperties?.["Helicone-Session-Id"] && (
+            <Button variant="ghost" size="xs" className="px-2 py-1">
+              <span className="text-xs font-normal leading-none text-base-foreground truncate">
+                {request.heliconeMetadata.customProperties?.[
+                  "Helicone-Session-Id"
+                ] as string}
+              </span>
+            </Button>
+          )}
+        </div>
+
+        {/* Main grid layout for request details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 w-full pt-2 px-2">
+
+          {/* Metrics grid */}
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Total Tokens</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.totalTokens !== null && request.heliconeMetadata.totalTokens !== undefined
+                ? request.heliconeMetadata.totalTokens
+                : "N/A"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Prompt Tokens</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.promptTokens !== null && request.heliconeMetadata.promptTokens !== undefined
+                ? request.heliconeMetadata.promptTokens
+                : "N/A"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Completion Tokens</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.completionTokens !== null && request.heliconeMetadata.completionTokens !== undefined
+                ? request.heliconeMetadata.completionTokens
+                : "N/A"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Time to First Token</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.timeToFirstToken !== null && request.heliconeMetadata.timeToFirstToken !== undefined
+                ? `${request.heliconeMetadata.timeToFirstToken}ms`
+                : "N/A"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Cache Tokens</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {0}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Created</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.createdAt ? new Date(request.heliconeMetadata.createdAt).toLocaleString() : "N/A"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Provider</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.heliconeMetadata.provider || "OpenAI"}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Path</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {getPathName(request.heliconeMetadata.path)}
+            </div>
           </div>
         </div>
-        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          Custom Properties{" "}
+
+        {/* Request ID with same styling as grid items but full width */}
+        <div className="w-full max-w-full py-2 px-2 pb-4">
+          <div className="flex justify-between items-center">
+            <div className="text-xs font-normal text-sidebar-foreground">Request ID</div>
+            <div className="text-xs font-medium text-secondary-foreground">
+              {request.id}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Properties section */}
+      <div className="flex flex-col w-full border-t border-border">
+        <div className="flex items-start justify-between p-2 w-full">
+          <div className="text-xs font-semibold text-sidebar-foreground w-[100px] py-1">Properties</div>
+
+          <div className="flex flex-1 flex-wrap gap-2 items-start">
+            {currentProperties && currentProperties.length > 0 &&
+              currentProperties
+                .filter(property =>
+                  !["Helicone-Prompt-Id", "Helicone-Session-Id", "Helicone-Experiment-Id"].includes(Object.keys(property)[0])
+                )
+                .map((property, i) => {
+                  const key = Object.keys(property)[0];
+                  return (
+                    <Link
+                      key={i}
+                      href={`/properties?property=${encodeURIComponent(key)}`}
+                      passHref
+                    >
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="h-auto px-2 py-1 text-xs font-medium"
+                      >
+                        <span className="font-medium text-muted-foreground mr-1">{key}</span>
+                        <span className="text-secondary-foreground">{property[key]}</span>
+                      </Button>
+                    </Link>
+                  );
+                })
+            }
+
+            {isAddingLabel && (
+              <form
+                onSubmit={onAddLabelHandler}
+                className="flex items-start gap-2 h-7"
+              >
+                <div className="flex gap-1 bg-secondary rounded-md p-1">
+                  <Input
+                    type="text"
+                    name="key"
+                    id="key"
+                    required
+                    autoFocus
+                    className="h-5 w-20 text-xs px-1 py-0 rounded-sm"
+                    placeholder="Key"
+                  />
+                  <Input
+                    type="text"
+                    name="value"
+                    id="value"
+                    required
+                    className="h-5 w-20 text-xs px-1 py-0 rounded-sm"
+                    placeholder="Value"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="ghost"
+                    className="h-5 w-5 p-0"
+                  >
+                    {isAdding ? (
+                      <ArrowPathIcon className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <CheckIcon className="h-3 w-3" />
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-5 w-5 p-0"
+                    onClick={() => setIsAddingLabel(false)}
+                  >
+                    <XMarkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-7 w-7 p-0 ml-2 flex-shrink-0"
                   onClick={() => {
                     setIsAddingLabel(!isAddingLabel);
                   }}
-                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
                 >
                   {isAddingLabel ? (
-                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                    <MinusIcon className="h-3 w-3" />
                   ) : (
-                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                    <PlusIcon className="h-3 w-3" />
                   )}
-                </button>
+                </Button>
               </TooltipTrigger>
-              <TooltipContent>Add a new label</TooltipContent>
+              <TooltipContent>Add a property</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
-        {isAddingLabel && (
-          <form
-            onSubmit={onAddLabelHandler}
-            className="flex flex-row items-end space-x-2 py-4 mb-4 border-b border-gray-300 dark:border-gray-700"
-          >
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="key"
-                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
+      </div>
+
+      {/* Scores section */}
+      <div className="flex flex-col w-full border-t border-border">
+        <div className="flex items-start justify-between p-2 w-full">
+          <div className="text-xs font-semibold text-sidebar-foreground w-[100px]">Scores</div>
+
+          <div className="flex flex-1 flex-wrap gap-2 items-start">
+            {currentScores && Object.keys(currentScores).length > 0 &&
+              Object.entries(currentScores)
+                .filter(([key]) => key !== "helicone-score-feedback")
+                .map(([key, value]) => (
+                  <Button
+                    key={key}
+                    variant="secondary"
+                    size="sm"
+                    className="h-auto px-2 py-1 text-xs font-medium"
+                  >
+                    <span className="font-medium text-muted-foreground mr-1">
+                      {key.replace("-hcone-bool", "")}
+                    </span>
+                    <span className="text-secondary-foreground">
+                      {key.endsWith("-hcone-bool")
+                        ? value === 1
+                          ? "true"
+                          : "false"
+                        : Number(value)}
+                    </span>
+                  </Button>
+                ))
+            }
+
+            {isScoresAddingLabel && (
+              <form
+                onSubmit={onAddScoreHandler}
+                className="flex items-start gap-2 h-7"
               >
-                Key
-              </label>
-              <div className="">
-                <Input
-                  type="text"
-                  name="key"
-                  id="key"
-                  required
-                  className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
-                  )}
-                  placeholder={"Key"}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="value"
-                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
-              >
-                Value
-              </label>
-              <div className="">
-                <Input
-                  type="text"
-                  name="value"
-                  id="value"
-                  required
-                  className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
-                  )}
-                  placeholder={"Value"}
-                />
-              </div>
-            </div>
-            <Button size="sm">
-              {isAdding && (
-                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-              )}
-              Add
-            </Button>
-          </form>
-        )}
-        {currentProperties && currentProperties.length > 0 && (
-          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-            {currentProperties
-              .filter(
-                (property) =>
-                  ![
-                    "Helicone-Prompt-Id",
-                    "Helicone-Session-Id",
-                    "Helicone-Experiment-Id",
-                  ].includes(Object.keys(property)[0])
-              )
-              .map((property, i) => {
-                const key = Object.keys(property)[0];
-                return (
-                  <li className="flex flex-row items-center space-x-2" key={i}>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm_sleek"
-                            className="flex flex-row items-center space-x-2 truncate select-text"
-                            onClick={() => {
-                              try {
-                                navigator.clipboard.writeText(
-                                  `${property[key]}`
-                                );
-                                setNotification(
-                                  "Copied to clipboard!",
-                                  "success"
-                                );
-                              } catch (error) {
-                                console.error("Failed to copy:", error);
-                                setNotification(
-                                  "Failed to copy to clipboard",
-                                  "error"
-                                );
-                              }
-                            }}
-                          >
-                            <span>{key}:</span> <span>{property[key]}</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Click to copy</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </li>
-                );
-              })}
+                <div className="flex gap-1 bg-secondary rounded-md p-1">
+                  <Input
+                    type="text"
+                    name="key"
+                    id="key"
+                    required
+                    autoFocus
+                    className="h-5 w-20 text-xs px-1 py-0 rounded-sm"
+                    placeholder="Key"
+                  />
+                  <Input
+                    type="text"
+                    name="value"
+                    id="value"
+                    required
+                    className="h-5 w-20 text-xs px-1 py-0 rounded-sm"
+                    placeholder="Value"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="ghost"
+                    className="h-5 w-5 p-0"
+                  >
+                    {isAdding ? (
+                      <ArrowPathIcon className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <CheckIcon className="h-3 w-3" />
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-5 w-5 p-0"
+                    onClick={() => setIsScoresAddingLabel(false)}
+                  >
+                    <XMarkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
-        )}
-        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-          Scores{" "}
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-7 w-7 p-0 ml-2 flex-shrink-0"
                   onClick={() => {
                     setIsScoresAddingLabel(!isScoresAddingLabel);
                   }}
-                  className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
                 >
                   {isScoresAddingLabel ? (
-                    <MinusIcon className="h-3 w-3 text-gray-500" />
+                    <MinusIcon className="h-3 w-3" />
                   ) : (
-                    <PlusIcon className="h-3 w-3 text-gray-500" />
+                    <PlusIcon className="h-3 w-3" />
                   )}
-                </button>
+                </Button>
               </TooltipTrigger>
-              <TooltipContent>Add a new score</TooltipContent>
+              <TooltipContent>Add a score</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
-        {isScoresAddingLabel && (
-          <form
-            onSubmit={onAddScoreHandler}
-            className="flex flex-row items-end space-x-2 py-4 mb-4 border-b border-gray-300 dark:border-gray-700"
-          >
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="key"
-                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
-              >
-                Key
-              </label>
-              <div className="">
-                <Input
-                  type="text"
-                  name="key"
-                  id="key"
-                  required
-                  className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
-                  )}
-                  placeholder={"Key"}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="value"
-                className="block text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100"
-              >
-                Value
-              </label>
-              <div className="">
-                <Input
-                  //@ts-ignore
-                  type="text"
-                  name="value"
-                  id="value"
-                  required
-                  className={clsx(
-                    "bg-white dark:bg-black block w-full rounded-md px-2  text-sm text-gray-900 dark:text-gray-100 shadow-sm placeholder:text-gray-400 border border-gray-300 dark:border-gray-700 sm:leading-6 h-full"
-                  )}
-                  placeholder={"Value"}
-                />
-              </div>
-            </div>
-            <Button size="sm" type="submit">
-              {isAdding && (
-                <ArrowPathIcon className="w-4 h-4 mr-1.5 animate-spin" />
-              )}
-              Add
-            </Button>
-          </form>
-        )}
-
-        {currentScores && Object.keys(currentScores).length > 0 && (
-          <div className="flex flex-wrap gap-4 text-sm items-center pt-2">
-            {Object.entries(currentScores)
-              .filter(([key]) => key !== "helicone-score-feedback")
-              .map(([key, value]) => (
-                <li
-                  className="flex flex-col space-y-1 justify-between text-left p-2.5 shadow-sm border border-gray-300 dark:border-gray-700 rounded-lg min-w-[5rem]"
-                  key={key}
-                >
-                  <p className="font-semibold text-gray-900 dark:text-gray-100">
-                    {key.replace("-hcone-bool", "")}
-                  </p>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {key.endsWith("-hcone-bool")
-                      ? value === 1
-                        ? "true"
-                        : "false"
-                      : Number(value)}
-                  </p>
-                </li>
-              ))}
-          </div>
-        )}
-      </div>
-      <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-        Helicone Settings{" "}
-      </div>
-      <div className="flex w-full justify-between gap-8">
-        <div className="flex flex-col gap-2">
-          {promptId && (
-            <div className="flex flex-row items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm_sleek"
-                className="flex flex-row items-center space-x-2 truncate"
-                asChild
-              >
-                <Link href={`/prompts/${promptData?.id}`}>
-                  <span>Prompt:</span> <span>{promptId}</span>
-                </Link>
-              </Button>
-            </div>
-          )}
-          {sessionData.sessionId && (
-            <>
-              <div className="flex flex-row items-center space-x-2 relative">
-                <Button
-                  variant="outline"
-                  size="sm_sleek"
-                  className="flex flex-row items-center space-x-2 truncate"
-                  asChild
-                >
-                  <Link
-                    href={`/sessions/${encodeURIComponent(
-                      sessionData.sessionId
-                    )}`}
-                  >
-                    <span>Session:</span> <span>{sessionData.sessionId}</span>
-                  </Link>
-                </Button>
-              </div>
-            </>
-          )}
-          {experimentId && (
-            <div className="flex flex-row items-center space-x-2">
-              <Button variant="outline" size="sm_sleek" asChild>
-                <Link href={`/experiments/${experimentId}`}>
-                  Experiment: {experimentId}
-                </Link>
-              </Button>
-            </div>
-          )}
-        </div>
-        <FeedbackButtons
-          requestId={request.id}
-          defaultValue={
-            request.heliconeMetadata.scores &&
-            request.heliconeMetadata.scores["helicone-score-feedback"]
-              ? Number(
-                  request.heliconeMetadata.scores["helicone-score-feedback"]
-                ) === 1
-                ? true
-                : false
-              : null
-          }
-        />
       </div>
 
-      {displayPreview && (
-        <div className="flex flex-col space-y-8">
-          <div className="flex flex-col space-y-2">
-            <RenderMappedRequest
-              mapperContent={request}
-              promptData={promptData}
-            />
-          </div>
-        </div>
-      )}
-      <div className="min-h-[100px]">{/* space */}</div>
-      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
-        <NewDataset
-          request_ids={[request.id]}
-          onComplete={() => setNewDatasetModalOpen(false)}
-        />
-      </ThemedModal>
+      <div className="flex flex-col py-2 px-2 border-t border-border bg-red-200">
+
+        {/* Request/Response content */}
+        {
+          displayPreview && (
+            <div className="flex flex-col space-y-8 pt-4 border-t border-gray-200 dark:border-gray-800">
+              <RenderMappedRequest
+                mapperContent={request}
+                promptData={promptData}
+              />
+            </div>
+          )
+        }
+
+        <div className="min-h-[100px]">{/* space */}</div>
+        <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
+          <NewDataset
+            request_ids={[request.id]}
+            onComplete={() => setNewDatasetModalOpen(false)}
+          />
+        </ThemedModal>
+      </div >
     </div>
   );
 };
