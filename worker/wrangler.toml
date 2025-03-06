@@ -17,7 +17,9 @@ kv_namespaces = [
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
-	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
+	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
+	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155", preview_id = "9d7e936c78be456c8c7e296a15215837" },
+	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 ]
 
 [vars]

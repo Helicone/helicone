@@ -6,7 +6,7 @@ import { PromiseGenericResult, err, ok } from "../shared/result";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { mapScores } from "../../managers/score/ScoreManager";
-import { sanitizeObject } from "../../utils/sanitize";
+import { sanitizeObject, safeJSONStringify } from "../../utils/sanitize";
 
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
 
@@ -367,8 +367,8 @@ export class LogStore {
           `INSERT INTO prompt_input_record (inputs, auto_prompt_inputs, source_request, prompt_version, created_at)
        VALUES ($1, $2, $3, $4, $5)`,
           [
-            JSON.stringify(heliconeTemplate.inputs),
-            JSON.stringify(heliconeTemplate?.autoInputs ?? []),
+            safeJSONStringify(heliconeTemplate.inputs),
+            safeJSONStringify(heliconeTemplate?.autoInputs ?? []),
             requestId,
             versionId,
             newPromptRecord.createdAt.toISOString(),
