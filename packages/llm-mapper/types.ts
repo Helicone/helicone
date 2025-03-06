@@ -19,7 +19,7 @@ export type Message = {
   content?: string;
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
-  timestamp?: string; // TODO: Remove when sessions have this data?
+  timestamp?: string; // For realtime API
   image_url?: string;
   audio_data?: string; // Base64 encoded audio data
   idx?: number; // Index of an auto prompt input message
