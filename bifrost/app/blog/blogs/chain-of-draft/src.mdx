@@ -1,28 +1,31 @@
-With **<a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought (CoT)</a>** prompting Large Language Models (LLMs) can now solve complex reasoning tasks with impressive accuracy, but often at high computational cost. 
+With **<a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought (CoT)</a>** prompting, Large Language Models (LLMs) can now solve complex reasoning tasks with impressive accuracy, but often at high computational cost. 
 
-**Chain-of-Draft (CoD)** prompting, introduced by researchers at Zoom Communications, provides a solution by encouraging LLMs to generate minimal yet informative reasoning steps—similar to how humans jot down concise notes rather than elaborate explanations.
+![Chain-of-Draft Prompting](/static/blog/chain-of-draft/chain-of-draft-cover.webp)
 
-Let's explore this fascinating new method and see how you can start benefitting from it today.
+**Chain-of-Draft (CoD)** prompting, <a href="https://arxiv.org/abs/2502.18600" target="_blank" rel="noopener">introduced by researchers at Zoom Communications</a>, provides a solution by encouraging LLMs to generate minimal yet informative reasoning steps—similar to how humans jot down concise notes rather than elaborate explanations.
+
+Let's take a look at this fascinating new method and see how you can start benefitting from it today.
 
 ## What is Chain-of-Draft Prompting?
 
 Chain-of-Draft is a new prompting technique that aims to reduce token usage while maintaining reasoning quality.
 
-CoD takes inspiration from human problem-solving behavior where we capture only essential information in our notes. Unlike Chain of Thought (CoT) prompting that generates verbose step-by-step reasoning, CoD limits each reasoning step to the absolute minimum—typically 5 words or less. This approach preserves the reasoning pathway while drastically cutting computational overhead.
+CoD takes inspiration from human problem-solving behavior where we capture only essential information in our notes. Unlike Chain of Thought (CoT) prompting that generates verbose step-by-step reasoning, CoD limits each reasoning step to the absolute minimum—**typically 5 words or less**. 
 
-### Chain-of-Draft and Chain of Thought Process Comparison
+This approach preserves the reasoning pathway while drastically cutting computational overhead.
+
+### Chain-of-Draft vs. Chain-of-Thought Outputs
 
 Let's compare approaches using a simple math problem:
-
 ```
 Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
 ```
 
-**Chain of Thought:** 
+**Chain-of-Thought Process:** 
 
 ```
 Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
-A: Let’s think through this step by step:
+A: Let's think through this step by step:
 1. Initially, Jason had 20 lollipops.
 2. After giving some to Denny, Jason now has 12 lollipops.
 3. To find out how many lollipops Jason gave to Denny, we need to calculate the difference between the initial number of lollipops and the remaining number.
@@ -34,7 +37,7 @@ Therefore, Jason gave 8 lollipops to Denny.
 [Response]: 8 lollipops
 ```
 
-**Chain-of-Draft:** 
+**Chain-of-Draft Process:** 
 
 ```
 Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
@@ -77,7 +80,9 @@ CoD delivers remarkable efficiency gains without sacrificing accuracy.
 
 When tested across multiple reasoning tasks, CoD consistently achieves similar accuracy to CoT while using a fraction of the tokens. 
 
-On **GSM8k** (a math reasoning benchmark), CoD achieved **91%** accuracy compared to CoT's **95%**, but used only **20%** of the tokens and reduced latency by up to **76%**. For symbolic reasoning tasks like the coin flip problem, CoD matched CoT's perfect 100% accuracy while using only **14-32%** of the tokens.
+On **GSM8k** (a math reasoning benchmark), CoD achieved **`91%`** accuracy compared to CoT's **`95%`**, but used only **20%** of the tokens and reduced latency by up to **76%**. 
+
+For symbolic reasoning tasks like the coin flip problem, CoD matched CoT's perfect **`100%`** accuracy while using only **14-32%** of the tokens.
 
 | Model | Task | CoT Accuracy | CoD Accuracy | Token Reduction | Latency Reduction |
 |-------|------|--------------|--------------|-----------------|-------------------|
@@ -114,7 +119,7 @@ CoD provides the best balance between reasoning quality and efficiency.
 
 CoD has specific constraints worth noting.
 
-CoD performs best in **few-shot** settings (where you seed with examples), with accuracy dropping significantly in **zero-shot** (no examples) scenarios. This is likely due to the absence of CoD-style reasoning patterns in training data which makes it harder for models to 'understand' the approach. 
+CoD performs best in <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> settings (where you seed with examples), with accuracy dropping significantly in **zero-shot** (no examples) scenarios. This is likely due to the absence of CoD-style reasoning patterns in training data which makes it harder for models to 'understand' the approach. 
 
 Smaller models (under 3B parameters) also show a more pronounced performance gap between CoT and CoD. Additionally, tasks requiring extensive contextual understanding may benefit from more verbose reasoning.
 
@@ -122,16 +127,16 @@ Smaller models (under 3B parameters) also show a more pronounced performance gap
 
 Chain-of-Draft presents a practical, immediately applicable approach to more efficient LLM reasoning.
 
-By embracing the minimalist reasoning approach of CoD, you can achieve comparable accuracy to Chain of Thought while significantly reducing costs and latency. This makes advanced reasoning capabilities more accessible for production applications with strict budgets and performance requirements. 
+By using the minimalist reasoning approach of CoD, you can achieve comparable accuracy to Chain of Thought **while significantly reducing costs and latency**. This makes advanced reasoning capabilities more accessible for production applications with strict budgets and performance requirements. 
 
-**Go ahead and play around with CoD and be sure to use Helicone to measure the improvements!**
+**Go ahead and play around with CoD and be sure to use <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone</a> to measure the improvements!**
 
 ### You might find these useful:
 
-- **<a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank">Prompt Engineering Tools & Techniques</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-thinking-models" target="_blank">How to Prompt Thinking Models like DeepSeek R1 and OpenAI o3</a>**
 - **<a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank">Chain-of-Thought Prompting: Techniques, Tips, and Code Examples</a>**
 - **<a href="https://www.helicone.ai/blog/tree-of-thought-prompting" target="_blank">Tree-of-Thought Prompting: Key Techniques and Use Cases</a>**
-- **<a href="https://www.helicone.ai/blog/prompt-thinking-models" target="_blank">How to Prompt Thinking Models like DeepSeek R1 and OpenAI o3</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank">Prompt Engineering Tools & Techniques</a>**
 
 <FAQ items={[
   {

@@ -140,8 +140,8 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
           </span>
         </div>
 
-        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2 md:line-clamp-none">{blog.title}</h2>
-        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-3">{blog.description}</p>
+        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">{blog.title}</h2>
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">{blog.description}</p>
 
         <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
           <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
