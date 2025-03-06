@@ -39,11 +39,7 @@ type Timing = {
 export function validateAsyncLogModel(
   logModel: AsyncLogModel
 ): [boolean, string?] {
-  if (
-    !logModel.providerRequest ||
-    !logModel.providerResponse ||
-    !logModel.timing
-  ) {
+  if (!logModel.providerRequest || !logModel.providerResponse) {
     return [
       false,
       "One of the required fields is missing, providerRequest, providerResponse, or timing",
