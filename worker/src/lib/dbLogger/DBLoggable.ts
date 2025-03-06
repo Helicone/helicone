@@ -193,16 +193,22 @@ export async function dbLoggableRequestFromAsyncLogModel(
       omitLog: false,
     },
     timing: {
-      startTime: new Date(
-        asyncLogModel.timing.startTime.seconds * 1000 +
-          asyncLogModel.timing.startTime.milliseconds
-      ),
-      endTime: new Date(
-        asyncLogModel.timing.endTime.seconds * 1000 +
-          asyncLogModel.timing.endTime.milliseconds
-      ),
+      startTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.startTime.seconds * 1000 +
+              asyncLogModel.timing.startTime.milliseconds
+          )
+        : new Date(),
+      endTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.endTime.seconds * 1000 +
+              asyncLogModel.timing.endTime.milliseconds
+          )
+        : new Date(new Date().getTime() + 1000),
       timeToFirstToken: async () =>
-        Number(asyncLogModel.timing.timeToFirstToken) ?? null,
+        asyncLogModel.timing
+          ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+          : null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });

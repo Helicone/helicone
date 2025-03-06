@@ -3,7 +3,7 @@ import { Json } from "../../../supabase/database.types";
 export type AsyncLogModel = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
-  timing: Timing;
+  timing?: Timing;
 };
 
 type ProviderRequest = {
@@ -78,6 +78,9 @@ export function validateAsyncLogModel(
   }
 
   const timing = logModel.timing;
+  if (!timing) {
+    return [true, undefined];
+  }
 
   if (typeof timing.startTime.seconds !== "number") {
     return [false, "Invalid timing: 'startTime.seconds' should be a number"];

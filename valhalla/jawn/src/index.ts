@@ -78,10 +78,10 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
   startConsumers({
-    dlqCount: DLQ_WORKER_COUNT,
-    normalCount: NORMAL_WORKER_COUNT,
-    scoresCount: SCORES_WORKER_COUNT,
-    scoresDlqCount: SCORES_WORKER_COUNT,
+    dlqCount: 1,
+    normalCount: 0,
+    scoresCount: 0,
+    scoresDlqCount: 0,
     backFillCount: 0,
   });
 }
