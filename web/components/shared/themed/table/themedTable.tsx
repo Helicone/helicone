@@ -1,3 +1,5 @@
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
@@ -13,10 +15,8 @@ import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "@/types/timeFilter";
 
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
@@ -29,18 +29,20 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { useRouter, useSearchParams } from "next/navigation";
-import { RequestViews } from "./RequestViews";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useRouter, useSearchParams } from "next/navigation";
+import FilterASTEditor from "../filterAST/filters";
+import { RequestViews } from "./RequestViews";
+import { Filter, FilterExpression } from "@/services/lib/filters/filterAst";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -226,10 +228,16 @@ export default function ThemedTable<T extends { id?: string }>(
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnboardingVisible, currentStep]);
+  const [filter, setFilter] = useState<FilterExpression>(
+    Filter.and(Filter.condition("request_response_rmt", "model", "eq", "gpt-4"))
+  );
 
   return (
     <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
       <div className="p-1 flex-shrink-0">
+        <div className="flex flex-row justify-between items-center max-w-3xl">
+          <FilterASTEditor filter={filter} onChange={setFilter} />
+        </div>
         <ThemedTableHeader
           search={search}
           onDataSet={onDataSet}

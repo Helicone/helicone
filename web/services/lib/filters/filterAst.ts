@@ -50,11 +50,13 @@ export interface AllExpression extends BaseExpression {
 export interface ConditionExpression extends BaseExpression {
   type: "condition";
   field: {
-    table: Tables;
-    column: Columns;
+    table?: string;
+    column: string;
+    subtype?: "property" | "score";
+    key?: string;
   };
   operator: string;
-  value: any;
+  value: string | number | boolean;
 }
 
 export interface AndExpression extends BaseExpression {
@@ -78,15 +80,14 @@ export function all(): AllExpression {
  * Create a condition expression
  */
 export function condition(
-  table: Tables,
-  column: Columns,
+  column: string,
   operator: string,
-  value: any
+  value: string | number | boolean
 ): ConditionExpression {
   return {
     type: "condition",
     field: {
-      table,
+      table: "request_response_rmt",
       column,
     },
     operator,
@@ -111,6 +112,48 @@ export function or(...expressions: FilterExpression[]): OrExpression {
   return {
     type: "or",
     expressions,
+  };
+}
+
+/**
+ * Create a property condition expression
+ */
+export function propertyCondition(
+  key: string,
+  operator: string,
+  value: string | number | boolean
+): ConditionExpression {
+  return {
+    type: "condition",
+    field: {
+      table: "request_response_rmt",
+      column: "properties",
+      subtype: "property",
+      key,
+    },
+    operator,
+    value,
+  };
+}
+
+/**
+ * Create a score condition expression
+ */
+export function scoreCondition(
+  key: string,
+  operator: string,
+  value: string | number | boolean
+): ConditionExpression {
+  return {
+    type: "condition",
+    field: {
+      table: "request_response_rmt",
+      column: "scores",
+      subtype: "score",
+      key,
+    },
+    operator,
+    value,
   };
 }
 
@@ -157,12 +200,7 @@ export function fromLegacyFilter(filter: FilterNode): FilterExpression {
 
   const [operatorName, value] = operatorEntries[0];
 
-  return condition(
-    tableName as Tables,
-    columnName as Columns,
-    operatorName,
-    value
-  );
+  return condition(columnName as string, operatorName, value);
 }
 
 /**
@@ -175,17 +213,17 @@ export function toLegacyFilter(filter: FilterExpression): FilterNode {
 
   if (filter.type === "condition") {
     const condition = filter as ConditionExpression;
-    const { table, column } = condition.field;
+    const { field, operator, value } = condition;
 
     // Create a nested structure: { table: { column: { operator: value } } }
     const operatorObj: Record<string, any> = {};
-    operatorObj[condition.operator] = condition.value;
+    operatorObj[operator] = value;
 
     const columnObj: Record<string, any> = {};
-    columnObj[column] = operatorObj;
+    columnObj[field.column] = operatorObj;
 
     const tableObj: Record<string, any> = {};
-    tableObj[table] = columnObj;
+    tableObj[field.table || "request_response_rmt"] = columnObj;
 
     return tableObj as FilterLeaf;
   }
@@ -227,6 +265,8 @@ export const Filter = {
   and,
   or,
   where: condition,
+  property: propertyCondition,
+  score: scoreCondition,
   fromLegacy: fromLegacyFilter,
   toLegacy: toLegacyFilter,
 };
@@ -243,4 +283,99 @@ export function serializeFilter(filter: FilterExpression): string {
  */
 export function deserializeFilter(json: string): FilterExpression {
   return JSON.parse(json) as FilterExpression;
+}
+
+export function toSqlWhereClause(filter: FilterExpression): string {
+  if (filter.type === "condition") {
+    const conditionExpr = filter as ConditionExpression;
+    const { field, operator, value } = conditionExpr;
+
+    // Handle property and score subtypes
+    if (field.subtype === "property" && field.key) {
+      return `properties->>'${field.key}' ${mapOperator(
+        operator
+      )} ${formatValue(value)}`;
+    } else if (field.subtype === "score" && field.key) {
+      return `scores->>'${field.key}' ${mapOperator(operator)} ${formatValue(
+        value
+      )}`;
+    }
+
+    // Regular column
+    return `${field.column} ${mapOperator(operator)} ${formatValue(value)}`;
+  } else if (filter.type === "and") {
+    const andExpr = filter as AndExpression;
+    if (andExpr.expressions.length === 0) return "TRUE";
+    return `(${andExpr.expressions.map(toSqlWhereClause).join(" AND ")})`;
+  } else if (filter.type === "or") {
+    const orExpr = filter as OrExpression;
+    if (orExpr.expressions.length === 0) return "TRUE";
+    return `(${orExpr.expressions.map(toSqlWhereClause).join(" OR ")})`;
+  }
+  return "";
+}
+
+function mapOperator(operator: string): string {
+  switch (operator) {
+    case "eq":
+      return "=";
+    case "neq":
+      return "!=";
+    case "gt":
+      return ">";
+    case "gte":
+      return ">=";
+    case "lt":
+      return "<";
+    case "lte":
+      return "<=";
+    case "like":
+      return "LIKE";
+    case "ilike":
+      return "ILIKE";
+    case "is":
+      return "IS";
+    case "in":
+      return "IN";
+    default:
+      return "=";
+  }
+}
+
+function formatValue(value: string | number | boolean): string {
+  if (typeof value === "string") {
+    // Escape single quotes in string values
+    const escapedValue = value.replace(/'/g, "''");
+    return `'${escapedValue}'`;
+  } else if (typeof value === "boolean") {
+    return value ? "TRUE" : "FALSE";
+  } else {
+    return value.toString();
+  }
+}
+
+export function isEmptyFilter(filter: FilterExpression): boolean {
+  if (filter.type === "condition") {
+    const conditionExpr = filter as ConditionExpression;
+    return conditionExpr.value === "" || conditionExpr.value === null;
+  } else if (filter.type === "and" || filter.type === "or") {
+    const groupExpr = filter as AndExpression | OrExpression;
+    return (
+      groupExpr.expressions.length === 0 ||
+      groupExpr.expressions.every(isEmptyFilter)
+    );
+  }
+  return true;
+}
+
+export function createDefaultFilter(): FilterExpression {
+  return condition("response_id", "eq", "");
+}
+
+export function createDefaultPropertyFilter(): FilterExpression {
+  return propertyCondition("user_id", "eq", "");
+}
+
+export function createDefaultScoreFilter(): FilterExpression {
+  return scoreCondition("toxicity", "gte", 0.5);
 }
