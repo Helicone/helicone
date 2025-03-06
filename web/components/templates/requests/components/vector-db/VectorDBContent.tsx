@@ -285,8 +285,7 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
       {(responseDetails?.status ||
         responseDetails?.message ||
         (responseDetails?.similarityThreshold !== undefined &&
-          responseDetails?.actualSimilarity !== undefined) ||
-        (matches && matches.length > 0)) && (
+          responseDetails?.actualSimilarity !== undefined)) && (
         <div className="w-full flex flex-col text-left">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Response
