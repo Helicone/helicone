@@ -1,6 +1,6 @@
 ---
 description: 
-globs: *.ts
+globs: **/jawn/**/*.ts
 alwaysApply: false
 ---
 # Helicone Jawn Controller and TanStack Query Integration

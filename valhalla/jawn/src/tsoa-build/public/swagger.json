@@ -4939,6 +4939,71 @@
 					"30d"
 				]
 			},
+			"PropertyMetadataResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					},
+					"property_key": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"deleted_at": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"created_at",
+					"updated_at",
+					"property_key",
+					"description",
+					"soft_delete",
+					"deleted_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreatePropertyMetadataParams": {
+				"properties": {
+					"property_key": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"property_key"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdatePropertyMetadataParams": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Property": {
 				"properties": {
 					"property": {
@@ -12256,6 +12321,414 @@
 						"required": true,
 						"schema": {
 							"$ref": "#/components/schemas/TimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/property-metadata": {
+			"get": {
+				"operationId": "GetAllPropertyMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"data": {},
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"items": {
+														"$ref": "#/components/schemas/PropertyMetadataResponse"
+													},
+													"type": "array"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all property metadata for the authenticated organization",
+				"tags": [
+					"Property Metadata"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreatePropertyMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"data": {},
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"deleted_at": {
+															"type": "string"
+														},
+														"soft_delete": {
+															"type": "boolean"
+														},
+														"description": {
+															"type": "string"
+														},
+														"property_key": {
+															"type": "string"
+														},
+														"updated_at": {
+															"type": "string"
+														},
+														"created_at": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"deleted_at",
+														"soft_delete",
+														"description",
+														"property_key",
+														"updated_at",
+														"created_at",
+														"id"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Create property metadata",
+				"tags": [
+					"Property Metadata"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreatePropertyMetadataParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property-metadata/{propertyKey}": {
+			"get": {
+				"operationId": "GetPropertyMetadataByKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"data": {},
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"deleted_at": {
+															"type": "string"
+														},
+														"soft_delete": {
+															"type": "boolean"
+														},
+														"description": {
+															"type": "string"
+														},
+														"property_key": {
+															"type": "string"
+														},
+														"updated_at": {
+															"type": "string"
+														},
+														"created_at": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"deleted_at",
+														"soft_delete",
+														"description",
+														"property_key",
+														"updated_at",
+														"created_at",
+														"id"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Get property metadata by key",
+				"tags": [
+					"Property Metadata"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdatePropertyMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"data": {},
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"deleted_at": {
+															"type": "string"
+														},
+														"soft_delete": {
+															"type": "boolean"
+														},
+														"description": {
+															"type": "string"
+														},
+														"property_key": {
+															"type": "string"
+														},
+														"updated_at": {
+															"type": "string"
+														},
+														"created_at": {
+															"type": "string"
+														},
+														"id": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"deleted_at",
+														"soft_delete",
+														"description",
+														"property_key",
+														"updated_at",
+														"created_at",
+														"id"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Update property metadata",
+				"tags": [
+					"Property Metadata"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdatePropertyMetadataParams"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeletePropertyMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"data": {},
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"success": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"success"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete property metadata",
+				"tags": [
+					"Property Metadata"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]

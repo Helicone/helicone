@@ -2099,6 +2099,47 @@ export type Database = {
           },
         ]
       }
+      property_metadata: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          organization_id: string
+          property_key: string
+          description: string | null
+          soft_delete: boolean
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          organization_id: string
+          property_key: string
+          description?: string | null
+          soft_delete?: boolean
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          organization_id?: string
+          property_key?: string
+          description?: string | null
+          soft_delete?: boolean
+          deleted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_metadata_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       provider_keys: {
         Row: {
           created_at: string | null

@@ -284,6 +284,20 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
+  "/v1/property-metadata": {
+    /** @description Get all property metadata for the authenticated organization */
+    get: operations["GetAllPropertyMetadata"];
+    /** @description Create property metadata */
+    post: operations["CreatePropertyMetadata"];
+  };
+  "/v1/property-metadata/{propertyKey}": {
+    /** @description Get property metadata by key */
+    get: operations["GetPropertyMetadataByKey"];
+    /** @description Update property metadata */
+    put: operations["UpdatePropertyMetadata"];
+    /** @description Delete property metadata */
+    delete: operations["DeletePropertyMetadata"];
+  };
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
@@ -1761,6 +1775,23 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
+    PropertyMetadataResponse: {
+      id: string;
+      created_at: string;
+      updated_at: string;
+      property_key: string;
+      description: string | null;
+      soft_delete: boolean;
+      deleted_at: string | null;
+    };
+    CreatePropertyMetadataParams: {
+      property_key: string;
+      description?: string;
+    };
+    UpdatePropertyMetadataParams: {
+      description?: string;
+      soft_delete?: boolean;
+    };
     Property: {
       property: string;
     };
@@ -4189,6 +4220,142 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get all property metadata for the authenticated organization */
+  GetAllPropertyMetadata: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            data?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            data: components["schemas"]["PropertyMetadataResponse"][];
+          };
+        };
+      };
+    };
+  };
+  /** @description Create property metadata */
+  CreatePropertyMetadata: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePropertyMetadataParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            data?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            data: {
+              deleted_at: string;
+              soft_delete: boolean;
+              description: string;
+              property_key: string;
+              updated_at: string;
+              created_at: string;
+              id: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  /** @description Get property metadata by key */
+  GetPropertyMetadataByKey: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            data?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            data: {
+              deleted_at: string;
+              soft_delete: boolean;
+              description: string;
+              property_key: string;
+              updated_at: string;
+              created_at: string;
+              id: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  /** @description Update property metadata */
+  UpdatePropertyMetadata: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePropertyMetadataParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            data?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            data: {
+              deleted_at: string;
+              soft_delete: boolean;
+              description: string;
+              property_key: string;
+              updated_at: string;
+              created_at: string;
+              id: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  /** @description Delete property metadata */
+  DeletePropertyMetadata: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            data?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            data: {
+              success: boolean;
+            };
+          };
         };
       };
     };
