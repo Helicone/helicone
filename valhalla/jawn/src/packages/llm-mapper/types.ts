@@ -186,6 +186,7 @@ type HeliconeMetadata = {
 };
 
 // UNORGANZIED
+export type PromptMessage = Message | string;
 // These are planned I think?
 export type HeliconeErrorType = {
   error: {
