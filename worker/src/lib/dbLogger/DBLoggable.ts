@@ -158,10 +158,12 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptMode: "deactivated",
           },
       userId: providerRequestHeaders.userId ?? undefined,
-      startTime: new Date(
-        asyncLogModel.timing.startTime.seconds * 1000 +
-          asyncLogModel.timing.startTime.milliseconds
-      ),
+      startTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.startTime.seconds * 1000 +
+              asyncLogModel.timing.startTime.milliseconds
+          )
+        : new Date(),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       targetUrl: asyncLogModel.providerRequest.url,
