@@ -13,6 +13,7 @@ import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
 import { formatLargeNumber } from "../../../shared/utils/numberFormat";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import SessionFeedback from "../../feedback/sessionFeedback";
+import clsx from "clsx";
 
 function timeDiff(startTime: Date, endTime: Date): string {
   const diff = endTime.getTime() - startTime.getTime();
@@ -44,6 +45,8 @@ export const BreadCrumb = ({
   users,
   className,
   sessionFeedback,
+  isLive,
+  setIsLive,
 }: {
   sessionId: string;
   startTime?: Date;
@@ -56,6 +59,8 @@ export const BreadCrumb = ({
   users: string[];
   className?: string;
   sessionFeedback: boolean | null;
+  isLive: boolean;
+  setIsLive: (isLive: boolean) => void;
 }) => {
   const { setNotification } = useNotification();
 
@@ -198,6 +203,25 @@ export const BreadCrumb = ({
         </HoverCard>
 
         <SessionFeedback sessionId={sessionId} defaultValue={sessionFeedback} />
+        <Button
+          variant="ghost"
+          className={clsx(
+            "flex flex-row gap-2 items-center",
+            isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+          )}
+          size="sm_sleek"
+          onClick={() => setIsLive(!isLive)}
+        >
+          <div
+            className={clsx(
+              isLive ? "bg-green-500" : "bg-slate-500",
+              "h-2 w-2 rounded-full"
+            )}
+          ></div>
+          <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+            {isLive ? "Live" : "Start Live"}
+          </span>
+        </Button>
       </div>
     </div>
   );
