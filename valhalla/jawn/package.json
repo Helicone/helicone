@@ -78,7 +78,9 @@
     "openapi-fetch": "^0.9.3",
     "openapi-typescript": "^6.7.5",
     "regenerator-runtime": "^0.14.1",
+    "simple-git": "^3.27.0",
     "ts-jest": "^29.1.1",
+    "ts-morph": "^25.0.1",
     "ts-node": "^10.9.2",
     "tsoa": "^6.5.1",
     "typescript": "^5.2.2"

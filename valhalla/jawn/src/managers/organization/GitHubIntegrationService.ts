@@ -1,21 +1,13 @@
-import { applyPatch, parsePatch } from "diff";
-import { GitHubIntegration } from "./OrganizationManager";
-import { Octokit } from "octokit";
-import * as fs from "fs";
 import * as path from "path";
+import { FeaturePromptService } from "./FeaturePromptService";
+import { Project, Node, SourceFile } from "ts-morph";
+import * as os from "os";
+import simpleGit from "simple-git";
 import {
-  sanitizeFilePath,
-  sanitizeDiffContent,
-  isValidDiff,
-  extractAddedLines,
-  extractFinalContent,
-  manuallyExtractCode,
-  createSimpleDiff,
-  fixInvalidHunks,
-  fixUnknownLineErrors,
-  fixHunkLineCounts,
-} from "../../utils/diffSanitizer";
-import { FeaturePromptService, HeliconeFeature } from "./FeaturePromptService";
+  extractAstTransformations,
+  getFeatureName,
+} from "../../utils/diffExtractor";
+import * as ts from "typescript";
 
 // Greptile API base URL
 const GREPTILE_API_BASE = "https://api.greptile.com/v2";
@@ -403,35 +395,66 @@ export class GitHubIntegrationService {
     selectedFeatures?: string[]
   ): Promise<any> {
     try {
-      await this.addLog(
+      await this.updateStatus(
         integrationId,
-        `Querying Greptile for Helicone integration suggestions`
+        "Querying for integration instructions...",
+        40
       );
 
-      // Parse the repository ID to get the components
       const decodedRepoId = decodeURIComponent(repoId);
       const [remote, branch, repository] = decodedRepoId.split(":");
 
-      // Convert selectedFeatures to HeliconeFeature objects for the FeaturePromptService
-      const features: HeliconeFeature[] =
-        selectedFeatures?.map((id) => ({
-          id,
-          name: this.getFeatureName(id),
-          description: "",
-          promptFile: `helicone${
-            id.charAt(0).toUpperCase() +
-            id.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-          }.md`,
-        })) || [];
-
-      await this.addLog(
-        integrationId,
-        `Generating prompt with ${features.length} selected features`
+      // Step 2: Generate the main prompt incorporating provider-specific instructions
+      const introContent = this.featurePromptService.readPromptFile(
+        "heliconeGeneralIntegration.md"
       );
 
-      // Generate the prompt using FeaturePromptService's provider-specific method
-      const promptContent =
-        this.featurePromptService.generateProviderSpecificPrompt(features);
+      const outputFormatContent = this.featurePromptService.readPromptFile(
+        "heliconeOutputFormat.md"
+      );
+
+      // Add feature-specific content if any features were selected
+      let featureSpecificContent = "";
+      if (selectedFeatures && selectedFeatures.length > 0) {
+        featureSpecificContent += "\n\n## Selected Feature Instructions\n";
+
+        for (const featureId of selectedFeatures) {
+          try {
+            // Construct the feature prompt file path
+            const featurePromptFile = `features/helicone${
+              featureId.charAt(0).toUpperCase() +
+              featureId.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+            }.md`;
+
+            const featureContent =
+              this.featurePromptService.readPromptFile(featurePromptFile);
+            const featureName = getFeatureName(featureId);
+            featureSpecificContent += `\n### ${featureName}\n${featureContent}\n`;
+
+            await this.addLog(
+              integrationId,
+              `Added feature instructions for ${featureName}`
+            );
+          } catch (featureError) {
+            await this.addLog(
+              integrationId,
+              `Error loading feature instructions for ${featureId}: ${featureError}`
+            );
+          }
+        }
+      }
+
+      const promptContent = `${introContent}
+
+## Repository Analysis Results
+Based on our analysis, your codebase uses the following:
+
+${featureSpecificContent}
+
+${outputFormatContent}`;
+
+      console.log("PROMPT CONTENT:", promptContent);
+      await this.addLog(integrationId, `Generated final integration prompt`);
 
       // Make the request to Greptile using the correct API structure
       const response = await fetch(`${GREPTILE_API_BASE}/query`, {
@@ -512,23 +535,23 @@ export class GitHubIntegrationService {
         `Preparing to create pull request for Helicone integration`
       );
 
-      // Parse GitHub repository owner and name from URL
-      const match = repositoryUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-      if (!match) {
-        throw new Error(`Invalid GitHub repository URL: ${repositoryUrl}`);
+      // Check if we have a valid response
+      if (!queryResults.message) {
+        throw new Error("No message in Greptile response");
       }
 
-      const [, owner, repo] = match;
+      // Parse the repository URL
+      const repoUrl = new URL(repositoryUrl);
+      const pathSegments = repoUrl.pathname.split("/");
+      const owner = pathSegments[1];
+      const repo = pathSegments[2];
 
-      // GitHub API Base URL
-      const GITHUB_API_BASE = "https://api.github.com";
-
-      // Function to make authenticated GitHub API calls
+      // Set up a wrapper for GitHub API calls
       const githubFetch = async (
         endpoint: string,
         options: RequestInit = {}
       ) => {
-        const url = `${GITHUB_API_BASE}${endpoint}`;
+        const url = `https://api.github.com${endpoint}`;
         const response = await fetch(url, {
           ...options,
           headers: {
@@ -552,16 +575,16 @@ export class GitHubIntegrationService {
       await this.addLog(integrationId, `Creating new branch: ${branchName}`);
 
       // Get the default branch
-      const repository = await githubFetch(`/repos/${owner}/${repo}`);
-      const defaultBranch = repository.default_branch;
+      const repoInfo = await githubFetch(`/repos/${owner}/${repo}`);
+      const defaultBranch = repoInfo.default_branch;
 
-      // Get the latest commit on the default branch
+      // Get the latest commit SHA from the default branch
       const refData = await githubFetch(
         `/repos/${owner}/${repo}/git/refs/heads/${defaultBranch}`
       );
       const latestCommitSha = refData.object.sha;
 
-      // Create a new branch from the latest commit
+      // Create a new branch reference
       await githubFetch(`/repos/${owner}/${repo}/git/refs`, {
         method: "POST",
         body: JSON.stringify({
@@ -570,228 +593,61 @@ export class GitHubIntegrationService {
         }),
       });
 
-      // Process the query results to extract file changes
-      const message = queryResults.message;
       await this.addLog(
         integrationId,
-        `Processing query results to extract file changes`
+        `Extracting AST transformations from Greptile response`
       );
 
-      // Extract file changes from the message
-      const fileChanges = this.extractFileChanges(message);
+      // Extract AST transformations from the message
+      const transformations = extractAstTransformations(queryResults.message);
 
-      if (fileChanges.length === 0) {
-        await this.addLog(
-          integrationId,
-          `No file changes found in the query results`
+      if (transformations.length === 0) {
+        throw new Error(
+          "No valid AST transformations found in Greptile response"
         );
-        throw new Error("No file changes found in the query results");
       }
 
       await this.addLog(
         integrationId,
-        `Found ${fileChanges.length} file changes to apply`
+        `Found ${transformations.length} AST transformations to apply`
       );
 
-      // Apply each file change
-      for (const fileChange of fileChanges) {
-        await this.addLog(
-          integrationId,
-          `Processing changes for file: ${fileChange.path}`
-        );
+      // Clone the repository locally to apply transformations
+      const repoDir = path.join(
+        os.tmpdir(),
+        `helicone-integration-${Date.now()}`
+      );
 
-        // Get the current file content
-        let existingContent = "";
-        let fileSha = "";
-        try {
-          const fileData = await githubFetch(
-            `/repos/${owner}/${repo}/contents/${fileChange.path}?ref=${branchName}`
-          );
+      await this.addLog(integrationId, `Cloning repository to ${repoDir}`);
 
-          if (fileData.type === "file") {
-            existingContent = Buffer.from(
-              fileData.content,
-              "base64"
-            ).toString();
-            fileSha = fileData.sha;
-            await this.addLog(
-              integrationId,
-              `Retrieved existing content for ${fileChange.path}`
-            );
-          } else {
-            await this.addLog(
-              integrationId,
-              `Error: ${fileChange.path} is not a file`
-            );
-            continue;
-          }
-        } catch (error: any) {
-          if (error.message.includes("404")) {
-            await this.addLog(
-              integrationId,
-              `File ${fileChange.path} does not exist, will create it from diff`
-            );
-          } else {
-            throw error;
-          }
-        }
+      // Use simple-git to clone the repository
+      const git = simpleGit();
+      await git.clone(repositoryUrl, repoDir);
+      await git.cwd(repoDir);
+      await git.checkout([branchName]);
 
-        // Apply the diff to the existing content
-        let updatedContent = "";
+      // Apply the AST transformations
+      const success = await this.processAstTransformations(
+        transformations,
+        repoDir,
+        integrationId
+      );
 
-        if (existingContent) {
-          // Parse the diff to get the changes
-          const diffContent = fileChange.content;
-          await this.addLog(
-            integrationId,
-            `Applying diff to ${fileChange.path} using diff package`
-          );
-
-          try {
-            // Apply multiple sanitization steps to ensure the diff is valid
-            const sanitizedDiff = fixHunkLineCounts(
-              fixUnknownLineErrors(
-                fixInvalidHunks(sanitizeDiffContent(diffContent))
-              )
-            );
-
-            // Parse the unified diff
-            const patches = parsePatch(sanitizedDiff);
-
-            // Apply the patches to the original content
-            updatedContent = existingContent;
-            for (const patch of patches) {
-              try {
-                const patchResult = applyPatch(updatedContent, patch);
-                if (patchResult === false) {
-                  throw new Error("Patch could not be applied");
-                }
-                updatedContent = patchResult;
-                await this.addLog(
-                  integrationId,
-                  `Successfully applied patch to ${fileChange.path}`
-                );
-              } catch (patchError) {
-                await this.addLog(
-                  integrationId,
-                  `Warning: Error applying patch to ${fileChange.path}: ${patchError}. Attempting fuzzy patch.`
-                );
-
-                // Try with fuzzy patching (allowing for some context mismatches)
-                try {
-                  const fuzzyResult = applyPatch(updatedContent, patch, {
-                    fuzzFactor: 2,
-                  });
-                  if (fuzzyResult === false) {
-                    throw new Error("Fuzzy patch could not be applied");
-                  }
-                  updatedContent = fuzzyResult;
-                  await this.addLog(
-                    integrationId,
-                    `Successfully applied fuzzy patch to ${fileChange.path}`
-                  );
-                } catch (fuzzyError) {
-                  await this.addLog(
-                    integrationId,
-                    `Error: Failed to apply fuzzy patch to ${fileChange.path}: ${fuzzyError}`
-                  );
-                  throw fuzzyError;
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`Error applying diff to ${fileChange.path}:`, error);
-            await this.addLog(
-              integrationId,
-              `Error applying diff to ${fileChange.path}: ${error}`
-            );
-            throw error;
-          }
-        } else {
-          // If the file doesn't exist, extract the added lines from the diff
-          const diffContent = fileChange.content;
-
-          try {
-            // Apply multiple sanitization steps to ensure the diff is valid
-            const sanitizedDiff = fixHunkLineCounts(
-              fixUnknownLineErrors(
-                fixInvalidHunks(sanitizeDiffContent(diffContent))
-              )
-            );
-
-            // Parse the unified diff
-            const patches = parsePatch(sanitizedDiff);
-
-            // For a new file, we just need to collect all the added lines
-            const newLines: string[] = [];
-
-            for (const patch of patches) {
-              for (const hunk of patch.hunks) {
-                for (const line of hunk.lines) {
-                  if (line.startsWith("+") && !line.startsWith("+++")) {
-                    newLines.push(line.substring(1));
-                  }
-                }
-              }
-            }
-
-            updatedContent = newLines.join("\n");
-            await this.addLog(
-              integrationId,
-              `Created new file content for ${fileChange.path} from diff using diff package`
-            );
-          } catch (error) {
-            console.error(
-              `Error creating new file from diff for ${fileChange.path}:`,
-              error
-            );
-            await this.addLog(
-              integrationId,
-              `Error creating new file from diff for ${fileChange.path}: ${error}`
-            );
-            throw error;
-          }
-        }
-
-        // Create or update the file
-        if (fileSha) {
-          // Update existing file
-          await this.addLog(integrationId, `Updating file: ${fileChange.path}`);
-          await githubFetch(
-            `/repos/${owner}/${repo}/contents/${fileChange.path}`,
-            {
-              method: "PUT",
-              body: JSON.stringify({
-                message: `Update ${fileChange.path} with Helicone integration`,
-                content: Buffer.from(updatedContent).toString("base64"),
-                branch: branchName,
-                sha: fileSha,
-              }),
-            }
-          );
-        } else {
-          // Create new file
-          await this.addLog(
-            integrationId,
-            `Creating new file: ${fileChange.path}`
-          );
-          await githubFetch(
-            `/repos/${owner}/${repo}/contents/${fileChange.path}`,
-            {
-              method: "PUT",
-              body: JSON.stringify({
-                message: `Add ${fileChange.path} with Helicone integration`,
-                content: Buffer.from(updatedContent).toString("base64"),
-                branch: branchName,
-              }),
-            }
-          );
-        }
+      if (!success) {
+        throw new Error("Failed to apply AST transformations");
       }
+
+      // Commit the changes
+      await this.addLog(integrationId, `Committing changes`);
+      await git.add(".");
+      await git.commit("Add Helicone integration");
+
+      // Push the changes
+      await this.addLog(integrationId, `Pushing changes to GitHub`);
+      await git.push("origin", branchName);
 
       // Create a pull request
       await this.addLog(integrationId, `Creating pull request`);
-
       const pullRequest = await githubFetch(`/repos/${owner}/${repo}/pulls`, {
         method: "POST",
         body: JSON.stringify({
@@ -801,6 +657,7 @@ export class GitHubIntegrationService {
 ## Changes Made
 - Added Helicone headers to API calls
 - Set up proper authentication for Helicone
+- Added environment variables
 
 ## Next Steps
 1. Sign up for a Helicone account at https://helicone.ai
@@ -830,101 +687,841 @@ For more information, visit the [Helicone documentation](https://docs.helicone.a
     }
   }
 
-  // Extract file changes from the Greptile query results
-  private extractFileChanges(
-    message: string
-  ): Array<{ path: string; content: string }> {
-    const fileChanges: Array<{ path: string; content: string }> = [];
+  // Extract AST transformations from Greptile response message
 
+  // Helper method to get feature name from ID
+
+  // Process AST transformations
+  private async processAstTransformations(
+    transformations: any[],
+    repositoryPath: string,
+    integrationId: string
+  ): Promise<boolean> {
     try {
-      // Extract diff blocks
-      const diffRegex = /```diff\n([\s\S]*?)```/g;
-      let diffMatch;
+      await this.addLog(
+        integrationId,
+        `Processing ${transformations.length} AST transformations`
+      );
 
-      while ((diffMatch = diffRegex.exec(message)) !== null) {
-        const diffContent = diffMatch[1];
+      // Group transformations by file
+      const transformationsByFile: { [file: string]: any } = {};
 
-        // Parse the diff to get file path and changes
-        const filePathRegex = /^--- \/?(.*?)\n\+\+\+ \/?(.*?)$/m;
-        const filePathMatch = diffContent.match(filePathRegex);
+      for (const transformation of transformations) {
+        const filePath = transformation.file;
+        if (!transformationsByFile[filePath]) {
+          transformationsByFile[filePath] = {
+            file: filePath,
+            transformations: [],
+          };
+        }
 
-        if (filePathMatch) {
-          // Get the file path and clean it up
-          let filePath = filePathMatch[2];
-
-          // Remove 'b/' prefix if present
-          filePath = filePath.replace(/^b\//, "");
-
-          // Remove leading slash if present
-          filePath = filePath.startsWith("/")
-            ? filePath.substring(1)
-            : filePath;
-
-          // Store the diff content for this file
-          fileChanges.push({
-            path: filePath,
-            content: diffContent,
-          });
-        } else {
-          console.log(
-            `Warning: Found diff block without valid file paths. Skipping.`
+        // Add all transformations for this file
+        if (
+          transformation.transformations &&
+          Array.isArray(transformation.transformations)
+        ) {
+          transformationsByFile[filePath].transformations.push(
+            ...transformation.transformations
           );
         }
       }
 
-      // If no file changes were found, try to extract code blocks with file paths
-      if (fileChanges.length === 0) {
-        console.log(
-          `Warning: No valid diff blocks found in the response. Checking for code blocks.`
-        );
+      // Process each file's transformations
+      for (const filePath in transformationsByFile) {
+        const absolutePath = path.join(repositoryPath, filePath);
+        const fileTransformations = transformationsByFile[filePath];
 
-        // Try to find file paths followed by code blocks
-        const fileBlockRegex =
-          /File:\s*`([^`]+)`[\s\S]*?```(?:.*?)\n([\s\S]*?)```/g;
-        let fileBlockMatch;
-
-        while ((fileBlockMatch = fileBlockRegex.exec(message)) !== null) {
-          const filePath = fileBlockMatch[1].trim();
-          const codeContent = fileBlockMatch[2];
-
-          // Create a synthetic diff for the file
-          const syntheticDiff = [
-            `--- a/${filePath}`,
-            `+++ b/${filePath}`,
-            `@@ -0,0 +1,${codeContent.split("\n").length} @@`,
-            ...codeContent.split("\n").map((line) => `+${line}`),
-          ].join("\n");
-
-          fileChanges.push({
-            path: filePath,
-            content: syntheticDiff,
-          });
+        // Determine file type and use appropriate processor
+        if (
+          filePath.endsWith(".ts") ||
+          filePath.endsWith(".tsx") ||
+          filePath.endsWith(".js") ||
+          filePath.endsWith(".jsx")
+        ) {
+          await this.applyTypeScriptTransformations(
+            absolutePath,
+            fileTransformations,
+            integrationId
+          );
+        } else if (filePath.endsWith(".json")) {
+          await this.applyJsonTransformations(
+            absolutePath,
+            fileTransformations,
+            integrationId
+          );
+        } else {
+          // Assume it's a text file (.md, .env, etc.)
+          await this.applyTextTransformations(
+            absolutePath,
+            fileTransformations,
+            integrationId
+          );
         }
       }
 
-      return fileChanges;
+      return true;
     } catch (error: any) {
-      console.error("Error extracting file changes:", error);
-      return fileChanges;
+      console.error("Error processing AST transformations:", error);
+      await this.addLog(
+        integrationId,
+        `Error processing AST transformations: ${error.message}`
+      );
+      return false;
     }
   }
 
-  // Helper method to get feature name from ID
-  private getFeatureName(featureId: string): string {
-    const nameMap: Record<string, string> = {
-      prompts: "Prompts",
-      sessions: "Sessions",
-      "custom-properties": "Custom Properties",
-      "user-metrics": "User Metrics",
-      caching: "Caching",
-      retries: "Retries",
-      "rate-limits": "Custom Rate Limits",
-      security: "LLM Security",
-    };
-    return (
-      nameMap[featureId] ||
-      featureId.charAt(0).toUpperCase() +
-        featureId.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-    );
+  // Apply transformations to TypeScript/JavaScript files
+  private async applyTypeScriptTransformations(
+    filePath: string,
+    transformations: { file: string; transformations: any[] },
+    integrationId: string
+  ): Promise<void> {
+    try {
+      await this.addLog(
+        integrationId,
+        `Applying TypeScript transformations to ${path.basename(filePath)}`
+      );
+
+      // Initialize ts-morph project
+      const project = new Project();
+
+      // Add the file to the project
+      const sourceFile = project.addSourceFileAtPath(filePath);
+
+      // Process each transformation
+      for (const transformation of transformations.transformations || []) {
+        await this.applyTransformation(
+          sourceFile,
+          transformation,
+          integrationId
+        );
+      }
+
+      // Save the changes
+      await sourceFile.save();
+
+      await this.addLog(
+        integrationId,
+        `Successfully applied TypeScript transformations to ${path.basename(
+          filePath
+        )}`
+      );
+    } catch (error: any) {
+      console.error(
+        `Error applying TypeScript transformations to ${filePath}:`,
+        error
+      );
+      await this.addLog(
+        integrationId,
+        `Error applying TypeScript transformations to ${path.basename(
+          filePath
+        )}: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  // Apply a single transformation to a source file
+  private async applyTransformation(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    try {
+      const transformationType = transformation.type;
+
+      switch (transformationType) {
+        case "add_import":
+          await this.addImportDeclaration(
+            sourceFile,
+            transformation,
+            integrationId
+          );
+          break;
+
+        case "modify_imports":
+          // Handle modify_imports as add_import for backward compatibility
+          if (transformation.content) {
+            await this.addImportDeclaration(
+              sourceFile,
+              { import_statement: transformation.content },
+              integrationId
+            );
+          }
+          break;
+
+        case "add_code_after_imports":
+          await this.addCodeAfterImports(
+            sourceFile,
+            transformation,
+            integrationId
+          );
+          break;
+
+        case "add_object_property":
+          await this.addObjectProperty(
+            sourceFile,
+            transformation,
+            integrationId
+          );
+          break;
+
+        case "add_function_call_property":
+          await this.addFunctionCallProperty(
+            sourceFile,
+            transformation,
+            integrationId
+          );
+          break;
+
+        case "modify_client":
+          await this.modifyClient(sourceFile, transformation, integrationId);
+          break;
+
+        default:
+          await this.addLog(
+            integrationId,
+            `Unknown transformation type: ${transformationType}`
+          );
+          break;
+      }
+    } catch (error: any) {
+      await this.addLog(
+        integrationId,
+        `Error applying transformation: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  // Add an import declaration to a source file
+  private async addImportDeclaration(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    try {
+      const importStatement = transformation.import_statement;
+
+      // Check if the import already exists
+      const existingImports = sourceFile.getImportDeclarations();
+      const importText = importStatement.trim();
+
+      // Extract the module name from the import statement
+      const moduleMatch = importText.match(/from\s+['"]([^'"]+)['"]/);
+      const importedModule = moduleMatch ? moduleMatch[1] : null;
+
+      // Extract the imported items from the import statement
+      const itemsMatch = importText.match(/import\s+{([^}]+)}/);
+      const importedItems: string[] = itemsMatch
+        ? itemsMatch[1]
+            .trim()
+            .split(",")
+            .map((item: string) => item.trim())
+        : [];
+
+      // Check if this import already exists
+      let importExists = false;
+
+      if (importedModule) {
+        for (const existingImport of existingImports) {
+          const existingModuleName = existingImport.getModuleSpecifierValue();
+
+          if (existingModuleName === importedModule) {
+            // If it's a named import, check if all items are already imported
+            if (importedItems.length > 0) {
+              const existingNamedImports = existingImport
+                .getNamedImports()
+                .map((ni) => ni.getName());
+              const allItemsExist = importedItems.every((item: string) => {
+                // Handle aliases and spaces
+                const cleanItem = item.split(" as ")[0].trim();
+                return existingNamedImports.includes(cleanItem);
+              });
+
+              if (allItemsExist) {
+                importExists = true;
+                break;
+              }
+            } else {
+              // For default imports or namespace imports, consider it exists
+              importExists = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (importExists) {
+        await this.addLog(
+          integrationId,
+          `Import already exists: ${importText}`
+        );
+        return;
+      }
+
+      // Add the import declaration at the top of the file
+      sourceFile.addImportDeclaration({
+        isTypeOnly: importStatement.includes("import type"),
+        moduleSpecifier: importedModule || "",
+        leadingTrivia: (writer) => writer.newLine(),
+      });
+
+      // Get the newly added import declaration
+      const importDeclarations = sourceFile.getImportDeclarations();
+      const lastImport = importDeclarations[importDeclarations.length - 1];
+
+      // Replace it with the full import statement to handle complex cases
+      lastImport.replaceWithText(importStatement);
+
+      await this.addLog(integrationId, `Added import: ${importStatement}`);
+    } catch (error: any) {
+      await this.addLog(
+        integrationId,
+        `Error adding import declaration: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  // Add code after imports
+  private async addCodeAfterImports(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    const { code } = transformation;
+
+    const imports = sourceFile.getImportDeclarations();
+    if (imports.length > 0) {
+      const lastImport = imports[imports.length - 1];
+      sourceFile.insertText(lastImport.getEnd() + 1, "\n\n" + code + "\n");
+    } else {
+      sourceFile.insertText(0, code + "\n\n");
+    }
+
+    await this.addLog(integrationId, `Added code after imports`);
+  }
+
+  // Add a property to an object in a variable declaration
+  private async addObjectProperty(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    const { target, property_name, property_value } = transformation;
+
+    // Find variable declarations matching the target
+    sourceFile.getVariableDeclarations().forEach((varDecl: any) => {
+      if (varDecl.getName() === target.name) {
+        // Find the call expression within the variable declaration
+        const initializer = varDecl.getInitializer();
+
+        if (initializer && Node.isCallExpression(initializer)) {
+          const expression = initializer.getExpression();
+          let match = false;
+
+          // Check if the function name matches
+          if (
+            Node.isIdentifier(expression) &&
+            expression.getText() === target.object_name
+          ) {
+            match = true;
+          }
+
+          if (match) {
+            // Get the first argument of the call expression (should be an object literal)
+            const args = initializer.getArguments();
+
+            if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
+              const objLiteral = args[0];
+
+              // Check if the property already exists
+              const existingProp = objLiteral.getProperty(property_name);
+
+              if (!existingProp) {
+                // Add the property
+                objLiteral.addPropertyAssignment({
+                  name: property_name,
+                  initializer: property_value,
+                });
+
+                console.log(
+                  `Added ${property_name} property to ${target.name}`
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Add a property to a function call
+  private async addFunctionCallProperty(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    const { target, property_name, property_value } = transformation;
+
+    // Determine the search scope
+    let searchScope: Node = sourceFile;
+
+    // If we're targeting a specific function, narrow the search scope
+    if (target.containing_function) {
+      const containingFunction = sourceFile
+        .getFunctions()
+        .find((func: any) => func.getName() === target.containing_function);
+
+      if (!containingFunction) {
+        await this.addLog(
+          integrationId,
+          `Warning: Could not find containing function ${target.containing_function}`
+        );
+        return;
+      }
+
+      searchScope = containingFunction;
+    }
+
+    // Find all call expressions that match our criteria
+    searchScope.forEachDescendant((node: Node) => {
+      if (Node.isCallExpression(node)) {
+        let match = false;
+
+        // Check function name
+        const expression = node.getExpression();
+
+        // Direct function call: functionName()
+        if (
+          Node.isIdentifier(expression) &&
+          expression.getText() === target.function_name
+        ) {
+          match = true;
+        }
+
+        // Method call: object.methodName()
+        if (Node.isPropertyAccessExpression(expression)) {
+          const methodName = expression.getName();
+          const object = expression.getExpression();
+
+          if (
+            methodName === target.method_name &&
+            Node.isIdentifier(object) &&
+            object.getText() === target.function_name
+          ) {
+            match = true;
+          }
+        }
+
+        if (match) {
+          // Get the first argument of the call expression (should be an object literal)
+          const args = node.getArguments();
+
+          if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
+            const objLiteral = args[0];
+
+            // Check if the property already exists
+            const existingProp = objLiteral.getProperty(property_name);
+
+            if (!existingProp) {
+              // Add the property
+              objLiteral.addPropertyAssignment({
+                name: property_name,
+                initializer: property_value,
+              });
+
+              console.log(
+                `Added ${property_name} property to ${target.function_name} call`
+              );
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Handle modify_client transformation using text manipulation
+  private async modifyClient(
+    sourceFile: SourceFile,
+    transformation: any,
+    integrationId: string
+  ): Promise<void> {
+    try {
+      const target = transformation.target;
+      const changes = transformation.changes || {};
+
+      await this.addLog(integrationId, `Modifying client: ${target}`);
+
+      // Get the file text
+      let fileText = sourceFile.getFullText();
+
+      // Find the client variable declaration
+      const clientRegex = new RegExp(
+        `(const|let|var)\\s+${target}\\s*=\\s*`,
+        "g"
+      );
+      const match = clientRegex.exec(fileText);
+
+      if (!match) {
+        await this.addLog(
+          integrationId,
+          `Could not find client variable: ${target}`
+        );
+        return;
+      }
+
+      // Find the opening brace of the client configuration
+      const startPos = match.index + match[0].length;
+      let openBracePos = fileText.indexOf("{", startPos);
+
+      if (openBracePos === -1) {
+        await this.addLog(
+          integrationId,
+          `Could not find client configuration object for: ${target}`
+        );
+        return;
+      }
+
+      // Find the matching closing brace
+      let braceCount = 1;
+      let closeBracePos = openBracePos + 1;
+
+      while (braceCount > 0 && closeBracePos < fileText.length) {
+        if (fileText[closeBracePos] === "{") {
+          braceCount++;
+        } else if (fileText[closeBracePos] === "}") {
+          braceCount--;
+        }
+        closeBracePos++;
+      }
+
+      if (braceCount !== 0) {
+        await this.addLog(
+          integrationId,
+          `Could not find end of client configuration object for: ${target}`
+        );
+        return;
+      }
+
+      // Extract the client configuration
+      const configText = fileText.substring(openBracePos, closeBracePos);
+
+      // Create the modified configuration
+      let modifiedConfig = configText;
+
+      // Apply baseURL change if specified
+      if (changes.baseURL) {
+        const baseUrlRegex = /baseURL\s*:\s*["']([^"']*)["']/;
+        if (baseUrlRegex.test(modifiedConfig)) {
+          // Replace existing baseURL
+          modifiedConfig = modifiedConfig.replace(
+            baseUrlRegex,
+            `baseURL: "${changes.baseURL}"`
+          );
+        } else {
+          // Add baseURL property
+          modifiedConfig = modifiedConfig.replace(
+            "{",
+            `{\n  baseURL: "${changes.baseURL}",`
+          );
+        }
+      }
+
+      // Apply headers changes if specified
+      if (changes.headers) {
+        const headersRegex = /headers\s*:\s*{([^}]*)}/;
+        const headersMatch = headersRegex.exec(modifiedConfig);
+
+        if (headersMatch) {
+          // Headers property exists, modify it
+          let headersText = headersMatch[1];
+
+          // Add each header
+          for (const [key, value] of Object.entries(changes.headers)) {
+            const headerRegex = new RegExp(
+              `["']${key}["']\\s*:\\s*["'][^"']*["']`
+            );
+
+            if (headerRegex.test(headersText)) {
+              // Replace existing header
+              headersText = headersText.replace(
+                headerRegex,
+                `"${key}": "${value}"`
+              );
+            } else {
+              // Add new header
+              headersText += `,\n    "${key}": "${value}"`;
+            }
+          }
+
+          // Replace headers in the config
+          modifiedConfig = modifiedConfig.replace(
+            headersRegex,
+            `headers: {${headersText}}`
+          );
+        } else {
+          // Headers property doesn't exist, add it
+          let headersText = "\n  headers: {\n";
+
+          for (const [key, value] of Object.entries(changes.headers)) {
+            headersText += `    "${key}": "${value}",\n`;
+          }
+
+          headersText += "  }";
+
+          // Add headers property after the opening brace or after baseURL if it was added
+          if (modifiedConfig.includes("baseURL:")) {
+            modifiedConfig = modifiedConfig.replace(
+              /baseURL:[^,]*,/,
+              (match) => `${match}${headersText},`
+            );
+          } else {
+            modifiedConfig = modifiedConfig.replace("{", `{${headersText},`);
+          }
+        }
+      }
+
+      // Replace the original configuration with the modified one
+      fileText =
+        fileText.substring(0, openBracePos) +
+        modifiedConfig +
+        fileText.substring(closeBracePos);
+
+      // Update the source file
+      sourceFile.replaceWithText(fileText);
+
+      await this.addLog(
+        integrationId,
+        `Successfully modified client: ${target}`
+      );
+    } catch (error: any) {
+      await this.addLog(
+        integrationId,
+        `Error modifying client: ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  // Apply transformations to JSON files
+  private async applyJsonTransformations(
+    filePath: string,
+    transformations: { file: string; transformations: any[] },
+    integrationId: string
+  ): Promise<void> {
+    try {
+      await this.addLog(
+        integrationId,
+        `Applying JSON transformations to ${path.basename(filePath)}`
+      );
+
+      // Read the JSON file
+      const fs = require("fs");
+      const jsonContent = fs.readFileSync(filePath, "utf8");
+      const jsonData = JSON.parse(jsonContent);
+
+      let modified = false;
+
+      // Process each transformation
+      for (const transformation of transformations.transformations || []) {
+        switch (transformation.type) {
+          case "add_package_dependency":
+            if (!jsonData.dependencies) {
+              jsonData.dependencies = {};
+            }
+
+            if (!jsonData.dependencies[transformation.dependency_name]) {
+              jsonData.dependencies[transformation.dependency_name] =
+                transformation.dependency_version;
+              modified = true;
+              console.log(
+                `Added ${transformation.dependency_name} to dependencies`
+              );
+            }
+            break;
+
+          case "add_dev_dependency":
+            if (!jsonData.devDependencies) {
+              jsonData.devDependencies = {};
+            }
+
+            if (!jsonData.devDependencies[transformation.dependency_name]) {
+              jsonData.devDependencies[transformation.dependency_name] =
+                transformation.dependency_version;
+              modified = true;
+              console.log(
+                `Added ${transformation.dependency_name} to devDependencies`
+              );
+            }
+            break;
+
+          default:
+            await this.addLog(
+              integrationId,
+              `Warning: Unsupported JSON transformation type: ${transformation.type}`
+            );
+        }
+      }
+
+      // Write the modified JSON back to the file
+      if (modified) {
+        fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
+
+        await this.addLog(
+          integrationId,
+          `Successfully applied JSON transformations to ${path.basename(
+            filePath
+          )}`
+        );
+      }
+    } catch (error: any) {
+      console.error(
+        `Error applying JSON transformations to ${filePath}:`,
+        error
+      );
+      await this.addLog(
+        integrationId,
+        `Error applying JSON transformations to ${path.basename(filePath)}: ${
+          error.message
+        }`
+      );
+      throw error;
+    }
+  }
+
+  // Apply transformations to text files (like .env)
+  private async applyTextTransformations(
+    filePath: string,
+    transformations: { file: string; transformations: any[] },
+    integrationId: string
+  ): Promise<void> {
+    try {
+      // Read the file content or create an empty file if it doesn't exist
+      const fs = require("fs");
+      let fileContent = "";
+
+      try {
+        fileContent = fs.readFileSync(filePath, "utf8");
+      } catch (error: any) {
+        if (error.code === "ENOENT") {
+          // File doesn't exist, create the directory if needed
+          const path = require("path");
+          const dirPath = path.dirname(filePath);
+
+          if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+          }
+
+          await this.addLog(
+            integrationId,
+            `Creating new file: ${transformations.file}`
+          );
+        } else {
+          throw error;
+        }
+      }
+
+      // Apply each transformation
+      for (const transformation of transformations.transformations) {
+        const transformationType = transformation.type;
+
+        switch (transformationType) {
+          case "add_section":
+            // Add a new section to the file
+            const sectionTitle = transformation.title || "";
+            const sectionContent = transformation.content || "";
+
+            if (fileContent.includes(sectionTitle)) {
+              await this.addLog(
+                integrationId,
+                `Section "${sectionTitle}" already exists in ${transformations.file}`
+              );
+            } else {
+              fileContent += `\n\n${sectionTitle}\n${sectionContent}`;
+              await this.addLog(
+                integrationId,
+                `Added section "${sectionTitle}" to ${transformations.file}`
+              );
+            }
+            break;
+
+          case "add_env_variable":
+            // Add an environment variable to the file
+            const variableName = transformation.variable_name || "";
+            const variableValue =
+              transformation.variable_value || "your_value_here";
+
+            if (!variableName) {
+              await this.addLog(
+                integrationId,
+                `No variable name provided for add_env_variable in ${transformations.file}`
+              );
+              break;
+            }
+
+            const envVarLine = `${variableName}=${variableValue}`;
+
+            if (fileContent.includes(variableName + "=")) {
+              await this.addLog(
+                integrationId,
+                `Environment variable ${variableName} already exists in ${transformations.file}`
+              );
+            } else {
+              // Add a newline if the file doesn't end with one
+              if (fileContent && !fileContent.endsWith("\n")) {
+                fileContent += "\n";
+              }
+
+              // Add a comment if this is the first Helicone variable
+              if (
+                variableName === "HELICONE_API_KEY" &&
+                !fileContent.includes("HELICONE_")
+              ) {
+                fileContent += "\n# Helicone Configuration\n";
+              }
+
+              fileContent += `${envVarLine}\n`;
+
+              await this.addLog(
+                integrationId,
+                `Added environment variable ${variableName} to ${transformations.file}`
+              );
+            }
+            break;
+
+          case "add_content":
+            // Add content to the file
+            const content = transformation.content || "";
+            fileContent += content;
+            await this.addLog(
+              integrationId,
+              `Added content to ${transformations.file}`
+            );
+            break;
+
+          default:
+            await this.addLog(
+              integrationId,
+              `Unknown text transformation type: ${transformationType}`
+            );
+            break;
+        }
+      }
+
+      // Write the modified content back to the file
+      fs.writeFileSync(filePath, fileContent);
+      await this.addLog(
+        integrationId,
+        `Successfully applied text transformations to ${transformations.file}`
+      );
+    } catch (error: any) {
+      await this.addLog(
+        integrationId,
+        `Error applying text transformations to ${transformations.file}: ${error.message}`
+      );
+      throw error;
+    }
   }
 }

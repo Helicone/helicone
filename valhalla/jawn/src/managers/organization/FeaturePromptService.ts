@@ -21,11 +21,45 @@ export class FeaturePromptService {
    * @param fileName The name of the prompt file
    * @returns The content of the prompt file
    */
-  private readPromptFile(fileName: string): string {
+  public readPromptFile(fileName: string): string {
     try {
+      // First try the root prompts directory
       const filePath = path.join(this.promptsDir, fileName);
       return fs.readFileSync(filePath, "utf8");
     } catch (error) {
+      // If the file is not found in the root prompts directory,
+      // try looking for it in the providers subdirectory structure
+      if (fileName.startsWith("providers/")) {
+        try {
+          const filePath = path.join(this.promptsDir, fileName);
+          return fs.readFileSync(filePath, "utf8");
+        } catch (nestedError) {
+          console.error(
+            `Error reading provider prompt file ${fileName}:`,
+            nestedError
+          );
+          return "";
+        }
+      }
+
+      // If the file name starts with "helicone" and is not found in the root directory,
+      // try looking for it in the features subdirectory
+      if (fileName.startsWith("helicone") && fileName.endsWith(".md")) {
+        try {
+          const featureFilePath = path.join(
+            this.promptsDir,
+            "features",
+            fileName
+          );
+          return fs.readFileSync(featureFilePath, "utf8");
+        } catch (featureError) {
+          console.error(
+            `Error reading feature prompt file ${fileName}:`,
+            featureError
+          );
+        }
+      }
+
       console.error(`Error reading prompt file ${fileName}:`, error);
       return "";
     }
@@ -136,11 +170,38 @@ ${outputFormatContent}`;
    */
   public getAvailablePromptFiles(): string[] {
     try {
-      return fs
-        .readdirSync(this.promptsDir)
-        .filter((file) => file.startsWith("helicone") && file.endsWith(".md"));
+      // First check the root directory
+      let promptFiles: string[] = [];
+
+      try {
+        const rootFiles = fs
+          .readdirSync(this.promptsDir)
+          .filter(
+            (file) => file.startsWith("helicone") && file.endsWith(".md")
+          );
+        promptFiles = [...promptFiles, ...rootFiles];
+      } catch (rootError) {
+        console.error("Error reading root prompts directory:", rootError);
+      }
+
+      // Then check the features directory
+      try {
+        const featuresDir = path.join(this.promptsDir, "features");
+        const featureFiles = fs
+          .readdirSync(featuresDir)
+          .filter(
+            (file) => file.startsWith("helicone") && file.endsWith(".md")
+          );
+
+        // Combine both lists
+        promptFiles = [...promptFiles, ...featureFiles];
+      } catch (featuresError) {
+        console.error("Error reading features directory:", featuresError);
+      }
+
+      return promptFiles;
     } catch (error) {
-      console.error("Error reading prompts directory:", error);
+      console.error("Error reading prompts directories:", error);
       return [];
     }
   }
