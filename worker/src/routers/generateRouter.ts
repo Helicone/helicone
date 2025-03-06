@@ -2,6 +2,7 @@ import { ExecutionContext } from "@cloudflare/workers-types";
 import { autoFillInputs } from "@helicone/prompts";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { type IRequest, type RouterType } from "itty-router";
+import { z } from "zod";
 import { Env } from "..";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
@@ -10,11 +11,24 @@ import { Result, err, ok } from "../lib/util/results";
 import { providersNames } from "../packages/cost/providers/mappings";
 import { gatewayForwarder } from "./gatewayRouter";
 
-type GenerateParameters = {
-  promptId: string;
-  version?: number | "production";
-  inputs?: Record<string, string>;
-};
+// Zod schema for GenerateParams
+const generateParamsSchema = z.object({
+  promptId: z.string().min(1, "promptId is required"),
+  version: z
+    .union([z.number(), z.literal("production")])
+    .optional()
+    .default("production"),
+  inputs: z.record(z.string()).optional().default({}),
+  chat: z.array(z.string()).optional(),
+
+  // Optional Helicone properties for tracking
+  // TODO: Move these to a properties object
+  userId: z.string().optional(),
+  sessionId: z.string().optional(),
+  cache: z.boolean().optional(),
+});
+// Type derived from the Zod schema
+type GenerateParams = z.infer<typeof generateParamsSchema>;
 
 type PromptVersion = Database["public"]["Tables"]["prompts_versions"]["Row"];
 type PromptMetadata = {
@@ -22,6 +36,16 @@ type PromptMetadata = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
+
+// Format chat history into a string
+function formatChatHistory(chat: string[]): string {
+  return chat
+    .map((message, index) => {
+      const role = index % 2 === 0 ? "User" : "Assistant";
+      return `${role}: ${message}`;
+    })
+    .join("\n\n");
+}
 
 // Handler for generate route
 const generateHandler = async (
@@ -34,28 +58,41 @@ const generateHandler = async (
     // 1. VALIDATE AUTH AND GET ORG DATA
     const { data: auth, error: authError } = await requestWrapper.auth();
     if (authError || !auth) {
-      return new Response(authError || "Invalid authentication", {
-        status: 401,
-      });
+      return createErrorResponse(
+        authError || "Invalid authentication",
+        "auth_error",
+        401
+      );
     }
     const db = new DBWrapper(env, auth);
     const { data: orgData, error: orgError } = await db.getAuthParams();
     if (orgError || !orgData) {
-      return new Response(orgError || "Failed to get organization data", {
-        status: 401,
-      });
+      return createErrorResponse(
+        orgError || "Failed to get organization data",
+        "org_error",
+        401
+      );
     }
 
-    // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY
-    const rawBody = await requestWrapper.getJson<GenerateParameters>();
-    const parameters: GenerateParameters = {
-      promptId: rawBody?.promptId || "",
-      version: rawBody?.version || "production",
-      inputs: rawBody?.inputs || {},
-    };
-    if (!parameters.promptId) {
-      return new Response("Missing promptId", { status: 400 });
+    // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE WITH ZOD
+    const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
+
+    // Validate parameters with Zod
+    const paramsResult = generateParamsSchema.safeParse(rawBody);
+
+    if (!paramsResult.success) {
+      return createErrorResponse(
+        "Invalid parameters",
+        "invalid_parameters",
+        400,
+        {
+          errors: paramsResult.error.format(),
+          received: rawBody,
+        }
+      );
     }
+
+    const parameters = paramsResult.data;
 
     // 3. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
     const promptResult = await getPromptVersion({
@@ -65,18 +102,26 @@ const generateHandler = async (
       version: parameters.version,
     });
     if (promptResult.error || !promptResult.data) {
-      return new Response(promptResult.error || "Failed to get prompt", {
-        status: 404,
-      });
+      return createErrorResponse(
+        promptResult.error || "Failed to get prompt",
+        "prompt_not_found",
+        404,
+        {
+          promptId: parameters.promptId,
+          version: parameters.version,
+        }
+      );
     }
 
     // 4. GET PROVIDER -> BASE URL
     const metadata = promptResult.data.metadata as PromptMetadata;
     const providerResult = getProviderInfo(metadata);
     if (providerResult.error || !providerResult.data) {
-      return new Response(
+      return createErrorResponse(
         providerResult.error || "Failed to get provider info",
-        { status: 400 }
+        "provider_error",
+        400,
+        { metadata }
       );
     }
     const { targetBaseUrl, provider } = providerResult.data;
@@ -86,19 +131,50 @@ const generateHandler = async (
       .getHeaders()
       .get(`${provider}_API_KEY`);
     if (!providerApiKey) {
-      return new Response(`Missing ${provider}_API_KEY in headers`, {
-        status: 400,
-      });
+      return createErrorResponse(
+        `Missing ${provider}_API_KEY in headers`,
+        "missing_api_key",
+        400,
+        { provider }
+      );
     }
     const requestHeaders = new Headers(requestWrapper.getHeaders());
     requestHeaders.set("Content-Type", "application/json");
     requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
     requestHeaders.set("Accept-Encoding", "identity");
 
+    // Add tracking headers from parameters
+    if (parameters.userId) {
+      requestHeaders.set("Helicone-User-Id", parameters.userId);
+    }
+
+    if (parameters.sessionId) {
+      requestHeaders.set("Helicone-Session-Id", parameters.sessionId);
+    }
+
+    if (parameters.cache !== undefined) {
+      requestHeaders.set("Helicone-Cache", parameters.cache.toString());
+    }
+
+    // Add Helicone-Prompt-Id header with the requested promptId
+    requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
+
     // 6. BUILD REQUEST TEMPLATE
+    let inputs = parameters.inputs || {};
+
+    // Handle chat history if provided
+    if (parameters.chat && parameters.chat.length > 0) {
+      // Format chat history and add to inputs
+      const chatHistory = formatChatHistory(parameters.chat);
+      inputs = {
+        ...inputs,
+        chat_history: chatHistory,
+      };
+    }
+
     const requestTemplate = autoFillInputs({
       template: promptResult.data.helicone_template,
-      inputs: parameters.inputs || {},
+      inputs: inputs,
       autoInputs: [],
     });
 
@@ -113,10 +189,11 @@ const generateHandler = async (
     });
     const newWrapperResult = await RequestWrapper.create(newRequest, env);
     if (newWrapperResult.error || !newWrapperResult.data) {
-      return new Response(
+      return createErrorResponse(
         "Failed to create request wrapper: " +
           (newWrapperResult.error || "No wrapper created"),
-        { status: 500 }
+        "request_creation_failed",
+        500
       );
     }
     return await gatewayForwarder(
@@ -133,18 +210,11 @@ const generateHandler = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     console.error("Error in generate route:", e);
-    return new Response(
-      JSON.stringify({
-        helicone_error: "internal server error",
-        error: e.message,
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          "helicone-error": "true",
-        },
-      }
+    return createErrorResponse(
+      e.message || "An unexpected error occurred",
+      "internal_server_error",
+      500,
+      { stack: e.stack }
     );
   }
 };
@@ -210,17 +280,23 @@ async function getPromptVersion({
 
   if (error) {
     console.error("Error fetching prompt version:", error);
-    return err("Error fetching prompt version");
+    return err("Error fetching prompt version: Database query failed");
   }
 
   if (!data || data.length === 0) {
-    return err("No prompt version found");
+    const versionText =
+      version === "production" ? "production version" : `version ${version}`;
+    return err(
+      `Prompt not found: No ${versionText} of prompt "${promptId}" exists in your organization`
+    );
   }
 
   // Extract the prompt version from the nested result
   const promptVersion = data[0].prompts_versions[0];
   if (!promptVersion) {
-    return err("No prompt version found");
+    return err(
+      `Prompt version not found: The prompt "${promptId}" exists but has no valid versions`
+    );
   }
 
   return ok(promptVersion);
@@ -271,11 +347,51 @@ function getProviderInfo(
   const provider =
     metadata.provider?.toUpperCase() as (typeof providersNames)[number];
   if (!provider) {
-    return err("No provider specified in metadata");
+    return err(
+      "Provider configuration error: No provider specified in prompt metadata"
+    );
   }
   if (!providerBaseUrls[provider]) {
-    return err(`Provider "${provider}" not supported`);
+    const supportedProviders = Object.keys(providerBaseUrls).join(", ");
+    return err(
+      `Provider configuration error: "${provider}" is not supported. Supported providers are: ${supportedProviders}`
+    );
   }
 
-  return ok({ targetBaseUrl: providerBaseUrls[provider], provider });
+  return ok({
+    targetBaseUrl: providerBaseUrls[provider],
+    provider,
+  });
+}
+
+/**
+ * Creates a standardized error response
+ * @param message Human-readable error message
+ * @param code Error code for programmatic handling
+ * @param status HTTP status code
+ * @param details Optional additional details about the error
+ * @returns Response object with standardized error format
+ */
+function createErrorResponse(
+  message: string,
+  code: string,
+  status: number,
+  details?: Record<string, unknown>
+): Response {
+  return new Response(
+    JSON.stringify({
+      error: {
+        message,
+        code,
+        details,
+      },
+      success: false,
+    }),
+    {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 }
