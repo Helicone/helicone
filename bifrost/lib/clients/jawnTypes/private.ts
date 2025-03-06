@@ -759,33 +759,40 @@ Json: JsonObject;
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
-      model?: string;
       provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
-      input?: string | string[];
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
       temperature?: number | null;
       /** Format: double */
       top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
       stream?: boolean | null;
       /** Format: double */
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
       /** @enum {string|null} */
       reasoning_effort?: "low" | "medium" | "high" | null;
+      input?: string | string[];
       /** Format: double */
       n?: number | null;
-      stop?: string[] | null;
-      messages?: components["schemas"]["Message"][] | null;
       tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
       tool_choice?: {
         name?: string;
         /** @enum {string} */
-        type: "auto" | "none" | "tool";
+        type: "none" | "auto" | "any" | "tool";
       };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      } | null;
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
     };

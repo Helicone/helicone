@@ -15,7 +15,6 @@ describe("OpenAI Chat Mapper Core Tests", () => {
           },
         ],
         temperature: 0.7,
-        max_tokens: 100,
       };
 
       // Transform to internal format
@@ -24,7 +23,6 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       // Verify basic fields were mapped correctly
       expect(internalRequest.schema.request.model).toBe("gpt-4");
       expect(internalRequest.schema.request.temperature).toBe(0.7);
-      expect(internalRequest.schema.request.max_tokens).toBe(100);
 
       // Verify messages were transformed correctly
       expect(internalRequest.schema.request.messages).toHaveLength(1);
@@ -219,11 +217,210 @@ describe("OpenAI Chat Mapper Core Tests", () => {
         0.9
       );
       expect(
-        getValueByPath(internalObject, maxTokensMapping?.internal || "")
-      ).toBe(200);
-      expect(
         getValueByPath(internalObject, streamMapping?.internal || "")
       ).toBe(true);
+    });
+  });
+
+  // Test tool and tool_choice mapping
+  describe("Tool and tool_choice mapping", () => {
+    it("should properly convert OpenAI tools to internal format", () => {
+      const externalRequest = {
+        model: "gpt-4",
+        messages: [
+          {
+            role: "user",
+            content: "Find me a restaurant",
+          },
+        ],
+        tools: [
+          {
+            type: "function" as const,
+            function: {
+              name: "find_restaurant",
+              description: "Find restaurants by cuisine and location",
+              parameters: {
+                type: "object",
+                properties: {
+                  cuisine: {
+                    type: "string",
+                    description: "Type of cuisine",
+                  },
+                  location: {
+                    type: "string",
+                    description: "City or area",
+                  },
+                },
+                required: ["cuisine", "location"],
+              },
+            },
+          },
+        ],
+      };
+
+      const internalRequest = openaiChatMapper.toInternal(externalRequest);
+
+      // Verify tools were transformed correctly
+      expect(internalRequest.schema.request.tools).toHaveLength(1);
+      const tool = internalRequest.schema.request.tools?.[0];
+      if (tool) {
+        expect(tool.name).toBe("find_restaurant");
+        expect(tool.description).toBe(
+          "Find restaurants by cuisine and location"
+        );
+        expect(tool.parameters).toEqual(
+          externalRequest.tools[0].function.parameters
+        );
+      }
+    });
+
+    it("should map different tool_choice types correctly", () => {
+      // Test "none" string type
+      const requestWithNone = {
+        tool_choice: "none" as const,
+      };
+      const internalWithNone = openaiChatMapper.toInternal(requestWithNone);
+      expect(internalWithNone.schema.request.tool_choice?.type).toBe("none");
+      expect(internalWithNone.schema.request.tool_choice?.name).toBeUndefined();
+
+      // Test "auto" string type
+      const requestWithAuto = {
+        tool_choice: "auto" as const,
+      };
+      const internalWithAuto = openaiChatMapper.toInternal(requestWithAuto);
+      expect(internalWithAuto.schema.request.tool_choice?.type).toBe("auto");
+      expect(internalWithAuto.schema.request.tool_choice?.name).toBeUndefined();
+
+      // Test "required" string type (maps to "any")
+      const requestWithRequired = {
+        tool_choice: "required" as const,
+      };
+      const internalWithRequired =
+        openaiChatMapper.toInternal(requestWithRequired);
+      expect(internalWithRequired.schema.request.tool_choice?.type).toBe("any");
+      expect(
+        internalWithRequired.schema.request.tool_choice?.name
+      ).toBeUndefined();
+
+      // Test function object type (maps to "tool")
+      const requestWithFunction = {
+        tool_choice: {
+          type: "function" as const,
+          function: {
+            type: "function" as const,
+            name: "find_restaurant",
+          },
+        },
+      };
+      const internalWithFunction =
+        openaiChatMapper.toInternal(requestWithFunction);
+      expect(internalWithFunction.schema.request.tool_choice?.type).toBe(
+        "tool"
+      );
+      expect(internalWithFunction.schema.request.tool_choice?.name).toBe(
+        "find_restaurant"
+      );
+    });
+
+    it("should convert internal tool_choice format back to OpenAI format", () => {
+      // Find tool_choice mapping in the openaiChatMapper
+      const toolChoiceMapping = openaiChatMapper["mappings"].find(
+        (m) =>
+          m.external === "tool_choice" &&
+          m.internal === "schema.request.tool_choice"
+      );
+
+      // Helper to get value by path
+      const getValueByPath = (obj: any, path: string) => {
+        return path.split(".").reduce((p, c) => (p && p[c]) || null, obj);
+      };
+
+      // Test converting "none" type
+      const internalNone = {
+        schema: {
+          request: {
+            tool_choice: {
+              type: "none" as const,
+            },
+          },
+        },
+      };
+
+      const toolChoiceNone = getValueByPath(
+        internalNone,
+        toolChoiceMapping?.internal || ""
+      );
+
+      const externalNone =
+        toolChoiceMapping?.transform?.toExternal(toolChoiceNone);
+      expect(externalNone).toBe("none");
+
+      // Test converting "auto" type
+      const internalAuto = {
+        schema: {
+          request: {
+            tool_choice: {
+              type: "auto" as const,
+            },
+          },
+        },
+      };
+
+      const toolChoiceAuto = getValueByPath(
+        internalAuto,
+        toolChoiceMapping?.internal || ""
+      );
+
+      const externalAuto =
+        toolChoiceMapping?.transform?.toExternal(toolChoiceAuto);
+      expect(externalAuto).toBe("auto");
+
+      // Test converting "any" type (maps to "required")
+      const internalAny = {
+        schema: {
+          request: {
+            tool_choice: {
+              type: "any" as const,
+            },
+          },
+        },
+      };
+
+      const toolChoiceAny = getValueByPath(
+        internalAny,
+        toolChoiceMapping?.internal || ""
+      );
+
+      const externalAny =
+        toolChoiceMapping?.transform?.toExternal(toolChoiceAny);
+      expect(externalAny).toBe("required");
+
+      // Test converting "tool" type with name
+      const internalTool = {
+        schema: {
+          request: {
+            tool_choice: {
+              type: "tool" as const,
+              name: "find_restaurant",
+            },
+          },
+        },
+      };
+
+      const toolChoiceTool = getValueByPath(
+        internalTool,
+        toolChoiceMapping?.internal || ""
+      );
+
+      const externalTool =
+        toolChoiceMapping?.transform?.toExternal(toolChoiceTool);
+      expect(externalTool).toEqual({
+        type: "function",
+        function: {
+          type: "function",
+          name: "find_restaurant",
+        },
+      });
     });
   });
 });

@@ -1675,28 +1675,22 @@
 					"llm_type": {
 						"$ref": "#/components/schemas/LlmType"
 					},
+					"provider": {
+						"type": "string"
+					},
 					"model": {
 						"type": "string"
 					},
-					"provider": {
-						"type": "string"
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
 					},
 					"prompt": {
 						"type": "string",
 						"nullable": true
-					},
-					"input": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
 					},
 					"max_tokens": {
 						"type": "number",
@@ -1709,6 +1703,11 @@
 						"nullable": true
 					},
 					"top_p": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"seed": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
@@ -1727,6 +1726,20 @@
 						"format": "double",
 						"nullable": true
 					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"nullable": true
+					},
 					"reasoning_effort": {
 						"type": "string",
 						"enum": [
@@ -1737,23 +1750,22 @@
 						],
 						"nullable": true
 					},
+					"input": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						]
+					},
 					"n": {
 						"type": "number",
 						"format": "double",
-						"nullable": true
-					},
-					"stop": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"messages": {
-						"items": {
-							"$ref": "#/components/schemas/Message"
-						},
-						"type": "array",
 						"nullable": true
 					},
 					"tools": {
@@ -1761,6 +1773,10 @@
 							"$ref": "#/components/schemas/Tool"
 						},
 						"type": "array"
+					},
+					"parallel_tool_calls": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"tool_choice": {
 						"properties": {
@@ -1770,8 +1786,9 @@
 							"type": {
 								"type": "string",
 								"enum": [
-									"auto",
 									"none",
+									"auto",
+									"any",
 									"tool"
 								]
 							}
@@ -1780,6 +1797,19 @@
 							"type"
 						],
 						"type": "object"
+					},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object",
+						"nullable": true
 					},
 					"toolDetails": {
 						"$ref": "#/components/schemas/HeliconeEventTool"
