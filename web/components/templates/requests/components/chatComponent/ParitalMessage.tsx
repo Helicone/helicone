@@ -17,12 +17,12 @@ export const ShowMoreButton: React.FC<ShowMoreButtonProps> = ({
     <div className="flex flex-row justify-center items-center py-8 relative">
       <button
         onClick={() => setShowAllMessages(true)}
-        className="absolute flex flex-row space-x-1 items-center border border-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 py-1 px-2 rounded-lg"
+        className="absolute flex flex-row space-x-1 items-center border border-border hover:bg-sidebar-background py-1 px-2 rounded-lg"
       >
         <ChatBubbleLeftRightIcon className="h-4 w-4" />
         <p className="text-xs font-semibold">
           Show More{" "}
-          <span className="text-gray-500">({messagesCount - 4} hidden)</span>
+          <span className="text-muted-foreground">({messagesCount - 4} hidden)</span>
         </p>
       </button>
     </div>

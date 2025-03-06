@@ -72,7 +72,7 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesToRender = useMemo(
     () =>
       messageSlice === "lastTwo" &&
-      mappedRequest.preview.concatenatedMessages.length > 2
+        mappedRequest.preview.concatenatedMessages.length > 2
         ? mappedRequest.preview.concatenatedMessages.slice(-2)
         : mappedRequest.preview.concatenatedMessages,
     [mappedRequest.preview.concatenatedMessages, messageSlice]
@@ -82,11 +82,11 @@ export const Chat: React.FC<ChatProps> = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm  dark:bg-black",
+          "w-full flex flex-col text-left space-y-2 text-sm bg-background",
           className
         )}
       >
-        <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-full border border-border divide-y divide-border h-full">
           {!hideTopBar && (
             <ChatTopBar
               allExpanded={allExpanded}

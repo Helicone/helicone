@@ -1,14 +1,9 @@
 import { LLMRequestBody } from "@/packages/llm-mapper/types";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import {
-  ArrowsPointingOutIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import React from "react";
-import { PiPlayBold } from "react-icons/pi";
 import { useCreatePrompt } from "../../../../../services/hooks/prompts/prompts";
+import { Button } from "@/components/ui/button";
+import { ChevronsUpDown, Maximize } from "lucide-react";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -50,57 +45,29 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   const createPrompt = useCreatePrompt();
 
   return (
-    <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
-      <div className="flex flex-row items-center space-x-2">
-        <button
-          onClick={toggleAllExpanded}
-          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
+    <div className="flex flex-row items-center justify-between w-full bg-sidebar-background p-2 rounded-md">
+      {!isModal && (
+        <Button
+          onClick={() => setOpen(true)}
+          variant="ghost"
+          size="sm"
+          className="px-2 py-1 gap-2 h-6"
         >
-          {allExpanded ? (
-            <EyeSlashIcon className="h-4 w-4" />
-          ) : (
-            <EyeIcon className="h-4 w-4" />
-          )}
-          <p className="text-xs font-semibold">
-            {allExpanded ? "Shrink All" : "Expand All"}
-          </p>
-        </button>
-
-        <button
-          onClick={async (e) => {
-            e.preventDefault();
-            if (promptData?.id) {
-              router.push(`/prompts/${promptData.id}`);
-            } else if (requestId) {
-              router.push(`/prompts/fromRequest/${requestId}`);
-            }
-          }}
-          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
-        >
-          <PiPlayBold className="h-4 w-4" />
-          <p className="text-xs font-semibold">Test Prompt</p>
-        </button>
-      </div>
-      <div className="flex flex-row items-center space-x-2">
-        {!isModal && (
-          <button
-            onClick={() => setOpen(true)}
-            className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
-          >
-            <ArrowsPointingOutIcon className="h-4 w-4" />
-            <p className="text-xs font-semibold">Expand</p>
-          </button>
-        )}
-        <button
-          onClick={(e) => {
-            setMode(cycleMode(mode, e.shiftKey));
-          }}
-          className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"
-        >
-          <ChevronUpDownIcon className="h-4 w-4" />
-          <p className="text-xs font-semibold">{mode}</p>
-        </button>
-      </div>
+          <Maximize className="h-3 w-3" />
+          <span className="text-xs font-medium">Expand</span>
+        </Button>
+      )}
+      <Button
+        onClick={(e) => {
+          setMode(cycleMode(mode, e.shiftKey));
+        }}
+        variant="ghost"
+        size="sm"
+        className="px-2 py-1 gap-2 h-6"
+      >
+        <ChevronsUpDown className="h-3 w-3" />
+        <span className="text-xs font-medium">{mode}</span>
+      </Button>
     </div>
   );
 };

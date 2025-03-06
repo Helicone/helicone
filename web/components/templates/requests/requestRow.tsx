@@ -28,10 +28,9 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import NewDataset from "../datasets/NewDataset";
-import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
-import ModelPill from "./modelPill";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import StatusBadge from "./statusBadge";
+import { ThumbsUp, ThumbsDown, FlaskConical } from "lucide-react";
 
 function getPathName(url: string) {
   try {
@@ -251,7 +250,7 @@ const RequestRow = (props: RequestRowProps) => {
           <h2 className="text-base font-medium leading-normal text-sidebar-foreground">
             {request.model}
           </h2>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
             <EllipsisHorizontalIcon className="h-4 w-4" />
           </Button>
           {/* {request.heliconeMetadata.user && (
@@ -458,7 +457,7 @@ const RequestRow = (props: RequestRowProps) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0 ml-2 flex-shrink-0"
                   onClick={() => {
@@ -561,7 +560,7 @@ const RequestRow = (props: RequestRowProps) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0 ml-2 flex-shrink-0"
                   onClick={() => {
@@ -581,28 +580,78 @@ const RequestRow = (props: RequestRowProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col py-2 px-2 border-t border-border bg-red-200">
-
-        {/* Request/Response content */}
-        {
-          displayPreview && (
-            <div className="flex flex-col space-y-8 pt-4 border-t border-gray-200 dark:border-gray-800">
+      {/* Request/Response content */}
+      <div className="flex flex-col border-t border-border h-full relative">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto pb-16">
+          {displayPreview && (
+            <div className="flex flex-col">
               <RenderMappedRequest
                 mapperContent={request}
                 promptData={promptData}
               />
             </div>
-          )
-        }
+          )}
+        </div>
 
-        <div className="min-h-[100px]">{/* space */}</div>
+        {/* Footer with action buttons - anchored to bottom of panel */}
+        <div className="absolute bottom-0 left-0 right-0 w-full border-t border-border bg-background p-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => {/* Add test prompt handler */ }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <line x1="10" y1="9" x2="8" y2="9" />
+                </svg>
+                Test Prompt
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {/* Add experiment handler */ }}
+              >
+                <FlaskConical className="mr-2 h-4 w-4" />
+                Experiment
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => setNewDatasetModalOpen(true)}
+              >
+                <PlusIcon className="h-4 w-4" />
+                Dataset
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <ThumbsUp className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <ThumbsDown className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
           <NewDataset
             request_ids={[request.id]}
             onComplete={() => setNewDatasetModalOpen(false)}
           />
         </ThemedModal>
-      </div >
+      </div>
     </div>
   );
 };
