@@ -68,10 +68,6 @@ export interface LLMRequestBody {
   stop?: string[] | string | null; // stop_sequences for Anthropic
   reasoning_effort?: "low" | "medium" | "high" | null;
 
-  // Embedding models
-  input?: string | string[];
-  n?: number | null;
-
   // Internal Tools
   tools?: Tool[];
   parallel_tool_calls?: boolean | null;
@@ -80,10 +76,18 @@ export interface LLMRequestBody {
     // For "tool"
     name?: string; // The function name to call
   };
-  response_format?: { type: string; json_schema?: any } | null;
+  response_format?: { type: string; json_schema?: any };
   // External Tools
   toolDetails?: HeliconeEventTool;
   vectorDBDetails?: HeliconeEventVectorDB;
+
+  // Embedding models
+  input?: string | string[];
+  n?: number | null;
+
+  // Image-gen Models
+  size?: string;
+  quality?: string;
 }
 
 /* -------------------------------------------------------------------------- */

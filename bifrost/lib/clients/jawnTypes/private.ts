@@ -779,9 +779,6 @@ Json: JsonObject;
       stop?: (string[] | string) | null;
       /** @enum {string|null} */
       reasoning_effort?: "low" | "medium" | "high" | null;
-      input?: string | string[];
-      /** Format: double */
-      n?: number | null;
       tools?: components["schemas"]["Tool"][];
       parallel_tool_calls?: boolean | null;
       tool_choice?: {
@@ -792,9 +789,14 @@ Json: JsonObject;
       response_format?: {
         json_schema?: unknown;
         type: string;
-      } | null;
+      };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
     };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {

@@ -2863,24 +2863,6 @@
 						],
 						"nullable": true
 					},
-					"input": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
-					},
-					"n": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
 					"tools": {
 						"items": {
 							"$ref": "#/components/schemas/Tool"
@@ -2921,14 +2903,37 @@
 						"required": [
 							"type"
 						],
-						"type": "object",
-						"nullable": true
+						"type": "object"
 					},
 					"toolDetails": {
 						"$ref": "#/components/schemas/HeliconeEventTool"
 					},
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
+					},
+					"input": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						]
+					},
+					"n": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"size": {
+						"type": "string"
+					},
+					"quality": {
+						"type": "string"
 					}
 				},
 				"type": "object",
