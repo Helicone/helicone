@@ -101,10 +101,7 @@ const getRequestText = (requestBody: GoogleChatRequest): string => {
 /**
  * Extract text from the response
  */
-const getResponseText = (
-  responseBody: any,
-  statusCode: number = 200
-): string => {
+const getResponseText = (responseBody: any, statusCode = 200): string => {
   try {
     if (statusCode === 0 || statusCode === null) return "";
     if (![200, 201, -3].includes(statusCode)) {
@@ -358,7 +355,6 @@ export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
   )
 
   // Map preview request text
-  // @ts-ignore - We need this mapper for preview data, even though the path isn't ideal
   .mapWithTransform(
     "contents",
     "preview.request",
