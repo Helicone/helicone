@@ -180,7 +180,7 @@ const DesktopSidebar = ({
   return (
     <>
       {/* Mobile hamburger menu */}
-      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-slate-100 dark:bg-black border-b border-slate-300 dark:border-slate-70">
         <Button
           variant="ghost"
           size="icon"
@@ -218,7 +218,7 @@ const DesktopSidebar = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 bg-background transition-all duration-300 h-screen bg-white dark:bg-neutral-950",
+          "flex flex-col z-50 transition-all duration-300 h-screen bg-sidebar-background",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
