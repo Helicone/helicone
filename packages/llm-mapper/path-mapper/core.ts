@@ -303,8 +303,8 @@ export class PathMapper<
       if (!segment) continue;
 
       // Extract all array accesses within this segment
-      let propertyName = segment;
-      let bracketIndex = propertyName.indexOf("[");
+      const propertyName = segment;
+      const bracketIndex = propertyName.indexOf("[");
 
       if (bracketIndex === -1) {
         // Simple property with no array access
