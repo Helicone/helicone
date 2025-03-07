@@ -12,10 +12,16 @@ import { useHasAccess } from "@/hooks/useHasAccess";
 import AuthHeader from "@/components/shared/authHeader";
 import React from "react";
 import { useEvalPanelStore } from "./store/evalPanelStore";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const EvalsPage = () => {
   const hasAccess = useHasAccess("evals");
+  const org = useOrg();
   const { panels } = useEvalPanelStore();
+
+  if (!org?.currentOrg?.tier) {
+    return null;
+  }
 
   if (!hasAccess) {
     return (

@@ -69,7 +69,6 @@ export const useEvaluators = () => {
 
   return {
     evaluators,
-
     deleteEvaluator,
   };
 };
