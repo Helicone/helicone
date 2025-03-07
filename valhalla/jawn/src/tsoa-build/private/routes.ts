@@ -1609,8 +1609,10 @@ const models: TsoaRoute.Models = {
     "CompletionUsage.CompletionTokensDetails": {
         "dataType": "refObject",
         "properties": {
+            "accepted_prediction_tokens": {"dataType":"double"},
             "audio_tokens": {"dataType":"double"},
             "reasoning_tokens": {"dataType":"double"},
+            "rejected_prediction_tokens": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -1670,6 +1672,16 @@ const models: TsoaRoute.Models = {
         "properties": {
             "text": {"dataType":"string","required":true},
             "type": {"dataType":"enum","enums":["text"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionDeveloperMessageParam": {
+        "dataType": "refObject",
+        "properties": {
+            "content": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionContentPartText"}}],"required":true},
+            "role": {"dataType":"enum","enums":["developer"],"required":true},
+            "name": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -1797,7 +1809,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ChatCompletionMessageParam": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionSystemMessageParam"},{"ref":"ChatCompletionUserMessageParam"},{"ref":"ChatCompletionAssistantMessageParam"},{"ref":"ChatCompletionToolMessageParam"},{"ref":"ChatCompletionFunctionMessageParam"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionDeveloperMessageParam"},{"ref":"ChatCompletionSystemMessageParam"},{"ref":"ChatCompletionUserMessageParam"},{"ref":"ChatCompletionAssistantMessageParam"},{"ref":"ChatCompletionToolMessageParam"},{"ref":"ChatCompletionFunctionMessageParam"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Record_string.unknown_": {

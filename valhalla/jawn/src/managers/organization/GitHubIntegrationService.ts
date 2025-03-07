@@ -4,16 +4,32 @@ import { Project, Node, SourceFile } from "ts-morph";
 import * as os from "os";
 import simpleGit from "simple-git";
 import {
-  extractAstTransformations,
-  getFeatureName,
-} from "../../utils/diffExtractor";
+  extractSimpleTransformations,
+  applySimpleTransformations,
+} from "../../utils/simpleTransformationApplier";
 import * as ts from "typescript";
+import { OpenAI } from "openai";
+import * as fs from "fs";
+import { exec } from "child_process";
+import { v4 as uuidv4 } from "uuid";
 
 // Greptile API base URL
 const GREPTILE_API_BASE = "https://api.greptile.com/v2";
 
 // Get Greptile API key from environment
 const GREPTILE_API_KEY = process.env.GREPTILE_API_KEY || "";
+
+// Initialize OpenAI client with OpenRouter base URL
+const openaiClient = new OpenAI({
+  baseURL: "https://openrouter.helicone.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY || "",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY || ""}`,
+  },
+});
+
+// Gemini Flash model ID
+const GEMINI_FLASH_MODEL = "google/gemini-2.0-flash-lite-001";
 
 export class GitHubIntegrationService {
   private updateStatusCallback: (
@@ -72,13 +88,12 @@ export class GitHubIntegrationService {
     await this.addLogCallback(integrationId, message);
   }
 
-  // Main method to process the GitHub integration
   public async processIntegration(
     integrationId: string,
     repositoryUrl: string,
     githubToken: string,
     selectedFeatures?: string[]
-  ): Promise<void> {
+  ): Promise<string> {
     try {
       // Update status to initializing
       await this.updateStatus(integrationId, "Initializing", 0);
@@ -153,41 +168,208 @@ export class GitHubIntegrationService {
           "Repository already indexed",
           50
         );
-        // For already indexed repositories, construct the status endpoint
-        statusEndpoint = `${GREPTILE_API_BASE}/repositories/${repoId}`;
       }
 
-      // Query the repository for Helicone integration
+      // Parse the repository URL to extract owner and repo name
+      const match = repositoryUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+      if (!match) {
+        throw new Error(`Invalid GitHub repository URL: ${repositoryUrl}`);
+      }
+      const [, owner, repo] = match;
+
+      // Decode the repository ID
+      const decodedRepoId = decodeURIComponent(repoId!);
+      const [remote, branch, repository] = decodedRepoId.split(":");
+
+      await this.addLog(integrationId, `Scanning repository for LLM API calls`);
       await this.updateStatus(
         integrationId,
-        "Analyzing repository for LLM API calls",
+        "Scanning repository for LLM usage",
         60
       );
-      const queryResults = await this.queryForHeliconeIntegration(
-        repoId!,
+
+      const sessionId = uuidv4();
+      // Use Gemini Flash to scan the repository for LLM usage
+      const fileContents = await this.scanRepositoryForLLMUsage(
+        owner,
+        repo,
+        branch,
         githubToken,
         integrationId,
-        selectedFeatures
+        sessionId
       );
 
-      // Create a pull request with the changes
-      await this.updateStatus(integrationId, "Creating pull request", 80);
-      const prUrl = await this.createPullRequest(
-        repositoryUrl,
-        queryResults,
-        githubToken,
-        integrationId
+      await this.addLog(
+        integrationId,
+        `Found ${fileContents.length} files with LLM usage`
       );
-
-      // Update the status to completed
       await this.updateStatus(
         integrationId,
-        "Integration completed",
+        "Generating Helicone integration",
+        80
+      );
+
+      // Log file paths to debug
+      await this.addLog(
+        integrationId,
+        `File paths: ${fileContents.map((f) => f.path).join(", ")}`
+      );
+
+      // Generate transformations using Claude 3.7 Sonnet with the extracted LLM blocks
+      const transformations = await this.generateTransformationsWithClaude(
+        fileContents,
+        integrationId,
+        sessionId
+      );
+
+      const parsedResponse = transformations;
+
+      // Create a temporary directory for the repository
+      const tempDir = path.join(
+        os.tmpdir(),
+        `helicone-integration-${Date.now()}`
+      );
+      fs.mkdirSync(tempDir, { recursive: true });
+
+      await this.addLog(integrationId, `Cloning repository ${owner}/${repo}`);
+
+      // Clone the repository
+      const cloneUrl = `https://x-access-token:${githubToken}@github.com/${owner}/${repo}.git`;
+      await new Promise<void>((resolve, reject) => {
+        exec(`git clone ${cloneUrl} ${tempDir}`, (error) => {
+          if (error) {
+            reject(new Error(`Failed to clone repository: ${error.message}`));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      await this.addLog(
+        integrationId,
+        `Applying transformations to ${parsedResponse.length} files`
+      );
+
+      // Apply the transformations
+      const transformationResults = await this.applyFuzzyPatching(
+        tempDir,
+        parsedResponse
+      );
+
+      // Count successful and failed transformations
+      const successCount = transformationResults.filter(
+        (result) => result.success
+      ).length;
+      const failureCount = transformationResults.length - successCount;
+
+      await this.addLog(
+        integrationId,
+        `Applied transformations: ${successCount} successful, ${failureCount} failed`
+      );
+
+      // Log the failures if any
+      if (failureCount > 0) {
+        const failures = transformationResults
+          .filter((result) => !result.success)
+          .map((result) => `${result.filePath}: ${result.error}`)
+          .join("\n");
+
+        await this.addLog(
+          integrationId,
+          `Transformation failures:\n${failures}`
+        );
+      }
+
+      // Create a branch name based on the current date
+      const branchName = `helicone-integration-${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}`;
+
+      // Create and push the branch with changes
+      await this.addLog(integrationId, `Creating branch ${branchName}`);
+
+      await new Promise<void>((resolve, reject) => {
+        exec(
+          `cd ${tempDir} && git checkout -b ${branchName} && git add . && git commit -m "Add Helicone integration" && git push origin ${branchName}`,
+          (error) => {
+            if (error) {
+              reject(new Error(`Failed to push changes: ${error.message}`));
+            } else {
+              resolve();
+            }
+          }
+        );
+      });
+
+      // Create a pull request
+      await this.addLog(integrationId, `Creating pull request`);
+
+      const prTitle = "Add Helicone Integration";
+      let prBody = "This PR adds Helicone integration to the project.\n\n";
+
+      // Add details about the transformations
+      prBody += `## Changes\n\n`;
+      prBody += `- ${successCount} files modified successfully\n`;
+      if (failureCount > 0) {
+        prBody += `- ${failureCount} files could not be modified\n`;
+      }
+
+      prBody += "\n## Setup Instructions\n\n";
+      prBody += "1. Sign up for a Helicone account at https://helicone.ai\n";
+      prBody += "2. Create an API key in the Helicone dashboard\n";
+      prBody += "3. Add the following environment variables to your project:\n";
+      prBody += "   - `HELICONE_API_KEY`: Your Helicone API key\n";
+
+      // Set up a wrapper for GitHub API calls
+      const githubFetch = async (
+        endpoint: string,
+        options: RequestInit = {}
+      ) => {
+        const url = `https://api.github.com${endpoint}`;
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github.v3+json",
+            ...options.headers,
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`GitHub API error (${response.status}): ${error}`);
+        }
+
+        return response.json();
+      };
+
+      // Create the pull request
+      const prResponse = await githubFetch(`/repos/${owner}/${repo}/pulls`, {
+        method: "POST",
+        body: JSON.stringify({
+          title: prTitle,
+          body: prBody,
+          head: branchName,
+          base: "main", // Assuming the default branch is main
+        }),
+      });
+
+      const prUrl = prResponse.html_url;
+
+      await this.addLog(integrationId, `Pull request created: ${prUrl}`);
+
+      // Update status with the PR URL
+      await this.updateStatus(
+        integrationId,
+        "Completed",
         100,
         true,
         undefined,
         prUrl
       );
+
+      // Return a JSON string of the transformations
+      return JSON.stringify(transformations);
     } catch (error: any) {
       console.error("Error in integration process:", error);
       await this.updateStatus(
@@ -197,6 +379,133 @@ export class GitHubIntegrationService {
         true,
         error.message || "An unexpected error occurred"
       );
+      throw error;
+    }
+  }
+
+  /**
+   * Parse the Gemini response into a structured format for transformations
+   */
+  private parseGeminiResponse(
+    geminiResponse: string
+  ): { filePath: string; original: string; replacement: string }[] {
+    try {
+      console.log("Parsing Gemini response");
+      const transformations: {
+        filePath: string;
+        original: string;
+        replacement: string;
+      }[] = [];
+
+      // First, try to parse the response as JSON
+      try {
+        // Parse the response as JSON
+        const jsonData = JSON.parse(geminiResponse);
+
+        // Handle the new format with needsChanges flag
+        if (
+          jsonData.file &&
+          jsonData.analysis &&
+          typeof jsonData.analysis.needsChanges === "boolean"
+        ) {
+          // Only process changes if needsChanges is true
+          if (
+            jsonData.analysis.needsChanges &&
+            jsonData.changes &&
+            Array.isArray(jsonData.changes)
+          ) {
+            // Process each change for this file
+            for (const change of jsonData.changes) {
+              if (
+                change.original &&
+                change.replacement &&
+                change.original !== change.replacement
+              ) {
+                transformations.push({
+                  filePath: jsonData.file,
+                  original: change.original,
+                  replacement: change.replacement,
+                });
+              }
+            }
+          }
+
+          console.log(
+            `Parsed ${transformations.length} transformations from JSON response (needsChanges: ${jsonData.analysis.needsChanges})`
+          );
+          return transformations;
+        }
+
+        // Handle the old array format for backward compatibility
+        if (Array.isArray(jsonData)) {
+          // Process JSON array format
+          for (const item of jsonData) {
+            const filePath = item.file || item.filePath;
+
+            if (filePath && item.changes && Array.isArray(item.changes)) {
+              // Process each change for this file
+              for (const change of item.changes) {
+                if (
+                  change.original &&
+                  change.replacement &&
+                  change.original !== change.replacement
+                ) {
+                  transformations.push({
+                    filePath,
+                    original: change.original,
+                    replacement: change.replacement,
+                  });
+                }
+              }
+            }
+          }
+
+          console.log(
+            `Parsed ${transformations.length} transformations from JSON array response`
+          );
+          return transformations;
+        }
+      } catch (jsonError) {
+        console.log("Failed to parse response as JSON:", jsonError);
+        // Continue to try the text-based format
+      }
+
+      // If JSON parsing failed, try the text-based format with file/ORIGINAL/REPLACEMENT markers
+      const fileBlocks = geminiResponse.split("```file:").slice(1);
+
+      for (const block of fileBlocks) {
+        const firstLineEnd = block.indexOf("\n");
+        const filePath = block.substring(0, firstLineEnd).trim();
+        const content = block
+          .substring(firstLineEnd + 1, block.lastIndexOf("```"))
+          .trim();
+
+        // Split the content into ORIGINAL and REPLACEMENT sections
+        const sections = content.split(
+          /\n(?:\/\/\s*)?(?:ORIGINAL|REPLACEMENT):\n/
+        );
+        if (sections.length >= 3) {
+          // The first element is empty, the second is ORIGINAL, the third is REPLACEMENT
+          const original = sections[1].trim();
+          const replacement = sections[2].trim();
+
+          if (original && replacement && original !== replacement) {
+            transformations.push({
+              filePath,
+              original,
+              replacement,
+            });
+          }
+        }
+      }
+
+      console.log(
+        `Parsed ${transformations.length} transformations from text-based response`
+      );
+      return transformations;
+    } catch (error) {
+      console.error("Error parsing Gemini response:", error);
+      return [];
     }
   }
 
@@ -387,1141 +696,899 @@ export class GitHubIntegrationService {
     }
   }
 
-  // Query the repository for Helicone integration
-  private async queryForHeliconeIntegration(
-    repoId: string,
-    githubToken: string,
-    integrationId: string,
-    selectedFeatures?: string[]
-  ): Promise<any> {
-    try {
-      await this.updateStatus(
-        integrationId,
-        "Querying for integration instructions...",
-        40
-      );
+  /**
+   * Creates a unique identifier for a file path that's more specific than just the filename
+   * but still concise enough for use in session paths
+   */
+  private getUniquePathIdentifier(filePath: string): string {
+    const parts = filePath.split("/");
 
-      const decodedRepoId = decodeURIComponent(repoId);
-      const [remote, branch, repository] = decodedRepoId.split(":");
+    // If the path has only one part (just filename), return it
+    if (parts.length === 1) {
+      return parts[0];
+    }
 
-      // Step 2: Generate the main prompt incorporating provider-specific instructions
-      const introContent = this.featurePromptService.readPromptFile(
-        "heliconeGeneralIntegration.md"
-      );
+    // If the path has two parts, return both joined with a dash
+    if (parts.length === 2) {
+      return parts.join("-");
+    }
 
-      const outputFormatContent = this.featurePromptService.readPromptFile(
-        "heliconeOutputFormat.md"
-      );
+    // For longer paths, take the last two directories and the filename
+    // e.g., "app/api/debate/route.ts" becomes "debate-route.ts"
+    return parts.slice(-3).join("-");
+  }
 
-      // Add feature-specific content if any features were selected
-      let featureSpecificContent = "";
-      if (selectedFeatures && selectedFeatures.length > 0) {
-        featureSpecificContent += "\n\n## Selected Feature Instructions\n";
+  getFeatureName = (featureId: string): string => {
+    // Map feature IDs to their display names
+    const featureMap: Record<string, string> = {
+      // Provider features
+      openai: "OpenAI",
+      anthropic: "Anthropic",
+      azure: "Azure OpenAI",
+      perplexity: "Perplexity",
+      openrouter: "OpenRouter",
+      cohere: "Cohere",
+      claude: "Claude",
+      llamafile: "Llamafile",
+      "helicone-proxy": "Helicone Proxy",
+      "together-ai": "Together AI",
+      "google-ai": "Google AI",
+      mistral: "Mistral AI",
+      ollama: "Ollama",
 
-        for (const featureId of selectedFeatures) {
-          try {
-            // Construct the feature prompt file path
-            const featurePromptFile = `features/helicone${
-              featureId.charAt(0).toUpperCase() +
-              featureId.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-            }.md`;
+      // Helicone features
+      caching: "Caching",
+      "custom-properties": "Custom Properties",
+      prompts: "Prompts",
+      "rate-limits": "Rate Limits",
+      retries: "Retries",
+      security: "Security",
+      sessions: "Sessions",
+      "user-metrics": "User Metrics",
+    };
 
-            const featureContent =
-              this.featurePromptService.readPromptFile(featurePromptFile);
-            const featureName = getFeatureName(featureId);
-            featureSpecificContent += `\n### ${featureName}\n${featureContent}\n`;
+    // Return the mapped name or transform the ID to a readable format
+    return (
+      featureMap[featureId] ||
+      featureId
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    );
+  };
 
-            await this.addLog(
-              integrationId,
-              `Added feature instructions for ${featureName}`
-            );
-          } catch (featureError) {
-            await this.addLog(
-              integrationId,
-              `Error loading feature instructions for ${featureId}: ${featureError}`
-            );
+  /**
+   * Apply fuzzy patching to files based on the parsed transformations
+   */
+  private async applyFuzzyPatching(
+    repoPath: string,
+    transformations: {
+      filePath: string;
+      original: string;
+      replacement: string;
+    }[]
+  ): Promise<{ filePath: string; success: boolean; error?: string }[]> {
+    const results: { filePath: string; success: boolean; error?: string }[] =
+      [];
+
+    for (const transformation of transformations) {
+      try {
+        const fullFilePath = path.join(repoPath, transformation.filePath);
+
+        // Check if file exists
+        if (!fs.existsSync(fullFilePath)) {
+          results.push({
+            filePath: transformation.filePath,
+            success: false,
+            error: `File not found: ${fullFilePath}`,
+          });
+          continue;
+        }
+
+        // Read the file content
+        const fileContent = fs.readFileSync(fullFilePath, "utf8");
+
+        // Apply the transformation using fuzzy matching
+        if (fileContent.includes(transformation.original)) {
+          // Direct replacement if exact match found
+          const newContent = fileContent.replace(
+            transformation.original,
+            transformation.replacement
+          );
+
+          // Write the modified content back to the file
+          fs.writeFileSync(fullFilePath, newContent);
+
+          results.push({
+            filePath: transformation.filePath,
+            success: true,
+          });
+        } else {
+          console.log(
+            `Exact match not found for ${transformation.filePath}, trying fuzzy match`
+          );
+
+          // Try multiple matching strategies
+          let matched = false;
+          let newContent = fileContent;
+
+          // Strategy 1: Normalized whitespace matching
+          if (!matched) {
+            const normalizedFileContent = fileContent
+              .replace(/\s+/g, " ")
+              .replace(/\r\n/g, "\n");
+
+            const normalizedOriginal = transformation.original
+              .replace(/\s+/g, " ")
+              .replace(/\r\n/g, "\n");
+
+            if (normalizedFileContent.includes(normalizedOriginal)) {
+              // Create a regex that's more flexible with whitespace
+              const escapedOriginal = transformation.original
+                .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+                .replace(/\s+/g, "\\s+")
+                .replace(/\n/g, "\\n?");
+
+              const fuzzyRegex = new RegExp(escapedOriginal, "g");
+              newContent = fileContent.replace(
+                fuzzyRegex,
+                transformation.replacement
+              );
+              matched = true;
+            }
+          }
+
+          // Strategy 2: Function call pattern matching
+          // This helps match function calls like client.chat.completions.create() even if parameters differ
+          if (!matched) {
+            // Extract function call pattern from original
+            const functionCallMatch =
+              transformation.original.match(/(\w+(?:\.\w+)*\s*\()/);
+
+            if (functionCallMatch && functionCallMatch[1]) {
+              const functionCallPattern = functionCallMatch[1];
+              // Find all occurrences of this function call in the file
+              const functionCallRegex = new RegExp(
+                `${functionCallPattern.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  "\\$&"
+                )}[\\s\\S]*?\\)`,
+                "g"
+              );
+
+              const matches = fileContent.match(functionCallRegex);
+
+              if (matches && matches.length > 0) {
+                // Find the best match based on similarity
+                let bestMatch = null;
+                let highestScore = 0;
+
+                for (const match of matches) {
+                  // Simple similarity score - count matching characters
+                  let score = 0;
+                  const minLength = Math.min(
+                    match.length,
+                    transformation.original.length
+                  );
+                  for (let i = 0; i < minLength; i++) {
+                    if (match[i] === transformation.original[i]) {
+                      score++;
+                    }
+                  }
+
+                  if (score > highestScore) {
+                    highestScore = score;
+                    bestMatch = match;
+                  }
+                }
+
+                if (
+                  bestMatch &&
+                  highestScore > transformation.original.length * 0.7
+                ) {
+                  newContent = fileContent.replace(
+                    bestMatch,
+                    transformation.replacement
+                  );
+                  matched = true;
+                }
+              }
+            }
+          }
+
+          // Strategy 3: Key parameter matching
+          // This helps match code blocks with specific parameters like model names
+          if (!matched) {
+            // Extract key parameters from original (like model names, temperature values)
+            const keyParams = [
+              ...transformation.original.matchAll(
+                /model\s*:\s*["']([^"']+)["']/g
+              ),
+              ...transformation.original.matchAll(
+                /temperature\s*:\s*([\d.]+)/g
+              ),
+              ...transformation.original.matchAll(/apiKey\s*:\s*([^,\n\r}]+)/g),
+            ].map((match) => match[1]);
+
+            if (keyParams.length > 0) {
+              // Find code blocks containing these key parameters
+              const lines = fileContent.split("\n");
+              let potentialMatches = [];
+
+              for (let i = 0; i < lines.length; i++) {
+                for (const param of keyParams) {
+                  if (lines[i].includes(param)) {
+                    // Extract a block of code around this line
+                    const startLine = Math.max(0, i - 10);
+                    const endLine = Math.min(lines.length, i + 10);
+                    potentialMatches.push(
+                      lines.slice(startLine, endLine).join("\n")
+                    );
+                    break;
+                  }
+                }
+              }
+
+              if (potentialMatches.length > 0) {
+                // Find the best match based on parameter overlap
+                let bestMatch = null;
+                let highestScore = 0;
+
+                for (const match of potentialMatches) {
+                  let score = 0;
+                  for (const param of keyParams) {
+                    if (match.includes(param)) {
+                      score++;
+                    }
+                  }
+
+                  if (score > highestScore) {
+                    highestScore = score;
+                    bestMatch = match;
+                  }
+                }
+
+                if (
+                  bestMatch &&
+                  highestScore >= Math.ceil(keyParams.length * 0.5)
+                ) {
+                  // We found a good match, now we need to replace just the relevant part
+                  newContent = fileContent.replace(
+                    bestMatch,
+                    bestMatch.replace(
+                      // Find the function call or client initialization in the matched block
+                      /(\w+(?:\.\w+)*\s*\([^)]*\)|\w+\s*=\s*new\s+\w+\([^)]*\))/g,
+                      (found) => {
+                        // Only replace if it looks similar to our original
+                        const normalizedFound = found.replace(/\s+/g, " ");
+                        const normalizedOriginal =
+                          transformation.original.replace(/\s+/g, " ");
+
+                        if (
+                          normalizedFound.includes(
+                            normalizedOriginal.substring(0, 20)
+                          ) ||
+                          normalizedOriginal.includes(
+                            normalizedFound.substring(0, 20)
+                          )
+                        ) {
+                          return transformation.replacement;
+                        }
+                        return found;
+                      }
+                    )
+                  );
+                  matched = true;
+                }
+              }
+            }
+          }
+
+          if (matched) {
+            // Write the modified content back to the file
+            fs.writeFileSync(fullFilePath, newContent);
+
+            results.push({
+              filePath: transformation.filePath,
+              success: true,
+            });
+          } else {
+            results.push({
+              filePath: transformation.filePath,
+              success: false,
+              error:
+                "Could not find matching code segment, even with enhanced fuzzy matching",
+            });
           }
         }
+      } catch (error) {
+        results.push({
+          filePath: transformation.filePath,
+          success: false,
+          error: `Error applying transformation: ${error}`,
+        });
       }
+    }
 
-      const promptContent = `${introContent}
+    return results;
+  }
 
-## Repository Analysis Results
-Based on our analysis, your codebase uses the following:
+  /**
+   * Scan repository files using Gemini Flash to identify LLM usage
+   */
+  private async scanRepositoryForLLMUsage(
+    owner: string,
+    repo: string,
+    branch: string,
+    githubToken: string,
+    integrationId: string,
+    sessionId: string
+  ): Promise<
+    {
+      path: string;
+      content: string;
+      llmBlocks?: string[];
+      description?: string;
+    }[]
+  > {
+    try {
+      await this.addLog(
+        integrationId,
+        `Scanning repository for LLM usage with Gemini Flash`
+      );
 
-${featureSpecificContent}
+      // First, get a list of all files in the repository
+      const allFiles = await this.listRepositoryFiles(
+        owner,
+        repo,
+        branch,
+        githubToken
+      );
 
-${outputFormatContent}`;
-
-      console.log("PROMPT CONTENT:", promptContent);
-      await this.addLog(integrationId, `Generated final integration prompt`);
-
-      // Make the request to Greptile using the correct API structure
-      const response = await fetch(`${GREPTILE_API_BASE}/query`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${GREPTILE_API_KEY}`,
-          "Content-Type": "application/json",
-          "X-Github-Token": githubToken,
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: promptContent,
-            },
-          ],
-          repositories: [
-            {
-              remote,
-              repository,
-              branch,
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to query Greptile: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      // Log the first part of the message to help with debugging
-      const messagePreview = data.message
-        ? `Response preview: ${data.message.substring(0, 500)}...`
-        : "No message in response";
-      console.log(messagePreview);
-
-      // Log full message for debugging
-      console.log("FULL GREPTILE RESPONSE:", data.message);
+      // Filter to only include likely code files
+      const codeFileExtensions = [
+        ".js",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".py",
+        ".rb",
+        ".go",
+        ".java",
+        ".php",
+        ".cs",
+      ];
+      const codeFiles = allFiles.filter((file) =>
+        codeFileExtensions.some((ext) => file.toLowerCase().endsWith(ext))
+      );
 
       await this.addLog(
         integrationId,
-        `Greptile response received, length: ${
-          data.message?.length || 0
-        } characters`
+        `Found ${codeFiles.length} code files to scan`
       );
 
-      // Check if the response contains a message
-      if (!data.message) {
+      // Process files in batches to avoid overwhelming the API
+      const batchSize = 10; // Process 10 files in parallel
+      const fileContents: {
+        path: string;
+        content: string;
+        llmBlocks?: string[];
+        description?: string;
+      }[] = [];
+
+      // Process files in batches
+      for (let i = 0; i < codeFiles.length; i += batchSize) {
+        const batch = codeFiles.slice(i, i + batchSize);
         await this.addLog(
           integrationId,
-          `Warning: Greptile response did not contain a message`
+          `Scanning batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+            codeFiles.length / batchSize
+          )}`
+        );
+
+        // Process each file in the batch in parallel
+        const batchPromises = batch.map(async (filePath) => {
+          try {
+            // Fetch file content from GitHub
+            const fileData = await fetch(
+              `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${githubToken}`,
+                  Accept: "application/vnd.github.v3+json",
+                },
+              }
+            );
+
+            // Parse the response as JSON
+            const fileDataJson = await fileData.json();
+
+            // GitHub API returns content as base64 encoded
+            const content = Buffer.from(
+              fileDataJson.content,
+              "base64"
+            ).toString("utf-8");
+
+            // Prepare the prompt for Gemini to extract LLM blocks
+            const geminiPrompt = `# LLM Usage Block Extraction
+
+## Context
+You are analyzing code for Helicone's GitHub Integration feature. Helicone is a monitoring platform for LLM API calls.
+This is step 1 of a 3-step process:
+1. You identify LLM usage in code files (current step)
+2. Claude will generate transformations to add Helicone integration
+3. The transformations will be applied to create a pull request
+
+Your analysis is critical - if you miss LLM usage or extract incorrect blocks, the integration will fail.
+
+## Task
+Analyze this file and extract code blocks that contain LLM API calls or client initializations.
+
+## What to Look For
+1. CLIENT INITIALIZATION - Code that creates clients for:
+   - OpenAI: \`new OpenAI()\`, \`new Configuration()\`
+   - Anthropic: \`new Anthropic()\`
+   - Gemini/Vertex: \`VertexAI\`, \`GenerativeModel\`
+   - OpenRouter: \`createOpenRouter()\`
+   - Any other LLM provider
+
+2. API CALLS - Function calls that request LLM responses:
+   - OpenAI: \`openai.chat.completions.create()\`, \`openai.completions.create()\`
+   - Anthropic: \`anthropic.messages.create()\`, \`anthropic.completions.create()\`
+   - Gemini/Vertex: \`model.generateContent()\`
+   - Generic: \`generateText()\`, \`generate()\`, \`complete()\`
+   - Any function with model names like "gpt", "claude", "gemini", "llama"
+
+3. CONFIGURATION - Code that sets up LLM parameters:
+   - API keys: \`OPENAI_API_KEY\`, \`ANTHROPIC_API_KEY\`
+   - Model names: \`gpt-4\`, \`claude-3\`, \`gemini-pro\`
+   - Parameters: \`temperature\`, \`max_tokens\`, \`top_p\`
+
+## Response Format
+Provide a JSON object with this structure:
+{
+  "file": "${filePath}",
+  "analysis": {
+    "containsLLMUsage": true/false,
+    "description": "Detailed description of all LLM usage in this file"
+  },
+  "llmBlocks": [
+    // Only include if containsLLMUsage is true
+    "complete code block with LLM client initialization or API call, including surrounding context",
+    "another code block if there are multiple instances"
+  ]
+}
+
+## Important Guidelines
+1. EXTRACT COMPLETE BLOCKS: Include entire function calls or client initializations
+2. INCLUDE CONTEXT: Capture 10-15 lines before/after to provide sufficient context
+3. CAPTURE IMPORTS: Include relevant import statements for LLM libraries
+4. BE THOROUGH: Look for all instances of LLM usage, not just obvious ones
+5. PRESERVE FORMATTING: Maintain indentation and code structure exactly as in the original
+6. INCLUDE FUNCTION BOUNDARIES: If LLM usage is inside a function, include the entire function
+
+## File to Analyze
+- ${filePath}
+
+## File Content
+\`\`\`
+${content}
+\`\`\`
+
+Your response must be a valid JSON object that can be parsed directly.`;
+
+            // Call Gemini Flash to analyze the file
+            const completion = await openaiClient.chat.completions.create(
+              {
+                model: "anthropic/claude-3.5-sonnet",
+                messages: [
+                  {
+                    role: "user",
+                    content: geminiPrompt,
+                  },
+                ],
+                temperature: 0.2,
+                response_format: { type: "json_object" },
+              },
+              {
+                headers: {
+                  "HTTP-Referer": "https://helicone.ai",
+                  "X-Title": "Helicone GitHub Integration - LLM Detection",
+                  "Helicone-Session-Id": sessionId,
+                  "Helicone-Session-Path": `/scan/${this.getUniquePathIdentifier(
+                    filePath
+                  )}`,
+                  "Helicone-Session-Name": "GitHub Integration",
+                },
+              }
+            );
+
+            const geminiResponse =
+              completion.choices[0].message.content || "{}";
+
+            try {
+              // Parse the response
+              const jsonData = JSON.parse(geminiResponse);
+
+              if (
+                jsonData.file &&
+                jsonData.analysis &&
+                typeof jsonData.analysis.containsLLMUsage === "boolean"
+              ) {
+                if (
+                  jsonData.analysis.containsLLMUsage &&
+                  jsonData.llmBlocks &&
+                  Array.isArray(jsonData.llmBlocks)
+                ) {
+                  return {
+                    path: filePath,
+                    content,
+                    llmBlocks: jsonData.llmBlocks,
+                    description: jsonData.analysis.description,
+                  };
+                }
+              }
+            } catch (error) {
+              await this.addLog(
+                integrationId,
+                `Error parsing Gemini response for ${filePath}: ${error}`
+              );
+            }
+
+            // Return the file with empty llmBlocks if no LLM usage was found or there was an error
+            return {
+              path: filePath,
+              content,
+              llmBlocks: [],
+              description: "No LLM usage detected",
+            };
+          } catch (error: any) {
+            await this.addLog(
+              integrationId,
+              `Error retrieving file ${filePath}: ${error.message}`
+            );
+            // Return the file with empty llmBlocks if there was an error
+            return {
+              path: filePath,
+              content: "",
+              llmBlocks: [],
+              description: `Error retrieving file: ${error.message}`,
+            };
+          }
+        });
+
+        // Wait for all files in the batch to be processed
+        const batchResults = await Promise.all(batchPromises);
+
+        // Add all files to fileContents
+        for (const result of batchResults) {
+          if (result) {
+            fileContents.push(result);
+          }
+        }
+
+        // Count files with LLM blocks
+        const filesWithLLMBlocks = batchResults.filter(
+          (result) => result && result.llmBlocks && result.llmBlocks.length > 0
+        );
+
+        await this.addLog(
+          integrationId,
+          `Found ${filesWithLLMBlocks.length} files with LLM usage in this batch`
         );
       }
 
-      return data;
-    } catch (error: any) {
-      console.error("Error querying Greptile:", error);
       await this.addLog(
         integrationId,
-        `Error querying Greptile: ${error.message}`
+        `Completed scan, found ${
+          fileContents.filter((f) => f.llmBlocks && f.llmBlocks.length > 0)
+            .length
+        } files with LLM usage`
       );
-      throw error;
+
+      return fileContents;
+    } catch (error: any) {
+      console.error("Error scanning repository for LLM usage:", error);
+      await this.addLog(
+        integrationId,
+        `Error scanning repository: ${error.message}`
+      );
+      return [];
     }
   }
 
-  // Create a pull request with Helicone integration
-  private async createPullRequest(
-    repositoryUrl: string,
-    queryResults: any,
-    githubToken: string,
-    integrationId: string
-  ): Promise<string> {
-    try {
-      await this.addLog(
-        integrationId,
-        `Preparing to create pull request for Helicone integration`
-      );
+  /**
+   * List all files in a repository
+   */
+  private async listRepositoryFiles(
+    owner: string,
+    repo: string,
+    branch: string,
+    githubToken: string
+  ): Promise<string[]> {
+    const files: string[] = [];
 
-      // Check if we have a valid response
-      if (!queryResults.message) {
-        throw new Error("No message in Greptile response");
-      }
-
-      // Parse the repository URL
-      const repoUrl = new URL(repositoryUrl);
-      const pathSegments = repoUrl.pathname.split("/");
-      const owner = pathSegments[1];
-      const repo = pathSegments[2];
-
-      // Set up a wrapper for GitHub API calls
-      const githubFetch = async (
-        endpoint: string,
-        options: RequestInit = {}
-      ) => {
-        const url = `https://api.github.com${endpoint}`;
-        const response = await fetch(url, {
-          ...options,
+    // Recursive function to list files in a directory
+    const listFiles = async (path = "") => {
+      const contents = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
+        {
           headers: {
             Authorization: `Bearer ${githubToken}`,
             Accept: "application/vnd.github.v3+json",
-            "Content-Type": "application/json",
-            ...options.headers,
           },
+        }
+      );
+
+      const data = await contents.json();
+
+      for (const item of data) {
+        if (item.type === "file") {
+          files.push(item.path);
+        } else if (item.type === "dir") {
+          await listFiles(item.path);
+        }
+      }
+    };
+
+    await listFiles();
+    return files;
+  }
+
+  /**
+   * Generate transformations for each file using Claude 3.7 Sonnet
+   */
+  private async generateTransformationsWithClaude(
+    filesWithLLMBlocks: {
+      path: string;
+      content: string;
+      llmBlocks?: string[];
+      description?: string;
+    }[],
+    integrationId: string,
+    sessionId: string
+  ): Promise<{ filePath: string; original: string; replacement: string }[]> {
+    const allTransformations: {
+      filePath: string;
+      original: string;
+      replacement: string;
+    }[] = [];
+
+    // Filter out files without LLM blocks
+    const filesToProcess = filesWithLLMBlocks.filter(
+      (file) => file.llmBlocks && file.llmBlocks.length > 0
+    );
+
+    // Process files in parallel batches
+    const batchSize = 5; // Process 5 files in parallel
+
+    for (let i = 0; i < filesToProcess.length; i += batchSize) {
+      const batch = filesToProcess.slice(i, i + batchSize);
+      await this.addLog(
+        integrationId,
+        `Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+          filesToProcess.length / batchSize
+        )} (${batch.length} files)`
+      );
+
+      // Create an array of promises for each file in the batch
+      const batchPromises = batch.map(async (file) => {
+        await this.addLog(
+          integrationId,
+          `Generating transformations for ${file.path}`
+        );
+
+        // Prepare the LLM blocks context
+        const llmBlocksContext =
+          file.llmBlocks
+            ?.map(
+              (block, index) =>
+                `## LLM Block ${index + 1}\n\`\`\`\n${block}\n\`\`\`\n\n`
+            )
+            .join("") || "";
+
+        // Prepare the prompt for Claude
+        const claudePrompt = `
+        You're a senior software engineer who is an expert at integrating Helicone with LLM APIs.
+
+        ## Context
+        This is step 2 of a 3-step process:
+        1. Gemini will identify LLM usage in code files (previous step)
+        2. Claude will generate the necessary transformations to add Helicone integration (current step)
+        3. The transformations will be applied to create a pull request (next step)
+
+        Your integration is critical - if you unnecessary integrate Helicone or incorrectly integrate Helicone, it will break the integration.
+
+        ## Task
+        Analyze the LLM usage blocks and generate the necessary transformations to add Helicone integration.
+
+        ## What to Look For
+        1. CLIENT INITIALIZATION - Code that creates clients for:
+          - OpenAI: \`new OpenAI()\`, \`new Configuration()\`
+          - Anthropic: \`new Anthropic()\`
+          - Gemini/Vertex: \`VertexAI\`, \`GenerativeModel\`
+          - OpenRouter: \`createOpenRouter()\`
+          - Any other LLM provider
+
+        2. API CALLS - Function calls that request LLM responses:
+          - OpenAI: \`openai.chat.completions.create()\`, \`openai.completions.create()\`
+          - Anthropic: \`anthropic.messages.create()\`, \`anthropic.completions.create()\`
+          - Gemini/Vertex: \`model.generateContent()\`
+          - Generic: \`generateText()\`, \`generate()\`, \`complete()\`
+          - Any function with model names like "gpt", "claude", "gemini", "llama"
+
+        3. CONFIGURATION - Code that sets up LLM parameters:
+          - API keys: \`OPENAI_API_KEY\`, \`ANTHROPIC_API_KEY\`
+          - Model names: \`gpt-4\`, \`claude-3\`, \`gemini-pro\`
+          - Parameters: \`temperature\`, \`max_tokens\`, \`top_p\`
+
+        ## Helicone Integration
+        1. Changing API base URLs to Helicone proxy endpoints
+        2. Adding Helicone authentication headers
+        3. Ensuring environment variables are properly set up
+
+        ## Integration Examples by Provider
+
+        ### OpenAI
+        \`\`\`javascript
+        // BEFORE
+        import { OpenAI } from "openai";
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+        // AFTER
+        import { OpenAI } from "openai";
+        const client = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
+          baseURL: "https://oai.helicone.ai",
+          defaultHeaders: {
+            "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY
+          }
+        });
+        \`\`\`
+
+        ### OpenRouter (for Gemini)
+        \`\`\`javascript
+        // BEFORE
+        export const openrouter = createOpenRouter({
+          apiKey: process.env.OPENROUTER_API_KEY || "",
         });
 
-        if (!response.ok) {
-          const error = await response.text();
-          throw new Error(`GitHub API error (${response.status}): ${error}`);
-        }
-
-        return await response.json();
-      };
-
-      // Create a new branch
-      const branchName = `helicone-integration-${Date.now()}`;
-      await this.addLog(integrationId, `Creating new branch: ${branchName}`);
-
-      // Get the default branch
-      const repoInfo = await githubFetch(`/repos/${owner}/${repo}`);
-      const defaultBranch = repoInfo.default_branch;
-
-      // Get the latest commit SHA from the default branch
-      const refData = await githubFetch(
-        `/repos/${owner}/${repo}/git/refs/heads/${defaultBranch}`
-      );
-      const latestCommitSha = refData.object.sha;
-
-      // Create a new branch reference
-      await githubFetch(`/repos/${owner}/${repo}/git/refs`, {
-        method: "POST",
-        body: JSON.stringify({
-          ref: `refs/heads/${branchName}`,
-          sha: latestCommitSha,
-        }),
-      });
-
-      await this.addLog(
-        integrationId,
-        `Extracting AST transformations from Greptile response`
-      );
-
-      // Extract AST transformations from the message
-      const transformations = extractAstTransformations(queryResults.message);
-
-      if (transformations.length === 0) {
-        throw new Error(
-          "No valid AST transformations found in Greptile response"
-        );
-      }
-
-      await this.addLog(
-        integrationId,
-        `Found ${transformations.length} AST transformations to apply`
-      );
-
-      // Clone the repository locally to apply transformations
-      const repoDir = path.join(
-        os.tmpdir(),
-        `helicone-integration-${Date.now()}`
-      );
-
-      await this.addLog(integrationId, `Cloning repository to ${repoDir}`);
-
-      // Use simple-git to clone the repository
-      const git = simpleGit();
-      await git.clone(repositoryUrl, repoDir);
-      await git.cwd(repoDir);
-      await git.checkout([branchName]);
-
-      // Apply the AST transformations
-      const success = await this.processAstTransformations(
-        transformations,
-        repoDir,
-        integrationId
-      );
-
-      if (!success) {
-        throw new Error("Failed to apply AST transformations");
-      }
-
-      // Commit the changes
-      await this.addLog(integrationId, `Committing changes`);
-      await git.add(".");
-      await git.commit("Add Helicone integration");
-
-      // Push the changes
-      await this.addLog(integrationId, `Pushing changes to GitHub`);
-      await git.push("origin", branchName);
-
-      // Create a pull request
-      await this.addLog(integrationId, `Creating pull request`);
-      const pullRequest = await githubFetch(`/repos/${owner}/${repo}/pulls`, {
-        method: "POST",
-        body: JSON.stringify({
-          title: "Add Helicone Integration",
-          body: `This PR adds Helicone integration to track and monitor your LLM API calls.
-
-## Changes Made
-- Added Helicone headers to API calls
-- Set up proper authentication for Helicone
-- Added environment variables
-
-## Next Steps
-1. Sign up for a Helicone account at https://helicone.ai
-2. Create an API key in the Helicone dashboard
-3. Add the API key to your environment variables as HELICONE_API_KEY
-4. Deploy your application to start tracking API calls
-
-For more information, visit the [Helicone documentation](https://docs.helicone.ai).`,
-          head: branchName,
-          base: defaultBranch,
-        }),
-      });
-
-      await this.addLog(
-        integrationId,
-        `Pull request created: ${pullRequest.html_url}`
-      );
-
-      return pullRequest.html_url;
-    } catch (error: any) {
-      console.error("Error creating pull request:", error);
-      await this.addLog(
-        integrationId,
-        `Error creating pull request: ${error.message}`
-      );
-      throw error;
-    }
-  }
-
-  // Extract AST transformations from Greptile response message
-
-  // Helper method to get feature name from ID
-
-  // Process AST transformations
-  private async processAstTransformations(
-    transformations: any[],
-    repositoryPath: string,
-    integrationId: string
-  ): Promise<boolean> {
-    try {
-      await this.addLog(
-        integrationId,
-        `Processing ${transformations.length} AST transformations`
-      );
-
-      // Group transformations by file
-      const transformationsByFile: { [file: string]: any } = {};
-
-      for (const transformation of transformations) {
-        const filePath = transformation.file;
-        if (!transformationsByFile[filePath]) {
-          transformationsByFile[filePath] = {
-            file: filePath,
-            transformations: [],
-          };
-        }
-
-        // Add all transformations for this file
-        if (
-          transformation.transformations &&
-          Array.isArray(transformation.transformations)
-        ) {
-          transformationsByFile[filePath].transformations.push(
-            ...transformation.transformations
-          );
-        }
-      }
-
-      // Process each file's transformations
-      for (const filePath in transformationsByFile) {
-        const absolutePath = path.join(repositoryPath, filePath);
-        const fileTransformations = transformationsByFile[filePath];
-
-        // Determine file type and use appropriate processor
-        if (
-          filePath.endsWith(".ts") ||
-          filePath.endsWith(".tsx") ||
-          filePath.endsWith(".js") ||
-          filePath.endsWith(".jsx")
-        ) {
-          await this.applyTypeScriptTransformations(
-            absolutePath,
-            fileTransformations,
-            integrationId
-          );
-        } else if (filePath.endsWith(".json")) {
-          await this.applyJsonTransformations(
-            absolutePath,
-            fileTransformations,
-            integrationId
-          );
-        } else {
-          // Assume it's a text file (.md, .env, etc.)
-          await this.applyTextTransformations(
-            absolutePath,
-            fileTransformations,
-            integrationId
-          );
-        }
-      }
-
-      return true;
-    } catch (error: any) {
-      console.error("Error processing AST transformations:", error);
-      await this.addLog(
-        integrationId,
-        `Error processing AST transformations: ${error.message}`
-      );
-      return false;
-    }
-  }
-
-  // Apply transformations to TypeScript/JavaScript files
-  private async applyTypeScriptTransformations(
-    filePath: string,
-    transformations: { file: string; transformations: any[] },
-    integrationId: string
-  ): Promise<void> {
-    try {
-      await this.addLog(
-        integrationId,
-        `Applying TypeScript transformations to ${path.basename(filePath)}`
-      );
-
-      // Initialize ts-morph project
-      const project = new Project();
-
-      // Add the file to the project
-      const sourceFile = project.addSourceFileAtPath(filePath);
-
-      // Process each transformation
-      for (const transformation of transformations.transformations || []) {
-        await this.applyTransformation(
-          sourceFile,
-          transformation,
-          integrationId
-        );
-      }
-
-      // Save the changes
-      await sourceFile.save();
-
-      await this.addLog(
-        integrationId,
-        `Successfully applied TypeScript transformations to ${path.basename(
-          filePath
-        )}`
-      );
-    } catch (error: any) {
-      console.error(
-        `Error applying TypeScript transformations to ${filePath}:`,
-        error
-      );
-      await this.addLog(
-        integrationId,
-        `Error applying TypeScript transformations to ${path.basename(
-          filePath
-        )}: ${error.message}`
-      );
-      throw error;
-    }
-  }
-
-  // Apply a single transformation to a source file
-  private async applyTransformation(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    try {
-      const transformationType = transformation.type;
-
-      switch (transformationType) {
-        case "add_import":
-          await this.addImportDeclaration(
-            sourceFile,
-            transformation,
-            integrationId
-          );
-          break;
-
-        case "modify_imports":
-          // Handle modify_imports as add_import for backward compatibility
-          if (transformation.content) {
-            await this.addImportDeclaration(
-              sourceFile,
-              { import_statement: transformation.content },
-              integrationId
-            );
+        // AFTER
+        export const openrouter = createOpenRouter({
+          apiKey: process.env.OPENROUTER_API_KEY || "",
+          baseURL: "https://openrouter.helicone.ai/api/v1",
+          defaultHeaders: {
+            "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY
           }
-          break;
+        });
+        \`\`\`
 
-        case "add_code_after_imports":
-          await this.addCodeAfterImports(
-            sourceFile,
-            transformation,
-            integrationId
+        ## File Information which may need Helicone integration
+        <file_path>
+        ${file.path}
+        </file_path>
+
+        <file_description>
+        ${file.description || "No description provided"}
+        </file_description>
+
+        ## LLM Usage Blocks that may need Helicone integration
+        <llm_usage_blocks>
+        ${llmBlocksContext}
+        </llm_usage_blocks>
+
+        ## Response Format
+        Provide a JSON array of objects with this structure:
+        [
+          {
+            "original": "code block that needs to be changed",
+            "replacement": "new code with Helicone integration",
+            "reasoning": "detailed step by step reasoning for the changes"
+          }
+        ]
+
+        ## Important Guidelines
+        1. ONLY INCLUDE BLOCKS THAT NEED CHANGES: If a block doesn't need modification, don't include it
+        2. EXACT MATCHING: Your response will be processed by a fuzzy matching algorithm that tries to find and replace code
+        3. CONTEXT: Include enough surrounding code to uniquely identify where changes should be made
+        4. COMPLETE BLOCKS: Never truncate code snippets - include complete statements with balanced brackets/parentheses
+        5. FUNCTION CALLS: For function calls, include the entire call from function name to closing parenthesis
+        6. TEMPLATE LITERALS: For code with backticks, include the entire string with all backticks properly escaped
+        7. MEANINGFUL CHANGES: Only include changes where the original and replacement are different
+        8. HELICONE INTEGRATION: Include proper headers and base URLs for each LLM provider
+        9. AUTHENTICATION: Ensure proper environment variable usage (HELICONE_API_KEY)
+
+        Your response must be a valid JSON array that can be parsed directly.`;
+
+        try {
+          // Call Claude 3.7 Sonnet through OpenRouter
+          const completion = await openaiClient.chat.completions.create(
+            {
+              model: "anthropic/claude-3.7-sonnet",
+              messages: [
+                {
+                  role: "user",
+                  content: claudePrompt,
+                },
+              ],
+              temperature: 0.2,
+              response_format: { type: "json_object" },
+            },
+            {
+              headers: {
+                "HTTP-Referer": "https://helicone.ai",
+                "X-Title": "Helicone GitHub Integration",
+                "Helicone-Session-Id": sessionId,
+                "Helicone-Session-Path": `/transform/${this.getUniquePathIdentifier(
+                  file.path
+                )}`,
+                "Helicone-Session-Name": "GitHub Integration",
+              },
+            }
           );
-          break;
 
-        case "add_object_property":
-          await this.addObjectProperty(
-            sourceFile,
-            transformation,
-            integrationId
-          );
-          break;
-
-        case "add_function_call_property":
-          await this.addFunctionCallProperty(
-            sourceFile,
-            transformation,
-            integrationId
-          );
-          break;
-
-        case "modify_client":
-          await this.modifyClient(sourceFile, transformation, integrationId);
-          break;
-
-        default:
+          const claudeResponse = completion.choices[0].message.content || "[]";
           await this.addLog(
             integrationId,
-            `Unknown transformation type: ${transformationType}`
+            `Received response from Claude for ${file.path}`
           );
-          break;
-      }
-    } catch (error: any) {
-      await this.addLog(
-        integrationId,
-        `Error applying transformation: ${error.message}`
-      );
-      throw error;
-    }
-  }
 
-  // Add an import declaration to a source file
-  private async addImportDeclaration(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    try {
-      const importStatement = transformation.import_statement;
+          try {
+            // Parse the response
+            const changes = JSON.parse(claudeResponse);
 
-      // Check if the import already exists
-      const existingImports = sourceFile.getImportDeclarations();
-      const importText = importStatement.trim();
+            if (Array.isArray(changes)) {
+              const fileTransformations = changes
+                .filter(
+                  (change) =>
+                    change.original &&
+                    change.replacement &&
+                    change.original !== change.replacement
+                )
+                .map((change) => ({
+                  filePath: file.path,
+                  original: change.original,
+                  replacement: change.replacement,
+                }));
 
-      // Extract the module name from the import statement
-      const moduleMatch = importText.match(/from\s+['"]([^'"]+)['"]/);
-      const importedModule = moduleMatch ? moduleMatch[1] : null;
-
-      // Extract the imported items from the import statement
-      const itemsMatch = importText.match(/import\s+{([^}]+)}/);
-      const importedItems: string[] = itemsMatch
-        ? itemsMatch[1]
-            .trim()
-            .split(",")
-            .map((item: string) => item.trim())
-        : [];
-
-      // Check if this import already exists
-      let importExists = false;
-
-      if (importedModule) {
-        for (const existingImport of existingImports) {
-          const existingModuleName = existingImport.getModuleSpecifierValue();
-
-          if (existingModuleName === importedModule) {
-            // If it's a named import, check if all items are already imported
-            if (importedItems.length > 0) {
-              const existingNamedImports = existingImport
-                .getNamedImports()
-                .map((ni) => ni.getName());
-              const allItemsExist = importedItems.every((item: string) => {
-                // Handle aliases and spaces
-                const cleanItem = item.split(" as ")[0].trim();
-                return existingNamedImports.includes(cleanItem);
-              });
-
-              if (allItemsExist) {
-                importExists = true;
-                break;
-              }
-            } else {
-              // For default imports or namespace imports, consider it exists
-              importExists = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (importExists) {
-        await this.addLog(
-          integrationId,
-          `Import already exists: ${importText}`
-        );
-        return;
-      }
-
-      // Add the import declaration at the top of the file
-      sourceFile.addImportDeclaration({
-        isTypeOnly: importStatement.includes("import type"),
-        moduleSpecifier: importedModule || "",
-        leadingTrivia: (writer) => writer.newLine(),
-      });
-
-      // Get the newly added import declaration
-      const importDeclarations = sourceFile.getImportDeclarations();
-      const lastImport = importDeclarations[importDeclarations.length - 1];
-
-      // Replace it with the full import statement to handle complex cases
-      lastImport.replaceWithText(importStatement);
-
-      await this.addLog(integrationId, `Added import: ${importStatement}`);
-    } catch (error: any) {
-      await this.addLog(
-        integrationId,
-        `Error adding import declaration: ${error.message}`
-      );
-      throw error;
-    }
-  }
-
-  // Add code after imports
-  private async addCodeAfterImports(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    const { code } = transformation;
-
-    const imports = sourceFile.getImportDeclarations();
-    if (imports.length > 0) {
-      const lastImport = imports[imports.length - 1];
-      sourceFile.insertText(lastImport.getEnd() + 1, "\n\n" + code + "\n");
-    } else {
-      sourceFile.insertText(0, code + "\n\n");
-    }
-
-    await this.addLog(integrationId, `Added code after imports`);
-  }
-
-  // Add a property to an object in a variable declaration
-  private async addObjectProperty(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    const { target, property_name, property_value } = transformation;
-
-    // Find variable declarations matching the target
-    sourceFile.getVariableDeclarations().forEach((varDecl: any) => {
-      if (varDecl.getName() === target.name) {
-        // Find the call expression within the variable declaration
-        const initializer = varDecl.getInitializer();
-
-        if (initializer && Node.isCallExpression(initializer)) {
-          const expression = initializer.getExpression();
-          let match = false;
-
-          // Check if the function name matches
-          if (
-            Node.isIdentifier(expression) &&
-            expression.getText() === target.object_name
-          ) {
-            match = true;
-          }
-
-          if (match) {
-            // Get the first argument of the call expression (should be an object literal)
-            const args = initializer.getArguments();
-
-            if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
-              const objLiteral = args[0];
-
-              // Check if the property already exists
-              const existingProp = objLiteral.getProperty(property_name);
-
-              if (!existingProp) {
-                // Add the property
-                objLiteral.addPropertyAssignment({
-                  name: property_name,
-                  initializer: property_value,
-                });
-
-                console.log(
-                  `Added ${property_name} property to ${target.name}`
-                );
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  // Add a property to a function call
-  private async addFunctionCallProperty(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    const { target, property_name, property_value } = transformation;
-
-    // Determine the search scope
-    let searchScope: Node = sourceFile;
-
-    // If we're targeting a specific function, narrow the search scope
-    if (target.containing_function) {
-      const containingFunction = sourceFile
-        .getFunctions()
-        .find((func: any) => func.getName() === target.containing_function);
-
-      if (!containingFunction) {
-        await this.addLog(
-          integrationId,
-          `Warning: Could not find containing function ${target.containing_function}`
-        );
-        return;
-      }
-
-      searchScope = containingFunction;
-    }
-
-    // Find all call expressions that match our criteria
-    searchScope.forEachDescendant((node: Node) => {
-      if (Node.isCallExpression(node)) {
-        let match = false;
-
-        // Check function name
-        const expression = node.getExpression();
-
-        // Direct function call: functionName()
-        if (
-          Node.isIdentifier(expression) &&
-          expression.getText() === target.function_name
-        ) {
-          match = true;
-        }
-
-        // Method call: object.methodName()
-        if (Node.isPropertyAccessExpression(expression)) {
-          const methodName = expression.getName();
-          const object = expression.getExpression();
-
-          if (
-            methodName === target.method_name &&
-            Node.isIdentifier(object) &&
-            object.getText() === target.function_name
-          ) {
-            match = true;
-          }
-        }
-
-        if (match) {
-          // Get the first argument of the call expression (should be an object literal)
-          const args = node.getArguments();
-
-          if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
-            const objLiteral = args[0];
-
-            // Check if the property already exists
-            const existingProp = objLiteral.getProperty(property_name);
-
-            if (!existingProp) {
-              // Add the property
-              objLiteral.addPropertyAssignment({
-                name: property_name,
-                initializer: property_value,
-              });
-
-              console.log(
-                `Added ${property_name} property to ${target.function_name} call`
+              await this.addLog(
+                integrationId,
+                `Parsed ${fileTransformations.length} transformations for ${file.path}`
               );
+
+              return fileTransformations;
             }
-          }
-        }
-      }
-    });
-  }
-
-  // Handle modify_client transformation using text manipulation
-  private async modifyClient(
-    sourceFile: SourceFile,
-    transformation: any,
-    integrationId: string
-  ): Promise<void> {
-    try {
-      const target = transformation.target;
-      const changes = transformation.changes || {};
-
-      await this.addLog(integrationId, `Modifying client: ${target}`);
-
-      // Get the file text
-      let fileText = sourceFile.getFullText();
-
-      // Find the client variable declaration
-      const clientRegex = new RegExp(
-        `(const|let|var)\\s+${target}\\s*=\\s*`,
-        "g"
-      );
-      const match = clientRegex.exec(fileText);
-
-      if (!match) {
-        await this.addLog(
-          integrationId,
-          `Could not find client variable: ${target}`
-        );
-        return;
-      }
-
-      // Find the opening brace of the client configuration
-      const startPos = match.index + match[0].length;
-      let openBracePos = fileText.indexOf("{", startPos);
-
-      if (openBracePos === -1) {
-        await this.addLog(
-          integrationId,
-          `Could not find client configuration object for: ${target}`
-        );
-        return;
-      }
-
-      // Find the matching closing brace
-      let braceCount = 1;
-      let closeBracePos = openBracePos + 1;
-
-      while (braceCount > 0 && closeBracePos < fileText.length) {
-        if (fileText[closeBracePos] === "{") {
-          braceCount++;
-        } else if (fileText[closeBracePos] === "}") {
-          braceCount--;
-        }
-        closeBracePos++;
-      }
-
-      if (braceCount !== 0) {
-        await this.addLog(
-          integrationId,
-          `Could not find end of client configuration object for: ${target}`
-        );
-        return;
-      }
-
-      // Extract the client configuration
-      const configText = fileText.substring(openBracePos, closeBracePos);
-
-      // Create the modified configuration
-      let modifiedConfig = configText;
-
-      // Apply baseURL change if specified
-      if (changes.baseURL) {
-        const baseUrlRegex = /baseURL\s*:\s*["']([^"']*)["']/;
-        if (baseUrlRegex.test(modifiedConfig)) {
-          // Replace existing baseURL
-          modifiedConfig = modifiedConfig.replace(
-            baseUrlRegex,
-            `baseURL: "${changes.baseURL}"`
-          );
-        } else {
-          // Add baseURL property
-          modifiedConfig = modifiedConfig.replace(
-            "{",
-            `{\n  baseURL: "${changes.baseURL}",`
-          );
-        }
-      }
-
-      // Apply headers changes if specified
-      if (changes.headers) {
-        const headersRegex = /headers\s*:\s*{([^}]*)}/;
-        const headersMatch = headersRegex.exec(modifiedConfig);
-
-        if (headersMatch) {
-          // Headers property exists, modify it
-          let headersText = headersMatch[1];
-
-          // Add each header
-          for (const [key, value] of Object.entries(changes.headers)) {
-            const headerRegex = new RegExp(
-              `["']${key}["']\\s*:\\s*["'][^"']*["']`
-            );
-
-            if (headerRegex.test(headersText)) {
-              // Replace existing header
-              headersText = headersText.replace(
-                headerRegex,
-                `"${key}": "${value}"`
-              );
-            } else {
-              // Add new header
-              headersText += `,\n    "${key}": "${value}"`;
-            }
-          }
-
-          // Replace headers in the config
-          modifiedConfig = modifiedConfig.replace(
-            headersRegex,
-            `headers: {${headersText}}`
-          );
-        } else {
-          // Headers property doesn't exist, add it
-          let headersText = "\n  headers: {\n";
-
-          for (const [key, value] of Object.entries(changes.headers)) {
-            headersText += `    "${key}": "${value}",\n`;
-          }
-
-          headersText += "  }";
-
-          // Add headers property after the opening brace or after baseURL if it was added
-          if (modifiedConfig.includes("baseURL:")) {
-            modifiedConfig = modifiedConfig.replace(
-              /baseURL:[^,]*,/,
-              (match) => `${match}${headersText},`
-            );
-          } else {
-            modifiedConfig = modifiedConfig.replace("{", `{${headersText},`);
-          }
-        }
-      }
-
-      // Replace the original configuration with the modified one
-      fileText =
-        fileText.substring(0, openBracePos) +
-        modifiedConfig +
-        fileText.substring(closeBracePos);
-
-      // Update the source file
-      sourceFile.replaceWithText(fileText);
-
-      await this.addLog(
-        integrationId,
-        `Successfully modified client: ${target}`
-      );
-    } catch (error: any) {
-      await this.addLog(
-        integrationId,
-        `Error modifying client: ${error.message}`
-      );
-      throw error;
-    }
-  }
-
-  // Apply transformations to JSON files
-  private async applyJsonTransformations(
-    filePath: string,
-    transformations: { file: string; transformations: any[] },
-    integrationId: string
-  ): Promise<void> {
-    try {
-      await this.addLog(
-        integrationId,
-        `Applying JSON transformations to ${path.basename(filePath)}`
-      );
-
-      // Read the JSON file
-      const fs = require("fs");
-      const jsonContent = fs.readFileSync(filePath, "utf8");
-      const jsonData = JSON.parse(jsonContent);
-
-      let modified = false;
-
-      // Process each transformation
-      for (const transformation of transformations.transformations || []) {
-        switch (transformation.type) {
-          case "add_package_dependency":
-            if (!jsonData.dependencies) {
-              jsonData.dependencies = {};
-            }
-
-            if (!jsonData.dependencies[transformation.dependency_name]) {
-              jsonData.dependencies[transformation.dependency_name] =
-                transformation.dependency_version;
-              modified = true;
-              console.log(
-                `Added ${transformation.dependency_name} to dependencies`
-              );
-            }
-            break;
-
-          case "add_dev_dependency":
-            if (!jsonData.devDependencies) {
-              jsonData.devDependencies = {};
-            }
-
-            if (!jsonData.devDependencies[transformation.dependency_name]) {
-              jsonData.devDependencies[transformation.dependency_name] =
-                transformation.dependency_version;
-              modified = true;
-              console.log(
-                `Added ${transformation.dependency_name} to devDependencies`
-              );
-            }
-            break;
-
-          default:
+          } catch (error) {
             await this.addLog(
               integrationId,
-              `Warning: Unsupported JSON transformation type: ${transformation.type}`
+              `Error parsing Claude response for ${file.path}: ${error}`
             );
-        }
-      }
-
-      // Write the modified JSON back to the file
-      if (modified) {
-        fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
-
-        await this.addLog(
-          integrationId,
-          `Successfully applied JSON transformations to ${path.basename(
-            filePath
-          )}`
-        );
-      }
-    } catch (error: any) {
-      console.error(
-        `Error applying JSON transformations to ${filePath}:`,
-        error
-      );
-      await this.addLog(
-        integrationId,
-        `Error applying JSON transformations to ${path.basename(filePath)}: ${
-          error.message
-        }`
-      );
-      throw error;
-    }
-  }
-
-  // Apply transformations to text files (like .env)
-  private async applyTextTransformations(
-    filePath: string,
-    transformations: { file: string; transformations: any[] },
-    integrationId: string
-  ): Promise<void> {
-    try {
-      // Read the file content or create an empty file if it doesn't exist
-      const fs = require("fs");
-      let fileContent = "";
-
-      try {
-        fileContent = fs.readFileSync(filePath, "utf8");
-      } catch (error: any) {
-        if (error.code === "ENOENT") {
-          // File doesn't exist, create the directory if needed
-          const path = require("path");
-          const dirPath = path.dirname(filePath);
-
-          if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
           }
 
+          return [];
+        } catch (error) {
           await this.addLog(
             integrationId,
-            `Creating new file: ${transformations.file}`
+            `Error calling Claude for ${file.path}: ${error}`
           );
-        } else {
-          throw error;
+          return [];
         }
+      });
+
+      // Wait for all files in the batch to be processed
+      const batchResults = await Promise.all(batchPromises);
+
+      // Combine all transformations from this batch
+      for (const transformations of batchResults) {
+        allTransformations.push(...transformations);
       }
-
-      // Apply each transformation
-      for (const transformation of transformations.transformations) {
-        const transformationType = transformation.type;
-
-        switch (transformationType) {
-          case "add_section":
-            // Add a new section to the file
-            const sectionTitle = transformation.title || "";
-            const sectionContent = transformation.content || "";
-
-            if (fileContent.includes(sectionTitle)) {
-              await this.addLog(
-                integrationId,
-                `Section "${sectionTitle}" already exists in ${transformations.file}`
-              );
-            } else {
-              fileContent += `\n\n${sectionTitle}\n${sectionContent}`;
-              await this.addLog(
-                integrationId,
-                `Added section "${sectionTitle}" to ${transformations.file}`
-              );
-            }
-            break;
-
-          case "add_env_variable":
-            // Add an environment variable to the file
-            const variableName = transformation.variable_name || "";
-            const variableValue =
-              transformation.variable_value || "your_value_here";
-
-            if (!variableName) {
-              await this.addLog(
-                integrationId,
-                `No variable name provided for add_env_variable in ${transformations.file}`
-              );
-              break;
-            }
-
-            const envVarLine = `${variableName}=${variableValue}`;
-
-            if (fileContent.includes(variableName + "=")) {
-              await this.addLog(
-                integrationId,
-                `Environment variable ${variableName} already exists in ${transformations.file}`
-              );
-            } else {
-              // Add a newline if the file doesn't end with one
-              if (fileContent && !fileContent.endsWith("\n")) {
-                fileContent += "\n";
-              }
-
-              // Add a comment if this is the first Helicone variable
-              if (
-                variableName === "HELICONE_API_KEY" &&
-                !fileContent.includes("HELICONE_")
-              ) {
-                fileContent += "\n# Helicone Configuration\n";
-              }
-
-              fileContent += `${envVarLine}\n`;
-
-              await this.addLog(
-                integrationId,
-                `Added environment variable ${variableName} to ${transformations.file}`
-              );
-            }
-            break;
-
-          case "add_content":
-            // Add content to the file
-            const content = transformation.content || "";
-            fileContent += content;
-            await this.addLog(
-              integrationId,
-              `Added content to ${transformations.file}`
-            );
-            break;
-
-          default:
-            await this.addLog(
-              integrationId,
-              `Unknown text transformation type: ${transformationType}`
-            );
-            break;
-        }
-      }
-
-      // Write the modified content back to the file
-      fs.writeFileSync(filePath, fileContent);
-      await this.addLog(
-        integrationId,
-        `Successfully applied text transformations to ${transformations.file}`
-      );
-    } catch (error: any) {
-      await this.addLog(
-        integrationId,
-        `Error applying text transformations to ${transformations.file}: ${error.message}`
-      );
-      throw error;
     }
+
+    await this.addLog(
+      integrationId,
+      `Generated ${allTransformations.length} total transformations`
+    );
+
+    return allTransformations;
   }
 }

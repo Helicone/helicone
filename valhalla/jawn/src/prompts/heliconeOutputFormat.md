@@ -1,64 +1,34 @@
 ## Helicone Integration Format
 
-When integrating Helicone, provide your changes in the following format:
-
-1. Brief overview of required changes
-2. List of files that need modification
-3. JSON transformation blocks for each file
+JSON blocks for each file with exact text replacements
 
 ### JSON Format
 
 ```json
 {
   "file": "path/to/file.ts",
-  "transformations": [
+  "replacements": [
     {
-      "type": "add_import",
-      "import_statement": "import { Something } from 'package';"
-    },
-    {
-      "type": "modify_client",
-      "target": "clientName",
-      "changes": {
-        "baseURL": "https://helicone-endpoint.com",
-        "headers": {
-          "Helicone-Auth": "Bearer ${process.env.HELICONE_API_KEY}"
-        }
-      }
-    },
-    {
-      "type": "add_env_variable",
-      "variable": "HELICONE_API_KEY"
+      "from": "const client = createClient({\n  apiKey: process.env.API_KEY\n});",
+      "to": "const client = createClient({\n  apiKey: process.env.API_KEY,\n  baseURL: \"https://helicone-endpoint.com\",\n  headers: {\n    \"Helicone-Auth\": `Bearer ${process.env.HELICONE_API_KEY}`\n  }\n});"
     }
   ]
 }
 ```
 
-### Example
+For files that need to be created (like .env.example):
 
 ```json
 {
-  "file": "lib/api/openai.ts",
-  "transformations": [
-    {
-      "type": "modify_client",
-      "target": "openai",
-      "changes": {
-        "baseURL": "https://oai.helicone.ai/v1",
-        "headers": {
-          "Helicone-Auth": "Bearer ${process.env.HELICONE_API_KEY}"
-        }
-      }
-    },
-    {
-      "type": "add_env_variable",
-      "variable": "HELICONE_API_KEY"
-    }
-  ]
+  "file": ".env.example",
+  "content": "# API Keys\nAPI_KEY=\n\n# Helicone Configuration\nHELICONE_API_KEY="
 }
 ```
 
-## Rules:
+## CRITICAL: For successful replacements
 
-- Only modify files that are part of the integration.
-- Do not add features that were not requested.
+- **ANALYZE THE ACTUAL CODE CAREFULLY**: Open and examine each file before suggesting replacements
+- **COPY-PASTE EXACT CODE**: Use the exact code from the file for the "from" field, including all indentation, whitespace, and line breaks
+- **VERIFY BEFORE SUBMITTING**: Confirm your "from" text exists in the file verbatim by searching for it
+- **INCLUDE CONTEXT**: Provide enough surrounding code to ensure unique matches
+- **AVOID ASSUMPTIONS**: Don't assume code structure - verify it in the actual files

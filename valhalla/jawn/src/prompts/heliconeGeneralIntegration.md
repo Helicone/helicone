@@ -1,23 +1,12 @@
 # Helicone Integration Guide for LLM Applications
 
-## Overview
-
-Analyze this codebase to integrate Helicone for monitoring and optimizing LLM API calls. Helicone provides observability, analytics, and cost tracking for all major LLM providers.
-
-## Integration Requirements
-
-## Code Changes
-
 Helicone proxy is integrated by changing the base URL of the API calls to the Helicone proxy endpoint and adding the Helicone authentication headers.
 
-- OpenAI
-  Base URL: https://oai.helicone.ai
+- OpenAI Base URL: https://oai.helicone.ai
 
-- Anthropic
-  Base URL: https://anthropic.helicone.ai
+- Anthropic Base URL: https://anthropic.helicone.ai
 
-- Gemini
-  Base URL: https://gateway.helicone.ai
+- Gemini Base URL: https://gateway.helicone.ai
 
   Required Headers:
 

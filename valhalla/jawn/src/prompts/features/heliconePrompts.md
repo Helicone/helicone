@@ -2,6 +2,12 @@
 
 Helicone Prompts allows you to version, track, and optimize your prompts with variable inputs.
 
+#### When to implement
+
+- **Apply to**: Message content in chat completions or text completions
+- **Best for**: Prompts that are reused across the application or contain variable inputs
+- **Implementation priority**: Medium - implement after basic Helicone integration is working
+
 #### Integration
 
 1. Install the Helicone Prompts package:
