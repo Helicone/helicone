@@ -848,7 +848,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         {open && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25} minSize={25} className="h-screen flex flex-col" style={{ minWidth: "500px" }}>
+            <ResizablePanel
+              defaultSize={25}
+              minSize={20}
+              className="h-screen flex flex-col"
+              style={{ width: "500px", minWidth: "500px", backgroundColor: "background" }}>
               <div className="flex-1 overflow-hidden flex flex-col">
                 <RequestDiv
                   open={open}

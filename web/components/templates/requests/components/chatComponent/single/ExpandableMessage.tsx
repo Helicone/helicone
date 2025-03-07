@@ -100,19 +100,22 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
         )}
         style={{ maxHeight: expanded ? "none" : sixLinesHeight }}
       >
-        <div className="h-full" ref={contentRef}>
+        <div className="h-full w-full" ref={contentRef}>
           {mode === "Pretty" ? (
             <RenderWithPrettyInputKeys
               text={isTextJson ? formattedText : formattedMessageContent}
               selectedProperties={selectedProperties}
             />
           ) : (
-            <MarkdownEditor
-              language="markdown"
-              text={isTextJson ? formattedText : formattedMessageContent}
-              setText={() => { }}
-              className=""
-            />
+            <div className="p-1">
+              <MarkdownEditor
+                language="markdown"
+                text={isTextJson ? formattedText : formattedMessageContent}
+                setText={() => { }}
+                className="bg-card text-card-foreground rounded-md border border-border shadow-sm p-0"
+                disabled={true}
+              />
+            </div>
           )}
         </div>
       </div>

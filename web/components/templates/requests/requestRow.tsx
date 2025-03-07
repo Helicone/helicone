@@ -262,31 +262,58 @@ const RequestRow = (props: RequestRowProps) => {
         </div>
 
         {/* Quick Actions: User, Prompt, Sessions */}
-        <div className="flex items-center justify-start gap-2">
+        <div className="flex items-center justify-start gap-1 w-full overflow-hidden">
           {request.heliconeMetadata.user && (
-            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
-              <span className="text-xs font-normal leading-none text-base-foreground truncate">
-                {request.heliconeMetadata.user}
-              </span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="xs" className="px-2 py-1 h-6 min-w-0 max-w-[30%]">
+                    <span className="text-xs font-normal leading-none text-base-foreground truncate">
+                      {request.heliconeMetadata.user}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Go to User</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {request.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] && (
-            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
-              <span className="text-xs font-normal leading-none text-base-foreground truncate">
-                {request.heliconeMetadata.customProperties?.[
-                  "Helicone-Prompt-Id"
-                ] as string}
-              </span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="xs" className="px-2 py-1 h-6 min-w-0 max-w-[30%]">
+                    <span className="text-xs font-normal leading-none text-base-foreground truncate">
+                      {request.heliconeMetadata.customProperties?.[
+                        "Helicone-Prompt-Id"
+                      ] as string}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Go to Prompt</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {request.heliconeMetadata.customProperties?.["Helicone-Session-Id"] && (
-            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
-              <span className="text-xs font-normal leading-none text-base-foreground truncate">
-                {request.heliconeMetadata.customProperties?.[
-                  "Helicone-Session-Id"
-                ] as string}
-              </span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="xs" className="flex-1 px-2 py-1 h-6 min-w-0 overflow-hidden max-w-[40%]">
+                    <span className="text-xs font-normal leading-none text-base-foreground truncate block w-full overflow-hidden">
+                      {request.heliconeMetadata.customProperties?.[
+                        "Helicone-Session-Id"
+                      ] as string}
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Go to Session</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
 

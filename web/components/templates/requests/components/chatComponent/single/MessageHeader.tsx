@@ -37,7 +37,7 @@ export const MessageHeader: React.FC<MessageHeaderProps> = ({ message }) => {
               onClick={handleCopy}
               className="h-6 w-6"
             >
-              <Copy size={14} />
+              <Copy size={14} className="text-muted-foreground" />
               <span className="sr-only">Copy message</span>
             </Button>
           </TooltipTrigger>

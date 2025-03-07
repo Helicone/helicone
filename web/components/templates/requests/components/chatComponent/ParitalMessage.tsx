@@ -56,7 +56,7 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
   const lastTwo = messages.slice(messages.length - 2, messages.length);
 
   return (
-    <>
+    <div className="divide-y divide-border">
       <MessageGroup
         messages={firstTwo}
         expandedChildren={expandedChildren}
@@ -66,10 +66,12 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
         autoInputs={autoInputs}
         mode={mode}
       />
-      <ShowMoreButton
-        messagesCount={messages.length}
-        setShowAllMessages={setShowAllMessages}
-      />
+      <div className="border-t border-border">
+        <ShowMoreButton
+          messagesCount={messages.length}
+          setShowAllMessages={setShowAllMessages}
+        />
+      </div>
       <MessageGroup
         messages={lastTwo}
         expandedChildren={expandedChildren}
@@ -79,6 +81,6 @@ export const PartialMessages: React.FC<PartialMessagesProps> = ({
         autoInputs={autoInputs}
         mode={mode}
       />
-    </>
+    </div>
   );
 };

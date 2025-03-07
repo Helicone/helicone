@@ -49,7 +49,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
     <div
       className={clsx(
         "items-start p-4 text-left flex flex-col text-sidebar-foreground",
-        isSystem && "font-semibold",
+        isSystem && "font-normal",
         isLast && "rounded-b-md"
       )}
       key={index}

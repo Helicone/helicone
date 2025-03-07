@@ -22,7 +22,7 @@ const ThemedDiv: React.FC<ThemedDivProps> = ({
   const divRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col h-full bg-card">
+    <div className="flex flex-col h-full bg-background">
       <div className="pl-1 pr-2 py-1 sticky top-0 z-10 border-b border-border">
         <div className="flex items-center justify-between">
           <Button

@@ -205,13 +205,13 @@ const RequestDiv = (props: RequestDivProps) => {
               {request.heliconeMetadata.cost !== null &&
                 request.heliconeMetadata.cost !== undefined &&
                 request.heliconeMetadata.cost > 0 ? (
-                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 ring-1 ring-inset ring-border">
+                <span className="inline-flex items-center rounded-md bg-background px-2 py-1 ring-1 ring-inset ring-border">
                   <Small className="text-xs text-muted-foreground">${formatNumber(request.heliconeMetadata.cost || 0)}</Small>
                 </span>
               ) : request.heliconeMetadata.status.statusType === "success" ? (
                 <CostPill />
               ) : (
-                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 ring-1 ring-inset ring-border">
+                <span className="inline-flex items-center rounded-md bg-background px-2 py-1 ring-1 ring-inset ring-border">
                   <Small className="text-xs text-muted-foreground">N/A</Small>
                 </span>
               )}
@@ -219,7 +219,7 @@ const RequestDiv = (props: RequestDivProps) => {
 
             {/* Latency Badge */}
             <div className="flex items-center">
-              <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 ring-1 ring-inset ring-border">
+              <span className="inline-flex items-center rounded-md bg-background px-2 py-1 ring-1 ring-inset ring-border">
                 <Small className="text-xs text-muted-foreground">{Number(request.heliconeMetadata.latency || 0) / 1000}s</Small>
               </span>
             </div>

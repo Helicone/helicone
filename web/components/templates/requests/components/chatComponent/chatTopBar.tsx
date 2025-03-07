@@ -45,7 +45,7 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   const createPrompt = useCreatePrompt();
 
   return (
-    <div className="flex flex-row items-center justify-between w-full bg-secondary py-1 px-2">
+    <div className="sticky top-0 z-10 flex flex-row items-center justify-between w-full bg-muted p-2 shadow-sm">
       {!isModal && (
         <Button
           onClick={() => setOpen(true)}

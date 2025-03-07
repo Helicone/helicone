@@ -34,7 +34,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     );
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       <MonacoEditor
         value={text}
         onChange={(value) => setText(value || "")}
@@ -45,7 +45,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
         }
         options={{
           minimap: { enabled: false },
-          fontSize: 12,
+          fontSize: 13,
           fontFamily: '"Fira Code", "Fira Mono", monospace',
           readOnly: disabled,
           wordWrap: "on",
@@ -53,12 +53,13 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
           language: "markdown",
           scrollBeyondLastLine: false, // Prevents extra space at bottom
           automaticLayout: true, // Enables auto-resizing
+          padding: { top: 8, bottom: 8 },
         }}
-        className={className}
+        className={className || "rounded-md border border-border shadow-sm"}
         height={height}
       />
-      <i className="text-xs text-muted-foreground">
-        Helicone: Large text detected, falling back to large text editor
+      <i className="text-xs text-muted-foreground italic">
+        Helicone: Large text detected, using enhanced editor
       </i>
     </div>
   );
