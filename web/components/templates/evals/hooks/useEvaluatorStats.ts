@@ -33,7 +33,6 @@ export const useEvaluatorStats = (evaluatorId: string) => {
     queryKey: ["evaluatorStats", evaluatorId, org?.currentOrg?.id],
     queryFn: async () => {
       if (!evaluatorId) {
-        console.log("No evaluator ID provided to useEvaluatorStats");
         return DEFAULT_STATS;
       }
 

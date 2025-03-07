@@ -118,7 +118,7 @@ export const EditPanel = ({
 
   const handleTest = () => {
     if (!evaluator) return;
-    console.log("Opening test panel for evaluator", evaluator.id);
+
     useEvalPanelStore.getState().openTestPanel();
   };
 

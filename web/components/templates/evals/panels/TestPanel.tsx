@@ -2,20 +2,11 @@ import { Col, Row } from "@/components/layout/common";
 import { TestEvaluator } from "@/components/templates/evals/CreateNewEvaluator/components/TestEvaluator";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { useEffect } from "react";
 import { useEvalPanelStore } from "../store/evalPanelStore";
 import { H3 } from "@/components/ui/typography";
 
 export const TestPanel = () => {
   const { closeTestPanel } = useEvalPanelStore();
-
-  // Log when the test panel is mounted to help with debugging
-  useEffect(() => {
-    console.log("TestPanel mounted");
-    return () => {
-      console.log("TestPanel unmounted");
-    };
-  }, []);
 
   return (
     <Col className="h-full flex flex-col overflow-hidden bg-background">
@@ -25,7 +16,6 @@ export const TestPanel = () => {
           variant="ghost"
           size="icon"
           onClick={() => {
-            console.log("Closing test panel");
             closeTestPanel();
           }}
         >

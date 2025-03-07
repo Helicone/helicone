@@ -167,16 +167,8 @@ export const PythonEvaluatorConfigForm: React.FC<{
     };
 
     if (openTestPanel) {
-      console.log(
-        "Opening test panel via prop",
-        existingEvaluatorId ? "in edit mode" : "in create mode"
-      );
       openTestPanel(testFunction);
     } else {
-      console.log(
-        "Opening test panel via store",
-        existingEvaluatorId ? "in edit mode" : "in create mode"
-      );
       // Set test data first
       setTestConfig({
         _type: "python",

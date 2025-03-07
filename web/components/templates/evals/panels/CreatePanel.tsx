@@ -76,7 +76,6 @@ export const CreatePanel = () => {
   useEffect(() => {
     // Set the appropriate test config based on the selected tab
     if (selectedTab === "llm-as-a-judge") {
-      console.log("Setting test data for LLM evaluator");
       setTestConfig({
         _type: "llm",
         evaluator_llm_template: llmTemplate,
@@ -84,14 +83,12 @@ export const CreatePanel = () => {
         evaluator_name: llmConfig.name || "evaluator",
       });
     } else if (selectedTab === "python") {
-      console.log("Setting test data for Python evaluator");
       setTestConfig({
         _type: "python",
         evaluator_name: pythonName || "Python Evaluator",
         code: pythonCode,
       });
     } else if (selectedTab === "lastmile") {
-      console.log("Setting test data for LastMile evaluator");
       setTestConfig({
         _type: "lastmile",
         evaluator_name: lastMileName || "LastMile Evaluator",
@@ -110,8 +107,6 @@ export const CreatePanel = () => {
   ]);
 
   const handleTest = () => {
-    console.log("Opening test panel from Create Evaluator");
-
     // Update test data based on current tab before opening test panel
     if (selectedTab === "llm-as-a-judge") {
       setTestConfig({
@@ -200,7 +195,6 @@ export const CreatePanel = () => {
                 resetPanels();
               }}
               openTestPanel={() => {
-                console.log("Opening test panel from LLM evaluator");
                 openTestPanel();
               }}
             />
@@ -214,7 +208,6 @@ export const CreatePanel = () => {
                 resetPanels();
               }}
               openTestPanel={() => {
-                console.log("Opening test panel from Python evaluator");
                 openTestPanel();
               }}
               configFormParams={COMPOSITE_OPTIONS[0].preset}
@@ -231,7 +224,6 @@ export const CreatePanel = () => {
                 resetPanels();
               }}
               openTestPanel={() => {
-                console.log("Opening test panel from LastMile evaluator");
                 openTestPanel();
               }}
             />
