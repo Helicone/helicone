@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,11 +14,15 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
   MinusIcon,
+  BarChart2Icon,
+  LineChartIcon,
 } from "lucide-react";
-import { MockVisualization } from "./MockVisualization";
 import { TypeBadge } from "./TypeBadge";
 import { useEvaluatorStats } from "../hooks/useEvaluatorStats";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TimeSeriesChart } from "./TimeSeriesChart";
+import { ScoreDistributionChart } from "./ScoreDistributionChart";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface EvaluatorCardProps {
   evaluator: {
@@ -36,6 +40,8 @@ interface EvaluatorCardProps {
   onTest: () => void;
 }
 
+type ChartView = "time" | "distribution";
+
 /**
  * Card component for displaying evaluator information
  */
@@ -44,6 +50,9 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
   onEdit,
   onTest,
 }) => {
+  // Chart view state
+  const [chartView, setChartView] = useState<ChartView>("time");
+
   // Fetch real stats data for this evaluator
   const { data: stats, isLoading, isError } = useEvaluatorStats(evaluator.id);
 
@@ -67,6 +76,46 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
     totalUses: stats?.totalUses ?? 0,
   };
 
+  // Determine if we have any data
+  const hasRealData =
+    !isLoading &&
+    stats &&
+    (stats.timeSeriesData.length > 0 ||
+      stats.scoreDistribution.length > 0 ||
+      stats.totalUses > 0);
+
+  // Render the chart based on current view
+  const renderChart = () => {
+    if (isLoading) {
+      return <Skeleton className="h-32 w-full" />;
+    }
+
+    if (!hasRealData) {
+      return (
+        <div className="h-32 flex flex-col items-center justify-center">
+          <p className="text-sm text-muted-foreground">
+            No evaluator data available
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Run an evaluation to see statistics
+          </p>
+        </div>
+      );
+    }
+
+    switch (chartView) {
+      case "time":
+        return <TimeSeriesChart timeSeriesData={stats?.timeSeriesData || []} />;
+      case "distribution":
+      default:
+        return (
+          <ScoreDistributionChart
+            distributionData={stats?.scoreDistribution || []}
+          />
+        );
+    }
+  };
+
   return (
     <Card
       key={evaluator.id}
@@ -84,9 +133,33 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
         </div>
         <TypeBadge type={evaluator.type} />
       </CardHeader>
-      <CardContent className="pt-2">
-        <MockVisualization type={evaluator.type} />
-        <div className="flex justify-between items-center mt-3 text-sm">
+
+      <CardContent className="pt-2 space-y-4">
+        {/* Chart visualization */}
+        {renderChart()}
+
+        {/* Chart type tabs - only show if we have data */}
+        {hasRealData && (
+          <Tabs
+            value={chartView}
+            onValueChange={(value) => setChartView(value as ChartView)}
+            className="w-full"
+          >
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="time" className="text-xs">
+                <LineChartIcon className="h-3 w-3 mr-1" />
+                Trend
+              </TabsTrigger>
+              <TabsTrigger value="distribution" className="text-xs">
+                <BarChart2Icon className="h-3 w-3 mr-1" />
+                Distribution
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
+        {/* Stats summary */}
+        <div className="flex justify-between items-center text-sm">
           {isLoading ? (
             <>
               <Skeleton className="h-4 w-24" />
@@ -105,6 +178,7 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
           )}
         </div>
       </CardContent>
+
       <CardFooter className="flex justify-between pt-4 pb-4">
         <Button
           variant="ghost"
