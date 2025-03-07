@@ -9,10 +9,10 @@ import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
-import SessionMetrics from "./SessionMetrics";
 import { TabsContent } from "@/components/ui/tabs";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
+import SessionMetrics from "./SessionMetrics";
 
 type TSessions = {
   created_at: string;
@@ -113,9 +113,7 @@ const SessionDetails = ({
               }
             },
           }}
-          onRowSelect={(row) => {
-            router.push(`/sessions/${encodeURIComponent(row.session_id)}`);
-          }}
+          rowLink={(row) => `/sessions/${encodeURIComponent(row.session_id)}`}
         />
       </TabsContent>
       <TabsContent value="metrics">
