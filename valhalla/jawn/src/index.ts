@@ -209,13 +209,10 @@ function setRouteTimeout(
 
 app.use(setRouteTimeout);
 
-const server = app.listen(
-  parseInt(process.env.PORT ?? "8585"),
-  "0.0.0.0",
-  () => {
-    console.log(`Server is running on http://localhost:8585`);
-  }
-);
+const port = parseInt(process.env.PORT ?? "8585");
+const server = app.listen(port, "0.0.0.0", () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 server.on("upgrade", async (req, socket, head) => {
   // Only handle websocket upgrades for /v1/gateway/oai

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { PanelType } from "../panels/types";
+import { useEvalConfigStore } from "./evalConfigStore";
+import { useTestDataStore } from "../testing/testingStore";
 
 interface EvalPanelState {
   panels: PanelType[];
@@ -65,26 +67,8 @@ export const useEvalPanelStore = create<EvalPanelState>()(
             const hasTestPanel = state.panels.some((p) => p._type === "test");
             if (hasTestPanel) return { panels: state.panels };
 
-            // Check if we're in edit mode
-            const hasEditPanel = state.panels.some((p) => p._type === "edit");
-            const hasCreatePanel = state.panels.some(
-              (p) => p._type === "create"
-            );
-
-            // If in edit mode, just add the test panel
-            if (hasEditPanel) {
-              return { panels: [...state.panels, { _type: "test" }] };
-            }
-
-            // If in create mode, add the test panel
-            if (hasCreatePanel) {
-              return { panels: [...state.panels, { _type: "test" }] };
-            }
-
-            // If no edit or create panel, add create and test panels
-            return {
-              panels: [...state.panels, { _type: "create" }, { _type: "test" }],
-            };
+            // Simply add the test panel without opening the create panel
+            return { panels: [...state.panels, { _type: "test" }] };
           });
         },
         closeTestPanel: () => {
@@ -93,7 +77,15 @@ export const useEvalPanelStore = create<EvalPanelState>()(
           }));
         },
         openCreatePanel: () => {
+          // Access the config stores and reset them
+          const resetConfig = useEvalConfigStore.getState().resetConfig;
+          const resetTestData = useTestDataStore.getState().resetTestData;
+
           set((state) => {
+            // Reset all stores before opening the panel
+            resetConfig();
+            resetTestData();
+
             // Check if create panel already exists
             const hasCreatePanel = state.panels.some(
               (p) => p._type === "create"

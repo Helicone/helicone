@@ -109,7 +109,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
             },
             body: {
               name,
-              code_template: code,
+              code_template: { code },
               scoring_type: "PYTHON",
             },
           });
@@ -128,7 +128,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
           const result = await jawn.POST("/v1/evaluator", {
             body: {
               name,
-              code_template: code,
+              code_template: { code },
               scoring_type: "PYTHON",
             },
           });

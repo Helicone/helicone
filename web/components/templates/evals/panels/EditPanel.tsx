@@ -55,7 +55,6 @@ export const EditPanel = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState("edit");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const jawn = useJawnClient();
   const notification = useNotification();
 
   const evaluator = useMemo(() => {

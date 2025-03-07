@@ -38,6 +38,9 @@ interface EvalConfigState {
   setLastMileDescription: (description: string) => void;
   lastMileConfig: any;
   setLastMileConfig: (config: any) => void;
+
+  // Reset all config values to defaults
+  resetConfig: () => void;
 }
 
 export const useEvalConfigStore = create<EvalConfigState>()(
@@ -68,6 +71,19 @@ export const useEvalConfigStore = create<EvalConfigState>()(
           set({ lastMileDescription: description }),
         lastMileConfig: null,
         setLastMileConfig: (config) => set({ lastMileConfig: config }),
+
+        // Reset function to clear all values
+        resetConfig: () =>
+          set({
+            llmConfig: defaultLLMConfig,
+            llmTemplate: "",
+            pythonName: "",
+            pythonDescription: "",
+            pythonCode: "",
+            lastMileName: "",
+            lastMileDescription: "",
+            lastMileConfig: null,
+          }),
       }),
       {
         name: "eval-config-store",

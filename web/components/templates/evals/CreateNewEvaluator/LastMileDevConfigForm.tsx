@@ -317,7 +317,11 @@ export const LastMileDevConfigForm: React.FC<{
                     id="name"
                     placeholder="Enter evaluator name"
                     value={evaluatorName}
+                    readOnly={!!existingEvaluatorId}
+                    disabled={!!existingEvaluatorId}
                     onChange={(e) => {
+                      if (!!existingEvaluatorId) return; // Skip if editing existing evaluator
+
                       if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
                         setEvaluatorName(e.target.value);
                       } else {
@@ -328,6 +332,11 @@ export const LastMileDevConfigForm: React.FC<{
                       }
                     }}
                   />
+                  {existingEvaluatorId && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Evaluator names cannot be changed after creation
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">

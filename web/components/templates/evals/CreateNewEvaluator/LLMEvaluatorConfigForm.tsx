@@ -135,12 +135,14 @@ const BasicInformationSection = ({
   configFormParams,
   updateConfigFormParams,
   notification,
+  existingEvaluator = false,
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
     updates: Partial<LLMEvaluatorConfigFormPreset>
   ) => void;
   notification: ReturnType<typeof useNotification>;
+  existingEvaluator?: boolean;
 }) => (
   <div className="space-y-3">
     <SectionHeader
@@ -155,17 +157,19 @@ const BasicInformationSection = ({
           placeholder="Enter evaluator name"
           value={configFormParams.name}
           className="border-input"
+          readOnly={existingEvaluator}
+          disabled={existingEvaluator}
           onChange={(e) => {
-            if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
-              updateConfigFormParams({ name: e.target.value });
-            } else {
-              notification.setNotification(
-                "Evaluator name can only contain letters and numbers.",
-                "error"
-              );
-            }
+            if (existingEvaluator) return; // Skip if editing existing evaluator
+
+            updateConfigFormParams({ name: e.target.value });
           }}
         />
+        {existingEvaluator && (
+          <div className="text-xs text-muted-foreground mt-1">
+            Evaluator names cannot be changed after creation
+          </div>
+        )}
       </FormField>
 
       <FormField id="description" label="Description">
@@ -176,9 +180,9 @@ const BasicInformationSection = ({
           </Muted>
           <Textarea
             id="description"
-            placeholder="Return a score between 0 and 100 where 0 is super boring and 100 is hilarious..."
+            placeholder="Check if the response is appropriate"
             value={configFormParams.description}
-            className="min-h-[80px] border-input"
+            className="border-input h-32"
             onChange={(e) =>
               updateConfigFormParams({ description: e.target.value })
             }
@@ -659,6 +663,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
               configFormParams={llmConfig}
               updateConfigFormParams={updateConfigFormParams}
               notification={notification}
+              existingEvaluator={!!existingEvaluatorId}
             />
 
             <Separator className="my-1" />

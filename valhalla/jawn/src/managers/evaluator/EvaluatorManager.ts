@@ -53,6 +53,18 @@ export function getEvaluatorScoreName(evaluatorName: string) {
     .replace(/[^a-z0-9]+/g, "_");
 }
 
+export function getFullEvaluatorScoreName(
+  evaluatorName: string,
+  isBoolean: boolean
+) {
+  return (
+    evaluatorName
+      .toLowerCase()
+      .replace(" ", "_")
+      .replace(/[^a-z0-9]+/g, "_") + (isBoolean ? "-hcone-bool" : "")
+  );
+}
+
 export class EvaluatorManager extends BaseManager {
   testLastMileEvaluator({
     config,
@@ -484,23 +496,6 @@ export class EvaluatorManager extends BaseManager {
   async createEvaluator(
     params: CreateEvaluatorParams
   ): Promise<Result<EvaluatorResult, string>> {
-    const scoreName = getEvaluatorScoreName(params.name);
-    const scoreAttributes = await dbExecute<{
-      id: string;
-      score_key: string;
-    }>(
-      `
-      SELECT id, score_key
-      FROM score_attributes
-      WHERE score_key = $1 AND organization_id = $2
-      `,
-      [scoreName, this.authParams.organizationId]
-    );
-
-    if (scoreAttributes.data?.length && scoreAttributes.data.length > 0) {
-      return err("Score attribute by this name already exists");
-    }
-
     const result = await dbExecute<EvaluatorResult>(
       `
       INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
@@ -608,9 +603,49 @@ export class EvaluatorManager extends BaseManager {
       );
     }
 
+    const deleteOldExperimentEvaluators = await dbExecute(
+      `
+      DELETE FROM evaluator_experiments
+      WHERE evaluator = $1
+      `,
+      [evaluatorId]
+    );
+    if (deleteOldExperimentEvaluators.error) {
+      return err(
+        `Failed to delete old experiment evaluators: ${deleteOldExperimentEvaluators.error}`
+      );
+    }
+
+    const deleteOnlineEvaluators = await dbExecute(
+      `
+      DELETE FROM online_evaluators
+      WHERE evaluator = $1 and organization = $2
+      `,
+      [evaluatorId, this.authParams.organizationId]
+    );
+    if (deleteOnlineEvaluators.error) {
+      return err(
+        `Failed to delete online evaluators: ${deleteOnlineEvaluators.error}`
+      );
+    }
+
+    const setNullScoreAttributes = await dbExecute(
+      `
+      UPDATE score_attribute
+      SET evaluator_id = NULL
+      WHERE evaluator_id = $1 and organization = $2
+      `,
+      [evaluatorId, this.authParams.organizationId]
+    );
+    if (setNullScoreAttributes.error) {
+      return err(
+        `Failed to set null score attributes: ${setNullScoreAttributes.error}`
+      );
+    }
+
     const result = await dbExecute(
       `
-      DELETE FROM evaluator_v3
+      DELETE FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
       [evaluatorId, this.authParams.organizationId]
