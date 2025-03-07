@@ -59,6 +59,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
+
       const definedModel =
         calculateModel(
           context.processedLog.request.model,
@@ -67,6 +68,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           this.getModelFromPath(context.message.log.request.path)
         ) ?? undefined;
 
+      if (typeof context.processedLog.response.model !== "string") {
+        context.processedLog.response.model = "unknown";
+      }
       const omittedResponseBody = this.handleOmitResponseBody(
         context,
         processedResponseBody,
@@ -94,10 +98,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       );
 
       context.processedLog.response.model = responseModel;
-      context.processedLog.model = model;
+      if (typeof model === "string") {
+        context.processedLog.model = model;
+      }
 
       // Set usage
-      const usage = processedResponseBody.data?.usage ?? {};
+      const usage =
+        processedResponseBody.data?.usage ??
+        processedResponseBody.data?.processedBody?.usage ??
+        {};
       context.usage.completionTokens = usage.completionTokens;
       context.usage.promptTokens = usage.promptTokens;
       context.usage.totalTokens = usage.totalTokens;

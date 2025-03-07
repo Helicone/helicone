@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useRouter } from "next/navigation";
+import { H1, H4, Muted } from "@/components/ui/typography";
 
 export default function IntegratePage() {
   const org = useOrg();
@@ -34,40 +35,39 @@ export default function IntegratePage() {
 
   return (
     <OnboardingHeader>
-      <div className="flex flex-col gap-6 mx-auto max-w-4xl mt-6 md:mt-12 px-4 md:px-0">
+      <div className="flex flex-col gap-6 mx-auto max-w-4xl py-12">
         <div className="flex flex-col gap-2">
-          <h1 className="text-xl md:text-2xl font-semibold">Get integrated</h1>
-          <p className="text-sm text-slate-500">
-            Choose your preferred integration method.
-          </p>
+          <H1>Get integrated</H1>
+          <Muted>Choose your preferred integration method.</Muted>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Async Card */}
           <Link href="/onboarding/integrate/async" className="flex-1">
-            <Card className="h-full transition-colors hover:bg-slate-50">
+            <Card className="h-full transition-colors hover:bg-[hsl(var(--muted))]">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
-                    <ArrowLeftRight className="h-5 w-5 md:h-6 md:w-6" />
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-[hsl(var(--muted))] rounded-md border border-[hsl(var(--border))]">
+                    <ArrowLeftRight
+                      size={20}
+                      className="text-[hsl(var(--foreground))]"
+                    />
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
-                    <h3 className="font-semibold">Async</h3>
-                    <p className="text-sm text-slate-500">
-                      Flexible, not on the critical path.
-                    </p>
+                    <H4>Async</H4>
+                    <Muted>Flexible, not on the critical path.</Muted>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="hidden md:flex"
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight size={16} />
                   </Button>
                 </div>
               </div>
-              <div className="border-t p-4">
-                <ul className="text-sm space-y-1 text-slate-500 ml-4 list-disc list-inside">
+              <div className="border-t border-[hsl(var(--border))] p-4">
+                <ul className="text-sm space-y-1 text-[hsl(var(--muted-foreground))] ml-4 list-disc list-inside">
                   <li>No latency impact</li>
                   <li>Does not support all languages and frameworks.</li>
                   <li>Requires SDK</li>
@@ -78,30 +78,31 @@ export default function IntegratePage() {
 
           {/* Proxy Card */}
           <Link href="/onboarding/integrate/proxy" className="flex-1">
-            <Card className="h-full transition-colors hover:bg-slate-50">
+            <Card className="h-full transition-colors hover:bg-[hsl(var(--muted))]">
               <div className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-slate-100 rounded-md border border-slate-200">
-                    <Waypoints className="h-5 w-5 md:h-6 md:w-6" />
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center bg-[hsl(var(--muted))] rounded-md border border-[hsl(var(--border))]">
+                    <Waypoints
+                      size={20}
+                      className="text-[hsl(var(--foreground))]"
+                    />
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
-                    <h3 className="font-semibold">Proxy</h3>
-                    <p className="text-sm text-slate-500">
-                      Simplest and fastest integration.
-                    </p>
+                    <H4>Proxy</H4>
+                    <Muted>Simplest and fastest integration.</Muted>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="hidden md:flex"
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight size={16} />
                   </Button>
                 </div>
               </div>
-              <div className="border-t p-4">
+              <div className="border-t border-[hsl(var(--border))] p-4">
                 <div className="flex flex-col gap-2.5">
-                  <ul className="text-sm text-slate-500 ml-4 list-disc list-inside">
+                  <ul className="text-sm text-[hsl(var(--muted-foreground))] ml-4 list-disc list-inside">
                     <li>~50ms latency impact</li>
                     <li>Supports 300+ LLMs</li>
                     <li>Built-in caching, rate limiting and more.</li>
@@ -115,14 +116,17 @@ export default function IntegratePage() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col gap-4">
           <Link
             href="https://docs.helicone.ai/references/proxy-vs-async"
             target="_blank"
           >
-            <Button variant="link" className="h-auto w-fit p-0 text-sky-500">
+            <Button
+              variant="link"
+              className="h-auto w-fit p-0 text-[hsl(var(--primary))]"
+            >
               Read more about the difference
-              <ExternalLink className="ml-2 h-4 w-4" />
+              <ExternalLink size={16} className="ml-2" />
             </Button>
           </Link>
           <Button
@@ -133,7 +137,7 @@ export default function IntegratePage() {
           >
             {isRedirecting ? (
               <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                <Loader size={16} className="mr-2 animate-spin" />
                 Redirecting...
               </>
             ) : (

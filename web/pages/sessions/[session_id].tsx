@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from "react";
+import { ReactElement, useMemo, useState } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
 import { withAuthSSR } from "../../lib/api/handlerWrappers";
@@ -10,6 +10,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
 
+  const [isLive, setIsLive] = useState(true);
   const requests = useGetRequests(
     1,
     1000,
@@ -36,7 +37,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
       created_at: "desc",
     },
     false,
-    false
+    isLive
   );
 
   const session = sessionFromHeliconeRequests(requests.requests.requests ?? []);
@@ -46,6 +47,8 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
       session={session}
       session_id={session_id as string}
       requests={requests}
+      isLive={isLive}
+      setIsLive={setIsLive}
     />
   );
 };
@@ -58,10 +61,14 @@ export default SessionDetail;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   const session_id = options.context.query.session_id;
+  const decodedSessionId =
+    typeof session_id === "string"
+      ? decodeURIComponent(session_id)
+      : session_id;
   return {
     props: {
       user: options.userData.user,
-      session_id,
+      session_id: decodedSessionId,
     },
   };
 });

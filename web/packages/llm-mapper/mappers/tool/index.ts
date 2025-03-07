@@ -1,4 +1,4 @@
-import { LlmSchema } from "../../types";
+import { LlmSchema, HeliconeEventTool } from "../../types";
 import { MapperFn } from "../types";
 
 const getRequestText = (requestBody: any) => {

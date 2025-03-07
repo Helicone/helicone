@@ -199,7 +199,7 @@ export default function VersionSelector({
           <div
             className={`h-2 w-2 rounded-full transition-all mr-2 ${
               isDirty
-                ? "bg-amber-500"
+                ? "bg-amber-500 animate-pulse"
                 : currentVersion === masterVersion
                 ? "bg-heliblue"
                 : "bg-slate-400 dark:bg-slate-600"

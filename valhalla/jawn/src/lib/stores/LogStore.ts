@@ -1,15 +1,14 @@
-import { BatchPayload } from "../handlers/LoggingHandler";
-import { deepCompare } from "../../utils/helpers";
 import pgPromise from "pg-promise";
-import { PromptRecord } from "../handlers/HandlerContext";
-import { PromiseGenericResult, ok, err } from "../shared/result";
 import { Database } from "../db/database.types";
+import { PromptRecord } from "../handlers/HandlerContext";
+import { BatchPayload } from "../handlers/LoggingHandler";
+import { PromiseGenericResult, err, ok } from "../shared/result";
 
 import { shouldBumpVersion } from "@helicone/prompts";
-import { sanitizeObject } from "../../utils/sanitize";
 import { mapScores } from "../../managers/score/ScoreManager";
+import { sanitizeObject, safeJSONStringify } from "../../utils/sanitize";
 
-import { HELICONE_PGP as pgp, HELICONE_DB as db } from "../shared/db/pgpClient";
+import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
 
 process.on("exit", () => {
   pgp.end();
@@ -229,7 +228,7 @@ export class LogStore {
     t: pgPromise.ITask<{}>
   ): PromiseGenericResult<string> {
     const INVALID_TEMPLATE_ERROR = "Invalid template";
-    const { promptId, orgId, requestId, heliconeTemplate, model } =
+    const { promptId, orgId, requestId, heliconeTemplate, model, provider } =
       newPromptRecord;
 
     if (!heliconeTemplate) {
@@ -321,7 +320,7 @@ export class LogStore {
           heliconeTemplate.template,
           model,
           newPromptRecord.createdAt,
-          { isProduction: true },
+          { isProduction: true, provider: provider },
         ]);
 
         versionId = insertResult.id;
@@ -388,8 +387,8 @@ export class LogStore {
           `INSERT INTO prompt_input_record (inputs, auto_prompt_inputs, source_request, prompt_version, created_at)
        VALUES ($1, $2, $3, $4, $5)`,
           [
-            JSON.stringify(heliconeTemplate.inputs),
-            JSON.stringify(heliconeTemplate?.autoInputs ?? []),
+            safeJSONStringify(heliconeTemplate.inputs),
+            safeJSONStringify(heliconeTemplate?.autoInputs ?? []),
             requestId,
             versionId,
             newPromptRecord.createdAt.toISOString(),

@@ -30,10 +30,10 @@ export const PlanStep = ({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-slate-800">Plan</h2>
+        <h2 className="text-[hsl(var(--foreground))]">Plan</h2>
         <Link
           href="https://helicone.ai/pricing"
-          className="text-sm font-light text-slate-500 underline hover:text-slate-600"
+          className="text-sm font-light text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline"
           target="_blank"
           rel="noopener noreferrer"
         >

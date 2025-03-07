@@ -1437,6 +1437,9 @@
 						"type": "number",
 						"format": "double"
 					},
+					"audio_data": {
+						"type": "string"
+					},
 					"image_url": {
 						"type": "string"
 					},
@@ -1467,12 +1470,13 @@
 					"_type": {
 						"type": "string",
 						"enum": [
-							"function",
 							"functionCall",
+							"function",
 							"image",
 							"message",
 							"autoInput",
-							"contentArray"
+							"contentArray",
+							"audio"
 						]
 					}
 				},
@@ -1624,6 +1628,16 @@
 					"frequency_penalty": {
 						"type": "number",
 						"format": "double",
+						"nullable": true
+					},
+					"reasoning_effort": {
+						"type": "string",
+						"enum": [
+							"low",
+							"medium",
+							"high",
+							null
+						],
 						"nullable": true
 					},
 					"n": {
@@ -6068,7 +6082,8 @@
 					"kafka:orgs-to-dlq",
 					"azure:experiment",
 					"openai:apiKey",
-					"anthropic:apiKey"
+					"anthropic:apiKey",
+					"openrouter:apiKey"
 				],
 				"nullable": false
 			},
@@ -12159,6 +12174,101 @@
 								"required": [
 									"active",
 									"id"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/top-orgs-over-time": {
+			"post": {
+				"operationId": "GetTopOrgsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"data": {
+														"items": {
+															"properties": {
+																"request_count": {
+																	"type": "number",
+																	"format": "double"
+																},
+																"time": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"request_count",
+																"time"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"organization_name": {
+														"type": "string"
+													},
+													"organization_id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"data",
+													"organization_name",
+													"organization_id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"groupBy": {
+										"type": "string"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"timeRange": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"limit",
+									"timeRange"
 								],
 								"type": "object"
 							}

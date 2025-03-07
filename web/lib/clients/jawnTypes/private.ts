@@ -367,6 +367,9 @@ export interface paths {
     post: operations["CreateAlertBanner"];
     patch: operations["UpdateAlertBanner"];
   };
+  "/v1/admin/top-orgs-over-time": {
+    post: operations["GetTopOrgsOverTime"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -690,6 +693,7 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      audio_data?: string;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -699,7 +703,7 @@ Json: JsonObject;
       role?: string;
       id?: string;
       /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;
@@ -743,6 +747,8 @@ Json: JsonObject;
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      /** @enum {string|null} */
+      reasoning_effort?: "low" | "medium" | "high" | null;
       /** Format: double */
       n?: number | null;
       stop?: string[] | null;
@@ -2205,7 +2211,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
@@ -4506,6 +4512,36 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  GetTopOrgsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": {
+          groupBy?: string;
+          /** Format: double */
+          limit: number;
+          timeRange: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: {
+                data: {
+                    /** Format: double */
+                    request_count: number;
+                    time: string;
+                  }[];
+                organization_name: string;
+                organization_id: string;
+              }[];
+          };
+        };
       };
     };
   };

@@ -59,3 +59,110 @@ iconType: "solid"
 
   </Step>
 </Steps>
+
+## Adding User-Specific Headers with Client Factory Method
+
+Currently, the Gemini Python SDK doesn't support setting headers at request time, unlike OpenAI and Anthropic SDKs (see [GitHub issue #698](https://github.com/google-gemini/generative-ai-python/issues/698)). As a workaround, you can create a factory function that dynamically generates client instances with specific headers.
+
+### Client Factory Method for User-Specific Headers
+
+```python
+from typing import Optional, List, Tuple, Any
+from google import genai
+import os
+import instructor
+
+def setup_gemini_client(
+    user_id: Optional[str] = None,
+    session_id: Optional[str] = None,
+    session_name: Optional[str] = None,
+    session_path: Optional[str] = None,
+    custom_properties: Optional[dict] = None,
+    other_metadata: Optional[dict] = None
+) -> Any:
+    """
+    Factory function to create a Gemini client with user-specific Helicone headers.
+
+    Args:
+        user_id: Optional user identifier for Helicone tracking
+        session_id: Optional session identifier for Helicone tracking
+        session_name: Optional name for the session in Helicone
+        session_path: Optional path for the session in Helicone
+        custom_properties: Optional dictionary of custom properties for Helicone
+        other_metadata: Optional dictionary of additional metadata headers
+
+    Returns:
+        Configured Gemini client with Instructor integration
+    """
+    # Base headers required for Helicone
+    metadata: List[Tuple[str, str]] = [
+        ("helicone-auth", f"Bearer {os.environ.get('HELICONE_API_KEY')}"),
+        ("helicone-target-url", "https://generativelanguage.googleapis.com"),
+    ]
+
+    # Add user_id if provided
+    if user_id:
+        metadata.append(("helicone-user-id", user_id))
+
+    # Add session_id if provided
+    if session_id:
+        metadata.append(("helicone-session-id", session_id))
+
+    # Add session_name if provided
+    if session_name:
+        metadata.append(("helicone-session-name", session_name))
+
+    # Add session_path if provided
+    if session_path:
+        metadata.append(("helicone-session-path", session_path))
+
+    # Add custom properties if provided
+    if custom_properties:
+        for key, value in custom_properties.items():
+            metadata.append((f"helicone-property-{key}", value))
+
+    # Add other metadata if provided
+    if other_metadata:
+        for key, value in other_metadata.items():
+            metadata.append((key, value))
+
+    # Configure the client with metadata
+    genai.configure(
+        api_key=os.environ.get('GOOGLE_API_KEY'),
+        client_options={
+            "api_endpoint": "gateway.helicone.ai",
+        },
+        default_metadata=metadata,
+        transport="rest",
+    )
+
+    # Create Gemini client with Instructor integration
+    gemini_client = instructor.from_gemini(
+        genai.GenerativeModel(
+            model_name="gemini-2.0-flash",
+        ),
+        mode=instructor.Mode.GEMINI_JSON,
+    )
+
+    return gemini_client
+
+session_client = setup_gemini_client(
+    user_id="user123",
+    session_id="session456",
+    session_name="Customer Support Chat",
+    session_path="/support/tickets/123",
+    custom_properties={
+        "job_id": "1234567890",
+        "job_name": "Customer Support Chat",
+    }
+)
+
+response = session_client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": "What are black holes?"}
+    ],
+    response_model=Response
+)
+```
+
+This factory method approach allows you to create clients with different user identifiers, session tracking, and custom properties for each request, working around the current limitation in the Gemini SDK while providing comprehensive tracking capabilities in Helicone.

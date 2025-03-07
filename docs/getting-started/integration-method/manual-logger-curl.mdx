@@ -37,7 +37,7 @@ The request body follows this structure:
 export type HeliconeAsyncLogRequest = {
   providerRequest: ProviderRequest;
   providerResponse: ProviderResponse;
-  timing: Timing;
+  timing?: Timing; // Optional field
 };
 
 export type ProviderRequest = {
@@ -49,16 +49,15 @@ export type ProviderRequest = {
 };
 
 export type ProviderResponse = {
-  json: {
+  headers: Record<string, string>;
+  status: number;
+  json?: {
     [key: string]: any;
   };
   textBody?: string;
-  status: number;
-  headers: Record<string, string>;
 };
 
 export type Timing = {
-  // From Unix epoch in Milliseconds
   startTime: {
     seconds: number;
     milliseconds: number;
@@ -67,6 +66,7 @@ export type Timing = {
     seconds: number;
     milliseconds: number;
   };
+  timeToFirstToken?: number;
 };
 ```
 
@@ -101,19 +101,11 @@ curl -X POST https://api.worker.helicone.ai/custom/v1/log \
       "headerKey1": "headerValue1",
       "headerKey2": "headerValue2"
     }
-  },
-  "timing": {
-    "startTime": {
-      "seconds": 1625686222,
-      "milliseconds": 500
-    },
-    "endTime": {
-      "seconds": 1625686244,
-      "milliseconds": 750
-    }
   }
 }'
 ```
+
+> **Note:** The `timing` field is optional. If not provided, Helicone will automatically set the current time as both start and end time.
 
 ## Token Tracking
 
@@ -221,11 +213,13 @@ To associate requests with specific users, include a user ID in the `meta` field
 
 ### Calculating Timing Information
 
-The timing information should be calculated as follows:
+The timing information is optional but recommended for accurate latency metrics. It should be calculated as follows:
 
 1. Record the start time before making your request to the LLM provider
 2. Record the end time after receiving the response
 3. Convert these times to Unix epoch format (seconds and milliseconds)
+
+> **Regional Support:** Helicone supports both US and EU regions for caching. In development/preview environments, both regions use the same cache URL, while in production they use region-specific endpoints.
 
 Example in JavaScript:
 
@@ -317,3 +311,137 @@ print(f"Helicone logging status: {helicone_response.status_code}")
 ```
 
 For more examples and detailed usage, check out our [Manual Logger with Streaming](/guides/cookbooks/manual-logger-streaming) cookbook.
+
+## Examples
+
+### Basic Example
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-helicone-api-key" \
+  -d '{
+    "providerRequest": {
+      "url": "custom-model-nopath",
+      "json": {
+        "model": "my-custom-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Hello, world!"
+          }
+        ]
+      },
+      "meta": {}
+    },
+    "providerResponse": {
+      "headers": {},
+      "status": 200,
+      "json": {
+        "id": "response-123",
+        "choices": [
+          {
+            "message": {
+              "role": "assistant",
+              "content": "Hello! How can I assist you today?"
+            }
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10,
+          "completion_tokens": 8,
+          "total_tokens": 18
+        }
+      }
+    },
+    "timing": {
+      "startTime": {
+        "seconds": 1677721748,
+        "milliseconds": 123
+      },
+      "endTime": {
+        "seconds": 1677721749,
+        "milliseconds": 456
+      }
+    }
+  }'
+```
+
+### String Response Example
+
+You can now log string responses directly using the `textBody` field:
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-helicone-api-key" \
+  -d '{
+    "providerRequest": {
+      "url": "custom-model-nopath",
+      "json": {
+        "model": "my-custom-model",
+        "prompt": "Tell me a joke"
+      },
+      "meta": {}
+    },
+    "providerResponse": {
+      "headers": {},
+      "status": 200,
+      "textBody": "Why did the chicken cross the road? To get to the other side!"
+    },
+    "timing": {
+      "startTime": {
+        "seconds": 1677721748,
+        "milliseconds": 123
+      },
+      "endTime": {
+        "seconds": 1677721749,
+        "milliseconds": 456
+      }
+    }
+  }'
+```
+
+### Time to First Token Example
+
+For streaming responses, you can include the time to first token:
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-helicone-api-key" \
+  -d '{
+    "providerRequest": {
+      "url": "custom-model-nopath",
+      "json": {
+        "model": "my-streaming-model",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a story about a robot"
+          }
+        ],
+        "stream": true
+      },
+      "meta": {}
+    },
+    "providerResponse": {
+      "headers": {},
+      "status": 200,
+      "textBody": "Once upon a time, there was a robot named Rusty who dreamed of becoming human..."
+    },
+    "timing": {
+      "startTime": {
+        "seconds": 1677721748,
+        "milliseconds": 123
+      },
+      "endTime": {
+        "seconds": 1677721749,
+        "milliseconds": 456
+      },
+      "timeToFirstToken": 150
+    }
+  }'
+```
+
+Note that `timeToFirstToken` is measured in milliseconds.

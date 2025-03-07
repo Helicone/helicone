@@ -1,9 +1,16 @@
 import time
 import requests
-from typing import Callable, Literal, Optional, TypeVar, Union
+from typing import Callable, Dict, Literal, Optional, TypeVar, Union, TypedDict
 
 
 T = TypeVar('T')
+
+
+class LoggingOptions(TypedDict, total=False):
+    start_time: float
+    end_time: float
+    additional_headers: Dict[str, str]
+    time_to_first_token_ms: Optional[float]
 
 
 class HeliconeResultRecorder:
@@ -23,7 +30,7 @@ class HeliconeManualLogger:
     headers: dict
     logging_endpoint: str
 
-    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.hconeai.com"):
+    def __init__(self, api_key: str, headers: dict = {}, logging_endpoint: str = "https://api.worker.helicone.ai"):
         self.api_key = api_key
         self.headers = dict(headers)
         self.logging_endpoint = logging_endpoint
@@ -53,7 +60,7 @@ class HeliconeManualLogger:
             result = operation(result_recorder)
             end_time = time.time()
 
-            self.__send_log(provider, request, result_recorder.get_results(), {
+            self.send_log(provider, request, result_recorder.get_results(), {
                 "start_time": start_time,
                 "end_time": end_time,
                 "additional_headers": additional_headers
@@ -72,12 +79,12 @@ class HeliconeManualLogger:
         else:
             return self.logging_endpoint + "/custom/v1/log"
 
-    def __send_log(
+    def send_log(
         self,
         provider: Optional[str],
         request: dict,
-        response: dict,
-        options: dict
+        response: Union[dict, str],
+        options: LoggingOptions
     ):
         start_time = options.get("start_time")
         end_time = options.get("end_time")
@@ -90,6 +97,7 @@ class HeliconeManualLogger:
             },
             "meta": {}
         }
+        is_response_string = isinstance(response, str)
 
         provider_response = {
             "headers": self.headers,
@@ -98,7 +106,8 @@ class HeliconeManualLogger:
                 **response,
                 "_type": request.get("_type", "unknown"),
                 "toolName": request.get("toolName", "unknown"),
-            }
+            } if not is_response_string else {},
+            "textBody": response if is_response_string else None
         }
 
         timing = {
@@ -109,7 +118,8 @@ class HeliconeManualLogger:
             "endTime": {
                 "seconds": int(end_time),
                 "milliseconds": int((end_time - int(end_time)) * 1000)
-            }
+            },
+            "timeToFirstToken": options.get("time_to_first_token") if options.get("time_to_first_token") is not None else None
         }
 
         fetch_options = {
@@ -128,10 +138,12 @@ class HeliconeManualLogger:
         }
 
         try:
-            requests.post(
+            result = requests.post(
                 self.__get_logging_endpoint(provider),
                 json=fetch_options["body"],
                 headers=fetch_options["headers"]
             )
+            if result.status_code != 200:
+                print("Error making request to Helicone log endpoint:", result.text)
         except Exception as e:
             print("Error making request to Helicone log endpoint:", e)

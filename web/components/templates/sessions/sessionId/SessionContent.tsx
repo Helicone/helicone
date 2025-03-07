@@ -1,27 +1,32 @@
+import { Row } from "@/components/layout/common";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
+import { PiBroadcastBold } from "react-icons/pi";
+import {
+  getEffectiveRequests,
+  isRealtimeSession,
+} from "../../../../lib/sessions/realtimeSession";
 import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
-
 import RequestDrawerV2 from "../../requests/requestDrawerV2";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
 import TreeView from "./Tree/TreeView";
-import { Row } from "@/components/layout/common";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 
 interface SessionContentProps {
   session: Session;
   session_id: string;
   requests: ReturnType<typeof useGetRequests>;
+  isLive: boolean;
+  setIsLive: (isLive: boolean) => void;
 }
-
 export const TABS = [
   {
     id: "tree",
@@ -32,11 +37,12 @@ export const TABS = [
     label: "Chat",
   },
 ] as const;
-
 export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
   requests,
+  isLive,
+  setIsLive,
 }) => {
   const router = useRouter();
   const { view, requestId } = router.query;
@@ -88,7 +94,42 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
 
-  if (requests.requests.isLoading) {
+  // Centralized realtime session handling in a single object
+  const realtimeData = useMemo(() => {
+    // Default values when loading or no data
+    if (
+      requests.requests.isLoading ||
+      !requests.requests.requests ||
+      requests.requests.requests.length === 0
+    ) {
+      return {
+        isRealtime: null,
+        effectiveRequests: [],
+        originalRequest: null,
+      };
+    }
+
+    const isRealtime = isRealtimeSession(requests.requests.requests || []);
+
+    // Get effective requests (either original or simulated realtime requests)
+    const effectiveRequests = isRealtime
+      ? getEffectiveRequests(requests.requests.requests || [])
+      : requests.requests.requests || [];
+
+    // For realtime sessions, get the original request for proper rendering
+    let originalRequest = null;
+    if (isRealtime) {
+      originalRequest = requests.requests.requests[0] || null;
+    }
+
+    return {
+      isRealtime,
+      effectiveRequests,
+      originalRequest,
+    };
+  }, [requests.requests.requests, requests.requests.isLoading]);
+
+  if (requests.requests.isLoading || realtimeData.isRealtime === null) {
     return (
       <div className="h-screen w-full flex justify-center items-center">
         <LoadingAnimation />
@@ -105,100 +146,106 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         }
         className="flex flex-col h-full"
       >
-        <div className="sticky top-0 bg-white dark:bg-slate-950 z-10">
-          <Row className="items-center justify-between">
-            <BreadCrumb
-              className="mx-8 pt-10"
-              // @ts-ignore
-              users={session.traces
-                .map((trace) => trace.request.heliconeMetadata.user)
-                .filter((user) => user !== "" && user != null)}
-              models={session.traces.map((trace) => trace.request.model ?? "")}
-              promptTokens={session.traces.reduce(
-                (acc, trace) =>
-                  acc +
-                  (parseInt(
-                    `${trace?.request?.heliconeMetadata?.promptTokens}`
-                  ) || 0),
-                0
-              )}
-              completionTokens={session.traces.reduce(
-                (acc, trace) =>
-                  acc +
-                  (parseInt(
-                    `${trace?.request?.heliconeMetadata?.completionTokens}`
-                  ) || 0),
-                0
-              )}
-              sessionId={session_id as string}
-              numTraces={session.traces.length}
-              sessionCost={session.session_cost_usd}
-              startTime={startTime}
-              endTime={endTime}
-              sessionFeedback={
-                requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
-                "1"
-                  ? true
-                  : requestWithFeedback?.properties[
-                      "Helicone-Session-Feedback"
-                    ] === "0"
-                  ? false
-                  : null
-              }
-            />
-
-            <Row className="gap-2 items-center mr-8">
-              {currentTopView === "tree" &&
-                (showSpan ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-[30px] text-sm font-medium flex items-center gap-1"
-                    onClick={() => setShowSpan(!showSpan)}
-                  >
-                    <EyeOffIcon width={16} height={16} />
-                    Hide span
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-[30px] text-sm font-medium flex items-center gap-1"
-                    onClick={() => setShowSpan(!showSpan)}
-                  >
-                    <EyeIcon width={16} height={16} />
-                    Show span
-                  </Button>
-                ))}
-              <TabsList variant="secondary" className="h-[30px]">
-                {TABS.map((tab) => (
-                  <TabsTrigger
-                    className="h-[22px] text-slate-900 text-xs"
-                    variant="secondary"
-                    key={tab.id}
-                    value={tab.id}
-                  >
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Row>
+        {/* Header */}
+        <div className="h-16 flex flex-row gap-4 items-center justify-between border-b border-slate-200 dark:border-slate-800 sticky bg-slate-100 dark:bg-slate-900 z-10 p-4">
+          <BreadCrumb
+            // @ts-ignore
+            users={session.traces
+              .map((trace) => trace.request.heliconeMetadata.user)
+              .filter((user) => user !== "" && user != null)}
+            models={session.traces.map((trace) => trace.request.model ?? "")}
+            promptTokens={session.traces.reduce(
+              (acc, trace) =>
+                acc +
+                (parseInt(
+                  `${trace?.request?.heliconeMetadata?.promptTokens}`
+                ) || 0),
+              0
+            )}
+            completionTokens={session.traces.reduce(
+              (acc, trace) =>
+                acc +
+                (parseInt(
+                  `${trace?.request?.heliconeMetadata?.completionTokens}`
+                ) || 0),
+              0
+            )}
+            sessionId={session_id as string}
+            numTraces={session.traces.length}
+            sessionCost={session.session_cost_usd}
+            startTime={startTime}
+            endTime={endTime}
+            sessionFeedback={
+              requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
+              "1"
+                ? true
+                : requestWithFeedback?.properties[
+                    "Helicone-Session-Feedback"
+                  ] === "0"
+                ? false
+                : null
+            }
+            isLive={isLive}
+            setIsLive={setIsLive}
+          />
+          {realtimeData.isRealtime && (
+            <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
+              <PiBroadcastBold className="h-4 w-4" />
+              Realtime Sessions reconstruct a timeline using connection
+              timestamps.
+            </div>
+          )}
+          <Row className="gap-2 items-center">
+            {currentTopView === "tree" &&
+              (showSpan ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-medium flex items-center gap-1"
+                  onClick={() => setShowSpan(!showSpan)}
+                >
+                  <EyeOffIcon width={16} height={16} />
+                  Hide Span
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-medium flex items-center gap-1"
+                  onClick={() => setShowSpan(!showSpan)}
+                >
+                  <EyeIcon width={16} height={16} />
+                  Show Span
+                </Button>
+              ))}
+            <TabsList variant="default">
+              {TABS.map((tab) => (
+                <TabsTrigger variant="default" key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </Row>
         </div>
 
-        <div className="flex-grow overflow-auto">
+        <div className="h-full">
           <TabsContent value="tree" className="h-full">
             <TreeView
-              session={session}
               selectedRequestId={selectedRequestId}
               setSelectedRequestId={handleRequestIdChange}
-              requests={requests}
               showSpan={showSpan}
+              session={session}
+              requests={requests}
+              realtimeData={realtimeData}
             />
           </TabsContent>
 
           <TabsContent value="chat" className="h-full">
-            <ChatSession requests={requests} />
+            <ChatSession
+              session={session}
+              requests={requests}
+              realtimeData={realtimeData}
+            />
           </TabsContent>
         </div>
 

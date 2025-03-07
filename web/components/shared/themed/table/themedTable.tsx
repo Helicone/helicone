@@ -1,3 +1,5 @@
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
@@ -8,15 +10,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "@/types/timeFilter";
 
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
@@ -29,18 +30,18 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -98,6 +99,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     onChange: (value: string) => void;
     placeholder: string;
   };
+  rowLink?: (row: T) => string;
 }
 
 export default function ThemedTable<T extends { id?: string }>(
@@ -130,6 +132,7 @@ export default function ThemedTable<T extends { id?: string }>(
     isDatasetsPage,
     rightPanel,
     search,
+    rowLink,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -218,7 +221,10 @@ export default function ThemedTable<T extends { id?: string }>(
       currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
     ) {
       setOnClickElement(
-        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+        () => () =>
+          router.push(
+            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
+          )
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -376,10 +382,11 @@ export default function ThemedTable<T extends { id?: string }>(
                         <tr
                           key={row.original?.id}
                           className={clsx(
-                            " hover:cursor-pointer",
+                            "hover:cursor-pointer",
                             checkedIds?.includes(row.original?.id ?? "")
                               ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                            rowLink && "relative"
                           )}
                           onClick={
                             onRowSelect &&
@@ -439,6 +446,42 @@ export default function ThemedTable<T extends { id?: string }>(
                               )}
                             </td>
                           ))}
+                          {/* Place link as a separate overlay that won't affect layout */}
+                          {rowLink && (
+                            <td
+                              className="p-0 m-0 border-0"
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                padding: 0,
+                                margin: 0,
+                                border: "none",
+                                background: "transparent",
+                                pointerEvents: "none",
+                                zIndex: 2,
+                              }}
+                            >
+                              <Link
+                                href={rowLink(row.original)}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  height: "100%",
+                                  opacity: 0,
+                                  pointerEvents: "auto",
+                                }}
+                                onClick={(e: React.MouseEvent) => {
+                                  if (onRowSelect) {
+                                    e.stopPropagation();
+                                  }
+                                }}
+                                aria-hidden="true"
+                              />
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>

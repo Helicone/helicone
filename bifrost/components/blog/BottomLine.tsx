@@ -11,9 +11,9 @@ export function BottomLine({
 }: BottomLineProps) {
   return (
     <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-      <div className="rounded-lg bg-[#F2F9FC] px-6 py-4 border border-[#E3EFF3]">
-        <h2 className="text-lg font-semibold text-slate-600 my-0">{title}</h2>
-        <p className="text-[#6B8C9C] text-md my-1">{description}</p>
+      <div className="rounded-lg bg-sky-50 px-5 py-4 border border-slate-200">
+        <h2 className="text-xl font-semibold text-slate-600 my-1">{title}</h2>
+        <p className="text-slate-500 text-md leading-relaxed">{description}</p>
       </div>
     </section>
   );

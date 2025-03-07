@@ -1083,6 +1083,7 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      audio_data?: string;
       image_url?: string;
       timestamp?: string;
       tool_call_id?: string;
@@ -1092,7 +1093,7 @@ Json: JsonObject;
       role?: string;
       id?: string;
       /** @enum {string} */
-      _type: "function" | "functionCall" | "image" | "message" | "autoInput" | "contentArray";
+      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;
@@ -1136,6 +1137,8 @@ Json: JsonObject;
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      /** @enum {string|null} */
+      reasoning_effort?: "low" | "medium" | "high" | null;
       /** Format: double */
       n?: number | null;
       stop?: string[] | null;

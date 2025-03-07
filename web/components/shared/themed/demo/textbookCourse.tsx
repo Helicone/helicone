@@ -98,7 +98,9 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
         <div className="flex flex-wrap gap-2 items-center">
           {sessionId && (
             <Link
-              href={`https://us.helicone.ai/sessions/${sessionId}`}
+              href={`https://us.helicone.ai/sessions/${encodeURIComponent(
+                sessionId
+              )}`}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               View Session

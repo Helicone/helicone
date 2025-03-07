@@ -33,6 +33,7 @@ export interface SettingsType {
   "azure:experiment": AzureExperiment;
   "openai:apiKey": ApiKey;
   "anthropic:apiKey": ApiKey;
+  "openrouter:apiKey": ApiKey;
 }
 
 export type SettingName = keyof SettingsType;

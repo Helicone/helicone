@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const switchVariants = cva(
-  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-slate-200 dark:focus-visible:ring-offset-slate-850",
+  "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--background))] disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {
@@ -15,9 +15,9 @@ const switchVariants = cva(
       },
       variant: {
         default:
-          "data-[state=checked]:bg-slate-900 data-[state=unchecked]:bg-slate-200 dark:data-[state=checked]:bg-slate-200 dark:data-[state=unchecked]:bg-slate-600",
+          "data-[state=checked]:bg-[hsl(var(--primary))] data-[state=unchecked]:bg-[hsl(var(--muted))]",
         helicone:
-          "data-[state=checked]:bg-sky-500 data-[state=unchecked]:bg-slate-100",
+          "data-[state=checked]:bg-[hsl(var(--primary))] data-[state=unchecked]:bg-[hsl(var(--muted))]",
       },
     },
     defaultVariants: {
@@ -28,7 +28,7 @@ const switchVariants = cva(
 );
 
 const switchThumbVariants = cva(
-  "pointer-events-none block rounded-full bg-white shadow-lg ring-0 transition-transform dark:bg-slate-950",
+  "pointer-events-none block rounded-full bg-[hsl(var(--background))] shadow-lg ring-0 transition-transform",
   {
     variants: {
       size: {
