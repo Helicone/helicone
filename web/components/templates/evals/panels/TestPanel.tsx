@@ -2,16 +2,20 @@ import { Col, Row } from "@/components/layout/common";
 import { TestEvaluator } from "@/components/templates/evals/CreateNewEvaluator/components/TestEvaluator";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import { PanelType } from "./types";
+import { useEffect } from "react";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
-export const TestPanel = ({
-  setPanels,
-  panels,
-}: {
-  setPanels: Dispatch<SetStateAction<PanelType[]>>;
-  panels: PanelType[];
-}) => {
+export const TestPanel = () => {
+  const { closeTestPanel } = useEvalPanelStore();
+
+  // Log when the test panel is mounted to help with debugging
+  useEffect(() => {
+    console.log("TestPanel mounted");
+    return () => {
+      console.log("TestPanel unmounted");
+    };
+  }, []);
+
   return (
     <Col className="h-full">
       <Row className="justify-end">
@@ -19,18 +23,13 @@ export const TestPanel = ({
           variant="ghost"
           size="icon"
           onClick={() => {
-            setPanels((prev) => {
-              const newPanels = prev.filter((p) => p._type !== "test");
-              if (!prev.includes({ _type: "main" })) {
-                return [{ _type: "main" }, ...newPanels];
-              }
-              return newPanels;
-            });
+            console.log("Closing test panel");
+            closeTestPanel();
           }}
         >
           <XIcon className="w-4 h-4" />
         </Button>
-      </Row>{" "}
+      </Row>
       <div className="w-full px-10 overflow-y-auto">
         <TestEvaluator />
       </div>

@@ -61,14 +61,6 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
     useEvaluatorDetails(evaluator, () => {
       setShowCreateModal(false);
     });
-  const llmFunctionParams = useMemo(
-    () =>
-      openAITemplateToOpenAIFunctionParams(
-        evaluator.llm_template,
-        evaluator.scoring_type as "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
-      ),
-    [evaluator.llm_template, evaluator.scoring_type]
-  );
 
   const { setLLMEvaluatorConfigFormPreset } = useLLMConfigStore();
 

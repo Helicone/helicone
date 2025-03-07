@@ -86,7 +86,7 @@ export function TestEvaluator() {
   });
   const [previewOpen, setPreviewOpen] = useState(false);
   return (
-    <div>
+    <div className="pb-20">
       <Row className="gap-5 items-center justify-end">
         <Label className="whitespace-nowrap">Request Id: </Label>
         <Input

@@ -12,6 +12,7 @@ import { useJawnClient } from "@/lib/clients/jawnHook";
 import React, { useEffect, useState } from "react";
 import MarkdownEditor from "../../../shared/markdownEditor";
 import useNotification from "../../../shared/notification/useNotification";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -40,6 +41,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
 }) => {
   const notification = useNotification();
   const { invalidate } = useInvalidateEvaluators();
+  const evalPanelStore = useEvalPanelStore();
 
   const [text, setText] = useState<string>(configFormParams.code);
   const { setTestConfig: setTestData } = useTestDataStore();
@@ -83,9 +85,8 @@ export const PythonEvaluatorConfigForm: React.FC<{
         />
 
         <Button
-          onClick={() =>
-            openTestPanel &&
-            openTestPanel(async () => {
+          onClick={() => {
+            const testFunction = async () => {
               const result = await jawn.POST("/v1/evaluator/python/test", {
                 body: {
                   code: text,
@@ -95,16 +96,37 @@ export const PythonEvaluatorConfigForm: React.FC<{
               if (result?.data?.data) {
                 return {
                   ...(result?.data?.data ?? {}),
-                  _type: "completed",
+                  _type: "completed" as const,
                 };
               } else {
                 return {
-                  _type: "error",
+                  _type: "error" as const,
                   error: result?.data?.error ?? "Unknown error - try again",
                 };
               }
-            })
-          }
+            };
+
+            if (openTestPanel) {
+              console.log(
+                "Opening test panel via prop",
+                existingEvaluatorId ? "in edit mode" : "in create mode"
+              );
+              openTestPanel(testFunction);
+            } else {
+              console.log(
+                "Opening test panel via store",
+                existingEvaluatorId ? "in edit mode" : "in create mode"
+              );
+              // Set test data first
+              setTestData({
+                _type: "python",
+                evaluator_name: name,
+                code: text,
+              });
+              // Then open the test panel
+              evalPanelStore.openTestPanel();
+            }
+          }}
         >
           Test
         </Button>

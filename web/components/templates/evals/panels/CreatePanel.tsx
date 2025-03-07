@@ -5,12 +5,11 @@ import { COMPOSITE_OPTIONS } from "@/components/templates/evals/testing/examples
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { XIcon } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import { PanelType } from "./types";
 import { LastMileDevConfigForm } from "../CreateNewEvaluator/LastMileDevConfigForm";
 
 import { devtools, persist } from "zustand/middleware";
 import { create } from "zustand";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
 export const useCreatePanelTabs = create<{
   selectedTab: string;
@@ -29,14 +28,10 @@ export const useCreatePanelTabs = create<{
   )
 );
 
-export const CreatePanel = ({
-  setPanels,
-  panels,
-}: {
-  setPanels: Dispatch<SetStateAction<PanelType[]>>;
-  panels: PanelType[];
-}) => {
+export const CreatePanel = () => {
   const { selectedTab, setSelectedTab } = useCreatePanelTabs();
+  const { resetPanels, openTestPanel } = useEvalPanelStore();
+
   return (
     <Col>
       <Row className="justify-end">
@@ -44,7 +39,7 @@ export const CreatePanel = ({
           variant="ghost"
           size="icon"
           onClick={() => {
-            setPanels((prev) => [{ _type: "main" }]);
+            resetPanels();
           }}
         >
           <XIcon className="w-4 h-4" />
@@ -79,10 +74,11 @@ export const CreatePanel = ({
           <div className="flex-grow overflow-hidden">
             <LLMEvaluatorConfigForm
               onSubmit={() => {
-                setPanels((prev) => [{ _type: "main" }]);
+                resetPanels();
               }}
               openTestPanel={() => {
-                setPanels((prev) => [{ _type: "create" }, { _type: "test" }]);
+                console.log("Opening test panel from LLM evaluator");
+                openTestPanel();
               }}
             />
           </div>
@@ -90,10 +86,11 @@ export const CreatePanel = ({
         <TabsContent value="python">
           <PythonEvaluatorConfigForm
             onSubmit={() => {
-              setPanels((prev) => [{ _type: "main" }]);
+              resetPanels();
             }}
             openTestPanel={() => {
-              setPanels((prev) => [{ _type: "create" }, { _type: "test" }]);
+              console.log("Opening test panel from Python evaluator");
+              openTestPanel();
             }}
             configFormParams={COMPOSITE_OPTIONS[0].preset}
             name={COMPOSITE_OPTIONS[0].name}
@@ -103,10 +100,11 @@ export const CreatePanel = ({
         <TabsContent value="lastmile">
           <LastMileDevConfigForm
             onSubmit={() => {
-              setPanels((prev) => [{ _type: "main" }]);
+              resetPanels();
             }}
             openTestPanel={() => {
-              setPanels((prev) => [{ _type: "create" }, { _type: "test" }]);
+              console.log("Opening test panel from LastMile evaluator");
+              openTestPanel();
             }}
           />
         </TabsContent>

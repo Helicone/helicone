@@ -1,7 +1,7 @@
 import AuthHeader from "@/components/shared/authHeader";
 import { TimeInterval, getTimeIntervalAgo } from "@/lib/timeCalculations/time";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { useMemo } from "react";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,10 @@ import { INITIAL_COLUMNS } from "../EvaluratorColumns";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
-import { PanelType } from "./types";
 import { PiPlusBold } from "react-icons/pi";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
-export const MainPanel = ({
-  setPanels,
-  panels,
-}: {
-  setPanels: Dispatch<SetStateAction<PanelType[]>>;
-  panels: PanelType[];
-}) => {
+export const MainPanel = () => {
   const {
     evalScores,
     evaluators: evaluators,
@@ -42,6 +36,7 @@ export const MainPanel = ({
     deleteEvaluator,
   } = useEvaluators();
 
+  const { panels, openCreatePanel, openEditPanel } = useEvalPanelStore();
   const org = useOrg();
 
   const evals = useMemo(() => {
@@ -145,7 +140,7 @@ export const MainPanel = ({
                 variant="action"
                 className="gap-2"
                 onClick={() => {
-                  setPanels([{ _type: "main" }, { _type: "create" }]);
+                  openCreatePanel();
                 }}
               >
                 <PiPlusBold className="h-4 w-4 mr-2" />
@@ -184,18 +179,15 @@ export const MainPanel = ({
               },
             }}
             onRowSelect={(row) => {
-              setPanels((prev) => [
-                { _type: "main" },
-                { _type: "edit", selectedEvaluatorId: row.id ?? "" },
-              ]);
+              openEditPanel(row.id ?? "");
             }}
             customButtons={[
               ...(panels.length > 1
                 ? []
                 : [
                     <Button
-                      onClick={async () => {
-                        setPanels([{ _type: "main" }, { _type: "create" }]);
+                      onClick={() => {
+                        openCreatePanel();
                       }}
                       key="create-new-evaluator"
                       size="sm_sleek"

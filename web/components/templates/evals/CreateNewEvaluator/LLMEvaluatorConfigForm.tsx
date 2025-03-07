@@ -30,6 +30,7 @@ import { devtools, persist } from "zustand/middleware";
 import useNotification from "../../../shared/notification/useNotification";
 import { LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { TestInput } from "./types";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -87,10 +88,10 @@ export const LLMEvaluatorConfigForm: React.FC<{
   openTestPanel?: () => void;
 }> = ({ existingEvaluatorId, onSubmit, openTestPanel }) => {
   const notification = useNotification();
-
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
   const { setTestConfig: setTestData } = useTestDataStore();
+  const evalPanelStore = useEvalPanelStore();
 
   const {
     LLMEvaluatorConfigFormPreset: configFormParams,
@@ -159,11 +160,26 @@ export const LLMEvaluatorConfigForm: React.FC<{
             <RadioGroup
               defaultValue="boolean"
               value={configFormParams.expectedValueType}
-              onValueChange={(value) =>
-                updateConfigFormParams({
-                  expectedValueType: value as "boolean" | "choice" | "range",
-                })
-              }
+              onValueChange={(value) => {
+                const valueType = value as "boolean" | "choice" | "range";
+                const updates: Partial<LLMEvaluatorConfigFormPreset> = {
+                  expectedValueType: valueType,
+                };
+
+                // Initialize choiceScores when switching to choice type
+                if (
+                  valueType === "choice" &&
+                  (!configFormParams.choiceScores ||
+                    configFormParams.choiceScores.length === 0)
+                ) {
+                  updates.choiceScores = [
+                    { score: 1, description: "Poor" },
+                    { score: 5, description: "Excellent" },
+                  ];
+                }
+
+                updateConfigFormParams(updates);
+              }}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="boolean" id="boolean" />
@@ -225,75 +241,97 @@ export const LLMEvaluatorConfigForm: React.FC<{
                 used to score the response based on how well it matches a
                 predefined set of choices.
               </span>
-              {configFormParams.choiceScores?.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Input
-                    type="number"
-                    value={item.score}
-                    onChange={(e) => {
-                      const choiceScores = configFormParams.choiceScores ?? [];
-                      choiceScores[index] = {
-                        score: Number(e.target.value),
-                        description: item.description,
-                      };
+              {!configFormParams.choiceScores ||
+              configFormParams.choiceScores.length === 0 ? (
+                <div className="mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
                       updateConfigFormParams({
-                        choiceScores,
-                      });
-                    }}
-                    className="w-24"
-                  />
-                  <Input
-                    type="text"
-                    value={item.description}
-                    onChange={(e) => {
-                      const choiceScores = configFormParams.choiceScores ?? [];
-                      choiceScores[index] = {
-                        score: item.score,
-                        description: e.target.value,
-                      };
-                      updateConfigFormParams({
-                        choiceScores,
-                      });
-                    }}
-                    placeholder="Short description"
-                    className="flex-grow"
-                  />
-                  {index > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        updateConfigFormParams({
-                          choiceScores: configFormParams.choiceScores?.filter(
-                            (_, i) => i !== index
-                          ),
-                        })
-                      }
-                    >
-                      <MinusIcon className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {index ===
-                    (configFormParams.choiceScores?.length || 0) - 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        updateConfigFormParams({
-                          choiceScores: [
-                            ...(configFormParams.choiceScores || []),
-                            { score: 0, description: "" },
-                          ],
-                        })
-                      }
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                    </Button>
-                  )}
+                        choiceScores: [
+                          { score: 1, description: "Poor" },
+                          { score: 5, description: "Excellent" },
+                        ],
+                      })
+                    }
+                  >
+                    Add Choice Scores
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                configFormParams.choiceScores.map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2 mt-2">
+                    <Input
+                      type="number"
+                      value={item.score}
+                      onChange={(e) => {
+                        const choiceScores =
+                          configFormParams.choiceScores ?? [];
+                        choiceScores[index] = {
+                          score: Number(e.target.value),
+                          description: item.description,
+                        };
+                        updateConfigFormParams({
+                          choiceScores,
+                        });
+                      }}
+                      className="w-24"
+                    />
+                    <Input
+                      type="text"
+                      value={item.description}
+                      onChange={(e) => {
+                        const choiceScores =
+                          configFormParams.choiceScores ?? [];
+                        choiceScores[index] = {
+                          score: item.score,
+                          description: e.target.value,
+                        };
+                        updateConfigFormParams({
+                          choiceScores,
+                        });
+                      }}
+                      placeholder="Short description"
+                      className="flex-grow"
+                    />
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          updateConfigFormParams({
+                            choiceScores: configFormParams.choiceScores?.filter(
+                              (_, i) => i !== index
+                            ),
+                          })
+                        }
+                      >
+                        <MinusIcon className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {index ===
+                      (configFormParams.choiceScores?.length || 0) - 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          updateConfigFormParams({
+                            choiceScores: [
+                              ...(configFormParams.choiceScores || []),
+                              { score: 0, description: "" },
+                            ],
+                          })
+                        }
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           )}
           {configFormParams.expectedValueType === "range" && (
@@ -448,7 +486,24 @@ export const LLMEvaluatorConfigForm: React.FC<{
                 </SelectContent>
               </Select>
             </Row>
-            <Button variant="outline" onClick={openTestPanel}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (openTestPanel) {
+                  console.log(
+                    "Opening test panel via prop",
+                    existingEvaluatorId ? "in edit mode" : "in create mode"
+                  );
+                  openTestPanel();
+                } else {
+                  console.log(
+                    "Opening test panel via store",
+                    existingEvaluatorId ? "in edit mode" : "in create mode"
+                  );
+                  evalPanelStore.openTestPanel();
+                }
+              }}
+            >
               Open Test Panel
             </Button>
           </Row>

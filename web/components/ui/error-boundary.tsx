@@ -63,17 +63,48 @@ export class ErrorBoundary extends Component<Props, State> {
                   <h3 className="text-lg font-medium text-gray-900">
                     Error details:
                   </h3>
-                  <pre className="mt-2 text-sm text-red-600 bg-red-100 p-2 rounded overflow-auto">
-                    {this.state.error.toString()}
-                  </pre>
+                  <div className="mt-2 text-sm bg-red-50 border border-red-200 rounded-md overflow-hidden">
+                    <div className="bg-red-100 px-4 py-2 font-medium text-red-800 flex justify-between items-center">
+                      <span>{this.state.error.name}</span>
+                      <span className="text-xs bg-red-200 px-2 py-1 rounded-full">
+                        {process.env.NODE_ENV}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-red-700 font-medium">
+                        {this.state.error.message}
+                      </p>
+                      {this.state.error.stack && (
+                        <pre className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100 overflow-auto max-h-60 whitespace-pre-wrap">
+                          {this.state.error.stack}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                  {this.state.errorInfo && (
+                    <div className="mt-4">
+                      <h4 className="text-md font-medium text-gray-900">
+                        Component Stack:
+                      </h4>
+                      <pre className="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 overflow-auto max-h-60 whitespace-pre-wrap">
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               )}
-              <div className="mt-6">
+              <div className="mt-6 flex flex-col space-y-2">
                 <button
                   onClick={() => window.location.reload()}
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Reload Page
+                </button>
+                <button
+                  onClick={() => window.history.back()}
+                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Go Back
                 </button>
               </div>
             </div>
@@ -124,17 +155,36 @@ export function ErrorBoundaryWithHandler({
                 <h3 className="text-lg font-medium text-gray-900">
                   Error details:
                 </h3>
-                <pre className="mt-2 text-sm text-red-600 bg-red-100 p-2 rounded overflow-auto">
-                  {error.toString()}
-                </pre>
+                <div className="mt-2 text-sm bg-red-50 border border-red-200 rounded-md overflow-hidden">
+                  <div className="bg-red-100 px-4 py-2 font-medium text-red-800 flex justify-between items-center">
+                    <span>{error.name}</span>
+                    <span className="text-xs bg-red-200 px-2 py-1 rounded-full">
+                      {process.env.NODE_ENV}
+                    </span>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-red-700 font-medium">{error.message}</p>
+                    {error.stack && (
+                      <pre className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100 overflow-auto max-h-60 whitespace-pre-wrap">
+                        {error.stack}
+                      </pre>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col space-y-2">
               <button
                 onClick={() => window.location.reload()}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Reload Page
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Go Back
               </button>
             </div>
           </div>

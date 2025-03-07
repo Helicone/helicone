@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { useTestDataStore } from "../testing/testingStore";
 import { DataEntry, LastMileConfigForm } from "./types";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
 function SelectDataEntryType({
   label,
@@ -171,6 +172,7 @@ export const LastMileDevConfigForm: React.FC<{
 
   const jawn = useJawnClient();
   const { invalidate } = useInvalidateEvaluators();
+  const evalPanelStore = useEvalPanelStore();
 
   const { setTestConfig: setTestData } = useTestDataStore();
 
@@ -332,7 +334,26 @@ export const LastMileDevConfigForm: React.FC<{
         <Button
           variant="outline"
           onClick={() => {
-            openTestPanel?.();
+            if (openTestPanel) {
+              console.log(
+                "Opening test panel via prop",
+                existingEvaluatorId ? "in edit mode" : "in create mode"
+              );
+              openTestPanel();
+            } else {
+              console.log(
+                "Opening test panel via store",
+                existingEvaluatorId ? "in edit mode" : "in create mode"
+              );
+              // Make sure test data is set
+              setTestData({
+                _type: "lastmile",
+                evaluator_name: evaluatorType.name,
+                config: evaluatorType,
+              });
+              // Then open the test panel
+              evalPanelStore.openTestPanel();
+            }
           }}
         >
           Test

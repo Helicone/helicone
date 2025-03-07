@@ -1,24 +1,21 @@
 import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { useMemo } from "react";
 import LLMAsJudgeEvaluatorDetails from "../details/LLMAsJudgeEvaluatorDetails";
 import PythonEvaluatorDetails from "../details/PythonEvaluatorDetails";
 import LastMileEvaluatorDetails from "../details/LastMileEvaluatorDetails";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
 import { useEvaluators } from "../EvaluatorHook";
-import { PanelType } from "./types";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 
 export const EditPanel = ({
-  setPanels,
-  panels,
   selectedEvaluatorId,
 }: {
-  setPanels: Dispatch<SetStateAction<PanelType[]>>;
-  panels: PanelType[];
   selectedEvaluatorId: string;
 }) => {
   const { evaluators: evaluators, deleteEvaluator } = useEvaluators();
+  const { closeEditPanel } = useEvalPanelStore();
 
   const evaluator = useMemo(() => {
     return evaluators.data?.data?.data?.find(
@@ -35,12 +32,12 @@ export const EditPanel = ({
           variant="ghost"
           size="icon"
           onClick={() => {
-            setPanels((prev) => prev.filter((p) => p._type !== "edit"));
+            closeEditPanel();
           }}
         >
           <XIcon className="w-4 h-4" />
         </Button>
-      </Row>{" "}
+      </Row>
       <div className="w-full px-10 overflow-y-auto">
         <h1 className="text-xl font-medium">Edit evaluator</h1>
         {evaluator ? (
