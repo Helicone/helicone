@@ -237,12 +237,12 @@ export default function ThemedTable<T extends { id?: string }>(
           advancedFilters={
             advancedFilters
               ? {
-                  filterMap: advancedFilters.filterMap,
-                  filters: advancedFilters.filters,
-                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                  show: advancedFilters.show,
-                }
+                filterMap: advancedFilters.filterMap,
+                filters: advancedFilters.filters,
+                searchPropertyFilters: advancedFilters.searchPropertyFilters,
+                setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                show: advancedFilters.show,
+              }
               : undefined
           }
           savedFilters={savedFilters}
@@ -252,18 +252,18 @@ export default function ThemedTable<T extends { id?: string }>(
           timeFilter={
             timeFilter
               ? {
-                  defaultValue: timeFilter.defaultValue,
-                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                  currentTimeFilter: timeFilter.currentTimeFilter,
-                }
+                defaultValue: timeFilter.defaultValue,
+                onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                currentTimeFilter: timeFilter.currentTimeFilter,
+              }
               : undefined
           }
           viewToggle={
             makeCard
               ? {
-                  currentView: view,
-                  onViewChange: setView,
-                }
+                currentView: view,
+                onViewChange: setView,
+              }
               : undefined
           }
           rows={exportData}
@@ -279,7 +279,7 @@ export default function ThemedTable<T extends { id?: string }>(
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+              <div className="bg-white dark:bg-black h-48 w-full  border-border py-2 px-4 flex flex-col space-y-3 justify-center items-center">
                 <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
                 <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   No Data Found
@@ -356,7 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               className={clsx(
                                 "relative",
                                 index === headerGroup.headers.length - 1 &&
-                                  "border-r border-slate-300 dark:border-slate-700"
+                                "border-r border-slate-300 dark:border-slate-700"
                               )}
                             >
                               <DraggableColumnHeader
@@ -398,7 +398,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                 checked={selectedIds?.includes(
                                   row.original?.id ?? ""
                                 )}
-                                onChange={() => {}} // Handle individual row selection
+                                onChange={() => { }} // Handle individual row selection
                                 className="text-slate-700 dark:text-slate-400"
                               />
                             </td>
@@ -410,7 +410,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 && "pl-10", // Add left padding to the first column
                                 i === row.getVisibleCells().length - 1 &&
-                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
                               style={{
                                 maxWidth: cell.column.getSize(),
@@ -420,8 +420,8 @@ export default function ThemedTable<T extends { id?: string }>(
                               }}
                             >
                               {dataLoading &&
-                              (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") ? (
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") ? (
                                 <span
                                   className={clsx(
                                     "w-full flex flex-grow",

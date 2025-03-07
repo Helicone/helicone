@@ -86,7 +86,7 @@ export const Chat: React.FC<ChatProps> = ({
           className
         )}
       >
-        <div className="w-full border border-border divide-y divide-border h-full">
+        <div className="w-full divide-y divide-border h-full bg-card">
           {!hideTopBar && (
             <ChatTopBar
               allExpanded={allExpanded}
@@ -116,7 +116,7 @@ export const Chat: React.FC<ChatProps> = ({
         </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-[80vw] rounded-md divide-y divide-border h-full">
           <>
             <ChatTopBar {...chatTopBarProps} isModal={true} />
             <ChatContent

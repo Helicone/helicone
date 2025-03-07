@@ -57,7 +57,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
         className={className}
         height={height}
       />
-      <i className="text-xs text-gray-500">
+      <i className="text-xs text-muted-foreground">
         Helicone: Large text detected, falling back to large text editor
       </i>
     </div>
@@ -133,7 +133,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
       padding={16}
       className={
         className ??
-        `text-sm text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg whitespace-pre-wrap `
+        `text-xs text-muted-foreground border border-border rounded-lg whitespace-pre-wrap `
       }
       textareaClassName={textareaClassName ?? ""}
       // mono font

@@ -48,7 +48,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
   return (
     <div
       className={clsx(
-        "items-start p-4 text-left flex flex-row space-x-4 text-black dark:text-white ",
+        "items-start p-4 text-left flex flex-col text-sidebar-foreground",
         isSystem && "font-semibold",
         isLast && "rounded-b-md"
       )}

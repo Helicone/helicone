@@ -65,6 +65,7 @@ const RequestRow = (props: RequestRowProps) => {
   const [isScoresAddingLabel, setIsScoresAddingLabel] = useState(false);
   const [isScoresAdding, setIsScoresAdding] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [currentProperties, setCurrentProperties] = useState<
     {
       [key: string]: string;
@@ -243,37 +244,34 @@ const RequestRow = (props: RequestRowProps) => {
   return (
     <div className="flex flex-col h-full sentry-mask-me">
 
-      <div className="flex flex-col w-full gap-1">
+      <div className="flex flex-col w-full gap-1 p-2">
 
         {/* Header with model name */}
         <div className="flex items-center justify-between px-2">
           <h2 className="text-base font-medium leading-normal text-sidebar-foreground">
             {request.model}
           </h2>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            onClick={() => setShowDetails(!showDetails)}
+          >
             <EllipsisHorizontalIcon className="h-4 w-4" />
           </Button>
-          {/* {request.heliconeMetadata.user && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {request.heliconeMetadata.user}
-            </span>
-          )}
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {getPathName(request.heliconeMetadata.path)}
-          </span> */}
         </div>
 
         {/* Quick Actions: User, Prompt, Sessions */}
         <div className="flex items-center justify-start gap-2">
           {request.heliconeMetadata.user && (
-            <Button variant="ghost" size="xs" className="px-2 py-1">
+            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
               <span className="text-xs font-normal leading-none text-base-foreground truncate">
                 {request.heliconeMetadata.user}
               </span>
             </Button>
           )}
           {request.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] && (
-            <Button variant="ghost" size="xs" className="px-2 py-1">
+            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
               <span className="text-xs font-normal leading-none text-base-foreground truncate">
                 {request.heliconeMetadata.customProperties?.[
                   "Helicone-Prompt-Id"
@@ -282,7 +280,7 @@ const RequestRow = (props: RequestRowProps) => {
             </Button>
           )}
           {request.heliconeMetadata.customProperties?.["Helicone-Session-Id"] && (
-            <Button variant="ghost" size="xs" className="px-2 py-1">
+            <Button variant="ghost" size="xs" className="px-2 py-1 h-6">
               <span className="text-xs font-normal leading-none text-base-foreground truncate">
                 {request.heliconeMetadata.customProperties?.[
                   "Helicone-Session-Id"
@@ -292,89 +290,89 @@ const RequestRow = (props: RequestRowProps) => {
           )}
         </div>
 
-        {/* Main grid layout for request details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 w-full pt-2 px-2">
+        {/* Main grid layout for request details - Toggle with showDetails */}
+        {showDetails && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 w-full pt-2 px-2">
 
-          {/* Metrics grid */}
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Total Tokens</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.totalTokens !== null && request.heliconeMetadata.totalTokens !== undefined
-                ? request.heliconeMetadata.totalTokens
-                : "N/A"}
+            {/* Metrics grid */}
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Total Tokens</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.totalTokens !== null && request.heliconeMetadata.totalTokens !== undefined
+                  ? request.heliconeMetadata.totalTokens
+                  : "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Prompt Tokens</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.promptTokens !== null && request.heliconeMetadata.promptTokens !== undefined
+                  ? request.heliconeMetadata.promptTokens
+                  : "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Completion Tokens</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.completionTokens !== null && request.heliconeMetadata.completionTokens !== undefined
+                  ? request.heliconeMetadata.completionTokens
+                  : "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Time to First Token</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.timeToFirstToken !== null && request.heliconeMetadata.timeToFirstToken !== undefined
+                  ? `${request.heliconeMetadata.timeToFirstToken}ms`
+                  : "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Cache Tokens</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {0}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Created</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.createdAt ? new Date(request.heliconeMetadata.createdAt).toLocaleString() : "N/A"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Provider</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.heliconeMetadata.provider || "OpenAI"}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Path</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {getPathName(request.heliconeMetadata.path)}
+              </div>
+            </div>
+
+            {/* Request ID with same styling as grid items but full width */}
+            <div className="col-span-1 md:col-span-2 flex justify-between items-center">
+              <div className="text-xs font-normal text-sidebar-foreground">Request ID</div>
+              <div className="text-xs font-medium text-secondary-foreground">
+                {request.id}
+              </div>
             </div>
           </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Prompt Tokens</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.promptTokens !== null && request.heliconeMetadata.promptTokens !== undefined
-                ? request.heliconeMetadata.promptTokens
-                : "N/A"}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Completion Tokens</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.completionTokens !== null && request.heliconeMetadata.completionTokens !== undefined
-                ? request.heliconeMetadata.completionTokens
-                : "N/A"}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Time to First Token</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.timeToFirstToken !== null && request.heliconeMetadata.timeToFirstToken !== undefined
-                ? `${request.heliconeMetadata.timeToFirstToken}ms`
-                : "N/A"}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Cache Tokens</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {0}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Created</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.createdAt ? new Date(request.heliconeMetadata.createdAt).toLocaleString() : "N/A"}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Provider</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.heliconeMetadata.provider || "OpenAI"}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Path</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {getPathName(request.heliconeMetadata.path)}
-            </div>
-          </div>
-        </div>
-
-        {/* Request ID with same styling as grid items but full width */}
-        <div className="w-full max-w-full py-2 px-2 pb-4">
-          <div className="flex justify-between items-center">
-            <div className="text-xs font-normal text-sidebar-foreground">Request ID</div>
-            <div className="text-xs font-medium text-secondary-foreground">
-              {request.id}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Properties section */}
-      <div className="flex flex-col w-full border-t border-border">
-        <div className="flex items-start justify-between p-2 w-full">
+      <div className="flex flex-col w-full border-t border-border px-4 py-2">
+        <div className="flex items-start justify-between w-full">
           <div className="text-xs font-semibold text-sidebar-foreground w-[100px] py-1">Properties</div>
 
           <div className="flex flex-1 flex-wrap gap-2 items-start">
@@ -478,9 +476,9 @@ const RequestRow = (props: RequestRowProps) => {
       </div>
 
       {/* Scores section */}
-      <div className="flex flex-col w-full border-t border-border">
-        <div className="flex items-start justify-between p-2 w-full">
-          <div className="text-xs font-semibold text-sidebar-foreground w-[100px]">Scores</div>
+      <div className="flex flex-col w-full border-t border-border px-4 py-2">
+        <div className="flex items-start justify-between w-full">
+          <div className="text-xs font-semibold text-sidebar-foreground w-[100px] py-1">Scores</div>
 
           <div className="flex flex-1 flex-wrap gap-2 items-start">
             {currentScores && Object.keys(currentScores).length > 0 &&
@@ -581,9 +579,9 @@ const RequestRow = (props: RequestRowProps) => {
       </div>
 
       {/* Request/Response content */}
-      <div className="flex flex-col border-t border-border h-full relative">
+      <div className="flex flex-col h-full p-3">
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto pb-16">
+        <div className="flex-1 overflow-y-auto rounded-lg border border-border">
           {displayPreview && (
             <div className="flex flex-col">
               <RenderMappedRequest
@@ -592,57 +590,6 @@ const RequestRow = (props: RequestRowProps) => {
               />
             </div>
           )}
-        </div>
-
-        {/* Footer with action buttons - anchored to bottom of panel */}
-        <div className="absolute bottom-0 left-0 right-0 w-full border-t border-border bg-background p-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => {/* Add test prompt handler */ }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-file-text">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <line x1="10" y1="9" x2="8" y2="9" />
-                </svg>
-                Test Prompt
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {/* Add experiment handler */ }}
-              >
-                <FlaskConical className="mr-2 h-4 w-4" />
-                Experiment
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => setNewDatasetModalOpen(true)}
-              >
-                <PlusIcon className="h-4 w-4" />
-                Dataset
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <ThumbsUp className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <ThumbsDown className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
         </div>
 
         <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>

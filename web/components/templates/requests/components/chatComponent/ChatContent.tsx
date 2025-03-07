@@ -34,14 +34,14 @@ export const ChatContent: React.FC<ChatContentProps> = ({
   if (mode === "Debug") {
     return (
       <div
-        className="bg-sidebar-background items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"
+        className="bg-sidebar-background px-4 py-4 text-left text-xs font-medium flex flex-col gap-2 cursor-pointer"
         onClick={() => {
           navigator.clipboard.writeText(JSON.stringify(mappedRequest, null, 2));
           setNotification("Copied to clipboard", "success");
         }}
       >
-        Debug
-        <pre>{JSON.stringify(mappedRequest, null, 2)}</pre>
+        <div className="font-semibold">Debug</div>
+        <pre className="whitespace-pre-wrap overflow-x-auto max-w-full">{JSON.stringify(mappedRequest, null, 2)}</pre>
       </div>
     );
   }

@@ -26,7 +26,7 @@ const ModelResponseGroup: React.FC<ModelResponseGroupProps> = ({
       <div className="w-full flex justify-between">
         <RoleButton
           role={"assistant"}
-          onRoleChange={() => {}}
+          onRoleChange={() => { }}
           disabled={true}
         />
         <Tooltip title="Delete Row" placement="top">

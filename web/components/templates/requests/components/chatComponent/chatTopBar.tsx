@@ -45,13 +45,13 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   const createPrompt = useCreatePrompt();
 
   return (
-    <div className="flex flex-row items-center justify-between w-full bg-sidebar-background p-2 rounded-md">
+    <div className="flex flex-row items-center justify-between w-full bg-secondary py-1 px-2">
       {!isModal && (
         <Button
           onClick={() => setOpen(true)}
           variant="ghost"
           size="sm"
-          className="px-2 py-1 gap-2 h-6"
+          className="px-2 py-1 gap-1.5 h-6 hover:bg-slate-200 dark:hover:bg-slate-800 text-muted-foreground"
         >
           <Maximize className="h-3 w-3" />
           <span className="text-xs font-medium">Expand</span>
@@ -63,7 +63,7 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
         }}
         variant="ghost"
         size="sm"
-        className="px-2 py-1 gap-2 h-6"
+        className="px-2 py-1 gap-1.5 h-6 hover:bg-slate-200 dark:hover:bg-slate-800 text-muted-foreground"
       >
         <ChevronsUpDown className="h-3 w-3" />
         <span className="text-xs font-medium">{mode}</span>

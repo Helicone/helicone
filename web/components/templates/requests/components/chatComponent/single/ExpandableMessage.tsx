@@ -6,6 +6,8 @@ import { RenderWithPrettyInputKeys } from "../../../../playground/chatRow";
 import { Col } from "../../../../../layout/common";
 import MarkdownEditor from "../../../../../shared/markdownEditor";
 import { PROMPT_MODES } from "../chatTopBar";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface ExpandableMessageProps {
   formattedMessageContent: string;
@@ -29,22 +31,28 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
   const handleToggle = () => setExpanded(!expanded);
 
   const parentRef = useRef<HTMLDivElement>(null);
-
   const contentRef = useRef<HTMLDivElement>(null);
-
   const [showButton, setShowButton] = useState(false);
 
+  // Calculate line height and determine if content exceeds 6 lines
   useEffect(() => {
     if (!contentRef.current || !parentRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        console.log("New scroll height:", entry.target.scrollHeight);
-        if (
-          entry.target.scrollHeight > (parentRef.current?.clientHeight ?? 0)
-        ) {
-          setShowButton(true);
-        }
+    const resizeObserver = new ResizeObserver(() => {
+      if (!contentRef.current) return;
+
+      // Get the computed line height of the content
+      const computedStyle = window.getComputedStyle(contentRef.current);
+      const lineHeight = parseInt(computedStyle.lineHeight) || 24; // Default to 24px if not specified
+
+      // Calculate height for 6 lines
+      const sixLinesHeight = lineHeight * 6;
+
+      // Check if content height exceeds 6 lines
+      if (contentRef.current.scrollHeight > sixLinesHeight) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
       }
     });
 
@@ -79,14 +87,18 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
     );
   }
 
+  // Calculate the max height based on line height (approximately 6 lines)
+  const lineHeightInRem = 1.5; // Typical line height
+  const sixLinesHeight = `${lineHeightInRem * 6}rem`; // Height for 6 lines
+
   return (
     <Col ref={parentRef}>
       <div
         className={clsx(
           expandFormat ? "truncate-text" : "",
-          "leading-6 pb-2 max-w-full transition-all"
+          "max-w-full transition-all"
         )}
-        style={{ maxHeight: expanded ? "none" : "10.5rem" }}
+        style={{ maxHeight: expanded ? "none" : sixLinesHeight }}
       >
         <div className="h-full" ref={contentRef}>
           {mode === "Pretty" ? (
@@ -98,7 +110,7 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
             <MarkdownEditor
               language="markdown"
               text={isTextJson ? formattedText : formattedMessageContent}
-              setText={() => {}}
+              setText={() => { }}
               className=""
             />
           )}
@@ -106,15 +118,21 @@ export const ExpandableMessage: React.FC<ExpandableMessageProps> = ({
       </div>
 
       {showButton && (
-        <div className="w-full flex justify-center items-center pt-2 pr-24">
-          <button onClick={handleToggle}>
-            <ChevronDownIcon
-              className={clsx(
-                "rounded-full border text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 h-7 w-7 p-1.5",
-                expanded && "transition-transform rotate-180"
-              )}
-            />
-          </button>
+        <div className="w-full flex justify-center items-center pt-2">
+          <Button
+            onClick={handleToggle}
+            variant="ghost"
+            className="w-full h-auto py-1 px-0"
+          >
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <ChevronDownIcon
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  expanded && "rotate-180"
+                )}
+              />
+            </span>
+          </Button>
         </div>
       )}
     </Col>

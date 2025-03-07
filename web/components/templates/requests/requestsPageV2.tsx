@@ -845,55 +845,54 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           </div>
         </ResizablePanel>
 
-
-
         {open && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25} minSize={25}>
-              <RequestDiv
-                open={open}
-                setOpen={setOpen}
-                request={selectedData}
-                properties={properties}
-                hasPrevious={
-                  selectedDataIndex !== undefined && selectedDataIndex > 0
-                }
-                hasNext={
-                  selectedDataIndex !== undefined &&
-                  selectedDataIndex < requests.length - 1
-                }
-                onPrevHandler={() => {
-                  if (
-                    selectedDataIndex !== undefined &&
-                    selectedDataIndex > 0
-                  ) {
-                    setSelectedDataIndex(selectedDataIndex - 1);
-                    setSelectedData(requests[selectedDataIndex - 1]);
-                    searchParams.set(
-                      "requestId",
-                      requests[selectedDataIndex - 1].id
-                    );
+            <ResizablePanel defaultSize={25} minSize={25} className="h-screen flex flex-col" style={{ minWidth: "500px" }}>
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <RequestDiv
+                  open={open}
+                  setOpen={setOpen}
+                  request={selectedData}
+                  properties={properties}
+                  hasPrevious={
+                    selectedDataIndex !== undefined && selectedDataIndex > 0
                   }
-                }}
-                onNextHandler={() => {
-                  if (
+                  hasNext={
                     selectedDataIndex !== undefined &&
                     selectedDataIndex < requests.length - 1
-                  ) {
-                    setSelectedDataIndex(selectedDataIndex + 1);
-                    setSelectedData(requests[selectedDataIndex + 1]);
-                    searchParams.set(
-                      "requestId",
-                      requests[selectedDataIndex + 1].id
-                    );
                   }
-                }}
-              />
+                  onPrevHandler={() => {
+                    if (
+                      selectedDataIndex !== undefined &&
+                      selectedDataIndex > 0
+                    ) {
+                      setSelectedDataIndex(selectedDataIndex - 1);
+                      setSelectedData(requests[selectedDataIndex - 1]);
+                      searchParams.set(
+                        "requestId",
+                        requests[selectedDataIndex - 1].id
+                      );
+                    }
+                  }}
+                  onNextHandler={() => {
+                    if (
+                      selectedDataIndex !== undefined &&
+                      selectedDataIndex < requests.length - 1
+                    ) {
+                      setSelectedDataIndex(selectedDataIndex + 1);
+                      setSelectedData(requests[selectedDataIndex + 1]);
+                      searchParams.set(
+                        "requestId",
+                        requests[selectedDataIndex + 1].id
+                      );
+                    }
+                  }}
+                />
+              </div>
             </ResizablePanel>
           </>
         )}
-
       </ResizablePanelGroup>
 
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>

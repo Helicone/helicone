@@ -1,0 +1,11 @@
+.markdown-content {
+  @apply text-foreground;
+}
+
+.markdown-content > *:first-child {
+  @apply mt-0;
+}
+
+.markdown-content > *:last-child {
+  @apply mb-0;
+} 
