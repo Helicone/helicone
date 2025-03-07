@@ -22,10 +22,13 @@ const generateParamsSchema = z.object({
   chat: z.array(z.string()).optional(),
 
   // Optional Helicone properties for tracking
-  // TODO: Move these to a properties object
-  userId: z.string().optional(),
-  sessionId: z.string().optional(),
-  cache: z.boolean().optional(),
+  properties: z
+    .object({
+      userId: z.string().optional(),
+      sessionId: z.string().optional(),
+      cache: z.boolean().optional(),
+    })
+    .optional(),
 });
 // Type derived from the Zod schema
 type GenerateParams = z.infer<typeof generateParamsSchema>;
@@ -36,16 +39,6 @@ type PromptMetadata = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
-
-// Format chat history into a string
-function formatChatHistory(chat: string[]): string {
-  return chat
-    .map((message, index) => {
-      const role = index % 2 === 0 ? "User" : "Assistant";
-      return `${role}: ${message}`;
-    })
-    .join("\n\n");
-}
 
 // Handler for generate route
 const generateHandler = async (
@@ -143,34 +136,28 @@ const generateHandler = async (
     requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
     requestHeaders.set("Accept-Encoding", "identity");
 
-    // Add tracking headers from parameters
-    if (parameters.userId) {
-      requestHeaders.set("Helicone-User-Id", parameters.userId);
+    // Add properties parameters to Heliconeheaders
+    if (parameters.properties?.userId) {
+      requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
     }
-
-    if (parameters.sessionId) {
-      requestHeaders.set("Helicone-Session-Id", parameters.sessionId);
+    if (parameters.properties?.sessionId) {
+      requestHeaders.set(
+        "Helicone-Session-Id",
+        parameters.properties.sessionId
+      );
     }
-
-    if (parameters.cache !== undefined) {
-      requestHeaders.set("Helicone-Cache", parameters.cache.toString());
+    if (parameters.properties?.cache) {
+      requestHeaders.set(
+        "Helicone-Cache",
+        parameters.properties.cache.toString()
+      );
     }
 
     // Add Helicone-Prompt-Id header with the requested promptId
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
 
     // 6. BUILD REQUEST TEMPLATE
-    let inputs = parameters.inputs || {};
-
-    // Handle chat history if provided
-    if (parameters.chat && parameters.chat.length > 0) {
-      // Format chat history and add to inputs
-      const chatHistory = formatChatHistory(parameters.chat);
-      inputs = {
-        ...inputs,
-        chat_history: chatHistory,
-      };
-    }
+    const inputs = parameters.inputs || {};
 
     const requestTemplate = autoFillInputs({
       template: promptResult.data.helicone_template,
