@@ -119,9 +119,9 @@ export const OnlineEvaluatorsSection = ({
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="icon"
-                      className="w-8 h-8"
+                      className="w-8 h-8 text-destructive border-destructive hover:bg-destructive/10"
                     >
                       <TrashIcon className="w-4 h-4" />
                     </Button>
@@ -137,8 +137,8 @@ export const OnlineEvaluatorsSection = ({
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        variant="destructive"
                         onClick={() => deleteOnlineEvaluator.mutate(item.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         Delete
                       </AlertDialogAction>
