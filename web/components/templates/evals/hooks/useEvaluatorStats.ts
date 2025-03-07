@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 
 export interface EvaluatorStats {
   averageScore: number;
-  totalUses: number;
+  totalUses: number | string;
   recentTrend: "up" | "down" | "stable";
   scoreDistribution: Array<{
     range: string;
-    count: number;
+    count: number | string;
   }>;
   timeSeriesData: Array<{
     date: string;
@@ -63,7 +63,26 @@ export const useEvaluatorStats = (evaluatorId: string) => {
           return DEFAULT_STATS;
         }
 
-        return responseData.data.data as EvaluatorStats;
+        // Process and normalize the data to ensure it matches expected types
+        const rawData = responseData.data.data;
+        const processedData: EvaluatorStats = {
+          averageScore: Number(rawData.averageScore) || 0,
+          totalUses: rawData.totalUses, // Keep as string or number
+          recentTrend: rawData.recentTrend || "stable",
+          scoreDistribution: Array.isArray(rawData.scoreDistribution)
+            ? rawData.scoreDistribution
+            : [],
+          timeSeriesData: Array.isArray(rawData.timeSeriesData)
+            ? rawData.timeSeriesData.map(
+                (item: { date: string; value: number | string }) => ({
+                  date: item.date,
+                  value: Number(item.value) || 0,
+                })
+              )
+            : [],
+        };
+
+        return processedData;
       } catch (error) {
         console.error(
           `Exception fetching stats for evaluator ${evaluatorId}:`,

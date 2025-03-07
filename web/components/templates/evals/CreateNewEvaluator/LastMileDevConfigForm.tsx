@@ -1,8 +1,8 @@
 import { Col } from "@/components/layout/common";
-import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
 import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -10,22 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useEffect, useState } from "react";
-import useNotification from "../../../shared/notification/useNotification";
-import { DataEntry, LastMileConfigForm } from "./types";
-import { H3, Muted } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { useEvalFormStore } from "../store/evalFormStore";
-import { useEvalConfigStore } from "../store/evalConfigStore";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { H3, Muted } from "@/components/ui/typography";
 import { InfoIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import useNotification from "../../../shared/notification/useNotification";
+import { useEvalConfigStore } from "../store/evalConfigStore";
+import { DataEntry, LastMileConfigForm } from "./types";
 
 function SelectDataEntryType({
   label,
@@ -174,23 +170,13 @@ const DEFAULT_CONTEXT_RELEVANCE_TYPE: LastMileConfigForm = {
   },
 };
 
-const DEFAULT_MAP = {
-  faithfulness: DEFAULT_FAITHFULNESS_TYPE,
-  relevance: DEFAULT_RELEVANCE_TYPE,
-  context_relevance: DEFAULT_CONTEXT_RELEVANCE_TYPE,
-};
-
 export const LastMileDevConfigForm: React.FC<{
   onSubmit: () => void;
   existingEvaluatorId?: string;
   openTestPanel?: () => void;
   preset?: LastMileConfigForm;
-}> = ({ existingEvaluatorId, onSubmit, openTestPanel, preset }) => {
+}> = ({ existingEvaluatorId, preset }) => {
   const notification = useNotification();
-  const jawn = useJawnClient();
-  const invalidateEvaluators = useInvalidateEvaluators();
-  const { isSubmitting, hideFormButtons } = useEvalFormStore();
-  const { setTestConfig: setTestData } = useTestDataStore();
 
   // Use the config store
   const {
@@ -224,59 +210,6 @@ export const LastMileDevConfigForm: React.FC<{
     setLastMileDescription,
     setLastMileConfig,
   ]);
-
-  const handleSubmit = async () => {
-    // We don't need to set isSubmitting here as it's handled by the mutation hook
-    try {
-      if (existingEvaluatorId) {
-        const result = await jawn.PUT("/v1/evaluator/{evaluatorId}", {
-          params: {
-            path: {
-              evaluatorId: existingEvaluatorId,
-            },
-          },
-          body: {
-            name: evaluatorName,
-            description: evaluatorDescription,
-            last_mile_config: evaluatorType,
-            scoring_type: "LAST_MILE",
-          },
-        });
-        if (!result.data?.data) {
-          notification.setNotification("Failed to update evaluator", "error");
-        } else {
-          notification.setNotification(
-            "Evaluator updated successfully",
-            "success"
-          );
-          invalidateEvaluators.invalidate();
-          onSubmit();
-        }
-      } else {
-        const result = await jawn.POST("/v1/evaluator", {
-          body: {
-            name: evaluatorName,
-            description: evaluatorDescription,
-            last_mile_config: evaluatorType,
-            scoring_type: "LAST_MILE",
-          },
-        });
-        if (!result.data?.data) {
-          notification.setNotification("Failed to create evaluator", "error");
-        } else {
-          notification.setNotification(
-            "Evaluator created successfully",
-            "success"
-          );
-          invalidateEvaluators.invalidate();
-          onSubmit();
-        }
-      }
-    } catch (error) {
-      console.error("Error submitting LastMile evaluator:", error);
-      notification.setNotification("An error occurred", "error");
-    }
-  };
 
   return (
     <Col className="h-full flex flex-col overflow-hidden">
@@ -447,47 +380,6 @@ export const LastMileDevConfigForm: React.FC<{
           </Col>
         </div>
       </ScrollArea>
-
-      {!hideFormButtons && (
-        <div className="shrink-0 border-t bg-muted/10 p-4 flex justify-end">
-          <Button
-            variant="default"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            data-create-evaluator="true"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                {existingEvaluatorId ? "Updating..." : "Creating..."}
-              </span>
-            ) : existingEvaluatorId ? (
-              "Update Evaluator"
-            ) : (
-              "Create Evaluator"
-            )}
-          </Button>
-        </div>
-      )}
     </Col>
   );
 };

@@ -90,19 +90,6 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
       return <Skeleton className="h-32 w-full" />;
     }
 
-    if (!hasRealData) {
-      return (
-        <div className="h-32 flex flex-col items-center justify-center">
-          <p className="text-sm text-muted-foreground">
-            No evaluator data available
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Run an evaluation to see statistics
-          </p>
-        </div>
-      );
-    }
-
     switch (chartView) {
       case "time":
         return <TimeSeriesChart timeSeriesData={stats?.timeSeriesData || []} />;
@@ -138,25 +125,23 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
         {/* Chart visualization */}
         {renderChart()}
 
-        {/* Chart type tabs - only show if we have data */}
-        {hasRealData && (
-          <Tabs
-            value={chartView}
-            onValueChange={(value) => setChartView(value as ChartView)}
-            className="w-full"
-          >
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="time" className="text-xs">
-                <LineChartIcon className="h-3 w-3 mr-1" />
-                Trend
-              </TabsTrigger>
-              <TabsTrigger value="distribution" className="text-xs">
-                <BarChart2Icon className="h-3 w-3 mr-1" />
-                Distribution
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        )}
+        {/* Chart type tabs - always show since we have fallback data */}
+        <Tabs
+          value={chartView}
+          onValueChange={(value) => setChartView(value as ChartView)}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="time" className="text-xs">
+              <LineChartIcon className="h-3 w-3 mr-1" />
+              Trend
+            </TabsTrigger>
+            <TabsTrigger value="distribution" className="text-xs">
+              <BarChart2Icon className="h-3 w-3 mr-1" />
+              Distribution
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {/* Stats summary */}
         <div className="flex justify-between items-center text-sm">
