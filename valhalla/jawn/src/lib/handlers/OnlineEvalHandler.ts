@@ -1,6 +1,7 @@
 import {
   EvaluatorManager,
   getEvaluatorScoreName,
+  getFullEvaluatorScoreName,
 } from "../../managers/evaluator/EvaluatorManager";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../cache/kvCache";
@@ -109,9 +110,10 @@ export class OnlineEvalHandler extends AbstractLogHandler {
           continue;
         }
 
-        const scoreName =
-          getEvaluatorScoreName(onlineEval.evaluator_name) +
-          (typeof result.data?.score === "boolean" ? "-hcone-bool" : "");
+        const scoreName = getFullEvaluatorScoreName(
+          onlineEval.evaluator_name,
+          typeof result.data?.score === "boolean"
+        );
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};

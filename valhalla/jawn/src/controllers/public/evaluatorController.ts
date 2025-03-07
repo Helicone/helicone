@@ -77,6 +77,20 @@ export type TestInput = {
   promptTemplate?: string;
 };
 
+export interface EvaluatorStats {
+  averageScore: number;
+  totalUses: number;
+  recentTrend: "up" | "down" | "stable";
+  scoreDistribution: Array<{
+    range: string;
+    count: number;
+  }>;
+  timeSeriesData: Array<{
+    date: string;
+    value: number;
+  }>;
+}
+
 @Route("v1/evaluator")
 @Tags("Evaluator")
 @Security("api_key")
@@ -322,6 +336,17 @@ export class EvaluatorController extends Controller {
       evaluatorName: string;
     }
   ): Promise<EvaluatorScoreResult> {
+    // convert "boolean" | "choice" | "range" to "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE"
+    if (requestBody.evaluatorConfig.evaluator_scoring_type === "boolean") {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-BOOLEAN";
+    } else if (
+      requestBody.evaluatorConfig.evaluator_scoring_type === "choice"
+    ) {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-CHOICE";
+    } else if (requestBody.evaluatorConfig.evaluator_scoring_type === "range") {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-RANGE";
+    }
+
     const llmAsAJudge = new LLMAsAJudge({
       scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
         | "LLM-CHOICE"
@@ -372,5 +397,21 @@ export class EvaluatorController extends Controller {
       this.setStatus(200);
       return ok(result.data!);
     }
+  }
+
+  @Get("{evaluatorId}/stats")
+  public async getEvaluatorStats(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() evaluatorId: string
+  ): Promise<Result<EvaluatorStats, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorStats(evaluatorId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
   }
 }

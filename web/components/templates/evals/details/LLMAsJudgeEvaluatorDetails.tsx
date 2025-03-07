@@ -1,16 +1,11 @@
 import { Col } from "@/components/layout/common";
-import { openAITemplateToOpenAIFunctionParams } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
 import {
   LLMEvaluatorConfigForm,
   LLMEvaluatorConfigFormPreset,
   useLLMConfigStore,
 } from "@/components/templates/evals/CreateNewEvaluator/LLMEvaluatorConfigForm";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import { useEvaluators } from "../EvaluatorHook";
-import { DeleteEvaluator } from "./DeleteEvalutor";
-import { ExperimentsForEvaluator } from "./Experiments";
-import { useEvaluatorDetails } from "./hooks";
-import { OnlineEvaluatorsSection } from "./OnlineEvaluatorsSection";
 import { Evaluator } from "./types";
 
 const getInitialState = (
@@ -54,56 +49,17 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
   deleteEvaluator,
   setSelectedEvaluator,
 }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const { onlineEvaluators, createOnlineEvaluator, deleteOnlineEvaluator } =
-    useEvaluatorDetails(evaluator, () => {
-      setShowCreateModal(false);
-    });
-  const llmFunctionParams = useMemo(
-    () =>
-      openAITemplateToOpenAIFunctionParams(
-        evaluator.llm_template,
-        evaluator.scoring_type as "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE"
-      ),
-    [evaluator.llm_template, evaluator.scoring_type]
-  );
-
   const { setLLMEvaluatorConfigFormPreset } = useLLMConfigStore();
 
   useEffect(() => {
-    if (evaluator) {
-      setLLMEvaluatorConfigFormPreset(getInitialState(evaluator));
-    }
+    setLLMEvaluatorConfigFormPreset(getInitialState(evaluator));
   }, [evaluator, setLLMEvaluatorConfigFormPreset]);
 
   return (
     <Col className="space-y-4">
-      <p>This evaluator is a LLM as a judge evaluator.</p>
-
-      <Col className="space-y-2">
-        <LLMEvaluatorConfigForm
-          onSubmit={() => {}}
-          existingEvaluatorId={evaluator.id}
-        />
-      </Col>
-      {onlineEvaluators.data?.data?.data && (
-        <OnlineEvaluatorsSection
-          onlineEvaluators={onlineEvaluators.data?.data?.data ?? []}
-          createOnlineEvaluator={createOnlineEvaluator}
-          deleteOnlineEvaluator={deleteOnlineEvaluator}
-          showCreateModal={showCreateModal}
-          setShowCreateModal={setShowCreateModal}
-        />
-      )}
-      <ExperimentsForEvaluator evaluator={evaluator} />
-      <DeleteEvaluator
-        evaluator={evaluator}
-        setSelectedEvaluator={setSelectedEvaluator}
-        showDeleteModal={showDeleteModal}
-        setShowDeleteModal={setShowDeleteModal}
-        deleteEvaluator={deleteEvaluator}
+      <LLMEvaluatorConfigForm
+        onSubmit={() => {}}
+        existingEvaluatorId={evaluator.id}
       />
     </Col>
   );

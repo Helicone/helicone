@@ -69,6 +69,7 @@ export class EvalController extends Controller {
   }
 
   @Get("/scores")
+  //old
   public async getEvalScores(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string[], string>> {

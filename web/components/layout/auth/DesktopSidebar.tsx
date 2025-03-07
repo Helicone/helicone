@@ -381,12 +381,14 @@ const DesktopSidebar = ({
                 <SidebarHelpDropdown
                   changelog={changelog}
                   handleChangelogClick={handleChangelogClick}
+                  isCollapsed={isCollapsed}
                 />
               </div>
             )}
           </div>
         </div>
       </div>
+
       <ChangelogModal
         open={modalOpen}
         setOpen={handleModalOpen}

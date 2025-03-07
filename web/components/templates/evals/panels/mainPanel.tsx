@@ -1,111 +1,91 @@
-import AuthHeader from "@/components/shared/authHeader";
-import { TimeInterval, getTimeIntervalAgo } from "@/lib/timeCalculations/time";
-import Link from "next/link";
-import { Dispatch, SetStateAction, useMemo } from "react";
-
-// Import shadcn components
 import { Button } from "@/components/ui/button";
-
-// Import Recharts components
-import ThemedTable from "@/components/shared/themed/table/themedTable";
-
-import { ChartLineIcon } from "lucide-react";
-
-// Import Shadcn UI components for dropdown
-import { useEvaluators } from "../EvaluatorHook";
-import { INITIAL_COLUMNS } from "../EvaluratorColumns";
-
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
-import { PanelType } from "./types";
+import { Card } from "@/components/ui/card";
 import { PiPlusBold } from "react-icons/pi";
+import { ChartLineIcon } from "lucide-react";
+import { EvaluatorCard } from "../cards";
+import { Col } from "@/components/layout/common";
+import AuthHeader from "@/components/shared/authHeader";
+import { useEvaluators } from "../EvaluatorHook";
+import { useEvalPanelStore } from "../store/evalPanelStore";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useMemo } from "react";
+import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import clsx from "clsx";
+import { useTestDataStore } from "../testing/testingStore";
 
-export const MainPanel = ({
-  setPanels,
-  panels,
-}: {
-  setPanels: Dispatch<SetStateAction<PanelType[]>>;
-  panels: PanelType[];
-}) => {
-  const {
-    evalScores,
-    evaluators: evaluators,
-    scoreDistributions,
-    defaultEvaluators,
-    filterMap,
-    searchPropertyFilters,
-    setAdvancedFilters,
-    advancedFilters,
-    setTimeFilter,
-    timeFilter,
-    deleteEvaluator,
-  } = useEvaluators();
-
+export const MainPanel = () => {
+  const { evaluators } = useEvaluators();
+  const { openCreatePanel, openEditPanel, openTestPanel, panels } =
+    useEvalPanelStore();
   const org = useOrg();
+  const { setTestConfig } = useTestDataStore();
 
-  const evals = useMemo(() => {
-    const allEvaluators =
-      defaultEvaluators?.data?.data?.data?.map((evalRow) => {
-        const evaluator = evaluators.data?.data?.data?.find(
-          (x) => x.scoring_type === evalRow.name
-        );
-
-        let evalType = "Default";
-        if (evaluator?.llm_template) {
-          evalType = "LLM as a judge";
-        } else if (evaluator?.code_template) {
-          evalType = "Python";
+  // Get a simplified list of evaluators from the API response
+  const simpleEvaluators = useMemo(() => {
+    return (
+      evaluators.data?.data?.data?.map((evaluator) => {
+        // Determine the evaluator type based on available properties
+        let type = "Default";
+        if (evaluator.llm_template) {
+          type = "LLM as a judge";
+        } else if (evaluator.code_template) {
+          type = "Python";
+        } else if (evaluator.last_mile_config) {
+          type = "LastMile";
         }
+
         return {
-          ...evalRow,
-          scoreDistribution:
-            scoreDistributions?.data?.data?.data?.find(
-              (s) => s.name === evalRow.name
-            )?.distribution ?? [],
-          valueType: evalRow.name.includes("-hcone-bool")
-            ? "Boolean"
-            : "# Number",
-          type: evalType,
-          id: evalRow.name,
-        };
-      }) ?? [];
-
-    for (const evaluator of evaluators.data?.data?.data ?? []) {
-      const scoreName = getEvaluatorScoreName(
-        evaluator.name,
-        evaluator.scoring_type
-      );
-      if (allEvaluators.find((e) => e.name === scoreName)) {
-      } else {
-        let evalType = "Default";
-        if (evaluator?.llm_template) {
-          evalType = "LLM as a judge";
-        } else if (evaluator?.code_template) {
-          evalType = "Python";
-        }
-        allEvaluators.push({
-          averageOverTime: [],
-          averageScore: 0,
-          count: 0,
-          id: evaluator.name,
-          maxScore: 0,
-          minScore: 0,
+          id: evaluator.id,
           name: evaluator.name,
-          overTime: [],
-          scoreDistribution: [],
-          type: evalType,
-          valueType: "# Number",
-        });
-      }
+          scoreName: getEvaluatorScoreName(
+            evaluator.name,
+            evaluator.scoring_type
+          ),
+          type,
+          scoring_type: evaluator.scoring_type,
+          evaluator_llm_template: evaluator.llm_template,
+          evaluator_code_template: evaluator.code_template,
+          evaluator_last_mile_config: evaluator.last_mile_config,
+        };
+      }) || []
+    );
+  }, [evaluators.data?.data?.data]);
+
+  const handleTestEvaluator = (evaluator: any) => {
+    // Set test data based on evaluator type
+    if (evaluator.evaluator_llm_template) {
+      // LLM evaluator
+      setTestConfig({
+        _type: "llm",
+        evaluator_llm_template: JSON.stringify(
+          evaluator.evaluator_llm_template
+        ),
+        evaluator_scoring_type: evaluator.scoring_type,
+        evaluator_name: evaluator.name || "evaluator",
+      });
+    } else if (evaluator.evaluator_code_template) {
+      // Python evaluator
+      setTestConfig({
+        _type: "python",
+        evaluator_name: evaluator.name || "Python Evaluator",
+        code: evaluator.evaluator_code_template as string,
+      });
+    } else if (evaluator.evaluator_last_mile_config) {
+      // LastMile evaluator
+      setTestConfig({
+        _type: "lastmile",
+        evaluator_name: evaluator.name || "LastMile Evaluator",
+        config: evaluator.evaluator_last_mile_config as any,
+      });
     }
 
-    return allEvaluators;
-  }, [
-    defaultEvaluators?.data?.data?.data,
-    scoreDistributions?.data?.data?.data,
-    evaluators.data?.data?.data,
-  ]);
+    openTestPanel();
+  };
+
+  if (!org?.currentOrg?.tier) {
+    return null;
+  }
 
   if (org?.currentOrg?.tier === "free") {
     return (
@@ -123,95 +103,87 @@ export const MainPanel = ({
 
   return (
     <div className="flex flex-col w-full h-screen">
-      <AuthHeader title="Evaluators" actions={[]} />
-      {!defaultEvaluators.isLoading && evals.length === 0 ? (
-        <div className="flex flex-col w-full justify-center items-center h-full">
-          <div className="flex flex-col items-center max-w-3xl">
-            <ChartLineIcon className="h-12 w-12 text-black dark:text-white" />
-            <p className="text-xl text-black dark:text-white font-semibold mt-6">
-              No evaluators yet
-            </p>
-            <p className="text-sm text-gray-500 max-w-sm mt-2 text-center">
-              Create an evaluator to help you measure prompt performance and
-              drive improvements.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <Button variant="outline" asChild>
-                <Link href="https://docs.helicone.ai/features/advanced-usage/evals">
-                  View Docs
-                </Link>
-              </Button>
-              <Button
-                variant="action"
-                className="gap-2"
-                onClick={() => {
-                  setPanels([{ _type: "main" }, { _type: "create" }]);
-                }}
+      <AuthHeader
+        title="Evaluators"
+        actions={[
+          <Button
+            key="create-evaluator"
+            onClick={() => openCreatePanel()}
+            variant="outline"
+            size="sm"
+            className="gap-1 items-center"
+          >
+            <PiPlusBold className="h-3.5 w-3.5" />
+            Create Evaluator
+          </Button>,
+        ]}
+      />
+
+      {evaluators.isLoading ? (
+        // Loading state
+        <div className="flex flex-col w-full gap-6 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card
+                key={i}
+                className="animate-pulse rounded-xl border shadow-sm"
               >
-                <PiPlusBold className="h-4 w-4 mr-2" />
-                Create Evaluator
-              </Button>
-            </div>
+                <div className="pb-2 p-6">
+                  <div className="h-6 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
+                </div>
+                <div className="px-6 py-4">
+                  <div className="h-10 bg-muted rounded w-full"></div>
+                </div>
+                <div className="px-6 py-4">
+                  <div className="h-8 bg-muted rounded w-full"></div>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
+      ) : simpleEvaluators.length === 0 ? (
+        // Empty state
+        <div className="flex flex-col w-full justify-center items-center h-full">
+          <Col className="items-center justify-center gap-4 max-w-md text-center py-12">
+            <div className="bg-muted rounded-full p-3">
+              <PiPlusBold className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-medium">No evaluators yet</h3>
+            <p className="text-muted-foreground text-sm">
+              Create an evaluator to score your LLM outputs
+            </p>
+            <Button
+              onClick={openCreatePanel}
+              className="mt-2"
+              variant="default"
+              size="sm"
+            >
+              Create Evaluator
+            </Button>
+          </Col>
+        </div>
       ) : (
-        <>
-          <ThemedTable
-            advancedFilters={{
-              filterMap: filterMap,
-              setAdvancedFilters: setAdvancedFilters,
-              filters: advancedFilters,
-              searchPropertyFilters: searchPropertyFilters,
-            }}
-            timeFilter={{
-              currentTimeFilter: timeFilter,
-              defaultValue: "all",
-              onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                if ((key as string) === "custom") {
-                  value = value.replace("custom:", "");
-                  const start = new Date(value.split("_")[0]);
-                  const end = new Date(value.split("_")[1]);
-                  setTimeFilter({
-                    start,
-                    end,
-                  });
-                } else {
-                  setTimeFilter({
-                    start: getTimeIntervalAgo(key),
-                    end: new Date(),
-                  });
-                }
-              },
-            }}
-            onRowSelect={(row) => {
-              setPanels((prev) => [
-                { _type: "main" },
-                { _type: "edit", selectedEvaluatorId: row.id ?? "" },
-              ]);
-            }}
-            customButtons={[
-              ...(panels.length > 1
-                ? []
-                : [
-                    <Button
-                      onClick={async () => {
-                        setPanels([{ _type: "main" }, { _type: "create" }]);
-                      }}
-                      key="create-new-evaluator"
-                      size="sm_sleek"
-                      variant="outline"
-                    >
-                      Create New Evaluator
-                    </Button>,
-                  ]),
-            ]}
-            dataLoading={defaultEvaluators.isLoading}
-            skeletonLoading={defaultEvaluators.isLoading}
-            id="evals-table"
-            defaultColumns={INITIAL_COLUMNS}
-            defaultData={evals}
-          />
-        </>
+        // Card grid view
+        <div className="flex flex-col w-full gap-6 p-6">
+          <div
+            className={clsx(
+              "grid gap-6",
+              panels.length > 1
+                ? "grid-cols-1"
+                : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+            )}
+          >
+            {simpleEvaluators.map((evaluator) => (
+              <EvaluatorCard
+                key={evaluator.id}
+                evaluator={evaluator}
+                onEdit={openEditPanel}
+                onTest={() => handleTestEvaluator(evaluator)}
+              />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
