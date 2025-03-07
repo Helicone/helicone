@@ -698,17 +698,17 @@ export class EvaluatorManager extends BaseManager {
       // Query to get the average score and total uses from clickhouse
       const statsQuery = `
         SELECT
-          avg(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')]) as average_score,
+          avg(mapValues(scores)[indexOf(mapKeys(scores), {val_0: String})]) as average_score,
           count(*) as total_uses
         FROM request_response_rmt
-        WHERE organization_id = '${this.authParams.organizationId}'
-          AND has(mapKeys(scores), '${scoreName}')
+        WHERE organization_id = {val_1: String}
+          AND has(mapKeys(scores), {val_0: String})
       `;
 
       const statsResult = await dbQueryClickhouse<{
         average_score: number;
         total_uses: number;
-      }>(statsQuery, []);
+      }>(statsQuery, [scoreName, this.authParams.organizationId]);
 
       if (
         statsResult.error ||
@@ -732,18 +732,18 @@ export class EvaluatorManager extends BaseManager {
           subtractWeeks(current_time, 1) AS one_week_ago,
           subtractWeeks(current_time, 2) AS two_weeks_ago
         SELECT
-          avg(IF(request_created_at >= one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')], NULL)) as recent_avg,
-          avg(IF(request_created_at >= two_weeks_ago AND request_created_at < one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')], NULL)) as previous_avg
+          avg(IF(request_created_at >= one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), {val_0: String})], NULL)) as recent_avg,
+          avg(IF(request_created_at >= two_weeks_ago AND request_created_at < one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), {val_0: String})], NULL)) as previous_avg
         FROM request_response_rmt
-        WHERE organization_id = '${this.authParams.organizationId}'
-          AND has(mapKeys(scores), '${scoreName}')
+        WHERE organization_id = {val_1: String}
+          AND has(mapKeys(scores), {val_0: String})
           AND request_created_at >= two_weeks_ago
       `;
 
       const trendResult = await dbQueryClickhouse<{
         recent_avg: number;
         previous_avg: number;
-      }>(recentTrendQuery, []);
+      }>(recentTrendQuery, [scoreName, this.authParams.organizationId]);
 
       let trend: "up" | "down" | "stable" = "stable";
       if (trendResult.data && trendResult.data.length > 0) {
@@ -762,10 +762,10 @@ export class EvaluatorManager extends BaseManager {
           count(*) as count
         FROM (
           SELECT
-            floor(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')] / 20) as bucket
+            floor(mapValues(scores)[indexOf(mapKeys(scores), {val_0: String})] / 20) as bucket
           FROM request_response_rmt
-          WHERE organization_id = '${this.authParams.organizationId}'
-            AND has(mapKeys(scores), '${scoreName}')
+          WHERE organization_id = {val_1: String}
+            AND has(mapKeys(scores), {val_0: String})
         )
         GROUP BY bucket
         ORDER BY bucket
@@ -774,7 +774,7 @@ export class EvaluatorManager extends BaseManager {
       const distributionResult = await dbQueryClickhouse<{
         range: string;
         count: number;
-      }>(distributionQuery, []);
+      }>(distributionQuery, [scoreName, this.authParams.organizationId]);
 
       const scoreDistribution = distributionResult.data || [];
 
@@ -782,10 +782,10 @@ export class EvaluatorManager extends BaseManager {
       const timeSeriesQuery = `
         SELECT
           toDate(request_created_at) as date,
-          avg(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')]) as value
+          avg(mapValues(scores)[indexOf(mapKeys(scores), {val_0: String})]) as value
         FROM request_response_rmt
-        WHERE organization_id = '${this.authParams.organizationId}'
-          AND has(mapKeys(scores), '${scoreName}')
+        WHERE organization_id = {val_1: String}
+          AND has(mapKeys(scores), {val_0: String})
           AND request_created_at >= subtractDays(now(), 30)
         GROUP BY date
         ORDER BY date
@@ -794,7 +794,7 @@ export class EvaluatorManager extends BaseManager {
       const timeSeriesResult = await dbQueryClickhouse<{
         date: string;
         value: number;
-      }>(timeSeriesQuery, []);
+      }>(timeSeriesQuery, [scoreName, this.authParams.organizationId]);
 
       const timeSeriesData = timeSeriesResult.data || [];
 
