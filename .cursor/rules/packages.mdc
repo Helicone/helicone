@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When you make ANY changes to a Helicone package in the /packages directory, please run yarn copy-llm-mapper or yarn copy-costs from the /packages directory to propogate the package changes and imports work elsewhere.
