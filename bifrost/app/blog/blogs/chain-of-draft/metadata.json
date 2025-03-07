@@ -1,0 +1,11 @@
+{ 
+  "title": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
+  "title1": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
+  "title2": "Chain-of-Draft Prompting: A More Efficient Alternative to Chain of Thought",
+  "description": "Learn about the new COD prompting technique, and how its performance and cost stack up against CoT. We also share how you can implement it to improve your AI app's performance and reduce costs.",
+  "images": "/static/blog/chain-of-draft/chain-of-draft-cover.webp",
+  "time": "6 minute read",
+  "author": "Yusuf Ishola",
+  "date": "March 5, 2025", 
+  "badge": "guide"
+}

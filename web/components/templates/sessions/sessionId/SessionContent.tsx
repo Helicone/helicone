@@ -24,6 +24,8 @@ interface SessionContentProps {
   session: Session;
   session_id: string;
   requests: ReturnType<typeof useGetRequests>;
+  isLive: boolean;
+  setIsLive: (isLive: boolean) => void;
 }
 export const TABS = [
   {
@@ -39,6 +41,8 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
   requests,
+  isLive,
+  setIsLive,
 }) => {
   const router = useRouter();
   const { view, requestId } = router.query;
@@ -175,8 +179,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
                 ? false
                 : null
             }
+            isLive={isLive}
+            setIsLive={setIsLive}
           />
-
           {realtimeData.isRealtime && (
             <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
               <PiBroadcastBold className="h-4 w-4" />
@@ -184,7 +189,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               timestamps.
             </div>
           )}
-
           <Row className="gap-2 items-center">
             {currentTopView === "tree" &&
               (showSpan ? (
