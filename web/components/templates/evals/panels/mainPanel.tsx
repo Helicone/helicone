@@ -12,12 +12,14 @@ import { useMemo } from "react";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import clsx from "clsx";
+import { useTestDataStore } from "../testing/testingStore";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
   const { openCreatePanel, openEditPanel, openTestPanel, panels } =
     useEvalPanelStore();
   const org = useOrg();
+  const { setTestConfig } = useTestDataStore();
 
   // Get a simplified list of evaluators from the API response
   const simpleEvaluators = useMemo(() => {
@@ -42,6 +44,9 @@ export const MainPanel = () => {
           ),
           type,
           scoring_type: evaluator.scoring_type,
+          evaluator_llm_template: evaluator.llm_template,
+          evaluator_code_template: evaluator.code_template,
+          evaluator_last_mile_config: evaluator.last_mile_config,
         };
       }) || []
     );
@@ -135,7 +140,7 @@ export const MainPanel = () => {
               "grid gap-6",
               panels.length > 1
                 ? "grid-cols-1"
-                : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
             )}
           >
             {simpleEvaluators.map((evaluator) => (
@@ -143,7 +148,34 @@ export const MainPanel = () => {
                 key={evaluator.id}
                 evaluator={evaluator}
                 onEdit={openEditPanel}
-                onTest={openTestPanel}
+                onTest={() => {
+                  if (evaluator.evaluator_llm_template) {
+                    console.log("Setting test data for LLM evaluator");
+                    setTestConfig({
+                      _type: "llm",
+                      evaluator_llm_template: JSON.stringify(
+                        evaluator.evaluator_llm_template
+                      ),
+                      evaluator_scoring_type: evaluator.scoring_type,
+                      evaluator_name: evaluator.name || "evaluator",
+                    });
+                  } else if (evaluator.evaluator_code_template) {
+                    console.log("Setting test data for Python evaluator");
+                    setTestConfig({
+                      _type: "python",
+                      evaluator_name: evaluator.name || "Python Evaluator",
+                      code: evaluator.evaluator_code_template as string,
+                    });
+                  } else if (evaluator.evaluator_last_mile_config) {
+                    console.log("Setting test data for LastMile evaluator");
+                    setTestConfig({
+                      _type: "lastmile",
+                      evaluator_name: evaluator.name || "LastMile Evaluator",
+                      config: evaluator.evaluator_last_mile_config as any,
+                    });
+                  }
+                  openTestPanel();
+                }}
               />
             ))}
           </div>
