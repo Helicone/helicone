@@ -85,7 +85,7 @@ export interface LLMRequestBody {
   input?: string | string[];
   n?: number | null;
 
-  // Image Models
+  // Image-gen Models
   size?: string;
   quality?: string;
 }
