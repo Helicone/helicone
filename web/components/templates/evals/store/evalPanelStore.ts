@@ -18,11 +18,15 @@ interface EvalPanelState {
   resetPanels: () => void;
 }
 
+const initialState: Pick<EvalPanelState, "panels"> = {
+  panels: [{ _type: "main" as const }],
+};
+
 export const useEvalPanelStore = create<EvalPanelState>()(
   devtools(
     persist(
       (set) => ({
-        panels: [{ _type: "main" }],
+        ...initialState,
         setPanels: (by) => {
           if (typeof by === "function") {
             set((state) => ({ panels: by(state.panels) }));
@@ -63,33 +67,24 @@ export const useEvalPanelStore = create<EvalPanelState>()(
 
             // Check if we're in edit mode
             const hasEditPanel = state.panels.some((p) => p._type === "edit");
-
-            // If in edit mode, just add the test panel without adding a create panel
-            if (hasEditPanel) {
-              console.log("Opening test panel in edit mode");
-              return { panels: [...state.panels, { _type: "test" }] };
-            }
-
-            // Check if create panel exists
             const hasCreatePanel = state.panels.some(
               (p) => p._type === "create"
             );
 
-            // If no create panel and not in edit mode, add both create and test panels
-            if (!hasCreatePanel) {
-              console.log("Opening test panel with create panel");
-              return {
-                panels: [
-                  ...state.panels,
-                  { _type: "create" },
-                  { _type: "test" },
-                ],
-              };
+            // If in edit mode, just add the test panel
+            if (hasEditPanel) {
+              return { panels: [...state.panels, { _type: "test" }] };
             }
 
-            // Otherwise, just add test panel
-            console.log("Opening test panel only");
-            return { panels: [...state.panels, { _type: "test" }] };
+            // If in create mode, add the test panel
+            if (hasCreatePanel) {
+              return { panels: [...state.panels, { _type: "test" }] };
+            }
+
+            // If no edit or create panel, add create and test panels
+            return {
+              panels: [...state.panels, { _type: "create" }, { _type: "test" }],
+            };
           });
         },
         closeTestPanel: () => {
@@ -99,11 +94,17 @@ export const useEvalPanelStore = create<EvalPanelState>()(
         },
         openCreatePanel: () => {
           set((state) => {
+            // Check if create panel already exists
             const hasCreatePanel = state.panels.some(
               (p) => p._type === "create"
             );
             if (hasCreatePanel) return { panels: state.panels };
-            return { panels: [...state.panels, { _type: "create" }] };
+
+            // Remove any edit panels before adding the create panel
+            const filteredPanels = state.panels.filter(
+              (p) => p._type !== "edit"
+            );
+            return { panels: [...filteredPanels, { _type: "create" }] };
           });
         },
         closeCreatePanel: () => {
@@ -113,9 +114,9 @@ export const useEvalPanelStore = create<EvalPanelState>()(
         },
         openEditPanel: (evaluatorId) => {
           set((state) => {
-            // Remove any existing edit panels
+            // Remove any existing edit panels and create panels
             const filteredPanels = state.panels.filter(
-              (p) => p._type !== "edit"
+              (p) => p._type !== "edit" && p._type !== "create"
             );
             return {
               panels: [
@@ -131,11 +132,34 @@ export const useEvalPanelStore = create<EvalPanelState>()(
           }));
         },
         resetPanels: () => {
-          set({ panels: [{ _type: "main" }] });
+          set({ panels: [{ _type: "main" as const }] });
         },
       }),
       {
         name: "eval-panel-store",
+        onRehydrateStorage: () => (state) => {
+          // When state is rehydrated from localStorage (on page refresh or initial load)
+          // Check for any problematic panel configurations and reset if needed
+          if (state) {
+            const editPanel = state.panels.find(
+              (panel) => panel._type === "edit"
+            ) as
+              | { _type: "edit"; selectedEvaluatorId: string | null }
+              | undefined;
+
+            // If we have an edit panel but no selectedEvaluatorId, reset to initial state
+            if (
+              editPanel &&
+              (!editPanel.selectedEvaluatorId ||
+                editPanel.selectedEvaluatorId === "")
+            ) {
+              // Need to use the state.resetPanels() method to properly reset
+              setTimeout(() => {
+                state.resetPanels();
+              }, 0);
+            }
+          }
+        },
       }
     )
   )

@@ -1,6 +1,6 @@
-import { Col, Row } from "@/components/layout/common";
+import { Col } from "@/components/layout/common";
 import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
-import { Button } from "@/components/ui/button";
+import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,11 +11,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
-import { useTestDataStore } from "../testing/testingStore";
 import { DataEntry, LastMileConfigForm } from "./types";
-import { useEvalPanelStore } from "../store/evalPanelStore";
+import { H3, Muted } from "@/components/ui/typography";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useEvalFormStore } from "../store/evalFormStore";
+import { useEvalConfigStore } from "../store/evalConfigStore";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
 
 function SelectDataEntryType({
   label,
@@ -37,83 +47,91 @@ function SelectDataEntryType({
       };
     });
   }, [setTestData]);
+
   return (
-    <>
-      <Label className="whitespace-nowrap">{label}</Label>
-      <div className="grid grid-cols-3 items-center gap-10">
-        <Select
-          value={defaultValue._type}
-          onValueChange={(value) => {
-            if (value === "prompt-input") {
-              onChange({ _type: "prompt-input", inputKey: "" });
-            } else if (value === "input-body") {
-              onChange({ _type: "input-body", content: "message" });
-            } else if (value === "output-body") {
-              onChange({ _type: "output-body", content: "message" });
-            } else if (value === "system-prompt") {
-              onChange({ _type: "system-prompt" });
-            }
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select data entry type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="system-prompt">System Prompt</SelectItem>
-            <SelectItem value="prompt-input">Prompt Input</SelectItem>
-            <SelectItem value="input-body">Input Body</SelectItem>
-            <SelectItem value="output-body">Output Body</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label className="font-medium">{label}</Label>
+        <Tooltip>
+          <TooltipTrigger>
+            <InfoIcon className="h-4 w-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            {label === "Input"
+              ? "Select the source of input data for evaluation"
+              : label === "Output"
+              ? "Select the source of output data for evaluation"
+              : "Select the source of ground truth data for comparison"}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Select
+            value={defaultValue._type}
+            onValueChange={(value) => {
+              if (value === "prompt-input") {
+                onChange({ _type: "prompt-input", inputKey: "" });
+              } else if (value === "input-body") {
+                onChange({ _type: "input-body", content: "message" });
+              } else if (value === "output-body") {
+                onChange({ _type: "output-body", content: "message" });
+              } else if (value === "system-prompt") {
+                onChange({ _type: "system-prompt" });
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="prompt-input">Prompt Input</SelectItem>
+              <SelectItem value="input-body">Input Body</SelectItem>
+              <SelectItem value="output-body">Output Body</SelectItem>
+              <SelectItem value="system-prompt">System Prompt</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {defaultValue._type === "prompt-input" && (
-          <Input
-            placeholder="Input Key"
-            value={defaultValue.inputKey}
-            onChange={(e) => {
-              onChange({ ...defaultValue, inputKey: e.target.value });
-            }}
-          />
+          <div>
+            <Input
+              placeholder="Input Key"
+              value={defaultValue.inputKey}
+              onChange={(e) => {
+                onChange({
+                  _type: "prompt-input",
+                  inputKey: e.target.value,
+                });
+              }}
+            />
+          </div>
         )}
-        {defaultValue._type === "input-body" && (
-          <Select
-            value={defaultValue.content}
-            onValueChange={(value) => {
-              onChange({
-                ...defaultValue,
-                content: value as "jsonify" | "message",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select input body type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="message">Message</SelectItem>
-              <SelectItem value="jsonify">JSONify</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        {defaultValue._type === "output-body" && (
-          <Select
-            value={defaultValue.content}
-            onValueChange={(value) => {
-              onChange({
-                ...defaultValue,
-                content: value as "jsonify" | "message",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select input body type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="jsonify">JSONify</SelectItem>
-              <SelectItem value="message">Message</SelectItem>
-            </SelectContent>
-          </Select>
+
+        {(defaultValue._type === "input-body" ||
+          defaultValue._type === "output-body") && (
+          <div>
+            <Select
+              value={defaultValue.content}
+              onValueChange={(value) => {
+                onChange({
+                  ...defaultValue,
+                  content: value as "message" | "jsonify",
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select content type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="message">Message</SelectItem>
+                <SelectItem value="jsonify">Jsonify</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -169,196 +187,298 @@ export const LastMileDevConfigForm: React.FC<{
   preset?: LastMileConfigForm;
 }> = ({ existingEvaluatorId, onSubmit, openTestPanel, preset }) => {
   const notification = useNotification();
-
   const jawn = useJawnClient();
-  const { invalidate } = useInvalidateEvaluators();
-  const evalPanelStore = useEvalPanelStore();
-
+  const invalidateEvaluators = useInvalidateEvaluators();
+  const { isSubmitting, hideFormButtons } = useEvalFormStore();
   const { setTestConfig: setTestData } = useTestDataStore();
 
+  // Use the config store
+  const {
+    lastMileName,
+    setLastMileName,
+    lastMileDescription,
+    setLastMileDescription,
+    lastMileConfig,
+    setLastMileConfig,
+  } = useEvalConfigStore();
+
+  // Local state for form values
+  const [evaluatorName, setEvaluatorName] = useState(lastMileName || "");
+  const [evaluatorDescription, setEvaluatorDescription] = useState(
+    lastMileDescription || ""
+  );
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
-    preset || DEFAULT_RELEVANCE_TYPE
+    lastMileConfig || preset || DEFAULT_RELEVANCE_TYPE
   );
 
+  // Update the store when local state changes
   useEffect(() => {
-    setTestData((prev) => {
-      if (!prev) return null;
-      return {
-        _type: "lastmile",
-        evaluator_name: evaluatorType.name,
-        config: evaluatorType,
-      };
-    });
-  }, [setTestData, evaluatorType]);
+    setLastMileName(evaluatorName);
+    setLastMileDescription(evaluatorDescription);
+    setLastMileConfig(evaluatorType);
+  }, [
+    evaluatorName,
+    evaluatorDescription,
+    evaluatorType,
+    setLastMileName,
+    setLastMileDescription,
+    setLastMileConfig,
+  ]);
 
-  // Initialize with preset if available
-  useEffect(() => {
-    if (preset) {
-      setEvaluatorType(preset);
+  const handleSubmit = async () => {
+    // We don't need to set isSubmitting here as it's handled by the mutation hook
+    try {
+      if (existingEvaluatorId) {
+        const result = await jawn.PUT("/v1/evaluator/{evaluatorId}", {
+          params: {
+            path: {
+              evaluatorId: existingEvaluatorId,
+            },
+          },
+          body: {
+            name: evaluatorName,
+            description: evaluatorDescription,
+            last_mile_config: evaluatorType,
+            scoring_type: "LAST_MILE",
+          },
+        });
+        if (!result.data?.data) {
+          notification.setNotification("Failed to update evaluator", "error");
+        } else {
+          notification.setNotification(
+            "Evaluator updated successfully",
+            "success"
+          );
+          invalidateEvaluators.invalidate();
+          onSubmit();
+        }
+      } else {
+        const result = await jawn.POST("/v1/evaluator", {
+          body: {
+            name: evaluatorName,
+            description: evaluatorDescription,
+            last_mile_config: evaluatorType,
+            scoring_type: "LAST_MILE",
+          },
+        });
+        if (!result.data?.data) {
+          notification.setNotification("Failed to create evaluator", "error");
+        } else {
+          notification.setNotification(
+            "Evaluator created successfully",
+            "success"
+          );
+          invalidateEvaluators.invalidate();
+          onSubmit();
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting LastMile evaluator:", error);
+      notification.setNotification("An error occurred", "error");
     }
-  }, [preset]);
+  };
 
   return (
-    <Col className="h-full flex flex-col gap-2">
-      <div>
-        <a
-          href="https://docs.lastmileai.dev"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:text-blue-600"
-        >
-          Lastmile AI Documentation
-        </a>
-      </div>
-      <Label>Evaluator Name</Label>
-      <Input
-        placeholder="Name"
-        value={evaluatorType.name}
-        onChange={(e) =>
-          setEvaluatorType({ ...evaluatorType, name: e.target.value })
-        }
-      />
-      <Label>Evaluator Type</Label>
-      <Select
-        value={evaluatorType._type}
-        onValueChange={(value) => {
-          setEvaluatorType(DEFAULT_MAP[value as keyof typeof DEFAULT_MAP]);
-        }}
+    <Col className="h-full flex flex-col overflow-hidden">
+      <ScrollArea
+        className="flex-grow overflow-y-auto"
+        type="always"
+        scrollHideDelay={0}
       >
-        <SelectTrigger className="w-fit">
-          <SelectValue placeholder="Select evaluator type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="relevance">Relevance</SelectItem>
-          <SelectItem value="context_relevance">Context Relevance</SelectItem>
-          <SelectItem value="faithfulness">Faithfulness</SelectItem>
-        </SelectContent>
-      </Select>
-      {evaluatorType.input && (
-        <SelectDataEntryType
-          label="Input"
-          defaultValue={evaluatorType.input}
-          onChange={(value) => {
-            setEvaluatorType({
-              ...evaluatorType,
-              input: value,
-            });
-          }}
-        />
-      )}
-      {evaluatorType.output && (
-        <SelectDataEntryType
-          label="Output"
-          defaultValue={evaluatorType.output}
-          onChange={(value) => {
-            setEvaluatorType({ ...evaluatorType, output: value });
-          }}
-        />
-      )}
-      {evaluatorType._type === "faithfulness" && evaluatorType.groundTruth && (
-        <SelectDataEntryType
-          label="Ground Truth"
-          defaultValue={evaluatorType.groundTruth}
-          onChange={(value) => {
-            setEvaluatorType({ ...evaluatorType, groundTruth: value });
-          }}
-        />
-      )}
+        <div className="px-4 py-4">
+          <Col className="space-y-4">
+            {/* Basic Information Section */}
+            <div className="space-y-3">
+              <div className="border-b pb-1 mb-3">
+                <div className="flex items-baseline gap-2">
+                  <H3 className="text-lg">Basic Information</H3>
+                  <Muted className="text-sm">
+                    Define your LastMile evaluator&apos;s name and type
+                  </Muted>
+                </div>
+              </div>
 
-      <i className="text-xs text-gray-500">
-        You will be charged for the LLM usage of this evaluator.
-      </i>
-      <Row className="justify-between mt-4">
-        <Button
-          onClick={() => {
-            if (!evaluatorType.name) {
-              notification.setNotification(
-                "Evaluator name is required",
-                "error"
-              );
-              return;
-            }
-            if (existingEvaluatorId) {
-              jawn
-                .PUT(`/v1/evaluator/{evaluatorId}`, {
-                  params: {
-                    path: {
-                      evaluatorId: existingEvaluatorId,
-                    },
-                  },
-                  body: {
-                    llm_template: null,
-                    last_mile_config: evaluatorType,
-                    scoring_type: `LASTMILE`,
-                    name: evaluatorType.name,
-                  },
-                })
-                .then((res) => {
-                  if (res.data?.data) {
-                    notification.setNotification(
-                      "Evaluator updated successfully",
-                      "success"
-                    );
-                    invalidate();
-                  }
-                });
-            } else {
-              jawn
-                .POST("/v1/evaluator", {
-                  body: {
-                    last_mile_config: evaluatorType,
-                    scoring_type: `LASTMILE`,
-                    name: evaluatorType.name,
-                  },
-                })
-                .then((res) => {
-                  if (res.data?.data) {
-                    notification.setNotification(
-                      "Evaluator created successfully",
-                      "success"
-                    );
-                    invalidate();
-                    onSubmit();
-                  } else {
-                    notification.setNotification(
-                      "Failed to create evaluator",
-                      "error"
-                    );
-                  }
-                });
-            }
-          }}
-        >
-          {existingEvaluatorId ? "Update Evaluator" : "Create Evaluator"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (openTestPanel) {
-              console.log(
-                "Opening test panel via prop",
-                existingEvaluatorId ? "in edit mode" : "in create mode"
-              );
-              openTestPanel();
-            } else {
-              console.log(
-                "Opening test panel via store",
-                existingEvaluatorId ? "in edit mode" : "in create mode"
-              );
-              // Make sure test data is set
-              setTestData({
-                _type: "lastmile",
-                evaluator_name: evaluatorType.name,
-                config: evaluatorType,
-              });
-              // Then open the test panel
-              evalPanelStore.openTestPanel();
-            }
-          }}
-        >
-          Test
-        </Button>
-      </Row>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Evaluator Name
+                    </Label>
+                    <a
+                      href="https://docs.lastmileai.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-600 text-xs"
+                    >
+                      LastMile AI Documentation
+                    </a>
+                  </div>
+                  <Input
+                    id="name"
+                    placeholder="Enter evaluator name"
+                    value={evaluatorName}
+                    onChange={(e) => {
+                      if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
+                        setEvaluatorName(e.target.value);
+                      } else {
+                        notification.setNotification(
+                          "Evaluator name can only contain letters and numbers.",
+                          "error"
+                        );
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="type" className="text-sm font-medium">
+                      Evaluator Type
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        Choose the type of LastMile evaluator
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={evaluatorType._type}
+                    onValueChange={(value) => {
+                      if (value === "relevance") {
+                        setEvaluatorType({
+                          ...DEFAULT_RELEVANCE_TYPE,
+                          name: evaluatorName,
+                        });
+                      } else if (value === "context_relevance") {
+                        setEvaluatorType({
+                          ...DEFAULT_CONTEXT_RELEVANCE_TYPE,
+                          name: evaluatorName,
+                        });
+                      } else if (value === "faithfulness") {
+                        setEvaluatorType({
+                          ...DEFAULT_FAITHFULNESS_TYPE,
+                          name: evaluatorName,
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select evaluator type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="context_relevance">
+                        Context Relevance
+                      </SelectItem>
+                      <SelectItem value="faithfulness">Faithfulness</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-1" />
+
+            {/* Configuration Section */}
+            <div className="space-y-3">
+              <div className="border-b pb-1 mb-3">
+                <div className="flex items-baseline gap-2">
+                  <H3 className="text-lg">Configuration</H3>
+                  <Muted className="text-sm">
+                    Configure the data sources for your evaluator
+                  </Muted>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-3 bg-muted/10 rounded-md">
+                {evaluatorType.input && (
+                  <SelectDataEntryType
+                    label="Input"
+                    defaultValue={evaluatorType.input}
+                    onChange={(value) => {
+                      setEvaluatorType({
+                        ...evaluatorType,
+                        input: value,
+                      });
+                    }}
+                  />
+                )}
+
+                {evaluatorType.output && (
+                  <SelectDataEntryType
+                    label="Output"
+                    defaultValue={evaluatorType.output}
+                    onChange={(value) => {
+                      setEvaluatorType({
+                        ...evaluatorType,
+                        output: value,
+                      });
+                    }}
+                  />
+                )}
+
+                {evaluatorType._type === "faithfulness" &&
+                  evaluatorType.groundTruth && (
+                    <SelectDataEntryType
+                      label="Ground Truth"
+                      defaultValue={evaluatorType.groundTruth}
+                      onChange={(value) => {
+                        setEvaluatorType({
+                          ...evaluatorType,
+                          groundTruth: value,
+                        });
+                      }}
+                    />
+                  )}
+              </div>
+            </div>
+          </Col>
+        </div>
+      </ScrollArea>
+
+      {!hideFormButtons && (
+        <div className="shrink-0 border-t bg-muted/10 p-4 flex justify-end">
+          <Button
+            variant="default"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            data-create-evaluator="true"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {existingEvaluatorId ? "Updating..." : "Creating..."}
+              </span>
+            ) : existingEvaluatorId ? (
+              "Update Evaluator"
+            ) : (
+              "Create Evaluator"
+            )}
+          </Button>
+        </div>
+      )}
     </Col>
   );
 };

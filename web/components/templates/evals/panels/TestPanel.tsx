@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { useEffect } from "react";
 import { useEvalPanelStore } from "../store/evalPanelStore";
+import { H3 } from "@/components/ui/typography";
 
 export const TestPanel = () => {
   const { closeTestPanel } = useEvalPanelStore();
@@ -17,8 +18,9 @@ export const TestPanel = () => {
   }, []);
 
   return (
-    <Col className="h-full">
-      <Row className="justify-end">
+    <Col className="h-full flex flex-col overflow-hidden bg-background">
+      <Row className="justify-between items-center px-4 py-2 border-b shrink-0 bg-muted/30">
+        <H3 className="text-lg font-medium">Test Evaluator</H3>
         <Button
           variant="ghost"
           size="icon"
@@ -30,7 +32,7 @@ export const TestPanel = () => {
           <XIcon className="w-4 h-4" />
         </Button>
       </Row>
-      <div className="w-full px-10 overflow-y-auto">
+      <div className="w-full flex-grow overflow-hidden">
         <TestEvaluator />
       </div>
     </Col>

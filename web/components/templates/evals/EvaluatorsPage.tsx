@@ -29,7 +29,10 @@ const EvalsPage = () => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-screen">
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="h-screen overflow-hidden"
+    >
       {panels.map((panel, index) => {
         return (
           <React.Fragment key={`panel-fragment-${panel._type}-${index}`}>
@@ -38,9 +41,9 @@ const EvalsPage = () => {
               minSize={panel._type === "main" ? 0 : 25}
               defaultSize={50}
               maxSize={75}
-              className="h-screen"
+              className="h-screen overflow-hidden"
             >
-              <div className="h-full">
+              <div className="h-full overflow-hidden">
                 {panel._type === "main" ? (
                   <MainPanel />
                 ) : panel._type === "edit" ? (
