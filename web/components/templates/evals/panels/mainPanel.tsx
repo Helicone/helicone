@@ -52,6 +52,37 @@ export const MainPanel = () => {
     );
   }, [evaluators.data?.data?.data]);
 
+  const handleTestEvaluator = (evaluator: any) => {
+    // Set test data based on evaluator type
+    if (evaluator.evaluator_llm_template) {
+      // LLM evaluator
+      setTestConfig({
+        _type: "llm",
+        evaluator_llm_template: JSON.stringify(
+          evaluator.evaluator_llm_template
+        ),
+        evaluator_scoring_type: evaluator.scoring_type,
+        evaluator_name: evaluator.name || "evaluator",
+      });
+    } else if (evaluator.evaluator_code_template) {
+      // Python evaluator
+      setTestConfig({
+        _type: "python",
+        evaluator_name: evaluator.name || "Python Evaluator",
+        code: evaluator.evaluator_code_template as string,
+      });
+    } else if (evaluator.evaluator_last_mile_config) {
+      // LastMile evaluator
+      setTestConfig({
+        _type: "lastmile",
+        evaluator_name: evaluator.name || "LastMile Evaluator",
+        config: evaluator.evaluator_last_mile_config as any,
+      });
+    }
+
+    openTestPanel();
+  };
+
   if (!org?.currentOrg?.tier) {
     return null;
   }
@@ -148,34 +179,7 @@ export const MainPanel = () => {
                 key={evaluator.id}
                 evaluator={evaluator}
                 onEdit={openEditPanel}
-                onTest={() => {
-                  if (evaluator.evaluator_llm_template) {
-                    console.log("Setting test data for LLM evaluator");
-                    setTestConfig({
-                      _type: "llm",
-                      evaluator_llm_template: JSON.stringify(
-                        evaluator.evaluator_llm_template
-                      ),
-                      evaluator_scoring_type: evaluator.scoring_type,
-                      evaluator_name: evaluator.name || "evaluator",
-                    });
-                  } else if (evaluator.evaluator_code_template) {
-                    console.log("Setting test data for Python evaluator");
-                    setTestConfig({
-                      _type: "python",
-                      evaluator_name: evaluator.name || "Python Evaluator",
-                      code: evaluator.evaluator_code_template as string,
-                    });
-                  } else if (evaluator.evaluator_last_mile_config) {
-                    console.log("Setting test data for LastMile evaluator");
-                    setTestConfig({
-                      _type: "lastmile",
-                      evaluator_name: evaluator.name || "LastMile Evaluator",
-                      config: evaluator.evaluator_last_mile_config as any,
-                    });
-                  }
-                  openTestPanel();
-                }}
+                onTest={() => handleTestEvaluator(evaluator)}
               />
             ))}
           </div>

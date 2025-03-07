@@ -2,13 +2,10 @@ import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
-import LLMAsJudgeEvaluatorDetails from "../details/LLMAsJudgeEvaluatorDetails";
-import PythonEvaluatorDetails from "../details/PythonEvaluatorDetails";
-import LastMileEvaluatorDetails from "../details/LastMileEvaluatorDetails";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
 import { useEvaluators } from "../EvaluatorHook";
 import { useEvalPanelStore } from "../store/evalPanelStore";
-import { H3, P } from "@/components/ui/typography";
+import { H3 } from "@/components/ui/typography";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertDialog,
@@ -25,8 +22,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OnlineEvaluatorsSection } from "../details/OnlineEvaluatorsSection";
 import { ExperimentsForEvaluator } from "../details/Experiments";
 import { useEvaluatorDetails } from "../details/hooks";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
+import {
+  EvaluatorEditor,
+  EvaluatorNotFound,
+  LoadingEvaluator,
+} from "./components";
 
 // Create a dummy evaluator for when the real one doesn't exist yet
 // This ensures we can always call the hook, even if we ignore the results
@@ -129,65 +130,13 @@ export const EditPanel = ({
     return "default";
   };
 
-  const renderEvaluatorEditor = () => {
-    if (!evaluator) return <p>This evaluator is a default evaluator.</p>;
-
-    if (evaluator.llm_template) {
-      return (
-        <LLMAsJudgeEvaluatorDetails
-          evaluator={evaluator}
-          deleteEvaluator={deleteEvaluator}
-          setSelectedEvaluator={() => {}}
-        />
-      );
-    } else if (evaluator.code_template) {
-      return (
-        <PythonEvaluatorDetails
-          evaluator={evaluator}
-          deleteEvaluator={deleteEvaluator}
-          setSelectedEvaluator={() => {}}
-        />
-      );
-    } else if (evaluator.last_mile_config) {
-      return (
-        <LastMileEvaluatorDetails
-          evaluator={evaluator}
-          deleteEvaluator={deleteEvaluator}
-          setSelectedEvaluator={() => {}}
-        />
-      );
-    } else {
-      return <p>This evaluator is a default evaluator.</p>;
-    }
-  };
-
   // Show loading state or fallback UI if evaluator is not found
   if (evaluators.isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-8">
-        <p>Loading evaluator details...</p>
-      </div>
-    );
+    return <LoadingEvaluator />;
   }
 
   if (!evaluator) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-8">
-        <div className="flex justify-between w-full mb-4">
-          <H3>Evaluator Not Found</H3>
-          <Button variant="ghost" size="icon" onClick={closeEditPanel}>
-            <XIcon size={18} />
-          </Button>
-        </div>
-        <P className="text-muted-foreground text-center mb-6">
-          The selected evaluator could not be found. It may have been deleted or
-          you may need to refresh the page.
-        </P>
-        <Button variant="outline" onClick={closeEditPanel}>
-          Go Back
-        </Button>
-      </div>
-    );
+    return <EvaluatorNotFound closeEditPanel={closeEditPanel} />;
   }
 
   return (
@@ -227,8 +176,18 @@ export const EditPanel = ({
         </TabsList>
 
         <ScrollArea className="flex-grow overflow-y-auto">
-          <TabsContent value="edit" className="m-0 p-4 h-full">
-            {renderEvaluatorEditor()}
+          <TabsContent
+            value="edit"
+            className="flex-grow overflow-hidden relative"
+          >
+            <ScrollArea className="h-full">
+              <div className="p-4">
+                <EvaluatorEditor
+                  evaluator={evaluator}
+                  deleteEvaluator={deleteEvaluator}
+                />
+              </div>
+            </ScrollArea>
           </TabsContent>
 
           <TabsContent value="online" className="m-0 p-4 h-full">
@@ -241,11 +200,11 @@ export const EditPanel = ({
                 setShowCreateModal={setShowCreateModal}
               />
             ) : (
-              <P className="text-muted-foreground text-center py-8">
+              <p className="text-muted-foreground text-center py-8">
                 {!evaluator
                   ? "Evaluator not found"
                   : "Loading online evaluators..."}
-              </P>
+              </p>
             )}
           </TabsContent>
 
@@ -253,9 +212,9 @@ export const EditPanel = ({
             {evaluator ? (
               <ExperimentsForEvaluator evaluator={evaluator} />
             ) : (
-              <P className="text-muted-foreground text-center py-8">
+              <p className="text-muted-foreground text-center py-8">
                 Evaluator not found
-              </P>
+              </p>
             )}
           </TabsContent>
         </ScrollArea>

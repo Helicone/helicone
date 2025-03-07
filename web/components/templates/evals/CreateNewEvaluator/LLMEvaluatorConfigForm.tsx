@@ -644,7 +644,6 @@ export const LLMEvaluatorConfigForm: React.FC<{
 
     // The actual submission is handled by CreatePanel's handleCreate function,
     // which uses the data from the store
-    console.log("Form submitted, data:", llmConfig);
 
     // Call onSubmit to continue with the flow
     onSubmit();
