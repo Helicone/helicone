@@ -3,6 +3,7 @@ import {
   EvaluatorResult,
   TestInput,
   UpdateEvaluatorParams,
+  EvaluatorStats,
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -19,6 +20,7 @@ import { convertTestInputToHeliconeRequest } from "./convert";
 import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -281,7 +283,8 @@ export class EvaluatorManager extends BaseManager {
         return err(scoreResult.error);
       }
 
-      const scoreName = getEvaluatorScoreName(evaluator.name);
+      const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
+      const scoreName = getFullEvaluatorScoreName(evaluator.name, isBoolean);
 
       const scoreManager = new ScoreManager(this.authParams);
       if (
@@ -356,7 +359,11 @@ export class EvaluatorManager extends BaseManager {
         }
         const evaluationPromises: Promise<Result<null, string>>[] = [];
         for (const evaluator of evaluators.data ?? []) {
-          const scoreName = getEvaluatorScoreName(evaluator.name);
+          const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
+          const scoreName = getFullEvaluatorScoreName(
+            evaluator.name,
+            isBoolean
+          );
           if (!(request.scores && scoreName in request.scores)) {
             evaluationPromises.push(
               this.runEvaluatorAndPostScore({
@@ -404,9 +411,8 @@ export class EvaluatorManager extends BaseManager {
     let shouldRun = false;
     for (const request of experimentData.data ?? []) {
       for (const evaluator of evaluators.data ?? []) {
-        const scoreName =
-          getEvaluatorScoreName(evaluator.name) +
-          (evaluator.scoring_type === "LLM-BOOLEAN" ? "-hcone-bool" : "");
+        const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
+        const scoreName = getFullEvaluatorScoreName(evaluator.name, isBoolean);
         if (!(request.scores && scoreName in request.scores)) {
           shouldRun = true;
         }
@@ -520,7 +526,7 @@ export class EvaluatorManager extends BaseManager {
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config, name
       FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
@@ -656,5 +662,153 @@ export class EvaluatorManager extends BaseManager {
     }
 
     return ok(null);
+  }
+
+  public async getEvaluatorStats(
+    evaluatorId: string
+  ): Promise<Result<EvaluatorStats, string>> {
+    try {
+      // First, get the evaluator to verify it exists and get the name for scoring
+      const evaluator = await this.getEvaluator(evaluatorId);
+      if (evaluator.error || !evaluator.data) {
+        return err(evaluator.error || "Evaluator not found");
+      }
+
+      // If name or scoring_type is missing, return default stats instead of error
+      if (!evaluator.data.name || !evaluator.data.scoring_type) {
+        console.warn(
+          `Evaluator ${evaluatorId} has missing name or scoring_type, returning default stats`
+        );
+        return ok({
+          averageScore: 0,
+          totalUses: 0,
+          recentTrend: "stable",
+          scoreDistribution: [],
+          timeSeriesData: [],
+        });
+      }
+
+      // Get evaluator name for scoring using getFullEvaluatorScoreName function
+      const isBoolean = evaluator.data.scoring_type === "LLM-BOOLEAN";
+      const scoreName = getFullEvaluatorScoreName(
+        evaluator.data.name,
+        isBoolean
+      );
+
+      // Query to get the average score and total uses from clickhouse
+      const statsQuery = `
+        SELECT
+          avg(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')]) as average_score,
+          count(*) as total_uses
+        FROM request_response_rmt
+        WHERE organization_id = '${this.authParams.organizationId}'
+          AND has(mapKeys(scores), '${scoreName}')
+      `;
+
+      const statsResult = await dbQueryClickhouse<{
+        average_score: number;
+        total_uses: number;
+      }>(statsQuery, []);
+
+      if (
+        statsResult.error ||
+        !statsResult.data ||
+        statsResult.data.length === 0
+      ) {
+        // If no data, return default stats
+        return ok({
+          averageScore: 0,
+          totalUses: 0,
+          recentTrend: "stable",
+          scoreDistribution: [],
+          timeSeriesData: [],
+        });
+      }
+
+      // Query recent trend - compare last week to previous week
+      const recentTrendQuery = `
+        WITH 
+          now() AS current_time,
+          subtractWeeks(current_time, 1) AS one_week_ago,
+          subtractWeeks(current_time, 2) AS two_weeks_ago
+        SELECT
+          avg(IF(request_created_at >= one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')], NULL)) as recent_avg,
+          avg(IF(request_created_at >= two_weeks_ago AND request_created_at < one_week_ago, mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')], NULL)) as previous_avg
+        FROM request_response_rmt
+        WHERE organization_id = '${this.authParams.organizationId}'
+          AND has(mapKeys(scores), '${scoreName}')
+          AND request_created_at >= two_weeks_ago
+      `;
+
+      const trendResult = await dbQueryClickhouse<{
+        recent_avg: number;
+        previous_avg: number;
+      }>(recentTrendQuery, []);
+
+      let trend: "up" | "down" | "stable" = "stable";
+      if (trendResult.data && trendResult.data.length > 0) {
+        const { recent_avg, previous_avg } = trendResult.data[0];
+        if (recent_avg > previous_avg) {
+          trend = "up";
+        } else if (recent_avg < previous_avg) {
+          trend = "down";
+        }
+      }
+
+      // Query score distribution - 5 buckets
+      const distributionQuery = `
+        SELECT
+          concat(toString(floor(bucket * 20)), '-', toString(ceil(bucket * 20))) as range,
+          count(*) as count
+        FROM (
+          SELECT
+            floor(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')] / 20) as bucket
+          FROM request_response_rmt
+          WHERE organization_id = '${this.authParams.organizationId}'
+            AND has(mapKeys(scores), '${scoreName}')
+        )
+        GROUP BY bucket
+        ORDER BY bucket
+      `;
+
+      const distributionResult = await dbQueryClickhouse<{
+        range: string;
+        count: number;
+      }>(distributionQuery, []);
+
+      const scoreDistribution = distributionResult.data || [];
+
+      // Query time series data - last 30 days
+      const timeSeriesQuery = `
+        SELECT
+          toDate(request_created_at) as date,
+          avg(mapValues(scores)[indexOf(mapKeys(scores), '${scoreName}')]) as value
+        FROM request_response_rmt
+        WHERE organization_id = '${this.authParams.organizationId}'
+          AND has(mapKeys(scores), '${scoreName}')
+          AND request_created_at >= subtractDays(now(), 30)
+        GROUP BY date
+        ORDER BY date
+      `;
+
+      const timeSeriesResult = await dbQueryClickhouse<{
+        date: string;
+        value: number;
+      }>(timeSeriesQuery, []);
+
+      const timeSeriesData = timeSeriesResult.data || [];
+
+      // Return the combined stats
+      return ok({
+        averageScore: statsResult.data[0].average_score,
+        totalUses: statsResult.data[0].total_uses,
+        recentTrend: trend,
+        scoreDistribution,
+        timeSeriesData,
+      });
+    } catch (error) {
+      console.error("Error getting evaluator stats:", error);
+      return err("Error fetching evaluator statistics");
+    }
   }
 }

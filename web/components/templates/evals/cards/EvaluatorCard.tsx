@@ -8,9 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EditIcon, PlayIcon } from "lucide-react";
+import {
+  EditIcon,
+  PlayIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+  MinusIcon,
+} from "lucide-react";
 import { MockVisualization } from "./MockVisualization";
 import { TypeBadge } from "./TypeBadge";
+import { useEvaluatorStats } from "../hooks/useEvaluatorStats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface EvaluatorCardProps {
   evaluator: {
@@ -19,7 +27,7 @@ interface EvaluatorCardProps {
     scoreName?: string;
     type: string;
     scoring_type: string;
-    stats: {
+    stats?: {
       averageScore: number;
       totalUses: number;
     };
@@ -36,6 +44,29 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
   onEdit,
   onTest,
 }) => {
+  // Fetch real stats data for this evaluator
+  const { data: stats, isLoading, isError } = useEvaluatorStats(evaluator.id);
+
+  // Render trend icon based on the trend data
+  const renderTrendIcon = () => {
+    if (isLoading || isError || !stats) return null;
+
+    switch (stats.recentTrend) {
+      case "up":
+        return <TrendingUpIcon className="h-4 w-4 text-green-500" />;
+      case "down":
+        return <TrendingDownIcon className="h-4 w-4 text-red-500" />;
+      default:
+        return <MinusIcon className="h-4 w-4 text-slate-500" />;
+    }
+  };
+
+  // Safely access stats with fallbacks
+  const displayStats = {
+    averageScore: stats?.averageScore ?? 0,
+    totalUses: stats?.totalUses ?? 0,
+  };
+
   return (
     <Card
       key={evaluator.id}
@@ -56,12 +87,22 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
       <CardContent className="pt-2">
         <MockVisualization type={evaluator.type} />
         <div className="flex justify-between items-center mt-3 text-sm">
-          <span className="font-medium">
-            Avg Score: {evaluator.stats.averageScore.toFixed(1)}%
-          </span>
-          <span className="text-slate-500">
-            Uses: {evaluator.stats.totalUses}
-          </span>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-20" />
+            </>
+          ) : (
+            <>
+              <span className="font-medium flex items-center gap-1">
+                Avg Score: {displayStats.averageScore.toFixed(1)}%
+                {renderTrendIcon()}
+              </span>
+              <span className="text-slate-500">
+                Uses: {displayStats.totalUses}
+              </span>
+            </>
+          )}
         </div>
       </CardContent>
       <CardFooter className="flex justify-between pt-4 pb-4">

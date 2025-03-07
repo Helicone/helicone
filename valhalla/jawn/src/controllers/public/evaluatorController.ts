@@ -77,6 +77,20 @@ export type TestInput = {
   promptTemplate?: string;
 };
 
+export interface EvaluatorStats {
+  averageScore: number;
+  totalUses: number;
+  recentTrend: "up" | "down" | "stable";
+  scoreDistribution: Array<{
+    range: string;
+    count: number;
+  }>;
+  timeSeriesData: Array<{
+    date: string;
+    value: number;
+  }>;
+}
+
 @Route("v1/evaluator")
 @Tags("Evaluator")
 @Security("api_key")
@@ -372,5 +386,21 @@ export class EvaluatorController extends Controller {
       this.setStatus(200);
       return ok(result.data!);
     }
+  }
+
+  @Get("{evaluatorId}/stats")
+  public async getEvaluatorStats(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() evaluatorId: string
+  ): Promise<Result<EvaluatorStats, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorStats(evaluatorId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
   }
 }

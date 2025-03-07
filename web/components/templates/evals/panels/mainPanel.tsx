@@ -42,12 +42,6 @@ export const MainPanel = () => {
           ),
           type,
           scoring_type: evaluator.scoring_type,
-          // For now, mock some stats with random data
-          stats: {
-            averageScore: Math.random() * 100,
-            totalUses: Math.floor(Math.random() * 1000),
-            recentTrend: Math.random() > 0.5 ? "up" : "down",
-          },
         };
       }) || []
     );
