@@ -19,6 +19,7 @@ import {
   usePythonEvaluatorSubmit,
   useLastMileEvaluatorSubmit,
 } from "../hooks/useEvaluatorSubmit";
+import { useTestDataStore } from "../testing/testingStore";
 
 export const useCreatePanelTabs = create<{
   selectedTab: string;
@@ -41,6 +42,9 @@ export const CreatePanel = () => {
   const { selectedTab, setSelectedTab } = useCreatePanelTabs();
   const { resetPanels, openTestPanel } = useEvalPanelStore();
   const { isSubmitting, setHideFormButtons } = useEvalFormStore();
+
+  // Access test data store to update test config when tabs change
+  const { setTestConfig } = useTestDataStore();
 
   // Get config state from the store
   const {
@@ -68,8 +72,69 @@ export const CreatePanel = () => {
     };
   }, [setHideFormButtons]);
 
+  // Update test config when selected tab changes
+  useEffect(() => {
+    // Set the appropriate test config based on the selected tab
+    if (selectedTab === "llm-as-a-judge") {
+      console.log("Setting test data for LLM evaluator");
+      setTestConfig({
+        _type: "llm",
+        evaluator_llm_template: llmTemplate,
+        evaluator_scoring_type: llmConfig.expectedValueType,
+        evaluator_name: llmConfig.name || "evaluator",
+      });
+    } else if (selectedTab === "python") {
+      console.log("Setting test data for Python evaluator");
+      setTestConfig({
+        _type: "python",
+        evaluator_name: pythonName || "Python Evaluator",
+        code: pythonCode,
+      });
+    } else if (selectedTab === "lastmile") {
+      console.log("Setting test data for LastMile evaluator");
+      setTestConfig({
+        _type: "lastmile",
+        evaluator_name: lastMileName || "LastMile Evaluator",
+        config: lastMileConfig,
+      });
+    }
+  }, [
+    selectedTab,
+    setTestConfig,
+    llmTemplate,
+    llmConfig,
+    pythonName,
+    pythonCode,
+    lastMileName,
+    lastMileConfig,
+  ]);
+
   const handleTest = () => {
     console.log("Opening test panel from Create Evaluator");
+
+    // Update test data based on current tab before opening test panel
+    if (selectedTab === "llm-as-a-judge") {
+      setTestConfig({
+        _type: "llm",
+        evaluator_llm_template: llmTemplate,
+        evaluator_scoring_type: llmConfig.expectedValueType,
+        evaluator_name: llmConfig.name || "LLM Evaluator",
+      });
+    } else if (selectedTab === "python") {
+      setTestConfig({
+        _type: "python",
+        evaluator_name: pythonName || "Python Evaluator",
+        code: pythonCode,
+      });
+    } else if (selectedTab === "lastmile") {
+      setTestConfig({
+        _type: "lastmile",
+        evaluator_name: lastMileName || "LastMile Evaluator",
+        config: lastMileConfig,
+      });
+    }
+
+    // Open the test panel after updating test data
     openTestPanel();
   };
 

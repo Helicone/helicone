@@ -336,6 +336,17 @@ export class EvaluatorController extends Controller {
       evaluatorName: string;
     }
   ): Promise<EvaluatorScoreResult> {
+    // convert "boolean" | "choice" | "range" to "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE"
+    if (requestBody.evaluatorConfig.evaluator_scoring_type === "boolean") {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-BOOLEAN";
+    } else if (
+      requestBody.evaluatorConfig.evaluator_scoring_type === "choice"
+    ) {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-CHOICE";
+    } else if (requestBody.evaluatorConfig.evaluator_scoring_type === "range") {
+      requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-RANGE";
+    }
+
     const llmAsAJudge = new LLMAsAJudge({
       scoringType: requestBody.evaluatorConfig.evaluator_scoring_type as
         | "LLM-CHOICE"

@@ -339,9 +339,16 @@ export function TestEvaluator() {
                   const res = await testEvaluator(testConfig, jawn, testInput);
                   setResult(res);
                 } catch (e) {
+                  const errorMessage =
+                    e instanceof Error
+                      ? e.message
+                      : typeof e === "object"
+                      ? JSON.stringify(e, null, 2)
+                      : String(e || "Unknown error");
+
                   setResult({
                     _type: "error",
-                    error: e instanceof Error ? e.message : "Unknown error",
+                    error: errorMessage,
                   });
                 } finally {
                   setLoading(false);
@@ -371,7 +378,9 @@ export function TestEvaluator() {
                 <div>
                   <H4 className="text-sm text-destructive">Error</H4>
                   <pre className="text-xs mt-1 whitespace-pre-wrap">
-                    {result.error}
+                    {typeof result.error === "object"
+                      ? JSON.stringify(result.error, null, 2)
+                      : result.error}
                   </pre>
                 </div>
               </div>
