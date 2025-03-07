@@ -18,16 +18,18 @@ function CopyButton({
   text,
   label = "Copy",
 }: {
-  text: string;
+  text: string | null | undefined;
   label?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
   };
 
   return (
@@ -35,6 +37,7 @@ function CopyButton({
       onClick={handleCopy}
       className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
       aria-label={`Copy ${label} to clipboard`}
+      disabled={!text}
     >
       {copied ? "Copied!" : label}
     </button>

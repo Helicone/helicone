@@ -82,7 +82,9 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
     stats &&
     (stats.timeSeriesData.length > 0 ||
       stats.scoreDistribution.length > 0 ||
-      stats.totalUses > 0);
+      (typeof stats.totalUses === "number"
+        ? stats.totalUses > 0
+        : parseInt(String(stats.totalUses), 10) > 0));
 
   // Render the chart based on current view
   const renderChart = () => {
