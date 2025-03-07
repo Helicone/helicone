@@ -96,24 +96,30 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   // Centralized realtime session handling in a single object
   const realtimeData = useMemo(() => {
-    const isRealtime = isRealtimeSession(
-      session,
-      requests.requests.requests || []
-    );
+    // Default values when loading or no data
+    if (
+      requests.requests.isLoading ||
+      !requests.requests.requests ||
+      requests.requests.requests.length === 0
+    ) {
+      return {
+        isRealtime: null,
+        effectiveRequests: [],
+        originalRequest: null,
+      };
+    }
+
+    const isRealtime = isRealtimeSession(requests.requests.requests || []);
 
     // Get effective requests (either original or simulated realtime requests)
     const effectiveRequests = isRealtime
-      ? getEffectiveRequests(session, requests.requests.requests || [])
+      ? getEffectiveRequests(requests.requests.requests || [])
       : requests.requests.requests || [];
 
     // For realtime sessions, get the original request for proper rendering
     let originalRequest = null;
-    if (isRealtime && session.traces.length > 0) {
-      const originalRequestId = session.traces[0].request_id;
-      originalRequest =
-        requests.requests.requests?.find(
-          (r) => r.request_id === originalRequestId
-        ) || null;
+    if (isRealtime) {
+      originalRequest = requests.requests.requests[0] || null;
     }
 
     return {
@@ -121,9 +127,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       effectiveRequests,
       originalRequest,
     };
-  }, [session, requests.requests.requests]);
+  }, [requests.requests.requests, requests.requests.isLoading]);
 
-  if (requests.requests.isLoading) {
+  if (requests.requests.isLoading || realtimeData.isRealtime === null) {
     return (
       <div className="h-screen w-full flex justify-center items-center">
         <LoadingAnimation />
