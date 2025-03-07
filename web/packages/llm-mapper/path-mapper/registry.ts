@@ -8,7 +8,9 @@ export class MapperRegistry {
   private static instance: MapperRegistry;
   private mappers: Map<string, PathMapper<any, any>> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Private constructor to prevent direct instantiation (singleton pattern)
+  }
 
   /**
    * Get the singleton instance of the registry

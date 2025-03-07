@@ -319,7 +319,7 @@ export class PathMapper<
       });
 
       // Process all array bracket pairs in this segment
-      const bracketPattern = /\[([^\[\]]*)\]/g;
+      const bracketPattern = /\[([^[\]]*)\]/g;
       let bracketMatch;
 
       while ((bracketMatch = bracketPattern.exec(segment)) !== null) {

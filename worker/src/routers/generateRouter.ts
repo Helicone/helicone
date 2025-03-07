@@ -120,6 +120,7 @@ const generateHandler = async (
     const { targetBaseUrl, provider } = providerResult.data;
 
     // 5. BUILD REQUEST HEADERS
+    // a. Get provider API key
     const providerApiKey = requestWrapper
       .getHeaders()
       .get(`${provider}_API_KEY`);
@@ -131,12 +132,14 @@ const generateHandler = async (
         { provider }
       );
     }
+
+    // b. Set basic headers
     const requestHeaders = new Headers(requestWrapper.getHeaders());
     requestHeaders.set("Content-Type", "application/json");
     requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
     requestHeaders.set("Accept-Encoding", "identity");
 
-    // Add properties parameters to Heliconeheaders
+    // c. Set properties parameters
     if (parameters.properties?.userId) {
       requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
     }
@@ -152,8 +155,7 @@ const generateHandler = async (
         parameters.properties.cache.toString()
       );
     }
-
-    // Add Helicone-Prompt-Id header with the requested promptId
+    // d. Set promptId property
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
 
     // 6. BUILD REQUEST TEMPLATE
