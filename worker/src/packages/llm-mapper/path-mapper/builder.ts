@@ -1,6 +1,5 @@
-import { MappedLLMRequest } from "../types";
+import { LLMRequestBody } from "../types";
 import { PathMapper } from "./core";
-import { MapperRegistry } from "./registry";
 
 /**
  * Type helper to extract all possible paths of T type
@@ -44,20 +43,25 @@ export type RecursiveKeyOf<TObj extends object> = {
 }[keyof TObj & (string | number)];
 
 /**
- * Valid paths for the internal MappedLLMRequest type
- * This creates a union of all possible paths within MappedLLMRequest
+ * Valid paths for the internal type
+ * This creates a union of all possible paths within LLMRequestBody
  */
-export type ValidInternalPaths = RecursiveKeyOf<MappedLLMRequest>;
+export type ValidInternalPaths = RecursiveKeyOf<LLMRequestBody>;
 
 /**
  * Simplified interface for path mappings
  */
-export interface PathMapping<T = any, E = any> {
+export interface PathMapping<
+  T = any,
+  E = any,
+  InternalType = any,
+  ExternalType = any
+> {
   external: string;
   internal: string;
   transform?: {
-    toInternal: (value: E) => T;
-    toExternal: (value: T) => E;
+    toInternal: (value: E, internal?: InternalType) => T;
+    toExternal: (value: T, external?: ExternalType) => E;
   };
   description?: string;
 }
@@ -65,10 +69,7 @@ export interface PathMapping<T = any, E = any> {
 /**
  * Simplified builder class for creating path mappers with a fluent interface
  */
-export class MapperBuilder<
-  ExternalType = any,
-  InternalType extends MappedLLMRequest = MappedLLMRequest
-> {
+export class MapperBuilder<ExternalType = any, InternalType = LLMRequestBody> {
   private mappings: PathMapping[] = [];
   private mapperName: string;
 
@@ -105,8 +106,8 @@ export class MapperBuilder<
   >(
     externalPath: ExternalPath,
     internalPath: InternalPath,
-    toInternal: (value: E) => T,
-    toExternal: (value: T) => E,
+    toInternal: (value: E, internal?: InternalType) => T,
+    toExternal: (value: T, external?: ExternalType) => E,
     description?: string
   ): this {
     this.mappings.push({
@@ -129,14 +130,5 @@ export class MapperBuilder<
       this.mapperName,
       this.mappings
     );
-  }
-
-  /**
-   * Builds the mapper and registers it in the global registry
-   */
-  buildAndRegister(): PathMapper<ExternalType, InternalType> {
-    const mapper = this.build();
-    MapperRegistry.getInstance().register(mapper);
-    return mapper;
   }
 }

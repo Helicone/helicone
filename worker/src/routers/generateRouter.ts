@@ -7,11 +7,13 @@ import { Env } from "..";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { Result, err, ok } from "../lib/util/results";
+import { err, ok, Result } from "../lib/util/results";
 import { providersNames } from "../packages/cost/providers/mappings";
+import { getMapper } from "../packages/llm-mapper/path-mapper";
+import { PathMapper } from "../packages/llm-mapper/path-mapper/core";
+import { LLMRequestBody } from "../packages/llm-mapper/types";
 import { gatewayForwarder } from "./gatewayRouter";
 
-// Zod schema for GenerateParams
 const generateParamsSchema = z.object({
   promptId: z.string().min(1, "promptId is required"),
   version: z
@@ -30,17 +32,6 @@ const generateParamsSchema = z.object({
     })
     .optional(),
 });
-// Type derived from the Zod schema
-type GenerateParams = z.infer<typeof generateParamsSchema>;
-
-type PromptVersion = Database["public"]["Tables"]["prompts_versions"]["Row"];
-type PromptMetadata = {
-  provider?: (typeof providersNames)[number];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-};
-
-// Handler for generate route
 const generateHandler = async (
   req: IRequest,
   requestWrapper: RequestWrapper,
@@ -70,9 +61,8 @@ const generateHandler = async (
     // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE WITH ZOD
     const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
 
-    // Validate parameters with Zod
+    // 3. Validate parameters with Zod
     const paramsResult = generateParamsSchema.safeParse(rawBody);
-
     if (!paramsResult.success) {
       return createErrorResponse(
         "Invalid parameters",
@@ -84,10 +74,9 @@ const generateHandler = async (
         }
       );
     }
-
     const parameters = paramsResult.data;
 
-    // 3. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
+    // 4. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
     const promptResult = await getPromptVersion({
       supabaseClient: db.getClient(),
       orgId: orgData.organizationId,
@@ -106,9 +95,9 @@ const generateHandler = async (
       );
     }
 
-    // 4. GET PROVIDER -> BASE URL
+    // 5. GET PROVIDER CONFIG (TARGET URL, PROVIDER, MAPPER)
     const metadata = promptResult.data.metadata as PromptMetadata;
-    const providerResult = getProviderInfo(metadata);
+    const providerResult = getProviderConfig(metadata);
     if (providerResult.error || !providerResult.data) {
       return createErrorResponse(
         providerResult.error || "Failed to get provider info",
@@ -117,9 +106,9 @@ const generateHandler = async (
         { metadata }
       );
     }
-    const { targetBaseUrl, provider } = providerResult.data;
+    const { provider, mapper, targetUrl } = providerResult.data;
 
-    // 5. BUILD REQUEST HEADERS
+    // 6. BUILD REQUEST HEADERS
     // a. Get provider API key
     const providerApiKey = requestWrapper
       .getHeaders()
@@ -132,13 +121,11 @@ const generateHandler = async (
         { provider }
       );
     }
-
     // b. Set basic headers
     const requestHeaders = new Headers(requestWrapper.getHeaders());
     requestHeaders.set("Content-Type", "application/json");
     requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
     requestHeaders.set("Accept-Encoding", "identity");
-
     // c. Set properties parameters
     if (parameters.properties?.userId) {
       requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
@@ -158,20 +145,23 @@ const generateHandler = async (
     // d. Set promptId property
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
 
-    // 6. BUILD REQUEST TEMPLATE
+    // 7. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
+    // a. Autofill inputs
     const inputs = parameters.inputs || {};
-
-    const requestTemplate = autoFillInputs({
+    const filledTemplate = autoFillInputs({
       template: promptResult.data.helicone_template,
       inputs: inputs,
-      autoInputs: [],
-    });
+      autoInputs: [], // Never used
+    }) as LLMRequestBody;
+    // b. Add any chat messages to the template messages
+    if (parameters.chat) {
+      addChatMessagesToTemplate(filledTemplate, parameters.chat);
+    }
+    // c. Map from LLMRequestBody type to provider body type
+    const requestTemplate = mapper.toExternal(filledTemplate);
 
-    // 7. FORWARD TO PROVIDER
-    // TODO: Add reverse mapper for anthropic, and other api paths
-    // TODO: Add support for anthropic, and other api paths
-    // -- Use next-gen unified costs package + llm-mapper
-    const newRequest = new Request(`${targetBaseUrl}/v1/chat/completions`, {
+    // 8. FORWARD REQUEST TO PROVIDER
+    const newRequest = new Request(targetUrl, {
       method: "POST",
       headers: requestHeaders,
       body: JSON.stringify(requestTemplate),
@@ -187,7 +177,7 @@ const generateHandler = async (
     }
     return await gatewayForwarder(
       {
-        targetBaseUrl,
+        targetBaseUrl: targetUrl,
         setBaseURLOverride: newWrapperResult.data.setBaseURLOverride.bind(
           newWrapperResult.data
         ),
@@ -196,14 +186,13 @@ const generateHandler = async (
       env,
       ctx
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("Error in generate route:", e);
     return createErrorResponse(
-      e.message || "An unexpected error occurred",
+      e instanceof Error ? e.message : "An unexpected error occurred",
       "internal_server_error",
       500,
-      { stack: e.stack }
+      { stack: e instanceof Error ? e.stack : undefined }
     );
   }
 };
@@ -214,13 +203,214 @@ export const getGenerateRouter = (router: RouterType): RouterType => {
 };
 
 /**
+ * Extract provider, mapper, and target URL from metadata
+ *
+ * FUTURE: Use next-gen unified costs package + llm-mapper
+ */
+function getProviderConfig(metadata: PromptMetadata): Result<
+  {
+    provider: (typeof providersNames)[number];
+    mapper: PathMapper<unknown, LLMRequestBody>;
+    targetUrl: string;
+  },
+  string
+> {
+  // Validate provider exists
+  const provider = metadata.provider?.toUpperCase();
+  if (!provider) {
+    return err(
+      "Provider configuration error: No provider specified in prompt metadata"
+    );
+  }
+
+  // Use switch to return the complete configuration in one go
+  switch (provider) {
+    case "OPENAI":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.openai.com/v1/chat/completions",
+      });
+    case "ANTHROPIC":
+      return ok({
+        provider,
+        mapper: getMapper("anthropic-chat"),
+        targetUrl: "https://api.anthropic.com/v1/messages",
+      });
+    case "GOOGLE":
+      return ok({
+        provider,
+        mapper: getMapper("gemini-chat"),
+        targetUrl:
+          "https://googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions",
+      });
+    case "AZURE":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl:
+          "https://AZURE_ENDPOINT/openai/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15",
+      });
+    case "LOCAL":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "http://127.0.0.1/v1/chat/completions",
+      });
+    case "HELICONE":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://oai.hconeai.com/v1/chat/completions",
+      });
+    case "AMDBARTEK":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://amdbartek.dev/v1/chat/completions",
+      });
+    case "ANYSCALE":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.endpoints.anyscale.com/v1/chat/completions",
+      });
+    case "CLOUDFLARE":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://gateway.ai.cloudflare.com/v1/chat/completions",
+      });
+    case "2YFV":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.2yfv.com/v1/chat/completions",
+      });
+    case "TOGETHER":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.together.xyz/v1/chat/completions",
+      });
+    case "LEMONFOX":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.lemonfox.ai/v1/chat/completions",
+      });
+    case "FIREWORKS":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.fireworks.ai/v1/chat/completions",
+      });
+    case "PERPLEXITY":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.perplexity.ai/chat/completions",
+      });
+    case "OPENROUTER":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.openrouter.ai/api/v1/chat/completions",
+      });
+    case "WISDOMINANUTSHELL":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.wisdominanutshell.academy/v1/chat/completions",
+      });
+    case "GROQ":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.groq.com/openai/v1/chat/completions",
+      });
+    case "COHERE":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.cohere.ai/v1/chat",
+      });
+    case "MISTRAL":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.mistral.ai/v1/chat/completions",
+      });
+    case "DEEPINFRA":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.deepinfra.com/v1/openai/chat/completions",
+      });
+    case "QSTASH":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://qstash.upstash.io/v1/publish",
+      });
+    case "FIRECRAWL":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.firecrawl.dev/v1/chat/completions",
+      });
+    case "AWS":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl:
+          "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-v2/invoke",
+      });
+    case "DEEPSEEK":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.deepseek.com/v1/chat/completions",
+      });
+    case "X":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.x.ai/v1/chat/completions",
+      });
+    case "AVIAN":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.avian.io/v1/chat/completions",
+      });
+    case "NEBIUS":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.studio.nebius.ai/v1/chat/completions",
+      });
+    case "NOVITA":
+      return ok({
+        provider,
+        mapper: getMapper("openai-chat"),
+        targetUrl: "https://api.novita.ai/v1/chat/completions",
+      });
+    default:
+      return err(
+        `Provider configuration error: Unsupported provider ${provider}`
+      );
+  }
+}
+
+/**
  * Fetches and validates a prompt version from the database.
  *
  * @param {SupabaseClient<Database>} params.supabaseClient - The Supabase client instance
  * @param {string} params.orgId - The organization ID to filter prompts by
  * @param {string} params.promptId - The user-defined ID of the prompt to fetch
  * @param {number | "production"} [params.version="production"] - The version to fetch. If "production", fetches the latest production version
- * @returns {Promise<Result<PromptVersion, string>>} A Result containing either the prompt version or an error message
+ * @returns {Promise<Result<Database["public"]["Tables"]["prompts_versions"]["Row"], string>>} A Result containing either the prompt version or an error message
  */
 async function getPromptVersion({
   supabaseClient,
@@ -232,7 +422,9 @@ async function getPromptVersion({
   orgId: string;
   promptId: string;
   version?: number | "production";
-}): Promise<Result<PromptVersion, string>> {
+}): Promise<
+  Result<Database["public"]["Tables"]["prompts_versions"]["Row"], string>
+> {
   console.log("Query params:", { promptId, orgId, version });
 
   // Build an optimized single query with join
@@ -290,68 +482,11 @@ async function getPromptVersion({
 
   return ok(promptVersion);
 }
-
-/**
- * Extract and validate the provider from metadata, then get its base URL.
- */
-function getProviderInfo(
-  metadata: PromptMetadata
-): Result<
-  { targetBaseUrl: string; provider: (typeof providersNames)[number] },
-  string
-> {
-  const providerBaseUrls: Record<(typeof providersNames)[number], string> = {
-    OPENAI: "https://api.openai.com",
-    ANTHROPIC: "https://api.anthropic.com",
-    AZURE: "https://openai.azure.com",
-    LOCAL: "http://127.0.0.1",
-    HELICONE: "https://oai.hconeai.com",
-    AMDBARTEK: "https://amdbartek.dev",
-    ANYSCALE: "https://api.endpoints.anyscale.com",
-    CLOUDFLARE: "https://gateway.ai.cloudflare.com",
-    "2YFV": "https://api.2yfv.com",
-    TOGETHER: "https://api.together.xyz",
-    LEMONFOX: "https://api.lemonfox.ai",
-    FIREWORKS: "https://api.fireworks.ai",
-    PERPLEXITY: "https://api.perplexity.ai",
-    // TOODO: Add support for passing in project id and location
-    GOOGLE:
-      "https://googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions",
-    OPENROUTER: "https://api.openrouter.ai",
-    WISDOMINANUTSHELL: "https://api.wisdominanutshell.academy",
-    GROQ: "https://api.groq.com",
-    COHERE: "https://api.cohere.ai",
-    MISTRAL: "https://api.mistral.ai",
-    DEEPINFRA: "https://api.deepinfra.com",
-    QSTASH: "https://qstash.upstash.io",
-    FIRECRAWL: "https://api.firecrawl.dev",
-    AWS: "https://bedrock-runtime.us-east-1.amazonaws.com",
-    DEEPSEEK: "https://api.deepseek.com",
-    X: "https://api.x.ai",
-    AVIAN: "https://api.avian.io",
-    NEBIUS: "https://api.studio.nebius.ai",
-    NOVITA: "https://api.novita.ai",
-  };
-
-  const provider =
-    metadata.provider?.toUpperCase() as (typeof providersNames)[number];
-  if (!provider) {
-    return err(
-      "Provider configuration error: No provider specified in prompt metadata"
-    );
-  }
-  if (!providerBaseUrls[provider]) {
-    const supportedProviders = Object.keys(providerBaseUrls).join(", ");
-    return err(
-      `Provider configuration error: "${provider}" is not supported. Supported providers are: ${supportedProviders}`
-    );
-  }
-
-  return ok({
-    targetBaseUrl: providerBaseUrls[provider],
-    provider,
-  });
-}
+type PromptMetadata = {
+  provider?: (typeof providersNames)[number];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
 
 /**
  * Creates a standardized error response
@@ -383,4 +518,54 @@ function createErrorResponse(
       },
     }
   );
+}
+
+/**
+ * Intelligently adds chat messages to a template, alternating between user and assistant roles
+ * based on the last message in the existing messages array.
+ *
+ * @param template The LLMRequestBody template with existing messages
+ * @param chatMessages Array of chat message strings to add
+ * @returns The updated template with new messages added
+ */
+function addChatMessagesToTemplate(
+  template: LLMRequestBody,
+  chatMessages: string[]
+): LLMRequestBody {
+  if (!chatMessages || chatMessages.length === 0) {
+    return template;
+  }
+
+  // Ensure messages array exists
+  if (!template.messages) {
+    template.messages = [];
+  }
+
+  // Determine the role of the first message to add based on the last message in the array
+  let nextRole: "user" | "assistant" = "user"; // Default to user if no messages exist
+
+  if (template.messages.length > 0) {
+    const lastMessage = template.messages[template.messages.length - 1];
+    // If the last message was from a user, the next one should be from assistant
+    if (lastMessage && lastMessage.role === "user") {
+      nextRole = "assistant";
+    } else {
+      nextRole = "user";
+    }
+  }
+
+  // Add each chat message with alternating roles
+  const messages = template.messages;
+  chatMessages.forEach((messageContent) => {
+    messages.push({
+      _type: "message",
+      role: nextRole,
+      content: messageContent,
+    });
+    // Toggle role for next message
+    nextRole = nextRole === "user" ? "assistant" : "user";
+  });
+
+  template.messages = messages;
+  return template;
 }

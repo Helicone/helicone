@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "../types";
+import { LLMRequestBody } from "../types";
 import { PathMapping } from "./builder";
 
 // Core mapping definition - just paths
@@ -9,8 +9,8 @@ export interface PathPair {
 
 // Optional transformer for complex cases
 export interface ValueTransformer {
-  toInternal: (value: any) => any;
-  toExternal: (value: any) => any;
+  toInternal: (value: any, internal: any) => any;
+  toExternal: (value: any, external: any) => any;
 }
 
 // Enhanced mapping with optional transformer
@@ -22,102 +22,67 @@ export interface EnhancedPathPair extends PathPair {
 /**
  * Core PathMapper class that handles transforming between external and internal formats
  */
-export class PathMapper<
-  ExternalType,
-  InternalType extends MappedLLMRequest = MappedLLMRequest
-> {
+export class PathMapper<ExternalType, InternalType = LLMRequestBody> {
   constructor(private name: string, private mappings: PathMapping[]) {}
+
+  /**
+   * Maps an external request to the provider's format
+   * This is a convenience method that's equivalent to toExternal
+   */
+  map(internal: InternalType): ExternalType {
+    return this.toExternal(internal);
+  }
 
   /**
    * Transforms from external API format to internal Helicone format
    */
   toInternal(external: ExternalType): InternalType {
     // Initialize the internal object with default empty values
-    const internal: MappedLLMRequest = {
-      _type: "unknown",
-      id: "",
-      schema: { request: {} },
-      preview: { request: "", response: "", concatenatedMessages: [] },
-      model: "",
-      raw: {
-        request: external,
-        response: null,
-      },
-      heliconeMetadata: {
-        requestId: "",
-        path: "",
-        countryCode: null,
-        createdAt: new Date().toISOString(),
-        totalTokens: null,
-        promptTokens: null,
-        completionTokens: null,
-        latency: null,
-        user: null,
-        status: {
-          code: 200,
-          statusType: "success",
-        },
-        customProperties: null,
-        cost: null,
-        feedback: {
-          createdAt: null,
-          id: null,
-          rating: null,
-        },
-        provider: "CUSTOM",
-      },
-    };
+    const internal = {} as InternalType;
 
     // Apply each mapping
     for (const mapping of this.mappings) {
-      const {
-        external: externalPath,
-        internal: internalPath,
-        transform,
-      } = mapping;
-
-      // Get the value from the external object
-      const externalValue = this.getValueByPath(external, externalPath);
+      const externalValue = this.getValueByPath(external, mapping.external);
 
       if (externalValue !== undefined) {
-        // Apply transformation if provided
-        const valueToSet = transform
-          ? transform.toInternal(externalValue)
-          : externalValue;
+        let internalValue = externalValue;
+
+        // Apply transformation if defined
+        if (mapping.transform) {
+          // Pass both the external value and the current internal object to the transform function
+          internalValue = mapping.transform.toInternal(externalValue, internal);
+        }
 
         // Set the value in the internal object
-        this.setValueByPath(internal, internalPath, valueToSet);
+        this.setValueByPath(internal, mapping.internal, internalValue);
       }
     }
 
-    return internal as InternalType;
+    return internal;
   }
 
   /**
    * Transforms from internal Helicone format to external API format
    */
   toExternal(internal: InternalType): ExternalType {
+    // Initialize the external object
     const external = {} as ExternalType;
 
-    // Apply each mapping in reverse
+    // Apply each mapping
     for (const mapping of this.mappings) {
-      const {
-        external: externalPath,
-        internal: internalPath,
-        transform,
-      } = mapping;
-
-      // Get the value from the internal object
-      const internalValue = this.getValueByPath(internal, internalPath);
+      const internalValue = this.getValueByPath(internal, mapping.internal);
 
       if (internalValue !== undefined) {
-        // Apply transformation if provided
-        const valueToSet = transform
-          ? transform.toExternal(internalValue)
-          : internalValue;
+        let externalValue = internalValue;
+
+        // Apply transformation if defined
+        if (mapping.transform) {
+          // Pass both the internal value and the current external object to the transform function
+          externalValue = mapping.transform.toExternal(internalValue, external);
+        }
 
         // Set the value in the external object
-        this.setValueByPath(external, externalPath, valueToSet);
+        this.setValueByPath(external, mapping.external, externalValue);
       }
     }
 

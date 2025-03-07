@@ -22,23 +22,18 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       const internalRequest = anthropicChatMapper.toInternal(externalRequest);
 
       // Verify basic fields were mapped correctly
-      expect(internalRequest.schema.request.model).toBe(
-        "claude-3-opus-20240229"
-      );
-      expect(internalRequest.schema.request.temperature).toBe(0.7);
-      expect(internalRequest.schema.request.max_tokens).toBe(100);
+      expect(internalRequest.model).toBe("claude-3-opus-20240229");
+      expect(internalRequest.temperature).toBe(0.7);
+      expect(internalRequest.max_tokens).toBe(100);
 
       // Verify messages were transformed correctly
-      expect(internalRequest.schema.request.messages).toHaveLength(1);
-      expect(internalRequest.schema.request.messages?.[0]).toMatchObject({
+      expect(internalRequest.messages).toHaveLength(1);
+      expect(internalRequest.messages?.[0]).toMatchObject({
         _type: "message",
         role: "user",
         content: "Hello, how are you?",
         id: "req-msg-0",
       });
-
-      // Verify preview was extracted correctly
-      expect(internalRequest.preview.request).toBe("Hello, how are you?");
     });
 
     it("should handle system param in request by converting it to a system message", () => {
@@ -53,28 +48,60 @@ describe("Anthropic Chat Mapper Core Tests", () => {
         ],
       };
 
-      // Using mapAnthropicRequestV2 directly to test the function that handles system conversion
-      const result = anthropicChatMapper.toInternal({
-        ...externalRequest,
-        messages: [
-          {
-            role: "system",
-            content: "You are Claude, an AI assistant by Anthropic.",
-          },
-          ...(externalRequest.messages || []),
-        ],
-      });
+      // Transform to internal format using the proper mapper
+      const internalRequest = anthropicChatMapper.toInternal(externalRequest);
 
       // Verify system message is included as the first message with role "system"
-      expect(result.schema.request.messages).toHaveLength(2);
-      expect(result.schema.request.messages?.[0]).toMatchObject({
+      expect(internalRequest.messages).toHaveLength(2);
+      expect(internalRequest.messages?.[0]).toMatchObject({
         _type: "message",
         role: "system",
         content: "You are Claude, an AI assistant by Anthropic.",
       });
 
-      // Verify user message is preserved
-      expect(result.schema.request.messages?.[1].role).toBe("user");
+      // Verify user message is preserved as the second message
+      expect(internalRequest.messages?.[1].role).toBe("user");
+      expect(internalRequest.messages?.[1].content).toBe(
+        "Tell me about yourself."
+      );
+    });
+
+    it("should handle system message and other messages in both conversion directions", () => {
+      // 1. First test External -> Internal
+      const externalRequest = {
+        model: "claude-3-sonnet-20240229",
+        system: "You are Claude, an AI assistant by Anthropic.",
+        messages: [
+          { role: "user", content: "Tell me about yourself." },
+          { role: "assistant", content: "I'm Claude, created by Anthropic." },
+          { role: "user", content: "What can you do?" },
+        ],
+      };
+
+      // Convert to internal format
+      const internalRequest = anthropicChatMapper.toInternal(externalRequest);
+
+      // Verify conversion creates proper message structure with system first
+      expect(internalRequest.messages).toHaveLength(4);
+      expect(internalRequest.messages?.[0].role).toBe("system");
+      expect(internalRequest.messages?.[1].role).toBe("user");
+      expect(internalRequest.messages?.[2].role).toBe("assistant");
+      expect(internalRequest.messages?.[3].role).toBe("user");
+
+      // 2. Then test Internal -> External
+      const convertedExternalRequest =
+        anthropicChatMapper.toExternal(internalRequest);
+
+      // Verify system message is extracted as a parameter
+      expect(convertedExternalRequest.system).toBe(
+        "You are Claude, an AI assistant by Anthropic."
+      );
+
+      // Verify other messages are preserved without the system message
+      expect(convertedExternalRequest.messages).toHaveLength(3);
+      expect(convertedExternalRequest.messages?.[0].role).toBe("user");
+      expect(convertedExternalRequest.messages?.[1].role).toBe("assistant");
+      expect(convertedExternalRequest.messages?.[2].role).toBe("user");
     });
 
     it("should handle complex message content with arrays", () => {
@@ -101,10 +128,81 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       const internalRequest = anthropicChatMapper.toInternal(externalRequest);
 
       // Verify message content was joined correctly
-      expect(internalRequest.schema.request.messages?.[0].content).toBe(
+      expect(internalRequest.messages?.[0].content).toBe(
         "What's in this image? "
       );
-      expect(internalRequest.preview.request).toBe("What's in this image? ");
+    });
+
+    it("should extract system message from messages array in both directions", () => {
+      // 1. First test External -> Internal with system message in messages array
+      const externalRequest = {
+        model: "claude-3-sonnet-20240229",
+        messages: [
+          {
+            role: "system",
+            content: "You are Claude, an AI assistant by Anthropic.",
+          },
+          { role: "user", content: "Tell me about yourself." },
+          { role: "assistant", content: "I'm Claude, created by Anthropic." },
+        ],
+      };
+
+      // Convert to internal format
+      const internalRequest = anthropicChatMapper.toInternal(externalRequest);
+
+      // Verify conversion preserves all messages including system
+      expect(internalRequest.messages).toHaveLength(3);
+      expect(internalRequest.messages?.[0].role).toBe("system");
+      expect(internalRequest.messages?.[1].role).toBe("user");
+      expect(internalRequest.messages?.[2].role).toBe("assistant");
+
+      // 2. Then test Internal -> External
+      const convertedExternalRequest =
+        anthropicChatMapper.toExternal(internalRequest);
+
+      // Verify system message is extracted as a parameter
+      expect(convertedExternalRequest.system).toBe(
+        "You are Claude, an AI assistant by Anthropic."
+      );
+
+      // Verify other messages are preserved without the system message
+      expect(convertedExternalRequest.messages).toHaveLength(2);
+      expect(convertedExternalRequest.messages?.[0].role).toBe("user");
+      expect(convertedExternalRequest.messages?.[1].role).toBe("assistant");
+    });
+
+    it("should handle both system parameter and system message in messages array", () => {
+      // Test case where both system parameter and a system message in the array exist
+      const externalRequest = {
+        model: "claude-3-sonnet-20240229",
+        system: "You are Claude, the primary AI.",
+        messages: [
+          { role: "system", content: "You are Claude, the secondary AI." },
+          { role: "user", content: "Which system message applies?" },
+        ],
+      };
+
+      // Convert to internal format
+      const internalRequest = anthropicChatMapper.toInternal(externalRequest);
+
+      // Verify only one system message is preserved (the one from system parameter)
+      expect(internalRequest.messages).toHaveLength(2);
+      expect(internalRequest.messages?.[0].role).toBe("system");
+      expect(internalRequest.messages?.[0].content).toBe(
+        "You are Claude, the primary AI."
+      );
+      expect(internalRequest.messages?.[1].role).toBe("user");
+
+      // Convert back to external format
+      const convertedExternalRequest =
+        anthropicChatMapper.toExternal(internalRequest);
+
+      // Verify system parameter is set and no system message in the array
+      expect(convertedExternalRequest.system).toBe(
+        "You are Claude, the primary AI."
+      );
+      expect(convertedExternalRequest.messages).toHaveLength(1);
+      expect(convertedExternalRequest.messages?.[0].role).toBe("user");
     });
   });
 
@@ -113,51 +211,43 @@ describe("Anthropic Chat Mapper Core Tests", () => {
     it("should convert messages back to Anthropic format", () => {
       // Create simple internal request with just the fields needed for the mapper
       const partialInternalRequest = {
-        schema: {
-          request: {
-            model: "claude-3-opus-20240229",
-            temperature: 0.5,
-            max_tokens: 150,
-            messages: [
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                id: "req-msg-0",
-                role: "user",
-                content: "Tell me about Claude.",
-              },
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                id: "req-msg-1",
-                role: "assistant",
-                content: "I'm Claude, an AI assistant created by Anthropic.",
-              },
-            ],
+        model: "claude-3-opus-20240229",
+        temperature: 0.5,
+        max_tokens: 150,
+        messages: [
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            id: "req-msg-0",
+            role: "user",
+            content: "Tell me about Claude.",
           },
-        },
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            id: "req-msg-1",
+            role: "assistant",
+            content: "I'm Claude, an AI assistant created by Anthropic.",
+          },
+        ],
       };
 
       // Use the mapper's public interface to directly test the message transformation
-      const messages = partialInternalRequest.schema.request.messages;
+      const messages = partialInternalRequest.messages;
       const externalMessages = anthropicChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "messages" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "messages" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Check if messages were transformed correctly
@@ -176,72 +266,62 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       expect(externalMessages?.[0]).not.toHaveProperty("id");
     });
 
-    it("should preserve system messages when converting to external format", () => {
+    it("should extract system messages when converting to external format", () => {
       const partialInternalRequest = {
-        schema: {
-          request: {
-            messages: [
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                id: "req-msg-0",
-                role: "system",
-                content: "You are Claude, an AI assistant by Anthropic.",
-              },
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                id: "req-msg-1",
-                role: "user",
-                content: "Hello there",
-              },
-            ],
+        messages: [
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            id: "req-msg-0",
+            role: "system",
+            content: "You are Claude, an AI assistant by Anthropic.",
           },
-        },
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            id: "req-msg-1",
+            role: "user",
+            content: "Hello there",
+          },
+        ],
       };
 
-      // Directly test message transformation
-      const messages = partialInternalRequest.schema.request.messages;
+      // Test the full mapper to ensure proper system message handling
+      const externalRequest = anthropicChatMapper.toExternal(
+        partialInternalRequest
+      );
 
-      // Get the messages
-      const externalMessages = anthropicChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "messages" &&
-            m.internal === "schema.request.messages"
-        )
-        ?.transform?.toExternal(messages);
+      // Verify system message is extracted as a parameter
+      expect(externalRequest.system).toBe(
+        "You are Claude, an AI assistant by Anthropic."
+      );
 
-      // Verify both messages are preserved including the system message
-      expect(externalMessages).toHaveLength(2);
-      expect(externalMessages?.[0].role).toBe("system");
-      expect(externalMessages?.[1].role).toBe("user");
+      // Verify only the user message remains in the messages array
+      expect(externalRequest.messages).toHaveLength(1);
+      expect(externalRequest.messages?.[0].role).toBe("user");
+      expect(externalRequest.messages?.[0].content).toBe("Hello there");
     });
 
     it("should correctly map basic properties to external format", () => {
       // Create a simple object with just the properties we want to test
       const internalObject = {
-        schema: {
-          request: {
-            model: "claude-3-opus-20240229",
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 200,
-            stream: true,
-          },
-        },
+        model: "claude-3-opus-20240229",
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 200,
+        stream: true,
       };
 
       // Test each property mapping individually
@@ -329,23 +409,19 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       const internalRequest = anthropicChatMapper.toInternal(externalRequest);
 
       // Verify tools were transformed correctly
-      expect(internalRequest.schema.request.tools).toHaveLength(1);
-      expect(internalRequest.schema.request.tools?.[0].name).toBe(
-        "flight_search"
-      );
-      expect(internalRequest.schema.request.tools?.[0].description).toBe(
+      expect(internalRequest.tools).toHaveLength(1);
+      expect(internalRequest.tools?.[0].name).toBe("flight_search");
+      expect(internalRequest.tools?.[0].description).toBe(
         "Search for flights based on departure and destination locations"
       );
-      expect(internalRequest.schema.request.tools?.[0].parameters).toEqual(
+      expect(internalRequest.tools?.[0].parameters).toEqual(
         externalRequest.tools[0].input_schema
       );
 
       // Verify tool_choice was transformed correctly
-      expect(internalRequest.schema.request.tool_choice?.type).toBe("auto");
-      expect(internalRequest.schema.request.tool_choice?.name).toBeUndefined();
-      expect(
-        internalRequest.schema.request.parallel_tool_calls
-      ).toBeUndefined();
+      expect(internalRequest.tool_choice?.type).toBe("auto");
+      expect(internalRequest.tool_choice?.name).toBeUndefined();
+      expect(internalRequest.parallel_tool_calls).toBeUndefined();
     });
 
     it("should map different tool_choice types correctly", () => {
@@ -366,12 +442,8 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       const internalWithToolName =
         anthropicChatMapper.toInternal(requestWithToolName);
-      expect(internalWithToolName.schema.request.tool_choice?.type).toBe(
-        "tool"
-      );
-      expect(internalWithToolName.schema.request.tool_choice?.name).toBe(
-        "flight_search"
-      );
+      expect(internalWithToolName.tool_choice?.type).toBe("tool");
+      expect(internalWithToolName.tool_choice?.name).toBe("flight_search");
 
       // Test "any" type
       const requestWithAny = {
@@ -388,7 +460,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       };
 
       const internalWithAny = anthropicChatMapper.toInternal(requestWithAny);
-      expect(internalWithAny.schema.request.tool_choice?.type).toBe("any");
+      expect(internalWithAny.tool_choice?.type).toBe("any");
 
       // Test "auto" type
       const requestWithAuto = {
@@ -405,45 +477,39 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       };
 
       const internalWithAuto = anthropicChatMapper.toInternal(requestWithAuto);
-      expect(internalWithAuto.schema.request.tool_choice?.type).toBe("auto");
+      expect(internalWithAuto.tool_choice?.type).toBe("auto");
     });
 
     it("should convert internal tool format back to Anthropic format", () => {
       // Setup internal format with tools
       const internalObject = {
-        schema: {
-          request: {
-            tools: [
-              {
-                name: "flight_search",
-                description: "Search for flights",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    departure: { type: "string" },
-                    destination: { type: "string" },
-                  },
-                  required: ["departure", "destination"],
-                },
+        tools: [
+          {
+            name: "flight_search",
+            description: "Search for flights",
+            parameters: {
+              type: "object",
+              properties: {
+                departure: { type: "string" },
+                destination: { type: "string" },
               },
-            ],
-            tool_choice: {
-              type: "tool" as "auto" | "none" | "tool",
-              name: "flight_search",
+              required: ["departure", "destination"],
             },
           },
+        ],
+        tool_choice: {
+          type: "tool" as "auto" | "none" | "tool",
+          name: "flight_search",
         },
       };
 
       // Get the tools mapping and test
       const toolsMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "tools" && m.internal === "schema.request.tools"
+        (m) => m.external === "tools" && m.internal === "tools"
       );
 
       const toolChoiceMapping = anthropicChatMapper["mappings"].find(
-        (m) =>
-          m.external === "tool_choice" &&
-          m.internal === "schema.request.tool_choice"
+        (m) => m.external === "tool_choice" && m.internal === "tool_choice"
       );
 
       // Use the getValueByPath helper for type safety
@@ -462,7 +528,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       expect(externalTools?.[0].name).toBe("flight_search");
       expect(externalTools?.[0].description).toBe("Search for flights");
       expect(externalTools?.[0].input_schema).toEqual(
-        internalObject.schema.request.tools[0].parameters
+        internalObject.tools[0].parameters
       );
 
       // Test tool_choice mapping
@@ -479,19 +545,13 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
     it("should map internal none type to Anthropic any type", () => {
       const internalObject = {
-        schema: {
-          request: {
-            tool_choice: {
-              type: "none" as "auto" | "none" | "tool",
-            },
-          },
+        tool_choice: {
+          type: "none" as "auto" | "none" | "tool",
         },
       };
 
       const toolChoiceMapping = anthropicChatMapper["mappings"].find(
-        (m) =>
-          m.external === "tool_choice" &&
-          m.internal === "schema.request.tool_choice"
+        (m) => m.external === "tool_choice" && m.internal === "tool_choice"
       );
 
       const getValueByPath = (obj: any, path: string) => {

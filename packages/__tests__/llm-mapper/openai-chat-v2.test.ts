@@ -21,20 +21,17 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       const internalRequest = openaiChatMapper.toInternal(externalRequest);
 
       // Verify basic fields were mapped correctly
-      expect(internalRequest.schema.request.model).toBe("gpt-4");
-      expect(internalRequest.schema.request.temperature).toBe(0.7);
+      expect(internalRequest.model).toBe("gpt-4");
+      expect(internalRequest.temperature).toBe(0.7);
 
       // Verify messages were transformed correctly
-      expect(internalRequest.schema.request.messages).toHaveLength(1);
-      expect(internalRequest.schema.request.messages?.[0]).toMatchObject({
+      expect(internalRequest.messages).toHaveLength(1);
+      expect(internalRequest.messages?.[0]).toMatchObject({
         _type: "message",
         role: "user",
         content: "Hello, how are you?",
         id: "req-msg-0",
       });
-
-      // Verify preview was extracted correctly
-      expect(internalRequest.preview.request).toBe("Hello, how are you?");
     });
 
     it("should handle complex message content with arrays", () => {
@@ -57,10 +54,9 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       const internalRequest = openaiChatMapper.toInternal(externalRequest);
 
       // Verify message content was joined correctly
-      expect(internalRequest.schema.request.messages?.[0].content).toBe(
+      expect(internalRequest.messages?.[0].content).toBe(
         "What's in this image? "
       );
-      expect(internalRequest.preview.request).toBe("What's in this image? ");
     });
   });
 
@@ -109,11 +105,7 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       // Use the mapper's public interface to directly test the message transformation
       const messages = partialInternalRequest.schema.request.messages;
       const externalMessages = openaiChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "messages" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "messages" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Check if messages were transformed correctly
@@ -159,11 +151,7 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       // Directly test message transformation
       const messages = partialInternalRequest.schema.request.messages;
       const externalMessages = openaiChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "messages" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "messages" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Verify name field was preserved
@@ -173,15 +161,11 @@ describe("OpenAI Chat Mapper Core Tests", () => {
     it("should correctly map basic properties to external format", () => {
       // Create a simple object with just the properties we want to test
       const internalObject = {
-        schema: {
-          request: {
-            model: "gpt-4",
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 200,
-            stream: true,
-          },
-        },
+        model: "gpt-4",
+        temperature: 0.7,
+        top_p: 0.9,
+        max_tokens: 200,
+        stream: true,
       };
 
       // Test each property mapping individually
@@ -261,8 +245,8 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       const internalRequest = openaiChatMapper.toInternal(externalRequest);
 
       // Verify tools were transformed correctly
-      expect(internalRequest.schema.request.tools).toHaveLength(1);
-      const tool = internalRequest.schema.request.tools?.[0];
+      expect(internalRequest.tools).toHaveLength(1);
+      const tool = internalRequest.tools?.[0];
       if (tool) {
         expect(tool.name).toBe("find_restaurant");
         expect(tool.description).toBe(
@@ -280,16 +264,16 @@ describe("OpenAI Chat Mapper Core Tests", () => {
         tool_choice: "none" as const,
       };
       const internalWithNone = openaiChatMapper.toInternal(requestWithNone);
-      expect(internalWithNone.schema.request.tool_choice?.type).toBe("none");
-      expect(internalWithNone.schema.request.tool_choice?.name).toBeUndefined();
+      expect(internalWithNone.tool_choice?.type).toBe("none");
+      expect(internalWithNone.tool_choice?.name).toBeUndefined();
 
       // Test "auto" string type
       const requestWithAuto = {
         tool_choice: "auto" as const,
       };
       const internalWithAuto = openaiChatMapper.toInternal(requestWithAuto);
-      expect(internalWithAuto.schema.request.tool_choice?.type).toBe("auto");
-      expect(internalWithAuto.schema.request.tool_choice?.name).toBeUndefined();
+      expect(internalWithAuto.tool_choice?.type).toBe("auto");
+      expect(internalWithAuto.tool_choice?.name).toBeUndefined();
 
       // Test "required" string type (maps to "any")
       const requestWithRequired = {
@@ -297,10 +281,8 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       };
       const internalWithRequired =
         openaiChatMapper.toInternal(requestWithRequired);
-      expect(internalWithRequired.schema.request.tool_choice?.type).toBe("any");
-      expect(
-        internalWithRequired.schema.request.tool_choice?.name
-      ).toBeUndefined();
+      expect(internalWithRequired.tool_choice?.type).toBe("any");
+      expect(internalWithRequired.tool_choice?.name).toBeUndefined();
 
       // Test function object type (maps to "tool")
       const requestWithFunction = {
@@ -314,20 +296,14 @@ describe("OpenAI Chat Mapper Core Tests", () => {
       };
       const internalWithFunction =
         openaiChatMapper.toInternal(requestWithFunction);
-      expect(internalWithFunction.schema.request.tool_choice?.type).toBe(
-        "tool"
-      );
-      expect(internalWithFunction.schema.request.tool_choice?.name).toBe(
-        "find_restaurant"
-      );
+      expect(internalWithFunction.tool_choice?.type).toBe("tool");
+      expect(internalWithFunction.tool_choice?.name).toBe("find_restaurant");
     });
 
     it("should convert internal tool_choice format back to OpenAI format", () => {
       // Find tool_choice mapping in the openaiChatMapper
       const toolChoiceMapping = openaiChatMapper["mappings"].find(
-        (m) =>
-          m.external === "tool_choice" &&
-          m.internal === "schema.request.tool_choice"
+        (m) => m.external === "tool_choice" && m.internal === "tool_choice"
       );
 
       // Helper to get value by path
@@ -337,12 +313,8 @@ describe("OpenAI Chat Mapper Core Tests", () => {
 
       // Test converting "none" type
       const internalNone = {
-        schema: {
-          request: {
-            tool_choice: {
-              type: "none" as const,
-            },
-          },
+        tool_choice: {
+          type: "none" as const,
         },
       };
 
@@ -357,12 +329,8 @@ describe("OpenAI Chat Mapper Core Tests", () => {
 
       // Test converting "auto" type
       const internalAuto = {
-        schema: {
-          request: {
-            tool_choice: {
-              type: "auto" as const,
-            },
-          },
+        tool_choice: {
+          type: "auto" as const,
         },
       };
 
@@ -377,12 +345,8 @@ describe("OpenAI Chat Mapper Core Tests", () => {
 
       // Test converting "any" type (maps to "required")
       const internalAny = {
-        schema: {
-          request: {
-            tool_choice: {
-              type: "any" as const,
-            },
-          },
+        tool_choice: {
+          type: "any" as const,
         },
       };
 
@@ -397,13 +361,9 @@ describe("OpenAI Chat Mapper Core Tests", () => {
 
       // Test converting "tool" type with name
       const internalTool = {
-        schema: {
-          request: {
-            tool_choice: {
-              type: "tool" as const,
-              name: "find_restaurant",
-            },
-          },
+        tool_choice: {
+          type: "tool" as const,
+          name: "find_restaurant",
         },
       };
 

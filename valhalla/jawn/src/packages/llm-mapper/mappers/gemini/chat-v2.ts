@@ -312,36 +312,36 @@ export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
   "gemini-chat-v2"
 )
   // Map basic request parameters
-  .map("model", "schema.request.model")
+  .map("model", "model")
 
-  // Map generation config parameters
+  // Map generation config parameters with transformations
   .mapWithTransform(
     "generationConfig",
-    "schema.request.temperature",
+    "temperature",
     (config) => config?.temperature,
     (value) => ({ temperature: value })
   )
   .mapWithTransform(
     "generationConfig",
-    "schema.request.top_p",
+    "top_p",
     (config) => config?.topP,
     (value) => ({ topP: value })
   )
   .mapWithTransform(
     "generationConfig",
-    "schema.request.max_tokens",
+    "max_tokens",
     (config) => config?.maxOutputTokens,
     (value) => ({ maxOutputTokens: value })
   )
   .mapWithTransform(
     "generationConfig",
-    "schema.request.n",
+    "n",
     (config) => config?.candidateCount,
     (value) => ({ candidateCount: value })
   )
   .mapWithTransform(
     "generationConfig",
-    "schema.request.stop",
+    "stop",
     (config) => config?.stopSequences,
     (value) => ({ stopSequences: value })
   )
@@ -349,20 +349,16 @@ export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
   // Map messages with transformation
   .mapWithTransform(
     "contents",
-    "schema.request.messages",
+    "messages",
     convertRequestMessages,
     toExternalContents
   )
+  .build();
 
-  // Map preview request text
-  .mapWithTransform(
-    "contents",
-    "preview.request",
-    (req) => getRequestText(req),
-    // Returning a minimal valid object when converting back
-    (_: string) => ({ contents: [] })
-  )
-  .buildAndRegister();
+// Create a separate mapper for preview data
+const previewMapper = (requestBody: GoogleChatRequest) => {
+  return getRequestText(requestBody);
+};
 
 /**
  * Maps a Google/Gemini request to our internal format
@@ -378,44 +374,46 @@ export const mapGeminiRequestV2 = ({
   statusCode?: number;
   model: string;
 }): LlmSchema => {
-  // Extract model from response.modelVersion if available and model is not provided or is "unknown"
-  const modelVersion =
-    (!model || model === "unknown") && response?.modelVersion
+  // Extract model from modelVersion if model is unknown
+  const extractedModel =
+    model === "unknown" && response?.modelVersion
       ? response.modelVersion
       : model || request.model;
 
   // Map the request using our path mapper
   const mappedRequest = googleChatMapper.toInternal({
     ...request,
-    model: modelVersion,
+    model: extractedModel,
   });
 
-  // Add response data
+  // Create the LlmSchema structure
+  const schema: LlmSchema = {
+    request: mappedRequest,
+    response: null,
+  };
+
+  // Add response data if available
   if (response) {
-    const responseMessages = convertResponseMessages(response);
-    const error = Array.isArray(response)
-      ? response.find((item: any) => item?.error)?.error
-      : response?.error;
+    // Handle error responses
+    if (response.error) {
+      schema.response = {
+        error: {
+          heliconeMessage: {
+            message: response.error.message,
+            code: response.error.code,
+          },
+        },
+        model: extractedModel,
+      };
+    } else {
+      const responseMessages = convertResponseMessages(response);
 
-    mappedRequest.schema.response = {
-      messages: responseMessages,
-      model: modelVersion,
-      error: error
-        ? {
-            heliconeMessage: {
-              message: error?.message,
-              code: error?.code,
-            },
-          }
-        : undefined,
-    };
-
-    mappedRequest.preview.response = getResponseText(response, statusCode);
-    mappedRequest.preview.concatenatedMessages = [
-      ...(mappedRequest.schema.request.messages || []),
-      ...responseMessages,
-    ];
+      schema.response = {
+        messages: responseMessages,
+        model: extractedModel,
+      };
+    }
   }
 
-  return mappedRequest.schema;
+  return schema;
 };

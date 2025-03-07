@@ -155,33 +155,13 @@ const toExternalMessages = (
 ): AnthropicChatRequest["messages"] => {
   if (!messages) return [];
 
-  return messages.map(({ _type, id, ...rest }) => ({
+  // Filter out system messages, as they're handled by the system parameter
+  const nonSystemMessages = messages.filter((msg) => msg.role !== "system");
+
+  return nonSystemMessages.map(({ _type, id, ...rest }) => ({
     role: rest.role || "user",
     content: rest.content || "",
   }));
-};
-
-/**
- * Extract system message from messages array
- */
-const extractSystemMessage = (
-  messages: Message[]
-): {
-  systemMessage?: string;
-  otherMessages: Message[];
-} => {
-  if (!messages || messages.length === 0) {
-    return { otherMessages: [] };
-  }
-
-  const systemMessages = messages.filter((msg) => msg.role === "system");
-  const otherMessages = messages.filter((msg) => msg.role !== "system");
-
-  return {
-    systemMessage:
-      systemMessages.length > 0 ? systemMessages[0].content : undefined,
-    otherMessages,
-  };
 };
 
 /**
@@ -294,57 +274,91 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
   "anthropic-chat-v2"
 )
   // Map basic request parameters
-  .map("model", "schema.request.model")
-  .map("temperature", "schema.request.temperature")
-  .map("top_p", "schema.request.top_p")
-  .map("max_tokens", "schema.request.max_tokens")
-  .map("stream", "schema.request.stream")
-  .map("stop_sequences", "schema.request.stop")
+  .map("model", "model")
+  .map("temperature", "temperature")
+  .map("top_p", "top_p")
+  .map("max_tokens", "max_tokens")
+  .map("stream", "stream")
+  .map("stop_sequences", "stop")
 
   // Map tool-related parameters with transformations
   .mapWithTransform(
     "tools",
-    "schema.request.tools",
-    convertTools,
-    toExternalTools
+    "tools",
+    (tools?: AnthropicChatRequest["tools"], internal?: any) =>
+      convertTools(tools),
+    (tools?: any, external?: any) => toExternalTools(tools)
   )
   .mapWithTransform(
     "tool_choice",
-    "schema.request.tool_choice",
-    convertToolChoice,
-    toExternalToolChoice
+    "tool_choice",
+    (toolChoice?: AnthropicChatRequest["tool_choice"], internal?: any) =>
+      convertToolChoice(toolChoice),
+    (toolChoice?: any, external?: any) => toExternalToolChoice(toolChoice)
   )
   .mapWithTransform(
     "tool_choice",
-    "schema.request.parallel_tool_calls",
-    (toolChoice?: AnthropicChatRequest["tool_choice"]) => {
+    "parallel_tool_calls",
+    (toolChoice?: AnthropicChatRequest["tool_choice"], internal?: any) => {
       if (!toolChoice || typeof toolChoice === "string") return undefined;
       return toolChoice.disable_parallel_tool_use === true ? false : undefined;
     },
-    (_: boolean | null | undefined) => undefined
+    (_: boolean | null | undefined, external?: any) => undefined
+  )
+
+  // Map system message
+  .mapWithTransform(
+    "system",
+    "messages",
+    (system?: string, internal?: any) => {
+      if (!system) return undefined;
+      return [{ _type: "message" as const, role: "system", content: system }];
+    },
+    (messages?: Message[], external?: any) => {
+      if (!messages) return undefined;
+      const systemMessage = messages.find((m) => m.role === "system");
+      return systemMessage?.content as string;
+    }
   )
 
   // Map messages with transformation
   .mapWithTransform(
     "messages",
-    "schema.request.messages",
-    (messagesInput: AnthropicChatRequest["messages"]) => {
-      // Since we can't access the full request object in this transform function,
-      // we'll need to look for a system message within the messages array
-      return convertRequestMessages(messagesInput);
-    },
-    toExternalMessages
-  )
-
-  // Map preview data
-  .mapWithTransform(
     "messages",
-    "preview.request",
-    getRequestText,
-    // Returning empty array when converting back to be type-safe
-    (_: string) => [] as AnthropicChatRequest["messages"]
+    (messages?: AnthropicChatRequest["messages"], internal?: any) => {
+      if (!messages) return undefined;
+      const convertedMessages = convertRequestMessages(messages);
+
+      // Check if we already have messages (from system parameter)
+      const existingMessages = internal?.messages || [];
+
+      if (existingMessages.length > 0) {
+        // If there's already a system message from the system parameter,
+        // filter out any system messages from the messages array to avoid duplicates
+        const nonSystemMessages = convertedMessages.filter(
+          (msg) => msg.role !== "system"
+        );
+        return [...existingMessages, ...nonSystemMessages];
+      }
+
+      return convertedMessages;
+    },
+    (messages?: Message[], external?: any) => {
+      if (!messages) return undefined;
+      // Don't filter out system messages, include all messages
+      return toExternalMessages(messages);
+    }
   )
-  .buildAndRegister();
+  .build();
+
+// Create a separate mapper for preview data
+const previewMapper = (
+  messages: AnthropicChatRequest["messages"] = [],
+  system?: string
+) => {
+  if (!messages && !system) return "";
+  return getRequestText(processMessages(messages, system));
+};
 
 /**
  * Maps an Anthropic request to our internal format
@@ -359,44 +373,27 @@ export const mapAnthropicRequestV2 = ({
   statusCode?: number; // Not currently used
   model: string;
 }): LlmSchema => {
-  // Process the request to transform system param into a system message
-  const requestToMap = { ...request };
-
-  // Process messages to include the system parameter as a system message
-  if (
-    requestToMap.system ||
-    (requestToMap.messages &&
-      requestToMap.messages.some((msg) => msg.role === "system"))
-  ) {
-    requestToMap.messages = processMessages(
-      requestToMap.messages,
-      requestToMap.system
-    );
-    // Remove the system parameter after processing to avoid duplication
-    delete requestToMap.system;
-  }
-
   // Map the request using our path mapper
   const mappedRequest = anthropicChatMapper.toInternal({
-    ...requestToMap,
+    ...request,
     model: model || request.model,
   });
 
-  // Add response data
+  // Create the LlmSchema structure
+  const schema: LlmSchema = {
+    request: mappedRequest,
+    response: null,
+  };
+
+  // Add response data if available
   if (response) {
     const responseMessages = convertResponseMessages(response);
 
-    mappedRequest.schema.response = {
+    schema.response = {
       messages: responseMessages,
       model: model || response.model,
     };
-
-    mappedRequest.preview.response = getResponseText(response);
-    mappedRequest.preview.concatenatedMessages = [
-      ...(mappedRequest.schema.request.messages || []),
-      ...responseMessages,
-    ];
   }
 
-  return mappedRequest.schema;
+  return schema;
 };

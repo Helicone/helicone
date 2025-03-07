@@ -32,14 +32,14 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
       const internalRequest = googleChatMapper.toInternal(externalRequest);
 
       // Verify basic fields were mapped correctly
-      expect(internalRequest.schema.request.model).toBe("gemini-1.5-pro");
-      expect(internalRequest.schema.request.temperature).toBe(0.7);
-      expect(internalRequest.schema.request.max_tokens).toBe(100);
-      expect(internalRequest.schema.request.top_p).toBe(0.9);
+      expect(internalRequest.model).toBe("gemini-1.5-pro");
+      expect(internalRequest.temperature).toBe(0.7);
+      expect(internalRequest.max_tokens).toBe(100);
+      expect(internalRequest.top_p).toBe(0.9);
 
       // Verify messages were transformed correctly
-      expect(internalRequest.schema.request.messages).toHaveLength(1);
-      expect(internalRequest.schema.request.messages?.[0]).toMatchObject({
+      expect(internalRequest.messages).toHaveLength(1);
+      expect(internalRequest.messages?.[0]).toMatchObject({
         _type: "message",
         role: "user",
         content: "Hello, how are you?",
@@ -70,7 +70,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
       const internalRequest = googleChatMapper.toInternal(externalRequest);
 
       // Verify image message was captured correctly
-      expect(internalRequest.schema.request.messages?.[0]).toMatchObject({
+      expect(internalRequest.messages?.[0]).toMatchObject({
         _type: "image",
         role: "user",
         content: "What's in this image?",
@@ -257,50 +257,42 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
     it("should convert messages back to Gemini format", () => {
       // Create internal request
       const partialInternalRequest = {
-        schema: {
-          request: {
-            model: "gemini-1.5-pro",
-            temperature: 0.5,
-            max_tokens: 150,
-            messages: [
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                role: "user",
-                content: "Tell me about quantum computing.",
-              },
-              {
-                _type: "message" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                role: "model",
-                content:
-                  "Quantum computing is a type of computation that uses quantum mechanics.",
-              },
-            ],
+        model: "gemini-1.5-pro",
+        temperature: 0.5,
+        max_tokens: 150,
+        messages: [
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            role: "user",
+            content: "Tell me about quantum computing.",
           },
-        },
+          {
+            _type: "message" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            role: "model",
+            content:
+              "Quantum computing is a type of computation that uses quantum mechanics.",
+          },
+        ],
       };
 
       // Use the mapper's interface to test the message transformation
-      const messages = partialInternalRequest.schema.request.messages;
+      const messages = partialInternalRequest.messages;
       const externalContents = googleChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "contents" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "contents" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Check if messages were transformed correctly
@@ -329,35 +321,27 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
     it("should handle image content when converting back to external format", () => {
       const imageData = "base64imagedata";
       const partialInternalRequest = {
-        schema: {
-          request: {
-            messages: [
-              {
-                _type: "image" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                role: "user",
-                content: "What's in this image?",
-                image_url: imageData,
-              },
-            ],
+        messages: [
+          {
+            _type: "image" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            role: "user",
+            content: "What's in this image?",
+            image_url: imageData,
           },
-        },
+        ],
       };
 
       // Test message transformation
-      const messages = partialInternalRequest.schema.request.messages;
+      const messages = partialInternalRequest.messages;
       const externalContents = googleChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "contents" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "contents" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Verify image part was included
@@ -374,42 +358,34 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
     it("should handle function calling when converting back to external format", () => {
       const partialInternalRequest = {
-        schema: {
-          request: {
-            messages: [
+        messages: [
+          {
+            _type: "functionCall" as
+              | "message"
+              | "functionCall"
+              | "function"
+              | "image"
+              | "autoInput"
+              | "contentArray"
+              | "audio",
+            role: "model",
+            tool_calls: [
               {
-                _type: "functionCall" as
-                  | "message"
-                  | "functionCall"
-                  | "function"
-                  | "image"
-                  | "autoInput"
-                  | "contentArray"
-                  | "audio",
-                role: "model",
-                tool_calls: [
-                  {
-                    name: "get_weather",
-                    arguments: {
-                      location: "San Francisco",
-                      unit: "celsius",
-                    },
-                  },
-                ],
+                name: "get_weather",
+                arguments: {
+                  location: "San Francisco",
+                  unit: "celsius",
+                },
               },
             ],
           },
-        },
+        ],
       };
 
       // Test transformation
-      const messages = partialInternalRequest.schema.request.messages;
+      const messages = partialInternalRequest.messages;
       const externalContents = googleChatMapper["mappings"]
-        .find(
-          (m) =>
-            m.external === "contents" &&
-            m.internal === "schema.request.messages"
-        )
+        .find((m) => m.external === "contents" && m.internal === "messages")
         ?.transform?.toExternal(messages);
 
       // Verify function call structure
@@ -439,7 +415,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Find temperature transformation via the property name
       const temperatureMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "schema.request.temperature"
+        (m) => m.internal === "temperature"
       );
 
       // Extract and test each transformation individually
@@ -451,7 +427,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test topP transformation
       const topPMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "schema.request.top_p"
+        (m) => m.internal === "top_p"
       );
       expect(topPMapping?.transform).toBeDefined();
       if (topPMapping?.transform) {
@@ -461,7 +437,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test maxTokens transformation
       const maxTokensMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "schema.request.max_tokens"
+        (m) => m.internal === "max_tokens"
       );
       expect(maxTokensMapping?.transform).toBeDefined();
       if (maxTokensMapping?.transform) {
@@ -471,7 +447,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test candidateCount transformation
       const candidateCountMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "schema.request.n"
+        (m) => m.internal === "n"
       );
       expect(candidateCountMapping?.transform).toBeDefined();
       if (candidateCountMapping?.transform) {
@@ -482,7 +458,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test stopSequences transformation
       const stopSequencesMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "schema.request.stop"
+        (m) => m.internal === "stop"
       );
       expect(stopSequencesMapping?.transform).toBeDefined();
       if (stopSequencesMapping?.transform) {

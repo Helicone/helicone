@@ -279,49 +279,41 @@ export const openaiChatMapper = new MapperBuilder<OpenAIChatRequest>(
   "openai-chat-v2"
 )
   // Map basic request parameters
-  .map("model", "schema.request.model")
-  .map("temperature", "schema.request.temperature")
-  .map("top_p", "schema.request.top_p")
-  .map("max_completion_tokens", "schema.request.max_tokens")
-  .map("stream", "schema.request.stream")
-  .map("stop", "schema.request.stop")
-  .mapWithTransform(
-    "tools",
-    "schema.request.tools",
-    convertTools,
-    toExternalTools
-  )
+  .map("model", "model")
+  .map("temperature", "temperature")
+  .map("top_p", "top_p")
+  .map("max_completion_tokens", "max_tokens")
+  .map("stream", "stream")
+  .map("stop", "stop")
+  .mapWithTransform("tools", "tools", convertTools, toExternalTools)
   .mapWithTransform(
     "tool_choice",
-    "schema.request.tool_choice",
+    "tool_choice",
     convertToolChoice,
     toExternalToolChoice
   )
-  .map("parallel_tool_calls", "schema.request.parallel_tool_calls")
-  .map("reasoning_effort", "schema.request.reasoning_effort")
-  .map("frequency_penalty", "schema.request.frequency_penalty")
-  .map("presence_penalty", "schema.request.presence_penalty")
-  .map("n", "schema.request.n")
-  .map("response_format", "schema.request.response_format")
-  .map("seed", "schema.request.seed")
+  .map("parallel_tool_calls", "parallel_tool_calls")
+  .map("reasoning_effort", "reasoning_effort")
+  .map("frequency_penalty", "frequency_penalty")
+  .map("presence_penalty", "presence_penalty")
+  .map("n", "n")
+  .map("response_format", "response_format")
+  .map("seed", "seed")
 
   // Map messages with transformation
   .mapWithTransform(
     "messages",
-    "schema.request.messages",
+    "messages",
     convertRequestMessages,
     toExternalMessages
   )
+  .build();
 
-  // Map preview data
-  .mapWithTransform(
-    "messages",
-    "preview.request",
-    getRequestText,
-    // Returning empty array when converting back to be type-safe
-    (_: string) => [] as OpenAIChatRequest["messages"]
-  )
-  .buildAndRegister();
+// Create a separate mapper for preview data
+const previewMapper = (messages?: OpenAIChatRequest["messages"]) => {
+  if (!messages) return "";
+  return getRequestText(messages);
+};
 
 /**
  * Maps an OpenAI request to our internal format
@@ -342,21 +334,21 @@ export const mapOpenAIRequestV2 = ({
     model: model || request.model,
   });
 
-  // Add response data
+  // Create the LlmSchema structure
+  const schema: LlmSchema = {
+    request: mappedRequest,
+    response: null,
+  };
+
+  // Add response data if available
   if (response) {
     const responseMessages = convertResponseMessages(response);
 
-    mappedRequest.schema.response = {
+    schema.response = {
       messages: responseMessages,
       model: model || response.model,
     };
-
-    mappedRequest.preview.response = getResponseText(response);
-    mappedRequest.preview.concatenatedMessages = [
-      ...(mappedRequest.schema.request.messages || []),
-      ...responseMessages,
-    ];
   }
 
-  return mappedRequest.schema;
+  return schema;
 };
