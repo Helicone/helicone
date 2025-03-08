@@ -1,9 +1,9 @@
-import { PROVIDER_MODELS } from "@/utils/generate";
+import { PROVIDER_MODELS, SupportedProviders } from "@/utils/generate";
 import { Message } from "packages/llm-mapper/types";
 import { z } from "zod";
 
 export interface GenerateParams {
-  provider: keyof typeof PROVIDER_MODELS;
+  provider: SupportedProviders;
   model: string;
   messages: Message[];
   temperature?: number;
@@ -25,13 +25,18 @@ export type GenerateResponse = string | { content: string; reasoning: string };
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
 ): Promise<T extends object ? T : GenerateResponse> {
-  const providerConfig =
-    PROVIDER_MODELS[params.provider as keyof typeof PROVIDER_MODELS];
+  const providerConfig = PROVIDER_MODELS[params.provider as SupportedProviders];
   if (!providerConfig) {
     throw new Error(`Provider "${params.provider}" not found`);
   }
+
+  // Find if the model has an openRouterName to use
+  const modelInfo = providerConfig.models.find((m) => m.name === params.model);
+
   // OpenRouter requires the model to be in the format of provider/model
-  params.model = `${providerConfig.openrouterDirectory}/${params.model}`;
+  // If the model has an openRouterName, use that instead of the regular model name
+  const modelNameToUse = modelInfo?.openrouterName || params.model;
+  params.model = `${providerConfig.openrouterDirectory}/${modelNameToUse}`;
 
   const response = await fetch("/api/llm", {
     method: "POST",

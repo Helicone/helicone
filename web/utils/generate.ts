@@ -2,8 +2,23 @@ import { Message } from "packages/llm-mapper/types";
 import findBestMatch from "string-similarity-js";
 
 // Define the type for the entire PROVIDER_MODELS object
+export type ProviderKeys =
+  | "ANTHROPIC"
+  | "OPENAI"
+  | "GOOGLE"
+  | "META_LLAMA"
+  | "DEEPSEEK"
+  | "MISTRALAI"
+  | "QWEN"
+  | "X"
+  | "PERPLEXITY"
+  | "COHERE"
+  | "AMAZON"
+  | "MICROSOFT"
+  | string; // Keep string for backward compatibility with any other providers
+
 export type ProviderModels = {
-  [key: string]: ProviderInfo;
+  [key in ProviderKeys]: ProviderInfo;
 };
 export type SupportedProviders = keyof ProviderModels;
 export interface ProviderInfo {
@@ -13,6 +28,7 @@ export interface ProviderInfo {
 }
 export interface ModelInfo {
   name: string;
+  openrouterName?: string;
   supportsReasoningEffort: boolean;
   max_tokens?: number;
 }
@@ -25,22 +41,26 @@ export const PROVIDER_MODELS: ProviderModels = {
     openrouterDirectory: "anthropic",
     models: [
       {
-        name: "claude-3.7-sonnet",
+        name: "claude-3-7-sonnet-latest",
+        openrouterName: "claude-3.7-sonnet",
         supportsReasoningEffort: false,
         max_tokens: 8192,
       },
       {
-        name: "claude-3.5-haiku",
+        name: "claude-3-5-haiku-latest",
+        openrouterName: "claude-3.5-haiku",
         supportsReasoningEffort: false,
         max_tokens: 8192,
       },
       {
-        name: "claude-3.5-sonnet",
+        name: "claude-3-5-sonnet-latest",
+        openrouterName: "claude-3.5-sonnet",
         supportsReasoningEffort: false,
         max_tokens: 8192,
       },
       {
-        name: "claude-3-opus",
+        name: "claude-3-opus-latest",
+        openrouterName: "claude-3-opus",
         supportsReasoningEffort: false,
         max_tokens: 4096,
       },
