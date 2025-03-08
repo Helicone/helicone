@@ -22,6 +22,7 @@ import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
+import { RequestViewProvider } from "@/services/context/useRequestViewContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -105,9 +106,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                 <OrgContextProvider>
                   <ThemeProvider attribute="class" defaultTheme="light">
                     <TooltipProvider>
-                      <div className={inter.className}>
-                        {getLayout(<Component {...pageProps} />)}
-                      </div>
+                      <RequestViewProvider>
+                        <div className={inter.className}>
+                          {getLayout(<Component {...pageProps} />)}
+                        </div>
+                      </RequestViewProvider>
                     </TooltipProvider>
                   </ThemeProvider>
                   <Notification />

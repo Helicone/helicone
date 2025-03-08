@@ -45,7 +45,6 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import NewDataset from "../datasets/NewDataset";
-import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDiv from "./requestDiv";
@@ -54,6 +53,7 @@ import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
+import { useRequestView } from "@/services/context/useRequestViewContext";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -174,6 +174,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   >(undefined);
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
+  const { view, setView } = useRequestView();
 
   const encodeFilters = (filters: UIFilterRowTree): string => {
     const encode = (node: UIFilterRowTree): any => {
@@ -555,8 +556,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [properties, isCached]);
 
   const {
-    selectMode,
-    toggleSelectMode,
+    selectMode: _selectMode,
+    toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
@@ -567,9 +568,17 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       request.heliconeMetadata.requestId,
   });
 
-  const onRowSelectHandler = (row: MappedLLMRequest, index: number) => {
-    if (selectMode) {
+  // if shift is pressed, we select the rows in the highlighted range
+  // if metakey is pressed, we add the row to the selection
+  // if click was on a checkbox, we add the row to the selection
+  // else we open the side-tray with details on the request.
+  const onRowSelectHandler = (row: MappedLLMRequest, index: number, event?: React.MouseEvent) => {
+    // bit of a hack since pre-existing table behavior is noop
+    let isCheckboxClick = event?.target instanceof HTMLElement &&
+      (event.target.tagName.toLowerCase() === 'button' || event.target.closest('button') !== null);
+    if (isShiftPressed || event?.metaKey || isCheckboxClick) {
       toggleSelection(row);
+      return;
     } else {
       setSelectedDataIndex(index);
       setSelectedData(row);
@@ -708,7 +717,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 highlightedIds={
                   selectedData && open ? [selectedData.id] : selectedIds
                 }
-                showCheckboxes={selectMode}
+                showCheckboxes={true}
                 defaultData={requests}
                 defaultColumns={columnsWithProperties}
                 skeletonLoading={isDataLoading}
@@ -762,9 +771,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   defaultValue: "1m",
                   onTimeSelectHandler: onTimeSelectHandler,
                 }}
-                onRowSelect={(row, index) => {
-                  onRowSelectHandler(row, index);
-                }}
+                onRowSelect={onRowSelectHandler}
                 makeCard={
                   userId
                     ? undefined
@@ -781,19 +788,30 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                         properties: properties,
                       }
                 }
-                customButtons={[
-                  <div key={"dataset-button"}>
-                    <DatasetButton
-                      datasetMode={selectMode}
-                      setDatasetMode={toggleSelectMode}
-                      items={[]}
-                      onAddToDataset={() => {}}
-                      renderModal={undefined}
-                    />
-                  </div>,
-                ]}
+                customButtons={[]}
                 onSelectAll={selectAll}
                 selectedIds={selectedIds}
+                selectedItems={
+                  selectedIds.length > 0
+                    ? {
+                        count: selectedIds.length,
+                        addToDatasetButton: (
+                          <ProFeatureWrapper featureName="Datasets">
+                            <GenericButton
+                              onClick={() => {
+                                setModalOpen(true);
+                              }}
+                              icon={
+                                <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                              }
+                              text="Add to dataset"
+                              className="h-8 py-0"
+                            />
+                          </ProFeatureWrapper>
+                        ),
+                      }
+                    : undefined
+                }
                 rightPanel={
                   open ? (
                     <RequestDiv
@@ -838,44 +856,18 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   ) : undefined
                 }
               >
-                {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-                    <div className="flex flex-row gap-2 items-center">
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                        Request Selection:
-                      </span>
-                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
-                        {selectedIds.length} selected
-                      </span>
-                    </div>
-                    {selectedIds.length > 0 && (
-                      <ProFeatureWrapper featureName="Datasets">
-                        <GenericButton
-                          onClick={() => {
-                            setModalOpen(true);
-                          }}
-                          icon={
-                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                          }
-                          text="Add to dataset"
-                        />
-                      </ProFeatureWrapper>
-                    )}
-                  </Row>
-                )}
               </ThemedTable>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
-              <TableFooter
-                currentPage={page}
-                pageSize={pageSize}
-                isCountLoading={isCountLoading}
-                count={count || 0}
-                onPageChange={(n) => handlePageChange(n)}
-                onPageSizeChange={(n) => setCurrentPageSize(n)}
-                pageSizeOptions={[25, 50, 100, 250, 500]}
-              />
+              <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+                <TableFooter
+                  currentPage={page}
+                  pageSize={pageSize}
+                  isCountLoading={isCountLoading}
+                  count={count || 0}
+                  onPageChange={(n) => handlePageChange(n)}
+                  onPageSizeChange={(n) => setCurrentPageSize(n)}
+                  pageSizeOptions={[25, 50, 100, 250, 500]}
+                />
+              </div>
             </div>
           </div>
         )}
@@ -886,7 +878,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           request_ids={selectedIds}
           onComplete={() => {
             setModalOpen(false);
-            toggleSelectMode(false);
           }}
         />
       </ThemedModal>

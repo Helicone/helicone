@@ -42,6 +42,7 @@ import {
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
+import { useRequestView } from "@/services/context/useRequestViewContext";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -70,7 +71,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  onRowSelect?: (row: T, index: number) => void;
+  onRowSelect?: (row: T, index: number, event?: React.MouseEvent) => void;
   makeCard?: (row: T) => React.ReactNode;
   makeRow?: {
     properties: string[];
@@ -91,6 +92,10 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   children?: React.ReactNode;
   onSelectAll?: (checked: boolean) => void;
   selectedIds?: string[];
+  selectedItems?: {
+    count: number;
+    addToDatasetButton?: React.ReactNode;
+  };
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
@@ -128,6 +133,7 @@ export default function ThemedTable<T extends { id?: string }>(
     children,
     onSelectAll,
     selectedIds,
+    selectedItems,
     fullWidth = false,
     isDatasetsPage,
     rightPanel,
@@ -135,7 +141,7 @@ export default function ThemedTable<T extends { id?: string }>(
     rowLink,
   } = props;
 
-  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
+  const { view, setView } = useRequestView();
 
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `${id}-activeColumns`,
@@ -180,8 +186,8 @@ export default function ThemedTable<T extends { id?: string }>(
     onSelectAll?.(checked);
   };
 
-  const handleRowSelect = (row: T, index: number) => {
-    onRowSelect?.(row, index);
+  const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
+    onRowSelect?.(row, index, event);
   };
 
   const [isPanelVisible, setIsPanelVisible] = useState(false);
@@ -271,14 +277,14 @@ export default function ThemedTable<T extends { id?: string }>(
           }
           rows={exportData}
           customButtons={customButtons}
+          selectedItems={selectedItems}
         />
       </div>
 
       {children && <div className="flex-shrink-0">{children}</div>}
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel>
-          {" "}
-          <div className="h-full overflow-x-auto bg-white dark:bg-slate-800">
+      <ResizablePanelGroup direction="horizontal" className="flex-grow overflow-hidden">
+        <ResizablePanel defaultSize={100} className="flex-grow">
+          <div className="h-full overflow-auto bg-white dark:bg-slate-800">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -350,7 +356,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                 }}
                                 className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                               />
-                              <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
+                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                             </th>
                           )}
                           {headerGroup.headers.map((header, index) => (
@@ -390,13 +396,13 @@ export default function ThemedTable<T extends { id?: string }>(
                           )}
                           onClick={
                             onRowSelect &&
-                            (() => {
-                              handleRowSelect(row.original, index);
+                            ((e: React.MouseEvent) => {
+                              handleRowSelect(row.original, index, e);
                             })
                           }
                         >
                           {showCheckboxes && (
-                            <td className="w-8 px-2">
+                            <td className="w-8 px-2 border-t border-slate-300 dark:border-slate-700">
                               <Checkbox
                                 variant="blue"
                                 checked={selectedIds?.includes(
@@ -412,7 +418,8 @@ export default function ThemedTable<T extends { id?: string }>(
                               key={i}
                               className={clsx(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 && "pl-10", // Add left padding to the first column
+                                i === 0 && !showCheckboxes && "pl-10", // Add left padding to the first column only if checkboxes aren't shown
+                                i === 0 && showCheckboxes && "pl-2", // Less padding for first column when checkboxes are shown
                                 i === row.getVisibleCells().length - 1 &&
                                   "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}

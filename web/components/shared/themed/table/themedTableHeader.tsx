@@ -82,6 +82,10 @@ interface ThemedTableHeaderProps<T> {
     onChange: (value: string) => void;
     placeholder: string;
   };
+  selectedItems?: {
+    count: number;
+    addToDatasetButton?: React.ReactNode;
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -97,6 +101,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     customButtons,
     isDatasetsPage,
     search,
+    selectedItems,
   } = props;
 
   const searchParams = useSearchParams();
@@ -261,6 +266,17 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
 
           <div className="flex flex-wrap justify-start lg:justify-end items-center">
+            {selectedItems && selectedItems.count > 0 && (
+              <div className="flex items-center gap-2 mr-2">
+                <div className="flex flex-row gap-2 items-center">
+                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                    {selectedItems.count} requests selected
+                  </span>
+                </div>
+                {selectedItems.addToDatasetButton && selectedItems.addToDatasetButton}
+              </div>
+            )}
+            
             {search && (
               <Tooltip>
                 <TooltipTrigger asChild>
