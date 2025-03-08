@@ -1,21 +1,50 @@
 import { Message } from "packages/llm-mapper/types";
 import findBestMatch from "string-similarity-js";
 
+// Define the type for the entire PROVIDER_MODELS object
+export type ProviderModels = {
+  [key: string]: ProviderInfo;
+};
+export type SupportedProviders = keyof ProviderModels;
+export interface ProviderInfo {
+  name: string;
+  openrouterDirectory: string;
+  models: ModelInfo[];
+}
+export interface ModelInfo {
+  name: string;
+  supportsReasoningEffort: boolean;
+  max_tokens?: number;
+}
+
 // Providers-models used by the generate function
-export const PROVIDER_MODELS = {
+export const PROVIDER_MODELS: ProviderModels = {
   // General Use Cases
   ANTHROPIC: {
     name: "Anthropic",
     openrouterDirectory: "anthropic",
     models: [
-      "claude-3.7-sonnet",
-      "claude-3.5-haiku",
-      "claude-3.5-sonnet",
-      "claude-3-opus",
-    ].map((model) => ({
-      name: model,
-      supportsReasoningEffort: false,
-    })),
+      {
+        name: "claude-3.7-sonnet",
+        supportsReasoningEffort: false,
+        max_tokens: 8192,
+      },
+      {
+        name: "claude-3.5-haiku",
+        supportsReasoningEffort: false,
+        max_tokens: 8192,
+      },
+      {
+        name: "claude-3.5-sonnet",
+        supportsReasoningEffort: false,
+        max_tokens: 8192,
+      },
+      {
+        name: "claude-3-opus",
+        supportsReasoningEffort: false,
+        max_tokens: 4096,
+      },
+    ],
   },
   OPENAI: {
     name: "OpenAI",
