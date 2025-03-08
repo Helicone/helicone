@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  FilterExpression,
-  AndExpression,
-  OrExpression,
-} from "../../../../services/lib/filters/filterAst";
+import { FilterExpression } from "../../../../services/lib/filters/filterAst";
 import { FilterASTEditorProps } from "./types";
 import { FilterNode } from "./components/FilterNode";
 import { DndProvider } from "./DndProvider";
@@ -18,138 +14,159 @@ import {
 } from "./utils";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
+import { useFilterStore } from "@/store/filterStore";
 
 /**
  * A component for editing filter expressions in AST format
+ *
+ * This component can be used in two ways:
+ * 1. With props (filter, onChange) for controlled usage
+ * 2. Without props, using the Zustand store for state management
  */
 export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   filter,
   onChange,
   className,
 }) => {
+  // Get store methods if we're using the store
+  const {
+    currentFilter,
+    updateNode: storeUpdateNode,
+    addCondition: storeAddCondition,
+    addPropertyCondition: storeAddPropertyCondition,
+    addScoreCondition: storeAddScoreCondition,
+    transformToGroup: storeTransformToGroup,
+    deleteNode: storeDeleteNode,
+    changeGroupType: storeChangeGroupType,
+    moveItem: storeMoveItem,
+  } = useFilterStore();
+
+  // Determine if we're using props or store
+  const usingStore = filter === undefined && onChange === undefined;
+  const activeFilter = usingStore ? currentFilter : filter;
+
   // Handler for updating a node in the filter tree
   const handleUpdateNode = (
     path: number[],
     updatedNode: FilterExpression
   ): void => {
-    onChange(updateNode(filter, path, updatedNode));
+    if (usingStore) {
+      storeUpdateNode(path, updatedNode);
+    } else if (onChange) {
+      onChange(updateNode(filter, path, updatedNode));
+    }
   };
 
   // Handler for adding a condition to a group
   const handleAddCondition = (path: number[]): void => {
-    onChange(addCondition(filter, path));
+    if (usingStore) {
+      storeAddCondition(path);
+    } else if (onChange) {
+      onChange(addCondition(filter, path));
+    }
   };
 
   // Handler for adding a property condition to a group
   const handleAddPropertyCondition = (path: number[]): void => {
-    if (path.length === 0) {
-      // If we're at the root and it's not a group, convert to a group
-      if (filter.type === "condition") {
-        onChange({
-          type: "and",
-          expressions: [filter, createDefaultPropertyCondition()],
-        });
-        return;
-      }
-
-      // Otherwise add to the existing group
-      if (filter.type === "and" || filter.type === "or") {
-        onChange({
-          ...filter,
-          expressions: [
-            ...(filter as AndExpression | OrExpression).expressions,
+    if (usingStore) {
+      storeAddPropertyCondition(path);
+    } else if (onChange) {
+      if (path.length === 0) {
+        // If we're at the root and it's not a group, convert to a group
+        if (filter.type === "condition") {
+          onChange({
+            type: "and",
+            expressions: [filter, createDefaultPropertyCondition()],
+          });
+        } else {
+          // Otherwise just add to the existing group
+          const newExpressions = [
+            ...(filter as any).expressions,
             createDefaultPropertyCondition(),
-          ],
-        });
-        return;
+          ];
+          onChange({
+            ...filter,
+            expressions: newExpressions,
+          });
+        }
+      } else {
+        // Add to a nested group
+        onChange(
+          updateNode(filter, path, (node: any) => ({
+            ...node,
+            expressions: [
+              ...node.expressions,
+              createDefaultPropertyCondition(),
+            ],
+          }))
+        );
       }
     }
-
-    // Navigate to the target node and add the condition
-    let current = filter;
-    for (let i = 0; i < path.length; i++) {
-      if (current.type !== "and" && current.type !== "or") break;
-      current = (current as AndExpression | OrExpression).expressions[path[i]];
-    }
-
-    if (current.type !== "and" && current.type !== "or") {
-      return;
-    }
-
-    const updatedNode = {
-      ...current,
-      expressions: [
-        ...(current as AndExpression | OrExpression).expressions,
-        createDefaultPropertyCondition(),
-      ],
-    };
-
-    onChange(updateNode(filter, path, updatedNode));
   };
 
   // Handler for adding a score condition to a group
   const handleAddScoreCondition = (path: number[]): void => {
-    if (path.length === 0) {
-      // If we're at the root and it's not a group, convert to a group
-      if (filter.type === "condition") {
-        onChange({
-          type: "and",
-          expressions: [filter, createDefaultScoreCondition()],
-        });
-        return;
-      }
-
-      // Otherwise add to the existing group
-      if (filter.type === "and" || filter.type === "or") {
-        onChange({
-          ...filter,
-          expressions: [
-            ...(filter as AndExpression | OrExpression).expressions,
+    if (usingStore) {
+      storeAddScoreCondition(path);
+    } else if (onChange) {
+      if (path.length === 0) {
+        // If we're at the root and it's not a group, convert to a group
+        if (filter.type === "condition") {
+          onChange({
+            type: "and",
+            expressions: [filter, createDefaultScoreCondition()],
+          });
+        } else {
+          // Otherwise just add to the existing group
+          const newExpressions = [
+            ...(filter as any).expressions,
             createDefaultScoreCondition(),
-          ],
-        });
-        return;
+          ];
+          onChange({
+            ...filter,
+            expressions: newExpressions,
+          });
+        }
+      } else {
+        // Add to a nested group
+        onChange(
+          updateNode(filter, path, (node: any) => ({
+            ...node,
+            expressions: [...node.expressions, createDefaultScoreCondition()],
+          }))
+        );
       }
     }
-
-    // Navigate to the target node and add the condition
-    let current = filter;
-    for (let i = 0; i < path.length; i++) {
-      if (current.type !== "and" && current.type !== "or") break;
-      current = (current as AndExpression | OrExpression).expressions[path[i]];
-    }
-
-    if (current.type !== "and" && current.type !== "or") {
-      return;
-    }
-
-    const updatedNode = {
-      ...current,
-      expressions: [
-        ...(current as AndExpression | OrExpression).expressions,
-        createDefaultScoreCondition(),
-      ],
-    };
-
-    onChange(updateNode(filter, path, updatedNode));
   };
 
-  // Handler for transforming a condition into a group
+  // Handler for transforming a condition to a group
   const handleTransformToGroup = (path: number[], type: "and" | "or"): void => {
-    onChange(transformToGroup(filter, path, type));
+    if (usingStore) {
+      storeTransformToGroup(path, type);
+    } else if (onChange) {
+      onChange(transformToGroup(filter, path, type));
+    }
   };
 
   // Handler for deleting a node
   const handleDeleteNode = (path: number[]): void => {
-    onChange(deleteNode(filter, path));
+    if (usingStore) {
+      storeDeleteNode(path);
+    } else if (onChange) {
+      onChange(deleteNode(filter, path));
+    }
   };
 
-  // Handler for changing a group's type
+  // Handler for changing a group type (AND/OR)
   const handleChangeGroupType = (
     path: number[],
     newType: "and" | "or"
   ): void => {
-    onChange(changeGroupType(filter, path, newType));
+    if (usingStore) {
+      storeChangeGroupType(path, newType);
+    } else if (onChange) {
+      onChange(changeGroupType(filter, path, newType));
+    }
   };
 
   // Handler for moving items (drag and drop)
@@ -159,62 +176,63 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
     dragPath: number[],
     hoverPath: number[]
   ): void => {
-    // Only handle moves within the same parent
-    if (dragPath.length !== hoverPath.length) {
-      return;
-    }
-
-    // Check if paths have the same parent
-    const dragParentPath = dragPath.slice(0, -1);
-    const hoverParentPath = hoverPath.slice(0, -1);
-
-    for (let i = 0; i < dragParentPath.length; i++) {
-      if (dragParentPath[i] !== hoverParentPath[i]) {
+    if (usingStore) {
+      storeMoveItem(dragIndex, hoverIndex, dragPath, hoverPath);
+    } else if (onChange) {
+      // Only handle reordering within the same parent for now
+      if (
+        dragPath.length !== hoverPath.length ||
+        dragPath.slice(0, -1).join(".") !== hoverPath.slice(0, -1).join(".")
+      ) {
         return;
       }
-    }
 
-    // Get the parent node
-    let parentNode = filter;
-    for (let i = 0; i < dragParentPath.length; i++) {
-      if (parentNode.type !== "and" && parentNode.type !== "or") {
-        return;
+      const parentPath = dragPath.slice(0, -1);
+
+      // Get the parent node
+      let parentNode;
+      if (parentPath.length === 0) {
+        parentNode = filter;
+      } else {
+        const getNodeAtPath = (node: any, path: number[], index = 0): any => {
+          if (index >= path.length) return node;
+          return getNodeAtPath(node.expressions[path[index]], path, index + 1);
+        };
+        parentNode = getNodeAtPath(filter, parentPath);
       }
-      parentNode = (parentNode as AndExpression | OrExpression).expressions[
-        dragParentPath[i]
-      ];
-    }
 
-    if (parentNode.type !== "and" && parentNode.type !== "or") {
-      return;
-    }
+      if (!parentNode || !parentNode.expressions) return;
 
-    // Create a new array of expressions with the item moved
-    const newExpressions = [
-      ...(parentNode as AndExpression | OrExpression).expressions,
-    ];
-    const [movedItem] = newExpressions.splice(dragIndex, 1);
-    newExpressions.splice(hoverIndex, 0, movedItem);
+      // Create a new array with the reordered items
+      const newExpressions = [...parentNode.expressions];
+      const [movedItem] = newExpressions.splice(dragIndex, 1);
+      newExpressions.splice(hoverIndex, 0, movedItem);
 
-    // Create the updated parent node
-    const updatedParentNode = {
-      ...parentNode,
-      expressions: newExpressions,
-    };
-
-    // Update the filter tree
-    if (dragParentPath.length === 0) {
-      onChange(updatedParentNode as FilterExpression);
-    } else {
-      onChange(updateNode(filter, dragParentPath, updatedParentNode));
+      // Update the parent node with the new expressions array
+      if (parentPath.length === 0) {
+        onChange({ ...filter, expressions: newExpressions });
+      } else {
+        onChange(
+          updateNode(filter, parentPath, (node: any) => ({
+            ...node,
+            expressions: newExpressions,
+          }))
+        );
+      }
     }
   };
 
+  // If we don't have a filter, don't render anything
+  if (!activeFilter) {
+    return null;
+  }
+
+  // Render the filter editor
   return (
-    <DndProvider>
-      <div className={className}>
+    <div className={`space-y-4 ${className || ""}`}>
+      <DndProvider>
         <FilterNode
-          node={filter}
+          node={activeFilter}
           path={[]}
           index={0}
           isRoot={true}
@@ -225,37 +243,39 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
           onChangeGroupType={handleChangeGroupType}
           onMoveItem={handleMoveItem}
         />
+      </DndProvider>
 
-        <div className="flex gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleAddCondition([])}
-            className="flex items-center"
-          >
-            <PlusIcon size={16} className="mr-2" /> Add Condition
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleAddPropertyCondition([])}
-            className="flex items-center"
-          >
-            <PlusIcon size={16} className="mr-2" /> Add Property Filter
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleAddScoreCondition([])}
-            className="flex items-center"
-          >
-            <PlusIcon size={16} className="mr-2" /> Add Score Filter
-          </Button>
-        </div>
+      {/* Root level actions */}
+      <div className="flex space-x-2 mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleAddCondition([])}
+          className="flex items-center"
+        >
+          <PlusIcon className="h-4 w-4 mr-1" />
+          Add Condition
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleAddPropertyCondition([])}
+          className="flex items-center"
+        >
+          <PlusIcon className="h-4 w-4 mr-1" />
+          Add Property Condition
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleAddScoreCondition([])}
+          className="flex items-center"
+        >
+          <PlusIcon className="h-4 w-4 mr-1" />
+          Add Score Condition
+        </Button>
       </div>
-    </DndProvider>
+    </div>
   );
 };
 

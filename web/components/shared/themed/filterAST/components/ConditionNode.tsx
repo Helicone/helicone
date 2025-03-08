@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import {
   ConditionNodeProps,
   COLUMNS,
@@ -22,7 +22,7 @@ import { useScoreKeys } from "../hooks/useScoreKeys";
 export const ConditionNode: React.FC<ConditionNodeProps> = ({
   node,
   path,
-  showTransformButton,
+  showTransformButton = false,
   onUpdate,
   onTransform,
   onDelete,
@@ -247,15 +247,6 @@ export const ConditionNode: React.FC<ConditionNodeProps> = ({
       </div>
 
       <div className="flex items-center gap-1">
-        {showTransformButton && (
-          <button
-            onClick={onTransform}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-            title="Transform to group"
-          >
-            <Plus size={16} />
-          </button>
-        )}
         <button
           onClick={onDelete}
           className="p-1 text-muted-foreground hover:text-destructive transition-colors"

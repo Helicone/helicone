@@ -8,8 +8,8 @@ import {
 export type ColumnType = string;
 
 export interface FilterASTEditorProps {
-  filter: FilterExpression;
-  onChange: (filter: FilterExpression) => void;
+  filter?: FilterExpression;
+  onChange?: (filter: FilterExpression) => void;
   className?: string;
 }
 
@@ -35,7 +35,7 @@ export interface ConditionNodeProps {
   node: ConditionExpression;
   path: number[];
   isRoot?: boolean;
-  showTransformButton: boolean;
+  showTransformButton?: boolean;
   onUpdate: (field: keyof ConditionExpression, value: any) => void;
   onTransform: () => void;
   onDelete: () => void;

@@ -24,8 +24,6 @@ export const FilterNode: React.FC<FilterNodeProps> = ({
 }) => {
   if (node.type === "condition") {
     const conditionNode = node as ConditionExpression;
-    // Check if we're at root or first level (path.length <= 1)
-    const showTransformButton = path.length <= 1;
 
     return (
       <DraggableItem
@@ -39,7 +37,7 @@ export const FilterNode: React.FC<FilterNodeProps> = ({
           node={conditionNode}
           path={path}
           isRoot={isRoot}
-          showTransformButton={showTransformButton}
+          showTransformButton={false}
           onUpdate={(field, value) => {
             const updatedNode = { ...conditionNode };
             if (field === "field") {
