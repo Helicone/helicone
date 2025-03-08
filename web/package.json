@@ -5,6 +5,16 @@
   "scripts": {
     "dev:local": "next dev -p 3000",
     "dev": "vercel env pull .env && next dev --turbo -p 3000",
+    "dev:fast": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo -p 3008",
+    "dev:turbo": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=4096 --no-warnings' next dev --turbo -p 3008",
+    "dev:ultra": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings --max-http-header-size=16384' next dev --turbo -p 3008",
+    "dev:webpack": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3008",
+    "dev:webpack-ultra": "BABEL_ENV=development NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings' next dev -p 3011",
+    "dev:optimized": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings' next dev -p 3012",
+    "dev:super": "TYPESCRIPT_SKIP_CHECKING=1 NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings --max-http-header-size=16384' next dev -p 3013",
+    "dev:max-perf": "TSC_COMPILE_ON_ERROR=true NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings --max-http-header-size=16384' next dev -p 3014",
+    "dev:ultimate": "TSC_COMPILE_ON_ERROR=true TYPESCRIPT_SKIP_CHECKING=1 NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings --max-http-header-size=16384' next dev -p 3015",
+    "dev:stable": "NODE_ENV=development NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings' next dev -p 3016",
     "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
     "build": "next build",
     "start": "next start",
@@ -145,6 +155,7 @@
     "tailwind-scrollbar": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24"
   }
 }

@@ -8,17 +8,25 @@ configureRuntimeEnv();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Speed up development by disabling strict mode
   reactStrictMode: false,
+  // Use SWC minifier for faster builds
   swcMinify: true,
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.(graphql|gql)$/,
-      exclude: /node_modules/,
-      loader: "graphql-tag/loader",
-    });
-    config.resolve.extensions.push(".graphql"); // Add this line
-    return config;
+  // Improve development performance
+  onDemandEntries: {
+    // Keep pages in memory longer (25 seconds)
+    maxInactiveAge: 25 * 1000,
+    // Load more pages simultaneously
+    pagesBufferLength: 5,
   },
+  // Disable source maps in development
+  productionBrowserSourceMaps: false,
+  // Speed up image processing
+  images: {
+    // Disable image optimization in development
+    unoptimized: process.env.NODE_ENV !== "production",
+  },
+  // Handle redirects
   async redirects() {
     return [
       {
@@ -28,6 +36,7 @@ const nextConfig = {
       },
     ];
   },
+  // Handle rewrites
   async rewrites() {
     return [
       {
@@ -36,9 +45,20 @@ const nextConfig = {
       },
     ];
   },
+  // Experimental features - only use valid ones that don't require critters in dev mode
   experimental: {
-    appDir: true,
-    runtime: "experimental-edge",
+    // Disable CSS optimization in development to avoid critters issues
+    optimizeCss: process.env.NODE_ENV === "production",
+    // Allocate memory efficiently
+    memoryBasedWorkersCount: true,
+    // Improve bundle splitting (valid option)
+    optimizePackageImports: [
+      "react",
+      "react-dom",
+      "lucide-react",
+      "@radix-ui",
+      "recharts",
+    ],
   },
 };
 

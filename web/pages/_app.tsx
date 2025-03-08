@@ -2,7 +2,7 @@ import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, ReactNode, useState, useEffect } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "../node_modules/react-grid-layout/css/styles.css";
@@ -22,8 +22,22 @@ import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
+import dynamic from "next/dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Safe environment variable access
+const safeEnv = (key: string): string | undefined => {
+  try {
+    if (typeof env === "function") {
+      return env(key);
+    }
+    return undefined;
+  } catch (error) {
+    console.warn(`Error accessing env var ${key}:`, error);
+    return undefined;
+  }
+};
 
 declare global {
   interface Window {
@@ -54,6 +68,65 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
 
+// Client-side only component
+const ClientSideSupabaseProvider = dynamic(
+  () =>
+    Promise.resolve(
+      ({
+        children,
+        initialSession,
+      }: {
+        children: React.ReactNode;
+        initialSession?: Session | null;
+      }) => {
+        const [supabaseClient, setSupabaseClient] = useState(() => {
+          const supabaseUrl = safeEnv("NEXT_PUBLIC_SUPABASE_URL");
+          const supabaseKey = safeEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+
+          if (supabaseUrl && supabaseKey) {
+            return createBrowserSupabaseClient({
+              supabaseUrl,
+              supabaseKey,
+            });
+          }
+          return null;
+        });
+
+        // Initialize the client on the client-side
+        useEffect(() => {
+          if (!supabaseClient) {
+            const supabaseUrl = safeEnv("NEXT_PUBLIC_SUPABASE_URL");
+            const supabaseKey = safeEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+
+            if (supabaseUrl && supabaseKey) {
+              setSupabaseClient(
+                createBrowserSupabaseClient({
+                  supabaseUrl,
+                  supabaseKey,
+                })
+              );
+            }
+          }
+        }, [supabaseClient]);
+
+        // If client is not initialized yet, just return children
+        if (!supabaseClient) {
+          return <>{children}</>;
+        }
+
+        return (
+          <SessionContextProvider
+            supabaseClient={supabaseClient}
+            initialSession={initialSession}
+          >
+            {children}
+          </SessionContextProvider>
+        );
+      }
+    ),
+  { ssr: false } // This is the key - it ensures this component only renders on the client
+);
+
 export function SupabaseProvider({
   children,
   initialSession,
@@ -61,30 +134,10 @@ export function SupabaseProvider({
   children: React.ReactNode;
   initialSession?: Session | null;
 }) {
-  const [supabaseClient] = useState(() => {
-    if (
-      env("NEXT_PUBLIC_SUPABASE_URL") &&
-      env("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    ) {
-      return createBrowserSupabaseClient({
-        supabaseUrl: env("NEXT_PUBLIC_SUPABASE_URL"),
-        supabaseKey: env("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-      });
-    }
-    return null;
-  });
-
-  if (!supabaseClient) {
-    return <>{children}</>;
-  }
-
   return (
-    <SessionContextProvider
-      supabaseClient={supabaseClient}
-      initialSession={initialSession}
-    >
+    <ClientSideSupabaseProvider initialSession={initialSession}>
       {children}
-    </SessionContextProvider>
+    </ClientSideSupabaseProvider>
   );
 }
 
@@ -98,7 +151,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <>
       <PHProvider>
-        <SupabaseProvider>
+        <SupabaseProvider initialSession={pageProps?.initialSession}>
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>

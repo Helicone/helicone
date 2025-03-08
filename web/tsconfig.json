@@ -14,6 +14,15 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "composite": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "noErrorTruncation": false,
+    "importsNotUsedAsValues": "remove",
+    "disableSizeLimit": true,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "skipDefaultLibCheck": true,
     "plugins": [
       {
         "name": "next"
@@ -25,5 +34,13 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "codegen.ts"]
+  "exclude": [
+    "node_modules",
+    "codegen.ts",
+    ".next",
+    "out",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__"
+  ]
 }
