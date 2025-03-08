@@ -106,7 +106,8 @@ const generateHandler = async (
         { metadata }
       );
     }
-    const { provider, mapper, targetUrl } = providerResult.data;
+    const { provider, mapper, targetUrl, authHeaderConfig, defaultHeaders } =
+      providerResult.data;
 
     // 6. BUILD REQUEST HEADERS
     // a. Get provider API key
@@ -124,8 +125,20 @@ const generateHandler = async (
     // b. Set basic headers
     const requestHeaders = new Headers(requestWrapper.getHeaders());
     requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set("Authorization", `Bearer ${providerApiKey}`);
+    // Use the provider-specific auth header configuration
+    requestHeaders.set(
+      authHeaderConfig.headerName,
+      authHeaderConfig.valuePrefix
+        ? `${authHeaderConfig.valuePrefix}${providerApiKey}`
+        : providerApiKey
+    );
     requestHeaders.set("Accept-Encoding", "identity");
+    // Add provider-specific default headers if they exist
+    if (defaultHeaders) {
+      Object.entries(defaultHeaders).forEach(([key, value]) => {
+        requestHeaders.set(key, value);
+      });
+    }
     // c. Set properties parameters
     if (parameters.properties?.userId) {
       requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
@@ -212,6 +225,11 @@ function getProviderConfig(metadata: PromptMetadata): Result<
     provider: (typeof providersNames)[number];
     mapper: PathMapper<unknown, LLMRequestBody>;
     targetUrl: string;
+    authHeaderConfig: {
+      headerName: string;
+      valuePrefix?: string;
+    };
+    defaultHeaders?: Record<string, string>;
   },
   string
 > {
@@ -230,12 +248,22 @@ function getProviderConfig(metadata: PromptMetadata): Result<
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.openai.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "ANTHROPIC":
       return ok({
         provider,
         mapper: getMapper("anthropic-chat"),
         targetUrl: "https://api.anthropic.com/v1/messages",
+        authHeaderConfig: {
+          headerName: "x-api-key",
+        },
+        defaultHeaders: {
+          "anthropic-version": "2023-06-01", // Ps. Always keep this up to date
+        },
       });
     case "GOOGLE":
       return ok({
@@ -243,6 +271,10 @@ function getProviderConfig(metadata: PromptMetadata): Result<
         mapper: getMapper("gemini-chat"),
         targetUrl:
           "https://googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "AZURE":
       return ok({
@@ -250,114 +282,189 @@ function getProviderConfig(metadata: PromptMetadata): Result<
         mapper: getMapper("openai-chat"),
         targetUrl:
           "https://AZURE_ENDPOINT/openai/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15",
+        authHeaderConfig: {
+          headerName: "api-key",
+        },
       });
     case "LOCAL":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "http://127.0.0.1/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "HELICONE":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://oai.hconeai.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "AMDBARTEK":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://amdbartek.dev/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "ANYSCALE":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.endpoints.anyscale.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "CLOUDFLARE":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://gateway.ai.cloudflare.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "2YFV":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.2yfv.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "TOGETHER":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.together.xyz/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "LEMONFOX":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.lemonfox.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "FIREWORKS":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.fireworks.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "PERPLEXITY":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.perplexity.ai/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "OPENROUTER":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.openrouter.ai/api/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "WISDOMINANUTSHELL":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.wisdominanutshell.academy/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "GROQ":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.groq.com/openai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "COHERE":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.cohere.ai/v1/chat",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "MISTRAL":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.mistral.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "DEEPINFRA":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.deepinfra.com/v1/openai/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "QSTASH":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://qstash.upstash.io/v1/publish",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "FIRECRAWL":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.firecrawl.dev/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "AWS":
       return ok({
@@ -365,36 +472,60 @@ function getProviderConfig(metadata: PromptMetadata): Result<
         mapper: getMapper("openai-chat"),
         targetUrl:
           "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-v2/invoke",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "DEEPSEEK":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.deepseek.com/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "X":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.x.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "AVIAN":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.avian.io/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "NEBIUS":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.studio.nebius.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     case "NOVITA":
       return ok({
         provider,
         mapper: getMapper("openai-chat"),
         targetUrl: "https://api.novita.ai/v1/chat/completions",
+        authHeaderConfig: {
+          headerName: "Authorization",
+          valuePrefix: "Bearer ",
+        },
       });
     default:
       return err(
@@ -541,31 +672,93 @@ function addChatMessagesToTemplate(
     template.messages = [];
   }
 
-  // Determine the role of the first message to add based on the last message in the array
-  let nextRole: "user" | "assistant" = "user"; // Default to user if no messages exist
+  // Create a copy of the messages array
+  const newMessages = [...template.messages];
 
-  if (template.messages.length > 0) {
-    const lastMessage = template.messages[template.messages.length - 1];
-    // If the last message was from a user, the next one should be from assistant
-    if (lastMessage && lastMessage.role === "user") {
-      nextRole = "assistant";
-    } else {
-      nextRole = "user";
+  // Process chat messages
+  if (chatMessages.length > 0) {
+    // Find the first user message index
+    let userMessageIndex = -1;
+    for (let i = 0; i < newMessages.length; i++) {
+      if (newMessages[i].role === "user") {
+        userMessageIndex = i;
+        break;
+      }
+    }
+
+    // Find the first assistant message index
+    let assistantMessageIndex = -1;
+    for (let i = 0; i < newMessages.length; i++) {
+      if (newMessages[i].role === "assistant") {
+        assistantMessageIndex = i;
+        break;
+      }
+    }
+
+    // Replace user message if it exists and we have at least one chat message
+    if (userMessageIndex !== -1 && chatMessages.length > 0) {
+      newMessages[userMessageIndex] = {
+        _type: "message",
+        role: "user",
+        content: chatMessages[0],
+      };
+    } else if (chatMessages.length > 0) {
+      // No user message found, add one at the beginning (after system message if exists)
+      let systemMessageIndex = -1;
+      for (let i = 0; i < newMessages.length; i++) {
+        if (newMessages[i].role === "system") {
+          systemMessageIndex = i;
+        }
+      }
+
+      const insertPosition =
+        systemMessageIndex !== -1 ? systemMessageIndex + 1 : 0;
+      newMessages.splice(insertPosition, 0, {
+        _type: "message",
+        role: "user",
+        content: chatMessages[0],
+      });
+
+      // Update assistant message index if it exists and was affected by the insertion
+      if (
+        assistantMessageIndex !== -1 &&
+        assistantMessageIndex >= insertPosition
+      ) {
+        assistantMessageIndex++;
+      }
+    }
+
+    // Replace assistant message if it exists and we have at least two chat messages
+    if (assistantMessageIndex !== -1 && chatMessages.length > 1) {
+      newMessages[assistantMessageIndex] = {
+        _type: "message",
+        role: "assistant",
+        content: chatMessages[1],
+      };
+    } else if (chatMessages.length > 1) {
+      // No assistant message found, add one after the user message
+      newMessages.push({
+        _type: "message",
+        role: "assistant",
+        content: chatMessages[1],
+      });
+    }
+
+    // Add any additional chat messages with alternating roles
+    if (chatMessages.length > 2) {
+      let nextRole: "user" | "assistant" = "user"; // Start with user since we just added/replaced an assistant message
+      for (let i = 2; i < chatMessages.length; i++) {
+        newMessages.push({
+          _type: "message",
+          role: nextRole,
+          content: chatMessages[i],
+        });
+        nextRole = nextRole === "user" ? "assistant" : "user";
+      }
     }
   }
 
-  // Add each chat message with alternating roles
-  const messages = template.messages;
-  chatMessages.forEach((messageContent) => {
-    messages.push({
-      _type: "message",
-      role: nextRole,
-      content: messageContent,
-    });
-    // Toggle role for next message
-    nextRole = nextRole === "user" ? "assistant" : "user";
-  });
-
-  template.messages = messages;
+  // Update the template with the new messages
+  template.messages = newMessages;
   return template;
 }
