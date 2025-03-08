@@ -55,25 +55,41 @@ This project includes several optimized development scripts that significantly i
 - `yarn dev:max-perf` - Maximum performance configuration that ignores TypeScript errors
 - `yarn dev:ultimate` - Ultimate performance configuration combining all optimizations
 - `yarn dev:stable` - Most stable optimized configuration, avoids CSS optimization issues
+- `yarn dev:lightning` - ⚡ Extreme performance mode with API mocking and optimizations
 
 ### Performance Metrics
 
 In our tests, we've seen dramatic performance improvements:
 
-| Script               | Initial Page Load | Cached Page Load |
-| -------------------- | ----------------- | ---------------- |
-| `yarn dev:local`     | ~10-15s           | ~1-2s            |
-| `yarn dev:optimized` | ~7s               | ~0.02s           |
-| `yarn dev:max-perf`  | ~7s               | ~0.02s           |
-| `yarn dev:stable`    | ~7s               | ~0.02s           |
+| Script               | Initial Page Load | Cached Page Load | API Response | Notes                                |
+| -------------------- | ----------------- | ---------------- | ------------ | ------------------------------------ |
+| `yarn dev:local`     | ~10-15s           | ~1-2s            | ~2-3s        | Full type checking                   |
+| `yarn dev:optimized` | ~7s               | ~0.02s           | ~2s          | Partial optimizations                |
+| `yarn dev:max-perf`  | ~7s               | ~0.02s           | ~2s          | No type errors                       |
+| `yarn dev:stable`    | ~7s               | ~0.02s           | ~2s          | No CSS optimization issues           |
+| `yarn dev:lightning` | ~3-5s             | ~0.01s           | ~0.05s       | Uses mocked API data, extremely fast |
 
 ### Recommended Usage
 
 For the best development experience:
 
-1. Use `yarn dev:stable` for reliable, fast performance (recommended for most cases)
-2. Use `yarn dev:ultimate` for maximum performance when working on UI or non-critical code
-3. Use `yarn dev:local` when you need the most accurate type checking
+1. Use `yarn dev:lightning` for UI/UX development when you need maximum speed
+2. Use `yarn dev:stable` for reliable, fast performance (recommended for most cases)
+3. Use `yarn dev:ultimate` for maximum performance when working with real API data
+4. Use `yarn dev:local` when you need the most accurate type checking
+
+### Lightning Mode
+
+Lightning mode (`yarn dev:lightning`) is designed for the fastest possible development experience:
+
+- Mocks API responses with realistic data for near-instant response times
+- Disables expensive calculations and validations
+- Optimizes webpack configuration for fastest build times
+- Increases memory allocation and caching for better performance
+- Reduces unnecessary console warnings
+- Perfect for UI development and design iterations
+
+Note: Lightning mode uses mock data instead of real API calls. Use this mode when you're primarily working on UI components or layouts and don't need real-time data.
 
 ### Troubleshooting
 

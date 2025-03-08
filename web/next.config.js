@@ -6,6 +6,9 @@ const { configureRuntimeEnv } = require("next-runtime-env/build/configure");
 
 configureRuntimeEnv();
 
+// Check if we're in lightning mode
+const isLightningMode = process.env.DISABLE_API_CALLS === "true";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Speed up development by disabling strict mode
@@ -15,9 +18,9 @@ const nextConfig = {
   // Improve development performance
   onDemandEntries: {
     // Keep pages in memory longer (25 seconds)
-    maxInactiveAge: 25 * 1000,
+    maxInactiveAge: isLightningMode ? 60 * 1000 : 25 * 1000, // Even longer in lightning mode
     // Load more pages simultaneously
-    pagesBufferLength: 5,
+    pagesBufferLength: isLightningMode ? 10 : 5, // More pages in lightning mode
   },
   // Disable source maps in development
   productionBrowserSourceMaps: false,
@@ -59,6 +62,11 @@ const nextConfig = {
       "@radix-ui",
       "recharts",
     ],
+    // Simpler lightning mode optimizations
+    ...(isLightningMode &&
+      {
+        // Only use stable features in lightning mode
+      }),
   },
 };
 

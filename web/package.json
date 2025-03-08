@@ -16,6 +16,7 @@
     "dev:ultimate": "TSC_COMPILE_ON_ERROR=true TYPESCRIPT_SKIP_CHECKING=1 NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings --max-http-header-size=16384' next dev -p 3015",
     "dev:stable": "NODE_ENV=development NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings' next dev -p 3016",
     "dev:preview": "vercel env pull .env --environment preview && next dev -p 3001",
+    "dev:lightning": "DISABLE_API_CALLS=true TSC_COMPILE_ON_ERROR=true TYPESCRIPT_SKIP_CHECKING=1 NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192 --no-warnings' next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "build-and-start": "next build && next start",

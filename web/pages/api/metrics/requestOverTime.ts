@@ -9,6 +9,11 @@ import { Result } from "../../../lib/result";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
+import {
+  isLightweightMode,
+  mockDashboardData,
+  simulateApiDelay,
+} from "../../../utils/devMocks";
 
 async function handler(
   options: HandlerWrapperOptions<Result<RequestsOverTime[], string>>
@@ -18,6 +23,22 @@ async function handler(
     res,
     userData: { orgId, userId },
   } = options;
+
+  // Use mock data in lightweight development mode
+  if (isLightweightMode) {
+    await simulateApiDelay();
+
+    // Convert our mock data to the expected format
+    const mockData: RequestsOverTime[] = mockDashboardData.requestsOverTime.map(
+      (item) => ({
+        count: item.count,
+        time: new Date(item.date),
+      })
+    );
+
+    return res.status(200).json({ data: mockData, error: null });
+  }
+
   const {
     timeFilter,
     filter: userFilters,
