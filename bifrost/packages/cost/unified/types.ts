@@ -1,5 +1,5 @@
-import { MapperName, PathMapper } from "@/llm-mapper/path-mapper";
-import { LLMRequestBody } from "@/llm-mapper/types";
+import { MapperName, PathMapper } from "../../llm-mapper/path-mapper";
+import { LLMRequestBody } from "../../llm-mapper/types";
 
 // Define the three main model creators we're focusing on
 export type Creator = "OpenAI" | "Anthropic" | "Google";
@@ -39,7 +39,7 @@ export interface TokenCost {
 // Parameters that can be applied at provider or model level
 export interface Parameters {
   max_tokens?: number;
-  reasoning_effort?: boolean;
+  reasoning_effort?: "low" | "medium" | "high";
   endpoint?: string;
   mapper?: PathMapper<unknown, LLMRequestBody>;
   [key: string]: any; // Allow for additional parameters

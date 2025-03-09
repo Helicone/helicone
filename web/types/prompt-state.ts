@@ -1,4 +1,4 @@
-import { SupportedProviders } from "@/utils/generate";
+import { Provider } from "@/packages/cost/unified/types";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
@@ -21,7 +21,7 @@ export interface PromptState {
 }
 
 export interface StateParameters {
-  provider: SupportedProviders;
+  provider: Provider;
   model: string;
   temperature: number;
   reasoning_effort?: "low" | "medium" | "high";

@@ -1,4 +1,4 @@
-import { getMapper } from "@/llm-mapper/path-mapper";
+import { getMapper } from "../../llm-mapper/path-mapper";
 import { getProviderConfig } from "./providers";
 import { Creator, CreatorModelMapping, Parameters, Provider } from "./types";
 
@@ -34,7 +34,7 @@ export const modelMapping: CreatorModelMapping = {
         output: 0,
       },
       defaultParameters: {
-        reasoning_effort: true,
+        reasoning_effort: "medium",
       },
       providers: [
         {
@@ -57,7 +57,7 @@ export const modelMapping: CreatorModelMapping = {
         output: 0,
       },
       defaultParameters: {
-        reasoning_effort: true,
+        reasoning_effort: "medium",
       },
       providers: [
         {
@@ -382,4 +382,96 @@ export function getModelConfig(
     authHeaderConfig: providerConfig.authHeaderConfig,
     defaultHeaders: providerConfig.defaultHeaders,
   };
+}
+
+/**
+ * Find the creator for a given provider and model string
+ */
+export function findCreatorForProviderAndModel(
+  provider: Provider,
+  modelString: string
+): Creator | null {
+  // Iterate through all creators
+  for (const creator of Object.keys(modelMapping) as Creator[]) {
+    const creatorModels = modelMapping[creator];
+
+    // Iterate through all models for this creator
+    for (const modelName of Object.keys(creatorModels)) {
+      const modelConfig = creatorModels[modelName];
+
+      // Check if any provider implementation matches
+      const match = modelConfig.providers.find(
+        (p) => p.provider === provider && p.modelString === modelString
+      );
+
+      if (match) {
+        return creator;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get all available models for a specific provider
+ */
+export function getModelsForProvider(
+  provider: Provider
+): { creator: Creator; modelName: string; modelString: string }[] {
+  const result: { creator: Creator; modelName: string; modelString: string }[] =
+    [];
+
+  // Iterate through all creators
+  for (const creator of Object.keys(modelMapping) as Creator[]) {
+    const creatorModels = modelMapping[creator];
+
+    // Iterate through all models for this creator
+    for (const modelName of Object.keys(creatorModels)) {
+      const modelConfig = creatorModels[modelName];
+
+      // Check if any provider implementation matches
+      const match = modelConfig.providers.find((p) => p.provider === provider);
+
+      if (match) {
+        result.push({
+          creator,
+          modelName,
+          modelString: match.modelString,
+        });
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get model information from a model string
+ */
+export function getModelInfoFromModelString(
+  modelString: string
+): { creator: Creator; modelName: string; provider: Provider } | null {
+  // Iterate through all creators
+  for (const creator of Object.keys(modelMapping) as Creator[]) {
+    const creatorModels = modelMapping[creator];
+
+    // Iterate through all models for this creator
+    for (const modelName of Object.keys(creatorModels)) {
+      const modelConfig = creatorModels[modelName];
+
+      // Check if any provider implementation matches
+      for (const providerModel of modelConfig.providers) {
+        if (providerModel.modelString === modelString) {
+          return {
+            creator,
+            modelName,
+            provider: providerModel.provider,
+          };
+        }
+      }
+    }
+  }
+
+  return null;
 }

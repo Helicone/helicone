@@ -46,7 +46,6 @@ import {
   $user,
   findClosestModel,
   findClosestProvider,
-  PROVIDER_MODELS,
 } from "@/utils/generate";
 import {
   isLastMessageUser,
@@ -163,7 +162,8 @@ export default function PromptEditor({
     if (
       state?.parameters?.provider === "OPENAI" ||
       state?.parameters?.provider === "ANTHROPIC" ||
-      state?.parameters?.provider === "GOOGLE"
+      state?.parameters?.provider === "GOOGLE_GEMINI" ||
+      state?.parameters?.provider === "GOOGLE_VERTEXAI"
     ) {
       return (
         state?.messages.some(
@@ -335,7 +335,7 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider as keyof typeof PROVIDER_MODELS,
+          provider: provider,
           model: model,
           temperature: templateData.temperature ?? 1,
           tools: templateData.tools ?? [],
@@ -929,7 +929,7 @@ export default function PromptEditor({
         setState({
           messages: basePrompt.body.messages || [],
           parameters: {
-            provider: provider as keyof typeof PROVIDER_MODELS,
+            provider: provider,
             model: model,
             temperature: basePrompt.body.temperature ?? 1,
             max_tokens: basePrompt.body.max_tokens ?? undefined,
