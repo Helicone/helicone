@@ -71,10 +71,10 @@ assert response.choices[0].text is not None
 **Helicone container builds**
 
 ```
-docker build --platform linux/amd64 -t helicone/supabase-migration-runner -f dockerfiles/dockerfile_migration_runner .
-docker build -t helicone/worker -f dockerfiles/dockerfile_worker .
-docker build -t helicone/web -f dockerfiles/dockerfile_web .
-docker build -t helicone/clickhouse-migration-runner -f dockerfiles/dockerfile_clickhouse_migration_runner . --no-cache
+docker build --platform linux/amd64 -t helicone/supabase-migration-runner -f dockerfiles/dockerfile_supabase_migration_runner ../supabase
+docker build -t helicone/worker -f dockerfiles/dockerfile_worker ../worker
+docker build -t helicone/web -f dockerfiles/dockerfile_web ../web
+docker build -t helicone/clickhouse-migration-runner -f dockerfiles/dockerfile_clickhouse_migration_runner ../clickhouse --no-cache
 ```
 
 ## Background

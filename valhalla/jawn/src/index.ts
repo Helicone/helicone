@@ -77,6 +77,7 @@ const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
+  console.log("Starting Kafka consumers");
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
