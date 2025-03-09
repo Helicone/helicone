@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -93,6 +93,23 @@ export const UpgradeProDialog = ({
   const promptsPrice = useCostForPrompts();
   const evalsPrice = useCostForEvals();
   const experimentsPrice = useCostForExperiments();
+
+  // Initialize selected addons based on featureName
+  useEffect(() => {
+    console.log("featureName", featureName);
+    if (open && featureName) {
+      // Convert featureName to lowercase to match addon keys
+      const featureKey = featureName.toLowerCase() as keyof Addons;
+
+      // Check if the featureKey is a valid addon key
+      if (featureKey in selectedAddons) {
+        setSelectedAddons((prev) => ({
+          ...prev,
+          [featureKey]: true,
+        }));
+      }
+    }
+  }, [open, featureName]);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -327,9 +344,6 @@ export const UpgradeProDialog = ({
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <P className="text-2xl font-bold">$200/mo</P>
-                  <Small className="text-primary font-medium">
-                    Save $100+/mo (33%)
-                  </Small>
                 </div>
               </div>
 

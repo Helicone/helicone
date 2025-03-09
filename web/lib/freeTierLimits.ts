@@ -87,10 +87,12 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.experiments,
         },
         variants: {
-          getLimit: () => 2,
+          getLimit: () => 3,
           description: (limit) =>
             `You can create up to ${limit} variants per experiment`,
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.experiments,
+          upgradeMessage: (limit, used) =>
+            `You've used ${used}/${limit} variants. Upgrade for unlimited access.`,
         },
       },
     },
@@ -99,14 +101,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
         getLimit: () => 3,
         description: (limit) =>
           `You can create up to ${limit} evaluators with the free tier`,
-        upgradeFeatureName: FEATURE_DISPLAY_NAMES.evals,
+        upgradeFeatureName: "evals",
+        upgradeMessage: (limit, used) =>
+          `You've used ${used}/${limit} evaluators. Upgrade for unlimited access.`,
       },
       subfeatures: {
         runs: {
           getLimit: () => 10,
           description: (limit) =>
             `You can perform up to ${limit} evaluation runs per evaluator`,
-          upgradeFeatureName: FEATURE_DISPLAY_NAMES.evals,
+          upgradeFeatureName: "evals",
         },
       },
     },

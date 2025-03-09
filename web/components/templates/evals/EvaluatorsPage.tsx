@@ -15,23 +15,11 @@ import { useEvalPanelStore } from "./store/evalPanelStore";
 import { useOrg } from "@/components/layout/org/organizationContext";
 
 const EvalsPage = () => {
-  const hasAccess = useHasAccess("evals");
   const org = useOrg();
   const { panels } = useEvalPanelStore();
 
   if (!org?.currentOrg?.tier) {
     return null;
-  }
-
-  if (!hasAccess) {
-    return (
-      <>
-        <AuthHeader title={null} />
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <EvalsPreview />
-        </div>
-      </>
-    );
   }
 
   return (
