@@ -1,11 +1,11 @@
 { 
-  "title": "Improving AI Agents: The Full Developer Guide to Building Effective AI Agents",
-  "title1": "Improving AI Agents: The Full Developer Guide to Building Effective AI Agents",
-  "title2": "Improving AI Agents: The Full Developer Guide to Building Effective AI Agents",
-  "description": "Learn everything about building and constantly improving actually useful AI agents",
-  "images": "/static/blog/chain-of-draft/chain-of-draft-cover.webp",
+  "title": "The Full Developer Guide to Building Effective AI Agents",
+  "title1": "The Full Developer Guide to Building Effective AI Agents",
+  "title2": "The Full Developer Guide to Building Effective AI Agents",
+  "description": "Learn everything about building reliable AI agents that deliver real business values. ",
+  "images": "/static/blog/full-guide-to-improving-ai-agents/build-effective-agents.webp",
   "time": "6 minute read",
   "author": "Yusuf Ishola",
-  "date": "March 5, 2025", 
-  "badge": "guide"
+  "date": "March 9, 2025", 
+  "badge": "how-to"
 }
