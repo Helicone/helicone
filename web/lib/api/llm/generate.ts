@@ -16,7 +16,7 @@ export interface GenerateParams {
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
   includeReasoning?: boolean;
-  reasoningEffort?: "low" | "medium" | "high";
+  reasoning_effort?: "low" | "medium" | "high";
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;

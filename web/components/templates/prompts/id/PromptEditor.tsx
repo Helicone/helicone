@@ -733,8 +733,8 @@ export default function PromptEditor({
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "DEEPSEEK",
-        model: "deepseek-r1",
+        provider: "OPENROUTER",
+        model: "anthropic/claude-3.7-sonnet:thinking",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
         includeReasoning: true,
