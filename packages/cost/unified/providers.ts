@@ -36,7 +36,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
       headerName: "Authorization",
     },
     defaultMapper: "anthropic-chat",
-    defaultEndpoint: "/model/{model}/invoke",
+    defaultEndpoint: "/model/{modelString}/invoke",
   },
   GOOGLE_GEMINI: {
     baseUrl: "https://generativelanguage.googleapis.com",
@@ -44,7 +44,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
       headerName: "x-goog-api-key",
     },
     defaultMapper: "gemini-chat",
-    defaultEndpoint: "/v1beta/models/{model}",
+    defaultEndpoint: "/v1beta/models/{modelString}:generateContent",
   },
   GOOGLE_VERTEXAI: {
     baseUrl: "https://{REGION}-aiplatform.googleapis.com",
@@ -54,7 +54,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "gemini-chat",
     defaultEndpoint:
-      "/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{model}:generateContent",
+      "/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{modelString}:generateContent",
   },
   OPENROUTER: {
     baseUrl: "https://api.openrouter.ai",
@@ -75,19 +75,95 @@ export function getProviderConfig(provider: Provider): ProviderConfig {
 // Helper function to build a full URL for a provider
 export function buildProviderUrl(
   provider: Provider,
-  endpoint?: string,
-  modelId?: string
+  modelString?: string,
+  providerSettings?: {
+    region?: string;
+    project?: string;
+    location?: string;
+    endpoint?: string;
+    deployment?: string;
+  }
 ): string {
   const config = providerConfigs[provider];
-  const finalEndpoint = endpoint || config.defaultEndpoint;
+  const finalEndpoint = providerSettings?.endpoint || config.defaultEndpoint;
 
   // Replace any placeholders in the endpoint
   let processedEndpoint = finalEndpoint;
-  if (modelId) {
-    processedEndpoint = processedEndpoint
-      .replace("{model}", modelId)
-      .replace("{modelId}", modelId);
+  if (modelString) {
+    processedEndpoint = processedEndpoint.replace(
+      /{modelString}/g,
+      modelString
+    );
   }
 
-  return `${config.baseUrl}${processedEndpoint}`;
+  // Process the baseUrl to replace any lowercase templates
+  let processedBaseUrl = config.baseUrl;
+
+  // For lowercase templates like {modelString} in baseUrl, replace with modelId
+  if (modelString) {
+    processedBaseUrl = processedBaseUrl.replace(/{modelString}/g, modelString);
+  }
+
+  // Replace ALLCAPS templates with provided values
+  if (providerSettings?.region) {
+    processedBaseUrl = processedBaseUrl.replace(
+      /{REGION}/g,
+      providerSettings.region
+    );
+    processedEndpoint = processedEndpoint.replace(
+      /{REGION}/g,
+      providerSettings.region
+    );
+  }
+
+  if (providerSettings?.project) {
+    processedBaseUrl = processedBaseUrl.replace(
+      /{PROJECT}/g,
+      providerSettings.project
+    );
+    processedEndpoint = processedEndpoint.replace(
+      /{PROJECT}/g,
+      providerSettings.project
+    );
+  }
+
+  if (providerSettings?.location) {
+    processedBaseUrl = processedBaseUrl.replace(
+      /{LOCATION}/g,
+      providerSettings.location
+    );
+    processedEndpoint = processedEndpoint.replace(
+      /{LOCATION}/g,
+      providerSettings.location
+    );
+  }
+
+  if (providerSettings?.endpoint) {
+    processedBaseUrl = processedBaseUrl.replace(
+      /{ENDPOINT}/g,
+      providerSettings.endpoint
+    );
+  }
+
+  if (providerSettings?.deployment) {
+    processedBaseUrl = processedBaseUrl.replace(
+      /{DEPLOYMENT}/g,
+      providerSettings.deployment
+    );
+    processedEndpoint = processedEndpoint.replace(
+      /{DEPLOYMENT}/g,
+      providerSettings.deployment
+    );
+  }
+
+  // Final check to ensure all placeholders are replaced
+  // This is a safety measure to catch any remaining placeholders
+  const finalUrl = `${processedBaseUrl}${processedEndpoint}`;
+
+  // If there are still placeholders, log a warning
+  if (finalUrl.includes("{") && finalUrl.includes("}")) {
+    console.warn(`Warning: URL still contains placeholders: ${finalUrl}`);
+  }
+
+  return finalUrl;
 }

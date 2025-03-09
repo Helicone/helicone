@@ -298,8 +298,11 @@ const toExternalContents = (messages: Message[]): any[] => {
       });
     }
 
+    // Convert system role to user role
+    const role = message.role === "system" ? "user" : message.role || "user";
+
     return {
-      role: message.role || "user",
+      role: role,
       parts,
     };
   });

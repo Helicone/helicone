@@ -8,9 +8,12 @@ import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { err, ok, Result } from "../lib/util/results";
-import { providersNames } from "../packages/cost/providers/mappings";
-import { getMapper } from "../packages/llm-mapper/path-mapper";
-import { PathMapper } from "../packages/llm-mapper/path-mapper/core";
+import {
+  buildProviderUrl,
+  getProviderConfig as getUnifiedProviderConfig,
+} from "../packages/cost/unified/providers";
+import { Provider } from "../packages/cost/unified/types";
+import { getMapper, PathMapper } from "../packages/llm-mapper/path-mapper";
 import { LLMRequestBody } from "../packages/llm-mapper/types";
 import { gatewayForwarder } from "./gatewayRouter";
 
@@ -60,8 +63,6 @@ const generateHandler = async (
 
     // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE WITH ZOD
     const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
-
-    // 3. Validate parameters with Zod
     const paramsResult = generateParamsSchema.safeParse(rawBody);
     if (!paramsResult.success) {
       return createErrorResponse(
@@ -76,7 +77,7 @@ const generateHandler = async (
     }
     const parameters = paramsResult.data;
 
-    // 4. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
+    // 3. GET PROMPT BASED ON ORG ID, REQUEST ID, AND VERSION
     const promptResult = await getPromptVersion({
       supabaseClient: db.getClient(),
       orgId: orgData.organizationId,
@@ -95,9 +96,13 @@ const generateHandler = async (
       );
     }
 
-    // 5. GET PROVIDER CONFIG (TARGET URL, PROVIDER, MAPPER)
+    // 4. GET PROVIDER CONFIG (TARGET URL, PROVIDER, MAPPER)
     const metadata = promptResult.data.metadata as PromptMetadata;
-    const providerResult = getProviderConfig(metadata);
+    const providerResult = getProviderConfig(
+      metadata,
+      requestWrapper.getHeaders(),
+      promptResult.data.helicone_template as unknown as LLMRequestBody
+    );
     if (providerResult.error || !providerResult.data) {
       return createErrorResponse(
         providerResult.error || "Failed to get provider info",
@@ -109,7 +114,7 @@ const generateHandler = async (
     const { provider, mapper, targetUrl, authHeaderConfig, defaultHeaders } =
       providerResult.data;
 
-    // 6. BUILD REQUEST HEADERS
+    // 5. BUILD REQUEST HEADERS
     // a. Get provider API key
     const providerApiKey = requestWrapper
       .getHeaders()
@@ -123,8 +128,12 @@ const generateHandler = async (
       );
     }
     // b. Set basic headers
-    const requestHeaders = new Headers(requestWrapper.getHeaders());
+    const requestHeaders = new Headers();
     requestHeaders.set("Content-Type", "application/json");
+    requestHeaders.set(
+      "Helicone-Auth",
+      `${requestWrapper.getHeaders().get("Helicone-Auth")}`
+    );
     // Use the provider-specific auth header configuration
     requestHeaders.set(
       authHeaderConfig.headerName,
@@ -139,7 +148,7 @@ const generateHandler = async (
         requestHeaders.set(key, value);
       });
     }
-    // c. Set properties parameters
+    // c. Set properties parameters as headers
     if (parameters.properties?.userId) {
       requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
     }
@@ -158,7 +167,7 @@ const generateHandler = async (
     // d. Set promptId property
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
 
-    // 7. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
+    // 6. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
     // a. Autofill inputs
     const inputs = parameters.inputs || {};
     const filledTemplate = autoFillInputs({
@@ -173,12 +182,19 @@ const generateHandler = async (
     // c. Map from LLMRequestBody type to provider body type
     const requestTemplate = mapper.toExternal(filledTemplate);
 
-    // 8. FORWARD REQUEST TO PROVIDER
+    // 7. FORWARD REQUEST TO PROVIDER
     const newRequest = new Request(targetUrl, {
       method: "POST",
       headers: requestHeaders,
       body: JSON.stringify(requestTemplate),
     });
+    console.log("New request:", {
+      targetUrl,
+      headers: requestHeaders,
+      body: JSON.stringify(requestTemplate),
+    });
+
+    // 8. EXECUTE REQUEST TO PROVIDER
     const newWrapperResult = await RequestWrapper.create(newRequest, env);
     if (newWrapperResult.error || !newWrapperResult.data) {
       return createErrorResponse(
@@ -216,13 +232,18 @@ export const getGenerateRouter = (router: RouterType): RouterType => {
 };
 
 /**
- * Extract provider, mapper, and target URL from metadata
  *
- * FUTURE: Use next-gen unified costs package + llm-mapper
+ * Get provider configuration using the unified cost package
+ * This implementation uses the new unified cost package to get provider configuration
+ * and build target URLs, which provides a more consistent and maintainable approach.
  */
-function getProviderConfig(metadata: PromptMetadata): Result<
+function getProviderConfig(
+  metadata: PromptMetadata,
+  headers?: Headers,
+  template?: LLMRequestBody
+): Result<
   {
-    provider: (typeof providersNames)[number];
+    provider: Provider;
     mapper: PathMapper<unknown, LLMRequestBody>;
     targetUrl: string;
     authHeaderConfig: {
@@ -234,303 +255,65 @@ function getProviderConfig(metadata: PromptMetadata): Result<
   string
 > {
   // Validate provider exists
-  const provider = metadata.provider?.toUpperCase();
-  if (!provider) {
+  const providerName = metadata.provider?.toUpperCase();
+  if (!providerName) {
     return err(
       "Provider configuration error: No provider specified in prompt metadata"
     );
   }
 
-  // Use switch to return the complete configuration in one go
-  switch (provider) {
-    case "OPENAI":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.openai.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "ANTHROPIC":
-      return ok({
-        provider,
-        mapper: getMapper("anthropic-chat"),
-        targetUrl: "https://api.anthropic.com/v1/messages",
-        authHeaderConfig: {
-          headerName: "x-api-key",
-        },
-        defaultHeaders: {
-          "anthropic-version": "2023-06-01", // Ps. Always keep this up to date
-        },
-      });
-    case "GOOGLE":
-      return ok({
-        provider,
-        mapper: getMapper("gemini-chat"),
-        targetUrl:
-          "https://googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "AZURE":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl:
-          "https://AZURE_ENDPOINT/openai/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15",
-        authHeaderConfig: {
-          headerName: "api-key",
-        },
-      });
-    case "LOCAL":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "http://127.0.0.1/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "HELICONE":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://oai.hconeai.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "AMDBARTEK":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://amdbartek.dev/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "ANYSCALE":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.endpoints.anyscale.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "CLOUDFLARE":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://gateway.ai.cloudflare.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "2YFV":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.2yfv.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "TOGETHER":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.together.xyz/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "LEMONFOX":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.lemonfox.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "FIREWORKS":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.fireworks.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "PERPLEXITY":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.perplexity.ai/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "OPENROUTER":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.openrouter.ai/api/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "WISDOMINANUTSHELL":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.wisdominanutshell.academy/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "GROQ":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.groq.com/openai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "COHERE":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.cohere.ai/v1/chat",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "MISTRAL":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.mistral.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "DEEPINFRA":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.deepinfra.com/v1/openai/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "QSTASH":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://qstash.upstash.io/v1/publish",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "FIRECRAWL":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.firecrawl.dev/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "AWS":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl:
-          "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-v2/invoke",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "DEEPSEEK":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.deepseek.com/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "X":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.x.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "AVIAN":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.avian.io/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "NEBIUS":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.studio.nebius.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    case "NOVITA":
-      return ok({
-        provider,
-        mapper: getMapper("openai-chat"),
-        targetUrl: "https://api.novita.ai/v1/chat/completions",
-        authHeaderConfig: {
-          headerName: "Authorization",
-          valuePrefix: "Bearer ",
-        },
-      });
-    default:
+  // Check if the provider is supported in the unified cost package
+  try {
+    const provider = providerName as Provider;
+    const config = getUnifiedProviderConfig(provider);
+    if (!config) {
       return err(
-        `Provider configuration error: Unsupported provider ${provider}`
+        `Provider configuration error: Unsupported provider ${providerName}`
       );
+    }
+
+    // Extract provider-specific configuration from headers
+    const providerSettings: {
+      region?: string;
+      project?: string;
+      location?: string;
+      endpoint?: string;
+      deployment?: string;
+    } = {};
+
+    if (headers) {
+      const regionKey = `${providerName}_REGION`;
+      const projectKey = `${providerName}_PROJECT`;
+      const locationKey = `${providerName}_LOCATION`;
+
+      if (headers.has(regionKey)) {
+        providerSettings.region = headers.get(regionKey) || undefined;
+      }
+
+      if (headers.has(projectKey)) {
+        providerSettings.project = headers.get(projectKey) || undefined;
+      }
+
+      if (headers.has(locationKey)) {
+        providerSettings.location = headers.get(locationKey) || undefined;
+      }
+    }
+
+    const modelString = template?.model;
+    const targetUrl = buildProviderUrl(provider, modelString, providerSettings);
+    console.log("Target URL:", targetUrl);
+
+    return ok({
+      provider,
+      mapper: getMapper(config.defaultMapper),
+      targetUrl,
+      authHeaderConfig: config.authHeaderConfig,
+      defaultHeaders: config.defaultHeaders,
+    });
+  } catch (error) {
+    return err(
+      `Provider configuration error: Unsupported provider ${providerName}`
+    );
   }
 }
 
@@ -614,7 +397,7 @@ async function getPromptVersion({
   return ok(promptVersion);
 }
 type PromptMetadata = {
-  provider?: (typeof providersNames)[number];
+  provider?: Provider;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
