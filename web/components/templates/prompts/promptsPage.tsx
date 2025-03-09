@@ -22,7 +22,7 @@ import {
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
 import {
   useCreatePrompt,
@@ -35,11 +35,13 @@ import ThemedTabs from "../../shared/themed/themedTabs";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { Button } from "../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
-import PromptsPreview from "../featurePreview/promptsPreview";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { P } from "@/components/ui/typography";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -52,15 +54,14 @@ const PromptsPage = (props: PromptsPageProps) => {
   const router = useRouter();
   const { createPrompt, isCreating } = useCreatePrompt();
   const searchParams = useSearchParams();
-  const hasAccess = useHasAccess("prompts");
+  const promptCount = prompts?.length ?? 0;
+  const { canCreate, hasReachedLimit, hasFullAccess, upgradeMessage } =
+    useFeatureLimit("prompts", promptCount);
 
   // DERIVED STATE
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
-  const hasLimitedAccess = useMemo(() => {
-    return !hasAccess && (prompts?.length ?? 0) > 0;
-  }, [hasAccess, prompts?.length]);
 
   // EVENT HANDLERS
   const handleCreatePrompt = async () => {
@@ -101,27 +102,29 @@ const PromptsPage = (props: PromptsPageProps) => {
       <AuthHeader
         className="min-w-full"
         title={
-          hasAccess || hasLimitedAccess ? (
-            <div className="flex items-center gap-2">
-              Prompts
-              {hasLimitedAccess && (
-                <InfoBox className="ml-4">
-                  <p className="text-sm font-medium flex gap-2">
-                    <b>Need to create new prompts?</b>
-                    <ProFeatureWrapper featureName="Prompts">
-                      <button className="underline">
-                        Get unlimited prompts & more.
-                      </button>
-                    </ProFeatureWrapper>
-                  </p>
-                </InfoBox>
-              )}
-            </div>
-          ) : null
+          <div className="flex items-center gap-2">
+            Prompts
+            {hasReachedLimit && (
+              <InfoBox className="ml-4" variant="warning">
+                <div className="flex items-center gap-2">
+                  {upgradeMessage || "Free tier limit reached"}
+                  <FreeTierLimitWrapper
+                    feature="prompts"
+                    itemCount={promptCount}
+                  >
+                    <Button variant="action" size="xs">
+                      Upgrade
+                    </Button>
+                  </FreeTierLimitWrapper>
+                </div>
+              </InfoBox>
+            )}
+          </div>
         }
         actions={
-          hasAccess ? (
-            <>
+          <>
+            {/* Always show create button but use FreeTierLimitWrapper to block if limit reached */}
+            <FreeTierLimitWrapper feature="prompts" itemCount={promptCount}>
               <Button
                 variant="action"
                 onClick={handleCreatePrompt}
@@ -134,23 +137,24 @@ const PromptsPage = (props: PromptsPageProps) => {
                 )}
                 {isCreating ? "Creating..." : "New Prompt"}
               </Button>
+            </FreeTierLimitWrapper>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="text-slate-700" variant="link" size="sm">
-                    Import from Code
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
-                  <DialogHeader>
-                    <DialogTitle>Import from Code</DialogTitle>
-                  </DialogHeader>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="text-slate-700" variant="link" size="sm">
+                  Import from Code
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Import from Code</DialogTitle>
+                </DialogHeader>
 
-                  {/* TODO: Allow for Python tab as well */}
-                  <DiffHighlight
-                    className="h-full"
-                    maxHeight={false}
-                    code={`
+                {/* TODO: Allow for Python tab as well */}
+                <DiffHighlight
+                  className="h-full"
+                  maxHeight={false}
+                  code={`
 // 1. Add this line
 import { hpf } from "@helicone/prompts";
 
@@ -172,15 +176,14 @@ const chatCompletion = await openai.chat.completions.create(
     },
   }
 );`}
-                    language="tsx"
-                    newLines={[]}
-                    oldLines={[]}
-                    minHeight={false}
-                  />
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : null
+                  language="tsx"
+                  newLines={[]}
+                  oldLines={[]}
+                  minHeight={false}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
         }
       />
 
@@ -191,8 +194,8 @@ const chatCompletion = await openai.chat.completions.create(
         </div>
       ) : (
         <>
-          {(hasAccess || hasLimitedAccess) && (prompts?.length ?? 0) > 0 && (
-            // Search & Card/Table View Toggle
+          {/* Search & Card/Table View Toggle */}
+          {promptCount > 0 && (
             <div
               id="util"
               className="flex flex-row justify-between items-center px-8 shrink-0"
@@ -230,8 +233,9 @@ const chatCompletion = await openai.chat.completions.create(
             </div>
           )}
 
-          {hasAccess && (prompts?.length ?? 0) === 0 ? (
-            // No Prompts to Display
+          {/* Content Based on State */}
+          {promptCount === 0 ? (
+            // No Prompts to Display - show this to everyone
             <div className="flex items-center justify-center mt-[20rem]">
               <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
                 <div className="flex flex-col items-center justify-center gap-2">
@@ -271,7 +275,7 @@ const chatCompletion = await openai.chat.completions.create(
                 </div>
               </div>
             </div>
-          ) : filteredPrompts && (hasAccess || hasLimitedAccess) ? (
+          ) : filteredPrompts && filteredPrompts.length > 0 ? (
             searchParams.get("view") === "card" ? (
               // Card View
               <ul
@@ -288,7 +292,7 @@ const chatCompletion = await openai.chat.completions.create(
             ) : (
               // Table View
               <SimpleTable
-                data={filteredPrompts}
+                data={filteredPrompts ?? []}
                 columns={[
                   {
                     key: "user_defined_id",
@@ -387,8 +391,17 @@ const chatCompletion = await openai.chat.completions.create(
               />
             )
           ) : (
-            // Feature Upsell
-            <PromptsPreview />
+            // Fallback for when filtering returns no results
+            <div className="flex items-center justify-center mt-[10rem]">
+              <div className="flex flex-col items-center justify-center gap-6 px-4 text-center max-w-lg">
+                <p className="text-gray-500 text-lg">
+                  No prompts match your search criteria.
+                </p>
+                <Button variant="outline" onClick={() => setSearchName("")}>
+                  Clear Search
+                </Button>
+              </div>
+            </div>
           )}
         </>
       )}
