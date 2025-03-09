@@ -345,6 +345,7 @@ export default function ParametersPanel({
         <h2 className="font-semibold text-secondary">Parameters</h2>
       </GlassHeader>
       <div className="divide-y divide-slate-100 dark:divide-slate-900 px-4">
+        {/* Creator / Model / Provider */}
         <div className="flex flex-row items-center justify-between gap-4 py-1 first:pt-0">
           <div className="flex items-center gap-2">
             <PiPlugsBold className="text-secondary" />
@@ -397,6 +398,8 @@ export default function ParametersPanel({
             </Select>
           </div>
         </div>
+
+        {/* Temperature */}
         <div className="flex flex-row items-center justify-between gap-4 py-2">
           <div className="flex items-center gap-2">
             {parameters.temperature < 1 ? (
@@ -423,6 +426,36 @@ export default function ParametersPanel({
             />
           </div>
         </div>
+
+        {/* Max Tokens */}
+        {maxTokens && (
+          <div className="flex flex-row items-center justify-between gap-4 py-2">
+            <div className="flex items-center gap-2">
+              <PiCoinsBold className="text-secondary" />
+              <label className="text-sm font-medium text-secondary">
+                Max Tokens
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">
+                {parameters.max_tokens?.toLocaleString()}
+              </span>
+              <Slider
+                value={[parameters.max_tokens ?? 1024]}
+                min={1024}
+                max={maxTokens}
+                step={1024}
+                onValueChange={([value]) =>
+                  onParameterChange({ max_tokens: value })
+                }
+                className="h-8 w-48"
+                variant="action"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Reasoning Effort */}
         {supportsReasoningEffort && (
           <div className="flex flex-row items-center justify-between gap-4 py-2">
             <div className="flex items-center gap-2">
@@ -449,32 +482,6 @@ export default function ParametersPanel({
                   <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-        )}
-        {maxTokens && (
-          <div className="flex flex-row items-center justify-between gap-4 py-2">
-            <div className="flex items-center gap-2">
-              <PiCoinsBold className="text-secondary" />
-              <label className="text-sm font-medium text-secondary">
-                Max Tokens
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">
-                {parameters.max_tokens?.toLocaleString()}
-              </span>
-              <Slider
-                value={[parameters.max_tokens ?? 1024]}
-                min={1024}
-                max={maxTokens}
-                step={1024}
-                onValueChange={([value]) =>
-                  onParameterChange({ max_tokens: value })
-                }
-                className="h-8 w-48"
-                variant="action"
-              />
             </div>
           </div>
         )}
