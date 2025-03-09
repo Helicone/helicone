@@ -6,12 +6,14 @@ interface ProFeatureWrapperProps {
   children: React.ReactElement;
   featureName: FeatureName;
   enabled?: boolean;
+  limitMessage?: string;
 }
 
 export const ProFeatureWrapper = forwardRef<
   HTMLElement,
   ProFeatureWrapperProps
->(({ children, featureName, enabled = true }, ref) => {
+>(({ children, featureName, enabled = true, limitMessage }, ref) => {
+  console.log("featureName", featureName);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { hasAccess } = useProFeature(featureName, enabled);
 
@@ -42,6 +44,7 @@ export const ProFeatureWrapper = forwardRef<
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         featureName={featureName}
+        limitMessage={limitMessage}
       />
     </>
   );

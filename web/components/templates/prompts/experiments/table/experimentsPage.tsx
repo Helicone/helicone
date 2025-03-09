@@ -6,7 +6,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon, SquareArrowOutUpRight, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronDownIcon,
+  SquareArrowOutUpRight,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
@@ -26,6 +31,7 @@ import {
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
 import ExperimentsPreview from "@/components/templates/featurePreview/experimentsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
+import { useFeatureLimit, useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
@@ -46,6 +52,17 @@ const ExperimentsPage = () => {
   const [headerDropdownOpen, setHeaderDropdownOpen] = useState(false);
   const [emptyStateDropdownOpen, setEmptyStateDropdownOpen] = useState(false);
 
+  // Free tier limit checks
+  const experimentCount = experiments?.length || 0;
+  const {
+    canCreate: canCreateExperiment,
+    hasReachedLimit: hasReachedExperimentLimit,
+    freeLimit: MAX_EXPERIMENTS,
+  } = useFeatureLimit("experiments", experimentCount);
+
+  console.log(`canCreateExperiment: ${canCreateExperiment}`);
+  console.log(`hasReachedExperimentLimit: ${hasReachedExperimentLimit}`);
+
   if (isLoading) {
     return <LoadingAnimation title="Loading Experiments" />;
   }
@@ -65,49 +82,63 @@ const ExperimentsPage = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       <AuthHeader
-        title={hasAccess ? "Experiments" : null}
+        title="Experiments"
         actions={
-          hasAccess ? (
-            <DropdownMenu
-              open={headerDropdownOpen}
-              onOpenChange={setHeaderDropdownOpen}
-              modal={false}
-            >
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Start new experiment
-                  <ChevronDownIcon className="w-4 h-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-[200px]">
-                <DropdownMenuItem
-                  onSelect={async () => {
-                    setNotification("Creating experiment...", "info");
-                    const res = await jawn.POST("/v2/experiment/create/empty");
-                    if (res.error) {
-                      notification.setNotification(
-                        "Failed to create experiment",
-                        "error"
-                      );
-                    } else {
-                      router.push(
-                        `/experiments/${res.data?.data?.experimentId}`
-                      );
-                    }
-                  }}
-                >
-                  Start from scratch
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-                  Start from prompt
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : null
+          <DropdownMenu
+            open={headerDropdownOpen}
+            onOpenChange={setHeaderDropdownOpen}
+            modal={false}
+          >
+            <DropdownMenuTrigger asChild>
+              <Button variant="action" disabled={!canCreateExperiment}>
+                Start new experiment
+                <ChevronDownIcon className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-[200px]">
+              <DropdownMenuItem
+                onSelect={async () => {
+                  setNotification("Creating experiment...", "info");
+                  const res = await jawn.POST("/v2/experiment/create/empty");
+                  if (res.error) {
+                    notification.setNotification(
+                      "Failed to create experiment",
+                      "error"
+                    );
+                  } else {
+                    router.push(`/experiments/${res.data?.data?.experimentId}`);
+                  }
+                }}
+              >
+                Start from scratch
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+                Start from prompt
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         }
       />
+
+      {/* Experiment limit warning banner */}
+      {hasReachedExperimentLimit && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                You've used {experimentCount}/{MAX_EXPERIMENTS} experiments.
+                Upgrade for unlimited experiments.
+              </span>
+            </div>
+            <Button variant="action" size="sm">
+              Upgrade
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <StartFromPromptDialog
@@ -143,129 +174,119 @@ const ExperimentsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {org?.currentOrg?.tier === "free" ? (
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <ExperimentsPreview />
-        </div>
-      ) : hasAccess ? (
-        experiments?.length === 0 ? (
-          <div className="flex items-center justify-center w-full h-full absolute top-0 left-0">
-            <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
-              <div className="flex flex-col items-center justify-center gap-2">
-                <h3 className="text-2xl font-semibold">
-                  No experiments created yet
-                </h3>
-                <p className="text-gray-500 text-md">
-                  Get started by creating your first experiment. Compare
-                  different prompt and model variations side by side.
-                </p>
-              </div>
-              <div className="flex flex-row gap-2">
-                <DropdownMenu
-                  open={emptyStateDropdownOpen}
-                  onOpenChange={setEmptyStateDropdownOpen}
-                  modal={false}
-                >
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="action">
-                      Create First Experiment
-                      <ChevronDownIcon className="w-4 h-4 ml-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="w-[200px]">
-                    <DropdownMenuItem
-                      onSelect={async () => {
-                        setNotification("Creating experiment...", "info");
-                        const res = await jawn.POST(
-                          "/v2/experiment/create/empty"
-                        );
-                        if (res.error) {
-                          notification.setNotification(
-                            "Failed to create experiment",
-                            "error"
-                          );
-                        } else {
-                          router.push(
-                            `/experiments/${res.data?.data?.experimentId}`
-                          );
-                        }
-                      }}
-                    >
-                      Start from scratch
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-                      Start from prompt
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Link
-                  href="https://docs.helicone.ai/features/experiments"
-                  target="_blank"
-                >
-                  <Button variant="outline" className="gap-2 text-slate-700">
-                    View Docs
-                    <SquareArrowOutUpRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
+      {experiments?.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <h3 className="text-2xl font-semibold">
+                No experiments created yet
+              </h3>
+              <p className="text-gray-500 text-md">
+                Get started by creating your first experiment. Compare different
+                prompt and model variations side by side.
+              </p>
             </div>
-          </div>
-        ) : (
-          <ThemedTable
-            defaultColumns={[
-              {
-                header: "Name",
-                accessorFn: (row) => {
-                  return row.name;
-                },
-              },
-              {
-                header: "Created At",
-                accessorKey: "created_at",
-                minSize: 100,
-                accessorFn: (row) => {
-                  return new Date(row.created_at ?? 0).toLocaleString();
-                },
-              },
-              {
-                header: "",
-                accessorKey: "actions",
-                cell: ({ row }) => (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExperimentToDelete(row.original.id);
-                      setDeleteDialogOpen(true);
+            <div className="flex flex-row gap-2">
+              <DropdownMenu
+                open={emptyStateDropdownOpen}
+                onOpenChange={setEmptyStateDropdownOpen}
+                modal={false}
+              >
+                <DropdownMenuTrigger asChild>
+                  <Button variant="action" disabled={!canCreateExperiment}>
+                    Create First Experiment
+                    <ChevronDownIcon className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="w-[200px]">
+                  <DropdownMenuItem
+                    onSelect={async () => {
+                      setNotification("Creating experiment...", "info");
+                      const res = await jawn.POST(
+                        "/v2/experiment/create/empty"
+                      );
+                      if (res.error) {
+                        notification.setNotification(
+                          "Failed to create experiment",
+                          "error"
+                        );
+                      } else {
+                        router.push(
+                          `/experiments/${res.data?.data?.experimentId}`
+                        );
+                      }
                     }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                ),
-                enableSorting: false,
-                size: 10,
-              },
-            ]}
-            defaultData={experiments}
-            dataLoading={isLoading}
-            id="experiments"
-            skeletonLoading={false}
-            onRowSelect={(row) => {
-              const promptId = row.original_prompt_version;
-              if (promptId) {
-                router.push(`/experiments/${row.id}`);
-              }
-            }}
-            fullWidth={true}
-          />
-        )
-      ) : (
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <ExperimentsPreview />
+                    Start from scratch
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+                    Start from prompt
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Link
+                href="https://docs.helicone.ai/features/experiments"
+                target="_blank"
+              >
+                <Button variant="outline" className="gap-2 text-slate-700">
+                  View Docs
+                  <SquareArrowOutUpRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
+      ) : (
+        <ThemedTable
+          defaultColumns={[
+            {
+              header: "Name",
+              accessorFn: (row) => {
+                return row.name;
+              },
+            },
+            {
+              header: "Created At",
+              accessorKey: "created_at",
+              minSize: 100,
+              accessorFn: (row) => {
+                return new Date(row.created_at ?? 0).toLocaleString();
+              },
+            },
+            {
+              header: "",
+              accessorKey: "actions",
+              cell: ({ row }) => (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExperimentToDelete(row.original.id);
+                    setDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              ),
+              enableSorting: false,
+              size: 10,
+            },
+          ]}
+          defaultData={experiments}
+          dataLoading={isLoading}
+          id="experiments"
+          skeletonLoading={false}
+          onRowSelect={(row) => {
+            const promptId = row.original_prompt_version;
+            if (promptId) {
+              router.push(`/experiments/${row.id}`);
+            }
+          }}
+          fullWidth={true}
+        />
       )}
-    </>
+    </div>
   );
 };
 
