@@ -51,12 +51,15 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
   }
   return (
     <div className="flex flex-col space-y-2">
-      <MarkdownEditor
-        language="markdown"
-        text={typeof message.content === "string" ? message.content : ""}
-        setText={() => {}}
-        className=""
-      />
+      <div className="p-1">
+        <MarkdownEditor
+          language="markdown"
+          text={typeof message.content === "string" ? message.content : ""}
+          setText={() => { }}
+          className="bg-card text-card-foreground rounded-md border border-border shadow-sm p-0"
+          disabled={true}
+        />
+      </div>
     </div>
   );
 };

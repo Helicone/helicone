@@ -25,7 +25,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
   mode,
 }) => {
   return (
-    <>
+    <div className="divide-y divide-border">
       {messages.map((message, index) =>
         typeof message === "string" ? (
           <div key={index}>{message}</div>
@@ -51,6 +51,6 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
           />
         )
       )}
-    </>
+    </div>
   );
 };

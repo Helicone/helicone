@@ -72,7 +72,7 @@ export const Chat: React.FC<ChatProps> = ({
   const messagesToRender = useMemo(
     () =>
       messageSlice === "lastTwo" &&
-      mappedRequest.preview.concatenatedMessages.length > 2
+        mappedRequest.preview.concatenatedMessages.length > 2
         ? mappedRequest.preview.concatenatedMessages.slice(-2)
         : mappedRequest.preview.concatenatedMessages,
     [mappedRequest.preview.concatenatedMessages, messageSlice]
@@ -82,43 +82,28 @@ export const Chat: React.FC<ChatProps> = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm  dark:bg-black",
+          "w-full flex flex-col text-left space-y-2 text-sm bg-background",
           className
         )}
       >
-        <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-full h-full bg-card relative">
           {!hideTopBar && (
-            <ChatTopBar
-              allExpanded={allExpanded}
-              toggleAllExpanded={toggleAllExpanded}
-              requestBody={mappedRequest.schema.request}
-              requestId={mappedRequest.heliconeMetadata.requestId}
-              setOpen={setOpen}
-              mode={mode}
-              setMode={setMode}
-              isModal={open}
-              promptData={promptData}
-            />
+            <div className="sticky top-0 z-10 bg-card border-b border-border">
+              <ChatTopBar
+                allExpanded={allExpanded}
+                toggleAllExpanded={toggleAllExpanded}
+                requestBody={mappedRequest.schema.request}
+                requestId={mappedRequest.heliconeMetadata.requestId}
+                setOpen={setOpen}
+                mode={mode}
+                setMode={setMode}
+                isModal={open}
+                promptData={promptData}
+              />
+            </div>
           )}
 
-          <ChatContent
-            mode={mode}
-            mappedRequest={mappedRequest}
-            messagesToRender={messagesToRender}
-            showAllMessages={showAllMessages}
-            expandedChildren={expandedChildren}
-            setExpandedChildren={setExpandedChildren}
-            selectedProperties={selectedProperties}
-            isHeliconeTemplate={isHeliconeTemplate}
-            autoInputs={autoInputs}
-            setShowAllMessages={setShowAllMessages}
-          />
-        </div>
-      </div>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-          <>
-            <ChatTopBar {...chatTopBarProps} isModal={true} />
+          <div className="overflow-auto">
             <ChatContent
               mode={mode}
               mappedRequest={mappedRequest}
@@ -131,6 +116,29 @@ export const Chat: React.FC<ChatProps> = ({
               autoInputs={autoInputs}
               setShowAllMessages={setShowAllMessages}
             />
+          </div>
+        </div>
+      </div>
+      <ThemedModal open={open} setOpen={setOpen}>
+        <div className="w-[80vw] h-full border border-border relative overflow-hidden">
+          <>
+            <div className="sticky top-0 z-10 bg-card border-b border-border">
+              <ChatTopBar {...chatTopBarProps} isModal={true} />
+            </div>
+            <div className="overflow-auto max-h-[80vh]">
+              <ChatContent
+                mode={mode}
+                mappedRequest={mappedRequest}
+                messagesToRender={messagesToRender}
+                showAllMessages={showAllMessages}
+                expandedChildren={expandedChildren}
+                setExpandedChildren={setExpandedChildren}
+                selectedProperties={selectedProperties}
+                isHeliconeTemplate={isHeliconeTemplate}
+                autoInputs={autoInputs}
+                setShowAllMessages={setShowAllMessages}
+              />
+            </div>
           </>
         </div>
       </ThemedModal>

@@ -182,7 +182,7 @@ export const RenderWithPrettyInputKeys = (props: {
   };
 
   return (
-    <div className="text-md leading-8 text-black dark:text-white whitespace-pre-wrap">
+    <div className="text-xs text-muted-foreground whitespace-pre-wrap py-1.5">
       {replaceInputKeysWithComponents(text)}
     </div>
   );
@@ -325,7 +325,7 @@ const ChatRow = (props: ChatRowProps) => {
                 height={256}
               />
             ) : (
-              <div className="h-[150px] w-[200px] bg-white border border-gray-300 text-center items-center flex justify-center text-xs italic text-gray-500">
+              <div className="h-[150px] w-[200px] bg-white border border-border text-center items-center flex justify-center text-xs italic text-muted-foreground">
                 Unsupported Image Type
               </div>
             )}
@@ -365,7 +365,7 @@ const ChatRow = (props: ChatRowProps) => {
             }}
           />
           {hasImage(content) && (
-            <div className="flex flex-wrap items-center pt-4 border-t border-gray-300 dark:border-gray-700">
+            <div className="flex flex-wrap items-center pt-4 border-t border-border">
               {imageElements}
             </div>
           )}
@@ -418,7 +418,7 @@ const ChatRow = (props: ChatRowProps) => {
       className={clsx(
         index === 0 ? "rounded-t-lg" : "border-t",
         "bg-white dark:bg-black",
-        "flex flex-row justify-between gap-8 border-gray-300 dark:border-gray-700"
+        "flex flex-row justify-between gap-8 border-border"
       )}
     >
       <div className="flex flex-col gap-4 w-full">
