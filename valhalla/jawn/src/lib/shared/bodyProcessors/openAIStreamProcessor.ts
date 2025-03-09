@@ -2,7 +2,7 @@ import { consolidateTextFields } from "../../../utils/streamParser";
 import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, err, ok } from "../result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { isParseInputJson } from "./helpers";
+import { isParseInputJson, mapLines } from "./helpers";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -52,14 +52,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       .filter((line) => line !== "")
       .filter((line) => !NON_DATA_LINES.includes(line));
 
-    const data = lines.map((line, i) => {
-      try {
-        return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
-        console.log("Error parsing line OpenAI", line);
-        return err({ msg: `Error parsing line`, line });
-      }
-    });
+    const data = mapLines(lines, "openai");
 
     try {
       const consolidatedData = consolidateTextFields(data);
