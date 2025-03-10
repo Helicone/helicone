@@ -198,9 +198,8 @@ export class KeyManager extends BaseManager {
     providerKey: string;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const { providerName, providerKey } = data;
+      const { providerName, providerKey, providerKeyName } = data;
       // Always use "default" as the key name
-      const providerKeyName = "default";
 
       // Check if a key already exists for this provider
       const existingKeys = await supabaseServer.client
@@ -226,7 +225,7 @@ export class KeyManager extends BaseManager {
       // Insert the new key
       const insertData = {
         provider_name: providerName,
-        provider_key_name: providerKeyName, // Always use "default"
+        provider_key_name: providerKeyName,
         provider_key: providerKey,
         org_id: this.authParams.organizationId,
         soft_delete: false,
@@ -239,12 +238,21 @@ export class KeyManager extends BaseManager {
         .single();
 
       if (res.error || !res.data?.id) {
-        return err(`Failed to create provider key: ${res.error?.message}`);
+        console.log(
+          `Failed to create provider key: ${
+            res.error?.message
+          }, ${JSON.stringify(insertData)}`
+        );
+        return err(
+          `Failed to create provider key: ${
+            res.error?.message
+          }, ${JSON.stringify(insertData)}`
+        );
       }
 
       return ok({ id: res.data.id });
     } catch (error) {
-      return err(`Failed to create provider key: ${error}`);
+      return err(`Failed to create provider key2: ${error}`);
     }
   }
 

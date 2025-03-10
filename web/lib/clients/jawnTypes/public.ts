@@ -5380,6 +5380,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          providerKeyName: string;
           providerKey: string;
           providerName: string;
         };

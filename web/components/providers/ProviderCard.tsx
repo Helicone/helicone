@@ -20,16 +20,16 @@ interface ProviderCardProps {
 type KeyDisplayState = "hidden" | "viewing" | "loading";
 
 export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
-  // Use our custom hook to manage all provider functionality
+  const [apiKey, setApiKey] = useState("");
   const {
     existingKey,
-    apiKey,
     isSavingKey,
     isSavedKey,
-    setApiKey,
-    handleSaveKey,
+    addProviderKey,
+    updateProviderKey,
+    isLoadingKeys,
+    providerKeys,
     viewDecryptedProviderKey,
-    refetchProviderKeys,
   } = useProvider({ provider });
 
   // Simplified state management
@@ -48,35 +48,37 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
   // Handle toggling key visibility with a simplified approach
   const toggleKeyVisibility = async () => {
-    if (!existingKey || !viewDecryptedProviderKey) return;
-
-    // If already viewing, hide the key
+    // If already viewing, hide the key in both cases
     if (keyDisplayState === "viewing") {
       setKeyDisplayState("hidden");
+      setDecryptedKey(null);
       return;
     }
 
-    // If we have the key cached, show it
-    if (decryptedKey) {
-      setKeyDisplayState("viewing");
-      return;
-    }
-
-    // Otherwise, load the key
-    try {
+    // If we have an existing key, fetch the decrypted version
+    if (existingKey) {
+      // Set loading state
       setKeyDisplayState("loading");
-      const key = await viewDecryptedProviderKey(existingKey.id);
 
-      if (key) {
-        setDecryptedKey(key);
-        setKeyDisplayState("viewing");
-      } else {
+      try {
+        // Fetch the decrypted key
+        const key = await viewDecryptedProviderKey(existingKey.id);
+
+        if (key) {
+          setDecryptedKey(key);
+          setKeyDisplayState("viewing");
+        } else {
+          setNotification("Failed to retrieve key", "error");
+          setKeyDisplayState("hidden");
+        }
+      } catch (error) {
+        console.error("Error viewing key:", error);
+        setNotification("Failed to retrieve key", "error");
         setKeyDisplayState("hidden");
-        setNotification("Couldn't retrieve the key", "error");
       }
-    } catch (error) {
-      setKeyDisplayState("hidden");
-      setNotification("Error fetching key", "error");
+    } else {
+      // For new key entry, just toggle the visibility
+      setKeyDisplayState("viewing");
     }
   };
 
@@ -87,23 +89,29 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       .catch(() => setNotification("Failed to copy to clipboard", "error"));
   };
 
-  // Handle saving with proper query invalidation
-  const handleSaveAndRefresh = async () => {
-    if (!handleSaveKey) return;
-
+  // Handle saving or updating the key
+  const handleSaveKey = async () => {
     try {
-      await handleSaveKey();
-
-      // Clear the decrypted key and states since it might have changed
-      setDecryptedKey(null);
-      setKeyDisplayState("hidden");
-
-      // Refetch to ensure our data is fresh
-      if (refetchProviderKeys) {
-        await refetchProviderKeys();
+      if (isEditMode) {
+        if (!existingKey) return;
+        // If we have an existing key, use updateProviderKey mutation
+        updateProviderKey.mutate({
+          providerName: provider.name,
+          key: apiKey,
+          keyId: existingKey.id,
+          providerKeyName: `${provider.name} API Key`,
+        });
+      } else {
+        // Otherwise create a new key using addProviderKey mutation
+        addProviderKey.mutate({
+          providerName: provider.name,
+          key: apiKey,
+          providerKeyName: `${provider.name} API Key`,
+        });
       }
     } catch (error) {
-      setNotification("Failed to save key", "error");
+      console.error("Error saving provider key:", error);
+      setNotification("Failed to save provider key", "error");
     }
   };
 
@@ -151,12 +159,12 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 }
                 value={isViewingKey && decryptedKey ? decryptedKey : apiKey}
                 onChange={(e) => {
-                  // If viewing decrypted key, changing input exits view mode
-                  if (isViewingKey) {
-                    setKeyDisplayState("hidden");
-                    setApiKey(e.target.value);
-                  } else {
-                    setApiKey(e.target.value);
+                  // Allow editing the input regardless of view mode
+                  setApiKey(e.target.value);
+
+                  // If we're viewing a decrypted key and editing, reset to the new value
+                  if (isViewingKey && decryptedKey) {
+                    setDecryptedKey(null);
                   }
                 }}
                 className="flex-1 text-sm h-8 py-1"
@@ -165,57 +173,55 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
             {/* Action buttons */}
             <div className="flex items-center gap-1">
-              {isEditMode && viewDecryptedProviderKey && (
-                <>
-                  {isViewingKey && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => copyToClipboard(decryptedKey || "")}
-                            className="h-8 w-8 text-blue-500"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Copy</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={toggleKeyVisibility}
-                          className="h-8 w-8 text-blue-500"
-                          disabled={keyDisplayState === "loading"}
-                        >
-                          {keyDisplayState === "loading" ? (
-                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-current" />
-                          ) : isViewingKey ? (
-                            <EyeOff className="h-3.5 w-3.5" />
-                          ) : (
-                            <Eye className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isViewingKey ? "Hide" : "View"}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </>
+              {/* Show copy button only when viewing an existing decrypted key */}
+              {isViewingKey && decryptedKey && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => copyToClipboard(decryptedKey || "")}
+                        className="h-8 w-8 text-blue-500"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Copy</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
 
+              {/* Show eye toggle for both new and existing keys */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleKeyVisibility}
+                      className="h-8 w-8 text-blue-500"
+                      disabled={keyDisplayState === "loading"}
+                    >
+                      {keyDisplayState === "loading" ? (
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-current" />
+                      ) : isViewingKey ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isViewingKey ? "Hide" : "View"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               <Button
-                onClick={handleSaveAndRefresh}
+                onClick={handleSaveKey}
                 disabled={(!apiKey && !isEditMode) || isSavingKey}
                 size="sm"
                 className="flex items-center gap-1 whitespace-nowrap h-8 px-3"

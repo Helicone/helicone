@@ -42,12 +42,13 @@ export class ApiKeyController extends Controller {
     body: {
       providerName: string;
       providerKey: string;
+      providerKeyName: string;
     }
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createProviderKey({
       providerName: body.providerName,
-      providerKeyName: "default",
+      providerKeyName: body.providerKeyName,
       providerKey: body.providerKey,
     });
 

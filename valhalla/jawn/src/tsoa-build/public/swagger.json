@@ -15335,6 +15335,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"providerKeyName": {
+										"type": "string"
+									},
 									"providerKey": {
 										"type": "string"
 									},
@@ -15343,6 +15346,7 @@
 									}
 								},
 								"required": [
+									"providerKeyName",
 									"providerKey",
 									"providerName"
 								],
