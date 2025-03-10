@@ -63,7 +63,7 @@ import {
   templateToHeliconeTags,
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
-import { FlaskConicalIcon } from "lucide-react";
+import { FlaskConicalIcon, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { LLMRequestBody, Message } from "packages/llm-mapper/types";
@@ -88,6 +88,9 @@ import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
+import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -140,6 +143,13 @@ export default function PromptEditor({
   const { newFromPromptVersion } = useExperiment();
   // - Create Prompt
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
+  // - Free Tier Limit
+  const versionCount = promptVersionsData?.length ?? 0;
+  const { canCreate: canCreateVersion } = useSubfeatureLimit(
+    "prompts",
+    "versions",
+    versionCount
+  );
 
   // VALIDATION
   // - Is Imported From Code
@@ -1057,6 +1067,7 @@ export default function PromptEditor({
               onIdEdit={handleIdEdit}
             />
           )}
+
           {/* From Request: ID Label */}
           {requestId && (
             <Link
@@ -1144,46 +1155,83 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          <Button
-            className={`${
-              isStreaming
-                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                : ""
-            }`}
-            variant={
-              promptId && isImportedFromCode === false ? "action" : "outline"
-            }
-            size="sm"
-            disabled={!canRun}
-            onClick={handleSaveAndRun}
-          >
-            {isStreaming ? (
-              <PiStopBold className="h-4 w-4 mr-2" />
-            ) : (
-              <PiPlayBold className="h-4 w-4 mr-2" />
-            )}
-            <span className="mr-2">
-              {isStreaming
-                ? "Stop"
-                : state.isDirty && promptId
-                ? "Save & Run"
-                : "Run"}
-            </span>
-            {isStreaming && (
-              <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-            )}
-            <div
-              className={`flex items-center gap-0.5 text-sm ${
-                (requestId || basePrompt || isImportedFromCode === true) &&
-                !isStreaming
-                  ? "text-black opacity-60"
-                  : "text-white opacity-60"
-              }`}
+          {promptId && isImportedFromCode === false && state.isDirty ? (
+            <FreeTierSubLimitWrapper
+              feature="prompts"
+              subfeature="versions"
+              itemCount={versionCount}
             >
-              <PiCommandBold className="h-4 w-4" />
-              <MdKeyboardReturn className="h-4 w-4" />
-            </div>
-          </Button>
+              <Button
+                className={`${
+                  isStreaming
+                    ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                    : ""
+                }`}
+                variant={
+                  promptId && isImportedFromCode === false
+                    ? "action"
+                    : "outline"
+                }
+                size="sm"
+                disabled={!canRun}
+                onClick={handleSaveAndRun}
+              >
+                {isStreaming ? (
+                  <PiStopBold className="h-4 w-4 mr-2" />
+                ) : (
+                  <PiPlayBold className="h-4 w-4 mr-2" />
+                )}
+                <span className="mr-2">
+                  {isStreaming
+                    ? "Stop"
+                    : state.isDirty && promptId
+                    ? "Save & Run"
+                    : "Run"}
+                </span>
+                {isStreaming && (
+                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                <div className="flex items-center gap-0.5 text-sm opacity-60">
+                  <PiCommandBold className="h-4 w-4" />
+                  <MdKeyboardReturn className="h-4 w-4" />
+                </div>
+              </Button>
+            </FreeTierSubLimitWrapper>
+          ) : (
+            <Button
+              className={`${
+                isStreaming
+                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                  : ""
+              }`}
+              variant={
+                promptId && isImportedFromCode === false ? "action" : "outline"
+              }
+              size="sm"
+              disabled={!canRun}
+              onClick={handleSaveAndRun}
+            >
+              {isStreaming ? (
+                <PiStopBold className="h-4 w-4 mr-2" />
+              ) : (
+                <PiPlayBold className="h-4 w-4 mr-2" />
+              )}
+              <span className="mr-2">
+                {isStreaming
+                  ? "Stop"
+                  : state.isDirty && promptId
+                  ? "Save & Run"
+                  : "Run"}
+              </span>
+              {isStreaming && (
+                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              <div className="flex items-center gap-0.5 text-sm opacity-60">
+                <PiCommandBold className="h-4 w-4" />
+                <MdKeyboardReturn className="h-4 w-4" />
+              </div>
+            </Button>
+          )}
 
           {/* Experiment Button */}
           {promptId && (
@@ -1288,6 +1336,54 @@ async function pullPromptAndRunCompletion() {
         </div>
       </div>
 
+      {/* Auto-improve Popup */}
+      {promptId && state.version && (
+        <UniversalPopup
+          title="Auto-Improve (Beta)"
+          width="w-full max-w-7xl"
+          isOpen={isAutoImproveOpen}
+          onClose={() => {
+            setIsAutoImproveOpen(false);
+            updateState({ improvement: undefined }, false);
+          }}
+        >
+          <AutoImprove
+            isImproving={isImproving}
+            improvement={state.improvement}
+            version={state.version}
+            messages={state.messages}
+            onStartImprove={handleImprove}
+            onApplyImprovement={handleApplyImprovement}
+            onCancel={() => setIsAutoImproveOpen(false)}
+            updateState={(updates) => updateState(updates, false)}
+          />
+        </UniversalPopup>
+      )}
+
+      {/* Version limit warning banner */}
+      {!canCreateVersion && promptId && isImportedFromCode === false && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                You've used {versionCount}/3 versions for this prompt. Upgrade
+                for unlimited versions.
+              </span>
+            </div>
+            <FreeTierSubLimitWrapper
+              feature="prompts"
+              subfeature="versions"
+              itemCount={versionCount}
+            >
+              <Button variant="action" size="sm">
+                Upgrade
+              </Button>
+            </FreeTierSubLimitWrapper>
+          </div>
+        </div>
+      )}
+
       {/* Prompt Editor */}
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={50} minSize={25}>
@@ -1367,30 +1463,6 @@ async function pullPromptAndRunCompletion() {
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
-
-      {/* Auto-improve Popup */}
-      {promptId && state.version && (
-        <UniversalPopup
-          title="Auto-Improve (Beta)"
-          width="w-full max-w-7xl"
-          isOpen={isAutoImproveOpen}
-          onClose={() => {
-            setIsAutoImproveOpen(false);
-            updateState({ improvement: undefined }, false);
-          }}
-        >
-          <AutoImprove
-            isImproving={isImproving}
-            improvement={state.improvement}
-            version={state.version}
-            messages={state.messages}
-            onStartImprove={handleImprove}
-            onApplyImprovement={handleApplyImprovement}
-            onCancel={() => setIsAutoImproveOpen(false)}
-            updateState={(updates) => updateState(updates, false)}
-          />
-        </UniversalPopup>
-      )}
     </main>
   );
 }
