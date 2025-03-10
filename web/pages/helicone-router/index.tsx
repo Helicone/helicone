@@ -52,7 +52,10 @@ import Link from "next/link";
 import clsx from "clsx";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useRouter } from "@/hooks/useRouter";
-import type { RouterConfiguration } from "@/hooks/useRouter";
+import type {
+  RouterConfiguration,
+  RouterProviderMapping,
+} from "@/hooks/useRouter";
 
 // Loading spinner component
 const LoadingSpinner = ({ size = 24 }: { size?: number }) => (
@@ -412,44 +415,49 @@ const RouterPage: NextPage = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {router.providers.map((mapping) => (
-                            <TableRow key={mapping.id}>
-                              <TableCell className="font-medium">
-                                {mapping.provider_key_name ||
-                                  mapping.provider_key_id}
-                                {mapping.provider_name && (
-                                  <Small className="block text-muted-foreground">
-                                    {mapping.provider_name}
-                                  </Small>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  className={clsx(
-                                    "text-xs",
-                                    getRoleBadgeColor(mapping.role)
+                          {router.providers.map(
+                            (mapping: RouterProviderMapping) => (
+                              <TableRow key={mapping.id}>
+                                <TableCell className="font-medium">
+                                  {mapping.provider_key_name ||
+                                    mapping.provider_key_id}
+                                  {mapping.provider_name && (
+                                    <Small className="block text-muted-foreground">
+                                      {mapping.provider_name}
+                                    </Small>
                                   )}
-                                >
-                                  {getProviderRoleText(mapping.role)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>{mapping.weight}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleRemoveProvider(router.id, mapping.id)
-                                  }
-                                >
-                                  <Trash2
-                                    size={14}
-                                    className="text-muted-foreground"
-                                  />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    className={clsx(
+                                      "text-xs",
+                                      getRoleBadgeColor(mapping.role)
+                                    )}
+                                  >
+                                    {getProviderRoleText(mapping.role)}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>{mapping.weight}</TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleRemoveProvider(
+                                        router.id,
+                                        mapping.id
+                                      )
+                                    }
+                                  >
+                                    <Trash2
+                                      size={14}
+                                      className="text-muted-foreground"
+                                    />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            )
+                          )}
                         </TableBody>
                       </Table>
                     ) : (
