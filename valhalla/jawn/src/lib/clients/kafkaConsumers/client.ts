@@ -6,6 +6,7 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 const KAFKA_BROKER = KAFKA_CREDS?.UPSTASH_KAFKA_BROKER;
 const KAFKA_USERNAME = KAFKA_CREDS?.UPSTASH_KAFKA_USERNAME;
 const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
+const LOCAL_KAFKA = KAFKA_CREDS?.LOCAL_KAFKA;
 
 export function getKafka() {
   if (KAFKA_ENABLED && KAFKA_BROKER && KAFKA_USERNAME && KAFKA_PASSWORD) {
@@ -17,6 +18,11 @@ export function getKafka() {
         password: KAFKA_PASSWORD,
       },
       ssl: true,
+      logLevel: logLevel.ERROR,
+    });
+  } else if (KAFKA_ENABLED && LOCAL_KAFKA && KAFKA_BROKER) {
+    return new Kafka({
+      brokers: [KAFKA_BROKER],
       logLevel: logLevel.ERROR,
     });
   } else {
