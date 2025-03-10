@@ -12298,6 +12298,59 @@
 				}
 			}
 		},
+		"/v1/property/{propertyKey}/search": {
+			"post": {
+				"operationId": "SearchProperties",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"searchTerm": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"searchTerm"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/property/{propertyKey}/top-costs/query": {
 			"post": {
 				"operationId": "GetTopCosts",

@@ -287,6 +287,9 @@ export interface paths {
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
+  "/v1/property/{propertyKey}/search": {
+    post: operations["SearchProperties"];
+  };
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
@@ -4204,6 +4207,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  SearchProperties: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          searchTerm: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };
