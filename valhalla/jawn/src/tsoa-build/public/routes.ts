@@ -8052,7 +8052,7 @@ export function RegisterRoutes(app: Router) {
             async function ApiKeyController_createProviderKey(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"providerKeyName":{"dataType":"string","required":true},"providerKey":{"dataType":"string","required":true},"providerName":{"dataType":"string","required":true}}},
+                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"providerKeyName":{"dataType":"string","required":true},"config":{"ref":"Record_string.string_","required":true},"providerKey":{"dataType":"string","required":true},"providerName":{"dataType":"string","required":true}}},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

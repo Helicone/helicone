@@ -42,6 +42,7 @@ export class ApiKeyController extends Controller {
     body: {
       providerName: string;
       providerKey: string;
+      config: Record<string, string>;
       providerKeyName: string;
     }
   ) {
@@ -50,6 +51,7 @@ export class ApiKeyController extends Controller {
       providerName: body.providerName,
       providerKeyName: body.providerKeyName,
       providerKey: body.providerKey,
+      config: body.config,
     });
 
     if (result.error) {

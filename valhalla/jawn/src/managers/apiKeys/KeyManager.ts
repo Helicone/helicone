@@ -196,6 +196,7 @@ export class KeyManager extends BaseManager {
     providerName: string;
     providerKeyName: string;
     providerKey: string;
+    config: Record<string, string>;
   }): Promise<Result<{ id: string }, string>> {
     try {
       const { providerName, providerKey, providerKeyName } = data;
@@ -229,6 +230,7 @@ export class KeyManager extends BaseManager {
         provider_key: providerKey,
         org_id: this.authParams.organizationId,
         soft_delete: false,
+        config: data.config,
       };
 
       const res = await supabaseServer.client

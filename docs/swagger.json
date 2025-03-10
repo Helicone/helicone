@@ -15338,6 +15338,9 @@
 									"providerKeyName": {
 										"type": "string"
 									},
+									"config": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
 									"providerKey": {
 										"type": "string"
 									},
@@ -15347,6 +15350,7 @@
 								},
 								"required": [
 									"providerKeyName",
+									"config",
 									"providerKey",
 									"providerName"
 								],

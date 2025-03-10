@@ -5381,6 +5381,7 @@ export interface operations {
       content: {
         "application/json": {
           providerKeyName: string;
+          config: components["schemas"]["Record_string.string_"];
           providerKey: string;
           providerName: string;
         };
