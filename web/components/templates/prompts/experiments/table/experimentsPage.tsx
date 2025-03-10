@@ -29,11 +29,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import ExperimentsPreview from "@/components/templates/featurePreview/experimentsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
-import { useFeatureLimit, useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -92,10 +92,15 @@ const ExperimentsPage = () => {
             modal={false}
           >
             <DropdownMenuTrigger asChild>
-              <Button variant="action" disabled={!canCreateExperiment}>
-                Start new experiment
-                <ChevronDownIcon className="w-4 h-4 ml-2" />
-              </Button>
+              <FreeTierLimitWrapper
+                feature="experiments"
+                itemCount={experimentCount}
+              >
+                <Button variant="action">
+                  Start new experiment
+                  <ChevronDownIcon className="w-4 h-4 ml-2" />
+                </Button>
+              </FreeTierLimitWrapper>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-[200px]">
               <DropdownMenuItem

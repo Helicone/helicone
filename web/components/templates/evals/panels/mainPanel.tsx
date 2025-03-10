@@ -14,6 +14,7 @@ import clsx from "clsx";
 import { useTestDataStore } from "../testing/testingStore";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { H3, P } from "@/components/ui/typography";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -106,7 +107,7 @@ export const MainPanel = () => {
             <Button
               key="create-evaluator"
               onClick={() => openCreatePanel()}
-              variant="outline"
+              variant="action"
               size="sm"
               className="gap-1 items-center"
             >
@@ -162,26 +163,26 @@ export const MainPanel = () => {
         </div>
       ) : simpleEvaluators.length === 0 ? (
         // Empty state
-        <div className="flex flex-col w-full justify-center items-center h-full">
-          <Col className="items-center justify-center gap-4 max-w-md text-center py-12">
-            <div className="bg-muted rounded-full p-3">
-              <PiPlusBold className="h-6 w-6 text-foreground" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <H3>No evaluators yet</H3>
+              <P className="text-muted-foreground">
+                Create an evaluator to score your LLM outputs
+              </P>
             </div>
-            <h3 className="text-lg font-medium">No evaluators yet</h3>
-            <p className="text-muted-foreground text-sm">
-              Create an evaluator to score your LLM outputs
-            </p>
-            <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
-              <Button
-                onClick={openCreatePanel}
-                className="mt-2"
-                variant="default"
-                size="sm"
-              >
-                Create Evaluator
-              </Button>
-            </FreeTierLimitWrapper>
-          </Col>
+            <div className="flex flex-row gap-2">
+              <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
+                <Button
+                  onClick={openCreatePanel}
+                  variant="action"
+                  disabled={!canCreateEvaluator}
+                >
+                  Create Evaluator
+                </Button>
+              </FreeTierLimitWrapper>
+            </div>
+          </div>
         </div>
       ) : (
         // Card grid view
