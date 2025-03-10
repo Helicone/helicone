@@ -5,109 +5,60 @@ import { uuid } from "uuidv4";
 import { dbExecute } from "../../shared/db/dbExecute";
 import { hashAuth } from "../../../utils/hash";
 import { BaseTempKey } from "./baseTempKey";
+import { KeyManager } from "../../../managers/apiKeys/KeyManager";
+
 type HashedPasswordRow = {
   hashed_password: string;
 };
 
-type DecryptedProviderKey = {
-  id: string | null;
-  org_id: string | null;
-  provider_key: string | null;
-  provider_name: string | null;
-  provider_key_name: string | null;
-};
-
-async function getDecryptedProviderKeyById(
-  providerKeyId: string
-): Promise<Result<DecryptedProviderKey, string>> {
-  const key = await supabaseServer.client
-    .from("decrypted_provider_keys")
-    .select(
-      "id, org_id, decrypted_provider_key, provider_key_name, provider_name"
-    )
-    .eq("id", providerKeyId)
-    .eq("soft_delete", false)
-    .single();
-
-  if (key.error !== null || key.data === null) {
-    return { data: null, error: key.error.message };
-  }
-
-  const providerKey: DecryptedProviderKey = {
-    id: key.data.id,
-    org_id: key.data.org_id,
-    provider_key: key.data.decrypted_provider_key,
-    provider_name: key.data.provider_name,
-    provider_key_name: key.data.provider_key_name,
-  };
-
-  return { data: providerKey, error: null };
-}
 async function createProxyKey(
   providerKeyId: string,
-  heliconeProxyKeyName: string
+  heliconeProxyKeyName: string,
+  organizationId: string
 ) {
-  if (providerKeyId === undefined) {
-    return;
+  if (!providerKeyId || !heliconeProxyKeyName) {
+    return {
+      data: null,
+      error: "Missing required parameters",
+    };
   }
 
-  if (heliconeProxyKeyName === undefined) {
-    return;
+  try {
+    // Create KeyManager with the organization ID
+    const keyManager = new KeyManager({
+      userId: "",
+      organizationId: organizationId,
+    });
+
+    // Create proxy key using the KeyManager
+    const result = await keyManager.createProxyKey({
+      providerKeyId,
+      proxyKeyName: heliconeProxyKeyName,
+      experimentUse: true,
+    });
+
+    if (result.error || !result.data) {
+      return {
+        data: null,
+        error: result.error || "Failed to create proxy key",
+      };
+    }
+
+    return {
+      data: {
+        proxyKey: result.data.proxyKey,
+        proxyKeyId: result.data.proxyKeyId,
+      },
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: `Failed to create proxy key: ${error}`,
+    };
   }
-
-  const { data: providerKey, error } = await getDecryptedProviderKeyById(
-    providerKeyId
-  );
-
-  if (error || !providerKey?.id) {
-    console.error("Failed to retrieve provider key", error);
-    return;
-  }
-
-  // Generate a new proxy key
-  const proxyKeyId = uuid();
-  const proxyKey = `sk-helicone-proxy-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}-${proxyKeyId}`.toLowerCase();
-
-  const query = `SELECT encode(pgsodium.crypto_pwhash_str($1), 'hex') as hashed_password;`;
-  const hashedResult = await dbExecute<HashedPasswordRow>(query, [proxyKey]);
-
-  if (
-    hashedResult.error ||
-    !hashedResult.data ||
-    hashedResult.data.length === 0
-  ) {
-    return;
-  }
-
-  // Constraint prevents provider key mapping twice to same helicone proxy key
-  // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
-  if (!providerKey.org_id) {
-    return;
-  }
-  const newProxyMapping = await supabaseServer.client
-    .from("helicone_proxy_keys")
-    .insert({
-      id: proxyKeyId,
-      org_id: providerKey.org_id,
-      helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: hashedResult.data[0].hashed_password,
-      provider_key_id: providerKey.id,
-      experiment_use: true,
-    })
-    .select("*")
-    .single();
-
-  return {
-    data: {
-      proxyKey,
-      proxyKeyId: newProxyMapping?.data?.id ?? "",
-    },
-    error: null,
-  };
 }
+
 class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
   constructor(private proxyKey: string, private proxyKeyId: string) {}
@@ -116,6 +67,8 @@ class TempProxyKey implements BaseTempKey {
     if (this.keyUsed) {
       return;
     }
+
+    // Direct database access for cleanup
     return await supabaseServer.client
       .from("helicone_proxy_keys")
       .delete({
@@ -144,11 +97,36 @@ class TempProxyKey implements BaseTempKey {
 
 export async function generateProxyKey(
   providerKeyId: string,
-  heliconeProxyKeyName: string
+  heliconeProxyKeyName: string,
+  organizationId?: string
 ): Promise<Result<TempProxyKey, string>> {
-  const proxyKey = await createProxyKey(providerKeyId, heliconeProxyKeyName);
+  // Get provider key details to determine organization ID if not provided
+  if (!organizationId) {
+    // We can't use KeyManager.getDecryptedProviderKeyById because it's private
+    // Use direct database query instead
+    const key = await supabaseServer.client
+      .from("decrypted_provider_keys")
+      .select("org_id")
+      .eq("id", providerKeyId)
+      .eq("soft_delete", false)
+      .single();
+
+    if (key.error || !key.data?.org_id) {
+      return err("Provider key not found or missing organization ID");
+    }
+
+    organizationId = key.data.org_id;
+  }
+
+  // Create the proxy key using the updated createProxyKey function
+  const proxyKey = await createProxyKey(
+    providerKeyId,
+    heliconeProxyKeyName,
+    organizationId
+  );
+
   if (!proxyKey?.data) {
-    return err("Failed to create proxy key");
+    return err(proxyKey?.error || "Failed to create proxy key");
   } else {
     return ok(
       new TempProxyKey(proxyKey.data.proxyKey, proxyKey.data.proxyKeyId)

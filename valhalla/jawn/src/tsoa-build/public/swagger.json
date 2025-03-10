@@ -5036,6 +5036,139 @@
 					"30d"
 				]
 			},
+			"ProviderConfigurationResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"provider_name": {
+						"type": "string"
+					},
+					"provider_configuration": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					},
+					"provider_keys": {
+						"items": {
+							"properties": {
+								"provider_configuration_id": {
+									"type": "string"
+								},
+								"provider_key_name": {
+									"type": "string"
+								},
+								"provider_name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"provider_configuration_id",
+								"provider_key_name",
+								"provider_name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"provider_name",
+					"provider_configuration",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderConfigurationResponse-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderConfigurationResponse"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderConfigurationResponse-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderConfigurationResponse-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_ProviderConfigurationResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderConfigurationResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderConfigurationResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderConfigurationResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpsertProviderConfigRequest": {
+				"properties": {
+					"provider_name": {
+						"type": "string"
+					},
+					"provider_configuration": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"provider_name",
+					"provider_configuration"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Property": {
 				"properties": {
 					"property": {
@@ -8093,22 +8226,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+			"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
 				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"statusText": {
-						"type": "string"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
 					"data": {
 						"items": {
 							"properties": {
@@ -8160,42 +8279,7 @@
 						},
 						"type": "array"
 					},
-					"count": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					}
-				},
-				"required": [
-					"status",
-					"statusText",
-					"error",
-					"data",
-					"count"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PostgrestResponseFailure": {
-				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"statusText": {
-						"type": "string"
-					},
 					"error": {
-						"$ref": "#/components/schemas/PostgrestError"
-					},
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"count": {
 						"type": "number",
 						"enum": [
 							null
@@ -8204,22 +8288,19 @@
 					}
 				},
 				"required": [
-					"status",
-					"statusText",
-					"error",
 					"data",
-					"count"
+					"error"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
+			"Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
 					},
 					{
-						"$ref": "#/components/schemas/PostgrestResponseFailure"
+						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			}
@@ -12393,6 +12474,134 @@
 				]
 			}
 		},
+		"/v1/provider-config": {
+			"get": {
+				"operationId": "GetAllProviderConfigurations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderConfigurationResponse-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Provider Config"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpsertProviderConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderConfigurationResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Provider Config"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpsertProviderConfigRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/provider-config/{providerName}": {
+			"get": {
+				"operationId": "GetProviderConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderConfigurationResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Provider Config"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteProviderConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_boolean.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Provider Config"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/property/query": {
 			"post": {
 				"operationId": "GetProperties",
@@ -15191,7 +15400,203 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
+									"$ref": "#/components/schemas/Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateAPIKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"apiKey": {
+													"type": "string"
+												},
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"apiKey",
+												"id"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"key_permissions": {
+										"type": "string",
+										"enum": [
+											"rw",
+											"r",
+											"w"
+										]
+									},
+									"api_key_name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"api_key_name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/provider-key": {
+			"post": {
+				"operationId": "CreateProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"id": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"id"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"providerConfigurationId": {
+										"type": "string"
+									},
+									"providerKey": {
+										"type": "string"
+									},
+									"providerKeyName": {
+										"type": "string"
+									},
+									"providerName": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"providerKey",
+									"providerKeyName",
+									"providerName"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/api-keys/provider-key/{providerKeyId}": {
+			"get": {
+				"operationId": "GetProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/DecryptedProviderKey"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
 								}
 							}
 						}
@@ -15207,14 +15612,120 @@
 				],
 				"parameters": [
 					{
-						"in": "query",
-						"name": "governance",
+						"in": "path",
+						"name": "providerKeyId",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				]
+			},
+			"delete": {
+				"operationId": "DeleteProviderKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "providerKeyId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/api-keys/proxy-key": {
+			"post": {
+				"operationId": "CreateProxyKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"proxyKeyId": {
+													"type": "string"
+												},
+												"proxyKey": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"proxyKeyId",
+												"proxyKey"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"error"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"API Key"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"proxyKeyName": {
+										"type": "string"
+									},
+									"providerKeyId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"proxyKeyName",
+									"providerKeyId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/api-keys/{apiKeyId}": {
@@ -15225,17 +15736,7 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {
-									"properties": {
-										"error": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"error"
-									],
-									"type": "object"
-								}
+								"schema": {}
 							}
 						}
 					}
