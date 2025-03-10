@@ -66,7 +66,7 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
-        reasoning_effort: params.reasoningEffort,
+        reasoning_effort: params.reasoning_effort,
         include_reasoning: params.includeReasoning,
         ...(params.schema && {
           response_format: zodResponseFormat(params.schema, "result"),
