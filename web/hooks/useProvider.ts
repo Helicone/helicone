@@ -51,11 +51,13 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       key,
       keyId,
       providerKeyName,
+      config,
     }: {
       providerName: string;
       key?: string;
       keyId: string;
       providerKeyName: string;
+      config?: Record<string, any>;
     }) => {
       if (!orgId) throw new Error("No organization selected");
 
@@ -69,6 +71,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         },
         body: {
           providerKey: key,
+          config,
         },
       });
     },
@@ -88,10 +91,12 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       providerName,
       key,
       providerKeyName,
+      config,
     }: {
       providerName: string;
       key: string;
       providerKeyName: string;
+      config?: Record<string, any>;
     }) => {
       if (!orgId) throw new Error("No organization selected");
       const jawnClient = getJawnClient(orgId);
@@ -102,6 +107,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
             providerName,
             providerKey: key,
             providerKeyName,
+            config,
           },
         });
 

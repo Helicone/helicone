@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Copy, Eye, EyeOff, Plus, Save } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  Plus,
+  Save,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Provider } from "@/types/provider";
 import { useProvider } from "@/hooks/useProvider";
 import {
@@ -11,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useNotification from "@/components/shared/notification/useNotification";
+import { Muted, Small } from "@/components/ui/typography";
 
 interface ProviderCardProps {
   provider: Provider;
@@ -21,6 +31,9 @@ type KeyDisplayState = "hidden" | "viewing" | "loading";
 
 export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   const [apiKey, setApiKey] = useState("");
+  const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+  const [config, setConfig] = useState<Record<string, string>>({});
+
   const {
     existingKey,
     isSavingKey,
@@ -37,6 +50,32 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     useState<KeyDisplayState>("hidden");
   const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
   const { setNotification } = useNotification();
+
+  // Initialize config from existing key
+  useEffect(() => {
+    if (existingKey?.config) {
+      try {
+        setConfig(existingKey.config as Record<string, string>);
+      } catch (error) {
+        console.error("Error parsing config:", error);
+      }
+    } else {
+      // Initialize with empty defaults based on provider
+      if (provider.id === "azure") {
+        setConfig({
+          baseUri: "",
+          apiVersion: "",
+          deploymentName: "",
+        });
+      } else if (provider.id === "aws") {
+        setConfig({
+          region: "",
+          accessKeyId: "",
+          sessionToken: "",
+        });
+      }
+    }
+  }, [existingKey, provider.id]);
 
   // Reset decrypted key view when saving or after successful save
   useEffect(() => {
@@ -89,6 +128,14 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       .catch(() => setNotification("Failed to copy to clipboard", "error"));
   };
 
+  // Update a specific config field
+  const updateConfigField = (key: string, value: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   // Handle saving or updating the key
   const handleSaveKey = async () => {
     try {
@@ -100,6 +147,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           key: apiKey,
           keyId: existingKey.id,
           providerKeyName: `${provider.name} API Key`,
+          config, // Add the config object
         });
       } else {
         // Otherwise create a new key using addProviderKey mutation
@@ -107,6 +155,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           providerName: provider.name,
           key: apiKey,
           providerKeyName: `${provider.name} API Key`,
+          config, // Add the config object
         });
       }
     } catch (error) {
@@ -117,6 +166,70 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
   const isViewingKey = keyDisplayState === "viewing";
   const isEditMode = !!existingKey;
+
+  // Determine if we need to show the advanced config section
+  const hasAdvancedConfig = provider.id === "azure" || provider.id === "aws";
+
+  // Render provider-specific config fields
+  const renderConfigFields = () => {
+    if (!hasAdvancedConfig) return null;
+
+    // Configuration fields based on provider
+    let configFields: { label: string; key: string; placeholder: string }[] =
+      [];
+
+    if (provider.id === "azure") {
+      configFields = [
+        {
+          label: "Base URI",
+          key: "baseUri",
+          placeholder: "https://your-resource-name.openai.azure.com",
+        },
+        { label: "API Version", key: "apiVersion", placeholder: "2023-05-15" },
+        {
+          label: "Deployment Name",
+          key: "deploymentName",
+          placeholder: "gpt-35-turbo",
+        },
+      ];
+    } else if (provider.id === "aws") {
+      configFields = [
+        { label: "Region", key: "region", placeholder: "us-west-2" },
+        {
+          label: "AWS Access Key ID",
+          key: "accessKeyId",
+          placeholder: "Access key",
+        },
+        {
+          label: "AWS Session Token",
+          key: "sessionToken",
+          placeholder: "Session token (optional)",
+        },
+      ];
+    }
+
+    return (
+      <div className="mt-3 border-t pt-3 flex flex-col gap-2">
+        <Small className="font-medium">Advanced Configuration</Small>
+        <Muted>Required fields for this provider</Muted>
+
+        <div className="flex flex-col gap-3 mt-2">
+          {configFields.map((field) => (
+            <div key={field.key} className="flex flex-col gap-1">
+              <Small className="text-xs">{field.label}</Small>
+              <Input
+                type="text"
+                placeholder={field.placeholder}
+                value={config[field.key] || ""}
+                onChange={(e) => updateConfigField(field.key, e.target.value)}
+                className="h-8 text-sm"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="border rounded-md overflow-hidden bg-card hover:border-primary/40 transition-colors">
@@ -244,6 +357,33 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               </Button>
             </div>
           </div>
+
+          {/* Advanced config toggle */}
+          {hasAdvancedConfig && (
+            <div className="mt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
+                className="flex items-center gap-1 text-xs text-muted-foreground h-7 px-2"
+              >
+                {showAdvancedConfig ? (
+                  <>
+                    <ChevronUp className="h-3.5 w-3.5" /> Hide advanced settings
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3.5 w-3.5" /> Show advanced
+                    settings
+                  </>
+                )}
+              </Button>
+
+              {/* Render the config fields when expanded */}
+              {showAdvancedConfig && renderConfigFields()}
+            </div>
+          )}
         </div>
       </div>
     </div>

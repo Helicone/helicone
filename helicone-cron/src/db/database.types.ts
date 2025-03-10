@@ -2101,12 +2101,12 @@ export type Database = {
       }
       provider_keys: {
         Row: {
+          config: Json | null
           created_at: string | null
           id: string
           key_id: string
           nonce: string
           org_id: string
-          provider_id: string | null
           provider_key: string
           provider_key_name: string
           provider_name: string
@@ -2114,12 +2114,12 @@ export type Database = {
           vault_key_id: string | null
         }
         Insert: {
+          config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string
           nonce?: string
           org_id: string
-          provider_id?: string | null
           provider_key: string
           provider_key_name: string
           provider_name: string
@@ -2127,12 +2127,12 @@ export type Database = {
           vault_key_id?: string | null
         }
         Update: {
+          config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string
           nonce?: string
           org_id?: string
-          provider_id?: string | null
           provider_key?: string
           provider_key_name?: string
           provider_name?: string
@@ -2727,13 +2727,13 @@ export type Database = {
     Views: {
       decrypted_provider_keys: {
         Row: {
+          config: Json | null
           created_at: string | null
           decrypted_provider_key: string | null
           id: string | null
           key_id: string | null
           nonce: string | null
           org_id: string | null
-          provider_id: string | null
           provider_key: string | null
           provider_key_name: string | null
           provider_name: string | null
@@ -2741,13 +2741,13 @@ export type Database = {
           vault_key_id: string | null
         }
         Insert: {
+          config?: Json | null
           created_at?: string | null
           decrypted_provider_key?: never
           id?: string | null
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null
-          provider_id?: string | null
           provider_key?: string | null
           provider_key_name?: string | null
           provider_name?: string | null
@@ -2755,13 +2755,13 @@ export type Database = {
           vault_key_id?: string | null
         }
         Update: {
+          config?: Json | null
           created_at?: string | null
           decrypted_provider_key?: never
           id?: string | null
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null
-          provider_id?: string | null
           provider_key?: string | null
           provider_key_name?: string | null
           provider_name?: string | null

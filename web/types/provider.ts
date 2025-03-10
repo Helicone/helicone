@@ -26,6 +26,7 @@ export interface ProviderKey {
   provider_key_name: string;
   created_at?: string;
   soft_delete: boolean;
+  config?: Record<string, any>; // JSON config field for provider-specific settings
 }
 
 // Interface for decrypted provider key
