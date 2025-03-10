@@ -2099,44 +2099,6 @@ export type Database = {
           },
         ]
       }
-      provider_configurations: {
-        Row: {
-          created_at: string
-          id: string
-          org_id: string
-          provider_configuration: Json
-          provider_name: string
-          soft_delete: boolean
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          org_id: string
-          provider_configuration?: Json
-          provider_name: string
-          soft_delete?: boolean
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          org_id?: string
-          provider_configuration?: Json
-          provider_name?: string
-          soft_delete?: boolean
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_configurations_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       provider_keys: {
         Row: {
           created_at: string | null
@@ -2144,7 +2106,7 @@ export type Database = {
           key_id: string
           nonce: string
           org_id: string
-          provider_configuration_id: string | null
+          provider_id: string | null
           provider_key: string
           provider_key_name: string
           provider_name: string
@@ -2157,7 +2119,7 @@ export type Database = {
           key_id?: string
           nonce?: string
           org_id: string
-          provider_configuration_id?: string | null
+          provider_id?: string | null
           provider_key: string
           provider_key_name: string
           provider_name: string
@@ -2170,7 +2132,7 @@ export type Database = {
           key_id?: string
           nonce?: string
           org_id?: string
-          provider_configuration_id?: string | null
+          provider_id?: string | null
           provider_key?: string
           provider_key_name?: string
           provider_name?: string
@@ -2183,13 +2145,6 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "provider_keys_provider_configuration_id_fkey"
-            columns: ["provider_configuration_id"]
-            isOneToOne: false
-            referencedRelation: "provider_configurations"
             referencedColumns: ["id"]
           },
         ]
@@ -2778,7 +2733,7 @@ export type Database = {
           key_id: string | null
           nonce: string | null
           org_id: string | null
-          provider_configuration_id: string | null
+          provider_id: string | null
           provider_key: string | null
           provider_key_name: string | null
           provider_name: string | null
@@ -2792,7 +2747,7 @@ export type Database = {
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null
-          provider_configuration_id?: string | null
+          provider_id?: string | null
           provider_key?: string | null
           provider_key_name?: string | null
           provider_name?: string | null
@@ -2806,7 +2761,7 @@ export type Database = {
           key_id?: string | null
           nonce?: string | null
           org_id?: string | null
-          provider_configuration_id?: string | null
+          provider_id?: string | null
           provider_key?: string | null
           provider_key_name?: string | null
           provider_name?: string | null
@@ -2819,13 +2774,6 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "provider_keys_provider_configuration_id_fkey"
-            columns: ["provider_configuration_id"]
-            isOneToOne: false
-            referencedRelation: "provider_configurations"
             referencedColumns: ["id"]
           },
         ]

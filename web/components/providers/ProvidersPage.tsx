@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,50 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SortOption } from "@/types/provider";
-import { useProviderConfig } from "@/hooks/useProviderConfig";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { filterProviders, sortProviders } from "@/utils/providerUtils";
 
 export const ProvidersPage: React.FC = () => {
   // Local UI state
-  const [expandedProvider, setExpandedProvider] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
-
-  // Use our enhanced hook with all provider configuration logic
-  const {
-    // Data and loading states
-    providerConfigs,
-    isLoadingConfigs,
-    apiKeys,
-    keyNames,
-    savingProvider,
-    savedProvider,
-
-    // Helper functions
-    getProviderKeysForProvider,
-    getConfigurationIdForProvider,
-    viewDecryptedProviderKey,
-    refetchProviderConfigs,
-
-    // Enhanced functions with built-in error handling and notifications
-    saveConfig,
-    saveKey,
-    deleteKey,
-    updateApiKey,
-    updateKeyName,
-  } = useProviderConfig();
-
-  // Refetch data when component mounts
-  useEffect(() => {
-    refetchProviderConfigs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const toggleExpand = (providerId: string) => {
-    setExpandedProvider(expandedProvider === providerId ? null : providerId);
-  };
 
   // Filter and sort the providers based on user selections
   const filteredProviders = sortProviders(
@@ -132,32 +96,14 @@ export const ProvidersPage: React.FC = () => {
           </DropdownMenu>
         </div>
 
-        <div className="border rounded-md divide-y overflow-hidden bg-white dark:bg-gray-950">
+        <div className="grid grid-cols-1 gap-2 ">
           {filteredProviders.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
+            <div className="text-center py-6 text-muted-foreground col-span-full">
               No providers found matching your search.
             </div>
           ) : (
             filteredProviders.map((provider) => (
-              <ProviderCard
-                key={provider.id}
-                provider={provider}
-                expanded={expandedProvider === provider.id}
-                onToggleExpand={() => toggleExpand(provider.id)}
-                isLoadingConfig={isLoadingConfigs}
-                configId={getConfigurationIdForProvider(provider.id)}
-                providerKeys={getProviderKeysForProvider(provider.id)}
-                keyName={keyNames[provider.id] || ""}
-                apiKey={apiKeys[provider.id] || ""}
-                onKeyNameChange={(value) => updateKeyName(provider.id, value)}
-                onApiKeyChange={(value) => updateApiKey(provider.id, value)}
-                onSaveKey={() => saveKey(provider.id, providers)}
-                onDeleteKey={(keyId) => deleteKey(keyId)}
-                onSaveConfig={() => saveConfig(provider.id, providers)}
-                isSavingKey={savingProvider === provider.id}
-                isSavedKey={savedProvider === provider.id}
-                viewDecryptedProviderKey={viewDecryptedProviderKey}
-              />
+              <ProviderCard key={provider.id} provider={provider} />
             ))
           )}
         </div>

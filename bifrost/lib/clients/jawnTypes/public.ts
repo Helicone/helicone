@@ -287,14 +287,6 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
-  "/v1/provider-config": {
-    get: operations["GetAllProviderConfigurations"];
-    post: operations["UpsertProviderConfiguration"];
-  };
-  "/v1/provider-config/{providerName}": {
-    get: operations["GetProviderConfiguration"];
-    delete: operations["DeleteProviderConfiguration"];
-  };
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
@@ -485,16 +477,20 @@ export interface paths {
   "/v1/customer/query": {
     post: operations["GetCustomers"];
   };
-  "/v1/api-keys": {
-    get: operations["GetAPIKeys"];
-    post: operations["CreateAPIKey"];
+  "/v1/api-keys/provider-key/{providerKeyId}": {
+    get: operations["GetProviderKey"];
+    delete: operations["DeleteProviderKey"];
+    patch: operations["UpdateProviderKey"];
   };
   "/v1/api-keys/provider-key": {
     post: operations["CreateProviderKey"];
   };
-  "/v1/api-keys/provider-key/{providerKeyId}": {
-    get: operations["GetProviderKey"];
-    delete: operations["DeleteProviderKey"];
+  "/v1/api-keys/provider-keys": {
+    get: operations["GetProviderKeys"];
+  };
+  "/v1/api-keys": {
+    get: operations["GetAPIKeys"];
+    post: operations["CreateAPIKey"];
   };
   "/v1/api-keys/proxy-key": {
     post: operations["CreateProxyKey"];
@@ -1807,35 +1803,6 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
-    ProviderConfigurationResponse: {
-      id: string;
-      provider_name: string;
-      provider_configuration: components["schemas"]["Record_string.any_"];
-      created_at: string;
-      updated_at: string;
-      provider_keys?: {
-          provider_configuration_id: string;
-          provider_key_name: string;
-          provider_name: string;
-          id: string;
-        }[];
-    };
-    "ResultSuccess_ProviderConfigurationResponse-Array_": {
-      data: components["schemas"]["ProviderConfigurationResponse"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderConfigurationResponse-Array.string_": components["schemas"]["ResultSuccess_ProviderConfigurationResponse-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_ProviderConfigurationResponse_: {
-      data: components["schemas"]["ProviderConfigurationResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderConfigurationResponse.string_": components["schemas"]["ResultSuccess_ProviderConfigurationResponse_"] | components["schemas"]["ResultError_string_"];
-    UpsertProviderConfigRequest: {
-      provider_name: string;
-      provider_configuration: components["schemas"]["Record_string.any_"];
-    };
     Property: {
       property: string;
     };
@@ -4268,61 +4235,6 @@ export interface operations {
       };
     };
   };
-  GetAllProviderConfigurations: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderConfigurationResponse-Array.string_"];
-        };
-      };
-    };
-  };
-  UpsertProviderConfiguration: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpsertProviderConfigRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderConfigurationResponse.string_"];
-        };
-      };
-    };
-  };
-  GetProviderConfiguration: {
-    parameters: {
-      path: {
-        providerName: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderConfigurationResponse.string_"];
-        };
-      };
-    };
-  };
-  DeleteProviderConfiguration: {
-    parameters: {
-      path: {
-        providerName: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
-        };
-      };
-    };
-  };
   GetProperties: {
     requestBody: {
       content: {
@@ -5406,6 +5318,98 @@ export interface operations {
       };
     };
   };
+  GetProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["DecryptedProviderKey"] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  DeleteProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  UpdateProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          providerKey?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  CreateProviderKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          providerKey: string;
+          providerName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  GetProviderKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown[] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
   GetAPIKeys: {
     responses: {
       /** @description Ok */
@@ -5436,62 +5440,6 @@ export interface operations {
           } | {
             error: string;
           };
-        };
-      };
-    };
-  };
-  CreateProviderKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          providerConfigurationId?: string;
-          providerKey: string;
-          providerKeyName: string;
-          providerName: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            id: string;
-          } | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  GetProviderKey: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["DecryptedProviderKey"] | {
-            error: string;
-          };
-        };
-      };
-    };
-  };
-  DeleteProviderKey: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
     };

@@ -166,34 +166,71 @@ export class KeyManager extends BaseManager {
   }
 
   /**
+   * Get all provider keys for an organization
+   */
+  async getProviderKeys(): Promise<Result<any[], string>> {
+    try {
+      const queryBuilder = supabaseServer.client
+        .from("provider_keys")
+        .select("*")
+        .eq("org_id", this.authParams.organizationId)
+        .eq("soft_delete", false)
+        .order("created_at", { ascending: false });
+
+      const { data, error } = await queryBuilder;
+
+      if (error) {
+        return err(`Failed to get provider keys: ${error.message}`);
+      }
+
+      return ok(data || []);
+    } catch (error) {
+      return err(`Failed to get provider keys: ${error}`);
+    }
+  }
+
+  /**
    * Create a provider key
    */
   async createProviderKey(data: {
     providerName: string;
     providerKeyName: string;
     providerKey: string;
-    providerConfigurationId?: string;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const {
-        providerName,
-        providerKeyName,
-        providerKey,
-        providerConfigurationId,
-      } = data;
+      const { providerName, providerKey } = data;
+      // Always use "default" as the key name
+      const providerKeyName = "default";
 
-      const insertData: any = {
+      // Check if a key already exists for this provider
+      const existingKeys = await supabaseServer.client
+        .from("provider_keys")
+        .select("id")
+        .eq("org_id", this.authParams.organizationId)
+        .eq("provider_name", providerName)
+        .eq("soft_delete", false);
+
+      // If a key exists, soft delete it first
+      if (existingKeys.data && existingKeys.data.length > 0) {
+        const existingKeyId = existingKeys.data[0].id;
+        const { error: deleteError } = await supabaseServer.client
+          .from("provider_keys")
+          .update({ soft_delete: true })
+          .eq("id", existingKeyId);
+
+        if (deleteError) {
+          return err(`Failed to replace existing key: ${deleteError.message}`);
+        }
+      }
+
+      // Insert the new key
+      const insertData = {
         provider_name: providerName,
-        provider_key_name: providerKeyName,
-        provider_key: providerKey, // This would be encrypted in a real implementation
+        provider_key_name: providerKeyName, // Always use "default"
+        provider_key: providerKey,
         org_id: this.authParams.organizationId,
         soft_delete: false,
       };
-
-      // If a provider configuration ID is provided, link the key to it
-      if (providerConfigurationId) {
-        insertData.provider_configuration_id = providerConfigurationId;
-      }
 
       const res = await supabaseServer.client
         .from("provider_keys")
@@ -208,6 +245,42 @@ export class KeyManager extends BaseManager {
       return ok({ id: res.data.id });
     } catch (error) {
       return err(`Failed to create provider key: ${error}`);
+    }
+  }
+
+  /**
+   * Update a provider key
+   */
+  async updateProviderKey(params: {
+    providerKeyId: string;
+    providerKey?: string;
+  }): Promise<Result<{ id: string }, string>> {
+    try {
+      const { providerKeyId, providerKey } = params;
+
+      // Verify the key belongs to this organization
+      const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
+      if (hasAccess.error) {
+        return err(hasAccess.error);
+      }
+
+      // Update the key
+      const result = await supabaseServer.client
+        .from("provider_keys")
+        .update({
+          provider_key: providerKey,
+        })
+        .eq("id", providerKeyId)
+        .select("id")
+        .single();
+
+      if (result.error) {
+        return err(`Failed to update provider key: ${result.error.message}`);
+      }
+
+      return ok({ id: result.data.id });
+    } catch (error) {
+      return err(`Failed to update provider key: ${error}`);
     }
   }
 

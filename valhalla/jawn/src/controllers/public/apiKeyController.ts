@@ -19,6 +19,96 @@ import { KeyManager } from "../../managers/apiKeys/KeyManager";
 @Tags("API Key")
 @Security("api_key")
 export class ApiKeyController extends Controller {
+  @Delete("/provider-key/{providerKeyId}")
+  public async deleteProviderKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() providerKeyId: string
+  ) {
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.deleteProviderKey(providerKeyId);
+
+    if (result.error) {
+      this.setStatus(500);
+      return { error: result.error };
+    }
+
+    return result.data;
+  }
+
+  @Post("/provider-key")
+  public async createProviderKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      providerName: string;
+      providerKey: string;
+    }
+  ) {
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.createProviderKey({
+      providerName: body.providerName,
+      providerKeyName: "default",
+      providerKey: body.providerKey,
+    });
+
+    if (result.error) {
+      this.setStatus(500);
+      return { error: result.error };
+    }
+
+    return result.data;
+  }
+
+  @Get("/provider-key/{providerKeyId}")
+  public async getProviderKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() providerKeyId: string
+  ) {
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.getDecryptedProviderKeyById(providerKeyId);
+
+    if (result.error) {
+      this.setStatus(500);
+      return { error: result.error };
+    }
+
+    // Return the decrypted key data directly
+    return result.data;
+  }
+
+  @Get("/provider-keys")
+  public async getProviderKeys(@Request() request: JawnAuthenticatedRequest) {
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.getProviderKeys();
+
+    if (result.error) {
+      this.setStatus(500);
+      return { error: result.error };
+    }
+
+    return result.data;
+  }
+
+  @Patch("/provider-key/{providerKeyId}")
+  public async updateProviderKey(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() providerKeyId: string,
+    @Body() body: { providerKey?: string }
+  ) {
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.updateProviderKey({
+      providerKeyId,
+      providerKey: body.providerKey,
+    });
+
+    if (result.error) {
+      this.setStatus(500);
+      return { error: result.error };
+    }
+
+    return result.data;
+  }
+
   @Get("/")
   public async getAPIKeys(@Request() request: JawnAuthenticatedRequest) {
     const keyManager = new KeyManager(request.authParams);
@@ -47,50 +137,6 @@ export class ApiKeyController extends Controller {
       return { error: result.error };
     }
 
-    return result.data;
-  }
-
-  @Post("/provider-key")
-  public async createProviderKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body()
-    body: {
-      providerName: string;
-      providerKeyName: string;
-      providerKey: string;
-      providerConfigurationId?: string;
-    }
-  ) {
-    const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.createProviderKey({
-      providerName: body.providerName,
-      providerKeyName: body.providerKeyName,
-      providerKey: body.providerKey,
-      providerConfigurationId: body.providerConfigurationId,
-    });
-
-    if (result.error) {
-      this.setStatus(500);
-      return { error: result.error };
-    }
-
-    return result.data;
-  }
-
-  @Get("/provider-key/{providerKeyId}")
-  public async getProviderKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() providerKeyId: string
-  ) {
-    const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.getDecryptedProviderKeyById(providerKeyId);
-
-    if (result.error) {
-      this.setStatus(500);
-      return { error: result.error };
-    }
-
-    // Return the decrypted key data directly
     return result.data;
   }
 
@@ -124,22 +170,6 @@ export class ApiKeyController extends Controller {
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteAPIKey(apiKeyId);
-
-    if (result.error) {
-      this.setStatus(500);
-      return { error: result.error };
-    }
-
-    return result.data;
-  }
-
-  @Delete("/provider-key/{providerKeyId}")
-  public async deleteProviderKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() providerKeyId: string
-  ) {
-    const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.deleteProviderKey(providerKeyId);
 
     if (result.error) {
       this.setStatus(500);

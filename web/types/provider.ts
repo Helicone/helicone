@@ -24,7 +24,9 @@ export interface ProviderKey {
   id: string;
   provider_name: string;
   provider_key_name: string;
-  provider_configuration_id?: string;
+  created_at?: string;
+  soft_delete: boolean;
+  provider_id: string;
 }
 
 // Interface for decrypted provider key
