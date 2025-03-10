@@ -283,6 +283,7 @@ export class KeyManager extends BaseManager {
           config: config,
         })
         .eq("id", providerKeyId)
+        .eq("org_id", this.authParams.organizationId)
         .select("id")
         .single();
 
@@ -315,6 +316,7 @@ export class KeyManager extends BaseManager {
           "id, org_id, decrypted_provider_key, provider_key_name, provider_name"
         )
         .eq("id", providerKeyId)
+        .eq("org_id", this.authParams.organizationId)
         .eq("soft_delete", false)
         .single();
 
