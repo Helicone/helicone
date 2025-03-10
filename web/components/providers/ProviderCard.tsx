@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useReducer, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,121 +22,269 @@ import {
 import useNotification from "@/components/shared/notification/useNotification";
 import { Muted, Small } from "@/components/ui/typography";
 
+// ====== Types ======
 interface ProviderCardProps {
   provider: Provider;
 }
 
-// A simpler key display state enum
-type KeyDisplayState = "hidden" | "viewing" | "loading";
+// Define our state structure
+interface ProviderCardState {
+  key: {
+    value: string;
+    displayState: "hidden" | "viewing" | "loading";
+    decryptedValue: string | null;
+  };
+  config: {
+    isVisible: boolean;
+    values: Record<string, string>;
+  };
+}
 
+// Define action types
+type ProviderCardAction =
+  | { type: "SET_KEY_VALUE"; payload: string }
+  | { type: "TOGGLE_KEY_VISIBILITY" }
+  | { type: "SET_KEY_LOADING" }
+  | { type: "SET_DECRYPTED_KEY"; payload: string }
+  | { type: "HIDE_KEY" }
+  | { type: "TOGGLE_CONFIG_VISIBILITY" }
+  | { type: "UPDATE_CONFIG_FIELD"; payload: { key: string; value: string } }
+  | { type: "INITIALIZE_CONFIG"; payload: Record<string, string> }
+  | { type: "RESET_VIEW" };
+
+// ====== Component ======
 export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
-  const [apiKey, setApiKey] = useState("");
-  const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
-  const [config, setConfig] = useState<Record<string, string>>({});
-
+  const { setNotification } = useNotification();
   const {
     existingKey,
     isSavingKey,
     isSavedKey,
     addProviderKey,
     updateProviderKey,
-    isLoadingKeys,
-    providerKeys,
     viewDecryptedProviderKey,
   } = useProvider({ provider });
 
-  // Simplified state management
-  const [keyDisplayState, setKeyDisplayState] =
-    useState<KeyDisplayState>("hidden");
-  const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
-  const { setNotification } = useNotification();
+  // ====== Reducer ======
+  const getInitialState = (): ProviderCardState => {
+    // Initialize with empty defaults based on provider
+    let initialConfig = {};
+    if (provider.id === "azure") {
+      initialConfig = {
+        baseUri: "",
+        apiVersion: "",
+        deploymentName: "",
+      };
+    } else if (provider.id === "aws") {
+      initialConfig = {
+        region: "",
+        accessKeyId: "",
+        sessionToken: "",
+      };
+    }
 
+    return {
+      key: {
+        value: "",
+        displayState: "hidden",
+        decryptedValue: null,
+      },
+      config: {
+        isVisible: false,
+        values: initialConfig,
+      },
+    };
+  };
+
+  const reducer = (
+    state: ProviderCardState,
+    action: ProviderCardAction
+  ): ProviderCardState => {
+    switch (action.type) {
+      case "SET_KEY_VALUE":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            value: action.payload,
+            // If we're editing while viewing a decrypted key, stop showing it
+            ...(state.key.displayState === "viewing" &&
+              state.key.decryptedValue && {
+                displayState: "hidden",
+                decryptedValue: null,
+              }),
+          },
+        };
+
+      case "TOGGLE_KEY_VISIBILITY":
+        // If already viewing, hide the key
+        if (state.key.displayState === "viewing") {
+          return {
+            ...state,
+            key: {
+              ...state.key,
+              displayState: "hidden",
+              decryptedValue: null,
+            },
+          };
+        }
+        // Otherwise show the key (for new keys, just toggle visibility)
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            displayState: "viewing",
+          },
+        };
+
+      case "SET_KEY_LOADING":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            displayState: "loading",
+          },
+        };
+
+      case "SET_DECRYPTED_KEY":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            displayState: "viewing",
+            decryptedValue: action.payload,
+          },
+        };
+
+      case "HIDE_KEY":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            displayState: "hidden",
+            decryptedValue: null,
+          },
+        };
+
+      case "TOGGLE_CONFIG_VISIBILITY":
+        return {
+          ...state,
+          config: {
+            ...state.config,
+            isVisible: !state.config.isVisible,
+          },
+        };
+
+      case "UPDATE_CONFIG_FIELD":
+        return {
+          ...state,
+          config: {
+            ...state.config,
+            values: {
+              ...state.config.values,
+              [action.payload.key]: action.payload.value,
+            },
+          },
+        };
+
+      case "INITIALIZE_CONFIG":
+        return {
+          ...state,
+          config: {
+            ...state.config,
+            values: action.payload,
+          },
+        };
+
+      case "RESET_VIEW":
+        return {
+          ...state,
+          key: {
+            ...state.key,
+            displayState: "hidden",
+            decryptedValue: null,
+          },
+        };
+
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(reducer, getInitialState());
+
+  // ====== Derived state ======
+  const isViewingKey = state.key.displayState === "viewing";
+  const isEditMode = !!existingKey;
+  const isLoadingKey = state.key.displayState === "loading";
+  const hasAdvancedConfig = provider.id === "azure" || provider.id === "aws";
+
+  // ====== Effects ======
   // Initialize config from existing key
   useEffect(() => {
     if (existingKey?.config) {
       try {
-        setConfig(existingKey.config as Record<string, string>);
+        dispatch({
+          type: "INITIALIZE_CONFIG",
+          payload: existingKey.config as Record<string, string>,
+        });
       } catch (error) {
         console.error("Error parsing config:", error);
       }
-    } else {
-      // Initialize with empty defaults based on provider
-      if (provider.id === "azure") {
-        setConfig({
-          baseUri: "",
-          apiVersion: "",
-          deploymentName: "",
-        });
-      } else if (provider.id === "aws") {
-        setConfig({
-          region: "",
-          accessKeyId: "",
-          sessionToken: "",
-        });
-      }
     }
-  }, [existingKey, provider.id]);
+  }, [existingKey]);
 
-  // Reset decrypted key view when saving or after successful save
+  // Reset key view when saving or after successful save
   useEffect(() => {
     if (isSavingKey || isSavedKey) {
-      setKeyDisplayState("hidden");
-      setDecryptedKey(null);
+      dispatch({ type: "RESET_VIEW" });
     }
   }, [isSavingKey, isSavedKey]);
 
-  // Handle toggling key visibility with a simplified approach
-  const toggleKeyVisibility = async () => {
-    // If already viewing, hide the key in both cases
-    if (keyDisplayState === "viewing") {
-      setKeyDisplayState("hidden");
-      setDecryptedKey(null);
+  // ====== Event handlers ======
+  const handleToggleKeyVisibility = async () => {
+    if (state.key.displayState === "viewing") {
+      dispatch({ type: "HIDE_KEY" });
       return;
     }
 
-    // If we have an existing key, fetch the decrypted version
+    // For existing keys, fetch the decrypted version
     if (existingKey) {
-      // Set loading state
-      setKeyDisplayState("loading");
+      dispatch({ type: "SET_KEY_LOADING" });
 
       try {
-        // Fetch the decrypted key
         const key = await viewDecryptedProviderKey(existingKey.id);
 
         if (key) {
-          setDecryptedKey(key);
-          setKeyDisplayState("viewing");
+          dispatch({ type: "SET_DECRYPTED_KEY", payload: key });
         } else {
           setNotification("Failed to retrieve key", "error");
-          setKeyDisplayState("hidden");
+          dispatch({ type: "HIDE_KEY" });
         }
       } catch (error) {
         console.error("Error viewing key:", error);
         setNotification("Failed to retrieve key", "error");
-        setKeyDisplayState("hidden");
+        dispatch({ type: "HIDE_KEY" });
       }
     } else {
-      // For new key entry, just toggle the visibility
-      setKeyDisplayState("viewing");
+      // For new keys, just toggle visibility
+      dispatch({ type: "TOGGLE_KEY_VISIBILITY" });
     }
   };
 
-  const copyToClipboard = (text: string) => {
+  const handleCopyToClipboard = (text: string) => {
     navigator.clipboard
       .writeText(text)
       .then(() => setNotification("API key copied to clipboard", "success"))
       .catch(() => setNotification("Failed to copy to clipboard", "error"));
   };
 
-  // Update a specific config field
-  const updateConfigField = (key: string, value: string) => {
-    setConfig((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const handleUpdateConfigField = (key: string, value: string) => {
+    dispatch({
+      type: "UPDATE_CONFIG_FIELD",
+      payload: { key, value },
+    });
   };
 
-  // Handle saving or updating the key
   const handleSaveKey = async () => {
     try {
       if (isEditMode) {
@@ -144,18 +292,18 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
         // If we have an existing key, use updateProviderKey mutation
         updateProviderKey.mutate({
           providerName: provider.name,
-          key: apiKey,
+          key: state.key.value,
           keyId: existingKey.id,
           providerKeyName: `${provider.name} API Key`,
-          config, // Add the config object
+          config: state.config.values,
         });
       } else {
         // Otherwise create a new key using addProviderKey mutation
         addProviderKey.mutate({
           providerName: provider.name,
-          key: apiKey,
+          key: state.key.value,
           providerKeyName: `${provider.name} API Key`,
-          config, // Add the config object
+          config: state.config.values,
         });
       }
     } catch (error) {
@@ -164,13 +312,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
     }
   };
 
-  const isViewingKey = keyDisplayState === "viewing";
-  const isEditMode = !!existingKey;
-
-  // Determine if we need to show the advanced config section
-  const hasAdvancedConfig = provider.id === "azure" || provider.id === "aws";
-
-  // Render provider-specific config fields
+  // ====== Render methods ======
   const renderConfigFields = () => {
     if (!hasAdvancedConfig) return null;
 
@@ -220,8 +362,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               <Input
                 type="text"
                 placeholder={field.placeholder}
-                value={config[field.key] || ""}
-                onChange={(e) => updateConfigField(field.key, e.target.value)}
+                value={state.config.values[field.key] || ""}
+                onChange={(e) =>
+                  handleUpdateConfigField(field.key, e.target.value)
+                }
                 className="h-8 text-sm"
               />
             </div>
@@ -270,16 +414,14 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 placeholder={
                   isEditMode ? "••••••••••••••••" : provider.apiKeyPlaceholder
                 }
-                value={isViewingKey && decryptedKey ? decryptedKey : apiKey}
-                onChange={(e) => {
-                  // Allow editing the input regardless of view mode
-                  setApiKey(e.target.value);
-
-                  // If we're viewing a decrypted key and editing, reset to the new value
-                  if (isViewingKey && decryptedKey) {
-                    setDecryptedKey(null);
-                  }
-                }}
+                value={
+                  isViewingKey && state.key.decryptedValue
+                    ? state.key.decryptedValue
+                    : state.key.value
+                }
+                onChange={(e) =>
+                  dispatch({ type: "SET_KEY_VALUE", payload: e.target.value })
+                }
                 className="flex-1 text-sm h-8 py-1"
               />
             </div>
@@ -287,7 +429,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
             {/* Action buttons */}
             <div className="flex items-center gap-1">
               {/* Show copy button only when viewing an existing decrypted key */}
-              {isViewingKey && decryptedKey && (
+              {isViewingKey && state.key.decryptedValue && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -295,7 +437,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => copyToClipboard(decryptedKey || "")}
+                        onClick={() =>
+                          handleCopyToClipboard(state.key.decryptedValue || "")
+                        }
                         className="h-8 w-8 text-blue-500"
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -314,11 +458,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={toggleKeyVisibility}
+                      onClick={handleToggleKeyVisibility}
                       className="h-8 w-8 text-blue-500"
-                      disabled={keyDisplayState === "loading"}
+                      disabled={isLoadingKey}
                     >
-                      {keyDisplayState === "loading" ? (
+                      {isLoadingKey ? (
                         <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-current" />
                       ) : isViewingKey ? (
                         <EyeOff className="h-3.5 w-3.5" />
@@ -335,7 +479,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
               <Button
                 onClick={handleSaveKey}
-                disabled={(!apiKey && !isEditMode) || isSavingKey}
+                disabled={(!state.key.value && !isEditMode) || isSavingKey}
                 size="sm"
                 className="flex items-center gap-1 whitespace-nowrap h-8 px-3"
               >
@@ -365,10 +509,10 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
+                onClick={() => dispatch({ type: "TOGGLE_CONFIG_VISIBILITY" })}
                 className="flex items-center gap-1 text-xs text-muted-foreground h-7 px-2"
               >
-                {showAdvancedConfig ? (
+                {state.config.isVisible ? (
                   <>
                     <ChevronUp className="h-3.5 w-3.5" /> Hide advanced settings
                   </>
@@ -381,7 +525,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               </Button>
 
               {/* Render the config fields when expanded */}
-              {showAdvancedConfig && renderConfigFields()}
+              {state.config.isVisible && renderConfigFields()}
             </div>
           )}
         </div>

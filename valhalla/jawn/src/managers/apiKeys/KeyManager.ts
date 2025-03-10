@@ -264,9 +264,10 @@ export class KeyManager extends BaseManager {
   async updateProviderKey(params: {
     providerKeyId: string;
     providerKey?: string;
+    config?: Record<string, string>;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const { providerKeyId, providerKey } = params;
+      const { providerKeyId, providerKey, config } = params;
 
       // Verify the key belongs to this organization
       const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
@@ -279,6 +280,7 @@ export class KeyManager extends BaseManager {
         .from("provider_keys")
         .update({
           provider_key: providerKey,
+          config: config,
         })
         .eq("id", providerKeyId)
         .select("id")

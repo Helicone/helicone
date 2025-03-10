@@ -96,12 +96,13 @@ export class ApiKeyController extends Controller {
   public async updateProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string,
-    @Body() body: { providerKey?: string }
+    @Body() body: { providerKey?: string; config?: Record<string, string> }
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateProviderKey({
       providerKeyId,
       providerKey: body.providerKey,
+      config: body.config,
     });
 
     if (result.error) {

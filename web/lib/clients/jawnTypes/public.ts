@@ -5359,6 +5359,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          config?: components["schemas"]["Record_string.string_"];
           providerKey?: string;
         };
       };

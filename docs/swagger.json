@@ -15271,6 +15271,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"config": {
+										"$ref": "#/components/schemas/Record_string.string_"
+									},
 									"providerKey": {
 										"type": "string"
 									}
