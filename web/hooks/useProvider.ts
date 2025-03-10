@@ -107,7 +107,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
             providerName,
             providerKey: key,
             providerKeyName,
-            config,
+            config: config || {},
           },
         });
 

@@ -14,9 +14,7 @@ import {
   FlaskConicalIcon,
   Home,
   ListTreeIcon,
-  LockIcon,
   ScrollTextIcon,
-  ServerIcon,
   SheetIcon,
   ShieldCheckIcon,
   TagIcon,
@@ -164,7 +162,7 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         ],
       },
     ],
-    [pathname, org?.currentOrg?.tier]
+    [pathname]
   );
 
   return (
