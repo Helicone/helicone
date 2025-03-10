@@ -3562,6 +3562,376 @@
 					}
 				]
 			},
+			"RouterProviderMapping": {
+				"properties": {
+					"conditions": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"primary",
+							"fallback",
+							"conditional"
+						]
+					},
+					"provider_key_id": {
+						"type": "string"
+					},
+					"router_id": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"weight",
+					"role",
+					"provider_key_id",
+					"router_id",
+					"id"
+				],
+				"type": "object"
+			},
+			"RouterConfiguration": {
+				"allOf": [
+					{
+						"properties": {
+							"updated_at": {
+								"type": "string",
+								"nullable": true
+							},
+							"soft_delete": {
+								"type": "boolean",
+								"nullable": true
+							},
+							"org_id": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"is_active": {
+								"type": "boolean",
+								"nullable": true
+							},
+							"id": {
+								"type": "string"
+							},
+							"description": {
+								"type": "string",
+								"nullable": true
+							},
+							"created_at": {
+								"type": "string",
+								"nullable": true
+							},
+							"config": {
+								"$ref": "#/components/schemas/Json"
+							}
+						},
+						"required": [
+							"updated_at",
+							"soft_delete",
+							"org_id",
+							"name",
+							"is_active",
+							"id",
+							"description",
+							"created_at",
+							"config"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"providers": {
+								"items": {
+									"$ref": "#/components/schemas/RouterProviderMapping"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
+					}
+				]
+			},
+			"ResultSuccess_RouterConfiguration-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/RouterConfiguration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_RouterConfiguration-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_RouterConfiguration-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_RouterConfiguration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/RouterConfiguration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_RouterConfiguration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_RouterConfiguration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"RouterConfig": {
+				"properties": {
+					"routing_strategy": {
+						"type": "string",
+						"enum": [
+							"weighted-random",
+							"round-robin",
+							"fallback-only",
+							"cost-optimized"
+						]
+					},
+					"limits": {
+						"properties": {
+							"cost": {
+								"properties": {
+									"currency": {
+										"type": "string"
+									},
+									"max_cost_per_day": {
+										"type": "number",
+										"format": "double"
+									},
+									"max_cost_per_request": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							},
+							"rate": {
+								"properties": {
+									"tokens_per_day": {
+										"type": "number",
+										"format": "double"
+									},
+									"requests_per_minute": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object"
+					}
+				},
+				"type": "object"
+			},
+			"CreateRouterConfigurationRequest": {
+				"description": "Represent request to create a new router configuration",
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the router configuration"
+					},
+					"description": {
+						"type": "string",
+						"description": "Optional description"
+					},
+					"config": {
+						"$ref": "#/components/schemas/RouterConfig",
+						"description": "Router configuration parameters"
+					},
+					"is_active": {
+						"type": "boolean",
+						"description": "Whether the router is active (default: true)"
+					}
+				},
+				"required": [
+					"name",
+					"config"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateRouterConfigurationRequest": {
+				"description": "Represent request to update an existing router configuration",
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "Name of the router configuration"
+					},
+					"description": {
+						"type": "string",
+						"description": "Optional description"
+					},
+					"config": {
+						"$ref": "#/components/schemas/RouterConfig",
+						"description": "Router configuration parameters"
+					},
+					"is_active": {
+						"type": "boolean",
+						"description": "Whether the router is active"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AddProviderToRouterRequest": {
+				"description": "Represent request to add a provider to a router",
+				"properties": {
+					"providerKeyId": {
+						"type": "string",
+						"description": "ID of the provider key to add"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"primary",
+							"fallback",
+							"conditional"
+						],
+						"description": "Provider's role in the router"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double",
+						"description": "Weight for weighted routing (default: 1.0)"
+					},
+					"conditions": {
+						"$ref": "#/components/schemas/Record_string.any_",
+						"description": "Conditions for when to use this provider"
+					}
+				},
+				"required": [
+					"providerKeyId",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateProviderMappingRequest": {
+				"description": "Represent request to update a provider mapping",
+				"properties": {
+					"role": {
+						"type": "string",
+						"enum": [
+							"primary",
+							"fallback",
+							"conditional"
+						],
+						"description": "Provider's role in the router"
+					},
+					"weight": {
+						"type": "number",
+						"format": "double",
+						"description": "Weight for weighted routing"
+					},
+					"conditions": {
+						"$ref": "#/components/schemas/Record_string.any_",
+						"description": "Conditions for when to use this provider"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AssociateRouterWithProxyKeyRequest": {
+				"description": "Represent request to associate a router with a proxy key",
+				"properties": {
+					"proxyKeyId": {
+						"type": "string",
+						"description": "ID of the proxy key to associate with the router"
+					}
+				},
+				"required": [
+					"proxyKeyId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UpgradeToProRequest": {
 				"properties": {
 					"addons": {
@@ -8968,6 +9338,370 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/router": {
+			"get": {
+				"operationId": "GetRouterConfigurations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_RouterConfiguration-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all router configurations for the authenticated organization",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateRouterConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new router configuration",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateRouterConfigurationRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/router/{routerId}": {
+			"get": {
+				"operationId": "GetRouterConfigurationById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_RouterConfiguration.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a specific router configuration by ID",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateRouterConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing router configuration",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateRouterConfigurationRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteRouterConfiguration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a router configuration",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/router/{routerId}/providers": {
+			"post": {
+				"operationId": "AddProviderToRouter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Add a provider to a router",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AddProviderToRouterRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/router/{routerId}/providers/{mappingId}": {
+			"delete": {
+				"operationId": "RemoveProviderFromRouter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Remove a provider from a router",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "mappingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateProviderMapping",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a provider mapping",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "mappingId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateProviderMappingRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/router/{routerId}/proxy-key": {
+			"post": {
+				"operationId": "AssociateRouterWithProxyKey",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Associate a router with a proxy key",
+				"tags": [
+					"Router"
+				],
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "routerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AssociateRouterWithProxyKeyRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/stripe/subscription/cost-for-prompts": {

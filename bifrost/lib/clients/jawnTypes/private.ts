@@ -186,6 +186,34 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/router": {
+    /** @description Get all router configurations for the authenticated organization */
+    get: operations["GetRouterConfigurations"];
+    /** @description Create a new router configuration */
+    post: operations["CreateRouterConfiguration"];
+  };
+  "/v1/router/{routerId}": {
+    /** @description Get a specific router configuration by ID */
+    get: operations["GetRouterConfigurationById"];
+    /** @description Update an existing router configuration */
+    put: operations["UpdateRouterConfiguration"];
+    /** @description Delete a router configuration */
+    delete: operations["DeleteRouterConfiguration"];
+  };
+  "/v1/router/{routerId}/providers": {
+    /** @description Add a provider to a router */
+    post: operations["AddProviderToRouter"];
+  };
+  "/v1/router/{routerId}/providers/{mappingId}": {
+    /** @description Update a provider mapping */
+    put: operations["UpdateProviderMapping"];
+    /** @description Remove a provider from a router */
+    delete: operations["RemoveProviderFromRouter"];
+  };
+  "/v1/router/{routerId}/proxy-key": {
+    /** @description Associate a router with a proxy key */
+    post: operations["AssociateRouterWithProxyKey"];
+  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -1286,6 +1314,127 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    RouterProviderMapping: {
+      conditions?: components["schemas"]["Record_string.any_"];
+      /** Format: double */
+      weight: number;
+      /** @enum {string} */
+      role: "primary" | "fallback" | "conditional";
+      provider_key_id: string;
+      router_id: string;
+      id: string;
+    };
+    RouterConfiguration: ({
+      updated_at: string | null;
+      soft_delete: boolean | null;
+      org_id: string;
+      name: string;
+      is_active: boolean | null;
+      id: string;
+      description: string | null;
+      created_at: string | null;
+      config: components["schemas"]["Json"];
+    }) & {
+      providers?: components["schemas"]["RouterProviderMapping"][];
+    };
+    "ResultSuccess_RouterConfiguration-Array_": {
+      data: components["schemas"]["RouterConfiguration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterConfiguration-Array.string_": components["schemas"]["ResultSuccess_RouterConfiguration-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_RouterConfiguration_: {
+      data: components["schemas"]["RouterConfiguration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RouterConfiguration.string_": components["schemas"]["ResultSuccess_RouterConfiguration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+    RouterConfig: {
+      /** @enum {string} */
+      routing_strategy?: "weighted-random" | "round-robin" | "fallback-only" | "cost-optimized";
+      limits?: {
+        cost?: {
+          currency?: string;
+          /** Format: double */
+          max_cost_per_day?: number;
+          /** Format: double */
+          max_cost_per_request?: number;
+        };
+        rate?: {
+          /** Format: double */
+          tokens_per_day?: number;
+          /** Format: double */
+          requests_per_minute?: number;
+        };
+      };
+    };
+    /** @description Represent request to create a new router configuration */
+    CreateRouterConfigurationRequest: {
+      /** @description Name of the router configuration */
+      name: string;
+      /** @description Optional description */
+      description?: string;
+      /** @description Router configuration parameters */
+      config: components["schemas"]["RouterConfig"];
+      /** @description Whether the router is active (default: true) */
+      is_active?: boolean;
+    };
+    /** @description Represent request to update an existing router configuration */
+    UpdateRouterConfigurationRequest: {
+      /** @description Name of the router configuration */
+      name?: string;
+      /** @description Optional description */
+      description?: string;
+      /** @description Router configuration parameters */
+      config?: components["schemas"]["RouterConfig"];
+      /** @description Whether the router is active */
+      is_active?: boolean;
+    };
+    /** @description Represent request to add a provider to a router */
+    AddProviderToRouterRequest: {
+      /** @description ID of the provider key to add */
+      providerKeyId: string;
+      /**
+       * @description Provider's role in the router
+       * @enum {string}
+       */
+      role: "primary" | "fallback" | "conditional";
+      /**
+       * Format: double
+       * @description Weight for weighted routing (default: 1.0)
+       */
+      weight?: number;
+      /** @description Conditions for when to use this provider */
+      conditions?: components["schemas"]["Record_string.any_"];
+    };
+    /** @description Represent request to update a provider mapping */
+    UpdateProviderMappingRequest: {
+      /**
+       * @description Provider's role in the router
+       * @enum {string}
+       */
+      role?: "primary" | "fallback" | "conditional";
+      /**
+       * Format: double
+       * @description Weight for weighted routing
+       */
+      weight?: number;
+      /** @description Conditions for when to use this provider */
+      conditions?: components["schemas"]["Record_string.any_"];
+    };
+    /** @description Represent request to associate a router with a proxy key */
+    AssociateRouterWithProxyKeyRequest: {
+      /** @description ID of the proxy key to associate with the router */
+      proxyKeyId: string;
+    };
     UpgradeToProRequest: {
       addons?: {
         evals?: boolean;
@@ -3372,6 +3521,167 @@ export interface operations {
           "application/json": {
             useAzureForExperiment: boolean;
           };
+        };
+      };
+    };
+  };
+  /** @description Get all router configurations for the authenticated organization */
+  GetRouterConfigurations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterConfiguration-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Create a new router configuration */
+  CreateRouterConfiguration: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRouterConfigurationRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get a specific router configuration by ID */
+  GetRouterConfigurationById: {
+    parameters: {
+      path: {
+        routerId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RouterConfiguration.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update an existing router configuration */
+  UpdateRouterConfiguration: {
+    parameters: {
+      path: {
+        routerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRouterConfigurationRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a router configuration */
+  DeleteRouterConfiguration: {
+    parameters: {
+      path: {
+        routerId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Add a provider to a router */
+  AddProviderToRouter: {
+    parameters: {
+      path: {
+        routerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddProviderToRouterRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update a provider mapping */
+  UpdateProviderMapping: {
+    parameters: {
+      path: {
+        routerId: string;
+        mappingId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProviderMappingRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Remove a provider from a router */
+  RemoveProviderFromRouter: {
+    parameters: {
+      path: {
+        routerId: string;
+        mappingId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Associate a router with a proxy key */
+  AssociateRouterWithProxyKey: {
+    parameters: {
+      path: {
+        routerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssociateRouterWithProxyKeyRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

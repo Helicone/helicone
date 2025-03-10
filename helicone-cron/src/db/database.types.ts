@@ -1188,6 +1188,7 @@ export type Database = {
           id: string
           org_id: string
           provider_key_id: string
+          router_id: string | null
           soft_delete: boolean
         }
         Insert: {
@@ -1198,6 +1199,7 @@ export type Database = {
           id?: string
           org_id: string
           provider_key_id: string
+          router_id?: string | null
           soft_delete?: boolean
         }
         Update: {
@@ -1208,6 +1210,7 @@ export type Database = {
           id?: string
           org_id?: string
           provider_key_id?: string
+          router_id?: string | null
           soft_delete?: boolean
         }
         Relationships: [
@@ -1230,6 +1233,13 @@ export type Database = {
             columns: ["provider_key_id"]
             isOneToOne: false
             referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "router_configurations"
             referencedColumns: ["id"]
           },
         ]
@@ -2469,6 +2479,170 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      router_configurations: {
+        Row: {
+          config: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          org_id: string
+          soft_delete: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          org_id: string
+          soft_delete?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          org_id?: string
+          soft_delete?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_configurations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_provider_mappings: {
+        Row: {
+          conditions: Json | null
+          created_at: string | null
+          id: string
+          provider_key_id: string
+          role: string
+          router_id: string
+          weight: number | null
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string | null
+          id?: string
+          provider_key_id: string
+          role: string
+          router_id: string
+          weight?: number | null
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string | null
+          id?: string
+          provider_key_id?: string
+          role?: string
+          router_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_provider_mappings_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "router_provider_mappings_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "router_provider_mappings_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "router_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_usage: {
+        Row: {
+          created_at: string | null
+          fallback_triggered: boolean | null
+          id: string
+          provider_key_id: string
+          request_context: Json | null
+          request_id: string | null
+          route_decision_time_ms: number | null
+          route_success: boolean | null
+          router_id: string
+          routing_reason: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fallback_triggered?: boolean | null
+          id?: string
+          provider_key_id: string
+          request_context?: Json | null
+          request_id?: string | null
+          route_decision_time_ms?: number | null
+          route_success?: boolean | null
+          router_id: string
+          routing_reason?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fallback_triggered?: boolean | null
+          id?: string
+          provider_key_id?: string
+          request_context?: Json | null
+          request_id?: string | null
+          route_decision_time_ms?: number | null
+          route_success?: boolean | null
+          router_id?: string
+          routing_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_usage_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "router_usage_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "router_usage_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "router_usage_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "router_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       score_attribute: {
         Row: {

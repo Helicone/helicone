@@ -341,7 +341,9 @@ const useOrgsContextManager = () => {
         (demoOrg.onboarding_status as any).demoDataSetup === false
       ) {
         fetch(
-          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+          `${env(
+            "NEXT_PUBLIC_HELICONE_JAWN_SERVICE"
+          )}/v1/organization/setup-demo`,
           {
             method: "POST",
             headers: {
