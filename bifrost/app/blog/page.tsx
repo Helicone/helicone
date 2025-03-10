@@ -196,6 +196,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "full-guide-to-improving-ai-agents",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "chain-of-draft",
     },
   },
