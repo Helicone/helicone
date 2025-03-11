@@ -6,15 +6,21 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hoverCard";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { TooltipContent } from "@radix-ui/react-tooltip";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { Row } from "../../layout/common/row";
 import { clsx } from "../../shared/clsx";
+import { Muted } from "@/components/ui/typography";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 
 interface SessionNameSelectionProps {
   sessionNameSearch?: string;
@@ -28,6 +34,7 @@ interface SessionNameSelectionProps {
   }>;
   selectedName?: string;
   setSelectedName: (name?: string) => void;
+  totalSessionCount?: number;
 }
 
 const SessionNameSelection = ({
@@ -36,7 +43,45 @@ const SessionNameSelection = ({
   sessionNames,
   selectedName,
   setSelectedName,
+  totalSessionCount,
 }: SessionNameSelectionProps) => {
+  const { freeLimit, hasFullAccess } = useFeatureLimit(
+    "sessions",
+    sessionNames.length
+  );
+
+  // Sort the session names by last_used date (most recent first)
+  const sortedSessions = [...sessionNames].sort(
+    (a, b) => new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+  );
+
+  // Filter sessions based on search or age criteria
+  const filteredSessions = sortedSessions.filter((seshName) =>
+    sessionNameSearch
+      ? true
+      : new Date(seshName.last_used).getTime() >
+        new Date().getTime() - 45 * 24 * 60 * 60 * 1000
+  );
+
+  // Function to handle session selection with free tier limit check
+  const handleSessionSelect = (
+    session: (typeof sessionNames)[0],
+    index: number
+  ) => {
+    if (!hasFullAccess && index >= freeLimit) {
+      // This is a premium session, do not set as selected
+      return;
+    }
+
+    if (session.name === selectedName) {
+      setSelectedName(undefined);
+      setSessionNameSearch(undefined);
+    } else {
+      setSelectedName(session.name);
+      setSessionNameSearch(undefined);
+    }
+  };
+
   return (
     <Col className="min-w-[20em] min-h-[calc(100vh-56px)] bg-slate-50 dark:bg-black border-r border-slate-200 dark:border-slate-800 place-items-stretch">
       <Row className="items-center border-b">
@@ -73,109 +118,183 @@ const SessionNameSelection = ({
       </Row>
 
       <Col className="max-h-[70vh] overflow-y-auto">
-        {sessionNames
-          .sort(
-            (a, b) =>
-              new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-          )
-          // Remove sessions older than 45 days
-          .filter((seshName) =>
-            sessionNameSearch
-              ? true
-              : new Date(seshName.last_used).getTime() >
-                new Date().getTime() - 45 * 24 * 60 * 60 * 1000
-          )
-          .map((seshName) => (
-            <Card
+        {filteredSessions.map((seshName, index) => {
+          // Determine if this session requires premium (beyond free tier limit)
+          const requiresPremium = !hasFullAccess && index >= freeLimit;
+
+          return (
+            <FreeTierLimitWrapper
               key={seshName.name}
-              className={clsx(
-                "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b",
-                selectedName === seshName.name
-                  ? "bg-sky-100 dark:bg-slate-900"
-                  : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
-              )}
-              onClick={() => {
-                if (seshName.name === selectedName) {
-                  setSelectedName(undefined);
-                  setSessionNameSearch(undefined);
-                } else {
-                  setSelectedName(seshName.name);
-                  setSessionNameSearch(undefined);
-                }
-              }}
+              feature="sessions"
+              itemCount={requiresPremium ? freeLimit + 1 : 0} // Trigger the upgrade modal only for premium sessions
             >
-              <Row className="flex w-full justify-between items-center gap-2 mb-2">
-                <Row className="gap-2 items-center">
-                  {seshName.name === "" ? (
-                    <div className="text-slate-400 dark:text-slate-600 font-semibold text-sm">
-                      Unnamed
-                    </div>
-                  ) : (
-                    <div className="font-semibold text-sm text-slate-900 dark:text-slate-300">
-                      {seshName.name}
-                    </div>
-                  )}
-                  <HoverCard>
-                    <HoverCardTrigger>
-                      <InfoIcon
-                        width={16}
-                        height={16}
-                        className="text-slate-700 cursor-pointer"
-                      />
-                    </HoverCardTrigger>
-                    <HoverCardContent
-                      align="start"
-                      className="w-[220px] p-0 z-[1000] bg-white dark:bg-black border border-slate-200 dark:border-slate-800"
-                    >
-                      <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Total sessions
-                          </h3>
-                          <p className="text-sm text-slate-500 truncate">
-                            {seshName.session_count}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Created on
-                          </h3>
-                          <p className="text-sm text-slate-500 truncate">
-                            {new Date(seshName.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
+              <Card
+                className={clsx(
+                  "shadow-sm p-4 w-full items-start text-left rounded-none cursor-pointer border-0 border-b relative",
+                  selectedName === seshName.name
+                    ? "bg-sky-100 dark:bg-slate-900"
+                    : requiresPremium
+                    ? "bg-slate-50/80 dark:bg-slate-900/30 hover:bg-slate-100/80 dark:hover:bg-slate-800/30"
+                    : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+                )}
+                onClick={() => handleSessionSelect(seshName, index)}
+              >
+                <Row className="flex w-full justify-between items-center gap-2 mb-2">
+                  <Row className="gap-2 items-center">
+                    {requiresPremium && (
+                      <LockIcon className="h-3 w-3 text-slate-400 dark:text-slate-500 flex-shrink-0" />
+                    )}
+                    {seshName.name === "" ? (
+                      <div
+                        className={clsx(
+                          "text-sm font-semibold",
+                          requiresPremium
+                            ? "text-slate-400 dark:text-slate-600"
+                            : "text-slate-400 dark:text-slate-600"
+                        )}
+                      >
+                        Unnamed
                       </div>
-                    </HoverCardContent>
-                  </HoverCard>
+                    ) : (
+                      <div
+                        className={clsx(
+                          "text-sm font-semibold",
+                          requiresPremium
+                            ? "text-slate-500 dark:text-slate-500"
+                            : "text-slate-900 dark:text-slate-300"
+                        )}
+                      >
+                        {seshName.name}
+                      </div>
+                    )}
+                    <HoverCard>
+                      <HoverCardTrigger>
+                        <InfoIcon
+                          width={16}
+                          height={16}
+                          className={clsx(
+                            "cursor-pointer",
+                            requiresPremium
+                              ? "text-slate-400 dark:text-slate-600"
+                              : "text-slate-700"
+                          )}
+                        />
+                      </HoverCardTrigger>
+                      <HoverCardContent
+                        align="start"
+                        className="w-[220px] p-0 z-[1000] bg-white dark:bg-black border border-slate-200 dark:border-slate-800"
+                      >
+                        <div className="p-3 gap-3 flex flex-col border-b border-slate-200">
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                              Total sessions
+                            </h3>
+                            <p className="text-sm text-slate-500 truncate">
+                              {seshName.session_count}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                              Created on
+                            </h3>
+                            <p className="text-sm text-slate-500 truncate">
+                              {new Date(
+                                seshName.created_at
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                          {requiresPremium && (
+                            <div className="flex flex-col gap-1">
+                              <h3 className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                                Premium Access
+                              </h3>
+                              <p className="text-sm text-slate-500">
+                                Upgrade to view this session
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </Row>
+
+                  <div
+                    className={clsx(
+                      "border rounded-full h-4 w-4 flex items-center justify-center",
+                      selectedName === seshName.name
+                        ? "bg-sky-500 dark:bg-sky-500/80 border-sky-500 dark:border-sky-500/80"
+                        : requiresPremium
+                        ? "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                        : "bg-white dark:bg-slate-700/50 border-slate-300 dark:border-slate-700"
+                    )}
+                  ></div>
                 </Row>
 
-                <div
+                <Row
                   className={clsx(
-                    "border border-slate-300 dark:border-slate-700 rounded-full h-4 w-4 flex items-center justify-center",
-                    selectedName === seshName.name
-                      ? "bg-sky-500 dark:bg-sky-500/80"
-                      : "bg-white dark:bg-slate-700/50"
+                    "flex w-full justify-between items-center",
+                    requiresPremium
+                      ? "text-slate-400 dark:text-slate-600"
+                      : "text-slate-500 dark:text-slate-500"
                   )}
-                ></div>
-              </Row>
-
-              <Row className="flex w-full justify-between items-center text-slate-500 dark:text-slate-500">
-                <p className="text-xs">
-                  Last used{" "}
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {getTimeAgo(new Date(seshName.last_used))}
-                  </span>
-                </p>
-                <p className="text-xs">
-                  Total cost $
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {seshName.total_cost.toFixed(2)}
-                  </span>
-                </p>
-              </Row>
-            </Card>
-          ))}
+                >
+                  <p className="text-xs">
+                    Last used{" "}
+                    <span
+                      className={clsx(
+                        "font-medium",
+                        requiresPremium
+                          ? "text-slate-500 dark:text-slate-500"
+                          : "text-slate-700 dark:text-slate-300"
+                      )}
+                    >
+                      {getTimeAgo(new Date(seshName.last_used))}
+                    </span>
+                  </p>
+                  <p className="text-xs">
+                    Total cost $
+                    <span
+                      className={clsx(
+                        "font-medium",
+                        requiresPremium
+                          ? "text-slate-500 dark:text-slate-500"
+                          : "text-slate-700 dark:text-slate-300"
+                      )}
+                    >
+                      {seshName.total_cost.toFixed(2)}
+                    </span>
+                  </p>
+                </Row>
+              </Card>
+            </FreeTierLimitWrapper>
+          );
+        })}
       </Col>
+
+      {/* Footer with upgrade message */}
+      {!hasFullAccess &&
+        (totalSessionCount || filteredSessions.length) > freeLimit && (
+          <div className="border-t border-slate-200 dark:border-slate-800 p-3">
+            <div className="flex items-center justify-between">
+              <Muted className="text-xs">
+                Free tier users can view up to {freeLimit} of{" "}
+                {totalSessionCount || filteredSessions.length} sessions
+              </Muted>
+              <FreeTierLimitWrapper
+                feature="sessions"
+                itemCount={freeLimit + 1}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-700 hover:bg-transparent dark:hover:text-sky-300"
+                >
+                  Unlock all →
+                </Button>
+              </FreeTierLimitWrapper>
+            </div>
+          </div>
+        )}
     </Col>
   );
 };

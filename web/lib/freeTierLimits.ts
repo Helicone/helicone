@@ -144,6 +144,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           `You've used ${used}/${limit} alert. Upgrade for unlimited alerts.`,
       },
     },
+    sessions: {
+      main: {
+        getLimit: () => 1,
+        description: (limit) =>
+          `You can have up to ${limit} named sessions with the free tier`,
+        upgradeFeatureName: FEATURE_DISPLAY_NAMES.sessions,
+        upgradeMessage: (limit, used) =>
+          `You've used ${used}/${limit} named sessions. Upgrade for unlimited access.`,
+      },
+    },
   },
 };
 

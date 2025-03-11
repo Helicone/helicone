@@ -86,6 +86,7 @@ const useSessionNames = (sessionNameSearch: string) => {
 
   return {
     sessions: data?.data?.data || [],
+    totalCount: data?.data?.data?.length || 0,
     refetch,
     isLoading,
     isRefetching,

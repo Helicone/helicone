@@ -15,8 +15,7 @@ import {
   getRootFilterNode,
 } from "@/services/lib/filters/uiFilterRowTree";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { ListTree } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
@@ -24,6 +23,17 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { Button } from "@/components/ui/button";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Muted, Small } from "@/components/ui/typography";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -107,22 +117,40 @@ const SessionsPage = (props: SessionsPageProps) => {
     return allNames.sessions.length > 0;
   }, [allNames.sessions.length]);
 
-  const hasAccessToSessions = useMemo(() => {
-    return (
-      hasAccess ||
-      (hasSomeSessions &&
-        new Date().getTime() < new Date("2024-09-27").getTime())
-    );
-  }, [hasAccess, hasSomeSessions]);
+  const { hasReachedLimit, freeLimit } = useFeatureLimit(
+    "sessions",
+    allNames.sessions.length
+  );
 
   const [currentTab, setCurrentTab] = useLocalStorage<
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
+  // Automatically select the first visible session when sessions load
+  useEffect(() => {
+    if (hasSomeSessions && selectedName === undefined && !allNames.isLoading) {
+      // Sort by most recently used
+      const sortedSessions = [...allNames.sessions].sort(
+        (a, b) =>
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+      );
+
+      // Pick first session (will be within free tier limit)
+      if (sortedSessions.length > 0) {
+        setSelectedName(sortedSessions[0].name);
+      }
+    }
+  }, [hasSomeSessions, allNames.sessions, allNames.isLoading, selectedName]);
+
   return (
     <Tabs
       value={currentTab}
-      onValueChange={(value) => setCurrentTab(value)}
+      onValueChange={(value) => {
+        if (value === "metrics" && !hasAccess) {
+          return;
+        }
+        setCurrentTab(value);
+      }}
       className="w-full"
     >
       <div>
@@ -130,87 +158,79 @@ const SessionsPage = (props: SessionsPageProps) => {
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <LoadingAnimation />
           </div>
-        ) : hasAccessToSessions ? (
-          hasSomeSessions ? (
-            <>
-              <AuthHeader
-                isWithinIsland={true}
-                title={
-                  <div className="flex items-center gap-2 ml-8">Sessions</div>
-                }
-                actions={
-                  <TabsList className="grid w-full grid-cols-2 mr-8">
+        ) : hasSomeSessions ? (
+          <>
+            <AuthHeader
+              isWithinIsland={true}
+              title={
+                <div className="flex items-center gap-2 ml-8">Sessions</div>
+              }
+              actions={
+                <div className="flex items-center gap-4 mr-8">
+                  <TabsList className="grid w-full grid-cols-2">
                     {TABS.map((tab) => (
                       <TabsTrigger
                         key={tab.id}
                         value={tab.id}
                         className="flex items-center gap-2"
+                        disabled={tab.id === "metrics" && !hasAccess}
+                        {...(tab.id === "metrics" && !hasAccess
+                          ? {
+                              onClick: (e) => {
+                                e.preventDefault();
+                              },
+                            }
+                          : {})}
                       >
                         {tab.icon}
                         {tab.label}
+                        {tab.id === "metrics" && !hasAccess && (
+                          <FreeTierLimitWrapper
+                            feature="sessions"
+                            itemCount={999}
+                          >
+                            <span className="sr-only">Upgrade</span>
+                          </FreeTierLimitWrapper>
+                        )}
                       </TabsTrigger>
                     ))}
                   </TabsList>
-                }
+                </div>
+              }
+            />
+
+            <Row className="border-t border-slate-200 dark:border-slate-800">
+              <SessionNameSelection
+                sessionNameSearch={sessionNameSearch}
+                selectedName={selectedName}
+                setSessionNameSearch={setSessionNameSearch}
+                setSelectedName={setSelectedName}
+                sessionNames={names.sessions}
+                totalSessionCount={allNames.totalCount}
               />
-              <Row className="border-t border-slate-200 dark:border-slate-800">
-                <SessionNameSelection
-                  sessionNameSearch={sessionNameSearch}
-                  selectedName={selectedName}
-                  setSessionNameSearch={setSessionNameSearch}
-                  setSelectedName={setSelectedName}
-                  sessionNames={names.sessions}
-                />
-                <SessionDetails
-                  currentTab={currentTab}
-                  selectedSession={
-                    names.sessions.find(
-                      (session) => session.name === selectedName
-                    ) ?? null
-                  }
-                  sessionIdSearch={sessionIdSearch ?? ""}
-                  setSessionIdSearch={setSessionIdSearch}
-                  sessions={sessions}
-                  isLoading={isLoading}
-                  sort={sort}
-                  timeFilter={timeFilter}
-                  setTimeFilter={setTimeFilter}
-                  setInterval={() => {}}
-                  advancedFilters={advancedFilters}
-                  onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
-                />
-              </Row>
-            </>
-          ) : (
-            <div className="flex flex-col w-full min-h-screen items-center bg-[hsl(var(--background))]">
-              <EmptyStateCard feature="sessions" />
-            </div>
-          )
-        ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-[hsl(var(--background))]">
-            <FeatureUpgradeCard
-              title="Sessions"
-              featureImage={{
-                type: "image",
-                content: "/static/featureUpgrade/sessions-graphic.webp",
-              }}
-              headerTagline="Group, analyze and fix AI workflows"
-              icon={<ListTree className="w-4 h-4 text-sky-500" />}
-              highlightedFeature="sessions"
-            />
-          </div>
+              <SessionDetails
+                currentTab={currentTab}
+                selectedSession={
+                  names.sessions.find(
+                    (session) => session.name === selectedName
+                  ) ?? null
+                }
+                sessionIdSearch={sessionIdSearch ?? ""}
+                setSessionIdSearch={setSessionIdSearch}
+                sessions={sessions}
+                isLoading={isLoading}
+                sort={sort}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                setInterval={() => {}}
+                advancedFilters={advancedFilters}
+                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
+              />
+            </Row>
+          </>
         ) : (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <FeatureUpgradeCard
-              title="Sessions"
-              featureImage={{
-                type: "image",
-                content: "/static/featureUpgrade/sessions-graphic.webp",
-              }}
-              headerTagline="Group, analyze and fix AI workflows"
-              icon={<ListTree className="w-4 h-4 text-sky-500" />}
-              highlightedFeature="sessions"
-            />
+          <div className="flex flex-col w-full min-h-screen items-center bg-[hsl(var(--background))]">
+            <EmptyStateCard feature="sessions" />
           </div>
         )}
       </div>
