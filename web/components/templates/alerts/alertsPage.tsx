@@ -18,7 +18,7 @@ import { H3, Muted, P, Small } from "@/components/ui/typography";
 import { Bell, FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import AuthHeader from "@/components/shared/authHeader";
 
 interface AlertsPageProps {
