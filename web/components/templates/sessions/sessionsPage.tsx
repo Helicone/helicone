@@ -1,6 +1,3 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { useHasAccess } from "@/hooks/useHasAccess";
-
 import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -99,9 +96,10 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
-  const org = useOrg();
-
-  const hasAccess = useHasAccess("sessions");
+  const { hasFullAccess } = useFeatureLimit(
+    "sessions",
+    allNames.sessions.length
+  );
 
   const hasSomeSessions = useMemo(() => {
     return allNames.sessions.length > 0;
@@ -116,31 +114,34 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  // Automatically select the first visible session when sessions load
   useEffect(() => {
-    if (hasSomeSessions && selectedName === undefined && !allNames.isLoading) {
-      // Sort by most recently used
+    if (
+      !hasFullAccess &&
+      hasSomeSessions &&
+      selectedName === undefined &&
+      !allNames.isLoading
+    ) {
       const sortedSessions = [...allNames.sessions].sort(
         (a, b) =>
           new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
       );
 
-      // Pick first session (will be within free tier limit)
       if (sortedSessions.length > 0) {
         setSelectedName(sortedSessions[0].name);
       }
     }
-  }, [hasSomeSessions, allNames.sessions, allNames.isLoading, selectedName]);
+  }, [
+    hasSomeSessions,
+    allNames.sessions,
+    allNames.isLoading,
+    selectedName,
+    hasFullAccess,
+  ]);
 
   return (
     <Tabs
       value={currentTab}
-      onValueChange={(value) => {
-        if (value === "metrics" && !hasAccess) {
-          return;
-        }
-        setCurrentTab(value);
-      }}
+      onValueChange={(value) => setCurrentTab(value)}
       className="w-full"
     >
       <div>
@@ -156,36 +157,18 @@ const SessionsPage = (props: SessionsPageProps) => {
                 <div className="flex items-center gap-2 ml-8">Sessions</div>
               }
               actions={
-                <div className="flex items-center gap-4 mr-8">
-                  <TabsList className="grid w-full grid-cols-2">
-                    {TABS.map((tab) => (
-                      <TabsTrigger
-                        key={tab.id}
-                        value={tab.id}
-                        className="flex items-center gap-2"
-                        disabled={tab.id === "metrics" && !hasAccess}
-                        {...(tab.id === "metrics" && !hasAccess
-                          ? {
-                              onClick: (e) => {
-                                e.preventDefault();
-                              },
-                            }
-                          : {})}
-                      >
-                        {tab.icon}
-                        {tab.label}
-                        {tab.id === "metrics" && !hasAccess && (
-                          <FreeTierLimitWrapper
-                            feature="sessions"
-                            itemCount={999}
-                          >
-                            <span className="sr-only">Upgrade</span>
-                          </FreeTierLimitWrapper>
-                        )}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </div>
+                <TabsList className="grid w-full grid-cols-2 mr-8">
+                  {TABS.map((tab) => (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className="flex items-center gap-2"
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
               }
             />
 
