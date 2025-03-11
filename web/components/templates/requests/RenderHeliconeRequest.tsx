@@ -117,12 +117,5 @@ export const RenderHeliconeRequest = (
   if (!mapped.content) {
     return <p>No mapped content</p>;
   }
-  return (
-    <>
-      <pre>
-        <code>{JSON.stringify(mapped.content, null, 2)}</code>
-      </pre>
-      <RenderMappedRequest {...props} mapperContent={mapped.content} />
-    </>
-  );
+  return <RenderMappedRequest {...props} mapperContent={mapped.content} />;
 };
