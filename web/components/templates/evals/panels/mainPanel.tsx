@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { PiPlusBold } from "react-icons/pi";
 import { AlertCircle } from "lucide-react";
 import { EvaluatorCard } from "../cards";
-import { Col } from "@/components/layout/common";
 import AuthHeader from "@/components/shared/authHeader";
 import { useEvaluators } from "../EvaluatorHook";
 import { useEvalPanelStore } from "../store/evalPanelStore";

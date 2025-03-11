@@ -3,10 +3,8 @@ import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/helicone
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Database } from "lucide-react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 interface DatasetsPageProps {

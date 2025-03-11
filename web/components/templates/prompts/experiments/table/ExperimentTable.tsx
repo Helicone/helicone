@@ -64,8 +64,6 @@ import {
 import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
 import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
 
 type TableDataType = {

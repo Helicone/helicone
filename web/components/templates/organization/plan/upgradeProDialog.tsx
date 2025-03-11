@@ -17,7 +17,6 @@ import {
   Check,
   Plus,
   Minus,
-  Info,
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";

@@ -90,7 +90,6 @@ import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode

@@ -1,10 +1,5 @@
 import { Database } from "@/supabase/database.types";
-import {
-  ADDON_FEATURES,
-  FeatureId,
-  FEATURE_DISPLAY_NAMES,
-  SubfeatureId,
-} from "./features";
+import { FeatureId, FEATURE_DISPLAY_NAMES, SubfeatureId } from "./features";
 
 // Type for context that can be passed to the limit calculation functions
 export interface FreeTierLimitContext {

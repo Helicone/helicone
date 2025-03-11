@@ -3,7 +3,6 @@ import { useHasAccess } from "@/hooks/useHasAccess";
 
 import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
@@ -25,15 +24,6 @@ import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { Button } from "@/components/ui/button";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Muted, Small } from "@/components/ui/typography";
 
 interface SessionsPageProps {
   currentPage: number;

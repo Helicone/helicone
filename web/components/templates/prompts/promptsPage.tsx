@@ -1,4 +1,3 @@
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -9,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
-import { useHasAccess } from "@/hooks/useHasAccess";
 import { cn } from "@/lib/utils";
 import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import {
@@ -41,7 +39,6 @@ import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { P } from "@/components/ui/typography";
 
 interface PromptsPageProps {
   defaultIndex: number;
