@@ -44,6 +44,7 @@ export type BatchPayload = {
     scores: Record<string, number | boolean | undefined>;
     evaluatorIds: Record<string, string>;
   }[];
+  orgsToMarkAsOnboarded: Set<string>;
 };
 
 const avgTokenLength = 4;
@@ -77,6 +78,7 @@ export class LoggingHandler extends AbstractLogHandler {
       searchRecords: [],
       experimentCellValues: [],
       scores: [],
+      orgsToMarkAsOnboarded: new Set<string>(),
     };
   }
 
@@ -97,6 +99,10 @@ export class LoggingHandler extends AbstractLogHandler {
       const experimentCellValueMapped = this.mapExperimentCellValues(context);
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
+
+      if (context.orgParams && context.orgParams.has_onboarded === false) {
+        this.batchPayload.orgsToMarkAsOnboarded.add(context.orgParams.id);
+      }
 
       // Sanitize request_body to prevent JSON parsing errors in Clickhouse
       // Special handling for the request_body field which often contains nested JSON with escape sequences

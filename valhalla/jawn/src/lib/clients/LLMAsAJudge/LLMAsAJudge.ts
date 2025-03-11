@@ -29,30 +29,45 @@ export class LLMAsAJudge {
     }
   ) {}
 
-  private async evaluateChoice(result: any): Promise<EvaluatorScore> {
+  private async evaluateChoice(result: any): Promise<EvaluatorScoreResult> {
     const evaluatorName = this.params.evaluatorName;
     const score = JSON.parse(
       result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
-    )?.[evaluatorName];
-    return {
-      score: parseInt(score),
-    };
+    );
+
+    if (Object.keys(score).length === 0) {
+      return err("No score found");
+    }
+    if (evaluatorName in score) {
+      return ok({ score: parseInt(score[evaluatorName]) });
+    }
+    return err(`No score found in ${JSON.stringify(score)}`);
   }
 
-  private async evaluateBoolean(result: any): Promise<EvaluatorScore> {
-    return {
-      score: JSON.parse(
-        result.choices[0].message.tool_calls[0].function.arguments
-      )?.[this.params.evaluatorName],
-    };
+  private async evaluateBoolean(result: any): Promise<EvaluatorScoreResult> {
+    const score = JSON.parse(
+      result.choices[0].message.tool_calls[0].function.arguments
+    );
+    if (Object.keys(score).length === 0) {
+      return err("No score found");
+    }
+    if (this.params.evaluatorName in score) {
+      return ok(score[this.params.evaluatorName]);
+    }
+    return err(`No score found in ${JSON.stringify(score)}`);
   }
 
-  private async evaluateRange(result: any): Promise<EvaluatorScore> {
-    return {
-      score: JSON.parse(
-        result.choices[0].message.tool_calls[0].function.arguments
-      )?.[this.params.evaluatorName],
-    };
+  private async evaluateRange(result: any): Promise<EvaluatorScoreResult> {
+    const score = JSON.parse(
+      result.choices[0].message.tool_calls[0].function.arguments
+    );
+    if (Object.keys(score).length === 0) {
+      return err("No score found");
+    }
+    if (this.params.evaluatorName in score) {
+      return ok({ score: parseInt(score[this.params.evaluatorName]) });
+    }
+    return err(`No score found in ${JSON.stringify(score)}`);
   }
 
   private async callLLM() {
@@ -99,7 +114,7 @@ export class LLMAsAJudge {
     return data;
   }
 
-  private async evaluateScore(): Promise<EvaluatorScore> {
+  private async evaluateScore(): Promise<EvaluatorScoreResult> {
     const result = await this.callLLM();
 
     switch (this.params.scoringType) {
@@ -125,7 +140,7 @@ export class LLMAsAJudge {
     }
 
     try {
-      return ok(await this.evaluateScore());
+      return await this.evaluateScore();
     } catch (e) {
       return err(JSON.stringify(e));
     }

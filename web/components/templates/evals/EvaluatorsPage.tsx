@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -8,15 +7,21 @@ import { CreatePanel } from "./panels/CreatePanel";
 import { EditPanel } from "./panels/EditPanel";
 import { MainPanel } from "./panels/mainPanel";
 import { TestPanel } from "./panels/TestPanel";
-import { PanelType } from "./panels/types";
 import EvalsPreview from "../featurePreview/evalsPreview";
 import { useHasAccess } from "@/hooks/useHasAccess";
 import AuthHeader from "@/components/shared/authHeader";
+import React from "react";
+import { useEvalPanelStore } from "./store/evalPanelStore";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const EvalsPage = () => {
   const hasAccess = useHasAccess("evals");
+  const org = useOrg();
+  const { panels } = useEvalPanelStore();
 
-  const [panels, setPanels] = useState<PanelType[]>([{ _type: "main" }]);
+  if (!org?.currentOrg?.tier) {
+    return null;
+  }
 
   if (!hasAccess) {
     return (
@@ -30,48 +35,36 @@ const EvalsPage = () => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-screen">
+    <ResizablePanelGroup
+      direction="horizontal"
+      className="h-screen overflow-hidden"
+    >
       {panels.map((panel, index) => {
         return (
-          <>
+          <React.Fragment key={`panel-fragment-${panel._type}-${index}`}>
             <ResizablePanel
-              key={`${panel._type}-${index}`}
+              key={`panel-${panel._type}-${index}`}
               minSize={panel._type === "main" ? 0 : 25}
               defaultSize={50}
               maxSize={75}
-              className="h-screen"
+              className="h-screen overflow-hidden"
             >
-              <div className="h-full">
+              <div className="h-full overflow-hidden">
                 {panel._type === "main" ? (
-                  <MainPanel
-                    setPanels={setPanels}
-                    panels={panels}
-                    key={`${panel._type}-${index}`}
-                  />
+                  <MainPanel />
                 ) : panel._type === "edit" ? (
                   <EditPanel
-                    setPanels={setPanels}
-                    panels={panels}
                     selectedEvaluatorId={panel.selectedEvaluatorId ?? ""}
-                    key={`${panel._type}-${index}`}
                   />
                 ) : panel._type === "create" ? (
-                  <CreatePanel
-                    setPanels={setPanels}
-                    panels={panels}
-                    key={`${panel._type}-${index}`}
-                  />
+                  <CreatePanel />
                 ) : panel._type === "test" ? (
-                  <TestPanel
-                    setPanels={setPanels}
-                    panels={panels}
-                    key={`${panel._type}-${index}`}
-                  />
+                  <TestPanel />
                 ) : null}
               </div>
             </ResizablePanel>
             {index !== panels.length - 1 && <ResizableHandle withHandle />}
-          </>
+          </React.Fragment>
         );
       })}
     </ResizablePanelGroup>
