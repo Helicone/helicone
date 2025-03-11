@@ -116,7 +116,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     datasets: {
       main: {
-        getLimit: () => 4,
+        getLimit: () => 3,
         description: (limit) =>
           `You can create up to ${limit} datasets with the free tier`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.datasets,

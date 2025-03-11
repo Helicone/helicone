@@ -23,7 +23,6 @@ import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { P, Muted } from "@/components/ui/typography";
-import { FreeTierSubLimitInfo } from "@/components/shared/FreeTierSubLimitInfo";
 
 // Constants
 const MAX_REQUESTS_PER_DATASET = 500; // Hard limit regardless of tier
@@ -58,6 +57,9 @@ export default function NewDataset({
   const router = useRouter();
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
   const [limitedRequestIds, setLimitedRequestIds] = useState(request_ids);
+  const [selectedDataset, setSelectedDataset] = useState<
+    (typeof datasets)[0] | undefined
+  >(undefined);
 
   const datasetCount = datasets?.length || 0;
   const requestCount = request_ids.length;
@@ -66,6 +68,7 @@ export default function NewDataset({
     canCreate: canCreateDataset,
     hasReachedLimit: hasReachedDatasetLimit,
     hasFullAccess,
+    freeLimit: FREE_TIER_DATASET_LIMIT,
   } = useFeatureLimit("datasets", datasetCount);
 
   const {
@@ -77,23 +80,27 @@ export default function NewDataset({
 
   // State to track which limit is enforcing restrictions
   const [limitType, setLimitType] = useState<
-    "none" | "free_tier" | "hard_limit"
+    | "none"
+    | "free_tier_request_limit"
+    | "free_tier_dataset_limit"
+    | "hard_limit"
   >("none");
 
   const handleSelection = (id: string | "new") => {
     setSelectedOption(id);
     if (id !== "new") {
       setNewDatasetName("");
-      const selectedDataset = datasets.find((d) => d.id === id);
-      if (selectedDataset) {
+      const dataset = datasets.find((d) => d.id === id);
+      setSelectedDataset(dataset);
+      if (dataset) {
         // Check hard limit first (500 requests per dataset)
-        if (selectedDataset.requests_count >= MAX_REQUESTS_PER_DATASET) {
+        if (dataset.requests_count >= MAX_REQUESTS_PER_DATASET) {
           setLimitedRequestIds([]);
           setLimitType("hard_limit");
         } else {
           // Apply the appropriate limit - hard limit or free tier limit
           const hardLimitRemaining =
-            MAX_REQUESTS_PER_DATASET - selectedDataset.requests_count;
+            MAX_REQUESTS_PER_DATASET - dataset.requests_count;
 
           // For paid users, only apply hard limit
           if (hasFullAccess) {
@@ -111,7 +118,7 @@ export default function NewDataset({
             // For free tier users, apply the more restrictive of the two limits
             const freeTierRemaining = Math.max(
               0,
-              FREE_TIER_REQUEST_LIMIT - selectedDataset.requests_count
+              FREE_TIER_REQUEST_LIMIT - dataset.requests_count
             );
             const effectiveLimit = Math.min(
               hardLimitRemaining,
@@ -123,7 +130,7 @@ export default function NewDataset({
             if (newLimitedRequestIds.length < request_ids.length) {
               setLimitType(
                 effectiveLimit === freeTierRemaining
-                  ? "free_tier"
+                  ? "free_tier_request_limit"
                   : "hard_limit"
               );
             } else {
@@ -133,6 +140,7 @@ export default function NewDataset({
         }
       }
     } else {
+      setSelectedDataset(undefined);
       // For new datasets
       const hardLimitRequestIds = request_ids.slice(
         0,
@@ -147,28 +155,22 @@ export default function NewDataset({
             ? "hard_limit"
             : "none"
         );
+      } else if (datasetCount >= FREE_TIER_DATASET_LIMIT) {
+        setLimitedRequestIds([]);
+        setLimitType("free_tier_dataset_limit");
+      } else if (
+        requestCount + (selectedDataset?.requests_count || 0) >=
+        FREE_TIER_REQUEST_LIMIT
+      ) {
+        setLimitedRequestIds([]);
+        setLimitType("free_tier_request_limit");
       } else {
-        // For free tier users, apply the more restrictive limit
-        const freeTierLimitRequestIds = request_ids.slice(
-          0,
-          FREE_TIER_REQUEST_LIMIT
+        setLimitedRequestIds(hardLimitRequestIds);
+        setLimitType(
+          hardLimitRequestIds.length < request_ids.length
+            ? "hard_limit"
+            : "none"
         );
-        const effectiveLimitedRequestIds =
-          FREE_TIER_REQUEST_LIMIT < MAX_REQUESTS_PER_DATASET
-            ? freeTierLimitRequestIds
-            : hardLimitRequestIds;
-
-        setLimitedRequestIds(effectiveLimitedRequestIds);
-
-        if (effectiveLimitedRequestIds.length < request_ids.length) {
-          setLimitType(
-            effectiveLimitedRequestIds.length === FREE_TIER_REQUEST_LIMIT
-              ? "free_tier"
-              : "hard_limit"
-          );
-        } else {
-          setLimitType("none");
-        }
       }
     }
   };
@@ -223,7 +225,7 @@ export default function NewDataset({
       );
     }
 
-    if (limitType === "free_tier") {
+    if (limitType === "free_tier_request_limit") {
       return (
         <InfoBox variant="helicone" className="mb-2">
           <div className="flex flex-col">
@@ -236,12 +238,39 @@ export default function NewDataset({
               <FreeTierSubLimitWrapper
                 feature="datasets"
                 subfeature="requests"
-                itemCount={requestCount}
+                itemCount={
+                  Number(requestCount) +
+                  (Number(selectedDataset?.requests_count) || 0)
+                }
               >
                 <Button variant="default" className="w-fit px-8" size="sm">
                   Upgrade
                 </Button>
               </FreeTierSubLimitWrapper>
+            </div>
+          </div>
+        </InfoBox>
+      );
+    }
+
+    if (limitType === "free_tier_dataset_limit") {
+      return (
+        <InfoBox variant="helicone" className="mb-2">
+          <div className="flex flex-col">
+            <P className="font-medium">Free Tier Limit</P>
+            <div className="flex flex-col gap-2">
+              <Muted>
+                You've reached the free tier limit of {FREE_TIER_DATASET_LIMIT}{" "}
+                datasets.
+              </Muted>
+              <FreeTierLimitWrapper
+                feature="datasets"
+                itemCount={datasetCount + 1}
+              >
+                <Button variant="action" className="w-fit px-4" size="sm">
+                  Upgrade for unlimited datasets
+                </Button>
+              </FreeTierLimitWrapper>
             </div>
           </div>
         </InfoBox>

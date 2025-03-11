@@ -61,7 +61,7 @@ export class HeliconeDatasetManager extends BaseManager {
     const values: any[] = [this.authParams.organizationId];
 
     if (params.datasetIds && params.datasetIds.length > 0) {
-      sql += ` AND hd.id = ANY($2)`;
+      sql += ` AND hd.id = ANY($2::uuid[])`;
       values.push(params.datasetIds);
     }
 

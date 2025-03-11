@@ -18,9 +18,6 @@ export function FreeTierLimitWrapper({
     feature,
     itemCount
   );
-
-  console.log("feature", feature);
-
   // If they can create more items or there's no free tier config, just render the children
   if (canCreate || !featureConfig) {
     return <>{children}</>;

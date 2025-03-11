@@ -93,7 +93,7 @@ export function useFeatureLimit(
   const freeLimit = featureConfig.getLimit(context);
 
   // Check if limit is reached
-  const hasReachedLimit = !hasFullAccess && itemCount >= freeLimit;
+  const hasReachedLimit = !hasFullAccess && itemCount > freeLimit;
   const remainingItems = Math.max(0, freeLimit - itemCount);
   const canCreate = hasFullAccess || !hasReachedLimit;
 
@@ -144,7 +144,7 @@ export function useSubfeatureLimit(
   const freeLimit = subfeatureConfig.getLimit(context);
 
   // Check if limit is reached
-  const hasReachedLimit = !hasFullAccess && itemCount >= freeLimit;
+  const hasReachedLimit = !hasFullAccess && itemCount > freeLimit;
   const remainingItems = Math.max(0, freeLimit - itemCount);
   const canCreate = hasFullAccess || !hasReachedLimit;
 

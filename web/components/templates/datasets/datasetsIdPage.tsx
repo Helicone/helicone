@@ -49,12 +49,15 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   const org = useOrg();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const datasetNameFromQuery = router.query.name as string | undefined;
 
   const { rows, isLoading, refetch, count, isCountLoading } =
     useGetHeliconeDatasetRows(id, page, currentPageSize);
-  const { datasets, isLoading: isLoadingDataset } = useGetHeliconeDatasets([
-    id,
-  ]);
+  const {
+    datasets,
+    isLoading: isLoadingDataset,
+    refetch: refetchDatasets,
+  } = useGetHeliconeDatasets([id]);
   const { setNotification } = useNotification();
   const jawn = useJawnClient();
 
@@ -89,6 +92,16 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         origin_request_id: row.origin_request_id,
       }));
   }, [rows, selectedIds]);
+
+  const [datasetName, setDatasetName] = useState<string>(
+    datasetNameFromQuery || "Loading..."
+  );
+
+  useEffect(() => {
+    if (datasets?.[0]?.name) {
+      setDatasetName(datasets[0].name);
+    }
+  }, [datasets]);
 
   const onRowSelectHandler = useCallback(
     (row: any) => {
@@ -248,7 +261,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
                   { href: "/datasets", name: "Datasets" },
                   {
                     href: `/datasets/${id}`,
-                    name: datasets?.[0]?.name || "Loading...",
+                    name: datasetName,
                   },
                 ]}
               />
@@ -256,7 +269,9 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 <h1 className="font-semibold text-4xl text-black dark:text-white">
-                  {datasets?.[0]?.name}
+                  {datasetName !== "Loading..."
+                    ? datasetName
+                    : datasets?.[0]?.name}
                 </h1>
                 <Badge variant="secondary">{`${count || 0} rows`}</Badge>
               </div>

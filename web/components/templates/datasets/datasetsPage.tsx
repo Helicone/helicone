@@ -85,7 +85,10 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             id="datasets"
             skeletonLoading={false}
             onRowSelect={(row) => {
-              router.push(`/datasets/${row.id}`);
+              router.push({
+                pathname: `/datasets/${row.id}`,
+                query: { name: row.name || "Untitled Dataset" },
+              });
             }}
             fullWidth={true}
           />

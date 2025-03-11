@@ -64,24 +64,26 @@ const fetchHeliconeDatasetRows = async (
 const useGetHeliconeDatasets = (datasetIds?: string[]) => {
   const org = useOrg();
 
+  const hasValidDatasetIds = datasetIds && datasetIds.length > 0;
+
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["helicone-datasets", org?.currentOrg?.id],
+    queryKey: ["helicone-datasets", org?.currentOrg?.id, datasetIds],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const jawn = getJawnClient(orgId);
+
       return jawn.POST("/v1/helicone-dataset/query", {
-        body: {
-          datasetIds,
-        },
+        body: hasValidDatasetIds ? { datasetIds } : {},
       });
     },
+    enabled: !!org?.currentOrg?.id,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading: isLoading,
+    isLoading,
     refetch,
-    isRefetching: isRefetching,
+    isRefetching,
     datasets:
       data?.data?.data?.map((dataset) => ({
         ...dataset,
