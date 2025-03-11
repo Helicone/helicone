@@ -60,9 +60,6 @@ const ExperimentsPage = () => {
     freeLimit: MAX_EXPERIMENTS,
   } = useFeatureLimit("experiments", experimentCount);
 
-  console.log(`canCreateExperiment: ${canCreateExperiment}`);
-  console.log(`hasReachedExperimentLimit: ${hasReachedExperimentLimit}`);
-
   if (isLoading) {
     return <LoadingAnimation title="Loading Experiments" />;
   }

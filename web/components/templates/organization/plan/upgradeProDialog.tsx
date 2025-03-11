@@ -225,18 +225,20 @@ export const UpgradeProDialog = ({
   const getDialogHeader = () => {
     if (limitMessage) {
       return (
-        <div className="flex flex-col gap-2">
-          <DialogTitle className="text-2xl font-bold">
+        <div className="flex flex-col gap-1">
+          <DialogTitle className="text-xl font-bold">
             Free Tier Limit Reached
           </DialogTitle>
-          <InfoBox variant="warning">{limitMessage}</InfoBox>
+          <InfoBox variant="warning" className="text-sm py-1">
+            {limitMessage}
+          </InfoBox>
         </div>
       );
     }
 
     // Default case - standard upgrade header
     return (
-      <DialogTitle className="text-foreground text-2xl font-bold">
+      <DialogTitle className="text-foreground text-xl font-bold">
         Upgrade to Pro
       </DialogTitle>
     );
@@ -244,20 +246,22 @@ export const UpgradeProDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-xl">
         <DialogHeader>{getDialogHeader()}</DialogHeader>
 
-        <DialogDescription>{descriptionText}</DialogDescription>
+        <DialogDescription className="text-sm">
+          {descriptionText}
+        </DialogDescription>
 
         <Tabs
           defaultValue="addons"
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-2"
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="addons">Add-ons</TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-2">
+            <TabsTrigger value="team" className="flex items-center gap-1">
               Team Bundle
               {savings > 0 && (
                 <Small className="text-sky-500">(Save {savings}%)</Small>
@@ -266,67 +270,76 @@ export const UpgradeProDialog = ({
           </TabsList>
 
           {/* Add-ons Tab Content */}
-          <TabsContent value="addons" className="flex flex-col gap-4 mt-0">
+          <TabsContent value="addons" className="flex flex-col gap-3 mt-0">
             {/* Pro Plan Card */}
-            <div className="rounded-lg border border-primary bg-muted p-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="rounded-lg border border-primary bg-muted p-3">
+              <div className="flex items-center justify-between mb-1">
                 <H4>Pro Plan</H4>
                 <P className="font-semibold">${proAddon.price * seats}/mo</P>
               </div>
-              <Muted className="mb-3">{proAddon.description}</Muted>
+              <Muted className="mb-2 text-sm">{proAddon.description}</Muted>
               <div className="flex items-center justify-between">
-                <P className="text-foreground">Seats:</P>
+                <P className="text-foreground text-sm">Seats:</P>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-7 w-7"
                     onClick={() => handleSeatChange(-1)}
                   >
-                    <Minus size={16} />
+                    <Minus size={14} />
                   </Button>
-                  <P className="font-semibold">{seats}</P>
+                  <P className="font-semibold w-5 text-center">{seats}</P>
                   <Button
                     variant="outline"
                     size="icon"
+                    className="h-7 w-7"
                     onClick={() => handleSeatChange(1)}
                   >
-                    <Plus size={16} />
+                    <Plus size={14} />
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Add-ons List */}
-            {otherAddons.map((addon) => (
-              <div
-                key={addon.key}
-                className={`rounded-lg border p-4 transition-colors cursor-pointer ${
-                  selectedAddons[addon.key as keyof Addons]
-                    ? "border-primary bg-muted"
-                    : "border-border hover:border-primary/50"
-                }`}
-                onClick={() => handleAddonToggle(addon.key as keyof Addons)}
-              >
-                <div className="flex items-center gap-4">
-                  <AddOnGraphic
-                    type={addon.key as "prompts" | "evals" | "experiments"}
-                  />
-                  <div className="flex-grow">
-                    <P className="font-semibold capitalize">{addon.name}</P>
-                    <Muted>{addon.description}</Muted>
-                  </div>
+            <div className="grid grid-cols-1 gap-2">
+              {otherAddons.map((addon) => (
+                <div
+                  key={addon.key}
+                  className={`rounded-lg border p-2.5 transition-colors cursor-pointer ${
+                    selectedAddons[addon.key as keyof Addons]
+                      ? "border-primary bg-muted"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  onClick={() => handleAddonToggle(addon.key as keyof Addons)}
+                >
                   <div className="flex items-center gap-2">
-                    <P className="font-semibold">${addon.price}/mo</P>
-                    {selectedAddons[addon.key as keyof Addons] && (
-                      <Check size={16} className="text-primary" />
-                    )}
+                    <AddOnGraphic
+                      type={addon.key as "prompts" | "evals" | "experiments"}
+                      className="shrink-0"
+                    />
+                    <div className="flex-grow min-w-0">
+                      <P className="font-semibold capitalize text-sm">
+                        {addon.name}
+                      </P>
+                      <Muted className="text-xs truncate">
+                        {addon.description}
+                      </Muted>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 pl-1">
+                      <P className="font-semibold text-sm">${addon.price}/mo</P>
+                      {selectedAddons[addon.key as keyof Addons] && (
+                        <Check size={16} className="text-primary" />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* Total Price */}
-            <div className="p-4 bg-muted rounded-lg mt-2">
+            <div className="p-2 bg-muted rounded-lg mt-1">
               <div className="flex justify-between items-center">
                 <P className="font-semibold">Total</P>
                 <P className="font-semibold">${totalPrice}/mo</P>
@@ -336,19 +349,19 @@ export const UpgradeProDialog = ({
 
           {/* Team Bundle Tab Content */}
           <TabsContent value="team" className="mt-0">
-            <div className="p-6 rounded-lg border-2 border-primary bg-primary/5">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex flex-col gap-1">
+            <div className="p-3 rounded-lg border-2 border-primary bg-primary/5">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex flex-col gap-0.5">
                   <H3>Team Bundle</H3>
-                  <Muted>Everything you need for your entire team</Muted>
+                  <Muted className="text-sm">Everything for your team</Muted>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <P className="text-2xl font-bold">$200/mo</P>
+                <div className="flex flex-col items-end gap-0.5">
+                  <P className="text-xl font-bold">$200/mo</P>
                 </div>
               </div>
 
               {/* Features List */}
-              <div className="flex flex-col gap-3 mt-4">
+              <div className="grid grid-cols-1 gap-y-1.5 mt-2">
                 {[
                   "Unlimited seats",
                   "All Pro features",
@@ -356,9 +369,9 @@ export const UpgradeProDialog = ({
                   "Evaluations suite",
                   "Experiments platform",
                 ].map((feature) => (
-                  <div key={feature} className="flex items-center gap-2">
-                    <Check size={16} className="text-primary" />
-                    <P>{feature}</P>
+                  <div key={feature} className="flex items-center gap-1.5">
+                    <Check size={14} className="text-primary shrink-0" />
+                    <P className="text-sm">{feature}</P>
                   </div>
                 ))}
               </div>
@@ -367,9 +380,9 @@ export const UpgradeProDialog = ({
         </Tabs>
 
         <Button
-          size="lg"
+          size="default"
           variant="action"
-          className="w-full text-primary-foreground"
+          className="w-full text-primary-foreground mt-1"
           onClick={async () => {
             if (activeTab === "team") {
               const result = await upgradeToTeamBundle.mutateAsync();
@@ -403,13 +416,13 @@ function AddOnGraphic({
   className?: string;
 }) {
   const icons = {
-    prompts: <MessageSquareText size={20} />,
-    evals: <GanttChartSquare size={20} />,
-    experiments: <SplitSquareHorizontal size={20} />,
+    prompts: <MessageSquareText size={18} />,
+    evals: <GanttChartSquare size={18} />,
+    experiments: <SplitSquareHorizontal size={18} />,
   };
 
   return (
-    <div className={`${className} p-2 bg-primary/10 rounded-full`}>
+    <div className={`${className} p-1.5 bg-primary/10 rounded-full`}>
       {icons[type]}
     </div>
   );
