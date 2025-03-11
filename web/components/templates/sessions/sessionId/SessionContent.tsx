@@ -129,7 +129,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     };
   }, [requests.requests.requests, requests.requests.isLoading]);
 
-  if (requests.requests.isLoading || realtimeData.isRealtime === null) {
+  // Only show loading when initially loading, not when refetching with existing data
+  if (
+    (requests.requests.isLoading && !requests.requests.isRefetching) ||
+    realtimeData.isRealtime === null
+  ) {
     return (
       <div className="h-screen w-full flex justify-center items-center">
         <LoadingAnimation />
