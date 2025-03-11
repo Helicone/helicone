@@ -3,6 +3,7 @@ import { Result, err, ok } from "../util/results";
 import { Database } from "../db/database.types";
 import { ClickhouseWrapper } from "./ClickhouseWrapper";
 import { PgWrapper } from "./PgWrapper";
+import { TIERS } from "../packages/common/features";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
 export interface UsageEligibleOrgs {
@@ -22,6 +23,7 @@ export class OrganizationStore {
   async getUsageEligibleOrganizations(): Promise<
     Result<UsageEligibleOrgs[], string>
   > {
+    const tiersToInclude = TIERS.filter((t) => t.trackUsage).map((t) => t.id);
     const query = `SELECT
       o.id as "orgId",
       o.stripe_subscription_id as "stripeSubscriptionId",
@@ -29,7 +31,7 @@ export class OrganizationStore {
       MAX(ou.end_date) as "latestEndTime"
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id
-      where (o.tier = 'growth' or o.tier = 'pro-20240913' or o.tier = 'pro-20250202')
+      where o.tier in (${tiersToInclude.map((t) => `'${t}'`).join(",")})
       and o.subscription_status = 'active'
       and o.stripe_customer_id is not null
       and o.stripe_subscription_item_id is not null

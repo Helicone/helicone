@@ -4,7 +4,7 @@ import {
   FeatureId,
   FEATURE_DISPLAY_NAMES,
   SubfeatureId,
-} from "./features";
+} from "../packages/common/features";
 
 // Type for context that can be passed to the limit calculation functions
 export interface FreeTierLimitContext {

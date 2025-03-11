@@ -1,6 +1,6 @@
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import { FeatureId, SubfeatureId } from "@/lib/features";
+import { FeatureId, SubfeatureId } from "@/packages/common/features";
 import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
 import { P } from "@/components/ui/typography";
 

@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { FeatureId } from "@/lib/features";
+import { FeatureId } from "@/packages/common/features";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 
