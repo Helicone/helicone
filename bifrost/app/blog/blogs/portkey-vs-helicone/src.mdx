@@ -1,10 +1,8 @@
 LLM applications in production demand strong observability tools. Without them, you're flying blind on costs, performance, and usage patterns.
 
-Both **<a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>** and **<a href="https://portkey.ai/" target="_blank" rel="noopener noreferrer">Portkey</a>** offer solutions to this problem, but with different approaches and strengths.
+Both **<a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>** and **<a href="https://portkey.ai/" target="_blank" rel="noopener noreferrer nofollow">Portkey</a>** offer solutions to this problem, but with different approaches and strengths. Let's dive in and help you determine which platform is the best fit for your needs.
 
 ![Helicone vs Portkey: Comparing LLM Observability Platforms](/static/blog/pk-helicone/pk-vs-helicone.webp)
-
-Let's cut through the marketing and compare what each platform actually delivers for developers building with LLMs.
 
 ## How is Helicone different?
 
@@ -17,83 +15,81 @@ Helicone provides flexibility through **both proxy-based and async logging**. Wh
 
 This dual approach makes Helicone adaptable to different deployment scenarios.
 
-### 2. Helicone prioritizes business metrics
+### 2. Helicone prioritizes optimization metrics
 
-Helicone's dashboard focuses on **business-relevant metrics** like costs, completion tokens, top models, and user metrics. Portkey's interface tends toward technical metrics like latency and evaluation scores.
+Helicone's dashboard focuses on **optimization-relevant metrics** like evaluation scores, costs, completion tokens, top models, and user metrics. 
 
-Helicone's business focus helps teams understand LLM usage from a practical perspective, making it easier to optimize spending and track ROI.
+Helicone's detailed metrics help teams understand LLM usage from a practical perspective, making it easier to optimize spending and track ROI.
 
-## At a Glance: Helicone vs Portkey
+## Quick Comparison: Helicone vs Portkey
 
 ### Platform 
 
-| **Feature**                                                                                                                                                                                                                                | **Helicone**                                                                                                                  | **Portkey**                                                                                                                     |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| **Open-source**                                                                                                                                                                                                                            | ✅                                                                                                                            | ✅                                                                                                                             |
-| **Self-hosting**                                                                                                                                                                                                                           | ✅                                                                                       | ✅                                                                                      |
-| **Generous Free Tier**                                                                                                                                                                                                                     | ✅                                                                                                                            | ✅                                                                                                                             |
-| **Seat-Based Pricing**                                                                                                                                                                                                                     | Starting at `$20/seat/month`. Discounts available for certain users                                                           | Starts at `$49/month`. No discounts available                                                                                   |
-| **Pricing Tiers**                                                                                                                                                                                                                          | Free, Pro, Teams and Enterprise <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">tiers available</a>  | Free, Team, and Enterprise tiers <a href="https://portkey.ai/pricing" rel="noopener" target="_blank">available</a>                                                                                         |
-| **One-line Integration** <br/> Integrate with the platform with a single line of code                                                                                                                                                      | ✅                                                                                                            | ❌                                                                                                         |
-| **Intuitive UI**                                                                                                                                                                                                                           | More intuitive and detailed                                                                                                | Decent but tailored to mostly just developers                                                                                |
-| **Built-in Security Features** <br/> Detects prompt injections, jailbreak attempts, etc. Omit logs for sensitive data                                                                                                                      | ✅                                                                                               | ❌ <br/>Requires extra setup                                                                                                       |
-| **Wide Integration Support** <br/> Supports all major LLM providers, orchestration frameworks, and third-party tools                                                                                                                       | ✅                 | ✅                                                                                                     |
-| **Supported Logging Methods**                                                                                                                                                                                                              | Multiple options: Proxy or Async logging. REST API and SDK Available (JavaScript/Python)                                       | Proxy only. REST API and Javascript and Python SDK available                                                                    |
-| **LLM Gateway**                 | ⚠️ Available in beta                             | ✅ Core feature, more advanced        |
+| **Feature** | **Helicone** | **Portkey** |
+| ----------- | ------------ | ----------- |
+| **Open-source** | ✅ | ✅ |
+| **Self-hosting** | ✅ | ✅ |
+| **Generous Free Tier** | ✅ | ✅ |
+| **One-line Integration** | ✅ | ❌ |
+| **Async Logging** | ✅ | ❌ |
+| **Seat-Based Pricing** | Starts at `$20/seat/month` | Starts at `$49/month` |
+| **Pricing Tiers** | Free, Pro, Teams and Enterprise <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">tiers available</a> | Free, Team, and Enterprise tiers <a href="https://portkey.ai/pricing" rel="noopener noreferrer nofollow" target="_blank">available</a> |
+| **Intuitive UI** <br/> Tailored to developers and non-technical teams| ✅ | ⚠️ Focused on devs |
+| **Built-in Security** <br/> Detects prompt injections, jailbreak attempts, etc. Omit logs for sensitive data | ✅ | ❌ Requires extra setup |
+| **Integration Support** <br/> Supports all major LLM providers and third-party tools | ✅ | ✅ |
+| **Logging Methods** | REST API and SDK Available (JavaScript/Python) | REST API and Javascript and Python SDK available |
 
 ### LLM Evaluation
 
-| **Feature**                                                      | **Helicone**     | **Portkey**        |
-|------------------------------------------------------------------|------------------|---------------------|
-| **Prompt Management** <br/> Version and track prompt changes    | ✅               | ✅  |
-| **Experimentation** <br/> Iterate and improve prompts at scale  | ✅ Robust UI-based experimentation      | ✅ Robust code-based experimentation features  |
-| **Evaluation** <br/> LLM evaluation via UI and API              | ✅               | ✅               |
+| **Feature** | **Helicone** | **Portkey** |
+| ----------- | ------------ | ----------- |
+| **Prompt Management** <br/> Version and track prompt changes | ✅ | ✅ |
+| **Prompt Experimentation** <br/> Iterate and improve prompts at scale | ✅ | ❌ |
+| **Evaluation** <br/> LLM evaluation via UI and API | ✅ | ❌ |
 
 ### LLM Monitoring
 
-| **Feature**                                                                                              | **Helicone**                 | **Portkey**                 |
-|----------------------------------------------------------------------------------------------------------|------------------------------|------------------------------|
-| **Dashboard Visualization**                                                                              | ✅                           | ✅                          |
-| **Caching** <br/>Built-in caching via headers to reduce API costs and latency                            | ✅   | ✅  |
-| **Rate Limits** <br/>Customizable rate limits separate from API provider limits                          | ✅                           | ✅                          |
-| **Cost & Usage Tracking** <br/>Detailed cost tracking with rich dashboards                               | ✅                           | ✅                          |
-| **Alerting & Webhooks** <br/>Automate LLM workflows, trigger actions, and get alerts for critical events | ✅   | ⚠️ <br/>Limited  |
-| **API Key Security** <br/> Out-of-the-box security measures for API key management          | ✅  | ✅      |
-| **User Feedback Collection** <br/> Robust user feedback tracking capabilities  | ✅             | ✅    |
+| **Feature** | **Helicone** | **Portkey** |
+| ----------- | ------------ | ----------- |
+| **Dashboard Visualization** | ✅ | ✅ |
+| **Caching** <br/>Built-in caching via headers to reduce API costs and latency | ✅ | ✅ |
+| **Rate Limits** <br/>Customizable rate limits separate from API provider limits | ✅ | ✅ |
+| **Cost & Usage Tracking** <br/>Detailed cost tracking with rich dashboards | ✅ | ✅ |
+| **Alerting & Webhooks** <br/>Automate LLM workflows, trigger actions, and get alerts for critical events | ✅ | ⚠️ <br/>Limited |
+| **API Key Security** <br/> Out-of-the-box security measures for API key management | ✅ | ✅ |
+| **User Feedback Collection** <br/> Robust user feedback tracking capabilities | ✅ | ✅ |
 
 ### Security, Compliance, Privacy
 
-|                     | **Helicone**                                                          | **Portkey**                                                          |
-| ------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| **Data Retention**  | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | 3 days for Free<br/>30 days for Pro<br/>forever for Enterprise |
-| **HIPAA-compliant** | ✅                                                                    | ✅                                                                |
-| **GDPR-compliant**  | ✅                                                                    | ✅                                                                |
-| **SOC 2**           | ✅                                                                    | ✅                                                                |
+| **Feature** | **Helicone** | **Portkey** |
+| ----------- | ------------ | ----------- |
+| **Data Retention** | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | 3 days for Free<br/>30 days for Pro<br/>forever for Enterprise |
+| **HIPAA-compliant** | ✅ | ✅ |
+| **GDPR-compliant** | ✅ | ✅ |
+| **SOC 2** | ✅ | ✅ |
 
 ## Helicone: The Complete LLM Observability
 
 > The ability to test prompt variations on production traffic without touching a line of code is magical. It feels like we're cheating; it's just that good!
 
-— _Helicone user_
+— Nishant Shukla, Sr. Director of AI at QA Wolf
 
 ![Helicone Dashboard](/static/blog/best-langsmith-alternatives/helicone-dashboard.webp)
 
-Helicone is an <a href="https://github.com/Helicone/helicone" target="_blank" rel="noopener">open-source</a> observability platform built for cross-functional teams developing production LLM applications. It provides comprehensive metrics and a host of features in a user-friendly interface complete with rich dashboards.
+Helicone is an <a href="https://github.com/Helicone/helicone" target="_blank" rel="noopener">open-source observability platform</a> built for teams optimizing their production LLM applications. It provides real-time analytics, cost-tracking, and performance insights that empowers developers and product teams to make data-driven decisions throughout the **entire LLM lifecycle**.
 
 ### Key Strengths
 
-- **Flexible integration**: Choose between proxy-based or SDK-based logging
-- **Robust experimentation**: UI-driven prompt experiments without code changes
-- **Scalability**: Built to handle trillions of LLM interactions effortlessly
-- **Advanced security**: Out-of-box integrations with LLM security tools like PromptArmor
-- **Evaluation capabilities**: Built-in tools for human and automated evaluations
+- **Multiple logging methods** (proxy or async)
+- **Experiment with prompts on production traffic** without code changes
+- **Highly scalable**, built to handle trillions of LLM interactions effortlessly with Kafka
+- **Built-in evaluation** for human and automated evaluations
 
 ### Why Developers Choose Helicone
 
-- A balance of simplicity in integration and UI without sacrificing depth of features
-- A focus on cost optimization with like caching to reduce LLM spending
+- 1-line integration and ability to start logging within minutes
+- Focuses on data collection and cost optimization (with features like caching)
 - Usable by both technical and non-technical team members
-- Flexible integration options (proxy or async logging)
 
 ### How to integrate with Helicone
 
@@ -116,8 +112,8 @@ const openai = new OpenAI({
   description="Ready to optimize your LLM applications? Start using Helicone today and see the difference for yourself."
   primaryButtonText="Try Helicone for Free"
   primaryButtonLink="https://helicone.ai/signup"
-  secondaryButtonText="Calculate LLM Costs"
-  secondaryButtonLink="https://www.helicone.ai/llm-cost"
+  secondaryButtonText="Contact Us"
+  secondaryButtonLink="https://www.helicone.ai/contact"
 />
 
 ## Portkey: Gateway-Focused Observability
@@ -167,14 +163,14 @@ async function createChatCompletion() {
 createChatCompletion();
 ```
 
-## Feature-by-Feature Comparison
+## How Helicone and Portkey Compare
 
 | Feature | Helicone | Portkey |
 |---------|----------|---------|
-| **Dashboard Overview** | More detailed and business-focused with cost metrics, user analytics, and geographic data | Less detailed and more technical with latency, evaluations, and detailed traces |
-| **Gateway Capabilities** | Available in beta with basic routing | Core feature with advanced routing, load balancing, and fallbacks |
-| **Security Features** | Out-of-box integration with LLM security tools | Custom guardrails requiring more setup |
-| **Prompt Management** | Version control and experimentation with UI | Includes unique prompt partials for modular design |
+| **Dashboard** | ⭐️ More comprehensive with cost metrics, user analytics, and top models | Less detailed and more technical with latency and detailed traces |
+| **Integrations** | ⭐️ Broad support for LLM providers & third-party tools with both proxy and async options | Broad support for LLM providers with proxy only |
+| **Security Features** | ⭐️ Out-of-the-box LLM security tools | Custom guardrails requiring more setup |
+| **Prompt Management** | ⭐️ Version control and experimentation with UI | Includes unique prompt partials for modular design |
 | **OpenTelemetry** | Built on OpenTelemetry | OpenTelemetry-compliant |
 | **Alerting** | Built-in alerting features | Built-in alerting features |
 
@@ -182,25 +178,23 @@ createChatCompletion();
 
 Both Helicone and Portkey offer robust observability solutions for LLM applications, but they excel in different areas:
 
-### Choose **<span style={{color: '#0ea5e9'}}>Helicone</span>** if you:
+### Choose <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a> if you:
 
-- **Need flexible integration options**: Helicone's dual integration approach (proxy or async) gives you architectural flexibility
-- **Want highly detailed insights**: Helicone's rich dashboards prioritize cost tracking, user analytics, and other key metrics
-- **Have cross-functional teams**: The intuitive UI can be used by both technical and non-technical stakeholders
-- **Prefer UI-based experimentation**: You can test prompt variations through the interface without code changes
-- **Value out-of-the-box security and simple third-party app integrations**: Built-in integrations with tools like PromptArmor and PostHog provide additional functionality quickly
+- **Need simple integration options** with either proxy or async logging
+- **Want highly detailed insights** like cost tracking, user analytics, latency, and more
+- **Designed for the entire LLM lifecycle** from development to production, with intuitive UI tools for experimentation, monitoring, and optimization
+- **Have cross-functional teams** that needs collaboration outside of the codebase
+- **Value out-of-the-box security** and simple third-party app integrations
 
-### Choose Portkey if you:
+### Choose <a href="https://portkey.ai/" target="_blank" rel="noopener noreferrer nofollow">Portkey</a> if you:
 
-- **Need advanced gateway capabilities**: Their routing, load balancing, and fallback systems are more mature
-- **Want fine-grained LLM control**: Their comprehensive guardrails system offers detailed control over LLM behavior
-- **Need modular prompt components**: Their prompt partials feature offers reusable prompt components
+- **Need advanced gateway capabilities** with more mature load balancing and fallback systems
+- **Want more control over LLM behavior** with comprehensive guardrails system
+- **Need modular prompt components** with their prompt partials feature
 
-The right choice ultimately depends on your specific use case, team composition, and priorities. 
+The right choice ultimately depends on your specific use case, team composition, and priorities. Both platforms offer free tiers. We recommend you test them in your environment before committing to either solution.
 
-Both platforms offer free tiers, so you can test them in your environment before committing to either solution.
-
-## You might also like
+### You might also like: 
 
 - <a
     href="https://www.helicone.ai/blog/helicone-vs-comet"
@@ -230,24 +224,24 @@ Both platforms offer free tiers, so you can test them in your environment before
     answer: "Both platforms offer proxy-based integration requiring minimal code changes. Helicone also provides SDK-based async logging as an alternative option."
   },
   {
-    question: "Which platform has better gateway features?",
-    answer: "Portkey has more advanced gateway features, as this is their core offering. Helicone's gateway is still in beta but functional."
-  },
-  {
     question: "Which platform has better cost tracking?",
     answer: "Both platforms track costs, but Helicone's dashboard is more detailed—offering key business metrics like cost analysis and user-based spending."
+  },
+  {
+    question: "Are there free tiers?",
+    answer: "Yes, both platforms offer generous free tiers of 10,000 API calls per month."
   },
   {
     question: "Which platform is better for prompt management?",
     answer: "Both platforms provide strong prompt management. Helicone excels in experimentation and versioning, while Portkey offers unique prompt partials for modular prompt design."
   },
   {
-    question: "Which platform has better security features?",
-    answer: "Helicone integrates out-of-the-box with major LLM security tools like PromptArmor. Portkey has customizable guardrails but requires more setup."
+    question: "How do these tools handle data privacy and security?",
+    answer: "Both tools prioritize data security, but Helicone's self-hosting option provides an additional layer of control for privacy-conscious users."
   },
   {
     question: "Which platform is better for cross-functional teams?",
-    answer: "Helicone's detailed, business-focused metrics and UI make it more accessible to non-technical team members while still providing the technical depth developers need."
+    answer: "Helicone's detailed optimization metrics and UI make it more accessible to non-technical team members while still providing the technical depth developers need."
   }
 ]} />
 
