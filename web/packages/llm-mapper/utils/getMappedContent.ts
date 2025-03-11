@@ -269,8 +269,6 @@ export const getMappedContent = ({
     heliconeRequest,
   });
 
-  console.log("unsanitized", unsanitized);
-  console.log("sanitized", sanitizeMappedContent(unsanitized));
   return sanitizeMappedContent(unsanitized);
 };
 
