@@ -45,6 +45,7 @@ copy_llm_mapper() {
         "../web/packages/llm-mapper"
         "../worker/src/packages/llm-mapper"
         "../valhalla/jawn/src/packages/llm-mapper"
+        "../bifrost/packages/llm-mapper"
     )
     
     # Remove and recreate directories
