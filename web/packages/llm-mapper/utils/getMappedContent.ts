@@ -238,10 +238,16 @@ const sanitizeMappedContent = (
       response: mappedContent.preview.response?.slice(0, 30),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
-      fullRequestText: () => {
+      fullRequestText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.request;
+        }
         return messagesToText(mappedContent.schema.request.messages ?? []);
       },
-      fullResponseText: () => {
+      fullResponseText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.response;
+        }
         return messagesToText(mappedContent.schema.response?.messages ?? []);
       },
     },
@@ -262,6 +268,9 @@ export const getMappedContent = ({
     mapperType,
     heliconeRequest,
   });
+
+  console.log("unsanitized", unsanitized);
+  console.log("sanitized", sanitizeMappedContent(unsanitized));
   return sanitizeMappedContent(unsanitized);
 };
 
