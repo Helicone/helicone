@@ -17,13 +17,42 @@ The Generate API allows you to use predefined prompts to generate content throug
 
 ## API Endpoint
 
+```bash
+POST https://generate.helicone.ai/
+```
+
 ## Request Format
 
 The request body should include:
 
+```json
+{
+  // Prompt Information
+  "promptId": "your-prompt-id",
+  "version": "production", // or specific version number
+  "inputs": {
+    "key1": "value1",
+    "key2": "value2"
+  },
+  // Helicone Properties (Optional)
+  "userId": "user-123",
+  "sessionId": "session-456"
+}
+```
+
 Required headers:
+```bash
+Helicone-Auth: Bearer <HELICONE_API_KEY>
+```
 
 Provider API keys (at least one required):
+```bash
+OPENAI_API_KEY: <YOUR_OPENAI_KEY>
+ANTHROPIC_API_KEY: <YOUR_ANTHROPIC_KEY>
+GOOGLE_API_KEY: <YOUR_GOOGLE_KEY>
+COHERE_API_KEY: <YOUR_COHERE_KEY>
+MISTRAL_API_KEY: <YOUR_MISTRAL_KEY>
+```
 
 ## Example Usage
 
@@ -63,7 +92,10 @@ Provider API keys (at least one required):
 
     const data = await response.json();
     console.log(data);
-    bash
+    ```
+  </Tab>
+  <Tab title="cURL">
+    ```bash
     curl -X POST https://generate.helicone.ai/v1/generate \
       -H "Content-Type: application/json" \
       -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
