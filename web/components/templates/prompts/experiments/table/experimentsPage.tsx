@@ -83,10 +83,17 @@ const ExperimentsPage = () => {
       <AuthHeader
         title="Experiments"
         actions={
-          <FreeTierLimitWrapper
-            feature="experiments"
-            itemCount={experimentCount}
-          >
+          hasReachedExperimentLimit ? (
+            <FreeTierLimitWrapper
+              feature="experiments"
+              itemCount={experimentCount}
+            >
+              <Button variant="action">
+                Start new experiment
+                <ChevronDownIcon className="w-4 h-4 ml-2" />
+              </Button>
+            </FreeTierLimitWrapper>
+          ) : (
             <DropdownMenu
               open={headerDropdownOpen}
               onOpenChange={setHeaderDropdownOpen}
@@ -122,7 +129,7 @@ const ExperimentsPage = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </FreeTierLimitWrapper>
+          )
         }
       />
 
@@ -137,9 +144,14 @@ const ExperimentsPage = () => {
                 Upgrade for unlimited experiments.
               </span>
             </div>
-            <Button variant="action" size="sm">
-              Upgrade
-            </Button>
+            <FreeTierLimitWrapper
+              feature="experiments"
+              itemCount={experimentCount}
+            >
+              <Button variant="action" size="sm">
+                Upgrade
+              </Button>
+            </FreeTierLimitWrapper>
           </div>
         </div>
       )}
