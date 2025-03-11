@@ -86,10 +86,11 @@ export class PropertyController extends Controller {
     });
 
     const query = `
-    SELECT DISTINCT arrayJoin(mapValues(properties[{val_0: String}])) AS property
+    SELECT DISTINCT value AS property
     FROM request_response_rmt
+    ARRAY JOIN mapKeys(properties) AS key, mapValues(properties) AS value
     WHERE (
-      ${builtFilter.filter}
+      ${builtFilter.filter} AND key = {val_0: String}
     )
   `;
 

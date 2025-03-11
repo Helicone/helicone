@@ -48,7 +48,7 @@ export const useFilterUIDefinitions = () => {
       properties.data?.data?.map((property) => ({
         id: property.property,
         label: property.property,
-        type: "string",
+        type: "searchable",
         operators: ["eq", "neq", "like", "ilike", "contains", "in"],
         onSearch: (searchTerm) => {
           return searchProperties

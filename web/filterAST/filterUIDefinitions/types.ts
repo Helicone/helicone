@@ -4,7 +4,7 @@ import { FilterOperator } from "../filterAst";
 export interface FilterUIDefinition {
   id: string;
   label: string;
-  type: "string" | "number" | "boolean" | "datetime" | "select";
+  type: "string" | "number" | "boolean" | "datetime" | "select" | "searchable";
   subType?: "property" | "score";
   operators: FilterOperator[];
   valueOptions?: { label: string; value: string | number | boolean }[];
