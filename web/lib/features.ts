@@ -1,5 +1,10 @@
 // Define all possible features
-export const ADDON_FEATURES = ["evals", "experiments", "prompts"] as const;
+export const ADDON_FEATURES = [
+  "evals",
+  "experiments",
+  "prompts",
+  "datasets",
+] as const;
 export const NON_FREE_FEATURES = ["sessions", "properties", "users"] as const;
 
 // Create a combined type of all features
@@ -12,13 +17,15 @@ export const SUBFEATURES = {
   prompts: ["versions"],
   experiments: ["test_cases", "variants"],
   evals: ["runs"],
+  datasets: ["requests"],
 } as const;
 
 // Create a type for all possible subfeature IDs
 export type SubfeatureId =
   | (typeof SUBFEATURES.prompts)[number]
   | (typeof SUBFEATURES.experiments)[number]
-  | (typeof SUBFEATURES.evals)[number];
+  | (typeof SUBFEATURES.evals)[number]
+  | (typeof SUBFEATURES.datasets)[number];
 
 // Helper functions to type check features and subfeatures
 export function isFeature(feature: string): feature is FeatureId {
@@ -46,6 +53,7 @@ export const FEATURE_DISPLAY_NAMES: Record<FeatureId, string> = {
   sessions: "Sessions",
   properties: "Properties",
   users: "Users",
+  datasets: "Datasets",
 };
 
 // Create lookup table for subfeature display names
@@ -54,4 +62,5 @@ export const SUBFEATURE_DISPLAY_NAMES: Record<SubfeatureId, string> = {
   test_cases: "Test Cases",
   variants: "Variants",
   runs: "Evaluation Runs",
+  requests: "Requests",
 };

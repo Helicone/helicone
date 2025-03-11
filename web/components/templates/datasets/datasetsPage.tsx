@@ -35,16 +35,6 @@ const DatasetsPage = (props: DatasetsPageProps) => {
         <div className="flex flex-col space-y-2 w-full items-center">
           <Skeleton className="w-full h-full" />
         </div>
-      ) : !isLoading && org?.currentOrg?.tier === "free" ? (
-        <div className="flex flex-col space-y-2 w-full items-center bg-white">
-          <FeatureUpgradeCard
-            title="Datasets"
-            headerTagline="Create datasets for evals and fine-tuning"
-            icon={<Database className="w-4 h-4 text-sky-500" />}
-            featureName="Datasets"
-            highlightedFeature="datasets"
-          />
-        </div>
       ) : datasets?.length === 0 ? (
         <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
           <EmptyStateCard feature="datasets" />

@@ -86,44 +86,46 @@ const ExperimentsPage = () => {
       <AuthHeader
         title="Experiments"
         actions={
-          <DropdownMenu
-            open={headerDropdownOpen}
-            onOpenChange={setHeaderDropdownOpen}
-            modal={false}
+          <FreeTierLimitWrapper
+            feature="experiments"
+            itemCount={experimentCount}
           >
-            <DropdownMenuTrigger asChild>
-              <FreeTierLimitWrapper
-                feature="experiments"
-                itemCount={experimentCount}
-              >
+            <DropdownMenu
+              open={headerDropdownOpen}
+              onOpenChange={setHeaderDropdownOpen}
+              modal={false}
+            >
+              <DropdownMenuTrigger asChild>
                 <Button variant="action">
                   Start new experiment
                   <ChevronDownIcon className="w-4 h-4 ml-2" />
                 </Button>
-              </FreeTierLimitWrapper>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-[200px]">
-              <DropdownMenuItem
-                onSelect={async () => {
-                  setNotification("Creating experiment...", "info");
-                  const res = await jawn.POST("/v2/experiment/create/empty");
-                  if (res.error) {
-                    notification.setNotification(
-                      "Failed to create experiment",
-                      "error"
-                    );
-                  } else {
-                    router.push(`/experiments/${res.data?.data?.experimentId}`);
-                  }
-                }}
-              >
-                Start from scratch
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-                Start from prompt
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-[200px]">
+                <DropdownMenuItem
+                  onSelect={async () => {
+                    setNotification("Creating experiment...", "info");
+                    const res = await jawn.POST("/v2/experiment/create/empty");
+                    if (res.error) {
+                      notification.setNotification(
+                        "Failed to create experiment",
+                        "error"
+                      );
+                    } else {
+                      router.push(
+                        `/experiments/${res.data?.data?.experimentId}`
+                      );
+                    }
+                  }}
+                >
+                  Start from scratch
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+                  Start from prompt
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </FreeTierLimitWrapper>
         }
       />
 

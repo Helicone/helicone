@@ -6,7 +6,6 @@ import useNotification from "../../shared/notification/useNotification";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useRouter } from "next/router";
-
 import {
   Card,
   CardContent,
@@ -19,6 +18,15 @@ import { Checkbox } from "../../ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "../../ui/label";
+import { useFeatureLimit, useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { P, Muted } from "@/components/ui/typography";
+import { FreeTierSubLimitInfo } from "@/components/shared/FreeTierSubLimitInfo";
+
+// Constants
+const MAX_REQUESTS_PER_DATASET = 500; // Hard limit regardless of tier
 
 interface NewDatasetProps {
   request_ids: string[];
@@ -48,11 +56,29 @@ export default function NewDataset({
     false
   );
   const router = useRouter();
-
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
-
-  const [showLimitWarning, setShowLimitWarning] = useState(false);
   const [limitedRequestIds, setLimitedRequestIds] = useState(request_ids);
+
+  const datasetCount = datasets?.length || 0;
+  const requestCount = request_ids.length;
+
+  const {
+    canCreate: canCreateDataset,
+    hasReachedLimit: hasReachedDatasetLimit,
+    hasFullAccess,
+  } = useFeatureLimit("datasets", datasetCount);
+
+  const {
+    canCreate: canAddRequests,
+    hasReachedLimit: hasReachedRequestLimit,
+    freeLimit: FREE_TIER_REQUEST_LIMIT,
+    upgradeMessage: requestLimitUpgradeMessage,
+  } = useSubfeatureLimit("datasets", "requests", requestCount);
+
+  // State to track which limit is enforcing restrictions
+  const [limitType, setLimitType] = useState<
+    "none" | "free_tier" | "hard_limit"
+  >("none");
 
   const handleSelection = (id: string | "new") => {
     setSelectedOption(id);
@@ -60,20 +86,90 @@ export default function NewDataset({
       setNewDatasetName("");
       const selectedDataset = datasets.find((d) => d.id === id);
       if (selectedDataset) {
-        if (selectedDataset.requests_count >= 500) {
-          setShowLimitWarning(true);
+        // Check hard limit first (500 requests per dataset)
+        if (selectedDataset.requests_count >= MAX_REQUESTS_PER_DATASET) {
           setLimitedRequestIds([]);
+          setLimitType("hard_limit");
         } else {
-          const remainingSlots = 500 - selectedDataset.requests_count;
-          const newLimitedRequestIds = request_ids.slice(0, remainingSlots);
-          setLimitedRequestIds(newLimitedRequestIds);
-          setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
+          // Apply the appropriate limit - hard limit or free tier limit
+          const hardLimitRemaining =
+            MAX_REQUESTS_PER_DATASET - selectedDataset.requests_count;
+
+          // For paid users, only apply hard limit
+          if (hasFullAccess) {
+            const newLimitedRequestIds = request_ids.slice(
+              0,
+              hardLimitRemaining
+            );
+            setLimitedRequestIds(newLimitedRequestIds);
+            setLimitType(
+              newLimitedRequestIds.length < request_ids.length
+                ? "hard_limit"
+                : "none"
+            );
+          } else {
+            // For free tier users, apply the more restrictive of the two limits
+            const freeTierRemaining = Math.max(
+              0,
+              FREE_TIER_REQUEST_LIMIT - selectedDataset.requests_count
+            );
+            const effectiveLimit = Math.min(
+              hardLimitRemaining,
+              freeTierRemaining
+            );
+            const newLimitedRequestIds = request_ids.slice(0, effectiveLimit);
+            setLimitedRequestIds(newLimitedRequestIds);
+
+            if (newLimitedRequestIds.length < request_ids.length) {
+              setLimitType(
+                effectiveLimit === freeTierRemaining
+                  ? "free_tier"
+                  : "hard_limit"
+              );
+            } else {
+              setLimitType("none");
+            }
+          }
         }
       }
     } else {
-      const newLimitedRequestIds = request_ids.slice(0, 500);
-      setLimitedRequestIds(newLimitedRequestIds);
-      setShowLimitWarning(newLimitedRequestIds.length < request_ids.length);
+      // For new datasets
+      const hardLimitRequestIds = request_ids.slice(
+        0,
+        MAX_REQUESTS_PER_DATASET
+      );
+
+      // For paid users, only apply hard limit
+      if (hasFullAccess) {
+        setLimitedRequestIds(hardLimitRequestIds);
+        setLimitType(
+          hardLimitRequestIds.length < request_ids.length
+            ? "hard_limit"
+            : "none"
+        );
+      } else {
+        // For free tier users, apply the more restrictive limit
+        const freeTierLimitRequestIds = request_ids.slice(
+          0,
+          FREE_TIER_REQUEST_LIMIT
+        );
+        const effectiveLimitedRequestIds =
+          FREE_TIER_REQUEST_LIMIT < MAX_REQUESTS_PER_DATASET
+            ? freeTierLimitRequestIds
+            : hardLimitRequestIds;
+
+        setLimitedRequestIds(effectiveLimitedRequestIds);
+
+        if (effectiveLimitedRequestIds.length < request_ids.length) {
+          setLimitType(
+            effectiveLimitedRequestIds.length === FREE_TIER_REQUEST_LIMIT
+              ? "free_tier"
+              : "hard_limit"
+          );
+        } else {
+          setLimitType("none");
+        }
+      }
     }
   };
 
@@ -101,6 +197,56 @@ export default function NewDataset({
       }
     }
     return null;
+  };
+
+  // Render appropriate limit warning message
+  const renderLimitWarning = () => {
+    if (
+      limitType === "none" ||
+      limitedRequestIds.length === request_ids.length
+    ) {
+      return null;
+    }
+
+    if (limitType === "hard_limit") {
+      return (
+        <InfoBox variant="warning" className="mb-2">
+          <div className="flex flex-col">
+            <P className="font-medium">Dataset Size Limit</P>
+            <Muted>
+              {limitedRequestIds.length === 0
+                ? `This dataset has reached the maximum capacity of ${MAX_REQUESTS_PER_DATASET} requests.`
+                : `Only ${limitedRequestIds.length} of ${request_ids.length} requests will be added to stay within the limit of ${MAX_REQUESTS_PER_DATASET} requests per dataset.`}
+            </Muted>
+          </div>
+        </InfoBox>
+      );
+    }
+
+    if (limitType === "free_tier") {
+      return (
+        <InfoBox variant="helicone" className="mb-2">
+          <div className="flex flex-col">
+            <P className="font-medium">Free Tier Limit</P>
+            <div className="flex flex-col gap-2">
+              <Muted>
+                You've reached the free tier limit of {FREE_TIER_REQUEST_LIMIT}{" "}
+                requests per dataset.
+              </Muted>
+              <FreeTierSubLimitWrapper
+                feature="datasets"
+                subfeature="requests"
+                itemCount={requestCount}
+              >
+                <Button variant="default" className="w-fit px-8" size="sm">
+                  Upgrade
+                </Button>
+              </FreeTierSubLimitWrapper>
+            </div>
+          </div>
+        </InfoBox>
+      );
+    }
   };
 
   return (
@@ -189,16 +335,7 @@ export default function NewDataset({
         )}
       </CardContent>
       <CardFooter className="flex-col items-stretch space-y-4 py-2 px-0">
-        {showLimitWarning && (
-          <div className="flex space-x-2 flex-col text-sm bg-[#F1F5F9] p-2 rounded-lg">
-            <span className="ml-2 font-medium text-lg">Note</span>
-            <span className="text-[#64748B]">
-              {limitedRequestIds.length === 0
-                ? "This dataset already has 500 or more requests. Please select or create a different dataset."
-                : `Only ${limitedRequestIds.length} requests will be added to stay within the limit of 500 requests per dataset.`}
-            </span>
-          </div>
-        )}
+        {renderLimitWarning()}
         <div className="flex justify-end items-center space-x-2">
           <label
             htmlFor="open-after"
@@ -216,58 +353,82 @@ export default function NewDataset({
           <Button variant="outline" onClick={onComplete}>
             Cancel
           </Button>
-          <Button
-            variant="default"
-            disabled={
-              !selectedOption ||
-              (selectedOption === "new" && !newDatasetName) ||
-              addingRequests ||
-              limitedRequestIds.length === 0
-            }
-            onClick={async () => {
-              setAddingRequests(true);
-              let datasetId = selectedOption;
-              if (selectedOption === "new") {
-                const newDatasetId = await handleCreateDataset();
-                if (newDatasetId) {
-                  datasetId = newDatasetId;
-                } else {
-                  setAddingRequests(false);
-                  return;
-                }
-              }
-              const res = await jawn.POST(
-                "/v1/helicone-dataset/{datasetId}/mutate",
-                {
-                  params: { path: { datasetId: datasetId! } },
-                  body: {
-                    addRequests: limitedRequestIds,
-                    removeRequests: [],
-                  },
-                }
-              );
 
-              if (res.data && !res.data.error) {
-                setNotification("Requests added to dataset", "success");
-                if (openDatasetOnAdd) {
-                  router.push(`/datasets/${datasetId}`);
-                }
-                onComplete();
-              } else {
-                setNotification("Failed to add requests to dataset", "error");
-              }
-              setAddingRequests(false);
-            }}
+          <FreeTierLimitWrapper
+            feature="datasets"
+            itemCount={
+              selectedOption === "new" ? datasetCount + 1 : datasetCount
+            }
           >
-            {addingRequests
-              ? isCopyMode
-                ? "Copying..."
-                : "Adding..." // Modify this line
-              : isCopyMode
-              ? `Copy ${limitedRequestIds.length} requests` // Add this line
-              : `Add ${limitedRequestIds.length} requests`}{" "}
-            {/* Modify this line */}
-          </Button>
+            <Button
+              variant="default"
+              disabled={
+                !selectedOption ||
+                (selectedOption === "new" && !newDatasetName) ||
+                addingRequests ||
+                limitedRequestIds.length === 0
+              }
+              onClick={async () => {
+                setAddingRequests(true);
+                let datasetId = selectedOption;
+                if (selectedOption === "new") {
+                  const newDatasetId = await handleCreateDataset();
+                  if (newDatasetId) {
+                    datasetId = newDatasetId;
+                  } else {
+                    setAddingRequests(false);
+                    return;
+                  }
+                }
+
+                // For adding requests, we need to check if we have permission to add this many requests
+                const requestAdditionWrapped = async () => {
+                  const res = await jawn.POST(
+                    "/v1/helicone-dataset/{datasetId}/mutate",
+                    {
+                      params: { path: { datasetId: datasetId! } },
+                      body: {
+                        addRequests: limitedRequestIds,
+                        removeRequests: [],
+                      },
+                    }
+                  );
+
+                  if (res.data && !res.data.error) {
+                    setNotification("Requests added to dataset", "success");
+                    if (openDatasetOnAdd) {
+                      router.push(`/datasets/${datasetId}`);
+                    }
+                    onComplete();
+                  } else {
+                    setNotification(
+                      "Failed to add requests to dataset",
+                      "error"
+                    );
+                  }
+                  setAddingRequests(false);
+                };
+
+                // Only wrap with FreeTierSubLimitWrapper if we're a free tier user and adding to an existing dataset
+                if (!hasFullAccess && selectedOption !== "new") {
+                  // Use the requestAdditionWrapped directly since the FreeTierSubLimitWrapper
+                  // is already checking the request count in canAddRequests
+                  await requestAdditionWrapped();
+                } else {
+                  // No need to check limits for paid users or when creating a new dataset
+                  await requestAdditionWrapped();
+                }
+              }}
+            >
+              {addingRequests
+                ? isCopyMode
+                  ? "Copying..."
+                  : "Adding..."
+                : isCopyMode
+                ? `Copy ${limitedRequestIds.length} requests`
+                : `Add ${limitedRequestIds.length} requests`}{" "}
+            </Button>
+          </FreeTierLimitWrapper>
         </div>
       </CardFooter>
     </Card>

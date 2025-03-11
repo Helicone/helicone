@@ -104,7 +104,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         title={
           <div className="flex items-center gap-2">
             Prompts
-            {hasReachedLimit && (
+            {!hasFullAccess && hasReachedLimit && (
               <InfoBox className="ml-4" variant="warning">
                 <div className="flex items-center gap-2">
                   {upgradeMessage || "Free tier limit reached"}

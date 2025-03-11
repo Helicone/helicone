@@ -1,6 +1,5 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -849,17 +848,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                       </span>
                     </div>
                     {selectedIds.length > 0 && (
-                      <ProFeatureWrapper featureName="Datasets">
-                        <GenericButton
-                          onClick={() => {
-                            setModalOpen(true);
-                          }}
-                          icon={
-                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                          }
-                          text="Add to dataset"
-                        />
-                      </ProFeatureWrapper>
+                      <GenericButton
+                        onClick={() => {
+                          setModalOpen(true);
+                        }}
+                        icon={
+                          <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                        }
+                        text="Add to dataset"
+                      />
                     )}
                   </Row>
                 )}
