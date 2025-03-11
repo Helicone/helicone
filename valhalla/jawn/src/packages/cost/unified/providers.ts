@@ -84,83 +84,37 @@ export function buildProviderUrl(
     deployment?: string;
   }
 ): string {
-  const config = providerConfigs[provider];
+  const config = getProviderConfig(provider);
   const finalEndpoint = providerSettings?.endpoint || config.defaultEndpoint;
 
-  // Replace any placeholders in the endpoint
-  let processedEndpoint = finalEndpoint;
-  if (modelString) {
-    processedEndpoint = processedEndpoint.replace(
-      /{modelString}/g,
-      modelString
-    );
-  }
+  // Define all possible replacements in a structured way
+  const replacements = [
+    { placeholder: /{modelString}/g, value: modelString },
+    { placeholder: /{REGION}/g, value: providerSettings?.region },
+    { placeholder: /{PROJECT}/g, value: providerSettings?.project },
+    { placeholder: /{LOCATION}/g, value: providerSettings?.location },
+    { placeholder: /{ENDPOINT}/g, value: providerSettings?.endpoint },
+    { placeholder: /{DEPLOYMENT}/g, value: providerSettings?.deployment },
+  ];
 
-  // Process the baseUrl to replace any lowercase templates
-  let processedBaseUrl = config.baseUrl;
+  // Apply replacements to baseUrl
+  const processedBaseUrl = replacements.reduce(
+    (url, { placeholder, value }) =>
+      value ? url.replace(placeholder, value) : url,
+    config.baseUrl
+  );
 
-  // For lowercase templates like {modelString} in baseUrl, replace with modelId
-  if (modelString) {
-    processedBaseUrl = processedBaseUrl.replace(/{modelString}/g, modelString);
-  }
+  // Apply replacements to endpoint
+  const processedEndpoint = replacements.reduce(
+    (endpoint, { placeholder, value }) =>
+      value ? endpoint.replace(placeholder, value) : endpoint,
+    finalEndpoint
+  );
 
-  // Replace ALLCAPS templates with provided values
-  if (providerSettings?.region) {
-    processedBaseUrl = processedBaseUrl.replace(
-      /{REGION}/g,
-      providerSettings.region
-    );
-    processedEndpoint = processedEndpoint.replace(
-      /{REGION}/g,
-      providerSettings.region
-    );
-  }
-
-  if (providerSettings?.project) {
-    processedBaseUrl = processedBaseUrl.replace(
-      /{PROJECT}/g,
-      providerSettings.project
-    );
-    processedEndpoint = processedEndpoint.replace(
-      /{PROJECT}/g,
-      providerSettings.project
-    );
-  }
-
-  if (providerSettings?.location) {
-    processedBaseUrl = processedBaseUrl.replace(
-      /{LOCATION}/g,
-      providerSettings.location
-    );
-    processedEndpoint = processedEndpoint.replace(
-      /{LOCATION}/g,
-      providerSettings.location
-    );
-  }
-
-  if (providerSettings?.endpoint) {
-    processedBaseUrl = processedBaseUrl.replace(
-      /{ENDPOINT}/g,
-      providerSettings.endpoint
-    );
-  }
-
-  if (providerSettings?.deployment) {
-    processedBaseUrl = processedBaseUrl.replace(
-      /{DEPLOYMENT}/g,
-      providerSettings.deployment
-    );
-    processedEndpoint = processedEndpoint.replace(
-      /{DEPLOYMENT}/g,
-      providerSettings.deployment
-    );
-  }
-
-  // Final check to ensure all placeholders are replaced
-  // This is a safety measure to catch any remaining placeholders
+  // Final URL
   const finalUrl = `${processedBaseUrl}${processedEndpoint}`;
 
-  // If there are still placeholders, log a warning
+  // Safety check for any remaining placeholders
   if (finalUrl.includes("{") && finalUrl.includes("}")) {
     console.warn(`Warning: URL still contains placeholders: ${finalUrl}`);
   }
