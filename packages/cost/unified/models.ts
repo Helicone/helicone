@@ -269,6 +269,10 @@ export const modelMapping: CreatorModelMapping = {
       },
       providers: [
         {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-2.0-flash-thinking-exp-01-21",
+        },
+        {
           provider: "GOOGLE_VERTEXAI",
           modelString: "gemini-2.0-flash-thinking-exp-01-21",
         },
