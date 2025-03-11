@@ -35,6 +35,9 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         .slice(0, 5)
         .map((n) => n.toFixed(6))
         .join(", ")}...]`;
+    } else if (typeof embedding === "string") {
+      // Handle base64 encoded embeddings
+      return `[base64 encoded embedding]`;
     }
     return "";
   } else if (statusCode === 0 || statusCode === null) {
@@ -98,14 +101,32 @@ export const mapOpenAIEmbedding: MapperFn<any, any> = ({
 
   // Handle regular embedding response
   const responseMessages =
-    response?.data?.map((item: any, index: number) => ({
-      role: "assistant",
-      content: `Embedding ${index}: [${item.embedding
-        .slice(0, 5)
-        .map((n: number) => n.toFixed(6))
-        .join(", ")}...]`,
-      _type: "message",
-    })) || [];
+    response?.data?.map((item: any, index: number) => {
+      // Check if embedding is an array or a string (base64)
+      let contentText = "";
+      if (Array.isArray(item.embedding)) {
+        try {
+          contentText = `Embedding ${index}: [${item.embedding
+            .slice(0, 5)
+            .map((n: number) => n.toFixed(6))
+            .join(", ")}...]`;
+        } catch (error) {
+          console.error("Error formatting embedding", error);
+          contentText = `Embedding ${index}: [format unknown]`;
+        }
+      } else if (typeof item.embedding === "string") {
+        // Handle base64 encoded embeddings
+        contentText = `Embedding ${index}: [base64 encoded]`;
+      } else {
+        contentText = `Embedding ${index}: [format unknown]`;
+      }
+
+      return {
+        role: "assistant",
+        content: contentText,
+        _type: "message",
+      };
+    }) || [];
 
   const llmSchema: LlmSchema = {
     request: requestToReturn,

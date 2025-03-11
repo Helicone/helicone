@@ -37,8 +37,8 @@ export interface LlmSchema {
   response?: LLMResponseBody | null;
 }
 export type LLMPreview = {
-  fullRequestText?: () => string;
-  fullResponseText?: () => string;
+  fullRequestText?: (preview?: boolean) => string;
+  fullResponseText?: (preview?: boolean) => string;
   request: string;
   response: string;
   concatenatedMessages: Message[];
