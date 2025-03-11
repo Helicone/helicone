@@ -46,7 +46,6 @@ import {
   $user,
   findClosestModel,
   findClosestProvider,
-  PROVIDER_MODELS,
 } from "@/utils/generate";
 import {
   isLastMessageUser,
@@ -163,7 +162,8 @@ export default function PromptEditor({
     if (
       state?.parameters?.provider === "OPENAI" ||
       state?.parameters?.provider === "ANTHROPIC" ||
-      state?.parameters?.provider === "GOOGLE"
+      state?.parameters?.provider === "GOOGLE_GEMINI" ||
+      state?.parameters?.provider === "GOOGLE_VERTEXAI"
     ) {
       return (
         state?.messages.some(
@@ -335,10 +335,11 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider as keyof typeof PROVIDER_MODELS,
+          provider: provider,
           model: model,
           temperature: templateData.temperature ?? 1,
           tools: templateData.tools ?? [],
+          max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
         inputs,
@@ -732,8 +733,8 @@ export default function PromptEditor({
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "DEEPSEEK",
-        model: "deepseek-r1",
+        provider: "OPENROUTER",
+        model: "anthropic/claude-3.7-sonnet:thinking",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
         includeReasoning: true,
@@ -928,9 +929,10 @@ export default function PromptEditor({
         setState({
           messages: basePrompt.body.messages || [],
           parameters: {
-            provider: provider as keyof typeof PROVIDER_MODELS,
+            provider: provider,
             model: model,
             temperature: basePrompt.body.temperature ?? 1,
+            max_tokens: basePrompt.body.max_tokens ?? undefined,
             tools: basePrompt.body.tools ?? [],
             reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
           },
