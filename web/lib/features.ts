@@ -4,6 +4,7 @@ export const ADDON_FEATURES = [
   "experiments",
   "prompts",
   "datasets",
+  "alerts",
 ] as const;
 export const NON_FREE_FEATURES = ["sessions", "properties", "users"] as const;
 
@@ -54,6 +55,7 @@ export const FEATURE_DISPLAY_NAMES: Record<FeatureId, string> = {
   properties: "Properties",
   users: "Users",
   datasets: "Datasets",
+  alerts: "Alerts",
 };
 
 // Create lookup table for subfeature display names

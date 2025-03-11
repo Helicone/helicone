@@ -134,6 +134,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
         },
       },
     },
+    alerts: {
+      main: {
+        getLimit: () => 1,
+        description: (limit) =>
+          `You can create up to ${limit} alert with the free tier`,
+        upgradeFeatureName: FEATURE_DISPLAY_NAMES.alerts,
+        upgradeMessage: (limit, used) =>
+          `You've used ${used}/${limit} alert. Upgrade for unlimited alerts.`,
+      },
+    },
   },
 };
 
