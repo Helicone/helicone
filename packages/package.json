@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "jest",
     "copy-cost": "./copy-packages.sh -p cost",
-    "copy-llm-mapper": "./copy-packages.sh -p llm-mapper"
+    "copy-llm-mapper": "./copy-packages.sh -p llm-mapper",
+    "copy-common": "./copy-packages.sh -p common"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

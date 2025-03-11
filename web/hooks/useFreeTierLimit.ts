@@ -5,7 +5,7 @@ import {
   FreeTierLimitContext,
   LimitConfig,
 } from "@/lib/freeTierLimits";
-import { FeatureId, SubfeatureId } from "@/lib/features";
+import { FeatureId, SubfeatureId } from "@/packages/common/features";
 
 // Define return type interfaces
 export interface FeatureLimitResult {

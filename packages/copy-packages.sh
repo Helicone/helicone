@@ -6,7 +6,7 @@ usage() {
     echo "Copy packages to their respective destinations"
     echo ""
     echo "Options:"
-    echo "  -p, --package PACKAGE    Package to copy (cost or llm-mapper)"
+    echo "  -p, --package PACKAGE    Package to copy (cost, llm-mapper, or common)"
     echo "  -h, --help              Display this help message"
     exit 1
 }
@@ -59,6 +59,30 @@ copy_llm_mapper() {
     done
 }
 
+# Function to copy the common package
+copy_common() {
+    echo "Copying common package..."
+    
+    # Define destinations (web, jawn, and helicone-cron as requested)
+    destinations=(
+        "../web/packages/common"
+        "../valhalla/jawn/src/packages/common"
+        "../helicone-cron/src/packages/common"
+    )
+    
+    # Remove and recreate directories
+    for dest in "${destinations[@]}"; do
+        rm -rf "$dest"
+        mkdir -p "$dest"
+    done
+    
+    # Copy files to all destinations
+    for dest in "${destinations[@]}"; do
+        cp -r common/* "$dest"
+        echo "Copied to $dest"
+    done
+}
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -90,8 +114,11 @@ case "$PACKAGE" in
     llm-mapper)
         copy_llm_mapper
         ;;
+    common)
+        copy_common
+        ;;
     *)
-        echo "Error: Invalid package name. Must be 'cost' or 'llm-mapper'"
+        echo "Error: Invalid package name. Must be 'cost', 'llm-mapper', or 'common'"
         usage
         ;;
 esac 

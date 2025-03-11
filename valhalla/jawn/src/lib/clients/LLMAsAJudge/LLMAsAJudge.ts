@@ -4,13 +4,12 @@ import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
 import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
 import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
 import { err, ok, Result } from "../../shared/result";
+import { tierHasFeature, TierId } from "../../../packages/common/features";
 
 type EvaluatorScore = {
   score: number | boolean;
 };
 export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
-
-const TIERS = ["pro-20240913", "pro-20250202", "enterprise", "demo"];
 
 export class LLMAsAJudge {
   constructor(
@@ -135,7 +134,13 @@ export class LLMAsAJudge {
     });
 
     const org = await organizationManager.getOrg();
-    if (!TIERS.includes(org.data?.tier ?? "")) {
+    if (
+      !tierHasFeature(
+        (org.data?.tier ?? "free") as TierId,
+        "evals",
+        org.data?.stripe_metadata as { addons?: { evals?: boolean } }
+      )
+    ) {
       return err("You are not authorized to use this evaluator");
     }
 
