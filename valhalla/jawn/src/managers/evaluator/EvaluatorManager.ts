@@ -21,7 +21,6 @@ import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { ceil, floor, range } from "lodash";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
