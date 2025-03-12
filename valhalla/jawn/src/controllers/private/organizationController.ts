@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Path,
   Post,
   Query,
@@ -200,58 +201,6 @@ export class OrganizationController extends Controller {
     }
   }
 
-  @Post("/{organizationId}/create_filter")
-  public async createOrganizationFilter(
-    @Body()
-    requestBody: {
-      filters: OrganizationFilter[];
-      filterType: "dashboard" | "requests";
-    },
-    @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.createFilter(
-      organizationId,
-      requestBody.filters,
-      requestBody.filterType
-    );
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error ?? "Error creating organization filter");
-    } else {
-      this.setStatus(201);
-      return ok(null);
-    }
-  }
-
-  @Post("/{organizationId}/update_filter")
-  public async updateOrganizationFilter(
-    @Body()
-    requestBody: {
-      filters: OrganizationFilter[];
-      filterType: "dashboard" | "requests";
-    },
-    @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.updateFilter(
-      organizationId,
-      requestBody.filterType,
-      requestBody.filters
-    );
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error ?? "Error updating organization filter");
-    } else {
-      this.setStatus(201);
-      return ok(null);
-    }
-  }
-
   @Delete("/delete")
   public async deleteOrganization(
     @Request() request: JawnAuthenticatedRequest
@@ -265,27 +214,6 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(201);
       return ok(null);
-    }
-  }
-
-  @Get("/{organizationId}/layout")
-  public async getOrganizationLayout(
-    @Path() organizationId: string,
-    @Query() filterType: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<OrganizationLayout, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.getOrganizationLayout(
-      organizationId,
-      filterType
-    );
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error ?? "Error getting organization layout");
-    } else {
-      this.setStatus(200);
-      return ok(result.data);
     }
   }
 
@@ -441,124 +369,5 @@ export class OrganizationController extends Controller {
       this.setStatus(201);
       return ok(null);
     }
-  }
-
-  @Post("/{organizationId}/create_layout")
-  public async createOrganizationLayout(
-    @Body()
-    requestBody: {
-      type: "dashboard" | "requests" | "filter_ast";
-      filters: any;
-    },
-    @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<OrganizationLayout, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.createFilter(
-      organizationId,
-      requestBody.filters,
-      requestBody.type
-    );
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error ?? "Error creating organization layout");
-    }
-
-    // Fetch the newly created layout to return it
-    const layoutResult = await organizationManager.getOrganizationLayout(
-      organizationId,
-      requestBody.type
-    );
-
-    if (layoutResult.error || !layoutResult.data) {
-      this.setStatus(500);
-      return err(
-        `Layout created but failed to retrieve: ${layoutResult.error}`
-      );
-    }
-
-    this.setStatus(201);
-    return ok(layoutResult.data);
-  }
-
-  @Delete("/{organizationId}/layout")
-  public async deleteOrganizationLayout(
-    @Path() organizationId: string,
-    @Query() type: "dashboard" | "requests" | "filter_ast",
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    if (!request.authParams.userId) {
-      this.setStatus(401);
-      return err("Unauthorized");
-    }
-
-    // Check if the layout exists first
-    const layoutResult = await organizationManager.getOrganizationLayout(
-      organizationId,
-      type
-    );
-
-    if (layoutResult.error) {
-      this.setStatus(404);
-      return err(`Layout not found: ${layoutResult.error}`);
-    }
-
-    // Delete the layout
-    const { error: deleteError } = await supabaseServer.client
-      .from("organization_layout")
-      .delete()
-      .eq("organization_id", organizationId)
-      .eq("type", type);
-
-    if (deleteError) {
-      this.setStatus(500);
-      return err(`Failed to delete layout: ${deleteError.message}`);
-    }
-
-    this.setStatus(200);
-    return ok(null);
-  }
-
-  @Post("/{organizationId}/update_layout")
-  public async updateOrganizationLayout(
-    @Body()
-    requestBody: {
-      type: "dashboard" | "requests" | "filter_ast";
-      filters: any;
-    },
-    @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<OrganizationLayout, string>> {
-    const organizationManager = new OrganizationManager(request.authParams);
-
-    const result = await organizationManager.updateFilter(
-      organizationId,
-      requestBody.type,
-      requestBody.filters
-    );
-
-    if (result.error) {
-      this.setStatus(500);
-      return err(`Failed to update layout: ${result.error}`);
-    }
-
-    // Fetch the updated layout to return it
-    const layoutResult = await organizationManager.getOrganizationLayout(
-      organizationId,
-      requestBody.type
-    );
-
-    if (layoutResult.error || !layoutResult.data) {
-      this.setStatus(500);
-      return err(
-        `Layout updated but failed to retrieve: ${layoutResult.error}`
-      );
-    }
-
-    this.setStatus(200);
-    return ok(layoutResult.data);
   }
 }

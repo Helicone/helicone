@@ -162,24 +162,6 @@ export class OrganizationStore extends BaseStore {
     return ok(userId!);
   }
 
-  async createOrganizationFilter(insertRequest: {
-    organization_id: string;
-    type: "dashboard" | "requests" | "filter_ast";
-    filters: OrganizationFilter[];
-  }): Promise<Result<string, string>> {
-    const insert = await supabaseServer.client
-      .from("organization_layout")
-      .insert([insertRequest as any])
-      .select("*")
-      .single();
-
-    if (insert.error || !insert.data) {
-      console.error(`Failed to create filter: ${insert.error}`);
-      return err(`Failed to create filter: ${insert.error}`);
-    }
-    return ok(insert.data.id);
-  }
-
   async deleteOrganization(): Promise<Result<string, string>> {
     const deleteRes = await supabaseServer.client
       .from("organization")
@@ -190,50 +172,6 @@ export class OrganizationStore extends BaseStore {
 
     if (deleteRes.error) {
       return err("internal error" + deleteRes.error);
-    }
-    return ok("success");
-  }
-
-  async getOrganizationLayout(
-    organizationId: string,
-    filterType: string
-  ): Promise<Result<OrganizationLayout, string>> {
-    const { data: layout, error } = await supabaseServer.client
-      .from("organization_layout")
-      .select("*")
-      .eq("organization_id", organizationId)
-      .eq("type", filterType)
-      .single();
-
-    if (error !== null) {
-      return err(error.message);
-    }
-
-    return ok({
-      id: layout.id,
-      type: layout.type,
-      filters: layout.filters as OrganizationFilter[],
-      organization_id: layout.organization_id,
-    });
-  }
-
-  async updateOrganizationFilter(
-    organizationId: string,
-    type: string,
-    filters: OrganizationFilter[]
-  ): Promise<Result<string, string>> {
-    const updateRes = await supabaseServer.client
-      .from("organization_layout")
-      .upsert({
-        organization_id: organizationId,
-        type: type,
-        filters: filters as any,
-      })
-      .eq("organization_id", organizationId)
-      .eq("type", type);
-
-    if (updateRes.error) {
-      return err("internal error" + updateRes.error);
     }
     return ok("success");
   }

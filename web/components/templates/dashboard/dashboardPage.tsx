@@ -21,7 +21,7 @@ import {
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
+
 import {
   filterUITreeToFilterNode,
   getRootFilterNode,
@@ -106,25 +106,6 @@ const DashboardPage = (props: DashboardPageProps) => {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
     }
   }, [orgContext?.currentOrg?.has_onboarded]);
-
-  const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
-    useOrganizationLayout(
-      orgContext?.currentOrg?.id!,
-      "dashboard",
-      organizationLayout
-        ? {
-            data: organizationLayout,
-            error: null,
-          }
-        : undefined
-    );
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
 
   const [currFilter, setCurrFilter] = useState<string | null>("");
 
@@ -549,18 +530,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                 onAdvancedFilter: onSetAdvancedFiltersHandler,
                 filters: advancedFilters,
                 searchPropertyFilters: searchPropertyFilters,
-              }}
-              savedFilters={{
-                currentFilter: currFilter ?? undefined,
-                filters:
-                  transformedFilters && orgLayout?.data?.id
-                    ? transformedFilters
-                    : undefined,
-                onFilterChange: onLayoutFilterChange,
-                onSaveFilterCallback: async () => {
-                  await orgLayoutRefetch();
-                },
-                layoutPage: "dashboard",
               }}
             />
             <section id="panels" className="-m-2">

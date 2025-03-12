@@ -29,6 +29,7 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
 
   // Delete a saved filter
   const handleDeleteFilter = async (filterId: string, e: React.MouseEvent) => {
+    console.log("deleting filter", filterId);
     e.stopPropagation(); // Prevent triggering the load filter action
     try {
       await deleteFilter(filterId);

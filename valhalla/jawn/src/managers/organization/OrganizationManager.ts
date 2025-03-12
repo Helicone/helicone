@@ -38,7 +38,7 @@ export type UIFilterRowTree = UIFilterRowNode | FilterRow;
 export type OrganizationFilter = {
   id: string;
   name: string;
-  filter: UIFilterRowTree[];
+  filter: any;
   createdAt?: string;
   softDelete: boolean;
 };
@@ -272,62 +272,6 @@ export class OrganizationManager extends BaseManager {
     return ok("success");
   }
 
-  async createFilter(
-    organizationId: string,
-    filters: OrganizationFilter[],
-    filterType: "dashboard" | "requests" | "filter_ast"
-  ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
-      organizationId,
-      this.authParams.userId
-    );
-    if (!hasAccess) {
-      return err("User does not have access to create organization filter");
-    }
-    const insertRequest = {
-      organization_id: organizationId,
-      type: filterType,
-      filters: filters,
-    };
-
-    const { data: createdFilter, error: createFilterError } =
-      await this.organizationStore.createOrganizationFilter(insertRequest);
-
-    if (createFilterError || !createdFilter) {
-      console.error(`Failed to create filter: ${createFilterError}`);
-      return err(`Failed to create filter: ${createFilterError}`);
-    }
-
-    return ok(createdFilter);
-  }
-
-  async updateFilter(
-    organizationId: string,
-    type: string,
-    filters: OrganizationFilter[]
-  ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
-      organizationId,
-      this.authParams.userId
-    );
-    if (!hasAccess) {
-      return err("User does not have access to update organization filter");
-    }
-    const { error: updateError } =
-      await this.organizationStore.updateOrganizationFilter(
-        organizationId,
-        type,
-        filters
-      );
-
-    if (updateError) {
-      return err(updateError);
-    }
-    return ok("success");
-  }
-
   async deleteOrganization(): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
@@ -345,31 +289,6 @@ export class OrganizationManager extends BaseManager {
       return err(orgError ?? "Error deleting organization");
     }
     return ok(orgData);
-  }
-
-  async getOrganizationLayout(
-    organizationId: string,
-    filterType: string
-  ): Promise<Result<OrganizationLayout, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
-      organizationId,
-      this.authParams.userId
-    );
-
-    if (!hasAccess) {
-      return err("User does not have access to get organization layout");
-    }
-    const { data: layout, error: organizationLayoutError } =
-      await this.organizationStore.getOrganizationLayout(
-        organizationId,
-        filterType
-      );
-
-    if (organizationLayoutError !== null) {
-      return ok({ filters: [], id: "", organization_id: "", type: "" });
-    }
-    return ok(layout);
   }
 
   async getMemberCount(

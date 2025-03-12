@@ -247,18 +247,8 @@ export interface paths {
   "/v1/organization/{organizationId}/add_member": {
     post: operations["AddMemberToOrganization"];
   };
-  "/v1/organization/{organizationId}/create_filter": {
-    post: operations["CreateOrganizationFilter"];
-  };
-  "/v1/organization/{organizationId}/update_filter": {
-    post: operations["UpdateOrganizationFilter"];
-  };
   "/v1/organization/delete": {
     delete: operations["DeleteOrganization"];
-  };
-  "/v1/organization/{organizationId}/layout": {
-    get: operations["GetOrganizationLayout"];
-    delete: operations["DeleteOrganizationLayout"];
   };
   "/v1/organization/{organizationId}/members": {
     get: operations["GetOrganizationMembers"];
@@ -277,12 +267,6 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
-  };
-  "/v1/organization/{organizationId}/create_layout": {
-    post: operations["CreateOrganizationLayout"];
-  };
-  "/v1/organization/{organizationId}/update_layout": {
-    post: operations["UpdateOrganizationLayout"];
   };
   "/v1/log/request": {
     post: operations["GetRequests"];
@@ -308,6 +292,15 @@ export interface paths {
   };
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
+  };
+  "/v1/filter": {
+    get: operations["GetFilters"];
+    post: operations["CreateFilter"];
+  };
+  "/v1/filter/{id}": {
+    get: operations["GetFilter"];
+    delete: operations["DeleteFilter"];
+    patch: operations["UpdateFilter"];
   };
   "/v1/demo/completion": {
     post: operations["DemoCompletion"];
@@ -1347,38 +1340,6 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
-    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
-    UIFilterRowNode: {
-      /** @enum {string} */
-      operator: "and" | "or";
-      rows: components["schemas"]["UIFilterRowTree"][];
-    };
-    FilterRow: {
-      value: string;
-      /** Format: double */
-      operatorIdx: number;
-      /** Format: double */
-      filterMapIdx: number;
-    };
-    OrganizationFilter: {
-      softDelete: boolean;
-      createdAt?: string;
-      filter: components["schemas"]["UIFilterRowTree"][];
-      name: string;
-      id: string;
-    };
-    OrganizationLayout: {
-      filters: components["schemas"]["OrganizationFilter"][];
-      type: string;
-      organization_id: string;
-      id: string;
-    };
-    ResultSuccess_OrganizationLayout_: {
-      data: components["schemas"]["OrganizationLayout"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
     OrganizationMember: {
       org_role: string;
       member: string;
@@ -1595,6 +1556,24 @@ Json: JsonObject;
     FineTuneBody: {
       providerKeyId: string;
     };
+    StoreFilterType: {
+      createdAt?: string;
+      filter: unknown;
+      name: string;
+      id?: string;
+    };
+    "ResultSuccess_StoreFilterType-Array_": {
+      data: components["schemas"]["StoreFilterType"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType-Array.string_": components["schemas"]["ResultSuccess_StoreFilterType-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_StoreFilterType_: {
+      data: components["schemas"]["StoreFilterType"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -3672,91 +3651,7 @@ export interface operations {
       };
     };
   };
-  CreateOrganizationFilter: {
-    parameters: {
-      path: {
-        organizationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          filterType: "dashboard" | "requests";
-          filters: components["schemas"]["OrganizationFilter"][];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateOrganizationFilter: {
-    parameters: {
-      path: {
-        organizationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          filterType: "dashboard" | "requests";
-          filters: components["schemas"]["OrganizationFilter"][];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
   DeleteOrganization: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetOrganizationLayout: {
-    parameters: {
-      query: {
-        filterType: string;
-      };
-      path: {
-        organizationId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
-        };
-      };
-    };
-  };
-  DeleteOrganizationLayout: {
-    parameters: {
-      query: {
-        type: "dashboard" | "requests" | "filter_ast";
-      };
-      path: {
-        organizationId: string;
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -3862,54 +3757,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateOrganizationLayout: {
-    parameters: {
-      path: {
-        organizationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          filters: unknown;
-          /** @enum {string} */
-          type: "dashboard" | "requests" | "filter_ast";
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
-        };
-      };
-    };
-  };
-  UpdateOrganizationLayout: {
-    parameters: {
-      path: {
-        organizationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          filters: unknown;
-          /** @enum {string} */
-          type: "dashboard" | "requests" | "filter_ast";
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
         };
       };
     };
@@ -4054,6 +3901,83 @@ export interface operations {
             events: unknown;
             job: unknown;
           };
+        };
+      };
+    };
+  };
+  GetFilters: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_StoreFilterType-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateFilter: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StoreFilterType"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_StoreFilterType.string_"];
+        };
+      };
+    };
+  };
+  DeleteFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          filters: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
