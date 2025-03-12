@@ -21,6 +21,7 @@ import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { ceil, floor, range } from "lodash";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -758,7 +759,7 @@ export class EvaluatorManager extends BaseManager {
       // Query score distribution - 5 buckets
       const distributionQuery = `
         SELECT
-          concat(toString(floor(bucket * 20)), '-', toString(ceil(bucket * 20))) as range,
+          concat(toString(bucket * 20), '-', toString((bucket + 1) * 20)) as range,
           count(*) as count
         FROM (
           SELECT
