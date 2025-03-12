@@ -63,6 +63,7 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  previewOnly?: boolean;
 }
 
 @Route("v1/request")

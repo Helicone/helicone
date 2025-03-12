@@ -1,26 +1,28 @@
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { Muted } from "@/components/ui/typography";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PiPlayBold } from "react-icons/pi";
+import { useGetRequestWithBodies } from "../../../services/hooks/requests";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
 import RequestRow from "./requestRow";
-import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
   open: boolean;
@@ -47,9 +49,27 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
-
   const org = useOrg();
+  const jawn = useJawnClient();
+  const [fullRequest, setFullRequest] = useState<MappedLLMRequest | undefined>(
+    request
+  );
+
+  // Fetch the full request body when the component is opened
+  const { data: requestWithBody, isLoading: isLoadingFullRequest } =
+    useGetRequestWithBodies(request?.id || "");
+
+  useEffect(() => {
+    if (open && requestWithBody?.data && !isLoadingFullRequest) {
+      // Convert the HeliconeRequest to MappedLLMRequest
+      const mappedRequest = heliconeRequestToMappedContent(
+        requestWithBody.data
+      );
+      setFullRequest(mappedRequest);
+    } else {
+      setFullRequest(request);
+    }
+  }, [open, requestWithBody, isLoadingFullRequest, request]);
 
   const setOpenHandler = (divOpen: boolean) => {
     setOpen(divOpen);
@@ -82,18 +102,15 @@ const RequestDiv = (props: RequestDivProps) => {
     };
   }, [onNextHandler, onPrevHandler, setOpen]);
 
-  const jawn = useJawnClient();
-
   const promptId = useMemo(
     () =>
-      request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
+      fullRequest?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
       null,
-    [request?.heliconeMetadata.customProperties]
+    [fullRequest?.heliconeMetadata.customProperties]
   );
   const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     queryFn: async (query) => {
-      const jawn = getJawnClient(query.queryKey[2]);
       const prompt = await jawn.POST("/v1/prompt/query", {
         body: {
           filter: {
@@ -124,8 +141,8 @@ const RequestDiv = (props: RequestDivProps) => {
                     e.preventDefault();
                     if (promptDataQuery.data?.id) {
                       router.push(`/prompts/${promptDataQuery.data?.id}`);
-                    } else if (request) {
-                      router.push(`/prompts/fromRequest/${request.id}`);
+                    } else if (fullRequest) {
+                      router.push(`/prompts/fromRequest/${fullRequest.id}`);
                     }
                   }}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
@@ -145,7 +162,7 @@ const RequestDiv = (props: RequestDivProps) => {
                       .POST("/v2/experiment/create/from-request/{requestId}", {
                         params: {
                           path: {
-                            requestId: request?.id!,
+                            requestId: fullRequest?.id!,
                           },
                         },
                       })
@@ -175,7 +192,7 @@ const RequestDiv = (props: RequestDivProps) => {
                   onClick={() => {
                     setNotification("Copied to clipboard", "success");
                     navigator.clipboard.writeText(
-                      JSON.stringify(request?.schema || {}, null, 4)
+                      JSON.stringify(fullRequest?.schema || {}, null, 4)
                     );
                   }}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
@@ -223,9 +240,14 @@ const RequestDiv = (props: RequestDivProps) => {
         </div>
       }
     >
-      {request ? (
+      {isLoadingFullRequest ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Muted>Loading full request details...</Muted>
+          <LoadingAnimation />
+        </div>
+      ) : fullRequest ? (
         <RequestRow
-          request={request}
+          request={fullRequest}
           properties={properties}
           open={open}
           promptData={promptDataQuery.data}

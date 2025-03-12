@@ -1090,6 +1090,7 @@ Json: JsonObject;
       includeInputs?: boolean;
       isPartOfExperiment?: boolean;
       isScored?: boolean;
+      previewOnly?: boolean;
     };
     ResultSuccess_HeliconeRequest_: {
       data: components["schemas"]["HeliconeRequest"];

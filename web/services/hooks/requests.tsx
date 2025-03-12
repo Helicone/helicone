@@ -80,6 +80,64 @@ export const useGetRequestWithBodies = (requestId: string) => {
   });
 };
 
+export const useGetRequestsWithPreviewBodies = (
+  currentPage: number,
+  currentPageSize: number,
+  advancedFilter: FilterNode,
+  sortLeaf: SortLeafRequest,
+  isLive: boolean = false,
+  isCached: boolean = false
+) => {
+  const org = useOrg();
+
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: [
+      "requestsPreviewData",
+      currentPage,
+      currentPageSize,
+      advancedFilter,
+      sortLeaf,
+      isCached,
+      org?.currentOrg?.id,
+    ],
+    queryFn: async (query) => {
+      const currentPage = query.queryKey[1] as number;
+      const currentPageSize = query.queryKey[2] as number;
+      const advancedFilter = query.queryKey[3];
+      const sortLeaf = query.queryKey[4];
+      const isCached = query.queryKey[5];
+      const orgId = query.queryKey[6] as string;
+      const jawn = getJawnClient(orgId);
+
+      const response = await jawn.POST("/v1/request/query-clickhouse", {
+        body: {
+          filter: advancedFilter as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf as any,
+          isCached: isCached as any,
+          previewOnly: true,
+        },
+      });
+
+      return response.data as Result<HeliconeRequest[], string>;
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: isLive ? 1_000 : false,
+    keepPreviousData: true,
+  });
+
+  const requests = useMemo(() => data?.data ?? [], [data]);
+  console.log("requests", requests);
+
+  return {
+    isLoading: isLoading,
+    refetch,
+    isRefetching,
+    requests,
+  };
+};
+
 export const useGetRequestsWithBodies = (
   currentPage: number,
   currentPageSize: number,
@@ -192,7 +250,7 @@ const useGetRequests = (
   isLive: boolean = false
 ) => {
   return {
-    requests: useGetRequestsWithBodies(
+    requests: useGetRequestsWithPreviewBodies(
       currentPage,
       currentPageSize,
       advancedFilter,

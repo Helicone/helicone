@@ -2713,6 +2713,9 @@
 					},
 					"isScored": {
 						"type": "boolean"
+					},
+					"previewOnly": {
+						"type": "boolean"
 					}
 				},
 				"required": [
