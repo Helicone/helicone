@@ -1336,7 +1336,7 @@ async function pullPromptAndRunCompletion() {
       </div>
 
       {/* Auto-improve Popup */}
-      {promptId && state.version && (
+      {promptId && !!state.version && (
         <UniversalPopup
           title="Auto-Improve (Beta)"
           width="w-full max-w-7xl"
@@ -1407,9 +1407,7 @@ async function pullPromptAndRunCompletion() {
             />
           </CustomScrollbar>
         </ResizablePanel>
-
         <ResizableHandle />
-
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
