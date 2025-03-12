@@ -1,5 +1,6 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
+import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -12,7 +13,6 @@ import {
 import { TimeFilter } from "@/types/timeFilter";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
@@ -42,23 +42,22 @@ import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
-import RequestCard from "./requestCard";
-import RequestDiv from "./requestDiv";
-import StreamWarning from "./StreamWarning";
-import TableFooter from "./tableFooter";
-import UnauthorizedView from "./UnauthorizedView";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
-import { Row } from "@/components/layout/common";
-import RequestsEmptyState from "./RequestsEmptyState";
 import {
   getMockFilterMap,
   getMockProperties,
   getMockRequestCount,
   getMockRequests,
 } from "./mockRequestsData";
+import RequestCard from "./requestCard";
+import RequestDiv from "./requestDiv";
+import RequestsEmptyState from "./RequestsEmptyState";
+import StreamWarning from "./StreamWarning";
+import TableFooter from "./tableFooter";
+import UnauthorizedView from "./UnauthorizedView";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -160,9 +159,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     organizationLayout,
     organizationLayoutAvailable,
   } = props;
+  const router = useRouter();
   const initialLoadRef = useRef(true);
   const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
-  const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
   const [currFilter, setCurrFilter] = useState(
@@ -196,27 +195,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  const encodeFilters = (filters: UIFilterRowTree): string => {
-    const encode = (node: UIFilterRowTree): any => {
-      if (isFilterRowNode(node)) {
-        return {
-          type: "node",
-          operator: node.operator,
-          rows: node.rows.map(encode),
-        };
-      } else {
-        return {
-          type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
-        };
-      }
-    };
-
-    return JSON.stringify(encode(filters));
-  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -281,7 +259,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const timeRange = useMemo(getTimeRange, []);
+  const timeRange = useMemo(getTimeRange, [searchParams]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -360,9 +338,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequest, selectedData]);
 
-  //convert this using useCallback
-
-  // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
     const decodeFilter = (encoded: any): UIFilterRowTree => {
       if (encoded.type === "node") {
@@ -428,9 +403,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters]);
+  }, [isDataLoading, filterMap, getAdvancedFilters]);
 
-  // TODO
   useEffect(() => {
     if (
       !isFilterRowNode(advancedFilters) ||
@@ -457,11 +431,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [advancedFilters, filterMap, userId]);
 
-  const userFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
+  const userFilterMapIndex = useMemo(
+    () =>
+      filterMap.findIndex(
+        (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
+      ),
+    [filterMap]
   );
 
-  // TODO
   useEffect(() => {
     if (rateLimited) {
       if (userFilterMapIndex === -1) {
@@ -502,8 +479,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
 
-  const router = useRouter();
-
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -530,39 +505,42 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [router.query.page, page]);
 
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
-    if (key === "custom") {
-      const [start, end] = value.split("_");
-      const filter: FilterNode = {
-        left: {
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+  const onTimeSelectHandler = useCallback(
+    (key: TimeInterval, value: string) => {
+      const tableName = getTableName(isCached);
+      const createdAtColumn = getCreatedAtColumn(isCached);
+      if (key === "custom") {
+        const [start, end] = value.split("_");
+        const filter: FilterNode = {
+          left: {
+            [tableName]: {
+              [createdAtColumn]: {
+                gte: new Date(start).toISOString(),
+              },
             },
           },
-        },
-        operator: "and",
-        right: {
-          [tableName]: {
-            [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+          operator: "and",
+          right: {
+            [tableName]: {
+              [createdAtColumn]: {
+                lte: new Date(end).toISOString(),
+              },
             },
           },
-        },
-      };
-      setTimeFilter(filter);
-    } else {
-      setTimeFilter({
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+        };
+        setTimeFilter(filter);
+      } else {
+        setTimeFilter({
+          [tableName]: {
+            [createdAtColumn]: {
+              gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+            },
           },
-        },
-      });
-    }
-  };
+        });
+      }
+    },
+    [isCached, setTimeFilter]
+  );
 
   const columnsWithProperties = useMemo(() => {
     const initialColumns = getInitialColumns(isCached);
@@ -639,6 +617,27 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
 
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      const encodeFilters = (filtersToEncode: UIFilterRowTree): string => {
+        const encode = (node: UIFilterRowTree): any => {
+          if (isFilterRowNode(node)) {
+            return {
+              type: "node",
+              operator: node.operator,
+              rows: node.rows.map(encode),
+            };
+          } else {
+            return {
+              type: "leaf",
+              filter: `${filterMap[node.filterMapIdx].label}:${
+                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+              }:${encodeURIComponent(node.value)}`,
+            };
+          }
+        };
+
+        return JSON.stringify(encode(filtersToEncode));
+      };
+
       setAdvancedFilters(filters);
       if (
         layoutFilterId === null ||
@@ -650,7 +649,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         searchParams.set("filters", currentAdvancedFilters);
       }
     },
-    [searchParams]
+    [searchParams, filterMap]
   );
 
   const {
@@ -692,7 +691,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext]);
 
   return (
     <>
