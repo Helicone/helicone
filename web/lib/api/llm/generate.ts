@@ -1,9 +1,10 @@
-import { PROVIDER_MODELS } from "@/utils/generate";
+import { modelMapping } from "packages/cost/unified/models";
+import { Provider } from "packages/cost/unified/types";
 import { Message } from "packages/llm-mapper/types";
 import { z } from "zod";
 
 export interface GenerateParams {
-  provider: keyof typeof PROVIDER_MODELS;
+  provider: Provider;
   model: string;
   messages: Message[];
   temperature?: number;
@@ -15,7 +16,7 @@ export interface GenerateParams {
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
   includeReasoning?: boolean;
-  reasoningEffort?: "low" | "medium" | "high";
+  reasoning_effort?: "low" | "medium" | "high";
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
@@ -25,13 +26,44 @@ export type GenerateResponse = string | { content: string; reasoning: string };
 export async function generate<T extends object | undefined = undefined>(
   params: GenerateParams
 ): Promise<T extends object ? T : GenerateResponse> {
-  const providerConfig =
-    PROVIDER_MODELS[params.provider as keyof typeof PROVIDER_MODELS];
-  if (!providerConfig) {
-    throw new Error(`Provider "${params.provider}" not found`);
+  // Find the OpenRouter model string for the given model
+  let openRouterModelString = params.model;
+
+  // Search through all creators and their models to find the OpenRouter model string
+  let foundMatch = false;
+  for (const creator of Object.keys(modelMapping) as Array<
+    keyof typeof modelMapping
+  >) {
+    if (foundMatch) break;
+    for (const modelName of Object.keys(modelMapping[creator])) {
+      const modelConfig = modelMapping[creator][modelName];
+
+      // Find the provider model that matches our model string
+      const providerModel = modelConfig.providers.find(
+        (pm) => pm.modelString === params.model
+      );
+
+      if (providerModel) {
+        // If we found a match, look for the OpenRouter model string
+        const openRouterProvider = modelConfig.providers.find(
+          (pm) => pm.provider === "OPENROUTER"
+        );
+
+        if (openRouterProvider) {
+          openRouterModelString = openRouterProvider.modelString;
+          foundMatch = true;
+          break;
+        }
+      }
+    }
   }
-  // OpenRouter requires the model to be in the format of provider/model
-  params.model = `${providerConfig.openrouterDirectory}/${params.model}`;
+
+  // Always use OpenRouter as the provider
+  const modifiedParams = {
+    ...params,
+    provider: "OPENROUTER" as Provider,
+    model: openRouterModelString,
+  };
 
   const response = await fetch("/api/llm", {
     method: "POST",
@@ -40,7 +72,7 @@ export async function generate<T extends object | undefined = undefined>(
       "x-cancel": "0",
     },
     body: JSON.stringify({
-      ...params,
+      ...modifiedParams,
       stream: !!params.stream,
     }),
   });

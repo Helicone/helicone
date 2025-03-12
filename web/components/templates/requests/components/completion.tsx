@@ -91,7 +91,9 @@ export const Completion = (props: CompletionProps) => {
                 Request
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {removeLeadingWhitespace(mappedRequest.preview.request)}
+                {removeLeadingWhitespace(
+                  mappedRequest.preview.fullRequestText?.(true) ?? ""
+                )}
               </p>
             </div>
             <div className="flex flex-col space-y-2 p-4">
@@ -99,8 +101,9 @@ export const Completion = (props: CompletionProps) => {
                 Response
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {mappedRequest.preview.response &&
-                  removeLeadingWhitespace(mappedRequest.preview.response)}
+                {removeLeadingWhitespace(
+                  mappedRequest.preview.fullResponseText?.(true) ?? ""
+                )}
                 {renderImageRow()}
               </p>
             </div>

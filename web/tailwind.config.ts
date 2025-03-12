@@ -112,11 +112,16 @@ export default {
         ring: "hsl(var(--ring))",
         // Chart Colors
         chart: {
-          1: "hsl(var(--chart-1))",
-          2: "hsl(var(--chart-2))",
-          3: "hsl(var(--chart-3))",
-          4: "hsl(var(--chart-4))",
-          5: "hsl(var(--chart-5))",
+          1: "oklch(var(--chart-1))",
+          2: "oklch(var(--chart-2))",
+          3: "oklch(var(--chart-3))",
+          4: "oklch(var(--chart-4))",
+          5: "oklch(var(--chart-5))",
+          6: "oklch(var(--chart-6))",
+          7: "oklch(var(--chart-7))",
+          8: "oklch(var(--chart-8))",
+          9: "oklch(var(--chart-9))",
+          10: "oklch(var(--chart-10))",
         },
         // Sidebar Colors
         sidebar: {

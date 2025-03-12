@@ -39,6 +39,9 @@ export interface paths {
   "/v1/evaluator/lastmile/test": {
     post: operations["TestLastMileEvaluator"];
   };
+  "/v1/evaluator/{evaluatorId}/stats": {
+    get: operations["GetEvaluatorStats"];
+  };
   "/v2/experiment/create/empty": {
     post: operations["CreateEmptyExperiment"];
   };
@@ -535,6 +538,30 @@ export interface components {
       /** @enum {string} */
       _type: "faithfulness";
     });
+    EvaluatorStats: {
+      /** Format: double */
+      averageScore: number;
+      /** Format: double */
+      totalUses: number;
+      /** @enum {string} */
+      recentTrend: "up" | "down" | "stable";
+      scoreDistribution: {
+          /** Format: double */
+          count: number;
+          range: string;
+        }[];
+      timeSeriesData: {
+          /** Format: double */
+          value: number;
+          date: string;
+        }[];
+    };
+    ResultSuccess_EvaluatorStats_: {
+      data: components["schemas"]["EvaluatorStats"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -732,35 +759,44 @@ Json: JsonObject;
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
-      model?: string;
       provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
-      input?: string | string[];
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
       temperature?: number | null;
       /** Format: double */
       top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
       stream?: boolean | null;
       /** Format: double */
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
       /** @enum {string|null} */
       reasoning_effort?: "low" | "medium" | "high" | null;
-      /** Format: double */
-      n?: number | null;
-      stop?: string[] | null;
-      messages?: components["schemas"]["Message"][] | null;
       tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
       tool_choice?: {
         name?: string;
         /** @enum {string} */
-        type: "auto" | "none" | "tool";
+        type: "none" | "auto" | "any" | "tool";
+      };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
     };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
@@ -2435,6 +2471,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__score-number--input-string--output-string--ground_truth_63_-string_.string_"];
+        };
+      };
+    };
+  };
+  GetEvaluatorStats: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorStats.string_"];
         };
       };
     };

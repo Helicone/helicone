@@ -1,4 +1,3 @@
-import useOnboardingContext from "@/components/layout/onboardingContext";
 import ScoresGraph from "./ScoresGraph";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -60,13 +59,6 @@ const ScoresGraphContainer = ({
   useEffect(() => {
     refetch();
   }, [promptVersions]);
-
-  const { updatePointerPosition } = useOnboardingContext();
-  useEffect(() => {
-    if (!isLoading) {
-      updatePointerPosition();
-    }
-  }, [isLoading]);
 
   if (isLoading) {
     return <div>Loading...</div>; // Or your loading component
