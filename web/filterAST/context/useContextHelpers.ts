@@ -1,31 +1,29 @@
-import { FilterExpression } from "@/filterAST";
-import { useFilterStore } from "@/filterAST/store/filterStore";
+import {
+  FilterExpression,
+  useFilterActions,
+  useFilterNavigation,
+} from "@/filterAST";
+import { FilterState, useFilterStore } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { useAutoSaveFilter } from "./useAutoSaveFilter";
-import { StoreFilterType, useFilterCrud } from "./useFilterCrud";
+import { useAutoSaveFilter } from "../hooks/useAutoSaveFilter";
+import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 
 /**
  * Hook to manage saved filters for a specific page type
  */
-export const useFilterAST = (options?: {
-  autoSaveDelay?: number;
-  defaultFilterName?: string;
-}) => {
-  const { autoSaveDelay = 1000, defaultFilterName = "Untitled Filter" } =
-    options || {};
+export const useContextHelpers = ({
+  filterStore,
 
-  // Get filter state from Zustand store
-  const filterStore = useFilterStore();
-  const filterCrud = useFilterCrud();
+  filterCrud,
+}: {
+  filterStore: FilterState;
+  filterCrud: ReturnType<typeof useFilterCrud>;
+}) => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
-
-  /**
-   * Load a filter by ID
-   */
   const loadFilterById = useCallback(
     async (filterId: string) => {
       const filterToLoad = filterCrud.savedFilters.find(
@@ -46,35 +44,8 @@ export const useFilterAST = (options?: {
     [filterCrud, filterStore, pathname, searchParams, router]
   );
 
-  // Initial URL hook
-  useEffect(() => {
-    if (filterStore.initialFilterId && !filterStore.activeFilterId) {
-      loadFilterById(filterStore.initialFilterId);
-    }
-    const newInitialFilterId = searchParams?.get("filter_id");
-    if (newInitialFilterId) {
-      filterStore.setInitialFilterId(newInitialFilterId);
-    }
-  }, [searchParams, filterStore, loadFilterById]);
-
-  // Use the auto-save hook
-  useAutoSaveFilter({
-    activeFilterId: filterStore.activeFilterId,
-    hasUnsavedChanges: filterStore.hasUnsavedChanges,
-    filter: filterStore.filter,
-    savedFilters: filterCrud.savedFilters,
-    updateFilter: async (filter) => {
-      await filterCrud.updateFilter.mutateAsync(filter);
-      filterStore.setHasUnsavedChanges(false);
-    },
-    autoSaveDelay,
-  });
-
-  /**
-   * Save a new filter
-   */
   const saveFilter = async (
-    name: string = defaultFilterName,
+    name: string = "Untitled Filter",
     filter: FilterExpression
   ) => {
     // If we have an active filter ID, update it instead of creating a new one
@@ -153,19 +124,10 @@ export const useFilterAST = (options?: {
   }, [filterStore.activeFilterId]);
 
   return {
-    savedFilters: filterCrud.savedFilters,
-    isLoading: filterCrud.isLoading,
-    isRefetching: filterCrud.isRefetching,
-    refetch: filterCrud.refetch,
+    loadFilterById,
     saveFilter,
     deleteFilter,
-    updateFilter: updateFilterById,
-    getFilterById: filterCrud.getFilterById,
-    loadFilterById,
-    activeFilterId: filterStore.activeFilterId,
-    hasUnsavedChanges: filterStore.hasUnsavedChanges,
+    updateFilterById,
     getShareableUrl,
-    isSaving: filterCrud.isSaving,
-    isDeleting: filterCrud.isDeleting,
   };
 };

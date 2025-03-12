@@ -3,7 +3,7 @@ import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { P, Small } from "@/components/ui/typography";
 import { Trash2 } from "lucide-react";
-import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
+import { useFilterAST } from "@/filterAST/context/FilterContext";
 
 interface SavedFiltersListProps {
   onClose?: () => void;
@@ -13,38 +13,12 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
   onClose,
 }) => {
   const filterStore = useFilterStore();
-  const { savedFilters, isLoading, deleteFilter, isDeleting, refetch } =
-    useFilterAST();
-
-  // Load a saved filter
-  const handleLoadFilter = (filterId: string) => {
-    const filter = savedFilters.find((f) => f.id === filterId);
-    if (filter && filter.filter && filter.filter[0]) {
-      // Cast the filter to the expected type
-      const filterExpression = filter.filter[0] as any;
-      filterStore.setFilter(filterExpression);
-      if (onClose) onClose();
-    }
-  };
-
-  // Delete a saved filter
-  const handleDeleteFilter = async (filterId: string, e: React.MouseEvent) => {
-    console.log("deleting filter", filterId);
-    e.stopPropagation(); // Prevent triggering the load filter action
-    try {
-      await deleteFilter(filterId);
-      // Refetch to update the list
-      refetch();
-    } catch (error) {
-      console.error("Error deleting filter:", error);
-    }
-  };
-
-  if (isLoading) {
+  const { crud, helpers } = useFilterAST();
+  if (crud.isLoading) {
     return <P className="text-center py-4">Loading saved filters...</P>;
   }
 
-  if (savedFilters.length === 0) {
+  if (crud.savedFilters.length === 0) {
     return (
       <P className="text-center py-4 text-muted-foreground">
         No saved filters yet. Create and save a filter to see it here.
@@ -54,11 +28,11 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
 
   return (
     <div className="space-y-2 max-h-[300px] overflow-y-auto">
-      {savedFilters.map((filter) => (
+      {crud.savedFilters.map((filter) => (
         <div
           key={filter.id}
           className="p-2 border rounded-md hover:bg-accent cursor-pointer flex justify-between items-center"
-          onClick={() => handleLoadFilter(filter.id || "")}
+          onClick={() => helpers.loadFilterById(filter.id || "")}
         >
           <div>
             <P className="font-medium">{filter.name}</P>
@@ -71,8 +45,8 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => handleDeleteFilter(filter.id || "", e)}
-            disabled={isDeleting}
+            onClick={(e) => helpers.deleteFilter(filter.id || "")}
+            disabled={crud.isDeleting}
             className="opacity-50 hover:opacity-100"
           >
             <Trash2 size={16} />

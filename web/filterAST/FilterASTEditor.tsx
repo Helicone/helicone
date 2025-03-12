@@ -19,7 +19,7 @@ import SavedFiltersList from "./components/SavedFiltersList";
 
 // Import hooks
 import { useFilterActions } from "./hooks/useFilterActions";
-import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
+import { useFilterAST } from "./context/filterContext";
 
 // Define a default filter structure
 const DEFAULT_FILTER: AndExpression = {
@@ -39,7 +39,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   const filterStore = useFilterStore();
   const { saveDialogOpen, setSaveDialogOpen, hasActiveFilters, clearFilter } =
     useFilterActions();
-  const { savedFilters, isLoading } = useFilterAST();
+  const { crud } = useFilterAST();
   const [showSavedFilters, setShowSavedFilters] = useState(false);
 
   // Call the onFilterChange callback whenever the filter changes
@@ -84,9 +84,9 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
           <Button variant="outline" size="sm" onClick={toggleSavedFilters}>
             <BookOpen size={16} className="mr-1" />
             {showSavedFilters ? "Hide Saved" : "Saved Filters"}
-            {!showSavedFilters && savedFilters.length > 0 && (
+            {!showSavedFilters && crud.savedFilters.length > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {savedFilters.length}
+                {crud.savedFilters.length}
               </Badge>
             )}
           </Button>

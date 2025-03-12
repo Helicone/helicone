@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface SaveFilterDialogProps {
   open: boolean;
@@ -22,12 +22,12 @@ export const SaveFilterDialog: React.FC<SaveFilterDialogProps> = ({
 }) => {
   const [filterName, setFilterName] = useState("");
   const filterStore = useFilterStore();
-  const { saveFilter, isSaving } = useFilterAST();
+  const { helpers, crud } = useFilterAST();
 
   const handleSaveFilter = async () => {
     if (filterStore.filter && filterName.trim()) {
       try {
-        await saveFilter(filterName.trim(), filterStore.filter);
+        await helpers.saveFilter(filterName.trim(), filterStore.filter);
         setFilterName("");
         onOpenChange(false);
       } catch (error) {
@@ -58,9 +58,9 @@ export const SaveFilterDialog: React.FC<SaveFilterDialogProps> = ({
             </Button>
             <Button
               onClick={handleSaveFilter}
-              disabled={!filterName.trim() || isSaving}
+              disabled={!filterName.trim() || crud.isSaving}
             >
-              {isSaving ? "Saving..." : "Save"}
+              {crud.isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
