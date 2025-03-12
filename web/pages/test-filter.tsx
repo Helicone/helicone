@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import FilterASTEditor from "@/filterAST/FilterASTEditor";
-import { H1, H4, P } from "@/components/ui/typography";
+import { H1, H4, P, Small } from "@/components/ui/typography";
 import {
   FilterExpression,
   ConditionExpression,
@@ -15,11 +15,33 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Info, RefreshCcw, Save, Trash2 } from "lucide-react";
-import FilterPills from "@/filterAST/components/FilterPills";
+import { Input } from "@/components/ui/input";
+import {
+  ChevronRight,
+  Info,
+  RefreshCcw,
+  Save,
+  Share2,
+  Trash2,
+  Check,
+  Clock,
+  Link,
+} from "lucide-react";
+import { useSavedFilters } from "@/services/hooks/useSavedFilters";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const TestFilterPage: React.FC = () => {
   const filterStore = useFilterStore();
@@ -27,16 +49,103 @@ const TestFilterPage: React.FC = () => {
     null
   );
   const [selectedTab, setSelectedTab] = useState("visual-editor");
-  const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
+  const [filterName, setFilterName] = useState("Untitled Filter");
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+
+  // Use the enhanced useSavedFilters hook
+  const {
+    savedFilters,
+    saveFilter,
+    deleteFilter,
+    loadFilterById,
+    activeFilterId,
+    hasUnsavedChanges,
+    getShareableUrl,
+    updateUrlWithFilterId,
+    isSaving,
+    isDeleting,
+  } = useSavedFilters();
 
   // Update local state whenever store filter changes
   useEffect(() => {
     setCurrentFilter(filterStore.filter);
   }, [filterStore.filter]);
 
+  // Update filter name when active filter changes
+  useEffect(() => {
+    if (activeFilterId) {
+      const activeFilter = savedFilters.find(
+        (filter) => filter.id === activeFilterId
+      );
+      if (activeFilter) {
+        setFilterName(activeFilter.name);
+      }
+    }
+  }, [activeFilterId, savedFilters]);
+
   // Handler for when the filter changes in the editor
   const handleFilterChange = (filter: FilterExpression) => {
     setCurrentFilter(filter);
+  };
+
+  // Handler for saving the current filter
+  const handleSaveFilter = async () => {
+    if (!currentFilter) return;
+
+    try {
+      await saveFilter(filterName, currentFilter);
+      toast.success("Filter saved", {
+        description: "Your filter has been saved successfully.",
+      });
+    } catch (error) {
+      toast.error("Error saving filter", {
+        description: "There was an error saving your filter.",
+      });
+    }
+  };
+
+  // Handler for deleting the current filter
+  const handleDeleteFilter = async () => {
+    if (!activeFilterId) return;
+
+    try {
+      await deleteFilter(activeFilterId);
+      filterStore.setFilter({
+        type: "and",
+        expressions: [],
+      });
+      setFilterName("Untitled Filter");
+      toast.success("Filter deleted", {
+        description: "Your filter has been deleted successfully.",
+      });
+    } catch (error) {
+      toast.error("Error deleting filter", {
+        description: "There was an error deleting your filter.",
+      });
+    }
+  };
+
+  // Handler for creating a new filter
+  const handleNewFilter = () => {
+    filterStore.clearActiveFilter();
+    updateUrlWithFilterId(null);
+    setFilterName("Untitled Filter");
+    filterStore.setFilter({
+      type: "and",
+      expressions: [],
+    });
+  };
+
+  // Handler for copying the shareable URL
+  const handleCopyShareableUrl = () => {
+    const url = getShareableUrl();
+    if (url) {
+      navigator.clipboard.writeText(url);
+      toast.success("URL copied", {
+        description: "Shareable filter URL has been copied to clipboard.",
+      });
+      setIsShareDialogOpen(false);
+    }
   };
 
   // Example of programmatically creating a simple filter
@@ -142,11 +251,6 @@ const TestFilterPage: React.FC = () => {
     });
   };
 
-  // Toggle filter collapse state
-  const toggleFilterCollapse = () => {
-    setIsFilterCollapsed(!isFilterCollapsed);
-  };
-
   return (
     <BasePageV2>
       <div className="container mx-auto py-8">
@@ -154,23 +258,20 @@ const TestFilterPage: React.FC = () => {
           <div>
             <H1>Filter Test Page</H1>
             <P className="text-muted-foreground">
-              Test and explore the new FilterASTEditor component with various
-              examples
+              Test and explore the new FilterASTEditor component with shareable
+              URLs
             </P>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={clearFilter}>
+            <Button variant="outline" size="sm" onClick={handleNewFilter}>
               <RefreshCcw size={16} className="mr-1" />
-              Reset
-            </Button>
-            <Button variant="outline" size="sm" onClick={toggleFilterCollapse}>
-              {isFilterCollapsed ? "Expand Filters" : "Collapse Filters"}
+              New Filter
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column - Filter examples */}
+          {/* Left column - Filter examples and saved filters */}
           <div className="lg:col-span-1 space-y-4">
             <Card>
               <CardHeader>
@@ -210,152 +311,224 @@ const TestFilterPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Saved Filters</CardTitle>
+                <CardDescription>Your previously saved filters</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {savedFilters.length === 0 ? (
+                  <P className="text-muted-foreground text-sm">
+                    No saved filters yet. Create and save a filter to see it
+                    here.
+                  </P>
+                ) : (
+                  <div className="space-y-2">
+                    {savedFilters.map((filter) => (
+                      <Button
+                        key={filter.id}
+                        variant={
+                          activeFilterId === filter.id ? "default" : "outline"
+                        }
+                        className="w-full justify-start"
+                        onClick={() => {
+                          if (filter.id) loadFilterById(filter.id);
+                        }}
+                      >
+                        <ChevronRight size={16} className="mr-2" />
+                        {filter.name}
+                        {activeFilterId === filter.id && (
+                          <Check
+                            size={16}
+                            className="ml-2 text-primary-foreground"
+                          />
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right columns - Editor and JSON view */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Filter Pills Component */}
-            {isFilterCollapsed ? (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Active Filters</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={toggleFilterCollapse}
-                    >
-                      Expand
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <FilterPills maxPills={10} />
-                </CardContent>
-              </Card>
-            ) : (
-              <Tabs defaultValue="visual-editor" onValueChange={setSelectedTab}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="visual-editor">Visual Editor</TabsTrigger>
-                  <TabsTrigger value="json-view">JSON View</TabsTrigger>
-                </TabsList>
-
-                <TabsContent
-                  value="visual-editor"
-                  className="border rounded-lg p-4"
-                >
-                  <FilterASTEditor
-                    onFilterChange={handleFilterChange}
-                    layoutPage="requests"
-                  />
-                </TabsContent>
-
-                <TabsContent
-                  value="json-view"
-                  className="border rounded-lg p-4"
-                >
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <H4>Filter JSON Structure</H4>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedTab("visual-editor")}
-                      >
-                        Edit in Visual Editor
-                      </Button>
-                    </div>
-
-                    <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md overflow-auto max-h-[500px]">
-                      <pre className="text-sm">
-                        {JSON.stringify(currentFilter, null, 2)}
-                      </pre>
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <Label>Filter Explanation</Label>
-                      <P className="text-muted-foreground text-sm mt-2">
-                        {currentFilter &&
-                        currentFilter.type === "and" &&
-                        currentFilter.expressions.length > 0 ? (
-                          <>
-                            This filter has {currentFilter.expressions.length}{" "}
-                            expression(s) combined with AND logic.
-                            {currentFilter.expressions.some(
-                              (expr) =>
-                                expr.type === "or" || expr.type === "and"
-                            ) &&
-                              " It contains nested groups for more complex filtering."}
-                          </>
-                        ) : currentFilter &&
-                          currentFilter.type === "or" &&
-                          currentFilter.expressions.length > 0 ? (
-                          <>
-                            This filter has {currentFilter.expressions.length}{" "}
-                            expression(s) combined with OR logic.
-                            {currentFilter.expressions.some(
-                              (expr) =>
-                                expr.type === "or" || expr.type === "and"
-                            ) &&
-                              " It contains nested groups for more complex filtering."}
-                          </>
-                        ) : (
-                          "No active filter or empty filter group."
-                        )}
-                      </P>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            )}
-          </div>
-        </div>
-
-        {/* FilterPills Demo Section */}
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Filter Pills Component Demo</CardTitle>
-              <CardDescription>
-                This demonstrates how the FilterPills component can be used in
-                other contexts, such as in a search bar or as a summary of
-                applied filters.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 border rounded-md bg-slate-50 dark:bg-slate-900">
-                <div className="mb-2">
-                  <Label>Example: Filter Pills in Search Bar</Label>
-                </div>
-                <div className="flex items-center gap-2 p-2 border rounded-md bg-white dark:bg-slate-800">
-                  <span className="text-muted-foreground">Search:</span>
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
                   <div className="flex-1">
-                    <FilterPills maxPills={3} className="py-1" />
+                    <Input
+                      value={filterName}
+                      onChange={(e) => setFilterName(e.target.value)}
+                      className="text-lg font-semibold border-none p-0 h-auto focus-visible:ring-0"
+                      placeholder="Filter Name"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Dialog
+                      open={isShareDialogOpen}
+                      onOpenChange={setIsShareDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!activeFilterId}
+                        >
+                          <Share2 size={16} className="mr-1" />
+                          Share
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Share Filter</DialogTitle>
+                          <DialogDescription>
+                            Copy this URL to share your filter with others
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex items-center space-x-2 mt-4">
+                          <Input value={getShareableUrl() || ""} readOnly />
+                          <Button onClick={handleCopyShareableUrl}>
+                            <Link size={16} className="mr-1" />
+                            Copy
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleSaveFilter}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <Clock size={16} className="mr-1 animate-spin" />
+                      ) : (
+                        <Save size={16} className="mr-1" />
+                      )}
+                      Save
+                    </Button>
+
+                    {activeFilterId && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleDeleteFilter}
+                        disabled={isDeleting}
+                      >
+                        <Trash2 size={16} className="mr-1" />
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
-              </div>
+                {hasUnsavedChanges && (
+                  <Small className="text-muted-foreground mt-1">
+                    <Clock size={12} className="inline mr-1" />
+                    Unsaved changes will be automatically saved
+                  </Small>
+                )}
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Tabs
+                  defaultValue="visual-editor"
+                  onValueChange={setSelectedTab}
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="visual-editor">
+                      Visual Editor
+                    </TabsTrigger>
+                    <TabsTrigger value="json-view">JSON View</TabsTrigger>
+                  </TabsList>
 
-              <div className="p-4 border rounded-md bg-slate-50 dark:bg-slate-900">
-                <div className="mb-2">
-                  <Label>Example: Filter Summary</Label>
-                </div>
-                <div className="p-3 border rounded-md bg-white dark:bg-slate-800">
-                  <P className="text-sm mb-2">Applied Filters:</P>
-                  <FilterPills maxPills={5} />
-                </div>
-              </div>
+                  <TabsContent
+                    value="visual-editor"
+                    className="border rounded-lg p-4 min-h-[400px]"
+                  >
+                    <FilterASTEditor
+                      onFilterChange={handleFilterChange}
+                      layoutPage="requests"
+                    />
+                  </TabsContent>
 
-              <div className="p-4 border rounded-md bg-slate-50 dark:bg-slate-900">
-                <div className="mb-2">
-                  <Label>Example: Inline Filter Pills</Label>
+                  <TabsContent
+                    value="json-view"
+                    className="border rounded-lg p-4 min-h-[400px]"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <H4>Filter JSON Structure</H4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedTab("visual-editor")}
+                        >
+                          Edit in Visual Editor
+                        </Button>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md overflow-auto max-h-[300px]">
+                        <pre className="text-sm">
+                          {JSON.stringify(currentFilter, null, 2)}
+                        </pre>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <Label>Filter Explanation</Label>
+                        <P className="text-muted-foreground text-sm mt-2">
+                          {currentFilter &&
+                          currentFilter.type === "and" &&
+                          currentFilter.expressions.length > 0 ? (
+                            <>
+                              This filter has {currentFilter.expressions.length}{" "}
+                              expression(s) combined with AND logic.
+                              {currentFilter.expressions.some(
+                                (expr) =>
+                                  expr.type === "or" || expr.type === "and"
+                              ) &&
+                                " It contains nested groups for more complex filtering."}
+                            </>
+                          ) : currentFilter &&
+                            currentFilter.type === "or" &&
+                            currentFilter.expressions.length > 0 ? (
+                            <>
+                              This filter has {currentFilter.expressions.length}{" "}
+                              expression(s) combined with OR logic.
+                              {currentFilter.expressions.some(
+                                (expr) =>
+                                  expr.type === "or" || expr.type === "and"
+                              ) &&
+                                " It contains nested groups for more complex filtering."}
+                            </>
+                          ) : (
+                            "No active filter or empty filter group."
+                          )}
+                        </P>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Info size={14} className="mr-2" />
+                  {activeFilterId ? (
+                    <>
+                      This filter is saved and has a shareable URL. Any changes
+                      will be automatically saved.
+                    </>
+                  ) : (
+                    <>
+                      This filter is not saved yet. Click the Save button to
+                      create a shareable URL.
+                    </>
+                  )}
                 </div>
-                <div className="flex items-center flex-wrap gap-2">
-                  <span className="text-sm font-medium">Filtered by:</span>
-                  <FilterPills maxPills={2} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardFooter>
+            </Card>
+          </div>
         </div>
       </div>
     </BasePageV2>

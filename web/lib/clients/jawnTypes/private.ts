@@ -3968,9 +3968,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": {
-          filters: unknown;
-        };
+        "application/json": components["schemas"]["StoreFilterType"];
       };
     };
     responses: {
