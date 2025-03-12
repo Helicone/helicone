@@ -1,7 +1,6 @@
 import { FilterExpression } from "@/filterAST";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";

@@ -1,102 +1,89 @@
-import { useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useFilterStore, StoreFilterType } from "../store/filterStore";
-import { FilterExpression } from "../filterAst";
-import { useTanStackSavedFilters } from "@/services/hooks/useTanStackSavedFilters";
+import { useEffect, useState, useCallback } from "react";
 
 /**
- * Hook that wraps the filter store and automatically handles URL synchronization
- * This provides a simpler API for components that need filter functionality with URL persistence
+ * A hook that combines filter state management with URL synchronization
+ * This provides a simpler API for components that need to work with filters
  */
-export const useUrlSyncedFilterStore = () => {
+export const useSyncURL = ({
+  loadFilterById,
+  activeFilterId,
+}: {
+  loadFilterById: (filterId: string) => Promise<boolean>;
+  activeFilterId: string | null;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const filterStore = useFilterStore();
-  const prevFilterIdRef = useRef<string | null>(null);
+  const [initialFilterId, setInitialFilterId] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const {
-    loadFilterById,
-    savedFilters,
-    isLoading: isLoadingSavedFilters,
-    isSaving: isSavingFilter,
-    isDeleting: isDeletingFilter,
-    saveFilter: tanStackSaveFilter,
-    deleteFilter: tanStackDeleteFilter,
-    refetch: fetchSavedFilters,
-  } = useTanStackSavedFilters();
-
-  const {
-    activeFilter,
-    hasUnsavedChanges,
-    setActiveFilter,
-    updateFilterExpression,
-    addFilterExpression,
-    removeFilterExpression,
-    updateFilterName,
-    clearActiveFilter,
-    setHasUnsavedChanges,
-  } = filterStore;
-
-  // Sync with URL on initial load and when URL changes
   useEffect(() => {
     if (!searchParams) return;
 
     const filterIdFromUrl = searchParams.get("filter_id");
-
-    // Only load if the filter ID has changed
-    if (filterIdFromUrl && filterIdFromUrl !== prevFilterIdRef.current) {
-      loadFilterById(filterIdFromUrl);
-      prevFilterIdRef.current = filterIdFromUrl;
-    } else if (!filterIdFromUrl && prevFilterIdRef.current) {
-      // URL filter ID was removed
-      clearActiveFilter();
-      prevFilterIdRef.current = null;
+    if (filterIdFromUrl) {
+      setInitialFilterId(filterIdFromUrl);
     }
-  }, [searchParams, loadFilterById, clearActiveFilter]);
+    setIsMounted(true);
+  }, [
+    activeFilterId,
+    initialFilterId,
+    loadFilterById,
+    searchParams,
+    isMounted,
+  ]);
 
-  // Update URL when active filter changes
-  useEffect(() => {
-    const currentFilterId = activeFilter?.id || null;
-
-    // Only update URL if the filter ID has changed
-    if (currentFilterId !== prevFilterIdRef.current) {
-      if (!searchParams || !router) return;
+  /**
+   * Utility function to manually update the URL with a filter ID
+   */
+  const updateUrlWithFilterId = useCallback(
+    (filterId: string | null) => {
+      if (!router || !searchParams) return;
 
       const params = new URLSearchParams(searchParams.toString());
 
-      if (currentFilterId) {
-        params.set("filter_id", currentFilterId);
+      if (filterId) {
+        params.set("filter_id", filterId);
       } else {
         params.delete("filter_id");
       }
 
-      // Update the URL without refreshing the page
       const newUrl = window.location.pathname + "?" + params.toString();
       router.replace(newUrl, { scroll: false });
-      prevFilterIdRef.current = currentFilterId;
+    },
+    [router, searchParams]
+  );
+
+  // Update URL when filter ID changes
+  useEffect(() => {
+    if (!searchParams || !router) return;
+    if (!isMounted) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    const currentFilterIdInUrl = params.get("filter_id");
+
+    // Only update URL if the filter ID has changed
+    if (activeFilterId !== currentFilterIdInUrl) {
+      if (activeFilterId) {
+        params.set("filter_id", activeFilterId);
+      } else {
+        params.delete("filter_id");
+      }
+
+      const newUrl = window.location.pathname + "?" + params.toString();
+      router.replace(newUrl, { scroll: false });
     }
-  }, [activeFilter, router, searchParams]);
+  }, [activeFilterId, router, searchParams, isMounted]);
 
+  // Load filter from URL on initial mount
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!initialFilterId) return;
+    loadFilterById(initialFilterId);
+  }, [initialFilterId, loadFilterById, isMounted]);
+
+  // Return utility function for manual URL updates
   return {
-    // Original store properties
-    activeFilter,
-    hasUnsavedChanges,
-    savedFilters,
-    isLoadingSavedFilters,
-    isSavingFilter,
-    isDeletingFilter,
-
-    loadFilterById,
-
-    // Original actions that don't need URL syncing
-    updateFilterExpression,
-    addFilterExpression,
-    removeFilterExpression,
-    updateFilterName,
-    setHasUnsavedChanges,
-    fetchSavedFilters,
-    getShareableUrl,
+    updateUrlWithFilterId,
   };
 };
-
-export default useUrlSyncedFilterStore;

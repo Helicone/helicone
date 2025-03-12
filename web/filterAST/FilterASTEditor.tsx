@@ -19,7 +19,7 @@ import SavedFiltersList from "./components/SavedFiltersList";
 
 // Import hooks
 import { useFilterActions } from "./hooks/useFilterActions";
-import { useSavedFilters } from "@/services/hooks/useSavedFilters";
+import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
 
 // Define a default filter structure
 const DEFAULT_FILTER: AndExpression = {

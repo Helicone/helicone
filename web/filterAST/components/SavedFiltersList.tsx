@@ -3,7 +3,7 @@ import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { P, Small } from "@/components/ui/typography";
 import { Trash2 } from "lucide-react";
-import { useSavedFilters } from "@/services/hooks/useSavedFilters";
+import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
 
 interface SavedFiltersListProps {
   onClose?: () => void;
@@ -58,7 +58,7 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
         <div
           key={filter.id}
           className="p-2 border rounded-md hover:bg-accent cursor-pointer flex justify-between items-center"
-          onClick={() => handleLoadFilter(filter.id)}
+          onClick={() => handleLoadFilter(filter.id || "")}
         >
           <div>
             <P className="font-medium">{filter.name}</P>
@@ -71,7 +71,7 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => handleDeleteFilter(filter.id, e)}
+            onClick={(e) => handleDeleteFilter(filter.id || "", e)}
             disabled={isDeleting}
             className="opacity-50 hover:opacity-100"
           >

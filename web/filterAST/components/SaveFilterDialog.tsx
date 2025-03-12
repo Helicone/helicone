@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSavedFilters } from "@/services/hooks/useSavedFilters";
+import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
 
 interface SaveFilterDialogProps {
   open: boolean;
