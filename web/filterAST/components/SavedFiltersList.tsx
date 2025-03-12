@@ -3,7 +3,7 @@ import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { P, Small } from "@/components/ui/typography";
 import { Trash2 } from "lucide-react";
-import { useFilterAST } from "@/filterAST/context/FilterContext";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface SavedFiltersListProps {
   onClose?: () => void;

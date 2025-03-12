@@ -242,7 +242,7 @@ export const TestFilterPage: React.FC = () => {
           </P>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleNewFilter}>
+          <Button variant="outline" size="sm" onClick={helpers.newEmptyFilter}>
             <RefreshCcw size={16} className="mr-1" />
             New Filter
           </Button>

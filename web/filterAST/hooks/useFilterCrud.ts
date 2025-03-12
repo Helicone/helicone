@@ -56,6 +56,7 @@ export const useFilterCrud = () => {
 
   // Create filter mutation
   const createFilter = useMutation({
+    mutationKey: ["createFilter", orgId],
     mutationFn: async (filter: StoreFilterType) => {
       if (!orgId) {
         throw new Error("Organization ID is required");
@@ -68,6 +69,7 @@ export const useFilterCrud = () => {
       if (response.data?.error) {
         throw new Error(response.data.error);
       }
+      await refetch();
 
       return response.data as CreateFilterResponse;
     },
@@ -78,6 +80,7 @@ export const useFilterCrud = () => {
 
   // Update filter mutation
   const updateFilter = useMutation({
+    mutationKey: ["updateFilter", orgId],
     mutationFn: async (params: StoreFilterType) => {
       const response = await jawn.PATCH("/v1/filter/{id}", {
         params: { path: { id: params.id || "" } },
@@ -95,11 +98,13 @@ export const useFilterCrud = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedFilters", orgId] });
+      refetch();
     },
   });
 
   // Delete filter mutation
   const deleteFilter = useMutation({
+    mutationKey: ["deleteFilter", orgId],
     mutationFn: async (id: string) => {
       const response = await jawn.DELETE("/v1/filter/{id}", {
         params: { path: { id } },
@@ -113,6 +118,7 @@ export const useFilterCrud = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedFilters", orgId] });
+      refetch();
     },
   });
 

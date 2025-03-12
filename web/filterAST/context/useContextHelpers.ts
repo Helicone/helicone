@@ -14,7 +14,6 @@ import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
  */
 export const useContextHelpers = ({
   filterStore,
-
   filterCrud,
 }: {
   filterStore: FilterState;
@@ -74,6 +73,22 @@ export const useContextHelpers = ({
     return result;
   };
 
+  const newEmptyFilter = async () => {
+    const result = await filterCrud.createFilter.mutateAsync({
+      name: "Untitled Filter",
+      filter: {
+        type: "and",
+        expressions: [],
+      },
+    });
+
+    if (result?.data?.id) {
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+      loadFilterById(result.data.id);
+    }
+
+    return result;
+  };
   /**
    * Delete a saved filter by ID
    */
@@ -126,6 +141,7 @@ export const useContextHelpers = ({
   return {
     loadFilterById,
     saveFilter,
+    newEmptyFilter,
     deleteFilter,
     updateFilterById,
     getShareableUrl,
