@@ -57,7 +57,7 @@ export function FAQ({
                   : "max-h-0 opacity-0 mt-0"
                   }`}
               >
-                <p className="text-slate-500 text-md leading-relaxed mb-3">{faq.answer}</p>
+                <div className="text-slate-500 text-md leading-relaxed mb-3">{faq.answer}</div>
               </div>
             </div>
             {index < items.length - 1 && (
