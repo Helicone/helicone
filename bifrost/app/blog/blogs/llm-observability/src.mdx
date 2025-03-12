@@ -1,22 +1,42 @@
-Building reliable LLM applications in production is incredibly challenging. You've probably heard of the term. So, what is LLM observability? How does it differ from traditional observability? Why is it so important for production environments?
+Building reliable LLM applications in production is incredibly challenging. 
 
-We will answer these questions for you today. Let's dive in!
+Today's LLM applications aren't just experimental. They're customer-facing and handle sensitive information, make important decisions, and represent your brand. With many emerging Large Language Model (LLM) applications, effective monitoring becomes a competitive advantage.
 
 ![Helicone: What is LLM Observability and Monitoring](/static/blog/llm-observability-cover.webp)
 
+Today, we'll walk you through why observability is important for production applications, how to use observability tools to monitor LLM performance.
+
+Let's dive in!
+
+<TableOfContents excludeHeadings={[
+  "Join Helicone", 
+  "Table of Contents", 
+  "Get Started with Helicone",
+  "1. Request and Response Logging",
+  "2. Online and Offline Evaluation",
+  "3. Performance Monitoring and Tracing",
+  "4. Anomaly Detection and Feedback Loops",
+  "5. Security and Compliance",
+  "1. Use Prompting Techniques to Reduce Hallucinations",
+  "2. Preventing Prompt Injections",
+  "3. Caching to Improve Performance and Latency",
+  "4. Managing and Optimizing Costs",
+  "5. Continuously Improving the Prompt"
+]} />
+
 ## What is LLM Observability?
 
-LLM Observability refers to the comprehensive monitoring, tracing, and analysis of LLM-powered applications. It involves gaining deep insights into every aspect of the system, from <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, to monitoring model responses and user interactions, to evaluating the LLM outputs.
+LLM observability refers to the comprehensive monitoring, tracing, and analysis of LLM-powered applications. It involves gaining deep insights into every aspect of the system, from <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, to monitoring model responses, to <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">testing prompts</a> and evaluating the LLM outputs.
 
-As your product transitions from prototype to production, monitoring key performance metrics helps you to continuously detect anomalies, such as hallucinations and ethical breaches, and fine-tune your model for better performance on the go.
+As you build your product from prototype to production, monitoring LLM metrics helps you to detect prompt injections, hallucinations and poor user experience, allowing you to improve your prompts for better performance on the go.
 
 ## LLM Observability vs. Traditional Observability
 
-LLM observability deals with highly complex models that contain billions of parameters, making it challenging to understand how prompt changes affect the model's behavior.
+LLMs are highly complex and contain billions of parameters, making it challenging to understand how prompt changes affect the model's behavior.
 
-While traditional observability focuses on system logs and performance metrics, LLM observability deals with model inputs/outputs, prompts, and embeddings.
+While traditional observability like <a href="https://www.helicone.ai/blog/best-datadog-alternative-for-llm" target="_blank" rel="noopener">Datadog</a> focuses on system logs and performance metrics, LLM observability deals with model inputs/outputs, prompts, and embeddings.
 
-Another difference is the non-deterministic nature of LLMs. Traditional systems are often deterministic with **expected behaviors**, whereas LLMs frequently produce **variable outputs**, making evaluation more nuanced.
+Another difference is the **non-deterministic nature of LLMs**. Traditional systems are often deterministic with expected behaviors, whereas LLMs frequently produce variable outputs, making evaluation more nuanced.
 
 **In summary:**
 
@@ -28,13 +48,22 @@ Another difference is the non-deterministic nature of LLMs. Traditional systems 
 | **Evaluation**        | Error rates, exceptions, latency                          | Error rate, cost, latency, but also response quality and user satisfaction                                                                |
 | **Tooling**           | APMs, log aggregators, monitoring dashboards like Datadog | Specialized tools for model monitoring and prompt analysis like <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> |
 
+
+## Why Do We Need LLM Observability?
+
+- **Understand model behavior**: Gain visibility into how the model processes inputs and generates outputs.
+- **Diagnose issues**: Quickly identify and resolve errors, bottlenecks, and anomalies.
+- **Optimize user experience**: Enhance latency and throughput by fine-tuning model parameters and infrastructure.
+
 ## The Pillars of LLM Observability
 
 ### 1. Request and Response Logging
 
 At the core of LLM observability is the detailed logging of **requests** and their corresponding **responses**. Logging them allows you to analyze patterns and understand the context which influenced the outputs.
 
-Monitoring tools typically captures other useful metrics like latency, costs, Time to First Token (TTFT), and more. Tracking conversation histories helps you understand the model's behavior over time.
+LLM monitoring tools typically captures other useful metrics like latency, costs, Time to First Token (TTFT), and more. Tracking conversation histories, especially in multi-step workflows like an AI agent or a RAG application, helps you understand the user behavior and model's performance over time.
+
+You might be interested in our blog on <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">How to Slash LLM Costs</a>. 
 
 ### 2. Online and Offline Evaluation
 
@@ -48,40 +77,36 @@ Once your model's output accuracy reaches an acceptable level, the next thing to
 
 For example, tracking latency helps identify any bottlenecks in response generation. Tracking errors such as API failures or exceptions tells you how reliable your AI application is.
 
-Tracing your multi-step workflows helps you debug faster and gives you a deeper understanding of your user's journey.
+<a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Tracing your multi-step workflows</a> helps you debug faster and gives you a deeper understanding of your user's journey.
+
+We wrote up some useful examples for <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">how to debug chatbots and AI agents with Sessions</a>.
+
 
 ### 4. Anomaly Detection and Feedback Loops
 
-Detecting anomalies, like unusual model behaviors or outputs indicating hallucinations or biases, is essential for maintaining application integrity. Implementing mechanisms to scan for inappropriate or non-compliant content helps prevent ethical issues. Feedback loops, where users can provide input on responses, facilitate iterative improvement over time.
+Detecting anomalies, like unusual model behaviors or outputs indicating hallucinations or biases, is essential for maintaining application integrity. 
+
+Implementing mechanisms to scan for inappropriate or non-compliant content helps prevent ethical issues. Feedback loops, where users can provide input on responses, facilitate iterative improvement over time.
 
 ### 5. Security and Compliance
 
-Ensuring the security of your LLM application involves implementing strict access controls to regulate who can interact with model inputs and outputs. Protecting sensitive data requires compliance with regulations like GDPR or HIPAA. Maintaining detailed audit trails promotes accountability and aids in meeting compliance requirements, building user trust.
+Ensuring the security of your LLM application involves implementing strict access controls to regulate who can interact with model inputs and outputs. Protecting sensitive data requires compliance with regulations like GDPR or HIPAA. 
 
-## Why do we need LLM Observability?
-
-- **Understand model behavior**: Gain visibility into how the model processes inputs and generates outputs.
-- **Diagnose issues**: Quickly identify and resolve errors, bottlenecks, and anomalies.
-- **Optimize performance**: Enhance latency and throughput by fine-tuning model parameters and infrastructure.
-- **Improve user experience**: Tailor responses to meet user expectations and improve satisfaction.
-- **Ensure compliance**: Maintain data privacy and adhere to regulatory requirements.
+Maintaining detailed audit trails promotes accountability and aids in meeting compliance requirements, building user trust.
 
 ## Best Practices for Monitoring LLM Applications
 
-Deploying LLMs in production comes with its set of challenges. We'll walk through some of the most common ones and how you can address them with Helicone. Let's dive in!
+Deploying LLMs in production comes with its set of challenges. We'll walk through some of the most common ones and how you can address them with Helicone. 
 
-### 🧠 Use Prompting Techniques to Reduce Hallucinations
+### 1. Use Prompting Techniques to Reduce Hallucinations
 
-LLMs sometimes generate outputs that sound plausible but are factually incorrect - also known as hallucination. As your app usage goes up, hallucinations can happen frequently and undermine your user's trust.
+LLMs sometimes generate inaccurate outputs that sound plausible - also known as hallucination. Hallucinations can happen frequently and undermine your user's trust as your usage goes up.
 
-The good news is, you can mitigate this by:
+The good news is, you can mitigate this by <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, or by <a href="https://docs.helicone.ai/features/experiments#4-create-and-run-custom-evaluators" target="_blank" rel="noopener">evaluating your LLM outputs</a> in Helicone.
 
-- Designing your prompts carefully with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, or
-- Setting up evaluators to monitor your outputs in Helicone.
+### 2. Preventing Prompt Injections
 
-### 🔒 Preventing Prompt Injections
-
-Malicious users can manipulate their inputs to trick your model into revealing sensitive information or take risky actions. We dive deeper into this topic in the <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">How to prevent prompt injections</a> blog.
+Malicious users can manipulate their inputs to trick your model into revealing sensitive information or take risky actions. We dive deeper into this topic in the <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">how to prevent prompt injections</a> blog.
 
 **On a high-level, you can prevent injections by**:
 
@@ -89,13 +114,13 @@ Malicious users can manipulate their inputs to trick your model into revealing s
 - Blocking inappropriate or malicious responses.
 - Using tools like Helicone or PromptArmor for detection.
 
-### ⚡ Caching to Improve Performance and Latency
+### 3. Caching to Improve Performance and Latency
 
 Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
 
 Latency can have the most impact on the user experience. Helicone allows you to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">cache responses</a> on the edge, so that you can serve cached responses immediately without invoking the LLM API, reducing costs at the same time.
 
-### 💰 Managing and Optimizing Costs
+### 4. Managing and Optimizing Costs
 
 It’s important to know exactly what might be drilling a hole in your operational cost. LLM monitoring can improve cost savings by tracking expenses for every model interaction, from the initial prompt to the final response.
 
@@ -107,17 +132,19 @@ It’s important to know exactly what might be drilling a hole in your operation
 
 For more effective cost optimization strategies, check out our blog on <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>.
 
-### 🔄 Continuously Improving the Prompt
+### 5. Continuously Improving the Prompt
 
 As models evolve, it's important to continuously test and audit your prompts to ensure they're performing as expected.
 
-You should experiment with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. You should also evaluate against key metrics that's important to your business.
+You should <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">experiment</a> with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. You should also evaluate against key metrics that's important to your business.
 
 <CallToAction
-  title="Get Started with Helicone"
-  description="Start monitoring your LLM applications with Helicone with just 1 line of code."
-  buttonText="Get Started"
-  buttonLink="https://us.helicone.ai/signup?demo=true"
+  title="Getting Started with Helicone in 1 Line of Code"
+  description="Integrate Helicone with any LLM provider using proxy or async methods."
+  primaryButtonText="Get Started with Proxy"
+  primaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
+  secondaryButtonText="Get Started with Async"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/openllmetry"
 >
 ```js
 import OpenAI from "openai";
@@ -126,38 +153,23 @@ const openai = new OpenAI({
 apiKey: process.env.OPENAI_API_KEY,
 baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
 });
-
 ```
 </CallToAction>
 
-## Setting Up Real-time Alerts in Helicone
+## Effective LLM Observability Tools
 
-Setting up real-time alerts helps you get instant notifications on critical issues, so that your team can respond quickly and improve the model's responsiveness.
+As organizations increasingly integrate LLMs into mission-critical business functions, observability platforms have transformed from basic logging utilities into comprehensive ecosystems supporting the entire LLM lifecycle. 
 
-You can configure <a href="https://www.helicone.ai/changelog/20240910-slack-alerts" target="_blank" rel="noopener">Slack or email alerts</a> in Helicone to send real-time updates by:
-
-- **Defining threshold metrics**: Add critical metrics to a watchlist and set thresholds for triggering notification events.
-- **Monitoring LLM drift**: Set up routine reports on key performance metrics to gain insight into model behavioral changes over time.
-- **Detecting anomalies**: Train robust evaluators to identify unusual patterns of behavior.
-- **Sending notifications**: Use webhooks to send alerts to dedicated communication channels
+<a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> is an open-source alternative to LangSmith. With impressive 2.3 billion processed requests, 3.2 trillion logged tokens, and 18.3 million tracked users—Helicone provide the visibility developers need to monitor, debug, and continuously improve their AI applications.
 
 
 ## Bottom Line
 
-Now, that you understand how to implement comprehensive LLM monitoring strategies, it’s time to put them into practice. Begin by setting up real-time alerts, tracking key metrics, experiment with different prompts and try out observability tools like Helicone to get more clarity into your LLM app performance.
+Now, that you understand how to implement comprehensive LLM monitoring strategies, it’s time to put them into practice. Begin by setting up real-time alerts, tracking key metrics, experiment with different prompts to get more clarity into your LLM app performance.
 
-At Helicone, we're committed to supporting you on this journey. Our solutions are tailored to address the specific needs of LLM applications, empowering you to focus on innovation rather than infrastructure.
-
-![Helicone](/static/blog/helicone_ad.webp)
-
-<style jsx>{`
-  .cta-button {
-    color: #0ea5e9;
-    text-decoration: none;
-    font-size: 1rem;
-    border-bottom: 1px solid #0ea5e9;
-  }
-`}</style>
+### You might find these useful: 
+- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a  >
+- <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging Chatbots and AI Agents with Sessions</a>
+- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
 
 <Questions />
-```
