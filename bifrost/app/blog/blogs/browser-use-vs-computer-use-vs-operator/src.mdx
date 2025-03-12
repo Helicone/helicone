@@ -193,39 +193,19 @@ All three platforms implement safety measures, but with different approaches:
 <FAQ items={[
     {
       question: "Can these tools access my personal accounts and data?",
-      answer: <>
-        Yes, if you authorize them. All three systems can log into websites, but they handle credentials differently:
-        <ul className="list-disc pl-5 mt-2">
-          <li>Browser Use: Can use your real browser profile with existing logins</li>
-          <li>Computer Use: Requires explicit credential input</li>
-          <li>Operator: Has a "takeover mode" for sensitive information</li>
-        </ul>
-      </>
+      answer: "Yes, if you authorize them. All three systems can log into websites, but they handle credentials differently. Browser Use can use your real browser profile with existing logins. Computer Use requires explicit credential input. Operator has a 'takeover mode' for sensitive information."
     },
     {
       question: "What happens if these tools make a mistake?",
-      answer: <>
-        Each handles errors differently:
-        <ul className="list-disc pl-5 mt-2">
-          <li>Browser Use: Provides detailed logs and screenshots for debugging</li>
-          <li>Computer Use: More likely to ask for human intervention</li>
-          <li>Operator: Built-in monitoring and confirmation steps</li>
-        </ul>
-      </>
+      answer: "Each handles errors differently: Browser Use provides detailed logs and screenshots for debugging. Computer Use is more likely to ask for human intervention. Operator has built-in monitoring and confirmation steps."
     },
     {
       question: "Which is most cost-effective?",
-      answer: <>
-        <strong>Browser Use</strong>. The self-hosted option costs only your compute resources, and even the cloud version's per-step pricing typically works out cheaper than token-based billing for complex tasks.
-      </>
+      answer: "Browser Use. The self-hosted option costs only your compute resources, and even the cloud version's per-step pricing typically works out cheaper than token-based billing for complex tasks."
     },
     {
       question: "Which is best for developers?",
-      answer: <>
-        <strong>Browser Use</strong>, hands down. The open-source nature, extensive customization options, and support for multiple LLMs make it the clear winner if you're writing code.
-        <br /><br />
-        The fact that you can self-host means no API rate limits or unexpected price increases.
-      </>
+      answer: "Browser Use, hands down. The open-source nature, extensive customization options, and support for multiple LLMs make it the clear winner if you're writing code. The fact that you can self-host means no API rate limits or unexpected price increases."
     }
   ]}
 />
