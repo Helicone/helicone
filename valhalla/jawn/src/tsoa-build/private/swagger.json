@@ -9940,6 +9940,51 @@
 						}
 					}
 				]
+			},
+			"delete": {
+				"operationId": "DeleteOrganizationLayout",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"dashboard",
+								"requests"
+							]
+						}
+					}
+				]
 			}
 		},
 		"/v1/organization/{organizationId}/members": {
@@ -10182,6 +10227,134 @@
 									"has_onboarded",
 									"name",
 									"onboarding_status"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/create_layout": {
+			"post": {
+				"operationId": "CreateOrganizationLayout",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationLayout.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"filters": {
+										"items": {
+											"$ref": "#/components/schemas/OrganizationFilter"
+										},
+										"type": "array"
+									},
+									"type": {
+										"type": "string",
+										"enum": [
+											"dashboard",
+											"requests"
+										]
+									}
+								},
+								"required": [
+									"filters",
+									"type"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/update_layout": {
+			"post": {
+				"operationId": "UpdateOrganizationLayout",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrganizationLayout.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"filters": {
+										"items": {
+											"$ref": "#/components/schemas/OrganizationFilter"
+										},
+										"type": "array"
+									},
+									"type": {
+										"type": "string",
+										"enum": [
+											"dashboard",
+											"requests"
+										]
+									}
+								},
+								"required": [
+									"filters",
+									"type"
 								],
 								"type": "object"
 							}

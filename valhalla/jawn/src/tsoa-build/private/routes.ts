@@ -4990,6 +4990,105 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/organization/:organizationId/create_layout',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController)),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController.prototype.createOrganizationLayout)),
+
+            async function OrganizationController_createOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"array","array":{"dataType":"refAlias","ref":"OrganizationFilter"},"required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}],"required":true}}},
+                    organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new OrganizationController();
+
+              await templateService.apiHandler({
+                methodName: 'createOrganizationLayout',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/v1/organization/:organizationId/layout',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController)),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController.prototype.deleteOrganizationLayout)),
+
+            async function OrganizationController_deleteOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
+                    type: {"in":"query","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}]},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new OrganizationController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteOrganizationLayout',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/organization/:organizationId/update_layout',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController)),
+            ...(fetchMiddlewares<RequestHandler>(OrganizationController.prototype.updateOrganizationLayout)),
+
+            async function OrganizationController_updateOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"array","array":{"dataType":"refAlias","ref":"OrganizationFilter"},"required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}],"required":true}}},
+                    organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new OrganizationController();
+
+              await templateService.apiHandler({
+                methodName: 'updateOrganizationLayout',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/v1/log/request',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(LogController)),

@@ -258,6 +258,7 @@ export interface paths {
   };
   "/v1/organization/{organizationId}/layout": {
     get: operations["GetOrganizationLayout"];
+    delete: operations["DeleteOrganizationLayout"];
   };
   "/v1/organization/{organizationId}/members": {
     get: operations["GetOrganizationMembers"];
@@ -276,6 +277,12 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
+  };
+  "/v1/organization/{organizationId}/create_layout": {
+    post: operations["CreateOrganizationLayout"];
+  };
+  "/v1/organization/{organizationId}/update_layout": {
+    post: operations["UpdateOrganizationLayout"];
   };
   "/v1/log/request": {
     post: operations["GetRequests"];
@@ -3741,6 +3748,24 @@ export interface operations {
       };
     };
   };
+  DeleteOrganizationLayout: {
+    parameters: {
+      query: {
+        type: "dashboard" | "requests";
+      };
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   GetOrganizationMembers: {
     parameters: {
       path: {
@@ -3837,6 +3862,54 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateOrganizationLayout: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          filters: components["schemas"]["OrganizationFilter"][];
+          /** @enum {string} */
+          type: "dashboard" | "requests";
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationLayout: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          filters: components["schemas"]["OrganizationFilter"][];
+          /** @enum {string} */
+          type: "dashboard" | "requests";
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
         };
       };
     };
