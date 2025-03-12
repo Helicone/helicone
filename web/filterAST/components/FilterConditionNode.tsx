@@ -136,8 +136,24 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   if (!filterDef) {
     return (
-      <div className="p-3 border rounded-md bg-card">
-        No filter definition found
+      <div className="p-3 border border-amber-300 rounded-md bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+            Invalid filter field: &quot;{condition.field.column || "empty"}
+            &quot;
+          </span>
+          <span className="text-xs text-amber-600 dark:text-amber-400">
+            Please select a valid field or remove this condition
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleRemove}
+          className="h-8 w-8 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+        >
+          <Trash2 size={16} />
+        </Button>
       </div>
     );
   }

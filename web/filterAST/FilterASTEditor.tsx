@@ -1,11 +1,10 @@
-import React from "react";
-import { useFilterUIDefinitions } from "./filterUIDefinitions/useFilterUIDefinitions";
-import { useFilterStore } from "./store/filterStore";
-import { FilterExpression, AndExpression } from "./filterAst";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { H4, P } from "@/components/ui/typography";
 import { Filter as FilterIcon, PlusCircle, Save, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { AndExpression, FilterExpression } from "./filterAst";
+import { useFilterStore } from "./store/filterStore";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
