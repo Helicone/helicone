@@ -15,7 +15,7 @@ export type FeatureId =
 
 // Define all possible subfeatures for each feature
 export const SUBFEATURES = {
-  prompts: ["versions"],
+  prompts: ["versions", "runs", "playground_runs"],
   experiments: ["test_cases", "variants"],
   evals: ["runs"],
   datasets: ["requests"],
@@ -63,6 +63,7 @@ export const SUBFEATURE_DISPLAY_NAMES: Record<SubfeatureId, string> = {
   versions: "Versions",
   test_cases: "Test Cases",
   variants: "Variants",
-  runs: "Evaluation Runs",
+  runs: "Prompt Runs",
+  playground_runs: "Playground Runs",
   requests: "Requests",
 };

@@ -90,6 +90,10 @@ import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -115,6 +119,20 @@ export default function PromptEditor({
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
+
+  const [promptUpgradeDialogOpen, setPromptUpgradeDialogOpen] = useState(false);
+  const [playgroundUpgradeDialogOpen, setPlaygroundUpgradeDialogOpen] =
+    useState(false);
+
+  const [promptLimitUpgradeDialogOpen, setPromptLimitUpgradeDialogOpen] =
+    useState(false);
+
+  const {
+    playgroundRunCount,
+    promptRunCount,
+    incrementPlaygroundRun,
+    incrementPromptRun,
+  } = usePromptRunsStore();
 
   // HOOKS
   // - Router
@@ -149,6 +167,31 @@ export default function PromptEditor({
     "versions",
     versionCount
   );
+
+  const { prompts: promptsData } = usePrompts();
+  const promptCount = promptsData?.length || 0;
+
+  const isPlaygroundMode = !!basePrompt && !promptId && !requestId;
+
+  const {
+    canCreate: canRunPlayground,
+    freeLimit: maxPlaygroundRuns,
+    upgradeMessage: playgroundUpgradeMessage,
+    hasFullAccess: hasPlaygroundAccess,
+  } = useSubfeatureLimit("prompts", "playground_runs", playgroundRunCount);
+
+  const {
+    canCreate: canRunPrompt,
+    freeLimit: maxPromptRuns,
+    upgradeMessage: promptUpgradeMessage,
+    hasFullAccess: hasPromptAccess,
+  } = useSubfeatureLimit("prompts", "runs", promptRunCount);
+
+  const {
+    canCreate: canCreatePrompt,
+    freeLimit: maxPrompts,
+    upgradeMessage: promptLimitUpgradeMessage,
+  } = useFeatureLimit("prompts", promptCount);
 
   // VALIDATION
   // - Is Imported From Code
@@ -606,9 +649,32 @@ export default function PromptEditor({
       return;
     }
 
+    // Check limits based on mode
+    if (isPlaygroundMode) {
+      if (!canRunPlayground) {
+        setPlaygroundUpgradeDialogOpen(true);
+        return;
+      }
+    } else if (promptId) {
+      if (!canRunPrompt) {
+        setPromptUpgradeDialogOpen(true);
+        return;
+      }
+    }
+
     // 2. STREAMING STATE + CLEAR RESPONSE
     setIsStreaming(true);
     updateState({ response: "" }, false);
+
+    if (isPlaygroundMode) {
+      if (!hasPlaygroundAccess) {
+        incrementPlaygroundRun();
+      }
+    } else if (promptId) {
+      if (!hasPromptAccess) {
+        incrementPromptRun();
+      }
+    }
 
     const variables = state.inputs || [];
     const variableMap = Object.fromEntries(
@@ -714,6 +780,13 @@ export default function PromptEditor({
     state,
     isStreaming,
     canRun,
+    isPlaygroundMode,
+    canRunPlayground,
+    canRunPrompt,
+    hasPlaygroundAccess,
+    hasPromptAccess,
+    incrementPlaygroundRun,
+    incrementPromptRun,
     jawnClient,
     setNotification,
     refetchPromptVersions,
@@ -875,6 +948,11 @@ export default function PromptEditor({
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
+    if (!canCreatePrompt) {
+      setPromptLimitUpgradeDialogOpen(true);
+      return;
+    }
+
     try {
       // Create a prompt from the current state
       const prompt = {
@@ -904,7 +982,7 @@ export default function PromptEditor({
       console.error("Error creating prompt:", error);
       setNotification("Failed to create prompt", "error");
     }
-  }, [state, createPrompt, router, setNotification]);
+  }, [state, canCreatePrompt, createPrompt, router, setNotification]);
 
   // EFFECTS
   // - Load Initial State
@@ -1383,6 +1461,50 @@ async function pullPromptAndRunCompletion() {
         </div>
       )}
 
+      {/* Playground run limit warning banner */}
+      {isPlaygroundMode && !canRunPlayground && playgroundRunCount > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                You've used {playgroundRunCount}/{maxPlaygroundRuns} playground
+                runs. Upgrade to Pro Tier for unlimited access.
+              </span>
+            </div>
+            <Button
+              variant="action"
+              size="sm"
+              onClick={() => setPlaygroundUpgradeDialogOpen(true)}
+            >
+              Upgrade
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Prompt run limit warning banner */}
+      {promptId && !canRunPrompt && promptRunCount > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                You've used {promptRunCount}/{maxPromptRuns} prompt runs.
+                Upgrade to Prompts Tier for unlimited access.
+              </span>
+            </div>
+            <Button
+              variant="action"
+              size="sm"
+              onClick={() => setPromptUpgradeDialogOpen(true)}
+            >
+              Upgrade
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Prompt Editor */}
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={50} minSize={25}>
@@ -1460,6 +1582,34 @@ async function pullPromptAndRunCompletion() {
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {/* Playground Upgrade Dialog */}
+      {isPlaygroundMode && (
+        <UpgradeProDialog
+          open={playgroundUpgradeDialogOpen}
+          onOpenChange={setPlaygroundUpgradeDialogOpen}
+          featureName="Playground"
+          limitMessage={playgroundUpgradeMessage}
+        />
+      )}
+
+      {/* Prompts Upgrade Dialog */}
+      {promptId && (
+        <UpgradeProDialog
+          open={promptUpgradeDialogOpen}
+          onOpenChange={setPromptUpgradeDialogOpen}
+          featureName="Prompts"
+          limitMessage={promptUpgradeMessage}
+        />
+      )}
+
+      {/* Prompt Limit Upgrade Dialog */}
+      <UpgradeProDialog
+        open={promptLimitUpgradeDialogOpen}
+        onOpenChange={setPromptLimitUpgradeDialogOpen}
+        featureName="Prompts"
+        limitMessage={promptLimitUpgradeMessage}
+      />
     </main>
   );
 }

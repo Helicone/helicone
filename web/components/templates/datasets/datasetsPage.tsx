@@ -10,6 +10,8 @@ import { Muted } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
+import { AlertCircle } from "lucide-react";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -50,20 +52,24 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           <AuthHeader title={"Datasets"} />
 
           {hasReachedLimit && (
-            <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
-              <div className="flex items-center justify-start gap-2">
-                <Muted className="flex items-center">
-                  Free tier users can manage up to {freeLimit}{" "}
-                  {datasets.length === 1 ? "dataset" : "datasets"}
-                </Muted>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  className="text-slate-500 dark:text-slate-400"
-                  onClick={() => setUpgradeDialogOpen(true)}
+            <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
+              <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                  <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                    You&apos;ve used {datasets.length}/{freeLimit}{" "}
+                    {datasets.length === 1 ? "dataset" : "datasets"}. Upgrade
+                    for unlimited datasets.
+                  </span>
+                </div>
+                <FreeTierLimitWrapper
+                  feature="datasets"
+                  itemCount={datasets.length}
                 >
-                  Unlock all →
-                </Button>
+                  <Button variant="action" size="sm">
+                    Upgrade
+                  </Button>
+                </FreeTierLimitWrapper>
               </div>
             </div>
           )}

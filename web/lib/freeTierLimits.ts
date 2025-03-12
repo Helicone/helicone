@@ -65,6 +65,22 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
             `You've used ${used}/${limit} prompt versions. Upgrade for unlimited access.`,
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
         },
+        runs: {
+          getLimit: () => 10,
+          description: (limit) =>
+            `You can perform up to ${limit} prompt runs with the free tier`,
+          upgradeMessage: (limit, used) =>
+            `You've used ${used}/${limit} prompt runs. Upgrade to Prompts Tier ($50/month addon) for unlimited access.`,
+          upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
+        },
+        playground_runs: {
+          getLimit: () => 10,
+          description: (limit) =>
+            `You can perform up to ${limit} playground runs with the free tier`,
+          upgradeMessage: (limit, used) =>
+            `You've used ${used}/${limit} playground runs. Upgrade to Pro Tier ($20/month) for unlimited access.`,
+          upgradeFeatureName: "Playground",
+        },
       },
     },
     experiments: {
