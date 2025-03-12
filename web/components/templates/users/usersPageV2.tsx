@@ -19,12 +19,9 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-import { useHasAccess } from "@/hooks/useHasAccess";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { Muted } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { LockIcon } from "lucide-react";
@@ -273,9 +270,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
                     users
                   </Muted>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-xs font-normal text-primary dark:text-sidebar-primary hover:text-primary-foreground hover:bg-primary dark:hover:text-sidebar-primary-foreground dark:hover:bg-sidebar-primary"
+                    variant="outline"
+                    size="xs"
+                    className="text-slate-500 dark:text-slate-400"
                     onClick={() => setUpgradeDialogOpen(true)}
                   >
                     Unlock all →

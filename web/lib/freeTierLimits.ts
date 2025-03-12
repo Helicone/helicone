@@ -93,7 +93,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     evals: {
       main: {
-        getLimit: () => 3,
+        getLimit: () => 1,
         description: (limit) =>
           `You can create up to ${limit} evaluators with the free tier`,
         upgradeFeatureName: "evals",
@@ -111,7 +111,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     datasets: {
       main: {
-        getLimit: () => 3,
+        getLimit: () => 1,
         description: (limit) =>
           `You can create up to ${limit} datasets with the free tier`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.datasets,

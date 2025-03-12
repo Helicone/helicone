@@ -3,9 +3,13 @@ import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/helicone
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { Muted } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -23,9 +27,13 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   const { datasets, isLoading, isRefetching, refetch } =
     useGetHeliconeDatasets();
 
-  const router = useRouter();
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const { hasReachedLimit, freeLimit, upgradeMessage } = useFeatureLimit(
+    "datasets",
+    datasets?.length || 0
+  );
 
-  const org = useOrg();
+  const router = useRouter();
 
   return (
     <>
@@ -40,6 +48,26 @@ const DatasetsPage = (props: DatasetsPageProps) => {
       ) : (
         <>
           <AuthHeader title={"Datasets"} />
+
+          {hasReachedLimit && (
+            <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
+              <div className="flex items-center justify-start gap-2">
+                <Muted className="flex items-center">
+                  Free tier users can manage up to {freeLimit}{" "}
+                  {datasets.length === 1 ? "dataset" : "datasets"}
+                </Muted>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="text-slate-500 dark:text-slate-400"
+                  onClick={() => setUpgradeDialogOpen(true)}
+                >
+                  Unlock all →
+                </Button>
+              </div>
+            </div>
+          )}
+
           <ThemedTable
             isDatasetsPage={true}
             defaultColumns={[
@@ -51,14 +79,14 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                 header: "Created At",
                 accessorKey: "created_at",
                 minSize: 200,
-                accessorFn: (row) => {
+                accessorFn: (row: any) => {
                   return new Date(row.created_at ?? 0).toLocaleString();
                 },
               },
               {
                 header: "Dataset Type",
                 accessorKey: "dataset_type",
-                cell: ({ row }) => {
+                cell: ({ row }: { row: any }) => {
                   return row.original.dataset_type === "helicone" ? (
                     <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 -my-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
                       Helicone
@@ -89,6 +117,13 @@ const DatasetsPage = (props: DatasetsPageProps) => {
               });
             }}
             fullWidth={true}
+          />
+
+          <UpgradeProDialog
+            open={upgradeDialogOpen}
+            onOpenChange={setUpgradeDialogOpen}
+            featureName="Datasets"
+            limitMessage={upgradeMessage}
           />
         </>
       )}

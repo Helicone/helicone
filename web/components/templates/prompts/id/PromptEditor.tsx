@@ -1366,8 +1366,8 @@ async function pullPromptAndRunCompletion() {
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You've used {versionCount}/3 versions for this prompt. Upgrade
-                for unlimited versions.
+                You&apos;ve used {versionCount}/3 versions for this prompt.
+                Upgrade for unlimited versions.
               </span>
             </div>
             <FreeTierSubLimitWrapper

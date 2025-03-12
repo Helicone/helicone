@@ -577,7 +577,7 @@ export function ExperimentTable({
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You've used {variantCount}/{MAX_VARIANTS} variants for this
+                You&apos;ve used {variantCount}/{MAX_VARIANTS} variants for this
                 experiment. Upgrade for unlimited variants.
               </span>
             </div>

@@ -102,7 +102,11 @@ export const MainPanel = () => {
       <AuthHeader
         title="Evaluators"
         actions={[
-          <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
+          <FreeTierLimitWrapper
+            key="create-evaluator-wrapper"
+            feature="evals"
+            itemCount={evaluatorCount}
+          >
             <Button
               key="create-evaluator"
               onClick={() => openCreatePanel()}
@@ -124,7 +128,7 @@ export const MainPanel = () => {
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You've used {evaluatorCount}/{MAX_EVALUATORS} evaluators.
+                You&apos;ve used {evaluatorCount}/{MAX_EVALUATORS} evaluators.
                 Upgrade for unlimited evaluators.
               </span>
             </div>

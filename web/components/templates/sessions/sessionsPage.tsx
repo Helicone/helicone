@@ -20,7 +20,6 @@ import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface SessionsPageProps {
   currentPage: number;

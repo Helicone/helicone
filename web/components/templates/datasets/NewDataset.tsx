@@ -232,8 +232,10 @@ export default function NewDataset({
             <P className="font-medium">Free Tier Limit</P>
             <div className="flex flex-col gap-2">
               <Muted>
-                You've reached the free tier limit of {FREE_TIER_REQUEST_LIMIT}{" "}
-                requests per dataset.
+                You&apos;ve reached the free tier limit of{" "}
+                {FREE_TIER_REQUEST_LIMIT} requests per dataset. Reduce the
+                number of requests you add to this dataset or upgrade to add
+                more requests.
               </Muted>
               <FreeTierSubLimitWrapper
                 feature="datasets"
@@ -260,13 +262,10 @@ export default function NewDataset({
             <P className="font-medium">Free Tier Limit</P>
             <div className="flex flex-col gap-2">
               <Muted>
-                You've reached the free tier limit of {FREE_TIER_DATASET_LIMIT}{" "}
-                datasets.
+                You&apos;ve reached the free tier limit of{" "}
+                {FREE_TIER_DATASET_LIMIT} datasets.
               </Muted>
-              <FreeTierLimitWrapper
-                feature="datasets"
-                itemCount={datasetCount + 1}
-              >
+              <FreeTierLimitWrapper feature="datasets" itemCount={datasetCount}>
                 <Button variant="action" className="w-fit px-4" size="sm">
                   Upgrade for unlimited datasets
                 </Button>
@@ -383,12 +382,7 @@ export default function NewDataset({
             Cancel
           </Button>
 
-          <FreeTierLimitWrapper
-            feature="datasets"
-            itemCount={
-              selectedOption === "new" ? datasetCount + 1 : datasetCount
-            }
-          >
+          <FreeTierLimitWrapper feature="datasets" itemCount={datasetCount}>
             <Button
               variant="default"
               disabled={
