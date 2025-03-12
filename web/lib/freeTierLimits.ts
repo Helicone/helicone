@@ -159,6 +159,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           `You've used ${used}/${limit} properties. Upgrade for unlimited access.`,
       },
     },
+    users: {
+      main: {
+        getLimit: () => 3,
+        description: (limit) =>
+          `You can view up to ${limit} users with the free tier`,
+        upgradeFeatureName: FEATURE_DISPLAY_NAMES.users,
+        upgradeMessage: (limit, used) =>
+          `You've reached the limit of ${limit} users. Upgrade for unlimited access.`,
+      },
+    },
   },
 };
 

@@ -287,7 +287,7 @@ const SessionNameSelection = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-700 hover:bg-transparent dark:hover:text-sky-300"
+                  className="h-6 text-xs font-normal text-primary dark:text-sidebar-primary hover:text-primary-foreground hover:bg-primary dark:hover:text-sidebar-primary-foreground dark:hover:bg-sidebar-primary"
                 >
                   Unlock all →
                 </Button>

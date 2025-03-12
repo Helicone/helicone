@@ -23,6 +23,13 @@ import { useHasAccess } from "@/hooks/useHasAccess";
 import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { Muted } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import { LockIcon } from "lucide-react";
+import { UserMetric } from "@/lib/api/users/UserMetric";
+import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -79,6 +86,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   );
   const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
 
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
   );
@@ -107,6 +116,11 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     parseInt(pageSize, 10),
     sortLeaf,
     filterNode
+  );
+
+  const { hasFullAccess, freeLimit, upgradeMessage } = useFeatureLimit(
+    "users",
+    users.length
   );
 
   const checkIsNotUniqueUser = useCallback(() => {
@@ -141,24 +155,86 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     [advancedFilters, onSetAdvancedFiltersHandler]
   );
 
-  const hasAccess = useHasAccess("users");
+  const columns = useMemo(() => {
+    if (hasFullAccess) {
+      return INITIAL_COLUMNS;
+    }
+
+    return INITIAL_COLUMNS.map((column) => {
+      if ("accessorKey" in column && column.accessorKey === "user_id") {
+        return {
+          ...column,
+          cell: (info: any) => {
+            const user = info.row.original;
+            const userIndex = users.findIndex(
+              (u) => u.user_id === user.user_id
+            );
+            const isPremium = userIndex >= freeLimit;
+
+            return (
+              <span
+                className={`text-gray-900 dark:text-gray-100 font-medium ${
+                  isPremium ? "opacity-70" : ""
+                }`}
+              >
+                {isPremium && (
+                  <LockIcon className="h-3 w-3 inline mr-1 text-muted-foreground" />
+                )}
+                {user.user_id ? `${user.user_id}` : "No User ID"}
+              </span>
+            );
+          },
+        };
+      } else if ("accessorKey" in column) {
+        const originalCell = column.cell;
+        return {
+          ...column,
+          cell: (info: any) => {
+            const user = info.row.original;
+            const userIndex = users.findIndex(
+              (u) => u.user_id === user.user_id
+            );
+            const isPremium = userIndex >= freeLimit;
+
+            if (isPremium) {
+              return (
+                <span className="blur-sm select-none opacity-70">••••••••</span>
+              );
+            }
+
+            if (originalCell && typeof originalCell === "function") {
+              return originalCell(info);
+            }
+
+            const value = info.getValue();
+            return value !== undefined && value !== null ? String(value) : "";
+          },
+        };
+      }
+      return column;
+    });
+  }, [hasFullAccess, freeLimit, users]);
+
+  const handleRowSelect = (row: UserMetric) => {
+    // Fast exit if user has full access - direct navigation
+    if (hasFullAccess) {
+      router.push(`/users/${encodeURIComponent(row.user_id)}`);
+      return;
+    }
+
+    const userIndex = users.findIndex((u) => u.user_id === row.user_id);
+    const isPremiumUser = userIndex >= freeLimit;
+
+    if (isPremiumUser) {
+      setUpgradeDialogOpen(true);
+      return;
+    }
+
+    router.push(`/users/${encodeURIComponent(row.user_id)}`);
+  };
 
   if (isLoading) {
     return <LoadingAnimation title="Loading Users" />;
-  }
-
-  if (!hasAccess) {
-    return (
-      <div className="flex justify-center items-center bg-white">
-        <FeatureUpgradeCard
-          title="Users"
-          featureName="Users"
-          headerTagline="Track user cost, usage, and more"
-          icon={<UserGroupIcon className="w-4 h-4 text-sky-500" />}
-          highlightedFeature="users"
-        />
-      </div>
-    );
   }
 
   if (users.length === 0) {
@@ -188,12 +264,30 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
         />
 
         <TabsContent value="all">
-          {" "}
           <div className="flex flex-col space-y-4 pb-10">
+            {!hasFullAccess && users.length > freeLimit && (
+              <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
+                <div className="flex items-center justify-start gap-2">
+                  <Muted className="flex items-center">
+                    Free tier users can view up to {freeLimit} of {users.length}{" "}
+                    users
+                  </Muted>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs font-normal text-primary dark:text-sidebar-primary hover:text-primary-foreground hover:bg-primary dark:hover:text-sidebar-primary-foreground dark:hover:bg-sidebar-primary"
+                    onClick={() => setUpgradeDialogOpen(true)}
+                  >
+                    Unlock all →
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <ThemedTable
               id="user-table"
               defaultData={users}
-              defaultColumns={INITIAL_COLUMNS}
+              defaultColumns={columns}
               skeletonLoading={isLoading}
               dataLoading={false}
               sortable={{
@@ -203,10 +297,9 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
               }}
               advancedFilters={advancedFiltersProp}
               exportData={users}
-              onRowSelect={(row) => {
-                router.push(`/users/${encodeURIComponent(row.user_id)}`);
-              }}
+              onRowSelect={handleRowSelect}
             />
+
             {!isLoading && checkIsNotUniqueUser() && (
               <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
                 <div className="flex flex-col w-2/5">
@@ -229,6 +322,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
                 </div>
               </div>
             )}
+
             <TableFooter
               currentPage={parseInt(currentPage, 10)}
               pageSize={parseInt(pageSize, 10)}
@@ -246,19 +340,16 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           </div>
         </TabsContent>
         <TabsContent value="active">
-          {/* I will add this back in later... we need to move everything to JAWN
-          <ThemedHeader
-            advancedFilter={{
-              filterMap: advancedFiltersProp.filterMap,
-              filters: advancedFiltersProp.filters,
-              onAdvancedFilter: advancedFiltersProp.setAdvancedFilters,
-              searchPropertyFilters: advancedFiltersProp.searchPropertyFilters,
-            }}
-            isFetching={false}
-          /> */}
           <UserMetrics filterNode={filterNode} />
         </TabsContent>
       </Tabs>
+
+      <UpgradeProDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        featureName="Users"
+        limitMessage={upgradeMessage}
+      />
     </>
   );
 };

@@ -64,7 +64,6 @@ function getContext(): FreeTierLimitContext {
   };
 }
 
-// Hook for main feature limits
 export function useFeatureLimit(
   feature: FeatureId,
   itemCount: number
