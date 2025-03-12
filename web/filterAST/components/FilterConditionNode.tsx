@@ -33,6 +33,21 @@ const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
   in: "∈",
 };
 
+// Define descriptive operator labels for dropdown menu
+const FILTER_OPERATOR_DESCRIPTIVE_LABELS: Record<FilterOperator, string> = {
+  eq: "Equals (=)",
+  neq: "Not Equals (≠)",
+  is: "Is",
+  gt: "Greater Than (>)",
+  gte: "Greater Than or Equal (≥)",
+  lt: "Less Than (<)",
+  lte: "Less Than or Equal (≤)",
+  like: "Like (~)",
+  ilike: "Case Insensitive Like (≈)",
+  contains: "Contains (⊃)",
+  in: "In (∈)",
+};
+
 interface FilterConditionNodeProps {
   condition: ConditionExpression;
   path: number[];
@@ -103,7 +118,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   // Convert operators to SearchableSelectOption format
   const operatorOptions: SearchableSelectOption[] = operators.map((op) => ({
-    label: FILTER_OPERATOR_LABELS[op],
+    label: FILTER_OPERATOR_DESCRIPTIVE_LABELS[op],
     value: op,
   }));
 
@@ -222,7 +237,10 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         disabled={!condition.field.column}
       >
         <SelectTrigger className="w-[60px] h-9 px-2 flex-shrink-0 text-center">
-          <SelectValue placeholder="Op" />
+          <SelectValue placeholder="Op">
+            {condition.operator &&
+              FILTER_OPERATOR_LABELS[condition.operator as FilterOperator]}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {operatorOptions.map((op) => (

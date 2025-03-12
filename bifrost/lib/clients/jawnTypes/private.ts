@@ -3751,7 +3751,7 @@ export interface operations {
   DeleteOrganizationLayout: {
     parameters: {
       query: {
-        type: "dashboard" | "requests";
+        type: "dashboard" | "requests" | "filter_ast";
       };
       path: {
         organizationId: string;
@@ -3875,9 +3875,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          filters: components["schemas"]["OrganizationFilter"][];
+          filters: unknown;
           /** @enum {string} */
-          type: "dashboard" | "requests";
+          type: "dashboard" | "requests" | "filter_ast";
         };
       };
     };
@@ -3899,9 +3899,9 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          filters: components["schemas"]["OrganizationFilter"][];
+          filters: unknown;
           /** @enum {string} */
-          type: "dashboard" | "requests";
+          type: "dashboard" | "requests" | "filter_ast";
         };
       };
     };

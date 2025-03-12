@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useSavedFilters } from "@/services/hooks/useSavedFilters";
 
 interface SaveFilterDialogProps {
   open: boolean;
@@ -21,12 +22,18 @@ export const SaveFilterDialog: React.FC<SaveFilterDialogProps> = ({
 }) => {
   const [filterName, setFilterName] = useState("");
   const filterStore = useFilterStore();
+  const { saveFilter, isSaving } = useSavedFilters();
 
-  const handleSaveFilter = () => {
+  const handleSaveFilter = async () => {
     if (filterStore.filter && filterName.trim()) {
-      filterStore.saveFilter(filterName.trim(), filterStore.filter);
-      setFilterName("");
-      onOpenChange(false);
+      try {
+        await saveFilter(filterName.trim(), filterStore.filter);
+        setFilterName("");
+        onOpenChange(false);
+      } catch (error) {
+        console.error("Error saving filter:", error);
+        // You could add error handling UI here
+      }
     }
   };
 
@@ -49,8 +56,11 @@ export const SaveFilterDialog: React.FC<SaveFilterDialogProps> = ({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveFilter} disabled={!filterName.trim()}>
-              Save
+            <Button
+              onClick={handleSaveFilter}
+              disabled={!filterName.trim() || isSaving}
+            >
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>

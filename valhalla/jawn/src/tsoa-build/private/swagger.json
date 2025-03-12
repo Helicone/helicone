@@ -9980,7 +9980,8 @@
 							"type": "string",
 							"enum": [
 								"dashboard",
-								"requests"
+								"requests",
+								"filter_ast"
 							]
 						}
 					}
@@ -10274,17 +10275,13 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"filters": {
-										"items": {
-											"$ref": "#/components/schemas/OrganizationFilter"
-										},
-										"type": "array"
-									},
+									"filters": {},
 									"type": {
 										"type": "string",
 										"enum": [
 											"dashboard",
-											"requests"
+											"requests",
+											"filter_ast"
 										]
 									}
 								},
@@ -10338,17 +10335,13 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"filters": {
-										"items": {
-											"$ref": "#/components/schemas/OrganizationFilter"
-										},
-										"type": "array"
-									},
+									"filters": {},
 									"type": {
 										"type": "string",
 										"enum": [
 											"dashboard",
-											"requests"
+											"requests",
+											"filter_ast"
 										]
 									}
 								},

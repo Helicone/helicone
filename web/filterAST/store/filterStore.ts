@@ -21,11 +21,6 @@ export interface FilterState {
     expression: FilterExpression
   ) => void;
   removeFilterExpression: (path: number[]) => void;
-
-  // Saved filter actions
-  saveFilter: (name: string, filter: FilterExpression) => void;
-  deleteSavedFilter: (id: string) => void;
-  loadSavedFilter: (id: string) => void;
 }
 
 const DEFAULT_FILTER: AndExpression = {
@@ -149,31 +144,6 @@ export const useFilterStore = create<FilterState>()(
         }
 
         set({ filter: newFilter });
-      },
-
-      saveFilter: (name, filter) => {
-        const { savedFilters } = get();
-        const id = `filter-${Date.now()}`;
-
-        set({
-          savedFilters: [...savedFilters, { id, name, filter }],
-        });
-      },
-
-      deleteSavedFilter: (id) => {
-        const { savedFilters } = get();
-        set({
-          savedFilters: savedFilters.filter((f) => f.id !== id),
-        });
-      },
-
-      loadSavedFilter: (id) => {
-        const { savedFilters } = get();
-        const savedFilter = savedFilters.find((f) => f.id === id);
-
-        if (savedFilter) {
-          set({ filter: savedFilter.filter });
-        }
       },
     }),
     {

@@ -164,7 +164,7 @@ export class OrganizationStore extends BaseStore {
 
   async createOrganizationFilter(insertRequest: {
     organization_id: string;
-    type: "dashboard" | "requests";
+    type: "dashboard" | "requests" | "filter_ast";
     filters: OrganizationFilter[];
   }): Promise<Result<string, string>> {
     const insert = await supabaseServer.client
@@ -224,7 +224,9 @@ export class OrganizationStore extends BaseStore {
   ): Promise<Result<string, string>> {
     const updateRes = await supabaseServer.client
       .from("organization_layout")
-      .update({
+      .upsert({
+        organization_id: organizationId,
+        type: type,
         filters: filters as any,
       })
       .eq("organization_id", organizationId)

@@ -447,8 +447,8 @@ export class OrganizationController extends Controller {
   public async createOrganizationLayout(
     @Body()
     requestBody: {
-      type: "dashboard" | "requests";
-      filters: OrganizationFilter[];
+      type: "dashboard" | "requests" | "filter_ast";
+      filters: any;
     },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -485,7 +485,7 @@ export class OrganizationController extends Controller {
   @Delete("/{organizationId}/layout")
   public async deleteOrganizationLayout(
     @Path() organizationId: string,
-    @Query() type: "dashboard" | "requests",
+    @Query() type: "dashboard" | "requests" | "filter_ast",
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
@@ -526,8 +526,8 @@ export class OrganizationController extends Controller {
   public async updateOrganizationLayout(
     @Body()
     requestBody: {
-      type: "dashboard" | "requests";
-      filters: OrganizationFilter[];
+      type: "dashboard" | "requests" | "filter_ast";
+      filters: any;
     },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest

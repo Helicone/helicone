@@ -113,9 +113,6 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleAddCondition}>
-                  Add Condition
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleAddGroup("and")}>
                   Add AND Group
                 </DropdownMenuItem>
@@ -124,12 +121,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button variant="ghost" size="sm" onClick={handleAddCondition}>
-              <PlusCircle size={16} className="mr-1" />
-              Add Condition
-            </Button>
-          )}
+          ) : undefined}
           {!isRoot && (
             <Button variant="ghost" size="icon" onClick={handleRemove}>
               <Trash2 size={16} className="text-muted-foreground" />

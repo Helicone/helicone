@@ -200,59 +200,6 @@ const TestFilterPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Saved Filters</CardTitle>
-                <CardDescription>
-                  Your saved filters will appear here
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {filterStore.savedFilters.length === 0 ? (
-                  <div className="text-center py-4">
-                    <P className="text-muted-foreground">
-                      No saved filters yet
-                    </P>
-                    <Info
-                      size={16}
-                      className="mx-auto mt-2 text-muted-foreground"
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {filterStore.savedFilters.map((filter) => (
-                      <div
-                        key={filter.id}
-                        className="flex items-center justify-between border rounded p-2"
-                      >
-                        <P>{filter.name}</P>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              filterStore.loadSavedFilter(filter.id)
-                            }
-                          >
-                            <ChevronRight size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              filterStore.deleteSavedFilter(filter.id)
-                            }
-                          >
-                            <Trash2 size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
           {/* Right columns - Editor and JSON view */}
@@ -325,74 +272,6 @@ const TestFilterPage: React.FC = () => {
                 </div>
               </TabsContent>
             </Tabs>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Testing Actions</CardTitle>
-                <CardDescription>
-                  Try out direct interactions with the filter store
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="mb-2">Save Current Filter</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="default"
-                        onClick={() => {
-                          if (currentFilter) {
-                            const name = `Test Filter ${new Date().toLocaleTimeString()}`;
-                            filterStore.saveFilter(name, currentFilter);
-                          }
-                        }}
-                        disabled={
-                          !currentFilter ||
-                          ((currentFilter.type === "and" ||
-                            currentFilter.type === "or") &&
-                            currentFilter.expressions.length === 0)
-                        }
-                      >
-                        <Save size={16} className="mr-1" />
-                        Quick Save
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Programmatic Updates</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          if (
-                            currentFilter &&
-                            (currentFilter.type === "and" ||
-                              currentFilter.type === "or")
-                          ) {
-                            // Add a timestamp condition to the current filter
-                            const timestampCondition: ConditionExpression = {
-                              type: "condition",
-                              field: { column: "response_created_at" },
-                              operator: "gt",
-                              value: new Date().toISOString(),
-                            };
-
-                            filterStore.addFilterExpression(
-                              [],
-                              timestampCondition
-                            );
-                          }
-                        }}
-                        disabled={!currentFilter}
-                      >
-                        Add Timestamp
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

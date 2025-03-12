@@ -275,7 +275,7 @@ export class OrganizationManager extends BaseManager {
   async createFilter(
     organizationId: string,
     filters: OrganizationFilter[],
-    filterType: "dashboard" | "requests"
+    filterType: "dashboard" | "requests" | "filter_ast"
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(

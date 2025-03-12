@@ -4997,7 +4997,7 @@ export function RegisterRoutes(app: Router) {
 
             async function OrganizationController_createOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"array","array":{"dataType":"refAlias","ref":"OrganizationFilter"},"required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}],"required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"any","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]},{"dataType":"enum","enums":["filter_ast"]}],"required":true}}},
                     organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
@@ -5031,7 +5031,7 @@ export function RegisterRoutes(app: Router) {
             async function OrganizationController_deleteOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
-                    type: {"in":"query","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}]},
+                    type: {"in":"query","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]},{"dataType":"enum","enums":["filter_ast"]}]},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
@@ -5063,7 +5063,7 @@ export function RegisterRoutes(app: Router) {
 
             async function OrganizationController_updateOrganizationLayout(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"array","array":{"dataType":"refAlias","ref":"OrganizationFilter"},"required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]}],"required":true}}},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"filters":{"dataType":"any","required":true},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["dashboard"]},{"dataType":"enum","enums":["requests"]},{"dataType":"enum","enums":["filter_ast"]}],"required":true}}},
                     organizationId: {"in":"path","name":"organizationId","required":true,"dataType":"string"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
