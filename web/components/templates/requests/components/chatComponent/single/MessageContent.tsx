@@ -81,7 +81,7 @@ export const MessageContent: React.FC<MessageContentProps> = ({
               {message.contentArray?.map((content, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 "
+                  className="border border-border rounded-lg p-4 bg-sidebar-background"
                 >
                   <div className="text-xs text-muted-foreground mb-2 underline">
                     Content {index + 1} of {message.contentArray?.length}

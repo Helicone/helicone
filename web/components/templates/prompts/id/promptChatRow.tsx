@@ -361,9 +361,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
             text={removeLeadingWhitespace(
               isStatic
                 ? displayText.replace(
-                    /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
-                    "$1"
-                  )
+                  /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+                  "$1"
+                )
                 : displayText
             )}
             selectedProperties={selectedProperties}
@@ -609,9 +609,9 @@ const PromptChatRow = (props: PromptChatRowProps) => {
         <div className="text-xs text-slate-700 dark:text-slate-300">
           {isStatic
             ? contentAsString?.replace(
-                /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
-                "$1"
-              )
+              /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+              "$1"
+            )
             : getContent(currentMessage, minimize, playgroundMode)}
         </div>
       </li>

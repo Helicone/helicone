@@ -83,7 +83,7 @@ export const RenderMappedRequest = (
   }
   return (
     <>
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         Unable to render this request. Please contact support at
         (support@helicone.ai) and we can be sure to add support for it. Or if
         you feel inclined, you can submit a PR to add support for it.

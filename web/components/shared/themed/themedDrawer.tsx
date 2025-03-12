@@ -73,8 +73,8 @@ const ThemedDrawer: React.FC<ThemedDrawerProps> = ({
                     defaultExpanded
                       ? defaultWidth
                       : expanded
-                      ? "md:min-w-[60rem] w-full md:w-[60vw]"
-                      : "md:min-w-[35rem] w-full md:w-[36vw]",
+                        ? "md:min-w-[60rem] w-full md:w-[60vw]"
+                        : "md:min-w-[35rem] w-full md:w-[36vw]",
                     "pointer-events-auto ease-in-out duration-300"
                   )}
                 >
