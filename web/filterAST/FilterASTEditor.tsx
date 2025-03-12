@@ -19,7 +19,7 @@ import SavedFiltersList from "./components/SavedFiltersList";
 
 // Import hooks
 import { useFilterActions } from "./hooks/useFilterActions";
-import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
+import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
 
 // Define a default filter structure
 const DEFAULT_FILTER: AndExpression = {
@@ -39,7 +39,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   const filterStore = useFilterStore();
   const { saveDialogOpen, setSaveDialogOpen, hasActiveFilters, clearFilter } =
     useFilterActions();
-  const { savedFilters, isLoading } = useSavedFilters();
+  const { savedFilters, isLoading } = useFilterAST();
   const [showSavedFilters, setShowSavedFilters] = useState(false);
 
   // Call the onFilterChange callback whenever the filter changes

@@ -31,7 +31,7 @@ import {
   Clock,
   Link,
 } from "lucide-react";
-import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
+import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
 import {
   Dialog,
   DialogContent,
@@ -64,7 +64,7 @@ const TestFilterPage: React.FC = () => {
     updateUrlWithFilterId,
     isSaving,
     isDeleting,
-  } = useSavedFilters();
+  } = useFilterAST();
 
   // Update local state whenever store filter changes
   useEffect(() => {

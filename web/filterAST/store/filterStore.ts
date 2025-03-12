@@ -8,6 +8,9 @@ export interface FilterState {
   // The ID of the currently active saved filter (if any)
   activeFilterId: string | null;
 
+  // initial filter id
+  initialFilterId: string | null;
+
   // Whether the filter has unsaved changes
   hasUnsavedChanges: boolean;
 
@@ -22,7 +25,7 @@ export interface FilterState {
     expression: FilterExpression
   ) => void;
   removeFilterExpression: (path: number[]) => void;
-
+  setInitialFilterId: (id: string | null) => void;
   // Actions for managing the active filter ID
   setActiveFilterId: (id: string | null) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
@@ -37,7 +40,13 @@ const DEFAULT_FILTER: AndExpression = {
 export const useFilterStore = create<FilterState>()((set, get) => ({
   filter: DEFAULT_FILTER,
   activeFilterId: null,
+  initialFilterId: null,
   hasUnsavedChanges: false,
+
+  setInitialFilterId: (id: string | null) => {
+    if (get().initialFilterId !== null) return;
+    set({ initialFilterId: id });
+  },
 
   setFilter: (filter) => {
     set({

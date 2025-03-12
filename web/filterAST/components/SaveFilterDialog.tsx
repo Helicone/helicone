@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
+import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
 
 interface SaveFilterDialogProps {
   open: boolean;
@@ -22,7 +22,7 @@ export const SaveFilterDialog: React.FC<SaveFilterDialogProps> = ({
 }) => {
   const [filterName, setFilterName] = useState("");
   const filterStore = useFilterStore();
-  const { saveFilter, isSaving } = useSavedFilters();
+  const { saveFilter, isSaving } = useFilterAST();
 
   const handleSaveFilter = async () => {
     if (filterStore.filter && filterName.trim()) {

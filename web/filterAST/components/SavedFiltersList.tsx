@@ -3,7 +3,7 @@ import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { P, Small } from "@/components/ui/typography";
 import { Trash2 } from "lucide-react";
-import { useSavedFilters } from "@/filterAST/hooks/useSavedFilters";
+import { useFilterAST } from "@/filterAST/hooks/useFilterAST";
 
 interface SavedFiltersListProps {
   onClose?: () => void;
@@ -14,7 +14,7 @@ export const SavedFiltersList: React.FC<SavedFiltersListProps> = ({
 }) => {
   const filterStore = useFilterStore();
   const { savedFilters, isLoading, deleteFilter, isDeleting, refetch } =
-    useSavedFilters();
+    useFilterAST();
 
   // Load a saved filter
   const handleLoadFilter = (filterId: string) => {
