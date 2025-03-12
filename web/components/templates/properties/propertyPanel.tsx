@@ -312,7 +312,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             ))}
                           </TableRow>
                         </TableHeader>
-                        <TableBody className="text-[13px]">
+                        <TableBody className="text-sm">
                           {Array.from({ length: 10 }).map((_, rowIndex) => (
                             <TableRow key={`skeleton-row-${rowIndex}`}>
                               {Array.from({ length: 7 }).map((_, colIndex) => (
@@ -353,7 +353,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                             header: "Value",
                             sortable: true,
                             render: (propertyValue) => (
-                              <div className="max-w-[180px] overflow-hidden">
+                              <div className="overflow-hidden">
                                 <Button
                                   variant="link"
                                   className="p-0 h-auto font-semibold truncate flex items-center"
