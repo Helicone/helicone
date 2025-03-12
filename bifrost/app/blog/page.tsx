@@ -196,6 +196,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "browser-use-vs-computer-use-vs-operator",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "chain-of-draft",
     },
   },
