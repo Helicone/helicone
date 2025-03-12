@@ -1,8 +1,8 @@
 {
-  "title": "What is LLM Observability and Monitoring?",
-  "title1": "What is LLM Observability and Monitoring?",
-  "title2": "What is LLM Observability and Monitoring?",
-  "description": "Learn about how LLM observability differs from traditional observability, key challenges in building with LLM and best practices for monitoring LLM applications.",
+  "title": "What is LLM Observability and Monitoring",
+  "title1": "What is LLM Observability and Monitoring",
+  "title2": "What is LLM Observability and Monitoring",
+  "description": "Do you need LLM observability? Let's talk about the difference between LLM and traditional observability and the best tools out there for tracking LLM behaviors.",
   "images": "/static/blog/llm-observability-cover.webp",
   "time": "9 minute read",
   "author": "Lina Lam",
