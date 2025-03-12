@@ -60,7 +60,7 @@ Another difference is the **non-deterministic nature of LLMs**. Traditional syst
 
 At the core of LLM observability is the detailed logging of **requests** and their corresponding **responses**. Logging them allows you to analyze patterns and understand the context which influenced the outputs.
 
-LLM monitoring tools typically captures other useful metrics like latency, costs, Time to First Token (TTFT), and more. Tracking conversation histories, especially in multi-step workflows like an AI agent or a RAG application, helps you understand the user behavior and model's performance over time.
+LLM monitoring tools typically capture other useful metrics like latency, costs, Time to First Token (TTFT), and more. Tracking conversation histories, especially in multi-step workflows like an AI agent or a RAG application, helps you understand the user behavior and model's performance over time.
 
 ### 2. Online and Offline Evaluation
 
@@ -99,7 +99,7 @@ Deploying LLMs in production comes with its set of challenges. We'll walk throug
 
 LLMs sometimes generate inaccurate outputs that sound plausible - also known as hallucination. Hallucinations can happen frequently and undermine your user's trust as your usage goes up.
 
-The good news is, you can mitigate this by using the right<a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompting techniques</a>, or by <a href="https://docs.helicone.ai/features/experiments#4-create-and-run-custom-evaluators" target="_blank" rel="noopener">evaluating your LLM outputs</a> in Helicone.
+The good news is, you can mitigate this by using the right <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompting techniques</a>, or by <a href="https://docs.helicone.ai/features/experiments#4-create-and-run-custom-evaluators" target="_blank" rel="noopener">evaluating your LLM outputs</a> in Helicone.
 
 ### 2. Preventing Prompt Injections
 
@@ -119,7 +119,7 @@ Latency can have the most impact on the user experience. Helicone allows you to 
 
 ### 4. Tracking API Usage and Costs
 
-It’s important to know exactly what might be drilling a hole in your operational cost. LLM monitoring can improve cost savings by tracking expenses for every model interaction, from the initial prompt to the final response.
+It's important to know exactly what might be drilling a hole in your operational cost. LLM monitoring can improve cost savings by tracking expenses for every model interaction, from the initial prompt to the final response.
 
 **You can mitigate this by**:
 
@@ -147,8 +147,8 @@ You should <a href="https://docs.helicone.ai/features/experiments" target="_blan
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-apiKey: process.env.OPENAI_API_KEY,
-baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
 });
 ```
 </CallToAction>
@@ -168,7 +168,7 @@ Now that you have a good understanding of how to implement monitoring strategies
 We are here to help you every step of the way! If you have any questions, please reach out to us via email at [support@helicone.ai](mailto:support@helicone.ai) or through the chat feature in our platform.
 
 ### You might find these useful: 
-- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a  >
+- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>
 - <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging Chatbots and AI Agents with Sessions</a>
 - <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
 
