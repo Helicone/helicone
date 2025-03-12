@@ -21,7 +21,6 @@ We will cover:
 |---------|------------|--------------|----------|
 | **Provider** | Open-source | Anthropic (Claude) | OpenAI |
 | **Release Date** | Late 2024 | October 2024 | January 2025 |
-| **Benchmark Accuracy** | 89% (WebVoyager) | 15-22% (OSWorld) | 87% (WebVoyager) |
 | **Access** | Self-hosted or Cloud API | API only | Web interface |
 | **Pricing** | Open source or $0.05/step (Cloud) | Uses Claude API pricing | Pro subscription ($200/mo) |
 | **Model Support** | Multiple (OpenAI, Claude, Gemini, etc.) | Claude 3.5 Sonnet | CUA (Computer-Using Agent) |
@@ -29,8 +28,18 @@ We will cover:
 | **Element Tracking** | ✅ | ✅ | ✅ |
 | **Customization** | Extensive | Limited | Limited |
 
-These tools represent three different approaches to browser automation with AI. Let's look at how each one works under the hood.
+### Benchmark Performance
 
+Comparing the leading web agents, Claude Computer Use and OpenAI Operator, the benchmarks indicate that while Operator currently leads in web navigation tasks, Anthropic's Computer Use demonstrates superior performance in coding and software development tasks.
+
+However, Browser Use is a more recent entrant to the market, showing promising results that surpass the Operator in WebVoyager, according to its <a href="https://browser-use.com/posts/sota-technical-report" target="_blank" rel="noopener noreferrer">Technical Report</a>. It has not yet been tested on the other benchmarks.
+
+![Benchmark Performance](/static/blog/browser-use-vs-computer-use-vs-operator/browser-automation-benchmarks.webp)
+
+|  | Browser Use | Computer Use | Operator |
+|-----------|------------|--------------|----------|
+| **WebVoyager** <br/> Tests web agent accuracy on diverse web tasks | ⭐️ 89% | 56% | 87% |
+| **OSWorld** <br/> Evaluates ability to use computer operating systems | - | 22% | 38.1% |
 
 <CallToAction
   title="Looking to monitor your AI Agents? ⚡️"
@@ -108,15 +117,6 @@ Now let's dive deeper into specific features and capabilities:
   title="💡 Key Insights"
   description="Browser Use stands out for flexibility in model choice and customization options, Operator provides the best user experience, while Computer Use offers the deepest visual understanding."
 />
-
-## Benchmark Performance
-
-![Benchmark Performance](/static/blog/browser-use-vs-computer-use-vs-operator/browser-automation-benchmarks.webp)
-
-|  | Browser Use | Computer Use | Operator |
-|-----------|------------|--------------|----------|
-| **WebVoyager** <br/> Tests web agent accuracy on diverse web tasks | 89.1% | 56% | 87% |
-| **OSWorld** <br/> Evaluates ability to use computer operating systems | - | 22% | 38.1% |
 
 ## Pricing and Accessibility
 
