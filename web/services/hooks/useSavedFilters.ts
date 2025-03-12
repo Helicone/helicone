@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
+import { useSyncURL } from "./useFilterWithUrl";
 
 type StoreFilterType = {
   id?: string;
@@ -35,8 +36,6 @@ export const useSavedFilters = (options?: {
   const orgId = org?.currentOrg?.id;
   const queryClient = useQueryClient();
   const jawn = getJawnClient(orgId);
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Get filter state from Zustand store
   const {
@@ -104,6 +103,7 @@ export const useSavedFilters = (options?: {
       // Update the active filter ID and URL
       if (data?.data?.id) {
         setActiveFilterId(data.data.id);
+        // Manually update URL (though useSyncURL will also handle this automatically)
         updateUrlWithFilterId(data.data.id);
       }
     },
@@ -152,33 +152,9 @@ export const useSavedFilters = (options?: {
       // Clear the active filter if it was deleted
       if (activeFilterId) {
         clearActiveFilter();
-        updateUrlWithFilterId(null);
       }
     },
   });
-
-  /**
-   * Update the URL with the filter ID
-   */
-  const updateUrlWithFilterId = useCallback(
-    (filterId: string | null) => {
-      if (!searchParams) return;
-
-      // Create a new URLSearchParams object based on the current params
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (filterId) {
-        params.set("filter_id", filterId);
-      } else {
-        params.delete("filter_id");
-      }
-
-      // Update the URL without refreshing the page
-      const newUrl = window.location.pathname + "?" + params.toString();
-      router.replace(newUrl, { scroll: false });
-    },
-    [router, searchParams]
-  );
 
   /**
    * Load a filter by ID
@@ -199,6 +175,11 @@ export const useSavedFilters = (options?: {
     },
     [savedFilters, setFilter, setActiveFilterId]
   );
+
+  const { updateUrlWithFilterId } = useSyncURL({
+    loadFilterById,
+    activeFilterId,
+  });
 
   /**
    * Auto-save the current filter if it has an ID
@@ -289,17 +270,6 @@ export const useSavedFilters = (options?: {
     return url.toString();
   }, [activeFilterId]);
 
-  // Effect to check for filter_id in URL on initial load
-  useEffect(() => {
-    if (!searchParams) return;
-
-    const filterIdFromUrl = searchParams.get("filter_id");
-
-    if (filterIdFromUrl && filterIdFromUrl !== activeFilterId) {
-      loadFilterById(filterIdFromUrl);
-    }
-  }, [searchParams, activeFilterId, loadFilterById]);
-
   // Effect to handle auto-saving
   useEffect(() => {
     if (hasUnsavedChanges && activeFilterId) {
@@ -335,7 +305,7 @@ export const useSavedFilters = (options?: {
     activeFilterId,
     hasUnsavedChanges,
     getShareableUrl,
-    updateUrlWithFilterId,
+
     isSaving: createLayout.isLoading || updateLayout.isLoading,
     isDeleting: deleteLayout.isLoading,
   };
