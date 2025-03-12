@@ -94,7 +94,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
   return (
     <div
       className={clsx(
-        "h-full overflow-x-auto bg-slate-100 dark:bg-slate-800 border-t",
+        "h-full overflow-x-auto bg-slate-100 dark:bg-slate-800 border-t border-slate-300 dark:border-slate-700",
         className
       )}
     >

@@ -149,6 +149,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           `You've used ${used}/${limit} named sessions. Upgrade for unlimited access.`,
       },
     },
+    properties: {
+      main: {
+        getLimit: () => 1,
+        description: (limit) =>
+          `You can have up to ${limit} properties with the free tier`,
+        upgradeFeatureName: FEATURE_DISPLAY_NAMES.properties,
+        upgradeMessage: (limit, used) =>
+          `You've used ${used}/${limit} properties. Upgrade for unlimited access.`,
+      },
+    },
   },
 };
 
