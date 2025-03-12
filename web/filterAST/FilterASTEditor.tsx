@@ -30,7 +30,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   onFilterChange,
   layoutPage = "requests",
 }) => {
-  const { filterDefinitions, isLoading } = useFilterUIDefinitions();
   const filterStore = useFilterStore();
   const { saveDialogOpen, setSaveDialogOpen, hasActiveFilters, clearFilter } =
     useFilterActions();
@@ -86,39 +85,29 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
       </div>
 
       {/* Main filter content */}
-      {isLoading ? (
-        <div className="text-center py-4">
-          <P>Loading filter options...</P>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filterStore.filter &&
-          (filterStore.filter.type === "and" ||
-            filterStore.filter.type === "or") ? (
-            <FilterGroupNode
-              group={filterStore.filter}
-              path={[]}
-              filterDefs={filterDefinitions}
-              isRoot={true}
-            />
-          ) : (
-            <div className="text-center py-8">
-              <P className="text-muted-foreground">No filters applied</P>
-              <Button
-                onClick={handleAddFilterGroup}
-                className="mt-2"
-                variant="default"
-              >
-                <PlusCircle size={16} className="mr-1" />
-                Add Filter Group
-              </Button>
-            </div>
-          )}
 
-          {/* Display saved filters */}
-          <SavedFiltersList />
-        </div>
-      )}
+      <div className="space-y-4">
+        {filterStore.filter &&
+        (filterStore.filter.type === "and" ||
+          filterStore.filter.type === "or") ? (
+          <FilterGroupNode group={filterStore.filter} path={[]} isRoot={true} />
+        ) : (
+          <div className="text-center py-8">
+            <P className="text-muted-foreground">No filters applied</P>
+            <Button
+              onClick={handleAddFilterGroup}
+              className="mt-2"
+              variant="default"
+            >
+              <PlusCircle size={16} className="mr-1" />
+              Add Filter Group
+            </Button>
+          </div>
+        )}
+
+        {/* Display saved filters */}
+        <SavedFiltersList />
+      </div>
 
       {/* Save filter dialog */}
       <SaveFilterDialog

@@ -19,18 +19,19 @@ import { Button } from "@/components/ui/button";
 import { P, Small } from "@/components/ui/typography";
 import { PlusCircle, Trash2 } from "lucide-react";
 import FilterConditionNode from "./FilterConditionNode";
+import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
   path: number[];
-  filterDefs: FilterUIDefinition[];
+
   isRoot?: boolean;
 }
 
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
-  filterDefs,
+
   isRoot = false,
 }) => {
   const filterStore = useFilterStore();
@@ -129,18 +130,13 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                   <FilterGroupNode
                     group={expr as AndExpression | OrExpression}
                     path={newPath}
-                    filterDefs={filterDefs}
                   />
                 </div>
               );
             } else if (expr.type === "condition") {
               return (
                 <div key={`condition-${index}`}>
-                  <FilterConditionNode
-                    condition={expr}
-                    path={newPath}
-                    filterDefs={filterDefs}
-                  />
+                  <FilterConditionNode condition={expr} path={newPath} />
                 </div>
               );
             }

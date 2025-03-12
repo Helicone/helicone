@@ -4,40 +4,46 @@ import { FilterUIDefinition } from "../filterUIDefinitions/types";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Small } from "@/components/ui/typography";
 import { Trash2 } from "lucide-react";
 import SearchableSelect, {
   SearchableSelectOption,
 } from "./ui/SearchableSelect";
 import SearchableInput, { SearchableInputOption } from "./ui/SearchableInput";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
-  eq: "equals",
-  neq: "not equals",
+  eq: "=",
+  neq: "≠",
   is: "is",
-  gt: "greater than",
-  gte: "greater than or equals",
-  lt: "less than",
-  lte: "less than or equals",
-  like: "contains (case sensitive)",
-  ilike: "contains (case insensitive)",
-  contains: "contains",
-  in: "in",
+  gt: ">",
+  gte: "≥",
+  lt: "<",
+  lte: "≤",
+  like: "~",
+  ilike: "≈",
+  contains: "⊃",
+  in: "∈",
 };
 
 interface FilterConditionNodeProps {
   condition: ConditionExpression;
   path: number[];
-  filterDefs: FilterUIDefinition[];
 }
 
 export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   condition,
   path,
-  filterDefs,
 }) => {
   const filterStore = useFilterStore();
+  const { filterDefinitions: filterDefs, isLoading } = useFilterUIDefinitions();
 
   // Handle changing a field in a condition
   const handleFieldChange = (fieldId: string) => {
@@ -117,7 +123,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
     try {
       const results = await filterDef.onSearch(searchTerm);
-      // Convert to SearchableInputOption[] to ensure value is a string
+
       return results.map((result) => ({
         label: result.label,
         value: String(result.value),
@@ -127,6 +133,14 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       return [];
     }
   };
+
+  if (!filterDef) {
+    return (
+      <div className="p-3 border rounded-md bg-card">
+        No filter definition found
+      </div>
+    );
+  }
 
   // Render value input based on field type
   const renderValueInput = () => {
@@ -140,7 +154,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           placeholder="Type to search..."
           emptyMessage="No results found"
           disabled={!condition.field.column || !condition.operator}
-          className="w-full"
+          className="w-full h-9"
         />
       );
     }
@@ -156,7 +170,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           searchPlaceholder="Search value..."
           emptyMessage="No value found."
           disabled={!condition.field.column || !condition.operator}
-          className="w-full"
+          className="w-full h-9"
         />
       );
     }
@@ -168,49 +182,51 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         onChange={(e) => handleValueChange(e.target.value)}
         disabled={!condition.field.column || !condition.operator}
         placeholder="Enter value"
-        className="w-full"
+        className="w-full h-9"
       />
     );
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 border rounded-md bg-card">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Small className="text-muted-foreground">Field</Small>
-          <SearchableSelect
-            options={fieldOptions}
-            value={condition.field.column}
-            onValueChange={handleFieldChange}
-            placeholder="Select field"
-            searchPlaceholder="Search field..."
-            emptyMessage="No field found."
-            width="200px"
-          />
-        </div>
-        <Button variant="ghost" size="icon" onClick={handleRemove}>
-          <Trash2 size={16} className="text-muted-foreground" />
-        </Button>
-      </div>
+    <div className="flex flex-row items-center gap-2 p-3 border rounded-md bg-card">
+      <SearchableSelect
+        options={fieldOptions}
+        value={condition.field.column}
+        onValueChange={handleFieldChange}
+        placeholder="Select field"
+        searchPlaceholder="Search field..."
+        emptyMessage="No field found."
+        width="180px"
+        className="flex-shrink-0 h-9"
+      />
 
-      <div className="flex items-center gap-2">
-        <Small className="text-muted-foreground">Operator</Small>
-        <SearchableSelect
-          options={operatorOptions}
-          value={condition.operator}
-          onValueChange={handleOperatorChange}
-          placeholder="Select operator"
-          searchPlaceholder="Search operator..."
-          emptyMessage="No operator found."
-          disabled={!condition.field.column}
-          width="180px"
-        />
-      </div>
+      <Select
+        value={condition.operator}
+        onValueChange={handleOperatorChange}
+        disabled={!condition.field.column}
+      >
+        <SelectTrigger className="w-[60px] h-9 px-2 flex-shrink-0 text-center">
+          <SelectValue placeholder="Op" />
+        </SelectTrigger>
+        <SelectContent>
+          {operatorOptions.map((op) => (
+            <SelectItem key={op.value} value={op.value}>
+              {op.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      <div className="flex items-center gap-2">
-        <Small className="text-muted-foreground">Value</Small>
-        {renderValueInput()}
-      </div>
+      <div className="flex-grow">{renderValueInput()}</div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleRemove}
+        className="flex-shrink-0 ml-1"
+      >
+        <Trash2 size={16} className="text-muted-foreground" />
+      </Button>
     </div>
   );
 };
