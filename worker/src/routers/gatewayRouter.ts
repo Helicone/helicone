@@ -64,6 +64,11 @@ async function rateLimitUnapprovedDomains(
           options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
         });
       }
+    await safePut({
+        key: rateLimitKV,
+        keyName: rlKey,
+        value: "1",
+      });
     }
   }
   return {
