@@ -306,7 +306,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="ml-2"
+                  className="ml-2 text-white"
                   onClick={() => {
                     deleteWebhook.mutate(webhook.id);
                   }}
@@ -333,7 +333,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
 
-        {canCreate && (
+        {!canCreate && (
           <FreeTierLimitBanner
             feature="webhooks"
             itemCount={webhookCount}

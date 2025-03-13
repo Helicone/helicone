@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { LockIcon } from "lucide-react";
 import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -115,7 +116,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     filterNode
   );
 
-  const { hasAccess, freeLimit, upgradeMessage } = useFeatureLimit(
+  const { hasAccess, freeLimit, upgradeMessage, canCreate } = useFeatureLimit(
     "users",
     users.length
   );
@@ -262,23 +263,13 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
         <TabsContent value="all">
           <div className="flex flex-col space-y-4 pb-10">
-            {!hasAccess && users.length > freeLimit && (
-              <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
-                <div className="flex items-center justify-start gap-2">
-                  <Muted className="flex items-center">
-                    Free tier users can view up to {freeLimit} of {users.length}{" "}
-                    users
-                  </Muted>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    className="text-slate-500 dark:text-slate-400"
-                    onClick={() => setUpgradeDialogOpen(true)}
-                  >
-                    Unlock all →
-                  </Button>
-                </div>
-              </div>
+            {!canCreate && (
+              <FreeTierLimitBanner
+                feature="users"
+                itemCount={users.length}
+                freeLimit={freeLimit}
+                className="w-full"
+              />
             )}
 
             <ThemedTable

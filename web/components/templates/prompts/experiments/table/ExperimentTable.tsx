@@ -94,7 +94,7 @@ export function ExperimentTable({
   const variantCount = promptVersionsData?.length || 0;
   const {
     canCreate: canCreateVariant,
-    hasAccess: hasReachedVariantLimit,
+    hasAccess: hasAccess,
     freeLimit: MAX_VARIANTS,
   } = useFeatureLimit("experiments", variantCount, "variants");
 
@@ -549,7 +549,6 @@ export function ExperimentTable({
             <Button
               variant="ghost"
               onClick={() => {
-                // Show confirmation dialog or directly call the mutation
                 deleteSelectedRows.mutate({
                   inputRecordIds: table
                     .getSelectedRowModel()
@@ -565,7 +564,7 @@ export function ExperimentTable({
       </div>
 
       {/* Variant limit warning banner */}
-      {hasReachedVariantLimit && (
+      {!canCreateVariant && (
         <FreeTierLimitBanner
           feature="experiments"
           subfeature="variants"

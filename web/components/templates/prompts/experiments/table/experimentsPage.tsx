@@ -76,7 +76,7 @@ const ExperimentsPage = () => {
       <AuthHeader
         title="Experiments"
         actions={
-          canCreateExperiment ? (
+          !canCreateExperiment ? (
             <FreeTierLimitWrapper
               feature="experiments"
               itemCount={experimentCount}

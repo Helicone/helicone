@@ -86,13 +86,21 @@ export function FreeTierLimitBanner({
               subfeature={subfeature}
               itemCount={itemCount}
             >
-              <Button variant="action" size={buttonSize}>
+              <Button
+                variant="action"
+                size={buttonSize}
+                className="bg-yellow-700 text-white hover:bg-yellow-800"
+              >
                 {buttonText}
               </Button>
             </FreeTierLimitWrapper>
           ) : (
             <FreeTierLimitWrapper feature={feature} itemCount={itemCount}>
-              <Button variant="action" size={buttonSize}>
+              <Button
+                variant="action"
+                size={buttonSize}
+                className="bg-yellow-700 text-white hover:bg-yellow-800"
+              >
                 {buttonText}
               </Button>
             </FreeTierLimitWrapper>

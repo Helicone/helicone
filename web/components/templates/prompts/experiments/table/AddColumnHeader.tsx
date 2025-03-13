@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AddColumnDialog from "./AddColumnDialog";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
@@ -68,12 +68,13 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
   return (
     <>
       {disabled ? (
-        <ProFeatureWrapper
-          featureName="Prompts"
-          limitMessage="You've reached the limit of 2 variants per experiment. Upgrade for unlimited variants."
+        <FreeTierLimitWrapper
+          feature="experiments"
+          subfeature="variants"
+          itemCount={experimentPromptVersions.length}
         >
           {buttonElement}
-        </ProFeatureWrapper>
+        </FreeTierLimitWrapper>
       ) : (
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>{buttonElement}</DropdownMenuTrigger>

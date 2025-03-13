@@ -22,6 +22,7 @@ import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { P, Muted } from "@/components/ui/typography";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 // Constants
 const MAX_REQUESTS_PER_DATASET = 500; // Hard limit regardless of tier
@@ -223,52 +224,27 @@ export default function NewDataset({
 
     if (limitType === "free_tier_request_limit") {
       return (
-        <InfoBox variant="helicone" className="mb-2">
-          <div className="flex flex-col">
-            <P className="font-medium">Free Tier Limit</P>
-            <div className="flex flex-col gap-2">
-              <Muted>
-                You&apos;ve reached the free tier limit of{" "}
-                {FREE_TIER_REQUEST_LIMIT} requests per dataset. Reduce the
-                number of requests you add to this dataset or upgrade to add
-                more requests.
-              </Muted>
-              <FreeTierLimitWrapper
-                feature="datasets"
-                subfeature="requests"
-                itemCount={
-                  Number(requestCount) +
-                  (Number(selectedDataset?.requests_count) || 0)
-                }
-              >
-                <Button variant="default" className="w-fit px-8" size="sm">
-                  Upgrade
-                </Button>
-              </FreeTierLimitWrapper>
-            </div>
-          </div>
-        </InfoBox>
+        <FreeTierLimitBanner
+          feature="datasets"
+          subfeature="requests"
+          itemCount={
+            Number(requestCount) +
+            (Number(selectedDataset?.requests_count) || 0)
+          }
+          freeLimit={FREE_TIER_REQUEST_LIMIT}
+          className="mb-2"
+        />
       );
     }
 
     if (limitType === "free_tier_dataset_limit") {
       return (
-        <InfoBox variant="helicone" className="mb-2">
-          <div className="flex flex-col">
-            <P className="font-medium">Free Tier Limit</P>
-            <div className="flex flex-col gap-2">
-              <Muted>
-                You&apos;ve reached the free tier limit of{" "}
-                {FREE_TIER_DATASET_LIMIT} datasets.
-              </Muted>
-              <FreeTierLimitWrapper feature="datasets" itemCount={datasetCount}>
-                <Button variant="action" className="w-fit px-4" size="sm">
-                  Upgrade for unlimited datasets
-                </Button>
-              </FreeTierLimitWrapper>
-            </div>
-          </div>
-        </InfoBox>
+        <FreeTierLimitBanner
+          feature="datasets"
+          itemCount={datasetCount}
+          freeLimit={FREE_TIER_DATASET_LIMIT}
+          className="mb-2"
+        />
       );
     }
   };

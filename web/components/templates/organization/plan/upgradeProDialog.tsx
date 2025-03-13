@@ -93,14 +93,10 @@ export const UpgradeProDialog = ({
   const evalsPrice = useCostForEvals();
   const experimentsPrice = useCostForExperiments();
 
-  // Initialize selected addons based on featureName
   useEffect(() => {
-    console.log("featureName", featureName);
     if (open && featureName) {
-      // Convert featureName to lowercase to match addon keys
       const featureKey = featureName.toLowerCase() as keyof Addons;
 
-      // Check if the featureKey is a valid addon key
       if (featureKey in selectedAddons) {
         setSelectedAddons((prev) => ({
           ...prev,
