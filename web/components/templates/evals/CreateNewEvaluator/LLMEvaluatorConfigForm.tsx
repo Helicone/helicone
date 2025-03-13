@@ -415,7 +415,7 @@ const ScoringTypeSection = ({
                   { score: 5, description: "Excellent" },
                 ];
               }
-              
+
               if (valueType === "range") {
                 updates.rangeMin = 0;
                 updates.rangeMax = 100;
