@@ -36,6 +36,8 @@ import { PiController } from './../../controllers/public/piController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ModelComparisonController } from './../../controllers/public/modelComparisonController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { ModelController } from './../../controllers/public/modelController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LLMSecurityController } from './../../controllers/public/llmSecurityController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { IntegrationController } from './../../controllers/public/integrationController';
@@ -1852,6 +1854,20 @@ const models: TsoaRoute.Models = {
     "ModelsToCompare": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"provider":{"dataType":"string","required":true},"names":{"dataType":"array","array":{"dataType":"string"},"required":true},"parent":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__model-string_-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"model":{"dataType":"string","required":true}}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__model-string_-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__model-string_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__unsafe-boolean__": {
@@ -5930,6 +5946,39 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/property/:propertyKey/search',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(PropertyController)),
+            ...(fetchMiddlewares<RequestHandler>(PropertyController.prototype.searchProperties)),
+
+            async function PropertyController_searchProperties(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    propertyKey: {"in":"path","name":"propertyKey","required":true,"dataType":"string"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"searchTerm":{"dataType":"string","required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new PropertyController();
+
+              await templateService.apiHandler({
+                methodName: 'searchProperties',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/v1/property/:propertyKey/top-costs/query',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(PropertyController)),
@@ -6173,6 +6222,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getModelComparison',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/v1/models',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(ModelController)),
+            ...(fetchMiddlewares<RequestHandler>(ModelController.prototype.getModels)),
+
+            async function ModelController_getModels(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new ModelController();
+
+              await templateService.apiHandler({
+                methodName: 'getModels',
                 controller,
                 response,
                 next,
