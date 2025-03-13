@@ -1,12 +1,7 @@
-import {
-  FilterExpression,
-  useFilterActions,
-  useFilterNavigation,
-} from "@/filterAST";
-import { FilterState, useFilterStore } from "@/filterAST/store/filterStore";
+import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
-import { useAutoSaveFilter } from "../hooks/useAutoSaveFilter";
+import { useCallback } from "react";
+import { FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 
 /**
