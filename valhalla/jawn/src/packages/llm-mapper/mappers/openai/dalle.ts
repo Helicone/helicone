@@ -38,8 +38,13 @@ export const mapDalleRequest: MapperFn<DalleRequestBody, any> = ({
       prompt: request.prompt,
       size: request.size,
       quality: request.quality,
-      response_format: request.response_format,
-    } as DalleRequestBody,
+      response_format: request.response_format
+        ? {
+            type: request.response_format,
+            json_schema: {},
+          }
+        : undefined,
+    },
     response: {
       messages: [
         {

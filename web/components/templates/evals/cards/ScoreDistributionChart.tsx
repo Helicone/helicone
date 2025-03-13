@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   TooltipProps,
 } from "recharts";
+import { Small } from "@/components/ui/typography";
 
 interface ScoreDistributionChartProps {
   distributionData: EvaluatorStats["scoreDistribution"];
@@ -23,14 +24,23 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
   distributionData,
   className = "",
 }) => {
-  // Process the data for charting
-  const processedData =
-    !distributionData || distributionData.length === 0
-      ? generateMockDistributionData()
-      : distributionData.map((item) => ({
-          range: item.range,
-          count: Number(item.count) || 0, // Ensure count is a number
-        }));
+  // Check if we have real data
+  const hasData = distributionData && distributionData.length > 0;
+
+  // If no data, show a message instead of chart
+  if (!hasData) {
+    return (
+      <div className={`h-24 flex items-center justify-center ${className}`}>
+        <Small className="text-muted-foreground">No data available</Small>
+      </div>
+    );
+  }
+
+  // Process real data for charting
+  const processedData = distributionData.map((item) => ({
+    range: item.range,
+    count: Number(item.count) || 0, // Ensure count is a number
+  }));
 
   // Custom tooltip component
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
@@ -74,16 +84,3 @@ export const ScoreDistributionChart: React.FC<ScoreDistributionChartProps> = ({
     </div>
   );
 };
-
-/**
- * Generate mock distribution data for when no real data is available
- */
-function generateMockDistributionData() {
-  return [
-    { range: "0-20", count: 2 },
-    { range: "21-40", count: 5 },
-    { range: "41-60", count: 8 },
-    { range: "61-80", count: 15 },
-    { range: "81-100", count: 10 },
-  ];
-}
