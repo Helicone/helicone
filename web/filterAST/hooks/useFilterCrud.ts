@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
+import { useCallback } from "react";
 
 export type StoreFilterType = {
   id?: string;
@@ -51,6 +52,20 @@ export const useFilterCrud = () => {
     enabled: !!orgId,
   });
 
+  const getFilterById = useCallback(
+    async (id: string): Promise<StoreFilterType | undefined> => {
+      if (savedFiltersData?.some((filter) => filter.id === id)) {
+        return savedFiltersData?.find((filter) => filter.id === id);
+      }
+
+      const response = await jawn.GET("/v1/filter/{id}", {
+        params: { path: { id } },
+      });
+      return response.data?.data as StoreFilterType;
+    },
+    [jawn, savedFiltersData]
+  );
+
   // Extract saved filters
   const savedFilters = savedFiltersData || [];
 
@@ -71,7 +86,7 @@ export const useFilterCrud = () => {
       }
       await refetch();
 
-      return response.data as CreateFilterResponse;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedFilters", orgId] });
@@ -85,8 +100,7 @@ export const useFilterCrud = () => {
       const response = await jawn.PATCH("/v1/filter/{id}", {
         params: { path: { id: params.id || "" } },
         body: {
-          filter: params.filter,
-          name: params.name,
+          filters: params,
         },
       });
 
@@ -121,15 +135,6 @@ export const useFilterCrud = () => {
       refetch();
     },
   });
-
-  /**
-   * Get a filter by ID
-   */
-  const getFilterById = (filterId: string) => {
-    return savedFilters.find(
-      (filter: StoreFilterType) => filter.id === filterId
-    );
-  };
 
   /**
    * Create a shareable URL for a filter

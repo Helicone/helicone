@@ -1574,6 +1574,14 @@ Json: JsonObject;
       error: null;
     };
     "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -3925,7 +3933,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_null.string_"];
+          "application/json": components["schemas"]["Result__id-string_.string_"];
         };
       };
     };
@@ -3968,7 +3976,9 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["StoreFilterType"];
+        "application/json": {
+          filters: unknown;
+        };
       };
     };
     responses: {

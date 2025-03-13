@@ -25,12 +25,10 @@ export const useContextHelpers = ({
   const pathname = usePathname();
   const loadFilterById = useCallback(
     async (filterId: string) => {
-      const filterToLoad = filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterId
-      );
+      const filterToLoad = await filterCrud.getFilterById(filterId);
 
-      if (filterToLoad) {
-        filterStore.setFilter(filterToLoad.filter);
+      if (filterToLoad && filterToLoad?.filter) {
+        filterStore.setFilter(filterToLoad?.filter as FilterExpression);
         filterStore.setActiveFilterId(filterId);
         const params = new URLSearchParams(searchParams?.toString());
         params.set("filter_id", filterId);
@@ -83,7 +81,6 @@ export const useContextHelpers = ({
     });
 
     if (result?.data?.id) {
-      await new Promise((resolve) => setTimeout(resolve, 1_000));
       loadFilterById(result.data.id);
     }
 
