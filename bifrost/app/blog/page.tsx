@@ -201,6 +201,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "manus-benchmark-operator-comparison",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "chain-of-draft",
     },
   },
