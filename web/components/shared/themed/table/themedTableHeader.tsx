@@ -82,6 +82,10 @@ interface ThemedTableHeaderProps<T> {
     onChange: (value: string) => void;
     placeholder: string;
   };
+  selectedRows?: {
+    count?: number;
+    children?: React.ReactNode;
+  };
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -97,6 +101,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     customButtons,
     isDatasetsPage,
     search,
+    selectedRows,
   } = props;
 
   const searchParams = useSearchParams();
@@ -139,6 +144,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const handlePopoverInteraction = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+  console.log(selectedRows);
 
   return (
     <TooltipProvider>
@@ -261,6 +267,18 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
 
           <div className="flex flex-wrap justify-start lg:justify-end items-center">
+            {(selectedRows?.count ?? 0) > 0 && (
+              <div className="flex items-center gap-2 mr-2">
+                <div className="flex flex-row gap-2 items-center">
+                  <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                    {selectedRows!.count}{" "}
+                    {selectedRows!.count === 1 ? "row" : "rows"} selected
+                  </span>
+                </div>
+                {selectedRows!.children && selectedRows!.children}
+              </div>
+            )}
+
             {search && (
               <Tooltip>
                 <TooltipTrigger asChild>

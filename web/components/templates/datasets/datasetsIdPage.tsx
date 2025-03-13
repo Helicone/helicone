@@ -10,19 +10,16 @@ import {
   getGenericRequestText,
   getGenericResponseText,
 } from "../requests/helpers";
-import DatasetButton from "../requests/buttons/datasetButton";
 import {
   FolderPlusIcon,
   Square2StackIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Row } from "../../layout/common";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useRouter } from "next/router";
 import TableFooter from "../requests/tableFooter";
-import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/org/organizationContext";
 import ExportButton from "../../shared/themed/table/exportButton";
 import NewDataset from "./NewDataset";
@@ -73,6 +70,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     toggleSelection,
     selectAll,
     deselectAll,
+    isShiftPressed,
   } = useSelectMode({
     items: rows,
     getItemId: (row) => row.id,
@@ -91,8 +89,19 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   }, [rows, selectedIds]);
 
   const onRowSelectHandler = useCallback(
-    (row: any) => {
-      if (selectModeHook) {
+    (row: any, index: number, event?: React.MouseEvent) => {
+      // Check if the click was on a checkbox or a button
+      let isCheckboxClick =
+        event?.target instanceof HTMLElement &&
+        (event.target.tagName.toLowerCase() === "button" ||
+          event.target.closest("button") !== null);
+
+      if (
+        selectModeHook ||
+        isShiftPressed ||
+        event?.metaKey ||
+        isCheckboxClick
+      ) {
         toggleSelection(row);
       } else {
         setSelectedRow(row);
@@ -100,7 +109,15 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         setOpen(true);
       }
     },
-    [selectModeHook, toggleSelection, rows]
+    [
+      selectModeHook,
+      toggleSelection,
+      rows,
+      setSelectedRow,
+      setSelectedRowIndex,
+      setOpen,
+      isShiftPressed,
+    ]
   );
 
   const handlePrevious = () => {
@@ -265,7 +282,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
         </div>
         <ThemedTable
           highlightedIds={selectedIds}
-          showCheckboxes={selectModeHook}
+          checkboxMode={"on_hover"}
           fullWidth={true}
           defaultColumns={[
             {
@@ -318,22 +335,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
               rows={rows}
               fetchRows={exportedData}
             />,
-            <div key={"dataset-button"}>
-              <DatasetButton
-                datasetMode={selectModeHook}
-                setDatasetMode={toggleSelectMode}
-                isDatasetPage={true}
-                items={rows.filter((request) =>
-                  selectedIds.includes(request.id)
-                )}
-                onAddToDataset={() => {
-                  rows
-                    .filter((row) => selectedIds.includes(row.id))
-                    .forEach(toggleSelection);
-                  toggleSelectMode(false);
-                }}
-              />
-            </div>,
             openPipeIntegration.integration?.active && (
               <div key={"open-pipe-button"}>
                 <OpenPipeFineTuneButton
@@ -355,49 +356,35 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           ]}
           onSelectAll={handleSelectAll}
           selectedIds={selectedIds}
-        >
-          {selectModeHook && (
-            <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-              <div className="flex flex-row gap-2 items-center">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                  Request Selection:
-                </span>
-                <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] text-[#1876D2] dark:text-gray-100 whitespace-nowrap">
-                  {selectedIds.length} selected
-                </span>
+          selectedRows={{
+            showSelectedCount: true,
+            children: (
+              <div className="flex gap-2">
+                <GenericButton
+                  onClick={() => setShowNewDatasetModal(true)}
+                  text="Copy to..."
+                  icon={
+                    <FolderPlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  }
+                ></GenericButton>
+                <GenericButton
+                  onClick={handleDuplicateRequests}
+                  text="Duplicate"
+                  icon={
+                    <Square2StackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+                  }
+                ></GenericButton>
+                <GenericButton
+                  onClick={() => setShowRemoveModal(true)}
+                  className="!bg-destructive hover:!bg-destructive/90 !border-destructive"
+                  text="Remove"
+                  textClassName="text-white"
+                  icon={<TrashIcon className="h-5 w-5 text-white" />}
+                />
               </div>
-              {selectedIds.length > 0 && (
-                <div className="flex gap-2">
-                  <GenericButton
-                    onClick={() => setShowNewDatasetModal(true)}
-                    text="Copy to..."
-                    icon={
-                      <FolderPlusIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                    }
-                  ></GenericButton>
-                  <GenericButton
-                    onClick={handleDuplicateRequests}
-                    text="Duplicate"
-                    icon={
-                      <Square2StackIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                    }
-                  ></GenericButton>
-                  <button
-                    onClick={() => setShowRemoveModal(true)}
-                    className={clsx(
-                      "relative inline-flex items-center hover:bg-red-700 bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                    )}
-                  >
-                    <div className="flex flex-row gap-2 items-center">
-                      <TrashIcon className="h-5 w-5 text-gray-100 dark:text-gray-900" />
-                      <span>Remove</span>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </Row>
-          )}
-        </ThemedTable>
+            ),
+          }}
+        ></ThemedTable>
 
         <TableFooter
           currentPage={page}
