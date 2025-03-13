@@ -99,10 +99,7 @@ export const TestFilterPage: React.FC = () => {
 
     try {
       await helpers.deleteFilter(store.activeFilterId);
-      filterStore.setFilter({
-        type: "and",
-        expressions: [],
-      });
+      filterStore.setFilter(null);
       setFilterName("Untitled Filter");
       toast.success("Filter deleted", {
         description: "Your filter has been deleted successfully.",
@@ -345,7 +342,13 @@ export const TestFilterPage: React.FC = () => {
                     placeholder="Filter Name"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  {store.hasUnsavedChanges && (
+                    <div className="flex items-center text-muted-foreground bg-muted px-2 py-1 rounded-md text-xs">
+                      <Clock size={12} className="mr-1" />
+                      Unsaved
+                    </div>
+                  )}
                   <Dialog
                     open={isShareDialogOpen}
                     onOpenChange={setIsShareDialogOpen}
@@ -387,11 +390,16 @@ export const TestFilterPage: React.FC = () => {
                     disabled={crud.isSaving}
                   >
                     {crud.isSaving ? (
-                      <Clock size={16} className="mr-1 animate-spin" />
+                      <>
+                        <Clock size={16} className="mr-1 animate-spin" />
+                        Saving...
+                      </>
                     ) : (
-                      <Save size={16} className="mr-1" />
+                      <>
+                        <Save size={16} className="mr-1" />
+                        Save
+                      </>
                     )}
-                    Save
                   </Button>
 
                   {store.activeFilterId && (
@@ -407,12 +415,6 @@ export const TestFilterPage: React.FC = () => {
                   )}
                 </div>
               </div>
-              {store.hasUnsavedChanges && (
-                <Small className="text-muted-foreground mt-1">
-                  <Clock size={12} className="inline mr-1" />
-                  Unsaved changes will be automatically saved
-                </Small>
-              )}
             </CardHeader>
             <CardContent className="pt-0">
               <Tabs defaultValue="visual-editor" onValueChange={setSelectedTab}>
@@ -425,10 +427,7 @@ export const TestFilterPage: React.FC = () => {
                   value="visual-editor"
                   className="border rounded-lg p-4 min-h-[400px]"
                 >
-                  <FilterASTEditor
-                    onFilterChange={handleFilterChange}
-                    layoutPage="requests"
-                  />
+                  <FilterASTEditor onFilterChange={handleFilterChange} />
                 </TabsContent>
 
                 <TabsContent

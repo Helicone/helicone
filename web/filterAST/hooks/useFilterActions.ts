@@ -17,15 +17,6 @@ export const useFilterActions = () => {
   };
 
   /**
-   * Initialize a new empty filter if none exists
-   */
-  const initializeFilter = () => {
-    if (!filterStore.filter) {
-      filterStore.setFilter(DEFAULT_FILTER);
-    }
-  };
-
-  /**
    * Check if there are any active filters
    */
   const hasActiveFilters = (): boolean => {
@@ -111,7 +102,6 @@ export const useFilterActions = () => {
   return {
     saveDialogOpen,
     setSaveDialogOpen,
-    initializeFilter,
     hasActiveFilters,
     createSimpleFilter,
     clearFilter,

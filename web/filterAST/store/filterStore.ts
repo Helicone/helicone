@@ -32,13 +32,8 @@ export interface FilterState {
   clearActiveFilter: () => void;
 }
 
-const DEFAULT_FILTER: AndExpression = {
-  type: "and",
-  expressions: [],
-};
-
 export const useFilterStore = create<FilterState>()((set, get) => ({
-  filter: DEFAULT_FILTER,
+  filter: null,
   activeFilterId: null,
   initialFilterId: null,
   hasUnsavedChanges: false,
@@ -141,7 +136,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
     // If removing the root, clear the filter
     if (path.length === 0) {
       set({
-        filter: DEFAULT_FILTER,
+        filter: null,
         hasUnsavedChanges: get().activeFilterId !== null,
       });
       return;

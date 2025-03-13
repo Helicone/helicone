@@ -15,6 +15,7 @@ import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
 
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 type StoreFilterType = {
   id?: string;
@@ -31,26 +32,35 @@ export class FilterController extends Controller {
   public async getFilters(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<StoreFilterType[], string>> {
-    const { data, error: deleteError } = await supabaseServer.client
-      .from("organization_layout")
-      .select("*")
-      .eq("organization_id", request.authParams.organizationId)
-      .eq("type", "filter_ast")
-      .order("created_at", { ascending: false });
+    const { data, error: deleteError } = await dbExecute<{
+      id: string;
+      name: string;
+      filter: string;
+      created_at: string;
+    }>(
+      `
+      SELECT id, filters->>'name' as name, filters->>'filter' as filter, created_at from 
+      organization_layout
+      WHERE organization_id = $1
+      AND type = 'filter_ast'
+      AND filters->>'name' != 'Untitled Filter'
+      ORDER BY created_at DESC
+      `,
+      [request.authParams.organizationId]
+    );
 
     if (deleteError) {
       this.setStatus(500);
-      return err(`Failed to delete filter: ${deleteError.message}`);
+      return err(`Failed to delete filter: ${deleteError}`);
     }
 
     return ok(
-      data.map(
-        (d) =>
-          ({
-            ...(d.filters as StoreFilterType),
-            id: d.id,
-          } as StoreFilterType)
-      )
+      data?.map((d) => ({
+        id: d.id,
+        name: d.name,
+        filter: JSON.parse(d.filter),
+        createdAt: d.created_at,
+      })) ?? []
     );
   }
 

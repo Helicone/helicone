@@ -314,6 +314,9 @@ export interface paths {
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
+  "/v1/models": {
+    get: operations["GetModels"];
+  };
   "/v1/public/security": {
     post: operations["GetSecurity"];
   };
@@ -1914,6 +1917,14 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -4343,6 +4354,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };

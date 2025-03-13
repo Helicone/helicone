@@ -7,6 +7,7 @@ import {
   Save,
   X,
   BookOpen,
+  Loader2,
 } from "lucide-react";
 import React, { useState } from "react";
 import { AndExpression, FilterExpression } from "./filterAst";
@@ -29,17 +30,22 @@ const DEFAULT_FILTER: AndExpression = {
 
 interface FilterASTEditorProps {
   onFilterChange?: (filter: FilterExpression) => void;
-  layoutPage?: "dashboard" | "requests";
 }
 
 export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   onFilterChange,
-  layoutPage = "requests",
 }) => {
-  const filterStore = useFilterStore();
-  const { saveDialogOpen, setSaveDialogOpen, hasActiveFilters, clearFilter } =
-    useFilterActions();
-  const { crud } = useFilterAST();
+  const {
+    crud,
+    store: filterStore,
+    actions: {
+      saveDialogOpen,
+      setSaveDialogOpen,
+      hasActiveFilters,
+      clearFilter,
+    },
+    helpers,
+  } = useFilterAST();
   const [showSavedFilters, setShowSavedFilters] = useState(false);
 
   // Call the onFilterChange callback whenever the filter changes
@@ -49,23 +55,18 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
     }
   }, [filterStore.filter, onFilterChange]);
 
-  // Create the root if it doesn't exist
-  if (!filterStore.filter) {
-    filterStore.setFilter(DEFAULT_FILTER);
-  }
-
-  // Create a new filter group when none exists
-  const handleAddFilterGroup = () => {
-    filterStore.setFilter({
-      type: "and",
-      expressions: [],
-    });
-  };
-
   // Toggle saved filters visibility
   const toggleSavedFilters = () => {
     setShowSavedFilters(!showSavedFilters);
   };
+
+  if (crud.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 w-full">
@@ -116,12 +117,14 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
           <div className="text-center py-8">
             <P className="text-muted-foreground">No filters applied</P>
             <Button
-              onClick={handleAddFilterGroup}
+              onClick={() => {
+                helpers.newEmptyFilter();
+              }}
               className="mt-2"
               variant="default"
             >
               <PlusCircle size={16} className="mr-1" />
-              Add Filter Group
+              New Filter
             </Button>
           </div>
         )}

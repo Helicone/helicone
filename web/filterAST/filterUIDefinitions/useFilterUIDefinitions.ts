@@ -25,6 +25,16 @@ export const useFilterUIDefinitions = () => {
     refetchOnWindowFocus: false,
   });
 
+  const models = useQuery({
+    queryKey: ["/v1/models", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[1]);
+      const res = await jawn.GET("/v1/models");
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const searchProperties = useMutation({
     mutationFn: async (params: { propertyKey: string; searchTerm: string }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
@@ -67,13 +77,37 @@ export const useFilterUIDefinitions = () => {
         subType: "property",
       })) ?? [];
 
+    const modelsDefinition: FilterUIDefinition = {
+      id: "model",
+      label: "Model",
+      type: "searchable",
+      operators: ["eq", "neq", "like", "ilike", "contains", "in"],
+
+      onSearch: async (searchTerm) => {
+        return Promise.resolve(
+          models.data?.data
+            ?.filter((m) =>
+              m.model.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((m) => ({
+              label: m.model,
+              value: m.model,
+            })) ?? []
+        );
+      },
+    };
+
     // Replace or add dynamic definitions to the static ones
     const staticIdsToExclude = dynamicDefinitions.map((def) => def.id);
     const filteredStaticDefs = STATIC_FILTER_DEFINITIONS.filter(
       (def) => !staticIdsToExclude.includes(def.id)
     );
 
-    return [...filteredStaticDefs, ...dynamicDefinitions];
+    return [
+      modelsDefinition,
+      ...filteredStaticDefs,
+      ...dynamicDefinitions,
+    ] as FilterUIDefinition[];
   }, [properties.data?.data, searchProperties]); // Include all dependencies
 
   return {

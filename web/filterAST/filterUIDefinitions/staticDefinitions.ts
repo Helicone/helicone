@@ -135,14 +135,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
   },
-
-  // Special fields
-  {
-    id: "properties",
-    label: "Properties",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-  },
   {
     id: "scores",
     label: "Scores",
