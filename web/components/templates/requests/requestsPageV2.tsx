@@ -36,7 +36,6 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Row } from "../../layout/common";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
@@ -53,7 +52,6 @@ import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
-import { useRequestView } from "@/services/context/useRequestViewContext";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -174,7 +172,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   >(undefined);
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
-  const { view, setView } = useRequestView();
 
   const encodeFilters = (filters: UIFilterRowTree): string => {
     const encode = (node: UIFilterRowTree): any => {
@@ -572,10 +569,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   // if metakey is pressed, we add the row to the selection
   // if click was on a checkbox, we add the row to the selection
   // else we open the side-tray with details on the request.
-  const onRowSelectHandler = (row: MappedLLMRequest, index: number, event?: React.MouseEvent) => {
+  const onRowSelectHandler = (
+    row: MappedLLMRequest,
+    index: number,
+    event?: React.MouseEvent
+  ) => {
     // bit of a hack since pre-existing table behavior is noop
-    let isCheckboxClick = event?.target instanceof HTMLElement &&
-      (event.target.tagName.toLowerCase() === 'button' || event.target.closest('button') !== null);
+    let isCheckboxClick =
+      event?.target instanceof HTMLElement &&
+      (event.target.tagName.toLowerCase() === "button" ||
+        event.target.closest("button") !== null);
     if (isShiftPressed || event?.metaKey || isCheckboxClick) {
       toggleSelection(row);
       return;
@@ -717,7 +720,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 highlightedIds={
                   selectedData && open ? [selectedData.id] : selectedIds
                 }
-                showCheckboxes={true}
+                checkboxMode={"on_hover"}
                 defaultData={requests}
                 defaultColumns={columnsWithProperties}
                 skeletonLoading={isDataLoading}
@@ -791,11 +794,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 customButtons={[]}
                 onSelectAll={selectAll}
                 selectedIds={selectedIds}
-                selectedItems={
+                selectedRows={
                   selectedIds.length > 0
                     ? {
-                        count: selectedIds.length,
-                        addToDatasetButton: (
+                        showSelectedCount: true,
+                        children: (
                           <ProFeatureWrapper featureName="Datasets">
                             <GenericButton
                               onClick={() => {
@@ -855,8 +858,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     />
                   ) : undefined
                 }
-              >
-              </ThemedTable>
+              ></ThemedTable>
               <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
                 <TableFooter
                   currentPage={page}
