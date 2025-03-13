@@ -115,7 +115,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     filterNode
   );
 
-  const { hasFullAccess, freeLimit, upgradeMessage } = useFeatureLimit(
+  const { hasAccess, freeLimit, upgradeMessage } = useFeatureLimit(
     "users",
     users.length
   );
@@ -153,7 +153,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   );
 
   const columns = useMemo(() => {
-    if (hasFullAccess) {
+    if (hasAccess) {
       return INITIAL_COLUMNS;
     }
 
@@ -210,11 +210,11 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       }
       return column;
     });
-  }, [hasFullAccess, freeLimit, users]);
+  }, [hasAccess, freeLimit, users]);
 
   const handleRowSelect = (row: UserMetric) => {
     // Fast exit if user has full access - direct navigation
-    if (hasFullAccess) {
+    if (hasAccess) {
       router.push(`/users/${encodeURIComponent(row.user_id)}`);
       return;
     }
@@ -262,7 +262,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
         <TabsContent value="all">
           <div className="flex flex-col space-y-4 pb-10">
-            {!hasFullAccess && users.length > freeLimit && (
+            {!hasAccess && users.length > freeLimit && (
               <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
                 <div className="flex items-center justify-start gap-2">
                   <Muted className="flex items-center">

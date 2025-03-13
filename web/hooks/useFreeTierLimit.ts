@@ -7,46 +7,33 @@ import {
 } from "@/lib/freeTierLimits";
 import { FeatureId, SubfeatureId } from "@/lib/features";
 
-// Define return type interfaces
-export interface FeatureLimitResult {
-  // Whether the user can create more items (has access or below limit)
-  canCreate: boolean;
-
-  // Whether the user has full access to this feature (e.g., via paid plan)
-  hasFullAccess: boolean;
-
+// Define base interface for all limit results
+export interface BaseLimitResult {
+  // Whether the user has access to this feature (via paid plan)
+  hasAccess: boolean;
   // How many more items the user can create
   remainingItems: number;
 
-  // The feature configuration from FREE_TIER_CONFIG
+  // Message to show when prompting for upgrade
+  upgradeMessage: string;
+
+  // The maximum number of items allowed on the free tier
+  freeLimit: number;
+
+  // Whether the user can create more items
+  canCreate: boolean;
+}
+
+export interface FeatureLimitResult extends BaseLimitResult {
   featureConfig: LimitConfig | null;
-
-  // Message to show when prompting for upgrade
-  upgradeMessage: string;
-
-  // The maximum number of items allowed on the free tier
-  freeLimit: number;
 }
 
-export interface SubfeatureLimitResult {
-  // Whether the user can create more subfeature items
-  canCreate: boolean;
-
-  // Whether the user has full access to the parent feature
-  hasFullAccess: boolean;
-
-  // How many more items the user can create
-  remainingItems: number;
-
-  // The subfeature configuration from FREE_TIER_CONFIG
+export interface SubfeatureLimitResult extends BaseLimitResult {
   subfeatureConfig: LimitConfig | null;
-
-  // Message to show when prompting for upgrade
-  upgradeMessage: string;
-
-  // The maximum number of items allowed on the free tier
-  freeLimit: number;
 }
+
+// Union type for both result types
+export type LimitResult = FeatureLimitResult | SubfeatureLimitResult;
 
 // Helper to create context object
 function getContext(): FreeTierLimitContext {
@@ -58,96 +45,81 @@ function getContext(): FreeTierLimitContext {
   };
 }
 
+/**
+ * Unified hook for checking feature and subfeature limits
+ * @param feature The feature ID to check access for
+ * @param itemCount Number of items using this feature
+ * @param subfeature Optional subfeature ID (if checking a subfeature)
+ * @returns Limit information including access status and remaining items
+ */
 export function useFeatureLimit(
   feature: FeatureId,
-  itemCount: number
-): FeatureLimitResult {
+  itemCount: number,
+  subfeature?: SubfeatureId | undefined
+): LimitResult {
   // Get required data
-  const hasFullAccess = useHasAccess(feature);
+  const hasAccess = useHasAccess(feature);
   const context = getContext();
 
-  // Get the feature configuration
-  const featureConfig = FREE_TIER_CONFIG.features[feature]?.main;
+  let config: LimitConfig | null = null;
 
-  // If no config exists, allow unlimited
-  if (!featureConfig) {
-    return {
-      canCreate: true,
-      hasFullAccess,
-      remainingItems: Infinity,
-      featureConfig: null,
-      upgradeMessage: "",
-      freeLimit: Infinity,
-    };
+  // Determine if we're checking a feature or subfeature
+  if (subfeature) {
+    config =
+      FREE_TIER_CONFIG.features[feature]?.subfeatures?.[subfeature] ?? null;
+  } else {
+    config = FREE_TIER_CONFIG.features[feature]?.main ?? null;
   }
 
-  // Calculate the limit based on context
-  const freeLimit = featureConfig.getLimit(context);
-
-  // Check if limit is reached
-  const canCreate = !hasFullAccess && itemCount >= freeLimit;
-  const remainingItems = Math.max(0, freeLimit - itemCount);
-
-  // Generate upgrade message
-  const upgradeMessage =
-    featureConfig.upgradeMessage?.(freeLimit, itemCount) ??
-    `Upgrade for unlimited access.`;
-
-  return {
-    canCreate,
-    hasFullAccess,
-    remainingItems,
-    featureConfig,
-    upgradeMessage,
-    freeLimit,
-  };
-}
-
-// Hook for subfeature limits
-export function useSubfeatureLimit(
-  feature: FeatureId,
-  subfeature: SubfeatureId,
-  itemCount: number
-): SubfeatureLimitResult {
-  // Get required data
-  const hasFullAccess = useHasAccess(feature);
-  const context = getContext();
-
-  // Get the subfeature configuration if it exists
-  const subfeatureConfig =
-    FREE_TIER_CONFIG.features[feature]?.subfeatures?.[subfeature];
-
   // If no config exists, allow unlimited
-  if (!subfeatureConfig) {
-    return {
-      canCreate: true,
-      hasFullAccess,
+  if (!config) {
+    const baseResult = {
+      hasAccess,
       remainingItems: Infinity,
-      subfeatureConfig: null,
       upgradeMessage: "",
       freeLimit: Infinity,
+      canCreate: true,
     };
+
+    // Return appropriate type based on if subfeature was provided
+    if (subfeature) {
+      return {
+        ...baseResult,
+        subfeatureConfig: null,
+      } as SubfeatureLimitResult;
+    } else {
+      return {
+        ...baseResult,
+        featureConfig: null,
+      } as FeatureLimitResult;
+    }
   }
 
-  // Calculate the limit based on context
-  const freeLimit = subfeatureConfig.getLimit(context);
-
-  // Check if limit is reached
-  const hasReachedLimit = !hasFullAccess && itemCount >= freeLimit;
+  const freeLimit = config.getLimit(context);
+  const canCreate = hasAccess || itemCount < freeLimit;
   const remainingItems = Math.max(0, freeLimit - itemCount);
-  const canCreate = hasFullAccess || !hasReachedLimit;
 
-  // Generate upgrade message
   const upgradeMessage =
-    subfeatureConfig.upgradeMessage?.(freeLimit, itemCount) ??
+    config.upgradeMessage?.(freeLimit, itemCount) ??
     `Upgrade for unlimited access.`;
 
-  return {
-    canCreate,
-    hasFullAccess,
+  const baseResult = {
+    hasAccess,
     remainingItems,
-    subfeatureConfig,
     upgradeMessage,
     freeLimit,
+    canCreate,
   };
+
+  if (subfeature) {
+    return {
+      ...baseResult,
+      subfeatureConfig: config,
+    } as SubfeatureLimitResult;
+  } else {
+    return {
+      ...baseResult,
+      featureConfig: config,
+    } as FeatureLimitResult;
+  }
 }

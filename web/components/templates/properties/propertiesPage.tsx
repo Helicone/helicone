@@ -20,21 +20,21 @@ const PropertiesPage = (props: {}) => {
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
-  const { hasFullAccess, freeLimit, canCreate } = useFeatureLimit(
+  const { hasAccess, freeLimit, canCreate } = useFeatureLimit(
     "properties",
     properties.length
   );
 
   useEffect(() => {
     if (
-      !hasFullAccess &&
+      !hasAccess &&
       properties.length > 0 &&
       selectedProperty === "" &&
       !isPropertiesLoading
     ) {
       setSelectedProperty(properties[0]);
     }
-  }, [properties, selectedProperty, isPropertiesLoading, hasFullAccess]);
+  }, [properties, selectedProperty, isPropertiesLoading, hasAccess]);
 
   if (isPropertiesLoading) {
     return (
@@ -102,7 +102,7 @@ const PropertiesPage = (props: {}) => {
           <CardContent>
             <ScrollArea className="h-full dark:bg-sidebar-background bg-background">
               {properties.map((property, i) => {
-                const requiresPremium = !hasFullAccess && i >= freeLimit;
+                const requiresPremium = !hasAccess && i >= freeLimit;
 
                 return (
                   <div key={i}>

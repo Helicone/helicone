@@ -96,10 +96,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     selectedName
   );
 
-  const { hasFullAccess } = useFeatureLimit(
-    "sessions",
-    allNames.sessions.length
-  );
+  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
 
   const hasSomeSessions = useMemo(() => {
     return allNames.sessions.length > 0;
@@ -116,7 +113,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   useEffect(() => {
     if (
-      !hasFullAccess &&
+      !hasAccess &&
       hasSomeSessions &&
       selectedName === undefined &&
       !allNames.isLoading
@@ -135,7 +132,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     allNames.sessions,
     allNames.isLoading,
     selectedName,
-    hasFullAccess,
+    hasAccess,
   ]);
 
   return (

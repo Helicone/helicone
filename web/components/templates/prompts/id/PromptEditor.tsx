@@ -88,13 +88,12 @@ import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import { DiffHighlight } from "../../welcome/diffHighlight";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
-import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -163,10 +162,10 @@ export default function PromptEditor({
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
   // - Free Tier Limit
   const versionCount = promptVersionsData?.length ?? 0;
-  const { canCreate: canCreateVersion } = useSubfeatureLimit(
+  const { canCreate: canCreateVersion } = useFeatureLimit(
     "prompts",
-    "versions",
-    versionCount
+    versionCount,
+    "versions"
   );
 
   const { prompts: promptsData } = usePrompts();
@@ -178,19 +177,18 @@ export default function PromptEditor({
     canCreate: canRunPlayground,
     freeLimit: maxPlaygroundRuns,
     upgradeMessage: playgroundUpgradeMessage,
-    hasFullAccess: hasPlaygroundAccess,
-  } = useSubfeatureLimit("prompts", "playground_runs", playgroundRunCount);
+    hasAccess: hasPlaygroundAccess,
+  } = useFeatureLimit("prompts", playgroundRunCount, "playground_runs");
 
   const {
     canCreate: canRunPrompt,
     freeLimit: maxPromptRuns,
     upgradeMessage: promptUpgradeMessage,
-    hasFullAccess: hasPromptAccess,
-  } = useSubfeatureLimit("prompts", "runs", promptRunCount);
+    hasAccess: hasPromptAccess,
+  } = useFeatureLimit("prompts", promptRunCount, "runs");
 
   const {
     canCreate: canCreatePrompt,
-    freeLimit: maxPrompts,
     upgradeMessage: promptLimitUpgradeMessage,
   } = useFeatureLimit("prompts", promptCount);
 
@@ -1234,7 +1232,7 @@ export default function PromptEditor({
 
           {/* Run & Save Button */}
           {promptId && isImportedFromCode === false && state.isDirty ? (
-            <FreeTierSubLimitWrapper
+            <FreeTierLimitWrapper
               feature="prompts"
               subfeature="versions"
               itemCount={versionCount}
@@ -1274,7 +1272,7 @@ export default function PromptEditor({
                   <MdKeyboardReturn className="h-4 w-4" />
                 </div>
               </Button>
-            </FreeTierSubLimitWrapper>
+            </FreeTierLimitWrapper>
           ) : (
             <Button
               className={`${

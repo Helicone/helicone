@@ -18,9 +18,8 @@ import { Checkbox } from "../../ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "../../ui/label";
-import { useFeatureLimit, useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { P, Muted } from "@/components/ui/typography";
 
@@ -64,15 +63,15 @@ export default function NewDataset({
   const datasetCount = datasets?.length || 0;
   const requestCount = request_ids.length;
 
-  const { hasFullAccess, freeLimit: FREE_TIER_DATASET_LIMIT } = useFeatureLimit(
+  const { hasAccess, freeLimit: FREE_TIER_DATASET_LIMIT } = useFeatureLimit(
     "datasets",
     datasetCount
   );
 
-  const { freeLimit: FREE_TIER_REQUEST_LIMIT } = useSubfeatureLimit(
+  const { freeLimit: FREE_TIER_REQUEST_LIMIT } = useFeatureLimit(
     "datasets",
-    "requests",
-    requestCount
+    requestCount,
+    "requests"
   );
 
   // State to track which limit is enforcing restrictions
@@ -100,7 +99,7 @@ export default function NewDataset({
             MAX_REQUESTS_PER_DATASET - dataset.requests_count;
 
           // For paid users, only apply hard limit
-          if (hasFullAccess) {
+          if (hasAccess) {
             const newLimitedRequestIds = request_ids.slice(
               0,
               hardLimitRemaining
@@ -145,7 +144,7 @@ export default function NewDataset({
       );
 
       // For paid users, only apply hard limit
-      if (hasFullAccess) {
+      if (hasAccess) {
         setLimitedRequestIds(hardLimitRequestIds);
         setLimitType(
           hardLimitRequestIds.length < request_ids.length
@@ -234,7 +233,7 @@ export default function NewDataset({
                 number of requests you add to this dataset or upgrade to add
                 more requests.
               </Muted>
-              <FreeTierSubLimitWrapper
+              <FreeTierLimitWrapper
                 feature="datasets"
                 subfeature="requests"
                 itemCount={
@@ -245,7 +244,7 @@ export default function NewDataset({
                 <Button variant="default" className="w-fit px-8" size="sm">
                   Upgrade
                 </Button>
-              </FreeTierSubLimitWrapper>
+              </FreeTierLimitWrapper>
             </div>
           </div>
         </InfoBox>
@@ -430,7 +429,7 @@ export default function NewDataset({
                 };
 
                 // Only wrap with FreeTierSubLimitWrapper if we're a free tier user and adding to an existing dataset
-                if (!hasFullAccess && selectedOption !== "new") {
+                if (!hasAccess && selectedOption !== "new") {
                   // Use the requestAdditionWrapped directly since the FreeTierSubLimitWrapper
                   // is already checking the request count in canAddRequests
                   await requestAdditionWrapped();
