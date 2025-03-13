@@ -164,8 +164,9 @@ const generateHandler = async (
         parameters.properties.cache.toString()
       );
     }
-    // d. Set promptId property
+    // d. Set prompt properties
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
+    requestHeaders.set("Helicone-Prompt-Version", promptResult.data.id);
 
     // 6. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
     // a. Autofill inputs
@@ -175,6 +176,7 @@ const generateHandler = async (
       inputs: inputs,
       autoInputs: [], // Never used
     }) as LLMRequestBody;
+
     // b. Add any chat messages to the template messages
     if (parameters.chat) {
       addChatMessagesToTemplate(filledTemplate, parameters.chat);
