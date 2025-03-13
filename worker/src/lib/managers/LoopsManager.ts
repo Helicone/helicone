@@ -1,6 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Env } from "../..";
 import { Database } from "../../../supabase/database.types";
+import { safePut } from "../safePut";
 
 const MAX_REQUESTS_PER_SECOND = 10;
 const MAX_USERS_PER_PAGE = 1000;
@@ -161,8 +162,11 @@ export async function updateLoopUsers(env: Env) {
     );
     console.log(`adding back cached emails`, newCache.length);
 
-    await env.UTILITY_KV.put("loop_user_emails_v10", JSON.stringify(newCache), {
-      expirationTtl: 60 * 60 * 24, // 1 day
+    await safePut({
+      key: env.UTILITY_KV,
+      keyName: "loop_user_emails_v10",
+      value: JSON.stringify(newCache),
+      options: { expirationTtl: 60 * 60 * 24 }, // 1 day
     });
   }
 }
