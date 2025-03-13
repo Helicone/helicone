@@ -19,7 +19,7 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-
+import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
@@ -602,6 +602,29 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     [searchParams]
   );
 
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "requests",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
+    }
+    return [];
+  }, [orgLayout?.data?.filters]);
+
   const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
     if (layoutFilter !== null) {
       const transformedFilter = transformFilter(layoutFilter.filter[0]);
@@ -698,6 +721,22 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                   searchPropertyFilters: searchPropertyFilters,
                   show: userId ? false : true,
                 }}
+                savedFilters={
+                  organizationLayoutAvailable
+                    ? {
+                        currentFilter: currFilter ?? undefined,
+                        filters:
+                          transformedFilters && orgLayout?.data?.id
+                            ? transformedFilters
+                            : undefined,
+                        onFilterChange: onLayoutFilterChange,
+                        onSaveFilterCallback: async () => {
+                          await orgLayoutRefetch();
+                        },
+                        layoutPage: "requests",
+                      }
+                    : undefined
+                }
                 exportData={requests.map((request) => {
                   const flattenedRequest: any = {};
                   Object.entries(request).forEach(([key, value]) => {
