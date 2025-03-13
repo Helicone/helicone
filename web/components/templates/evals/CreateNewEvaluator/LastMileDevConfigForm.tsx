@@ -1,8 +1,8 @@
-import { Col, Row } from "@/components/layout/common";
-import { useInvalidateEvaluators } from "@/components/templates/evals/EvaluatorHook";
-import { Button } from "@/components/ui/button";
+import { Col } from "@/components/layout/common";
+import { useTestDataStore } from "@/components/templates/evals/testing/testingStore";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -10,10 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import React, { useEffect, useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { H3, Muted } from "@/components/ui/typography";
+import { InfoIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
-import { useTestDataStore } from "../testing/testingStore";
+import { useEvalConfigStore } from "../store/evalConfigStore";
 import { DataEntry, LastMileConfigForm } from "./types";
 
 function SelectDataEntryType({
@@ -36,83 +43,91 @@ function SelectDataEntryType({
       };
     });
   }, [setTestData]);
+
   return (
-    <>
-      <Label className="whitespace-nowrap">{label}</Label>
-      <div className="grid grid-cols-3 items-center gap-10">
-        <Select
-          value={defaultValue._type}
-          onValueChange={(value) => {
-            if (value === "prompt-input") {
-              onChange({ _type: "prompt-input", inputKey: "" });
-            } else if (value === "input-body") {
-              onChange({ _type: "input-body", content: "message" });
-            } else if (value === "output-body") {
-              onChange({ _type: "output-body", content: "message" });
-            } else if (value === "system-prompt") {
-              onChange({ _type: "system-prompt" });
-            }
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select data entry type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="system-prompt">System Prompt</SelectItem>
-            <SelectItem value="prompt-input">Prompt Input</SelectItem>
-            <SelectItem value="input-body">Input Body</SelectItem>
-            <SelectItem value="output-body">Output Body</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label className="font-medium">{label}</Label>
+        <Tooltip>
+          <TooltipTrigger>
+            <InfoIcon className="h-4 w-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            {label === "Input"
+              ? "Select the source of input data for evaluation"
+              : label === "Output"
+              ? "Select the source of output data for evaluation"
+              : "Select the source of ground truth data for comparison"}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Select
+            value={defaultValue._type}
+            onValueChange={(value) => {
+              if (value === "prompt-input") {
+                onChange({ _type: "prompt-input", inputKey: "" });
+              } else if (value === "input-body") {
+                onChange({ _type: "input-body", content: "message" });
+              } else if (value === "output-body") {
+                onChange({ _type: "output-body", content: "message" });
+              } else if (value === "system-prompt") {
+                onChange({ _type: "system-prompt" });
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="prompt-input">Prompt Input</SelectItem>
+              <SelectItem value="input-body">Input Body</SelectItem>
+              <SelectItem value="output-body">Output Body</SelectItem>
+              <SelectItem value="system-prompt">System Prompt</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {defaultValue._type === "prompt-input" && (
-          <Input
-            placeholder="Input Key"
-            value={defaultValue.inputKey}
-            onChange={(e) => {
-              onChange({ ...defaultValue, inputKey: e.target.value });
-            }}
-          />
+          <div>
+            <Input
+              placeholder="Input Key"
+              value={defaultValue.inputKey}
+              onChange={(e) => {
+                onChange({
+                  _type: "prompt-input",
+                  inputKey: e.target.value,
+                });
+              }}
+            />
+          </div>
         )}
-        {defaultValue._type === "input-body" && (
-          <Select
-            value={defaultValue.content}
-            onValueChange={(value) => {
-              onChange({
-                ...defaultValue,
-                content: value as "jsonify" | "message",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select input body type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="message">Message</SelectItem>
-              <SelectItem value="jsonify">JSONify</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-        {defaultValue._type === "output-body" && (
-          <Select
-            value={defaultValue.content}
-            onValueChange={(value) => {
-              onChange({
-                ...defaultValue,
-                content: value as "jsonify" | "message",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select input body type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="jsonify">JSONify</SelectItem>
-              <SelectItem value="message">Message</SelectItem>
-            </SelectContent>
-          </Select>
+
+        {(defaultValue._type === "input-body" ||
+          defaultValue._type === "output-body") && (
+          <div>
+            <Select
+              value={defaultValue.content}
+              onValueChange={(value) => {
+                onChange({
+                  ...defaultValue,
+                  content: value as "message" | "jsonify",
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select content type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="message">Message</SelectItem>
+                <SelectItem value="jsonify">Jsonify</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -155,189 +170,216 @@ const DEFAULT_CONTEXT_RELEVANCE_TYPE: LastMileConfigForm = {
   },
 };
 
-const DEFAULT_MAP = {
-  faithfulness: DEFAULT_FAITHFULNESS_TYPE,
-  relevance: DEFAULT_RELEVANCE_TYPE,
-  context_relevance: DEFAULT_CONTEXT_RELEVANCE_TYPE,
-};
-
 export const LastMileDevConfigForm: React.FC<{
   onSubmit: () => void;
   existingEvaluatorId?: string;
   openTestPanel?: () => void;
   preset?: LastMileConfigForm;
-}> = ({ existingEvaluatorId, onSubmit, openTestPanel, preset }) => {
+}> = ({ existingEvaluatorId, preset }) => {
   const notification = useNotification();
 
-  const jawn = useJawnClient();
-  const { invalidate } = useInvalidateEvaluators();
+  // Use the config store
+  const {
+    lastMileName,
+    setLastMileName,
+    lastMileDescription,
+    setLastMileDescription,
+    lastMileConfig,
+    setLastMileConfig,
+  } = useEvalConfigStore();
 
-  const { setTestConfig: setTestData } = useTestDataStore();
-
+  // Local state for form values
+  const [evaluatorName, setEvaluatorName] = useState(lastMileName || "");
+  const [evaluatorDescription, setEvaluatorDescription] = useState(
+    lastMileDescription || ""
+  );
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(
-    preset || DEFAULT_RELEVANCE_TYPE
+    lastMileConfig || preset || DEFAULT_RELEVANCE_TYPE
   );
 
+  // Update the store when local state changes
   useEffect(() => {
-    setTestData((prev) => {
-      if (!prev) return null;
-      return {
-        _type: "lastmile",
-        evaluator_name: evaluatorType.name,
-        config: evaluatorType,
-      };
-    });
-  }, [setTestData, evaluatorType]);
-
-  // Initialize with preset if available
-  useEffect(() => {
-    if (preset) {
-      setEvaluatorType(preset);
-    }
-  }, [preset]);
+    setLastMileName(evaluatorName);
+    setLastMileDescription(evaluatorDescription);
+    setLastMileConfig(evaluatorType);
+  }, [
+    evaluatorName,
+    evaluatorDescription,
+    evaluatorType,
+    setLastMileName,
+    setLastMileDescription,
+    setLastMileConfig,
+  ]);
 
   return (
-    <Col className="h-full flex flex-col gap-2">
-      <div>
-        <a
-          href="https://docs.lastmileai.dev"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:text-blue-600"
-        >
-          Lastmile AI Documentation
-        </a>
-      </div>
-      <Label>Evaluator Name</Label>
-      <Input
-        placeholder="Name"
-        value={evaluatorType.name}
-        onChange={(e) =>
-          setEvaluatorType({ ...evaluatorType, name: e.target.value })
-        }
-      />
-      <Label>Evaluator Type</Label>
-      <Select
-        value={evaluatorType._type}
-        onValueChange={(value) => {
-          setEvaluatorType(DEFAULT_MAP[value as keyof typeof DEFAULT_MAP]);
-        }}
+    <Col className="h-full flex flex-col overflow-hidden">
+      <ScrollArea
+        className="flex-grow overflow-y-auto"
+        type="always"
+        scrollHideDelay={0}
       >
-        <SelectTrigger className="w-fit">
-          <SelectValue placeholder="Select evaluator type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="relevance">Relevance</SelectItem>
-          <SelectItem value="context_relevance">Context Relevance</SelectItem>
-          <SelectItem value="faithfulness">Faithfulness</SelectItem>
-        </SelectContent>
-      </Select>
-      {evaluatorType.input && (
-        <SelectDataEntryType
-          label="Input"
-          defaultValue={evaluatorType.input}
-          onChange={(value) => {
-            setEvaluatorType({
-              ...evaluatorType,
-              input: value,
-            });
-          }}
-        />
-      )}
-      {evaluatorType.output && (
-        <SelectDataEntryType
-          label="Output"
-          defaultValue={evaluatorType.output}
-          onChange={(value) => {
-            setEvaluatorType({ ...evaluatorType, output: value });
-          }}
-        />
-      )}
-      {evaluatorType._type === "faithfulness" && evaluatorType.groundTruth && (
-        <SelectDataEntryType
-          label="Ground Truth"
-          defaultValue={evaluatorType.groundTruth}
-          onChange={(value) => {
-            setEvaluatorType({ ...evaluatorType, groundTruth: value });
-          }}
-        />
-      )}
+        <div className="px-4 py-4">
+          <Col className="space-y-4">
+            {/* Basic Information Section */}
+            <div className="space-y-3">
+              <div className="border-b pb-1 mb-3">
+                <div className="flex items-baseline gap-2">
+                  <H3 className="text-lg">Basic Information</H3>
+                  <Muted className="text-sm">
+                    Define your LastMile evaluator&apos;s name and type
+                  </Muted>
+                </div>
+              </div>
 
-      <i className="text-xs text-gray-500">
-        You will be charged for the LLM usage of this evaluator.
-      </i>
-      <Row className="justify-between mt-4">
-        <Button
-          onClick={() => {
-            if (!evaluatorType.name) {
-              notification.setNotification(
-                "Evaluator name is required",
-                "error"
-              );
-              return;
-            }
-            if (existingEvaluatorId) {
-              jawn
-                .PUT(`/v1/evaluator/{evaluatorId}`, {
-                  params: {
-                    path: {
-                      evaluatorId: existingEvaluatorId,
-                    },
-                  },
-                  body: {
-                    llm_template: null,
-                    last_mile_config: evaluatorType,
-                    scoring_type: `LASTMILE`,
-                    name: evaluatorType.name,
-                  },
-                })
-                .then((res) => {
-                  if (res.data?.data) {
-                    notification.setNotification(
-                      "Evaluator updated successfully",
-                      "success"
-                    );
-                    invalidate();
-                  }
-                });
-            } else {
-              jawn
-                .POST("/v1/evaluator", {
-                  body: {
-                    last_mile_config: evaluatorType,
-                    scoring_type: `LASTMILE`,
-                    name: evaluatorType.name,
-                  },
-                })
-                .then((res) => {
-                  if (res.data?.data) {
-                    notification.setNotification(
-                      "Evaluator created successfully",
-                      "success"
-                    );
-                    invalidate();
-                    onSubmit();
-                  } else {
-                    notification.setNotification(
-                      "Failed to create evaluator",
-                      "error"
-                    );
-                  }
-                });
-            }
-          }}
-        >
-          {existingEvaluatorId ? "Update Evaluator" : "Create Evaluator"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => {
-            openTestPanel?.();
-          }}
-        >
-          Test
-        </Button>
-      </Row>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Evaluator Name
+                    </Label>
+                    <a
+                      href="https://docs.lastmileai.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-600 text-xs"
+                    >
+                      LastMile AI Documentation
+                    </a>
+                  </div>
+                  <Input
+                    id="name"
+                    placeholder="Enter evaluator name"
+                    value={evaluatorName}
+                    readOnly={!!existingEvaluatorId}
+                    disabled={!!existingEvaluatorId}
+                    onChange={(e) => {
+                      if (!!existingEvaluatorId) return; // Skip if editing existing evaluator
+
+                      if (!/[^a-zA-Z0-9\s]+/g.test(e.target.value)) {
+                        setEvaluatorName(e.target.value);
+                      } else {
+                        notification.setNotification(
+                          "Evaluator name can only contain letters and numbers.",
+                          "error"
+                        );
+                      }
+                    }}
+                  />
+                  {existingEvaluatorId && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Evaluator names cannot be changed after creation
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="type" className="text-sm font-medium">
+                      Evaluator Type
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        Choose the type of LastMile evaluator
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Select
+                    value={evaluatorType._type}
+                    onValueChange={(value) => {
+                      if (value === "relevance") {
+                        setEvaluatorType({
+                          ...DEFAULT_RELEVANCE_TYPE,
+                          name: evaluatorName,
+                        });
+                      } else if (value === "context_relevance") {
+                        setEvaluatorType({
+                          ...DEFAULT_CONTEXT_RELEVANCE_TYPE,
+                          name: evaluatorName,
+                        });
+                      } else if (value === "faithfulness") {
+                        setEvaluatorType({
+                          ...DEFAULT_FAITHFULNESS_TYPE,
+                          name: evaluatorName,
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select evaluator type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="context_relevance">
+                        Context Relevance
+                      </SelectItem>
+                      <SelectItem value="faithfulness">Faithfulness</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-1" />
+
+            {/* Configuration Section */}
+            <div className="space-y-3">
+              <div className="border-b pb-1 mb-3">
+                <div className="flex items-baseline gap-2">
+                  <H3 className="text-lg">Configuration</H3>
+                  <Muted className="text-sm">
+                    Configure the data sources for your evaluator
+                  </Muted>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-3 bg-muted/10 rounded-md">
+                {evaluatorType.input && (
+                  <SelectDataEntryType
+                    label="Input"
+                    defaultValue={evaluatorType.input}
+                    onChange={(value) => {
+                      setEvaluatorType({
+                        ...evaluatorType,
+                        input: value,
+                      });
+                    }}
+                  />
+                )}
+
+                {evaluatorType.output && (
+                  <SelectDataEntryType
+                    label="Output"
+                    defaultValue={evaluatorType.output}
+                    onChange={(value) => {
+                      setEvaluatorType({
+                        ...evaluatorType,
+                        output: value,
+                      });
+                    }}
+                  />
+                )}
+
+                {evaluatorType._type === "faithfulness" &&
+                  evaluatorType.groundTruth && (
+                    <SelectDataEntryType
+                      label="Ground Truth"
+                      defaultValue={evaluatorType.groundTruth}
+                      onChange={(value) => {
+                        setEvaluatorType({
+                          ...evaluatorType,
+                          groundTruth: value,
+                        });
+                      }}
+                    />
+                  )}
+              </div>
+            </div>
+          </Col>
+        </div>
+      </ScrollArea>
     </Col>
   );
 };

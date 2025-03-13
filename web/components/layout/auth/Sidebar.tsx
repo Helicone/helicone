@@ -14,7 +14,6 @@ import {
   FlaskConicalIcon,
   Home,
   ListTreeIcon,
-  LockIcon,
   ScrollTextIcon,
   SheetIcon,
   ShieldCheckIcon,
@@ -148,70 +147,22 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             icon: Webhook,
             current: pathname.includes("/webhooks"),
           },
+          // {
+          //   name: "Providers",
+          //   href: "/providers",
+          //   icon: ServerIcon,
+          //   current: pathname.includes("/providers"),
+          // },
+          // {
+          //   name: "Vault",
+          //   href: "/vault",
+          //   icon: LockIcon,
+          //   current: pathname.includes("/vault"),
+          // },
         ],
       },
-      ...(org?.currentOrg?.tier === "enterprise"
-        ? [
-            {
-              name: "Enterprise",
-              href: "/enterprise",
-              current: pathname.includes("/enterprise"),
-              icon: null,
-              subItems: [
-                {
-                  name: "Vault",
-                  href: "/vault",
-                  icon: LockIcon,
-                  current: pathname.includes("/vault"),
-                },
-              ],
-            },
-          ]
-        : []),
-      // {
-      //   name: "Settings",
-      //   href: "/settings",
-      //   icon: Cog6ToothIcon,
-      //   current: false,
-      //   subItems: [
-      //     {
-      //       name: "Organization",
-      //       href: "/settings/organization",
-      //       icon: null,
-      //       current: false,
-      //     },
-      //     {
-      //       name: "API Keys",
-      //       href: "/settings/api-keys",
-      //       icon: null,
-      //       current: false,
-      //     },
-      //     ...(!user?.email?.includes("@helicone.ai")
-      //       ? []
-      //       : [
-      //           {
-      //             name: "Connections",
-      //             href: "/settings/connections",
-      //             icon: null,
-      //             current: pathname.includes("/settings/connections"),
-      //           },
-      //         ]),
-      //     {
-      //       name: "Members",
-      //       href: "/settings/members",
-      //       icon: null,
-      //       current: false,
-      //     },
-      //     {
-      //       name: "Billing",
-      //       href: "/settings/billing",
-      //       icon: null,
-      //       current: pathname.includes("/settings/billing"),
-      //     },
-      //   ],
-      // },
     ],
-    [pathname, org?.currentOrg?.tier]
+    [pathname]
   );
 
   return (

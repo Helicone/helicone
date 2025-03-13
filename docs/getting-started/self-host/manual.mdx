@@ -39,8 +39,8 @@ brew install supabase/tap/supabase
 ### Install Wrangler and Yarn
 
 ```bash
-nvm install 18.11.0
-nvm use 18.11.0
+nvm install 20
+nvm use 20
 npm install -g wrangler
 npm install -g yarn
 ```
@@ -79,9 +79,10 @@ npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 --test-sched
 
 ### Start Jawn (Serves Web)
 
-I a new terminal tab, run the following:
+In a new terminal tab, run the following:
 
 ```bash
+nvm use 20
 cd valhalla/jawn
 cp .env.example .env
 yarn && yarn dev
@@ -89,9 +90,10 @@ yarn && yarn dev
 
 ### Start Web
 
-I a new terminal tab, run the following:
+In a new terminal tab, run the following:
 
 ```bash
+nvm use 20
 cp .env.example web/.env
 cd web
 yarn

@@ -668,6 +668,103 @@
 					}
 				]
 			},
+			"EvaluatorStats": {
+				"properties": {
+					"averageScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalUses": {
+						"type": "number",
+						"format": "double"
+					},
+					"recentTrend": {
+						"type": "string",
+						"enum": [
+							"up",
+							"down",
+							"stable"
+						]
+					},
+					"scoreDistribution": {
+						"items": {
+							"properties": {
+								"count": {
+									"type": "number",
+									"format": "double"
+								},
+								"range": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"count",
+								"range"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"timeSeriesData": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"date": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"value",
+								"date"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"averageScore",
+					"totalUses",
+					"recentTrend",
+					"scoreDistribution",
+					"timeSeriesData"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorStats_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorStats"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorStats.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorStats_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
 					"data": {
@@ -1578,28 +1675,22 @@
 					"llm_type": {
 						"$ref": "#/components/schemas/LlmType"
 					},
+					"provider": {
+						"type": "string"
+					},
 					"model": {
 						"type": "string"
 					},
-					"provider": {
-						"type": "string"
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
 					},
 					"prompt": {
 						"type": "string",
 						"nullable": true
-					},
-					"input": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
 					},
 					"max_tokens": {
 						"type": "number",
@@ -1612,6 +1703,11 @@
 						"nullable": true
 					},
 					"top_p": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"seed": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
@@ -1630,6 +1726,20 @@
 						"format": "double",
 						"nullable": true
 					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"nullable": true
+					},
 					"reasoning_effort": {
 						"type": "string",
 						"enum": [
@@ -1640,30 +1750,15 @@
 						],
 						"nullable": true
 					},
-					"n": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"stop": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"messages": {
-						"items": {
-							"$ref": "#/components/schemas/Message"
-						},
-						"type": "array",
-						"nullable": true
-					},
 					"tools": {
 						"items": {
 							"$ref": "#/components/schemas/Tool"
 						},
 						"type": "array"
+					},
+					"parallel_tool_calls": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"tool_choice": {
 						"properties": {
@@ -1673,10 +1768,23 @@
 							"type": {
 								"type": "string",
 								"enum": [
-									"auto",
 									"none",
+									"auto",
+									"any",
 									"tool"
 								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -1689,6 +1797,30 @@
 					},
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
+					},
+					"input": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						]
+					},
+					"n": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"size": {
+						"type": "string"
+					},
+					"quality": {
+						"type": "string"
 					}
 				},
 				"type": "object",
@@ -6576,6 +6708,41 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/stats": {
+			"get": {
+				"operationId": "GetEvaluatorStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorStats.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v2/experiment/create/empty": {

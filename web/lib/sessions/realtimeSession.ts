@@ -1,30 +1,16 @@
 import { Message } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { HeliconeRequest } from "../api/request/request";
-import { Session } from "./sessionTypes";
 
 /**
  * Checks if a session is a realtime session based on the first request's model
  */
-export const isRealtimeSession = (
-  session: Session,
-  requests: HeliconeRequest[]
-): boolean => {
-  if (
-    !session.traces ||
-    session.traces.length === 0 ||
-    !requests ||
-    requests.length === 0
-  ) {
+export const isRealtimeSession = (requests: HeliconeRequest[]): boolean => {
+  if (!requests || requests.length === 0) {
     return false;
   }
 
-  // Get the first request in the session
-  const firstRequestId = session.traces[0].request_id;
-  const firstRequest = requests.find(
-    (req) => req.request_id === firstRequestId
-  );
-
+  const firstRequest = requests[0];
   if (!firstRequest) {
     return false;
   }
@@ -115,19 +101,14 @@ function createSimulatedRequest(
  * Get either the original requests or simulated realtime requests
  */
 export const getEffectiveRequests = (
-  session: Session,
   requests: HeliconeRequest[]
 ): HeliconeRequest[] => {
-  if (!isRealtimeSession(session, requests)) {
+  if (!isRealtimeSession(requests) || requests.length === 0) {
     return requests;
   }
 
-  // Get the first request in the session
-  const firstRequestId = session.traces[0].request_id;
-  const firstRequest = requests.find(
-    (req) => req.request_id === firstRequestId
-  );
-
+  // Use the first request directly
+  const firstRequest = requests[0];
   if (!firstRequest) {
     return requests;
   }

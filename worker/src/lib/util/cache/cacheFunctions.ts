@@ -17,7 +17,7 @@ export async function kvKeyFromRequest(
     if (key.toLowerCase() === "helicone-auth") {
       headers.set(key, value);
     }
-    if (key.toLowerCase() === "authorization") {
+    if (!key.startsWith("ya29.") && key.toLowerCase() === "authorization") {
       headers.set(key, value);
     }
   }

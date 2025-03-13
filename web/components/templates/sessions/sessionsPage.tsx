@@ -1,19 +1,21 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useHasAccess } from "@/hooks/useHasAccess";
 
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
 import {
   filterUITreeToFilterNode,
   getRootFilterNode,
 } from "@/services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
+import { ListTree } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
@@ -22,8 +24,6 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { ListTree } from "lucide-react";
-import AuthHeader from "@/components/shared/authHeader";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -113,7 +113,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       (hasSomeSessions &&
         new Date().getTime() < new Date("2024-09-27").getTime())
     );
-  }, [org?.currentOrg?.tier, hasSomeSessions]);
+  }, [hasAccess, hasSomeSessions]);
 
   const [currentTab, setCurrentTab] = useLocalStorage<
     (typeof TABS)[number]["id"]

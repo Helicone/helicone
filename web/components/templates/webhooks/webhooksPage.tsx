@@ -7,15 +7,17 @@ import {
 } from "@heroicons/react/24/outline";
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { getUSDateFromString, getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
 
 // Import ShadcnUI components
+import AuthHeader from "@/components/shared/authHeader";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -26,18 +28,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getJawnClient } from "@/lib/clients/jawn";
-import AuthHeader from "@/components/shared/authHeader";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { ExternalLinkIcon } from "lucide-react";
 import { PiWebhooksLogo } from "react-icons/pi";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { ExternalLinkIcon, XIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface WebhooksPageProps {
   user: User;
@@ -350,40 +349,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           isWithinIsland={true}
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
-
-        {showChangelogBanner && (
-          <div className="mx-8">
-            <Alert className="bg-sky-50 border-sky-200 text-sky-800 relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-normal text-sky-600">
-                    {getUSDate(new Date())}
-                  </span>
-                  <span className="text-sky-600 font-normal">|</span>
-                  <AlertDescription className="text-sm">
-                    <span className="font-semibold">Webhook Update:</span>{" "}
-                    We&apos;ve added user_id to webhook payloads.{" "}
-                    <a
-                      href="https://github.com/Helicone/helicone/compare/main"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sky-600 hover:text-sky-800 underline"
-                    >
-                      View the PR diff
-                    </a>
-                  </AlertDescription>
-                </div>
-                <button
-                  onClick={dismissChangelogBanner}
-                  className="text-sky-500 hover:text-sky-700"
-                  aria-label="Dismiss"
-                >
-                  <XIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </Alert>
-          </div>
-        )}
 
         <div className="flex justify-between items-center mx-8 mb-2">
           <Button

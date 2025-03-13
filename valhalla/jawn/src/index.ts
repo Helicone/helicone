@@ -77,6 +77,7 @@ const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
+  console.log("Starting Kafka consumers");
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
@@ -209,13 +210,10 @@ function setRouteTimeout(
 
 app.use(setRouteTimeout);
 
-const server = app.listen(
-  parseInt(process.env.PORT ?? "8585"),
-  "0.0.0.0",
-  () => {
-    console.log(`Server is running on http://localhost:8585`);
-  }
-);
+const port = parseInt(process.env.PORT ?? "8585");
+const server = app.listen(port, "0.0.0.0", () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 server.on("upgrade", async (req, socket, head) => {
   // Only handle websocket upgrades for /v1/gateway/oai
