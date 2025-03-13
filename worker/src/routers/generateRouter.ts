@@ -167,13 +167,16 @@ const generateHandler = async (
     // d. Set prompt properties
     requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
     requestHeaders.set("Helicone-Prompt-Version", promptResult.data.id);
+    requestHeaders.set(
+      "Helicone-Prompt-Inputs",
+      JSON.stringify(parameters.inputs)
+    ); // This header is used with templateWithInputs logging (used for saving prompt_input_records)
 
     // 6. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
     // a. Autofill inputs
-    const inputs = parameters.inputs || {};
     const filledTemplate = autoFillInputs({
       template: promptResult.data.helicone_template,
-      inputs: inputs,
+      inputs: parameters.inputs,
       autoInputs: [], // Never used
     }) as LLMRequestBody;
 
@@ -181,6 +184,7 @@ const generateHandler = async (
     if (parameters.chat) {
       addChatMessagesToTemplate(filledTemplate, parameters.chat);
     }
+
     // c. Map from LLMRequestBody type to provider body type
     const requestTemplate = mapper.toExternal(filledTemplate);
 
@@ -206,7 +210,9 @@ const generateHandler = async (
         500
       );
     }
-    return await gatewayForwarder(
+
+    // Get the response from the provider
+    const response = await gatewayForwarder(
       {
         targetBaseUrl: targetUrl,
         setBaseURLOverride: newWrapperResult.data.setBaseURLOverride.bind(
@@ -217,6 +223,7 @@ const generateHandler = async (
       env,
       ctx
     );
+    return response;
   } catch (e: unknown) {
     console.error("Error in generate route:", e);
     return createErrorResponse(

@@ -39,6 +39,7 @@ export interface IHeliconeHeaders {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
+    promptInputs: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -99,6 +100,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     promptId: Nullable<string>;
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
+    promptInputs: Nullable<string>;
   };
   promptName: Nullable<string>;
   userId: Nullable<string>;
@@ -143,6 +145,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptId: heliconeHeaders.promptHeaders.promptId,
       promptMode: heliconeHeaders.promptHeaders.promptMode,
       promptVersion: heliconeHeaders.promptHeaders.promptVersion,
+      promptInputs: heliconeHeaders.promptHeaders.promptInputs,
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
@@ -260,6 +263,26 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     const requestId = this.getValidUUID(
       this.headers.get("Helicone-Request-Id")
     );
+
+    // Parse the Helicone-Prompt-Template-With-Inputs header to extract inputs
+    let promptInputs: string | null = null;
+    const templateWithInputs = this.headers.get(
+      "Helicone-Prompt-Template-With-Inputs"
+    );
+    if (templateWithInputs) {
+      try {
+        const parsed = JSON.parse(templateWithInputs);
+        if (parsed.inputs) {
+          promptInputs = JSON.stringify(parsed.inputs);
+        }
+      } catch (e) {
+        console.error(
+          "Error parsing Helicone-Prompt-Template-With-Inputs header:",
+          e
+        );
+      }
+    }
+
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
@@ -274,6 +297,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
         promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
+        promptInputs:
+          promptInputs ?? this.headers.get("Helicone-Prompt-Inputs") ?? null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,

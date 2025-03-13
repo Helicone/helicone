@@ -8,10 +8,10 @@ import { Result, ok } from "../util/results";
 import { IHeliconeHeaders } from "./HeliconeHeaders";
 
 import { CfProperties } from "@cloudflare/workers-types";
-import { RateLimitOptions } from "../clients/KVRateLimiterClient";
-import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
+import { RateLimitOptions } from "../clients/KVRateLimiterClient";
+import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -80,6 +80,12 @@ export class HeliconeProxyRequestMapper {
       const { templateWithInputs } = parseJSXObject(
         JSON.parse(await this.request.getRawText())
       );
+      // If the promptInputs header is set, use these inputs instead
+      if (this.request.heliconeHeaders.promptHeaders.promptInputs) {
+        templateWithInputs.inputs = JSON.parse(
+          this.request.heliconeHeaders.promptHeaders.promptInputs
+        );
+      }
       return templateWithInputs;
     }
     return null;
