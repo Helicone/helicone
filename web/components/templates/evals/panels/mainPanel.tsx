@@ -1,18 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PiPlusBold } from "react-icons/pi";
-import { ChartLineIcon } from "lucide-react";
 import { EvaluatorCard } from "../cards";
-import { Col } from "@/components/layout/common";
 import AuthHeader from "@/components/shared/authHeader";
 import { useEvaluators } from "../EvaluatorHook";
 import { useEvalPanelStore } from "../store/evalPanelStore";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import clsx from "clsx";
 import { useTestDataStore } from "../testing/testingStore";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { H3, P } from "@/components/ui/typography";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -52,6 +53,11 @@ export const MainPanel = () => {
     );
   }, [evaluators.data?.data?.data]);
 
+  // Free tier limit checks
+  const evaluatorCount = simpleEvaluators.length || 0;
+  const { canCreate: canCreateEvaluator, freeLimit: MAX_EVALUATORS } =
+    useFeatureLimit("evals", evaluatorCount);
+
   const handleTestEvaluator = (evaluator: any) => {
     // Set test data based on evaluator type
     if (evaluator.evaluator_llm_template) {
@@ -87,37 +93,37 @@ export const MainPanel = () => {
     return null;
   }
 
-  if (org?.currentOrg?.tier === "free") {
-    return (
-      <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
-        <FeatureUpgradeCard
-          title="Unlock Evaluators"
-          featureName="Evaluators"
-          headerTagline="Evaluate your prompts and models to drive improvements."
-          icon={<ChartLineIcon className="h-4 w-4" />}
-          highlightedFeature="Evaluators"
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col w-full h-screen">
       <AuthHeader
         title="Evaluators"
         actions={[
-          <Button
-            key="create-evaluator"
-            onClick={() => openCreatePanel()}
-            variant="outline"
-            size="sm"
-            className="gap-1 items-center"
+          <FreeTierLimitWrapper
+            key="create-evaluator-wrapper"
+            feature="evals"
+            itemCount={evaluatorCount}
           >
-            <PiPlusBold className="h-3.5 w-3.5" />
-            Create Evaluator
-          </Button>,
+            <Button
+              key="create-evaluator"
+              onClick={() => openCreatePanel()}
+              variant="action"
+              size="sm"
+              className="gap-1 items-center"
+            >
+              <PiPlusBold className="h-3.5 w-3.5" />
+              Create Evaluator
+            </Button>
+          </FreeTierLimitWrapper>,
         ]}
       />
+
+      {!canCreateEvaluator && (
+        <FreeTierLimitBanner
+          feature="evals"
+          itemCount={evaluatorCount}
+          freeLimit={MAX_EVALUATORS}
+        />
+      )}
 
       {evaluators.isLoading ? (
         // Loading state
@@ -144,24 +150,26 @@ export const MainPanel = () => {
         </div>
       ) : simpleEvaluators.length === 0 ? (
         // Empty state
-        <div className="flex flex-col w-full justify-center items-center h-full">
-          <Col className="items-center justify-center gap-4 max-w-md text-center py-12">
-            <div className="bg-muted rounded-full p-3">
-              <PiPlusBold className="h-6 w-6 text-foreground" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <H3>No evaluators yet</H3>
+              <P className="text-muted-foreground">
+                Create an evaluator to score your LLM outputs
+              </P>
             </div>
-            <h3 className="text-lg font-medium">No evaluators yet</h3>
-            <p className="text-muted-foreground text-sm">
-              Create an evaluator to score your LLM outputs
-            </p>
-            <Button
-              onClick={openCreatePanel}
-              className="mt-2"
-              variant="default"
-              size="sm"
-            >
-              Create Evaluator
-            </Button>
-          </Col>
+            <div className="flex flex-row gap-2">
+              <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
+                <Button
+                  onClick={openCreatePanel}
+                  variant="action"
+                  disabled={!canCreateEvaluator}
+                >
+                  Create Evaluator
+                </Button>
+              </FreeTierLimitWrapper>
+            </div>
+          </div>
         </div>
       ) : (
         // Card grid view

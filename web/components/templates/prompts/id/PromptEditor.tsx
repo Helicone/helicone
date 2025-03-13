@@ -80,6 +80,12 @@ import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
+import { usePrompts } from "../../../../services/hooks/prompts/prompts";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -105,6 +111,20 @@ export default function PromptEditor({
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
+
+  const [promptUpgradeDialogOpen, setPromptUpgradeDialogOpen] = useState(false);
+  const [playgroundUpgradeDialogOpen, setPlaygroundUpgradeDialogOpen] =
+    useState(false);
+
+  const [promptLimitUpgradeDialogOpen, setPromptLimitUpgradeDialogOpen] =
+    useState(false);
+
+  const {
+    playgroundRunCount,
+    promptRunCount,
+    incrementPlaygroundRun,
+    incrementPromptRun,
+  } = usePromptRunsStore();
 
   // HOOKS
   // - Router
@@ -132,6 +152,37 @@ export default function PromptEditor({
   const { newFromPromptVersion } = useExperiment();
   // - Create Prompt
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
+  // - Free Tier Limit
+  const versionCount = promptVersionsData?.length ?? 0;
+  const { canCreate: canCreateVersion } = useFeatureLimit(
+    "prompts",
+    versionCount,
+    "versions"
+  );
+
+  const { prompts: promptsData } = usePrompts();
+  const promptCount = promptsData?.length || 0;
+
+  const isPlaygroundMode = !!basePrompt && !promptId && !requestId;
+
+  const {
+    canCreate: canRunPlayground,
+    freeLimit: maxPlaygroundRuns,
+    upgradeMessage: playgroundUpgradeMessage,
+    hasAccess: hasPlaygroundAccess,
+  } = useFeatureLimit("prompts", playgroundRunCount, "playground_runs");
+
+  const {
+    canCreate: canRunPrompt,
+    freeLimit: maxPromptRuns,
+    upgradeMessage: promptUpgradeMessage,
+    hasAccess: hasPromptAccess,
+  } = useFeatureLimit("prompts", promptRunCount, "runs");
+
+  const {
+    canCreate: canCreatePrompt,
+    upgradeMessage: promptLimitUpgradeMessage,
+  } = useFeatureLimit("prompts", promptCount);
 
   // VALIDATION
   // - Is Imported From Code
@@ -591,9 +642,32 @@ export default function PromptEditor({
       return;
     }
 
+    // Check limits based on mode
+    if (isPlaygroundMode) {
+      if (!canRunPlayground) {
+        setPlaygroundUpgradeDialogOpen(true);
+        return;
+      }
+    } else if (promptId) {
+      if (!canRunPrompt) {
+        setPromptUpgradeDialogOpen(true);
+        return;
+      }
+    }
+
     // 2. STREAMING STATE + CLEAR RESPONSE
     setIsStreaming(true);
     updateState({ response: "" }, false);
+
+    if (isPlaygroundMode) {
+      if (!hasPlaygroundAccess) {
+        incrementPlaygroundRun();
+      }
+    } else if (promptId) {
+      if (!hasPromptAccess) {
+        incrementPromptRun();
+      }
+    }
 
     const variables = state.inputs || [];
     const variableMap = Object.fromEntries(
@@ -699,6 +773,13 @@ export default function PromptEditor({
     state,
     isStreaming,
     canRun,
+    isPlaygroundMode,
+    canRunPlayground,
+    canRunPrompt,
+    hasPlaygroundAccess,
+    hasPromptAccess,
+    incrementPlaygroundRun,
+    incrementPromptRun,
     jawnClient,
     setNotification,
     refetchPromptVersions,
@@ -860,6 +941,11 @@ export default function PromptEditor({
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
+    if (!canCreatePrompt) {
+      setPromptLimitUpgradeDialogOpen(true);
+      return;
+    }
+
     try {
       // Create a prompt from the current state
       const prompt = {
@@ -889,7 +975,7 @@ export default function PromptEditor({
       console.error("Error creating prompt:", error);
       setNotification("Failed to create prompt", "error");
     }
-  }, [state, createPrompt, router, setNotification]);
+  }, [state, canCreatePrompt, createPrompt, router, setNotification]);
 
   // EFFECTS
   // - Load Initial State
@@ -1052,6 +1138,7 @@ export default function PromptEditor({
               onIdEdit={handleIdEdit}
             />
           )}
+
           {/* From Request: ID Label */}
           {requestId && (
             <Link
@@ -1139,46 +1226,83 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          <Button
-            className={`${
-              isStreaming
-                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                : ""
-            }`}
-            variant={
-              promptId && isImportedFromCode === false ? "action" : "outline"
-            }
-            size="sm"
-            disabled={!canRun}
-            onClick={handleSaveAndRun}
-          >
-            {isStreaming ? (
-              <PiStopBold className="h-4 w-4 mr-2" />
-            ) : (
-              <PiPlayBold className="h-4 w-4 mr-2" />
-            )}
-            <span className="mr-2">
-              {isStreaming
-                ? "Stop"
-                : state.isDirty && promptId
-                ? "Save & Run"
-                : "Run"}
-            </span>
-            {isStreaming && (
-              <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-            )}
-            <div
-              className={`flex items-center gap-0.5 text-sm ${
-                (requestId || basePrompt || isImportedFromCode === true) &&
-                !isStreaming
-                  ? "text-black opacity-60"
-                  : "text-white opacity-60"
-              }`}
+          {promptId && isImportedFromCode === false && state.isDirty ? (
+            <FreeTierLimitWrapper
+              feature="prompts"
+              subfeature="versions"
+              itemCount={versionCount}
             >
-              <PiCommandBold className="h-4 w-4" />
-              <MdKeyboardReturn className="h-4 w-4" />
-            </div>
-          </Button>
+              <Button
+                className={`${
+                  isStreaming
+                    ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                    : ""
+                }`}
+                variant={
+                  promptId && isImportedFromCode === false
+                    ? "action"
+                    : "outline"
+                }
+                size="sm"
+                disabled={!canRun}
+                onClick={handleSaveAndRun}
+              >
+                {isStreaming ? (
+                  <PiStopBold className="h-4 w-4 mr-2" />
+                ) : (
+                  <PiPlayBold className="h-4 w-4 mr-2" />
+                )}
+                <span className="mr-2">
+                  {isStreaming
+                    ? "Stop"
+                    : state.isDirty && promptId
+                    ? "Save & Run"
+                    : "Run"}
+                </span>
+                {isStreaming && (
+                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                <div className="flex items-center gap-0.5 text-sm opacity-60">
+                  <PiCommandBold className="h-4 w-4" />
+                  <MdKeyboardReturn className="h-4 w-4" />
+                </div>
+              </Button>
+            </FreeTierLimitWrapper>
+          ) : (
+            <Button
+              className={`${
+                isStreaming
+                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                  : ""
+              }`}
+              variant={
+                promptId && isImportedFromCode === false ? "action" : "outline"
+              }
+              size="sm"
+              disabled={!canRun}
+              onClick={handleSaveAndRun}
+            >
+              {isStreaming ? (
+                <PiStopBold className="h-4 w-4 mr-2" />
+              ) : (
+                <PiPlayBold className="h-4 w-4 mr-2" />
+              )}
+              <span className="mr-2">
+                {isStreaming
+                  ? "Stop"
+                  : state.isDirty && promptId
+                  ? "Save & Run"
+                  : "Run"}
+              </span>
+              {isStreaming && (
+                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              <div className="flex items-center gap-0.5 text-sm opacity-60">
+                <PiCommandBold className="h-4 w-4" />
+                <MdKeyboardReturn className="h-4 w-4" />
+              </div>
+            </Button>
+          )}
 
           {/* Experiment Button */}
           {promptId && (
@@ -1211,6 +1335,66 @@ export default function PromptEditor({
         </div>
       </div>
 
+      {/* Auto-improve Popup */}
+      {promptId && !!state.version && (
+        <UniversalPopup
+          title="Auto-Improve (Beta)"
+          width="w-full max-w-7xl"
+          isOpen={isAutoImproveOpen}
+          onClose={() => {
+            setIsAutoImproveOpen(false);
+            updateState({ improvement: undefined }, false);
+          }}
+        >
+          <AutoImprove
+            isImproving={isImproving}
+            improvement={state.improvement}
+            version={state.version}
+            messages={state.messages}
+            onStartImprove={handleImprove}
+            onApplyImprovement={handleApplyImprovement}
+            onCancel={() => setIsAutoImproveOpen(false)}
+            updateState={(updates) => updateState(updates, false)}
+          />
+        </UniversalPopup>
+      )}
+
+      {/* Version limit warning banner */}
+      {!canCreateVersion && promptId && isImportedFromCode === false && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="versions"
+          itemCount={versionCount}
+          freeLimit={3}
+        />
+      )}
+
+      {/* Playground run limit warning banner */}
+      {isPlaygroundMode && !canRunPlayground && playgroundRunCount > 0 && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="playground_runs"
+          itemCount={playgroundRunCount}
+          freeLimit={maxPlaygroundRuns}
+          message={`You've used ${playgroundRunCount}/${maxPlaygroundRuns} playground runs. Upgrade to Pro Tier for unlimited access.`}
+          buttonText="Upgrade"
+          buttonSize="sm"
+        />
+      )}
+
+      {/* Prompt run limit warning banner */}
+      {promptId && !canRunPrompt && promptRunCount > 0 && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="runs"
+          itemCount={promptRunCount}
+          freeLimit={maxPromptRuns}
+          message={`You've used ${promptRunCount}/${maxPromptRuns} prompt runs. Upgrade to Prompts Tier for unlimited access.`}
+          buttonText="Upgrade"
+          buttonSize="sm"
+        />
+      )}
+
       {/* Prompt Editor */}
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={50} minSize={25}>
@@ -1235,9 +1419,7 @@ export default function PromptEditor({
             />
           </CustomScrollbar>
         </ResizablePanel>
-
         <ResizableHandle />
-
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
@@ -1291,29 +1473,33 @@ export default function PromptEditor({
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {/* Auto-improve Popup */}
-      {promptId && state.version && (
-        <UniversalPopup
-          title="Auto-Improve (Beta)"
-          width="w-full max-w-7xl"
-          isOpen={isAutoImproveOpen}
-          onClose={() => {
-            setIsAutoImproveOpen(false);
-            updateState({ improvement: undefined }, false);
-          }}
-        >
-          <AutoImprove
-            isImproving={isImproving}
-            improvement={state.improvement}
-            version={state.version}
-            messages={state.messages}
-            onStartImprove={handleImprove}
-            onApplyImprovement={handleApplyImprovement}
-            onCancel={() => setIsAutoImproveOpen(false)}
-            updateState={(updates) => updateState(updates, false)}
-          />
-        </UniversalPopup>
+      {/* Playground Upgrade Dialog */}
+      {isPlaygroundMode && (
+        <UpgradeProDialog
+          open={playgroundUpgradeDialogOpen}
+          onOpenChange={setPlaygroundUpgradeDialogOpen}
+          featureName="Playground"
+          limitMessage={playgroundUpgradeMessage}
+        />
       )}
+
+      {/* Prompts Upgrade Dialog */}
+      {promptId && (
+        <UpgradeProDialog
+          open={promptUpgradeDialogOpen}
+          onOpenChange={setPromptUpgradeDialogOpen}
+          featureName="Prompts"
+          limitMessage={promptUpgradeMessage}
+        />
+      )}
+
+      {/* Prompt Limit Upgrade Dialog */}
+      <UpgradeProDialog
+        open={promptLimitUpgradeDialogOpen}
+        onOpenChange={setPromptLimitUpgradeDialogOpen}
+        featureName="Prompts"
+        limitMessage={promptLimitUpgradeMessage}
+      />
     </main>
   );
 }
