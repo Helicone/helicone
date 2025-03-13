@@ -218,7 +218,12 @@ export class DBWrapper {
       heliconeApiKeyId: internalAuthParams.data.heliconeApiKeyId,
       tier: org.data.tier ?? "free",
       accessDict: {
-        cache: true,
+        cache:
+          tier === "enterprise" ||
+          tier === "pro" ||
+          tier === "pro-20240913" ||
+          tier === "pro-20250202" ||
+          tier === "growth",
       },
     });
   }
