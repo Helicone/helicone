@@ -758,7 +758,7 @@ export class EvaluatorManager extends BaseManager {
       // Query score distribution - 5 buckets
       const distributionQuery = `
         SELECT
-          concat(toString(floor(bucket * 20)), '-', toString(ceil(bucket * 20))) as range,
+          concat(toString(bucket * 20), '-', toString((bucket + 1) * 20)) as range,
           count(*) as count
         FROM (
           SELECT

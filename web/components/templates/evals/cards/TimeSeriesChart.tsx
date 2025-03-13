@@ -31,14 +31,23 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  // If no data or empty array, use mock data
-  const chartData =
-    !timeSeriesData || timeSeriesData.length === 0
-      ? generateMockData()
-      : timeSeriesData.map((item) => ({
-          date: formatDate(item.date),
-          value: Number(item.value) || 0, // Ensure value is a number
-        }));
+  // Check if we have real data
+  const hasData = timeSeriesData && timeSeriesData.length > 0;
+
+  // If no data, show a message instead of chart
+  if (!hasData) {
+    return (
+      <div className={`h-32 flex items-center justify-center ${className}`}>
+        <Small className="text-muted-foreground">No data available</Small>
+      </div>
+    );
+  }
+
+  // Process real data for the chart
+  const chartData = timeSeriesData.map((item) => ({
+    date: formatDate(item.date),
+    value: Number(item.value) || 0, // Ensure value is a number
+  }));
 
   // Calculate stats for display
   const values = chartData.map((item) => item.value);
@@ -60,31 +69,12 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     return null;
   };
 
-  // Custom dot for the line chart - renders only for actual data points
+  // Custom dot for the line chart
   const CustomDot = (props: any) => {
-    const { cx, cy, payload } = props;
-    // Check if this is a real data point from the API (not mock)
-    const isRealData =
-      timeSeriesData &&
-      timeSeriesData.some(
-        (point) =>
-          formatDate(point.date) === payload.date &&
-          Number(point.value) === payload.value
-      );
-
-    if (isRealData) {
-      return (
-        <Dot
-          cx={cx}
-          cy={cy}
-          r={4}
-          fill="#0284C7"
-          stroke="#fff"
-          strokeWidth={1}
-        />
-      );
-    }
-    return null;
+    const { cx, cy } = props;
+    return (
+      <Dot cx={cx} cy={cy} r={4} fill="#0284C7" stroke="#fff" strokeWidth={1} />
+    );
   };
 
   return (
@@ -138,30 +128,3 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     </div>
   );
 };
-
-/**
- * Generate mock data for when no real data is available
- */
-function generateMockData() {
-  const now = new Date();
-  const mockData = [];
-
-  // Format date helper function for mock data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
-
-  // Generate 4 data points for the last 4 days
-  for (let i = 0; i < 4; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - (3 - i));
-
-    mockData.push({
-      date: formatDate(date.toISOString().split("T")[0]),
-      value: Math.floor(50 + Math.random() * 30), // Random value between 50-80
-    });
-  }
-
-  return mockData;
-}

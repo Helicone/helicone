@@ -290,6 +290,9 @@ export interface paths {
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
+  "/v1/property/{propertyKey}/search": {
+    post: operations["SearchProperties"];
+  };
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
@@ -313,6 +316,9 @@ export interface paths {
   };
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
+  };
+  "/v1/models": {
+    get: operations["GetModels"];
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
@@ -477,8 +483,23 @@ export interface paths {
   "/v1/customer/query": {
     post: operations["GetCustomers"];
   };
+  "/v1/api-keys/provider-key/{providerKeyId}": {
+    get: operations["GetProviderKey"];
+    delete: operations["DeleteProviderKey"];
+    patch: operations["UpdateProviderKey"];
+  };
+  "/v1/api-keys/provider-key": {
+    post: operations["CreateProviderKey"];
+  };
+  "/v1/api-keys/provider-keys": {
+    get: operations["GetProviderKeys"];
+  };
   "/v1/api-keys": {
     get: operations["GetAPIKeys"];
+    post: operations["CreateAPIKey"];
+  };
+  "/v1/api-keys/proxy-key": {
+    post: operations["CreateProxyKey"];
   };
   "/v1/api-keys/{apiKeyId}": {
     delete: operations["DeleteAPIKey"];
@@ -1149,35 +1170,44 @@ Json: JsonObject;
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
-      model?: string;
       provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
-      input?: string | string[];
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
       temperature?: number | null;
       /** Format: double */
       top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
       stream?: boolean | null;
       /** Format: double */
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
       /** @enum {string|null} */
       reasoning_effort?: "low" | "medium" | "high" | null;
-      /** Format: double */
-      n?: number | null;
-      stop?: string[] | null;
-      messages?: components["schemas"]["Message"][] | null;
       tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
       tool_choice?: {
         name?: string;
         /** @enum {string} */
-        type: "auto" | "none" | "tool";
+        type: "none" | "auto" | "any" | "tool";
+      };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
     };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
@@ -1938,6 +1968,14 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -2529,12 +2567,7 @@ Json: JsonObject;
       id: string;
       name: string;
     };
-    "PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      /** @enum {number|null} */
-      error: null;
+    "ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": {
       data: {
           user_id: string;
           temp_key: boolean;
@@ -2548,20 +2581,10 @@ Json: JsonObject;
           api_key_name: string;
           api_key_hash: string;
         }[];
-      /** Format: double */
-      count: number | null;
-    };
-    PostgrestResponseFailure: {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      error: components["schemas"]["PostgrestError"];
       /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      count: null;
+      error: null;
     };
-    "PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_": components["schemas"]["PostgrestResponseSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
+    "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -4250,6 +4273,28 @@ export interface operations {
       };
     };
   };
+  SearchProperties: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          searchTerm: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
   GetTopCosts: {
     parameters: {
       path: {
@@ -4360,6 +4405,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
@@ -5318,17 +5373,154 @@ export interface operations {
       };
     };
   };
-  GetAPIKeys: {
+  GetProviderKey: {
     parameters: {
-      query: {
-        governance: string;
+      path: {
+        providerKeyId: string;
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"];
+          "application/json": components["schemas"]["DecryptedProviderKey"] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  DeleteProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  UpdateProviderKey: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config?: components["schemas"]["Record_string.string_"];
+          providerKey?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  CreateProviderKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          providerKeyName: string;
+          config: components["schemas"]["Record_string.string_"];
+          providerKey: string;
+          providerName: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  GetProviderKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown[] | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  GetAPIKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateAPIKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          key_permissions?: "rw" | "r" | "w";
+          api_key_name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            apiKey: string;
+            id: string;
+          } | {
+            error: string;
+          };
+        };
+      };
+    };
+  };
+  CreateProxyKey: {
+    requestBody: {
+      content: {
+        "application/json": {
+          proxyKeyName: string;
+          providerKeyId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            proxyKeyId: string;
+            proxyKey: string;
+          } | {
+            error: string;
+          };
         };
       };
     };
@@ -5343,9 +5535,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": {
-            error: string;
-          };
+          "application/json": unknown;
         };
       };
     };

@@ -305,6 +305,15 @@ export interface paths {
   "/v1/fine-tune/{jobId}/stats": {
     get: operations["FineTuneJobStats"];
   };
+  "/v1/filter": {
+    get: operations["GetFilters"];
+    post: operations["CreateFilter"];
+  };
+  "/v1/filter/{id}": {
+    get: operations["GetFilter"];
+    delete: operations["DeleteFilter"];
+    patch: operations["UpdateFilter"];
+  };
   "/v1/demo/completion": {
     post: operations["DemoCompletion"];
   };
@@ -759,35 +768,44 @@ Json: JsonObject;
     };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
-      model?: string;
       provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
-      input?: string | string[];
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
       temperature?: number | null;
       /** Format: double */
       top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
       stream?: boolean | null;
       /** Format: double */
       presence_penalty?: number | null;
       /** Format: double */
       frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
       /** @enum {string|null} */
       reasoning_effort?: "low" | "medium" | "high" | null;
-      /** Format: double */
-      n?: number | null;
-      stop?: string[] | null;
-      messages?: components["schemas"]["Message"][] | null;
       tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
       tool_choice?: {
         name?: string;
         /** @enum {string} */
-        type: "auto" | "none" | "tool";
+        type: "none" | "auto" | "any" | "tool";
+      };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
     };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
@@ -1615,6 +1633,32 @@ Json: JsonObject;
     FineTuneBody: {
       providerKeyId: string;
     };
+    StoreFilterType: {
+      createdAt?: string;
+      filter: unknown;
+      name: string;
+      id?: string;
+    };
+    "ResultSuccess_StoreFilterType-Array_": {
+      data: components["schemas"]["StoreFilterType"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType-Array.string_": components["schemas"]["ResultSuccess_StoreFilterType-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_StoreFilterType_: {
+      data: components["schemas"]["StoreFilterType"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -4023,6 +4067,83 @@ export interface operations {
             events: unknown;
             job: unknown;
           };
+        };
+      };
+    };
+  };
+  GetFilters: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_StoreFilterType-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateFilter: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StoreFilterType"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_StoreFilterType.string_"];
+        };
+      };
+    };
+  };
+  DeleteFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateFilter: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          filters: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

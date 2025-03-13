@@ -2101,6 +2101,7 @@ export type Database = {
       }
       provider_keys: {
         Row: {
+          config: Json | null
           created_at: string | null
           id: string
           key_id: string
@@ -2113,6 +2114,7 @@ export type Database = {
           vault_key_id: string | null
         }
         Insert: {
+          config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string
@@ -2125,6 +2127,7 @@ export type Database = {
           vault_key_id?: string | null
         }
         Update: {
+          config?: Json | null
           created_at?: string | null
           id?: string
           key_id?: string
@@ -2724,6 +2727,7 @@ export type Database = {
     Views: {
       decrypted_provider_keys: {
         Row: {
+          config: Json | null
           created_at: string | null
           decrypted_provider_key: string | null
           id: string | null
@@ -2737,6 +2741,7 @@ export type Database = {
           vault_key_id: string | null
         }
         Insert: {
+          config?: Json | null
           created_at?: string | null
           decrypted_provider_key?: never
           id?: string | null
@@ -2750,6 +2755,7 @@ export type Database = {
           vault_key_id?: string | null
         }
         Update: {
+          config?: Json | null
           created_at?: string | null
           decrypted_provider_key?: never
           id?: string | null

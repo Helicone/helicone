@@ -8,6 +8,7 @@ import {
 } from "../packages/cost/providers/mappings";
 import { Result, err, ok } from "../lib/util/results";
 import { BaseRouter } from "./routerFactory";
+import { safePut } from "../lib/safePut";
 
 function validateURL(url: string) {
   try {
@@ -39,21 +40,35 @@ async function rateLimitUnapprovedDomains(
         rateLimited: true,
       };
     } else if (count) {
-      await rateLimitKV.put(rlKey, (parseInt(count) + 1).toString());
+      await safePut({
+        key: rateLimitKV,
+        keyName: rlKey,
+        value: (parseInt(count) + 1).toString(),
+      });
     } else {
       const gatewayRlList = await rateLimitKV.get(`gateway-rl-list`);
       if (!gatewayRlList) {
-        await rateLimitKV.put(`gateway-rl-list`, JSON.stringify([rlKey]), {
-          expirationTtl: 365 * 24 * 60 * 60, // 1 year
+        await safePut({
+          key: rateLimitKV,
+          keyName: `gateway-rl-list`,
+          value: JSON.stringify([rlKey]),
+          options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
         });
       } else {
         const list = JSON.parse(gatewayRlList);
         list.push(url);
-        await rateLimitKV.put(`gateway-rl-list`, JSON.stringify(list), {
-          expirationTtl: 365 * 24 * 60 * 60, // 1 year
+        await safePut({
+          key: rateLimitKV,
+          keyName: `gateway-rl-list`,
+          value: JSON.stringify(list),
+          options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
         });
-        await rateLimitKV.put(rlKey, "1");
       }
+    await safePut({
+        key: rateLimitKV,
+        keyName: rlKey,
+        value: "1",
+      });
     }
   }
   return {

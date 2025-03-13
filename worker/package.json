@@ -42,7 +42,7 @@
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
     "@cloudflare/itty-router-openapi": "^1.0.7",
-    "@helicone/prompts": "^1.0.10",
+    "@helicone/prompts": "^1.0.12",
     "@smithy/protocol-http": "^4.1.7",
     "@smithy/signature-v4": "^4.2.3",
     "@supabase/supabase-js": "^2.45.6",

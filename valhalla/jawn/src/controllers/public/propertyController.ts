@@ -61,6 +61,47 @@ export class PropertyController extends Controller {
     );
   }
 
+  // Gets all possible values for a property
+  @Post("{propertyKey}/search")
+  public async searchProperties(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() propertyKey: string,
+    @Body()
+    requestBody: {
+      searchTerm: string;
+    }
+  ) {
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: request.authParams.organizationId,
+      argsAcc: [propertyKey],
+      filter: {
+        request_response_rmt: {
+          properties: {
+            [propertyKey]: {
+              ilike: `%${requestBody.searchTerm}%`,
+            },
+          },
+        },
+      },
+    });
+
+    const query = `
+    SELECT DISTINCT value AS property
+    FROM request_response_rmt
+    ARRAY JOIN mapKeys(properties) AS key, mapValues(properties) AS value
+    WHERE (
+      ${builtFilter.filter} AND key = {val_0: String}
+    )
+  `;
+
+    const res = await dbQueryClickhouse<{ property: string }>(
+      query,
+      builtFilter.argsAcc
+    );
+
+    return resultMap(res, (data) => data.map((r) => r.property));
+  }
+
   @Post("{propertyKey}/top-costs/query")
   public async getTopCosts(
     @Request() request: JawnAuthenticatedRequest,

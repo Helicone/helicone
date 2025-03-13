@@ -78,13 +78,42 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "equals",
-      value: "claude-3-5-sonnet-v2@20241022",
+      operator: "includes",
+      value: "claude-3-opus",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.000075,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-3-5-haiku",
+    },
+    cost: {
+      prompt_token: 0.0000008,
+      completion_token: 0.000004,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-3-5-sonnet",
     },
     cost: {
       prompt_token: 0.000003,
       completion_token: 0.000015,
     },
-    showInPlayground: false,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-3-7-sonnet",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
   },
 ];

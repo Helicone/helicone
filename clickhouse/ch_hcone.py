@@ -221,6 +221,7 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
         print("Applying all migrations")
         create_migration_table(args.host, args.port, args.user, password)
         run_migrations(args.host, args.port, user=args.user, password=password)
+        print("Finished applying all migrations")
 
     elif args.list_migrations:
         print("Listing applied migrations")

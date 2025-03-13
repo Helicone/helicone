@@ -12,13 +12,7 @@ import CustomScrollbar, {
 } from "@/components/shared/universal/Scrollbar";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   ResizableHandle,
@@ -46,7 +40,6 @@ import {
   $user,
   findClosestModel,
   findClosestProvider,
-  PROVIDER_MODELS,
 } from "@/utils/generate";
 import {
   isLastMessageUser,
@@ -75,7 +68,6 @@ import {
   PiChartBarBold,
   PiCommandBold,
   PiPlayBold,
-  PiRocketLaunchBold,
   PiSpinnerGapBold,
   PiStopBold,
 } from "react-icons/pi";
@@ -85,7 +77,7 @@ import {
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
-import { DiffHighlight } from "../../welcome/diffHighlight";
+import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
@@ -214,7 +206,8 @@ export default function PromptEditor({
     if (
       state?.parameters?.provider === "OPENAI" ||
       state?.parameters?.provider === "ANTHROPIC" ||
-      state?.parameters?.provider === "GOOGLE"
+      state?.parameters?.provider === "GOOGLE_GEMINI" ||
+      state?.parameters?.provider === "GOOGLE_VERTEXAI"
     ) {
       return (
         state?.messages.some(
@@ -386,10 +379,11 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider as keyof typeof PROVIDER_MODELS,
+          provider: provider,
           model: model,
           temperature: templateData.temperature ?? 1,
           tools: templateData.tools ?? [],
+          max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
         inputs,
@@ -813,8 +807,8 @@ export default function PromptEditor({
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "DEEPSEEK",
-        model: "deepseek-r1",
+        provider: "OPENROUTER",
+        model: "anthropic/claude-3.7-sonnet:thinking",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
         includeReasoning: true,
@@ -1014,9 +1008,10 @@ export default function PromptEditor({
         setState({
           messages: basePrompt.body.messages || [],
           parameters: {
-            provider: provider as keyof typeof PROVIDER_MODELS,
+            provider: provider,
             model: model,
             temperature: basePrompt.body.temperature ?? 1,
+            max_tokens: basePrompt.body.max_tokens ?? undefined,
             tools: basePrompt.body.tools ?? [],
             reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
           },
@@ -1330,84 +1325,12 @@ export default function PromptEditor({
 
           {/* Deploy Button */}
           {promptId && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isImportedFromCode === true}
-                  onClick={() => {}}
-                >
-                  <PiRocketLaunchBold className="h-4 w-4 mr-2" />
-                  <span>Deploy</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>Deploy Prompt</DialogTitle>
-                </DialogHeader>
-
-                {/* Code example */}
-                <DiffHighlight
-                  maxHeight={false}
-                  className="h-full"
-                  code={`
-export async function getPrompt(
-  id: string,
-  variables: Record<string, any>
-): Promise<any> {
-  const getHeliconePrompt = async (id: string) => {
-    const res = await fetch(
-      \`https://api.helicone.ai/v1/prompt/\${id}/template\`,
-      {
-        headers: {
-          Authorization: \`Bearer \${YOUR_HELICONE_API_KEY}\`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
-          inputs: variables,
-        }),
-      }
-    );
-
-    return (await res.json()) as Result<PromptVersionCompiled, any>;
-  };
-
-  const heliconePrompt = await getHeliconePrompt(id);
-  if (heliconePrompt.error) {
-    throw new Error(heliconePrompt.error);
-  }
-  return heliconePrompt.data?.filled_helicone_template;
-}
-
-async function pullPromptAndRunCompletion() {
-  const prompt = await getPrompt("${
-    promptData?.user_defined_id || "my-prompt-id"
-  }", {
-    ${
-      state?.inputs
-        ?.map((v) => `${v.name}: "${v.value || "value"}"`)
-        .join(",\n    ") || 'color: "red"'
-    }
-  });
-  console.log(prompt);
-
-  const openai = new OpenAI({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    baseURL: \`https://oai.helicone.ai/v1/\${YOUR_HELICONE_API_KEY}\`,
-  });
-  const response = await openai.chat.completions.create(
-    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
-  );
-  console.log(response);
-}`}
-                  language="tsx"
-                  newLines={[]}
-                  oldLines={[]}
-                />
-              </DialogContent>
-            </Dialog>
+            <DeployDialog
+              promptId={promptId}
+              userDefinedId={promptData?.user_defined_id || "my-prompt-id"}
+              state={state}
+              isImportedFromCode={isImportedFromCode === true}
+            />
           )}
         </div>
       </div>

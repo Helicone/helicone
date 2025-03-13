@@ -1,4 +1,4 @@
-import { PROVIDER_MODELS } from "@/utils/generate";
+import { Provider } from "@/packages/cost/unified/types";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { Message, Tool } from "packages/llm-mapper/types";
 
@@ -21,10 +21,11 @@ export interface PromptState {
 }
 
 export interface StateParameters {
-  provider: keyof typeof PROVIDER_MODELS;
+  provider: Provider;
   model: string;
   temperature: number;
   reasoning_effort?: "low" | "medium" | "high";
+  max_tokens?: number;
   tools?: Tool[];
   // TODO: Add more parameters
 }

@@ -1,4 +1,3 @@
-import { IslandContainer } from "@/components/ui/islandContainer";
 import {
   ArrowPathIcon,
   ChartBarIcon,
@@ -484,7 +483,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   return (
     <>
-      <IslandContainer>
+      <div className="px-8">
         <AuthHeader
           isWithinIsland={true}
           title={"Dashboard"}
@@ -1000,7 +999,7 @@ const DashboardPage = (props: DashboardPageProps) => {
           open={showOnboardingPopUp}
           setOpen={setShowOnboardingPopUp}
         />
-      </IslandContainer>
+      </div>
     </>
   );
 };

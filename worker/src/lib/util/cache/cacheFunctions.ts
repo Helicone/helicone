@@ -3,6 +3,7 @@ import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
 import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
+import { safePut } from "../../safePut";
 const CACHE_BACKOFF_RETRIES = 5;
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
@@ -17,7 +18,7 @@ export async function kvKeyFromRequest(
     if (key.toLowerCase() === "helicone-auth") {
       headers.set(key, value);
     }
-    if (key.toLowerCase() === "authorization") {
+    if (!key.startsWith("ya29.") && key.toLowerCase() === "authorization") {
       headers.set(key, value);
     }
   }
@@ -62,20 +63,24 @@ async function trySaveToCache(options: SaveToCacheOptions) {
       cacheSeed
     );
     if (freeIndexes.length > 0) {
-      await cacheKv.put(
-        await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
-        JSON.stringify({
+      const result = await safePut({
+        key: cacheKv,
+        keyName: await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
+        value: JSON.stringify({
           headers: Object.fromEntries(response.headers.entries()),
           body: responseBody,
         }),
-        {
+        options: {
           expirationTtl,
-        }
-      );
+        },
+      });
+      if (!result.success) {
+        console.error("Error saving to cache:", result.error);
+      }
+      return result.success;
     } else {
       return false;
     }
-    return true;
   } catch (error) {
     console.error("Error saving to cache:", error);
     return false;
