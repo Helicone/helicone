@@ -109,20 +109,14 @@ export default async function Home({
               className="flex items-center gap-1.5 text-slate-600 hover:text-slate-700 transition-colors group"
             >
               <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-sm font-medium">Back to changelog</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center mb-3">
-            <div className="flex items-center text-slate-500 text-sm">
-              <span>
+              <span className="text-sm font-medium">
                 {dateObject.toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
                 })}
               </span>
-            </div>
+            </Link>
           </div>
 
           <H1 className="text-sky-500 mb-5 font-semibold">{String(metadata?.title)}</H1>

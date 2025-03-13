@@ -99,6 +99,9 @@ export default async function Home() {
           </P>
         </div>
 
+        {/* Separator line */}
+        <div className="h-px w-full bg-slate-200 mb-2"></div>
+
         <div className="flex flex-col w-full h-full relative">
           {/* Timeline line - hidden on mobile */}
           <div className="absolute hidden md:block left-4 top-[52px] bottom-8 w-px bg-slate-200 z-0"></div>
