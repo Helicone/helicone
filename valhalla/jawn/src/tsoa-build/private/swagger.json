@@ -4484,6 +4484,44 @@
 					}
 				]
 			},
+			"ResultSuccess__id-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ChatCompletionTokenLogprob.TopLogprob": {
 				"properties": {
 					"token": {
@@ -10408,7 +10446,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
+									"$ref": "#/components/schemas/Result__id-string_.string_"
 								}
 							}
 						}

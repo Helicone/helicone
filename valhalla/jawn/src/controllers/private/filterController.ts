@@ -35,7 +35,8 @@ export class FilterController extends Controller {
       .from("organization_layout")
       .select("*")
       .eq("organization_id", request.authParams.organizationId)
-      .eq("type", "filter_ast");
+      .eq("type", "filter_ast")
+      .order("created_at", { ascending: false });
 
     if (deleteError) {
       this.setStatus(500);
@@ -77,14 +78,16 @@ export class FilterController extends Controller {
     @Body()
     requestBody: StoreFilterType,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const { error: createError } = await supabaseServer.client
+  ): Promise<Result<{ id: string }, string>> {
+    const { error: createError, data } = await supabaseServer.client
       .from("organization_layout")
       .insert({
         organization_id: request.authParams.organizationId,
         filters: requestBody,
         type: "filter_ast",
-      });
+      })
+      .select("id")
+      .single();
 
     if (createError) {
       this.setStatus(500);
@@ -92,7 +95,7 @@ export class FilterController extends Controller {
     }
 
     this.setStatus(201);
-    return ok(null);
+    return ok({ id: data.id });
   }
 
   @Delete("/{id}")
