@@ -102,10 +102,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
 
   const webhookCount = webhooks?.data?.data?.length || 0;
 
-  const { freeLimit, hasReachedLimit } = useFeatureLimit(
-    "webhooks",
-    webhookCount
-  );
+  const { freeLimit, canCreate } = useFeatureLimit("webhooks", webhookCount);
 
   const createWebhook = useMutation({
     mutationFn: async (data: {
@@ -336,7 +333,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
 
-        {hasReachedLimit && (
+        {canCreate && (
           <FreeTierLimitBanner
             feature="webhooks"
             itemCount={webhookCount}

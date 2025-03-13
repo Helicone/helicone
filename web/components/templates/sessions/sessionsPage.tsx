@@ -105,7 +105,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     return allNames.sessions.length > 0;
   }, [allNames.sessions.length]);
 
-  const { hasReachedLimit, freeLimit } = useFeatureLimit(
+  const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
     allNames.sessions.length
   );
@@ -172,7 +172,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               }
             />
 
-            {hasReachedLimit && (
+            {canCreate && (
               <FreeTierLimitBanner
                 feature="sessions"
                 itemCount={allNames.sessions.length}

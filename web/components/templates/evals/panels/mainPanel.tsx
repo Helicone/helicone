@@ -55,12 +55,8 @@ export const MainPanel = () => {
 
   // Free tier limit checks
   const evaluatorCount = simpleEvaluators.length || 0;
-  const {
-    canCreate: canCreateEvaluator,
-    hasReachedLimit: hasReachedEvaluatorLimit,
-    freeLimit: MAX_EVALUATORS,
-    upgradeMessage,
-  } = useFeatureLimit("evals", evaluatorCount);
+  const { canCreate: canCreateEvaluator, freeLimit: MAX_EVALUATORS } =
+    useFeatureLimit("evals", evaluatorCount);
 
   const handleTestEvaluator = (evaluator: any) => {
     // Set test data based on evaluator type
@@ -121,7 +117,7 @@ export const MainPanel = () => {
         ]}
       />
 
-      {hasReachedEvaluatorLimit && (
+      {canCreateEvaluator && (
         <FreeTierLimitBanner
           feature="evals"
           itemCount={evaluatorCount}

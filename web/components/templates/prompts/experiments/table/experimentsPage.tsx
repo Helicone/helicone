@@ -50,11 +50,8 @@ const ExperimentsPage = () => {
 
   // Free tier limit checks
   const experimentCount = experiments?.length || 0;
-  const {
-    canCreate: canCreateExperiment,
-    hasReachedLimit: hasReachedExperimentLimit,
-    freeLimit: MAX_EXPERIMENTS,
-  } = useFeatureLimit("experiments", experimentCount);
+  const { canCreate: canCreateExperiment, freeLimit: MAX_EXPERIMENTS } =
+    useFeatureLimit("experiments", experimentCount);
 
   if (isLoading) {
     return <LoadingAnimation title="Loading Experiments" />;
@@ -79,7 +76,7 @@ const ExperimentsPage = () => {
       <AuthHeader
         title="Experiments"
         actions={
-          hasReachedExperimentLimit ? (
+          canCreateExperiment ? (
             <FreeTierLimitWrapper
               feature="experiments"
               itemCount={experimentCount}
@@ -130,7 +127,7 @@ const ExperimentsPage = () => {
       />
 
       {/* Experiment limit warning banner */}
-      {hasReachedExperimentLimit && (
+      {canCreateExperiment && (
         <FreeTierLimitBanner
           feature="experiments"
           itemCount={experimentCount}

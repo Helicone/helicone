@@ -12,9 +12,6 @@ export interface FeatureLimitResult {
   // Whether the user can create more items (has access or below limit)
   canCreate: boolean;
 
-  // Whether the user has reached their free tier limit
-  hasReachedLimit: boolean;
-
   // Whether the user has full access to this feature (e.g., via paid plan)
   hasFullAccess: boolean;
 
@@ -34,9 +31,6 @@ export interface FeatureLimitResult {
 export interface SubfeatureLimitResult {
   // Whether the user can create more subfeature items
   canCreate: boolean;
-
-  // Whether the user has reached their free tier limit
-  hasReachedLimit: boolean;
 
   // Whether the user has full access to the parent feature
   hasFullAccess: boolean;
@@ -80,7 +74,6 @@ export function useFeatureLimit(
     return {
       canCreate: true,
       hasFullAccess,
-      hasReachedLimit: false,
       remainingItems: Infinity,
       featureConfig: null,
       upgradeMessage: "",
@@ -92,9 +85,8 @@ export function useFeatureLimit(
   const freeLimit = featureConfig.getLimit(context);
 
   // Check if limit is reached
-  const hasReachedLimit = !hasFullAccess && itemCount >= freeLimit;
+  const canCreate = !hasFullAccess && itemCount >= freeLimit;
   const remainingItems = Math.max(0, freeLimit - itemCount);
-  const canCreate = hasFullAccess || !hasReachedLimit;
 
   // Generate upgrade message
   const upgradeMessage =
@@ -104,7 +96,6 @@ export function useFeatureLimit(
   return {
     canCreate,
     hasFullAccess,
-    hasReachedLimit,
     remainingItems,
     featureConfig,
     upgradeMessage,
@@ -131,7 +122,6 @@ export function useSubfeatureLimit(
     return {
       canCreate: true,
       hasFullAccess,
-      hasReachedLimit: false,
       remainingItems: Infinity,
       subfeatureConfig: null,
       upgradeMessage: "",
@@ -155,7 +145,6 @@ export function useSubfeatureLimit(
   return {
     canCreate,
     hasFullAccess,
-    hasReachedLimit,
     remainingItems,
     subfeatureConfig,
     upgradeMessage,

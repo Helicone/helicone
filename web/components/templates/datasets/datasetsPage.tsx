@@ -27,7 +27,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
     useGetHeliconeDatasets();
 
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-  const { hasReachedLimit, freeLimit, upgradeMessage } = useFeatureLimit(
+  const { canCreate, freeLimit, upgradeMessage } = useFeatureLimit(
     "datasets",
     datasets?.length || 0
   );
@@ -48,7 +48,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
         <>
           <AuthHeader title={"Datasets"} />
 
-          {hasReachedLimit && (
+          {canCreate && (
             <FreeTierLimitBanner
               feature="datasets"
               itemCount={datasets.length}

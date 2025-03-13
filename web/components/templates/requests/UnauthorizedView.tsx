@@ -21,7 +21,7 @@ const UnauthorizedView: React.FC<UnauthorizedViewProps> = ({
       return {
         title: "You have reached your monthly limit.",
         description:
-          "Upgrade your plan to view your rate limit analytics. Your rate limits are still functioning, but you will not be able to view the analytics until you upgrade.",
+          "Upgrade your plan to view your rate limit data. Rate limits are still being enforced, but you will not be able to view it until you upgrade.",
       };
     } else {
       return {
@@ -59,8 +59,6 @@ const UnauthorizedView: React.FC<UnauthorizedViewProps> = ({
     const proTitle =
       pageType === "cache"
         ? "You have reached your monthly cache limit on the Pro plan."
-        : pageType === "ratelimit"
-        ? "You have reached your monthly rate limit quota on the Pro plan."
         : "You have reached your monthly limit on the Pro plan.";
 
     return (

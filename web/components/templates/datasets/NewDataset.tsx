@@ -64,19 +64,16 @@ export default function NewDataset({
   const datasetCount = datasets?.length || 0;
   const requestCount = request_ids.length;
 
-  const {
-    canCreate: canCreateDataset,
-    hasReachedLimit: hasReachedDatasetLimit,
-    hasFullAccess,
-    freeLimit: FREE_TIER_DATASET_LIMIT,
-  } = useFeatureLimit("datasets", datasetCount);
+  const { hasFullAccess, freeLimit: FREE_TIER_DATASET_LIMIT } = useFeatureLimit(
+    "datasets",
+    datasetCount
+  );
 
-  const {
-    canCreate: canAddRequests,
-    hasReachedLimit: hasReachedRequestLimit,
-    freeLimit: FREE_TIER_REQUEST_LIMIT,
-    upgradeMessage: requestLimitUpgradeMessage,
-  } = useSubfeatureLimit("datasets", "requests", requestCount);
+  const { freeLimit: FREE_TIER_REQUEST_LIMIT } = useSubfeatureLimit(
+    "datasets",
+    "requests",
+    requestCount
+  );
 
   // State to track which limit is enforcing restrictions
   const [limitType, setLimitType] = useState<

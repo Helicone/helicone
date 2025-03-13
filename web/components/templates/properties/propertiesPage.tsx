@@ -20,7 +20,7 @@ const PropertiesPage = (props: {}) => {
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
-  const { hasFullAccess, freeLimit, hasReachedLimit } = useFeatureLimit(
+  const { hasFullAccess, freeLimit, canCreate } = useFeatureLimit(
     "properties",
     properties.length
   );
@@ -88,7 +88,7 @@ const PropertiesPage = (props: {}) => {
     <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
       <AuthHeader title="Properties" />
 
-      {hasReachedLimit && (
+      {canCreate && (
         <FreeTierLimitBanner
           feature="properties"
           itemCount={properties.length}
