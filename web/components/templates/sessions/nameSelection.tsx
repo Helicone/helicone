@@ -42,9 +42,8 @@ const SessionNameSelection = ({
   sessionNames,
   selectedName,
   setSelectedName,
-  totalSessionCount,
 }: SessionNameSelectionProps) => {
-  const { freeLimit, hasFullAccess } = useFeatureLimit(
+  const { freeLimit, hasAccess } = useFeatureLimit(
     "sessions",
     sessionNames.length
   );
@@ -67,7 +66,7 @@ const SessionNameSelection = ({
     session: (typeof sessionNames)[0],
     index: number
   ) => {
-    if (!hasFullAccess && index >= freeLimit) {
+    if (!hasAccess && index >= freeLimit) {
       // This is a premium session, do not set as selected
       return;
     }
@@ -119,7 +118,7 @@ const SessionNameSelection = ({
       <Col className="max-h-[70vh] overflow-y-auto">
         {filteredSessions.map((seshName, index) => {
           // Determine if this session requires premium (beyond free tier limit)
-          const requiresPremium = !hasFullAccess && index >= freeLimit;
+          const requiresPremium = !hasAccess && index >= freeLimit;
 
           return (
             <FreeTierLimitWrapper
