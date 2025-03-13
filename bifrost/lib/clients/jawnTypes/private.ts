@@ -250,8 +250,17 @@ export interface paths {
   "/v1/organization/{organizationId}/add_member": {
     post: operations["AddMemberToOrganization"];
   };
+  "/v1/organization/{organizationId}/create_filter": {
+    post: operations["CreateOrganizationFilter"];
+  };
+  "/v1/organization/{organizationId}/update_filter": {
+    post: operations["UpdateOrganizationFilter"];
+  };
   "/v1/organization/delete": {
     delete: operations["DeleteOrganization"];
+  };
+  "/v1/organization/{organizationId}/layout": {
+    get: operations["GetOrganizationLayout"];
   };
   "/v1/organization/{organizationId}/members": {
     get: operations["GetOrganizationMembers"];
@@ -1376,6 +1385,38 @@ Json: JsonObject;
     UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
+    UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
+    UIFilterRowNode: {
+      /** @enum {string} */
+      operator: "and" | "or";
+      rows: components["schemas"]["UIFilterRowTree"][];
+    };
+    FilterRow: {
+      value: string;
+      /** Format: double */
+      operatorIdx: number;
+      /** Format: double */
+      filterMapIdx: number;
+    };
+    OrganizationFilter: {
+      softDelete: boolean;
+      createdAt?: string;
+      filter: components["schemas"]["UIFilterRowTree"][];
+      name: string;
+      id: string;
+    };
+    OrganizationLayout: {
+      filters: components["schemas"]["OrganizationFilter"][];
+      type: string;
+      organization_id: string;
+      id: string;
+    };
+    ResultSuccess_OrganizationLayout_: {
+      data: components["schemas"]["OrganizationLayout"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
     OrganizationMember: {
       org_role: string;
       member: string;
@@ -3710,12 +3751,78 @@ export interface operations {
       };
     };
   };
+  CreateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          filterType: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationFilter: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          filterType: "dashboard" | "requests";
+          filters: components["schemas"]["OrganizationFilter"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   DeleteOrganization: {
     responses: {
       /** @description Ok */
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrganizationLayout: {
+    parameters: {
+      query: {
+        filterType: string;
+      };
+      path: {
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationLayout.string_"];
         };
       };
     };
