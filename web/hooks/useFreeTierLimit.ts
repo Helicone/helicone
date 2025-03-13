@@ -1,10 +1,5 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { useHasAccess } from "@/hooks/useHasAccess";
-import {
-  FREE_TIER_CONFIG,
-  FreeTierLimitContext,
-  LimitConfig,
-} from "@/lib/freeTierLimits";
+import { FREE_TIER_CONFIG, LimitConfig } from "@/lib/freeTierLimits";
 import { FeatureId, SubfeatureId } from "@/lib/features";
 
 // Define base interface for all limit results
@@ -32,35 +27,14 @@ export interface SubfeatureLimitResult extends BaseLimitResult {
   subfeatureConfig: LimitConfig | null;
 }
 
-// Union type for both result types
 export type LimitResult = FeatureLimitResult | SubfeatureLimitResult;
 
-// Helper to create context object
-function getContext(): FreeTierLimitContext {
-  const org = useOrg();
-
-  return {
-    organization: org?.currentOrg,
-    userId: org?.currentOrg?.owner,
-  };
-}
-
-/**
- * Unified hook for checking feature and subfeature limits
- * @param feature The feature ID to check access for
- * @param itemCount Number of items using this feature
- * @param subfeature Optional subfeature ID (if checking a subfeature)
- * @returns Limit information including access status and remaining items
- */
 export function useFeatureLimit(
   feature: FeatureId,
   itemCount: number,
   subfeature?: SubfeatureId | undefined
 ): LimitResult {
-  // Get required data
   const hasAccess = useHasAccess(feature);
-  const context = getContext();
-
   let config: LimitConfig | null = null;
 
   // Determine if we're checking a feature or subfeature
@@ -95,7 +69,7 @@ export function useFeatureLimit(
     }
   }
 
-  const freeLimit = config.getLimit(context);
+  const freeLimit = config.getLimit();
   const canCreate = hasAccess || itemCount < freeLimit;
   const remainingItems = Math.max(0, freeLimit - itemCount);
 

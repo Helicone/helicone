@@ -1,39 +1,21 @@
-import { Database } from "@/supabase/database.types";
 import { FeatureId, FEATURE_DISPLAY_NAMES, SubfeatureId } from "./features";
 
-// Type for context that can be passed to the limit calculation functions
-export interface FreeTierLimitContext {
-  organization?: Database["public"]["Tables"]["organization"]["Row"];
-  userId?: string;
-}
-
-// Core limit configuration with function-based limits
 export interface LimitConfig {
-  // Function that calculates the limit based on context
-  getLimit: (context: FreeTierLimitContext) => number;
-
-  // Description of the limit to show in the UI
+  getLimit: () => number;
   description: (limit: number) => string;
-
-  // Feature name for the upgrade dialog
   upgradeFeatureName: string;
-
-  // Optional custom upgrade message
   upgradeMessage?: (limit: number, used: number) => string;
 }
 
-// A feature can have a main limit and optional subfeature limits
 export interface FeatureConfig {
   main: LimitConfig;
   subfeatures?: Partial<Record<SubfeatureId, LimitConfig>>;
 }
 
-// The complete free tier configuration
 export type FreeTierConfig = {
   features: Partial<Record<FeatureId, FeatureConfig>>;
 };
 
-// The actual configuration with default implementations
 export const FREE_TIER_CONFIG: FreeTierConfig = {
   features: {
     prompts: {
@@ -190,6 +172,6 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
 // Utility function to get all features with free tier limits
 export function getAllFeaturesWithLimits(): FeatureId[] {
   return Object.entries(FREE_TIER_CONFIG.features)
-    .filter(([_, config]) => config.main.getLimit({}) > 0)
+    .filter(([_, config]) => config.main.getLimit() > 0)
     .map(([key]) => key as FeatureId);
 }
