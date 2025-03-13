@@ -127,7 +127,7 @@ const ExperimentsPage = () => {
       />
 
       {/* Experiment limit warning banner */}
-      {canCreateExperiment && (
+      {!canCreateExperiment && (
         <FreeTierLimitBanner
           feature="experiments"
           itemCount={experimentCount}

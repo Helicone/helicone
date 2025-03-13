@@ -48,7 +48,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
         <>
           <AuthHeader title={"Datasets"} />
 
-          {canCreate && (
+          {!canCreate && (
             <FreeTierLimitBanner
               feature="datasets"
               itemCount={datasets.length}

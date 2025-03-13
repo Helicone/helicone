@@ -57,7 +57,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
-import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 type TableDataType = {
@@ -94,9 +94,9 @@ export function ExperimentTable({
   const variantCount = promptVersionsData?.length || 0;
   const {
     canCreate: canCreateVariant,
-    hasReachedLimit: hasReachedVariantLimit,
+    hasAccess: hasReachedVariantLimit,
     freeLimit: MAX_VARIANTS,
-  } = useSubfeatureLimit("experiments", "variants", variantCount);
+  } = useFeatureLimit("experiments", variantCount, "variants");
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =

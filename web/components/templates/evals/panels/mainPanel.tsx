@@ -117,7 +117,7 @@ export const MainPanel = () => {
         ]}
       />
 
-      {canCreateEvaluator && (
+      {!canCreateEvaluator && (
         <FreeTierLimitBanner
           feature="evals"
           itemCount={evaluatorCount}

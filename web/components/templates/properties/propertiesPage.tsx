@@ -88,7 +88,7 @@ const PropertiesPage = (props: {}) => {
     <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
       <AuthHeader title="Properties" />
 
-      {canCreate && (
+      {!canCreate && (
         <FreeTierLimitBanner
           feature="properties"
           itemCount={properties.length}

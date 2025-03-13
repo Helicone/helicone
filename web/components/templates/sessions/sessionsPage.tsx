@@ -169,7 +169,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               }
             />
 
-            {canCreate && (
+            {!canCreate && (
               <FreeTierLimitBanner
                 feature="sessions"
                 itemCount={allNames.sessions.length}
