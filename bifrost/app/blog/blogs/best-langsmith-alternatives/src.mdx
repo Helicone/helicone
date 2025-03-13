@@ -1,20 +1,19 @@
-Observability tools like LangSmith allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the "black box" nature of LLMs.
+As LangSmith's on-premise version becomes expensive, developers are looking for more cost-effective and reliable alternatives. 
 
-However, as LangSmith's on-premise version becomes expensive, users are seeking more flexible alternatives. **But which LangSmith alternative is the best in 2024?** We will shed some light.
+The market has matured significantly, with several strong contenders offering different approaches to LLM monitoring that works with other frameworks in addition to LangChain. 
+
+**Which platforms offer similar features to LangSmith?** We will shed some light.
 
 ![Comparing LangSmith Alternatives in July 2024](/static/blog/best-langsmith-alternatives/langsmith-cover.webp)
 
-## Top LLM observability tools (updated July 2024)
+<TableOfContents excludeHeadings={["Join Helicone", "Table of Contents", "Why are companies choosing Helicone?", "How does Helicone compare to LangSmith?", "Bottom Line", "Start Monitoring Your LLM App in Minutes ⚡️"]} maxLevel={2} />
 
-1. Helicone
-2. Phoenix by Arize
-3. Langfuse
-4. HoneyHive
-5. OpenLLMetry by Traceloop
+## Comparing LangSmith with Competitors
 
-## LangSmith Competitors Overview
+Here some some popular LangSmith alternatives that offers monitoring, tracing, and optimizing AI model performance. Here's how they compare:
 
-| Feature                | LangSmith | Helicone | Phoenix by Arize AI | Langfuse | HoneyHive | OpenLLMetry by Traceloop |
+
+|                 | LangSmith | Helicone | Phoenix by Arize AI | Langfuse | HoneyHive | Traceloop |
 | :--------------------- | :-------- | :------- | :------------------ | :------- | :-------- | :----------------------- |
 | Open-source            | -         | ✅       | ✔                   | ✔        | -         | ✔                        |
 | Self-hosted            | -         | ✅       | -                   | ✔        | -         | -                        |
@@ -32,27 +31,23 @@ However, as LangSmith's on-premise version becomes expensive, users are seeking 
 | Dashboard              | ✔         | ✅       | ✔                   | ✔        | ✔         | ✔                        |
 | Data Export            | ✔         | ✅       | ✔                   | ✔        | ✔         | -                        |
 
----
-
 ## 1. Helicone
 
-**<span style={{color: '#0ea5e9'}}>Designed for: developers & analysts</span>**
+**Designed for: developers & analysts**
 
 ![LLM cost and usage analytics in Helicone Dashboard](/static/blog/best-langsmith-alternatives/helicone-dashboard.webp)
 
-![Track requests and agent workflows in real-time on Helicone's Request page](/static/blog/best-langsmith-alternatives/helicone-request-table.webp)
-
 ### What is Helicone?
 
-**<a href="https://www.helicone.ai/" target="_blank">Helicone</a>** is an open-source LLM observability and monitoring platform purpose-built for
-developers to monitor, debug, and optimize their LLM applications. With the flexibilityto be self-hosted or used as a gateway with a simple **<span
-style={{ color: "#0ea5e9" }}>1-line integration</span>**, it provides instant insights into latency, costs, time to first tokens (TTFT) and more.
+**<a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone</a>** is an open-source LLM observability and monitoring platform purpose-built for developers to monitor, debug, and optimize their LLM applications. 
+
+Helicone has the flexibility ato be self-hosted or integrated as a proxy with a simple **1-line integration**, it provides instant insights into latency, costs, time to first tokens (TTFT) and more.
 
 ### Top features
 
-1. **Sessions** - Group, track and visualize multi-step agent workflows and LLM interactions.
-2. **Prompts & Experiments** - Version and test prompts, then compare outputs before going in production.
-3. **Custom properties** - Segment data to understand your users better.
+1. <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> allows you to group, track and visualize multi-step agent workflows and LLM interactions.
+2. <a href="https://docs.helicone.ai/features/prompts" target="_blank" rel="noopener">Prompts & Experiments</a> lets you version and test prompts on production data, regression test before pushing to production.
+3. <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties#custom-properties" target="_blank" rel="noopener">Custom properties</a> are useful for labeling and segmenting your data so you can understand user behaviors better.
 
 ## How does Helicone compare to LangSmith?
 
@@ -76,40 +71,44 @@ style={{ color: "#0ea5e9" }}>1-line integration</span>**, it provides instant in
 
 LangSmith currently primarily focuses on text-based LLM applications, with extensive tools for testing, monitoring, and debugging these applications, while Helicone offers support for **text and image inputs and outputs.**
 
+For a detailed comparison, check out <a href="https://www.helicone.ai/blog/langsmith" target="_blank" rel="noopener">In-Depth: Helicone vs. LangSmith</a>.
+
 ## Why are companies choosing Helicone?
 
-**<span style={{color: '#0ea5e9'}}>Open-Source & Self-Hosting</span>**
+### Open-Source & Self-Hostable
 
-Helicone is fully open-source and free to start. Companies can also self-host Helicone within their infrastructure. This ensures that you have full control over the application, flexibility and customization tailored to specific business needs. On the other hand, the self-host option is only available for users on enterprise plan for LangSmith.
+Helicone is fully <a href="https://github.com/Helicone/helicone" target="_blank" rel="noopener">open-source</a> and free to start. Companies can also self-host Helicone within their infrastructure. This ensures that you have full control over the application, flexibility and customization tailored to specific business needs. 
 
-**<span style={{color: '#0ea5e9'}}>Cost-Effective</span>**
+On the other hand, the self-host option is only available for users on enterprise plan for LangSmith.
 
-Helicone is also more cost-effective than LangSmith as it operates on a volumetric pricing model. This means companies only pay for what they use (**while the first 10k requests every month are free),** which makes Helicone an easy and flexible platform for businesses to get started and scale their applications.
+### More Cost-Effective
 
-**<span style={{color: '#0ea5e9'}}>Scalable & Reliable</span>**
+Helicone is also more cost-effective than LangSmith as it operates on a volumetric pricing model. This means companies only <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">pay for what they use</a> (the first 10k requests every month are free). 
 
-Helicone can also handle a large volume of requests, making it a dependable option for businesses with high traffic. Acting as a Gateway, Helicone offers a suite of both middleware and advanced features such as caching, prompt thread detection and vaults to securely share API keys.
+Helicone makes it easy for small teams to large companies to scale their applications.
 
-Companies that are highly responsive to market changes or opportunities often use Helicone to achieve production quality faster.
+### Scalable & Reliable
+
+Helicone can also handle a large volume of requests, making it a dependable option for businesses with high traffic. If integrated as a proxy, developers can access a suite of middleware features like <a href="https://docs.helicone.ai/features/advanced-usage/caching#llm-caching" target="_blank" rel="noopener">caching</a>, <a href="https://docs.helicone.ai/features/advanced-usage/llm-security" target="_blank" rel="noopener">threat detection</a> and <a href="https://docs.helicone.ai/features/advanced-usage/vault" target="_blank" rel="noopener">vaults</a> to securely share API keys.
+
+Companies that are highly responsive to market changes or opportunities often use Helicone to achieve production quality faster. 
 
 <CallToAction
   title="Bottom Line"
-  description="If you need something that 'just works' so you can get back to shipping features, Helicone has the core functionality to help you get started instantly."
+  description="If you need something that works out of the box, with prompt experimentation and evaluation functionality, Helicone can help you get started instantly."
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://www.helicone.ai/"
 />
 
----
-
 ## 2. Phoenix by Arize AI
 
-**<span style={{color: '#0ea5e9'}}>Designed for: ML engineers & ML Ops team</span>**
+**Designed for: ML engineers & ML Ops team**
 
 ![Arize AI dashboard](/static/blog/best-langsmith-alternatives/arize-ai-dashboard.webp)
 
 ### What is Arize AI?
 
-**<a href="https://phoenix.arize.com/" target="_blank">Phoenix by Arize AI</a>** is known for its strong focus on machine learning model monitoring and explainability.
+**<a href="https://phoenix.arize.com/" target="_blank" rel="noopener noreferrer nofollow">Phoenix by Arize AI</a>** is known for its strong focus on machine learning model monitoring and explainability.
 If your company prioritizes understanding model performance in production, detecting
 model drift, and getting detailed explanations of model predictions, Arize AI might
 be the better choice.
@@ -154,22 +153,22 @@ Arize AI stands out for its support for integration with various machine learnin
 
 Arize AI attracts users who need robust ML monitoring, explainability, and scalability, primarily data scientists, ML engineers, and ML ops teams, whereas LangSmith appeals to software engineers, content creators, and researchers who are focused on building and applying language models in different contexts.
 
+For a detailed comparison, check out <a href="https://www.helicone.ai/blog/best-arize-alternatives" target="_blank" rel="noopener">Arize AI vs. Helicone</a>.
+
 <BottomLine
   title="Bottom Line"
   description="For developers focused on enhancing model performance, Arize AI stands out due to its capabilities in monitoring and analyzing model performance. However, it's worth noting that Arize AI's emphasis may not include traditional user feedback tracking, such as gathering user comments or sentiment."
 />
 
----
-
 ## 3. Langfuse
 
-**<span style={{color: '#0ea5e9'}}>Designed for: developers & analysts</span>**
+**Designed for: developers & analysts**
 
 ![Langfuse Traces view](/static/blog/best-langsmith-alternatives/langfuse-traces.webp)
 
 ### What is Langfuse?
 
-**<a href="https://langfuse.com/" target="_blank" rel="noopener noreferrer">Langfuse</a>** is an open-source LLM Engineering Platform that helps to trace & debug LLM models.
+**<a href="https://langfuse.com/" target="_blank" rel="noopener noreferrer nofollow">Langfuse</a>** is an open-source LLM Engineering Platform that helps to trace & debug LLM models.
 
 It provides observability, metrics, evals, prompt management and a playground and
 to debug and improve LLM apps.
@@ -210,26 +209,26 @@ Langfuse is open-source, which means it offers flexibility for customization and
 
 Langfuse can be more cost-effective compared to LangSmith, which requires investment in enterprise plans for full feature access and support.
 
-**Framework-agnostic tracing capabilities**
+**Framework-Agnostic Tracing Capabilities**
 
 Langfuse offers comprehensive tracing capabilities that are model and framework agnostic. It allows for capturing the full context of LLM applications, including complex and chained calls, which simplifies debugging and pinpointing issues across extended control flows, while specific features like automated instrumentation for frameworks may require additional setup or integration effort using LangSmith.
+
+For a detailed comparison, check out <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Langfuse vs. Helicone</a>.
 
 <BottomLine
   title="Bottom Line"
   description="Langfuse is a good choice for teams looking to improve their LLM applications with a simple and cost-effective tool, but may be limited for larger teams who want a scalable solution or enterprise features."
 />
 
----
-
 ## 4. HoneyHive
 
-**<span style={{color: '#0ea5e9'}}>Designed for: developers & analysts</span>**
+**Designed for: developers & analysts**
 
 ![HoneyHive AI Dashboard](/static/blog/best-langsmith-alternatives/honeyhive-dashboard.webp)
 
 ### What is HoneyHive?
 
-**<a href="https://www.honeyhive.ai/" target="_blank">HoneyHive AI</a>** evaluates, debugs, and monitors production LLM applications. It lets you trace execution flows, customize event feedback, and create evaluation or fine-tuning datasets from production logs.
+**<a href="https://www.honeyhive.ai/" target="_blank" rel="noopener noreferrer nofollow">HoneyHive AI</a>** evaluates, debugs, and monitors production LLM applications. It lets you trace execution flows, customize event feedback, and create evaluation or fine-tuning datasets from production logs.
 
 It is built for teams who want to build reliable LLM products because it focuses on observability through performance tracking.
 
@@ -261,25 +260,25 @@ HoneyHive's tracing functionality includes support for multi-modal data, which e
 | Dashboard              | ✔         | ✔         |
 | Data Export            | ✔         | ✔         |
 
+For a detailed comparison, check out <a href="https://www.helicone.ai/blog/helicone-vs-honeyhive" target="_blank" rel="noopener">HoneyHive vs. Helicone</a>.
+
 <BottomLine
   title="Bottom Line"
   description="HoneyHive provides access to 100+ open-source models in their Playground through integrations for testing purpose. However, if you want a solution that allows you to plug and play, it's worth it to look into other solutions."
 />
 
----
-
 ## 5. OpenLLMetry by Traceloop
 
-**<span style={{color: '#0ea5e9'}}>Designed for: developers & analysts</span>**
+**Designed for: developers & analysts**
 
 ![Traceloop Traces view](/static/blog/best-langsmith-alternatives/traceloop-traces.webp)
 
 ### What is OpenLLMetry?
 
-**<a href="https://www.traceloop.com/docs/openllmetry/introduction" target="_blank">OpenLLMetry</a>** is an open-source framework developed by **Traceloop**, that simplifies the
+**<a href="https://www.traceloop.com/docs/openllmetry/introduction" target="_blank" rel="noopener noreferrer nofollow">OpenLLMetry</a>** is an open-source framework developed by **Traceloop**, that simplifies the
 process of monitoring and debugging Large Language Models. It is built on top of
 OpenTelemetry, ensuring non-intrusive tracing and seamless integration with leading
-observability platforms and backends like [KloudMate](https://docs.kloudmate.com/openllmetry-opentelemetry-based-observability-for-llms).
+observability platforms and backends like <a href="https://docs.kloudmate.com/openllmetry-opentelemetry-based-observability-for-llms" target="_blank" rel="noopener noreferrer nofollow">KloudMate</a>.
 
 OpenLLMetry aims to standardize the collection of mission-critical LLM metrics, spans, traces, and logs through OpenTelmetry.
 
@@ -308,6 +307,8 @@ OpenLLMetry aims to standardize the collection of mission-critical LLM metrics, 
 | Dashboard              | ✔         | ✔                        |
 | Data Export            | ✔         | -                        |
 
+For a detailed comparison, check out <a href="https://www.helicone.ai/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Traceloop vs. Helicone</a>.
+
 <BottomLine
   title="Bottom Line"
   description="Traceloop focuses on evaluation and the pricing reflects that, thus can become expensive as your application scale to log more traces."
@@ -315,21 +316,27 @@ OpenLLMetry aims to standardize the collection of mission-critical LLM metrics, 
 
 ## Choosing the Right LangSmith Alternative
 
-When selecting a LangSmith alternative, consider your specific needs and priorities.
+If you're looking for an enterprise-ready solution with comprehensive features and scalability, **Helicone** offers robust monitoring capabilities and flexible deployment options.
 
-- If you're looking for an enterprise-ready solution with comprehensive features and scalability, Helicone offers robust monitoring capabilities and flexible deployment options.
-- For teams focused on ML model evaluation and drift detection, Phoenix by Arize AI excels in those areas.
-- Langfuse provides a simpler, self-hosted option ideal for smaller teams, while HoneyHive and OpenLLMetry offer specialized features for specific use cases.
+For teams focused on ML model evaluation and drift detection, **Phoenix by Arize** excels in those areas. Otherwise, **Langfuse** provides a simpler, self-hosted option ideal for smaller teams, while **HoneyHive** and **OpenLLMetry** offer specialized features for specific use cases.
 
-Ultimately, the best choice depends on factors like your scale, budget, technical requirements, and the specific LLM monitoring challenges you need to address.
+Ultimately, the best choice depends on your specific LLM challenges - we recommend you to try out some of the platforms above and see which one works best for you.
+
+As always, if you have questions or need help, you can reach out via [support@helicone.ai](mailto:support@helicone.ai) or the chat widget in the Helicone platform. See you soon!
+
+
+### You might find these useful 
+- <a href="https://www.helicone.ai/blog/langsmith" target="_blank" rel="noopener">In-Depth Comparison: Helicone vs. LangSmith</a>
+- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>
+- <a href="https://www.helicone.ai/blog/llm-stack-guide" target="_blank" rel="noopener">The Ultimate LLM Stack Guide for Developers</a>
 
 <CallToAction
-  title="Ready to scale your LLM app?"
-  description="Track your LLM usage, optimize costs, improve your prompts, and scale your LLM app with Helicone."
-  primaryButtonText="Try Helicone for free"
+  title="Start Monitoring Your LLM App in Minutes ⚡️"
+  description="Join thousands of developers who trust Helicone to reduce costs by up to 70% with built-in caching, gain real-time insights, and scale confidently with enterprise-grade security—all with just one line of code."
+  primaryButtonText="Try Helicone Free"
   primaryButtonLink="https://www.helicone.ai/signup"
-  secondaryButtonText="Contact us"
-  secondaryButtonLink="https://www.helicone.ai/contact"
+  secondaryButtonText="Calculate Your LLM Savings"
+  secondaryButtonLink="https://www.helicone.ai/llm-cost"
 />
 
 <Questions />
