@@ -154,8 +154,7 @@ export async function getRequestsClickhouseNoSort(
   orgId: string,
   filter: FilterNode,
   offset: number,
-  limit: number,
-  previewOnly: boolean = false
+  limit: number
 ): Promise<Result<HeliconeRequest[], string>> {
   console.log("getRequestsClickhouseNoSort");
   if (isNaN(offset) || isNaN(limit)) {
@@ -171,22 +170,13 @@ export async function getRequestsClickhouseNoSort(
     argsAcc: [],
   });
 
-  // Modify the query to include preview data when previewOnly is true
-  const requestBodySelect = previewOnly
-    ? `map('preview', substring(toString(request_body), 1, 500)) as request_body`
-    : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body`;
-
-  const responseBodySelect = previewOnly
-    ? `map('preview', substring(toString(response_body), 1, 500)) as response_body`
-    : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body`;
-
   const query = `
     SELECT response_id,
-      ${responseBodySelect},
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      ${requestBodySelect},
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -227,12 +217,7 @@ export async function getRequestsClickhouseNoSort(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const mappedRequests = await mapLLMCalls(
-    requests.data,
-    s3Client,
-    orgId,
-    previewOnly
-  );
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return mappedRequests;
 }
@@ -242,8 +227,7 @@ export async function getRequestsClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  previewOnly: boolean = false
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
@@ -261,22 +245,13 @@ export async function getRequestsClickhouse(
     argsAcc: [],
   });
 
-  // Modify the query to include preview data when previewOnly is true
-  const requestBodySelect = previewOnly
-    ? `map('preview', substring(toString(request_body), 1, 500)) as request_body`
-    : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body`;
-
-  const responseBodySelect = previewOnly
-    ? `map('preview', substring(toString(response_body), 1, 500)) as response_body`
-    : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body`;
-
   const query = `
     SELECT response_id,
-      ${responseBodySelect},
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      ${requestBodySelect},
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -315,12 +290,7 @@ export async function getRequestsClickhouse(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const mappedRequests = await mapLLMCalls(
-    requests.data,
-    s3Client,
-    orgId,
-    previewOnly
-  );
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return mappedRequests;
 }
@@ -509,18 +479,10 @@ export async function getRequestsCached(
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
   s3Client: S3Client,
-  orgId: string,
-  previewOnly: boolean = false
+  orgId: string
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
-      // If previewOnly is true, we don't need to fetch the full bodies from S3
-      if (previewOnly) {
-        // Extract request_body and response_body from ClickHouse
-        // These are already placeholders, so we'll modify the query to include preview data
-        return heliconeRequest;
-      }
-
       // First retrieve s3 signed urls if past the implementation date
       const s3ImplementationDate = new Date("2024-03-30T02:00:00Z");
       const requestCreatedAt = new Date(heliconeRequest.request_created_at);
