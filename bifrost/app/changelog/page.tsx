@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import path from "path";
+import { H1, H3, P, Small, Muted } from "@/components/ui/typography";
 
 export const metadata: Metadata = {
   title: "Helicone Changelog | Latest Updates & New Features",
@@ -89,65 +90,90 @@ export default async function Home() {
   const mdxs = await getChangeMdxs();
 
   return (
-    <>
-      <div className="flex flex-col w-full h-full antialiased relative divide-gray-200 divide-y-2">
-        {mdxs
-          .reverse()
-          .map(
-            (
-              {
-                title,
-                date,
-                path,
-                link,
-                folder,
-                content,
-                imageExists,
-                imagePath,
-              },
-              i
-            ) => (
-              <div
-                className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative"
-                key={`changes-${i}`}
-              >
-                <div className="w-56 h-full flex flex-col space-y-2 md:sticky top-16 md:top-32">
-                  <h3 className="text-sm font-semibold text-gray-500">
-                    {date.toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </h3>
-                </div>
+    <div className="w-full bg-white min-h-screen antialiased relative">
+      <div className="relative w-full flex flex-col mx-auto max-w-3xl h-full py-10 md:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 md:mb-8">
+          <H1>Changelog</H1>
+          <P className="text-slate-500 mt-1.5">
+            Stay up to date with the latest features and improvements to Helicone
+          </P>
+        </div>
 
-                <article className="prose w-full h-full">
-                  <Link href={link} className="no-underline" key={i}>
-                    <h1 className="text-sky-500 mt-16 md:mt-0 font-bold text-2xl">
-                      {String(title)}
-                    </h1>
-                    {imageExists ? (
-                      <Image
-                        src={imagePath}
-                        alt="Changelog Image"
-                        width={500}
-                        height={300}
-                        layout="responsive"
-                        style={{
-                          borderRadius: "16px",
-                          border: "1px solid #D3DCE6",
-                        }}
-                      />
-                    ) : (
-                      <div className="bg-gray-200 w-full flex items-center justify-center"></div>
+        <div className="flex flex-col w-full h-full relative">
+          {/* Timeline line - hidden on mobile */}
+          <div className="absolute hidden md:block left-4 top-[52px] bottom-8 w-px bg-slate-200 z-0"></div>
+
+          {mdxs
+            .reverse()
+            .map(
+              (
+                {
+                  title,
+                  date,
+                  path,
+                  link,
+                  folder,
+                  content,
+                  imageExists,
+                  imagePath,
+                },
+                i,
+                arr
+              ) => (
+                <div
+                  className="flex py-8 md:py-10 w-full relative"
+                  key={`changes-${i}`}
+                >
+                  {/* Timeline dot - hidden on mobile */}
+                  <div className="absolute hidden md:block left-4 top-[52px] z-10" style={{ transform: 'translateX(-50%)' }}>
+                    <div className="h-3 w-3 rounded-full bg-sky-500 ring-2 ring-white"></div>
+                  </div>
+
+                  <div className="flex flex-col md:pl-12 w-full">
+                    <div className="flex items-center mb-3">
+                      <div className="flex items-center text-slate-500 text-sm">
+                        {date.toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </div>
+                    </div>
+
+                    <Link href={link}>
+                      <H3 className="text-sky-500 hover:text-sky-600 transition-colors mb-3">
+                        {String(title)}
+                      </H3>
+                    </Link>
+
+                    {imageExists && (
+                      <div className="w-full mb-5 overflow-hidden rounded-xl relative aspect-[16/9]">
+                        <Link href={link}>
+                          <Image
+                            src={imagePath}
+                            alt={`${title} preview`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 800px"
+                            className="object-cover rounded-xl border border-slate-200 hover:border-slate-300 transition-colors"
+                          />
+                        </Link>
+                      </div>
                     )}
-                  </Link>
-                  <p className="text-base">{content}</p>
-                </article>
-              </div>
-            )
-          )}
+
+                    <div className="prose prose-slate max-w-none prose-compact">
+                      {content}
+                    </div>
+
+                    {/* Add a divider for mobile view */}
+                    {i < arr.length - 1 && (
+                      <div className="md:hidden h-px w-full bg-slate-200 mt-8"></div>
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
