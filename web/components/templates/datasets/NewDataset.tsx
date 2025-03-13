@@ -400,43 +400,27 @@ export default function NewDataset({
                   }
                 }
 
-                // For adding requests, we need to check if we have permission to add this many requests
-                const requestAdditionWrapped = async () => {
-                  const res = await jawn.POST(
-                    "/v1/helicone-dataset/{datasetId}/mutate",
-                    {
-                      params: { path: { datasetId: datasetId! } },
-                      body: {
-                        addRequests: limitedRequestIds,
-                        removeRequests: [],
-                      },
-                    }
-                  );
-
-                  if (res.data && !res.data.error) {
-                    setNotification("Requests added to dataset", "success");
-                    if (openDatasetOnAdd) {
-                      router.push(`/datasets/${datasetId}`);
-                    }
-                    onComplete();
-                  } else {
-                    setNotification(
-                      "Failed to add requests to dataset",
-                      "error"
-                    );
+                const res = await jawn.POST(
+                  "/v1/helicone-dataset/{datasetId}/mutate",
+                  {
+                    params: { path: { datasetId: datasetId! } },
+                    body: {
+                      addRequests: limitedRequestIds,
+                      removeRequests: [],
+                    },
                   }
-                  setAddingRequests(false);
-                };
+                );
 
-                // Only wrap with FreeTierSubLimitWrapper if we're a free tier user and adding to an existing dataset
-                if (!hasAccess && selectedOption !== "new") {
-                  // Use the requestAdditionWrapped directly since the FreeTierSubLimitWrapper
-                  // is already checking the request count in canAddRequests
-                  await requestAdditionWrapped();
+                if (res.data && !res.data.error) {
+                  setNotification("Requests added to dataset", "success");
+                  if (openDatasetOnAdd) {
+                    router.push(`/datasets/${datasetId}`);
+                  }
+                  onComplete();
                 } else {
-                  // No need to check limits for paid users or when creating a new dataset
-                  await requestAdditionWrapped();
+                  setNotification("Failed to add requests to dataset", "error");
                 }
+                setAddingRequests(false);
               }}
             >
               {addingRequests
