@@ -10,12 +10,12 @@ import { getUSDate } from "../../shared/utils/utils";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 import { alertTimeWindows } from "./constant";
-import { IslandContainer } from "@/components/ui/islandContainer";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { H3, Muted, P, Small } from "@/components/ui/typography";
-import { Bell, FileText, AlertCircle } from "lucide-react";
+import { Bell, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +44,7 @@ const AlertsPage = (props: AlertsPageProps) => {
   const alertCount = alerts?.length || 0;
   const {
     canCreate: canCreateAlert,
-    hasReachedLimit: hasReachedAlertLimit,
+    hasAccess,
     freeLimit: MAX_ALERTS,
   } = useFeatureLimit("alerts", alertCount);
 
@@ -71,9 +71,19 @@ const AlertsPage = (props: AlertsPageProps) => {
   }
 
   return (
-    <IslandContainer>
+    <div className="">
       <AuthHeader title={""} />
-      <div className="flex flex-col gap-8">
+
+      {!canCreateAlert && (
+        <FreeTierLimitBanner
+          feature="alerts"
+          itemCount={alertCount}
+          freeLimit={MAX_ALERTS}
+          className="mb-6"
+        />
+      )}
+
+      <div className="flex flex-col gap-8 px-8">
         {/* Active Alerts Section */}
         <section className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
@@ -87,12 +97,6 @@ const AlertsPage = (props: AlertsPageProps) => {
               </div>
 
               <div className="flex flex-col items-end gap-1">
-                {hasReachedAlertLimit && (
-                  <Small className="text-amber-600 dark:text-amber-400 flex items-center gap-1 mb-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {alertCount}/{MAX_ALERTS} alerts used
-                  </Small>
-                )}
                 <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
                   <Button
                     variant="action"
@@ -320,7 +324,7 @@ const AlertsPage = (props: AlertsPageProps) => {
           alertId={selectedAlert?.id || ""}
         />
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 
