@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { H4 } from "@/components/ui/typography";
 
 interface PropertyTopCostsProps {
   property: string;
@@ -50,8 +51,8 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
       <Card className="rounded-none border-0 shadow-none">
         <CardContent className="flex flex-col items-center p-6">
           <Skeleton className="h-8 w-48 mb-6 bg-slate-200 dark:bg-slate-700" />
-          <div className="w-full h-[400px] flex items-center justify-center">
-            <div className="relative w-[300px] h-[300px]">
+          <div className="w-full min-h-[300px] flex items-center justify-center">
+            <div className="relative w-[250px] h-[250px]">
               {/* Outer circle skeleton */}
               <Skeleton className="absolute inset-0 rounded-full bg-slate-200 dark:bg-slate-700" />
               {/* Inner circle skeleton (for donut chart effect) */}
@@ -77,22 +78,20 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
     <>
       {topCosts.data?.data?.data &&
         Array.isArray(topCosts.data?.data?.data) && (
-          <Card className="rounded-none border-0 shadow-none">
-            <CardContent className="flex flex-col items-center p-6">
-              <h3 className="text-lg font-medium mb-6">
-                Top Costs by {property}
-              </h3>
-              <div className="w-full h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+          <Card className="rounded-none border-0 shadow-none bg-background dark:bg-sidebar-background">
+            <CardContent className="flex flex-col items-center p-4 md:p-6">
+              <H4 className="mb-4">Top Costs by {property}</H4>
+              <div className="w-full min-h-[300px] max-h-[400px]">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart margin={{ top: 25, right: 0, bottom: 0, left: 0 }}>
                     <Pie
                       data={topCosts.data?.data?.data}
                       dataKey="cost"
                       nameKey="value"
                       cx="50%"
                       cy="50%"
-                      outerRadius={150}
-                      innerRadius={80}
+                      outerRadius="75%"
+                      innerRadius="40%"
                       paddingAngle={3}
                       label={({
                         value,
@@ -105,8 +104,8 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
                       }) =>
                         name
                           ? `${
-                              name.length > 15
-                                ? name.substring(0, 15) + "..."
+                              name.length > 10
+                                ? name.substring(0, 10) + "..."
                                 : name
                             }`
                           : "Empty"
