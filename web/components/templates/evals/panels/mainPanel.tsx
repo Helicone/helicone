@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PiPlusBold } from "react-icons/pi";
-import { AlertCircle } from "lucide-react";
 import { EvaluatorCard } from "../cards";
 import AuthHeader from "@/components/shared/authHeader";
 import { useEvaluators } from "../EvaluatorHook";
@@ -14,6 +13,7 @@ import { useTestDataStore } from "../testing/testingStore";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { H3, P } from "@/components/ui/typography";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -121,24 +121,12 @@ export const MainPanel = () => {
         ]}
       />
 
-      {/* Evaluator limit warning banner */}
       {hasReachedEvaluatorLimit && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You&apos;ve used {evaluatorCount}/{MAX_EVALUATORS} evaluators.
-                Upgrade for unlimited evaluators.
-              </span>
-            </div>
-            <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
-              <Button variant="action" size="sm">
-                Upgrade
-              </Button>
-            </FreeTierLimitWrapper>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="evals"
+          itemCount={evaluatorCount}
+          freeLimit={MAX_EVALUATORS}
+        />
       )}
 
       {evaluators.isLoading ? (

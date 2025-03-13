@@ -10,7 +10,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { H3, H4, Muted } from "@/components/ui/typography";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { H3 } from "@/components/ui/typography";
+import AuthHeader from "@/components/shared/authHeader";
 
 const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
@@ -18,7 +20,7 @@ const PropertiesPage = (props: {}) => {
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
 
-  const { hasFullAccess, freeLimit } = useFeatureLimit(
+  const { hasFullAccess, freeLimit, hasReachedLimit } = useFeatureLimit(
     "properties",
     properties.length
   );
@@ -37,6 +39,8 @@ const PropertiesPage = (props: {}) => {
   if (isPropertiesLoading) {
     return (
       <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+        <AuthHeader title="Properties" />
+
         <div className="flex flex-col lg:flex-row flex-1 h-full bg-background dark:bg-sidebar-background">
           <Card className="w-full lg:w-[350px] lg:min-w-[350px] lg:max-w-[350px] lg:flex-shrink-0 h-full rounded-none border-0 shadow-none bg-background dark:bg-sidebar-background">
             <CardContent className="p-0">
@@ -82,15 +86,20 @@ const PropertiesPage = (props: {}) => {
 
   return (
     <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+      <AuthHeader title="Properties" />
+
+      {hasReachedLimit && (
+        <FreeTierLimitBanner
+          feature="properties"
+          itemCount={properties.length}
+          freeLimit={freeLimit}
+          className="w-full"
+        />
+      )}
+
       <div className="flex flex-col lg:flex-row h-full bg-background dark:bg-sidebar-background">
         <Card className="w-full lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] lg:flex-shrink-0 h-full rounded-none border-0 border-r border-border dark:border-sidebar-border shadow-none bg-background dark:bg-sidebar-background">
           <CardContent>
-            <div className="bg-background dark:bg-sidebar-background border-b border-border dark:border-sidebar-border">
-              <CardHeader className="py-3 px-4">
-                <H4>Your Properties</H4>
-              </CardHeader>
-            </div>
-
             <ScrollArea className="h-full dark:bg-sidebar-background bg-background">
               {properties.map((property, i) => {
                 const requiresPremium = !hasFullAccess && i >= freeLimit;
@@ -129,29 +138,6 @@ const PropertiesPage = (props: {}) => {
                   </div>
                 );
               })}
-
-              {!hasFullAccess && properties.length > freeLimit && (
-                <div className="border-t border-border dark:border-sidebar-border bg-background dark:bg-sidebar-background p-3">
-                  <div className="flex items-center justify-between">
-                    <Muted>
-                      Free tier users can view up to {freeLimit}{" "}
-                      {properties.length === 1 ? "property" : "properties"}
-                    </Muted>
-                    <FreeTierLimitWrapper
-                      feature="properties"
-                      itemCount={freeLimit + 1}
-                    >
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="text-slate-500 dark:text-slate-400"
-                      >
-                        Unlock all →
-                      </Button>
-                    </FreeTierLimitWrapper>
-                  </div>
-                </div>
-              )}
             </ScrollArea>
           </CardContent>
         </Card>

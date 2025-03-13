@@ -23,9 +23,10 @@ import RequestsPageV2 from "../requests/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import UnauthorizedView from "../requests/UnauthorizedView";
 
-import { FeatureUpgradeCard } from "../../shared/helicone/FeatureUpgradeCard";
-import { ShieldCheck } from "lucide-react";
 import { DiffHighlight } from "../welcome/diffHighlight";
 
 const RateLimitPage = (props: {}) => {
@@ -46,6 +47,13 @@ const RateLimitPage = (props: {}) => {
   const { properties, isLoading: propertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
   const org = useOrg();
+  const user = useUser();
+  const {
+    unauthorized,
+    currentTier,
+    isLoading: isAuthLoading,
+  } = useGetUnauthorized(user?.id || "");
+
   const hasAccess =
     org?.currentOrg?.tier === "pro-20240913" ||
     org?.currentOrg?.tier === "pro-20250202" ||
@@ -100,24 +108,28 @@ const RateLimitPage = (props: {}) => {
     });
   };
 
+  const hasRateLimitData =
+    rateLimitOverTime.data?.data?.some((d) => d.count > 0) || false;
+
+  const shouldShowUnauthorized = hasRateLimitData && unauthorized;
+
   const isOrgLoading = !org || !org.currentOrg;
+  const isUserLoading = user === undefined;
   const isLoading =
-    propertiesLoading || rateLimitOverTime.isLoading || isOrgLoading;
+    propertiesLoading ||
+    rateLimitOverTime.isLoading ||
+    isOrgLoading ||
+    isAuthLoading ||
+    isUserLoading;
 
   return (
     <>
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <LoadingAnimation height={175} width={175} />
-        </div>
-      ) : !hasAccess &&
-        !properties.find((x) => x === "Helicone-Rate-Limit-Status") ? (
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-white">
-          <FeatureUpgradeCard
-            title="Rate Limits"
-            headerTagline="Control API usage with custom limits"
-            icon={<ShieldCheck className="h-4 w-4 text-sky-500" />}
-            highlightedFeature="rate-limits"
+          <LoadingAnimation
+            height={175}
+            width={175}
+            title="Loading rate limit data..."
           />
         </div>
       ) : (
@@ -149,7 +161,12 @@ const RateLimitPage = (props: {}) => {
               defaultValue={getDefaultValue()}
               custom={true}
             />
-            {rateLimitOverTime.data?.data?.some((d) => d.count > 0) ? (
+            {shouldShowUnauthorized ? (
+              <UnauthorizedView
+                currentTier={currentTier || ""}
+                pageType="ratelimit"
+              />
+            ) : hasRateLimitData ? (
               <>
                 <div className="h-full w-full bg-white dark:bg-gray-800 rounded-md pt-4">
                   {rateLimitOverTime.isLoading ? (

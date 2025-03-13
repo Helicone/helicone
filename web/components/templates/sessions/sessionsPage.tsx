@@ -20,6 +20,7 @@ import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -170,6 +171,15 @@ const SessionsPage = (props: SessionsPageProps) => {
                 </TabsList>
               }
             />
+
+            {hasReachedLimit && (
+              <FreeTierLimitBanner
+                feature="sessions"
+                itemCount={allNames.sessions.length}
+                freeLimit={freeLimit}
+                className="w-full"
+              />
+            )}
 
             <Row className="border-t border-slate-200 dark:border-slate-800">
               <SessionNameSelection

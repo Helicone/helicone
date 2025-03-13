@@ -116,7 +116,7 @@ const useGetUnauthorized = (userId: string) => {
 
   return {
     unauthorized: checkAuthorizedByTier(),
-    isLoading: false,
+    isLoading: isCountLoading,
     currentTier: org?.currentOrg?.tier,
   };
 };

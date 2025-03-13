@@ -1,7 +1,8 @@
-import { ReactElement } from "react";
+import React, { ReactElement, useState, useCallback } from "react";
 import { FeatureId } from "@/lib/features";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { FeatureName } from "@/hooks/useProFeature";
 
 interface FreeTierLimitWrapperProps {
   feature: FeatureId;
@@ -14,22 +15,35 @@ export function FreeTierLimitWrapper({
   itemCount,
   children,
 }: FreeTierLimitWrapperProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { canCreate, featureConfig, upgradeMessage } = useFeatureLimit(
     feature,
     itemCount
   );
-  // If they can create more items or there's no free tier config, just render the children
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDialogOpen(true);
+  }, []);
+
   if (canCreate || !featureConfig) {
     return <>{children}</>;
   }
 
-  // Otherwise, wrap in the ProFeatureWrapper to trigger the upgrade dialog
   return (
-    <ProFeatureWrapper
-      featureName={featureConfig.upgradeFeatureName as any}
-      limitMessage={upgradeMessage}
-    >
-      {children}
-    </ProFeatureWrapper>
+    <>
+      {React.cloneElement(children, {
+        onClick: handleClick,
+        className: children.props.className,
+      })}
+
+      <UpgradeProDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        featureName={featureConfig.upgradeFeatureName as FeatureName}
+        limitMessage={upgradeMessage}
+      />
+    </>
   );
 }

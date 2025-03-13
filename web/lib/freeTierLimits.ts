@@ -38,18 +38,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
   features: {
     prompts: {
       main: {
-        getLimit: (context) => {
-          // Example of context-based logic
-          if (
-            context.organization?.stripe_metadata &&
-            typeof context.organization.stripe_metadata === "object" &&
-            "earlyAccess" in context.organization.stripe_metadata &&
-            context.organization.stripe_metadata.earlyAccess === true
-          ) {
-            return 5; // Early access users get more prompts
-          }
-          return 3; // Default limit
-        },
+        getLimit: () => 3,
         description: (limit) =>
           `You can create up to ${limit} prompts with the free tier`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
@@ -183,6 +172,16 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.users,
         upgradeMessage: (limit, used) =>
           `You've reached the limit of ${limit} users. Upgrade for unlimited access.`,
+      },
+    },
+    webhooks: {
+      main: {
+        getLimit: () => 1,
+        description: (limit) =>
+          `You can create up to ${limit} webhooks with the free tier`,
+        upgradeFeatureName: FEATURE_DISPLAY_NAMES.webhooks,
+        upgradeMessage: (limit, used) =>
+          `You've used ${used}/${limit} webhooks. Upgrade for unlimited access.`,
       },
     },
   },

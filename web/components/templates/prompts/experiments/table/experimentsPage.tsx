@@ -6,12 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertCircle,
-  ChevronDownIcon,
-  SquareArrowOutUpRight,
-  Trash2,
-} from "lucide-react";
+import { ChevronDownIcon, SquareArrowOutUpRight, Trash2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
@@ -34,6 +29,7 @@ import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import Link from "next/link";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();
@@ -135,25 +131,11 @@ const ExperimentsPage = () => {
 
       {/* Experiment limit warning banner */}
       {hasReachedExperimentLimit && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You&apos;ve used {experimentCount}/{MAX_EXPERIMENTS}{" "}
-                experiments. Upgrade for unlimited experiments.
-              </span>
-            </div>
-            <FreeTierLimitWrapper
-              feature="experiments"
-              itemCount={experimentCount}
-            >
-              <Button variant="action" size="sm">
-                Upgrade
-              </Button>
-            </FreeTierLimitWrapper>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="experiments"
+          itemCount={experimentCount}
+          freeLimit={MAX_EXPERIMENTS}
+        />
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

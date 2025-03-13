@@ -28,13 +28,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import {
-  AlertCircle,
-  ListIcon,
-  PlayIcon,
-  PlusIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { ListIcon, PlayIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
@@ -64,7 +58,7 @@ import {
 import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
 import { useSubfeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 type TableDataType = {
   index: number;
@@ -572,26 +566,12 @@ export function ExperimentTable({
 
       {/* Variant limit warning banner */}
       {hasReachedVariantLimit && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You&apos;ve used {variantCount}/{MAX_VARIANTS} variants for this
-                experiment. Upgrade for unlimited variants.
-              </span>
-            </div>
-            <FreeTierSubLimitWrapper
-              feature="experiments"
-              subfeature="variants"
-              itemCount={variantCount}
-            >
-              <Button variant="action" size="sm">
-                Upgrade
-              </Button>
-            </FreeTierSubLimitWrapper>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="experiments"
+          subfeature="variants"
+          itemCount={variantCount}
+          freeLimit={MAX_VARIANTS}
+        />
       )}
 
       <div className="h-[calc(100vh-50px)]">

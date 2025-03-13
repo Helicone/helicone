@@ -1,4 +1,3 @@
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import {
   ClipboardIcon,
   EyeIcon,
@@ -13,6 +12,9 @@ import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 // Import ShadcnUI components
 import AuthHeader from "@/components/shared/authHeader";
@@ -97,6 +99,13 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     },
     refetchOnWindowFocus: false,
   });
+
+  const webhookCount = webhooks?.data?.data?.length || 0;
+
+  const { freeLimit, hasReachedLimit } = useFeatureLimit(
+    "webhooks",
+    webhookCount
+  );
 
   const createWebhook = useMutation({
     mutationFn: async (data: {
@@ -319,29 +328,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     return null;
   }
 
-  const isWebhooksEnabled = () => {
-    return (
-      org?.currentOrg?.tier === "enterprise" ||
-      org?.currentOrg?.tier === "pro-20240913" ||
-      org?.currentOrg?.tier === "pro-20250202" ||
-      org?.currentOrg?.tier === "demo" ||
-      org?.currentOrg?.tier === "team-20250130"
-    );
-  };
-
-  if (!isWebhooksEnabled()) {
-    return (
-      <div className="flex justify-center items-center bg-white">
-        <FeatureUpgradeCard
-          title="Webhooks"
-          headerTagline="Subscribe to API requests with webhooks"
-          icon={<PiWebhooksLogo className="h-4 w-4 text-sky-500" />}
-          highlightedFeature="webhooks"
-        />
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-col space-y-4">
@@ -349,6 +335,14 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           isWithinIsland={true}
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
+
+        {hasReachedLimit && (
+          <FreeTierLimitBanner
+            feature="webhooks"
+            itemCount={webhookCount}
+            freeLimit={freeLimit}
+          />
+        )}
 
         <div className="flex justify-between items-center mx-8 mb-2">
           <Button
@@ -367,17 +361,34 @@ const WebhooksPage = (props: WebhooksPageProps) => {
               <ExternalLinkIcon className="h-4 w-4" />
             </a>
           </Button>
-
           <Dialog open={addWebhookOpen} onOpenChange={setAddWebhookOpen}>
             <DialogTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                <PlusIcon className="h-4 w-4" />
-                Add Webhook
-              </Button>
+              {webhookCount < freeLimit ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={() => setAddWebhookOpen(true)}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  Add Webhook
+                </Button>
+              ) : (
+                <FreeTierLimitWrapper
+                  key={`webhook-limit-${webhookCount}`}
+                  feature="webhooks"
+                  itemCount={webhookCount}
+                >
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Add Webhook
+                  </Button>
+                </FreeTierLimitWrapper>
+              )}
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <AddWebhookForm

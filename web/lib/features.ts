@@ -6,7 +6,12 @@ export const ADDON_FEATURES = [
   "datasets",
   "alerts",
 ] as const;
-export const NON_FREE_FEATURES = ["sessions", "properties", "users"] as const;
+export const NON_FREE_FEATURES = [
+  "sessions",
+  "properties",
+  "users",
+  "webhooks",
+] as const;
 
 // Create a combined type of all features
 export type FeatureId =
@@ -56,6 +61,7 @@ export const FEATURE_DISPLAY_NAMES: Record<FeatureId, string> = {
   users: "Users",
   datasets: "Datasets",
   alerts: "Alerts",
+  webhooks: "Webhooks",
 };
 
 // Create lookup table for subfeature display names

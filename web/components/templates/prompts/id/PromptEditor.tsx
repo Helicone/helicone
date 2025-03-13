@@ -63,7 +63,7 @@ import {
   templateToHeliconeTags,
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
-import { FlaskConicalIcon, AlertCircle } from "lucide-react";
+import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { LLMRequestBody, Message } from "packages/llm-mapper/types";
@@ -94,6 +94,7 @@ import { UpgradeProDialog } from "@/components/templates/organization/plan/upgra
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { usePrompts } from "../../../../services/hooks/prompts/prompts";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -1439,70 +1440,38 @@ async function pullPromptAndRunCompletion() {
 
       {/* Version limit warning banner */}
       {!canCreateVersion && promptId && isImportedFromCode === false && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You&apos;ve used {versionCount}/3 versions for this prompt.
-                Upgrade for unlimited versions.
-              </span>
-            </div>
-            <FreeTierSubLimitWrapper
-              feature="prompts"
-              subfeature="versions"
-              itemCount={versionCount}
-            >
-              <Button variant="action" size="sm">
-                Upgrade
-              </Button>
-            </FreeTierSubLimitWrapper>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="versions"
+          itemCount={versionCount}
+          freeLimit={3}
+        />
       )}
 
       {/* Playground run limit warning banner */}
       {isPlaygroundMode && !canRunPlayground && playgroundRunCount > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You've used {playgroundRunCount}/{maxPlaygroundRuns} playground
-                runs. Upgrade to Pro Tier for unlimited access.
-              </span>
-            </div>
-            <Button
-              variant="action"
-              size="sm"
-              onClick={() => setPlaygroundUpgradeDialogOpen(true)}
-            >
-              Upgrade
-            </Button>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="playground_runs"
+          itemCount={playgroundRunCount}
+          freeLimit={maxPlaygroundRuns}
+          message={`You've used ${playgroundRunCount}/${maxPlaygroundRuns} playground runs. Upgrade to Pro Tier for unlimited access.`}
+          buttonText="Upgrade"
+          buttonSize="sm"
+        />
       )}
 
       {/* Prompt run limit warning banner */}
       {promptId && !canRunPrompt && promptRunCount > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-800">
-          <div className="px-4 py-1.5 max-w-7xl mx-auto flex items-center justify-start gap-2">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-              <span className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                You've used {promptRunCount}/{maxPromptRuns} prompt runs.
-                Upgrade to Prompts Tier for unlimited access.
-              </span>
-            </div>
-            <Button
-              variant="action"
-              size="sm"
-              onClick={() => setPromptUpgradeDialogOpen(true)}
-            >
-              Upgrade
-            </Button>
-          </div>
-        </div>
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="runs"
+          itemCount={promptRunCount}
+          freeLimit={maxPromptRuns}
+          message={`You've used ${promptRunCount}/${maxPromptRuns} prompt runs. Upgrade to Prompts Tier for unlimited access.`}
+          buttonText="Upgrade"
+          buttonSize="sm"
+        />
       )}
 
       {/* Prompt Editor */}

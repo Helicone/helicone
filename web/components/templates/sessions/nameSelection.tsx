@@ -18,7 +18,6 @@ import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { Row } from "../../layout/common/row";
 import { clsx } from "../../shared/clsx";
-import { Muted } from "@/components/ui/typography";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 
@@ -270,31 +269,6 @@ const SessionNameSelection = ({
           );
         })}
       </Col>
-
-      {/* Footer with upgrade message */}
-      {!hasFullAccess &&
-        (totalSessionCount || filteredSessions.length) > freeLimit && (
-          <div className="border-t border-slate-200 dark:border-slate-800 p-3">
-            <div className="flex items-center justify-between">
-              <Muted className="text-xs">
-                Free tier users can view up to {freeLimit} of{" "}
-                {totalSessionCount || filteredSessions.length} sessions
-              </Muted>
-              <FreeTierLimitWrapper
-                feature="sessions"
-                itemCount={freeLimit + 1}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs font-normal text-primary dark:text-sidebar-primary hover:text-primary-foreground hover:bg-primary dark:hover:text-sidebar-primary-foreground dark:hover:bg-sidebar-primary"
-                >
-                  Unlock all →
-                </Button>
-              </FreeTierLimitWrapper>
-            </div>
-          </div>
-        )}
     </Col>
   );
 };

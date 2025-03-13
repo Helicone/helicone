@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { LLMRequestBody } from "@/packages/llm-mapper/types";
@@ -39,6 +38,7 @@ import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -52,8 +52,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { createPrompt, isCreating } = useCreatePrompt();
   const searchParams = useSearchParams();
   const promptCount = prompts?.length ?? 0;
-  const { canCreate, hasReachedLimit, hasFullAccess, upgradeMessage } =
-    useFeatureLimit("prompts", promptCount);
+  const { canCreate, freeLimit } = useFeatureLimit("prompts", promptCount);
 
   // DERIVED STATE
   const filteredPrompts = prompts?.filter((prompt) =>
@@ -98,26 +97,7 @@ const PromptsPage = (props: PromptsPageProps) => {
       {/* Header */}
       <AuthHeader
         className="min-w-full"
-        title={
-          <div className="flex items-center gap-2">
-            Prompts
-            {!hasFullAccess && hasReachedLimit && (
-              <InfoBox className="ml-4" variant="warning">
-                <div className="flex items-center gap-2">
-                  {upgradeMessage || "Free tier limit reached"}
-                  <FreeTierLimitWrapper
-                    feature="prompts"
-                    itemCount={promptCount}
-                  >
-                    <Button variant="action" size="xs">
-                      Upgrade
-                    </Button>
-                  </FreeTierLimitWrapper>
-                </div>
-              </InfoBox>
-            )}
-          </div>
-        }
+        title="Prompts"
         actions={
           <>
             {/* Always show create button but use FreeTierLimitWrapper to block if limit reached */}
@@ -183,7 +163,14 @@ const chatCompletion = await openai.chat.completions.create(
           </>
         }
       />
-
+      {!canCreate && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          itemCount={promptCount}
+          freeLimit={freeLimit}
+          className="w-full"
+        />
+      )}
       {isLoading ? (
         // Loading State
         <div className="flex flex-col w-full mt-16 justify-center items-center">
