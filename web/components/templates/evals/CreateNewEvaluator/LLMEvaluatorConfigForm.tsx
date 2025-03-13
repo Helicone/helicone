@@ -12,25 +12,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { H3, Muted } from "@/components/ui/typography";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { InfoIcon } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import useNotification from "../../../shared/notification/useNotification";
+import { useEvalConfigStore } from "../store/evalConfigStore";
+import { useEvalFormStore } from "../store/evalFormStore";
+import { useEvalPanelStore } from "../store/evalPanelStore";
 import { LLM_AS_A_JUDGE_OPTIONS } from "../testing/examples";
 import { TestInput } from "./types";
-import { useEvalPanelStore } from "../store/evalPanelStore";
-import { H3, Muted } from "@/components/ui/typography";
-import { Separator } from "@/components/ui/separator";
-import { useEvalFormStore } from "../store/evalFormStore";
-import { useEvalConfigStore } from "../store/evalConfigStore";
 
 const modelOptions = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"];
 
@@ -415,7 +415,7 @@ const ScoringTypeSection = ({
                   { score: 5, description: "Excellent" },
                 ];
               }
-              
+
               if (valueType === "range") {
                 updates.rangeMin = 0;
                 updates.rangeMax = 100;
