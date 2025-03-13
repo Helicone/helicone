@@ -61,7 +61,7 @@ export class PropertyController extends Controller {
     );
   }
 
-  // GETS ALL THE Possible values for a property
+  // Gets all possible values for a property
   @Post("{propertyKey}/search")
   public async searchProperties(
     @Request() request: JawnAuthenticatedRequest,
