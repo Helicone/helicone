@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import path from "path";
 import { H1, H3, P, Small, Muted } from "@/components/ui/typography";
+import { GitMerge } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Helicone Changelog | Latest Updates & New Features",
@@ -91,16 +92,13 @@ export default async function Home() {
 
   return (
     <div className="w-full bg-white min-h-screen antialiased relative">
-      <div className="relative w-full flex flex-col mx-auto max-w-3xl h-full py-10 md:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full flex flex-col mx-auto max-w-4xl h-full py-10 md:py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 md:mb-8">
           <H1>Changelog</H1>
           <P className="text-slate-500 mt-1.5">
-            Stay up to date with the latest features and improvements to Helicone
+            Stay up to date with the latest features and improvements to Helicone.
           </P>
         </div>
-
-        {/* Separator line */}
-        <div className="h-px w-full bg-slate-200 mb-2"></div>
 
         <div className="flex flex-col w-full h-full relative">
           {/* Timeline line - hidden on mobile */}
@@ -129,10 +127,12 @@ export default async function Home() {
                 >
                   {/* Timeline dot - hidden on mobile */}
                   <div className="absolute hidden md:block left-4 top-[52px] z-10" style={{ transform: 'translateX(-50%)' }}>
-                    <div className="h-3 w-3 rounded-full bg-sky-500 ring-2 ring-white"></div>
+                    <div className="h-7 w-7 rounded-md bg-sky-100 flex items-center justify-center">
+                      <GitMerge size={14} className="text-sky-600" />
+                    </div>
                   </div>
 
-                  <div className="flex flex-col md:pl-12 w-full">
+                  <div className="flex flex-col md:pl-16 w-full">
                     <div className="flex items-center mb-3">
                       <div className="flex items-center text-slate-500 text-sm">
                         {date.toLocaleDateString("en-US", {
