@@ -72,8 +72,8 @@ export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
         setIsSubmitting(false);
       }
     },
-    onSuccess: () => {
-      invalidateEvaluators.invalidate();
+    onSuccess: async () => {
+      await invalidateEvaluators.invalidate();
       onSuccess();
     },
   });
@@ -148,8 +148,8 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
         setIsSubmitting(false);
       }
     },
-    onSuccess: () => {
-      invalidateEvaluators.invalidate();
+    onSuccess: async () => {
+      await invalidateEvaluators.invalidate();
       onSuccess();
     },
   });
@@ -224,8 +224,8 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
         setIsSubmitting(false);
       }
     },
-    onSuccess: () => {
-      invalidateEvaluators.invalidate();
+    onSuccess: async () => {
+      await invalidateEvaluators.invalidate();
       onSuccess();
     },
   });
