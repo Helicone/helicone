@@ -22,8 +22,6 @@ import { UserMetrics } from "./UserMetrics";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { Muted } from "@/components/ui/typography";
-import { Button } from "@/components/ui/button";
 import { LockIcon } from "lucide-react";
 import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
