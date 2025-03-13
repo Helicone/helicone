@@ -2,7 +2,6 @@ import React from "react";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { FreeTierSubLimitWrapper } from "@/components/shared/FreeTierSubLimitWrapper";
 import { FeatureId, SubfeatureId } from "@/lib/features";
 
 interface FreeTierLimitBannerProps {
@@ -82,7 +81,7 @@ export function FreeTierLimitBanner({
         </div>
         <div className="ml-6 sm:ml-0">
           {subfeature ? (
-            <FreeTierSubLimitWrapper
+            <FreeTierLimitWrapper
               feature={feature}
               subfeature={subfeature}
               itemCount={itemCount}
@@ -90,7 +89,7 @@ export function FreeTierLimitBanner({
               <Button variant="action" size={buttonSize}>
                 {buttonText}
               </Button>
-            </FreeTierSubLimitWrapper>
+            </FreeTierLimitWrapper>
           ) : (
             <FreeTierLimitWrapper feature={feature} itemCount={itemCount}>
               <Button variant="action" size={buttonSize}>
