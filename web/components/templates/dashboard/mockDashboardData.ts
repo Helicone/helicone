@@ -5,7 +5,6 @@
 
 import { Result } from "@/lib/result";
 import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
-import { TimeInterval } from "@/lib/timeCalculations/time";
 import { ModelMetric } from "@/lib/api/models/models";
 import { SingleFilterDef } from "@/services/lib/filters/frontendFilterDefs";
 
