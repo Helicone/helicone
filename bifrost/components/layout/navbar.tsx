@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ArrowLeftRightIcon, BookIcon, Globe } from "lucide-react";
+import { ArrowLeftRightIcon, BookIcon, ChevronDown, Globe } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -105,22 +105,34 @@ const NavLinks = () => {
       label: "Resources",
       items: [
         {
+          href: "/community/customers",
+          label: "Customers",
+          description: "Discover companies using Helicone",
+          icon: <UserGroupIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
           href: "/changelog",
           label: "Changelog",
           description: "Latest updates and improvements",
           icon: <ClockIcon className="h-6 w-6 text-sky-500" />,
         },
         {
-          href: "/community",
-          label: "Community",
-          description: "Join our growing developer community",
-          icon: <UserGroupIcon className="h-6 w-6 text-sky-500" />,
-        },
-        {
           href: "/blog",
           label: "Blog",
           description: "Insights on AI development and best practices",
           icon: <BookIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/community/integrations",
+          label: "Integrations",
+          description: "Tools and platforms that integrate with Helicone",
+          icon: <ArrowsPointingOutIcon className="h-6 w-6 text-sky-500" />,
+        },
+        {
+          href: "/community/projects",
+          label: "Projects",
+          description: "Explore open-source projects built with Helicone",
+          icon: <NewspaperIcon className="h-6 w-6 text-sky-500" />,
         },
       ],
     },
@@ -164,41 +176,42 @@ const NavLinks = () => {
       {links.map((link, i) => {
         if (link.type === "dropdown") {
           return (
-            <DropdownMenu
+            <div
               key={`${link}-${i}`}
-              onOpenChange={(open) => {
-                setOpenDropdown(open ? link.label : null);
-              }}
+              onMouseEnter={() => setOpenDropdown(link.label)}
+              onMouseLeave={() => setOpenDropdown(null)}
             >
-              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-slate-700 opacity-75">
-                {link.label}
-                <ChevronDownIcon
-                  className={`h-4 w-4 transition-transform duration-600 ${
-                    openDropdown === link.label ? "rotate-180" : ""
-                  }`}
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="min-w-[240px] p-2 space-y-1.5">
-                {link.items?.map((item, j) => (
-                  <DropdownMenuItem key={j} asChild>
-                    <Link
-                      href={item.href}
-                      className="w-full cursor-pointer flex items-start gap-2 p-3 text-slate-700 hover:text-black"
-                    >
-                      <div className="mt-1 flex-shrink-0 p-2.5 rounded-md border border-sky-100 bg-sky-50">
-                        {item.icon}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{item.label}</span>
-                        <span className="text-sm text-slate-500 font-normal">
-                          {item.description}
-                        </span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <DropdownMenu open={openDropdown === link.label}>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-slate-700 opacity-75">
+                    {link.label}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-300 ${openDropdown === link.label ? "translate-y-0.5" : ""}`}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="min-w-[240px]">
+                  {link.items?.map((item, j) => (
+                    <DropdownMenuItem key={j} asChild>
+                      <Link
+                        href={item.href}
+                        className="w-full cursor-pointer flex items-start gap-2 p-3 text-slate-700 hover:text-black"
+                      >
+                        <div className="mt-1 flex-shrink-0 p-2.5 rounded-md border border-sky-100 bg-sky-50">
+                          {item.icon}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{item.label}</span>
+                          <span className="text-sm text-slate-500 font-normal">
+                            {item.description}
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           );
         }
         return (
@@ -283,62 +296,72 @@ const MobileNav = () => {
       description?: string;
     }>;
   }> = [
-    {
-      href: "https://docs.helicone.ai/",
-      label: "Docs",
-    },
-    {
-      href: "/pricing",
-      label: "Pricing",
-    },
-    {
-      type: "section",
-      label: "Tools",
-      items: [
-        {
-          href: "/open-stats",
-          label: "Open Stats",
-          icon: <Globe className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/comparison",
-          label: "Model Comparison",
-          icon: <ArrowLeftRightIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/status",
-          label: "Provider Status",
-          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/llm-cost",
-          label: "LLM API Pricing Calculator",
-          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
-        },
-      ],
-    },
-    {
-      type: "section",
-      label: "Resources",
-      items: [
-        {
-          href: "/changelog",
-          label: "Changelog",
-          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/community",
-          label: "Community",
-          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/blog",
-          label: "Blog",
-          icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
-        },
-      ],
-    },
-  ];
+      {
+        href: "https://docs.helicone.ai/",
+        label: "Docs",
+      },
+      {
+        href: "/pricing",
+        label: "Pricing",
+      },
+      {
+        type: "section",
+        label: "Tools",
+        items: [
+          {
+            href: "/open-stats",
+            label: "Open Stats",
+            icon: <Globe className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/comparison",
+            label: "Model Comparison",
+            icon: <ArrowLeftRightIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/status",
+            label: "Provider Status",
+            icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/llm-cost",
+            label: "LLM API Pricing Calculator",
+            icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
+          },
+        ],
+      },
+      {
+        type: "section",
+        label: "Resources",
+        items: [
+          {
+            href: "/changelog",
+            label: "Changelog",
+            icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/community/customers",
+            label: "Customers",
+            icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/community/projects",
+            label: "Projects",
+            icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/community/integrations",
+            label: "Integrations",
+            icon: <ArrowsPointingOutIcon className="h-4 w-4 text-sky-500" />,
+          },
+          {
+            href: "/blog",
+            label: "Blog",
+            icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
+          },
+        ],
+      },
+    ];
 
   return (
     <nav className="lg:hidden" aria-label="Global">
@@ -479,9 +502,9 @@ const NavBar = (props: NavBarProps) => {
                 <p className="text-sm text-[#64748B]">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                        notation: "compact",
-                        compactDisplay: "short",
-                      })
+                      notation: "compact",
+                      compactDisplay: "short",
+                    })
                     : "0"}
                 </p>
               </Button>
