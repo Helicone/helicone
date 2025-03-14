@@ -156,21 +156,21 @@ const getUnsanitizedMappedContent = ({
 const messageToText = (message: Message): string => {
   let text = "";
   message.contentArray?.forEach((message) => {
-    text += messageToText(message).trim();
+    text += messageToText(message)?.trim();
   });
   text += message.content?.trim() ?? "";
   message.tool_calls?.forEach((toolCall) => {
-    text += JSON.stringify(toolCall.arguments).trim();
-    text += JSON.stringify(toolCall.name).trim();
+    text += JSON.stringify(toolCall.arguments)?.trim();
+    text += JSON.stringify(toolCall.name)?.trim();
   });
   text += message.role ?? "";
   text += message.name ?? "";
   text += message.tool_call_id ?? "";
-  return text.trim();
+  return text?.trim();
 };
 
 const messagesToText = (messages: Message[]): string => {
-  return messages.map(messageToText).join("\n").trim();
+  return messages.map(messageToText).join("\n")?.trim();
 };
 
 const sanitizeMappedContent = (
