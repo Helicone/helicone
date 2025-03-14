@@ -102,6 +102,10 @@ const DashboardPage = (props: DashboardPageProps) => {
   // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
 
+  const mockMetrics = useMemo(() => getMockMetrics(), []);
+  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
+  const mockModels = useMemo(() => getMockModels(), []);
+
   const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
     useOrganizationLayout(
       orgContext?.currentOrg?.id!,
@@ -168,6 +172,11 @@ const DashboardPage = (props: DashboardPageProps) => {
     [timeFilter]
   );
 
+  const mockOverTimeData = useMemo(
+    () => getMockOverTimeData(timeIncrement),
+    [timeIncrement]
+  );
+
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,14 +234,11 @@ const DashboardPage = (props: DashboardPageProps) => {
     isLive,
   });
 
-  // Use mock data if the user hasn't onboarded, otherwise use real data
-  const metrics = shouldShowMockData ? getMockMetrics() : realMetrics;
-  const filterMap = shouldShowMockData ? getMockFilterMap() : realFilterMap;
-  const overTimeData = shouldShowMockData
-    ? getMockOverTimeData(timeIncrement)
-    : realOverTimeData;
+  const metrics = shouldShowMockData ? mockMetrics : realMetrics;
+  const filterMap = shouldShowMockData ? mockFilterMap : realFilterMap;
+  const overTimeData = shouldShowMockData ? mockOverTimeData : realOverTimeData;
   const models = shouldShowMockData
-    ? { data: getMockModels().data, isLoading: false }
+    ? { data: mockModels.data, isLoading: false }
     : realModels;
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
