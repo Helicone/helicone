@@ -207,6 +207,10 @@ const SessionsPage = (props: SessionsPageProps) => {
               />
             </Row>
           </>
+        ) : allNames.isRefetching ? (
+          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+            <LoadingAnimation />
+          </div>
         ) : (
           <div className="flex flex-col w-full min-h-screen items-center bg-[hsl(var(--background))]">
             <EmptyStateCard feature="sessions" />
