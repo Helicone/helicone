@@ -499,7 +499,10 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     const requestResponseLog: RequestResponseRMT = {
-      user_id: request.userId,
+      user_id:
+        typeof request.userId === "string"
+          ? request.userId
+          : String(request.userId),
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
