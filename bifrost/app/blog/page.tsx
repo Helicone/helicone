@@ -196,6 +196,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "mcp-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "browser-use-vs-computer-use-vs-operator",
     },
   },

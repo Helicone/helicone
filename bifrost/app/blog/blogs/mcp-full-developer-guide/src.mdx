@@ -1,5 +1,7 @@
 Anthropic's **Model Context Protocol (MCP)** is gaining massive traction as a game-changing standard for connecting Large Language Models (LLMs) to external data sources and tools. 
 
+![Claude MCP](/static/blog/mcp-full-developer-guide/claude-mcp.webp)
+
 MCP provides a universal interface for AI applications to interact with various systems while maintaining security and user control.
 
 Let's take a deep dive into just exactly what MCP is, and how you can begin using it in your projects.
@@ -11,7 +13,7 @@ MCP is an **open protocol** that **standardizes** how applications provide conte
 > Think of MCP like a USB-C port for AI applications. Just as USB-C provides a standardized way to connect your devices to various peripherals and accessories, MCP provides a standardized way to connect AI models to different data sources and tools.
 
 <BottomLine
-  title="Why Does MCP Even Exist❓"
+  title="Why does MCP even exist?"
   description="Before MCP, developers had to build custom integrations from scratch whenever they wanted LLMs to access external systems (files, APIs, databases). Each implementation was different, required significant code, and wouldn't work with desktop apps. MCP provides a standardized framework for these integrations that works consistently across implementations, with a common communication protocol between systems and AI tools."
 />
 
@@ -171,10 +173,10 @@ To add your newly-created MCP to Claude Desktop for example, update your `claude
 
 Now you can ask Claude to generate images, and it will use your Cloudflare Worker to do so!
 
-<a href="https://modelcontextprotocol.io" target="_blank" rel="noreferrer">View the full documentation</a> for more information on configuring MCPs with other Clients, such as Cursor.
+For more information on configuring MCPs with other Clients, such as Cursor, <a href="https://modelcontextprotocol.io" target="_blank" rel="noreferrer">check out the documentation</a>.
 
 <BottomLine
-title="Let AI do the heavy lifting 💡"
+title="💡 Hot tip: Let LLMs do the heavy lifting"
 description="You can use AI tools like Claude to build MCPs. You can just dumnp useful info such as docs and code samples into Claude and have it create your MCP for you!"
 />
 
