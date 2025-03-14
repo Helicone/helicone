@@ -13,6 +13,9 @@ import CustomScrollbar, {
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
 
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   ResizableHandle,
@@ -25,9 +28,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
@@ -74,18 +79,13 @@ import {
 import {
   useCreatePrompt,
   usePrompt,
+  usePrompts,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
-import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { usePrompts } from "../../../../services/hooks/prompts/prompts";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -335,6 +335,7 @@ export default function PromptEditor({
         );
 
         // 3.B. Extract additional variables contained in message content
+        stateMessages = (templateData.messages ?? []) as Message[]; // Typeguard and cast templateData to Message[]
         stateMessages.forEach((msg) => {
           const vars = extractVariables(msg.content || "", "helicone");
           vars.forEach((v) => {
@@ -360,9 +361,6 @@ export default function PromptEditor({
         // 3.D. Deduplicate variables
         inputs = deduplicateVariables(inputs);
       }
-
-      // 4. Typeguard and cast templateData to Message[]
-      stateMessages = (templateData.messages ?? []) as Message[];
 
       // 5. Validate model-provider or closest match or default
       const provider = findClosestProvider(
@@ -1149,28 +1147,6 @@ export default function PromptEditor({
             </Link>
           )}
 
-          {/* From Request or From Playground: Unsaved Changes Indicator */}
-          {(requestId || basePrompt) && state.isDirty && (
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex flex-row items-center gap-2 cursor-default">
-                  <div
-                    className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
-                  />
-                  <span className="text-sm text-secondary font-semibold">
-                    Unsaved Changes
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>
-                  <span className="font-semibold">Save As Prompt</span> to keep
-                  your progress
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {/* Metrics Drawer */}
           {promptId && (
             <Drawer>
@@ -1190,6 +1166,36 @@ export default function PromptEditor({
               </DrawerContent>
             </Drawer>
           )}
+
+          {/* From Request or From Playground: Unsaved Changes Indicator */}
+          {(requestId || basePrompt || isImportedFromCode === true) &&
+            state.isDirty && (
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-row items-center gap-2 cursor-default">
+                    <div
+                      className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                    />
+                    <span className="text-sm text-secondary font-semibold">
+                      Unsaved Changes
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="max-w-64 text-center">
+                    {isImportedFromCode === true
+                      ? "This prompt cannot be managed by Helicone because it was imported from code. "
+                      : ""}
+                    <span className="font-semibold">
+                      {isImportedFromCode === true
+                        ? "Save As Editor Prompt"
+                        : "Save As Prompt"}
+                    </span>{" "}
+                    to keep your progress.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
         </div>
 
         {/* Right Side: Actions */}
@@ -1209,6 +1215,7 @@ export default function PromptEditor({
           {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
           {(requestId || basePrompt || isImportedFromCode === true) && (
             <Button
+              className="text-white"
               variant="action"
               size="sm"
               onClick={handleSaveAsPrompt}
@@ -1219,6 +1226,8 @@ export default function PromptEditor({
                   <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
+              ) : isImportedFromCode === true ? (
+                "Save as Editor Prompt"
               ) : (
                 "Save As Prompt"
               )}
@@ -1255,7 +1264,7 @@ export default function PromptEditor({
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
-                    : state.isDirty && promptId
+                    : state.isDirty && promptId && isImportedFromCode === false
                     ? "Save & Run"
                     : "Run"}
                 </span>
@@ -1290,7 +1299,7 @@ export default function PromptEditor({
               <span className="mr-2">
                 {isStreaming
                   ? "Stop"
-                  : state.isDirty && promptId
+                  : state.isDirty && promptId && isImportedFromCode === false
                   ? "Save & Run"
                   : "Run"}
               </span>

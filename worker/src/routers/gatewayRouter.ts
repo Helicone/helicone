@@ -1,14 +1,14 @@
 import { Env, Provider } from "..";
-import { enumerate } from "../lib/util/helpers";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
+import { safePut } from "../lib/safePut";
+import { enumerate } from "../lib/util/helpers";
+import { Result, err, ok } from "../lib/util/results";
 import {
   approvedDomains,
   providers,
 } from "../packages/cost/providers/mappings";
-import { Result, err, ok } from "../lib/util/results";
 import { BaseRouter } from "./routerFactory";
-import { safePut } from "../lib/safePut";
 
 function validateURL(url: string) {
   try {
@@ -64,7 +64,7 @@ async function rateLimitUnapprovedDomains(
           options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
         });
       }
-    await safePut({
+      await safePut({
         key: rateLimitKV,
         keyName: rlKey,
         value: "1",
