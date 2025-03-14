@@ -78,6 +78,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     properties: string[];
   };
   hideView?: boolean;
+  hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
   savedFilters?: {
@@ -131,6 +132,7 @@ export default function ThemedTable<T extends { id?: string }>(
     makeCard,
     makeRow,
     hideView, // hides the view columns button
+    hideHeader,
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
@@ -245,51 +247,54 @@ export default function ThemedTable<T extends { id?: string }>(
 
   return (
     <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
-      <div className="p-1 flex-shrink-0">
-        <ThemedTableHeader
-          search={search}
-          onDataSet={onDataSet}
-          isDatasetsPage={isDatasetsPage}
-          advancedFilters={
-            advancedFilters
-              ? {
-                  filterMap: advancedFilters.filterMap,
-                  filters: advancedFilters.filters,
-                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                  show: advancedFilters.show,
-                }
-              : undefined
-          }
-          savedFilters={savedFilters}
-          activeColumns={activeColumns}
-          setActiveColumns={setActiveColumns}
-          columns={hideView ? [] : table.getAllColumns()}
-          timeFilter={
-            timeFilter
-              ? {
-                  defaultValue: timeFilter.defaultValue,
-                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                  currentTimeFilter: timeFilter.currentTimeFilter,
-                }
-              : undefined
-          }
-          viewToggle={
-            makeCard
-              ? {
-                  currentView: view,
-                  onViewChange: setView,
-                }
-              : undefined
-          }
-          rows={exportData}
-          customButtons={customButtons}
-          selectedRows={{
-            count: selectedIds?.length,
-            children: selectedRows?.children,
-          }}
-        />
-      </div>
+      {!hideHeader && (
+        <div className="p-1 flex-shrink-0">
+          <ThemedTableHeader
+            search={search}
+            onDataSet={onDataSet}
+            isDatasetsPage={isDatasetsPage}
+            advancedFilters={
+              advancedFilters
+                ? {
+                    filterMap: advancedFilters.filterMap,
+                    filters: advancedFilters.filters,
+                    searchPropertyFilters:
+                      advancedFilters.searchPropertyFilters,
+                    setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                    show: advancedFilters.show,
+                  }
+                : undefined
+            }
+            savedFilters={savedFilters}
+            activeColumns={activeColumns}
+            setActiveColumns={setActiveColumns}
+            columns={hideView ? [] : table.getAllColumns()}
+            timeFilter={
+              timeFilter
+                ? {
+                    defaultValue: timeFilter.defaultValue,
+                    onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                    currentTimeFilter: timeFilter.currentTimeFilter,
+                  }
+                : undefined
+            }
+            viewToggle={
+              makeCard
+                ? {
+                    currentView: view,
+                    onViewChange: setView,
+                  }
+                : undefined
+            }
+            rows={exportData}
+            customButtons={customButtons}
+            selectedRows={{
+              count: selectedIds?.length,
+              children: selectedRows?.children,
+            }}
+          />
+        </div>
+      )}
 
       {children && <div className="flex-shrink-0">{children}</div>}
       <ResizablePanelGroup
