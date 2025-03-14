@@ -1,6 +1,8 @@
 Another day, another AI agent. You've probably heard of **Manus AI**—the new player that's really turning heads. 
 
-Even with limited public access, Manus has generated quite a buzz for its seemingly unprecedented capabilities. But beyond the tweets and videos, **what's actually possible** with this tool, and should developers care?
+Even with limited public access, Manus has generated quite a buzz for its seemingly unprecedented capabilities. But beyond the tweets and videos, **what's actually possible** with this tool, and why should developers care?
+
+![Manus AI vs Operator](/static/blog/manus-benchmark-operator-comparison/manus-ai-vs-operator.webp)
 
 This article cuts through the noise to analyze Manus AI's real capabilities through concrete examples, assess its performance against competitors, and evaluate if developers should consider adding it to their toolkit in the future.
 
@@ -8,7 +10,7 @@ Let's break it down.
 
 ## What is Manus AI?
 
-Manus AI is an AI agent that bills itself as "the first general AI agent"—a bold claim in a field already crowded with assistants, agents, and copilots. 
+<a href="https://manus.im/" target="_blank" rel="noopener noreferrer">Manus AI</a> is an AI agent that bills itself as "the first general AI agent"—a bold claim in a field already crowded with assistants, agents, and copilots. Currently, it is in beta and <a href="https://manus.im/invitation" target="_blank" rel="noopener">invite-only</a>.
 
 It can perform various tasks autonomously—from building games and websites to performing research and creating reports. 
 
@@ -22,7 +24,6 @@ It can perform various tasks autonomously—from building games and websites to 
 | **Weaknesses**     | Slow processing speed. Issues with code reliability and context limits |  
 | **Benchmark Performance** | SoTA on GAIA |  
 | **Alternatives**   | Open-source options like OWL and ANUS offer similar functionality with more customization |  
-| **Availability**   | <a href="https://manus.im/invitation" target="_blank" rel="noopener">Invite-only</a> |  
 
 ## What can Manus do?
 
@@ -32,7 +33,7 @@ It can perform various tasks autonomously—from building games and websites to 
 - **Data visualization and analysis** with interactive outputs
 - **Web deployment** functionality that publishes directly to subdomains
 
-## Deep Dive: How Manus Works
+## How Manus Works
 
 Under the hood, Manus employs a sophisticated **multi-agent architecture** that separates responsibilities across specialized AI components:
 
@@ -51,7 +52,7 @@ Under the hood, Manus employs a sophisticated **multi-agent architecture** that 
 
 5. **Tool Integration** - Manus has access to 29 different tools covering web browsing, coding, data analysis, and media creation.
 
-The architecture uses **Claude** as its primary LLM, with a critical optimization: context length is carefully managed by having specialized agents handle different aspects of the task. 
+The architecture uses **Claude as its primary LLM**, with a critical optimization: context length is carefully managed by having specialized agents handle different aspects of the task. 
 
 This mitigates the common issue of context overflow that plagues many AI systems when handling complex, multi-step tasks.
 
@@ -69,23 +70,21 @@ When a user submits a request, the system:
 
 ## Performance & Benchmarks
 
-Before evaluating Manus' real-world performance, let's take a look at some benchmark results. 
+On the **GAIA benchmark** (designed to evaluate General AI Assistants on real-world tasks), Manus achieved state-of-the-art performance across all three difficulty levels, surpassing OpenAI Deep Research and SOTA. 
 
-On the **GAIA benchmark** (designed to evaluate General AI Assistants on real-world tasks), Manus achieved state-of-the-art performance across all three difficulty levels. 
+![Manus AI Benchmarks](/static/blog/manus-benchmark-operator-comparison/manus-benchmark.webp)
 
-![Manus AI Benchmarks](/static/blog/manus-benchmark-operator-comparison/manus_benchmark.svg)
+_Image Source:  <a href="https://manus.im/" target="_blank" rel="noopener">Benchmark Results on Manus.im</a>_
 
-_Image Source:  <a href="https://manus.im/" target="_blank" rel="noopener">Manus Website</a>_
-
-## Real Use Cases of Manus
+## Real-World Use Cases of Manus
 
 In terms of real-world performance, Manus has been rather impressive. Early users have praised the tool's remarkable ability to perform complex tasks end-to-end with little to no help and minimal instruction.  
 
 Let's take a look at a few examples:
 
-### Game Development
+### 1. Game Development
 
-Manus demonstrates impressive game-creation abilities that go beyond what most AI agents (even ones designed for coding) can produce:
+Manus showed impressive game-creation abilities that go beyond what most AI agents (even ones designed for coding) can produce. 
 
 #### <a href="https://x.com/_akhaliq/status/1898862611535405242" target="_blank" rel="noopener">ThreeJS Infinite Runner</a> 
 
@@ -103,27 +102,29 @@ With a single prompt ("make a three.js endless runner game"), Manus created a co
 
 Another impressive example is a Super Mario-style platformer created in the "Minecraft visual style." Though slightly buggy, it's still very playable—complete with enemies and score tracking.
 
-![Manus AI Mario Clone](/static/blog/manus-benchmark-operator-comparison/manus_mario_clone.png)
+![Manus AI Mario Clone](/static/blog/manus-benchmark-operator-comparison/manus-mario-clone.webp)
 
-### Web Development
+### 2. Web Development
 
-Manus—with its **Spaces** feature that allows it to easily push code to publicly-accessible websites—shows strong capabilities in creating functional, visually appealing websites:
+Manus's <a href="https://manus.im/space-gallery" target="_blank" rel="noopener">Spaces</a> allows users to easily push code to publicly-accessible websites—shows strong capabilities in creating functional, visually appealing websites. 
 
 #### <a href="https://bxzlhlmm.manus.space/" target="_blank" rel="noopener">Apple Website Clone</a>
 
 With the simple prompt "clone the Apple website," Manus created this:
 
-![Manus Apple Website Clone](/static/blog/manus-benchmark-operator-comparison/manus_apple_clone.png)
+![Manus Apple Website Clone](/static/blog/manus-benchmark-operator-comparison/manus-apple-clone.webp)
 
-The result closely resembled Apple's actual site, though images and and some other elements were faulty.
+The result closely resembled Apple's actual site, though images and some other elements were faulty.
 
 #### <a href="https://evvqfqoz.manus.space/modules" target="_blank" rel="noopener">Interactive Learning Platforms</a>
 
 Manus created a "Quantum Computing Learning Hub", a content-rich educational platform that features various modules and a functional interactive lab.
 
-### Research and Reports
+![Manus Quantum Computing Learning Hub](/static/blog/manus-benchmark-operator-comparison/manus-learning-hub.webp)
 
-Beyond creative projects, Manus excels at research-heavy analytical tasks:
+### 3. Research and Reports
+
+Beyond creative projects, Manus also excels at research-heavy analytical tasks. 
 
 #### <a href="https://manus.im/share/AWssWxITcsrl70js5L8LgU?replay=1" target="_blank" rel="noopener">Comprehensive SEO Optimization Report</a>
 
@@ -153,22 +154,22 @@ While Manus shows some impressive capabilities, it has a few flaws. The followin
   secondaryButtonLink="https://docs.helicone.ai"
 />
 
-## Manus vs OpenAI Deep Research vs OpenAI Operator vs Claude Computer Use vs Browser Use 
+## How Manus Compares to Other AI Agents
 
 Here's how Manus compares to similar AI agent tools:
 
 | Feature | Manus AI | OpenAI Deep Research | OpenAI Operator | Claude Computer Use | Browser Use |
 |---------|----------|----------------------|-----------------|---------------------|-------------|
 | **Control Context** | Own Browser (runs in cloud) | ChatGPT | Own Browser | Full desktop | Browser |
-| **Code Execution** | Yes (sandbox) | Limited | Limited | Limited | Yes (via custom plugins) |
-| **Web Deployment** | Yes | No | No | No | No |
-| **Visual Content Creation** | Yes | Limited | Limited | Limited | Limited |
-| **Multi-Tab Support** | Yes | Limited | Yes | Yes | Yes |
+| **Code Execution** | ✅ <br /> (sandbox) | Limited | Limited | Limited | ✅ <br /> (via custom plugins) |
+| **Web Deployment** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Visual Content Creation** | ✅ | Limited | Limited | Limited | Limited |
+| **Multi-Tab Support** | ✅ | Limited | ✅ | ✅ | ✅ |
 | **Research Capabilities** | Advanced | Advanced | Limited | Limited | Limited |
 | **Access Method** | Web interface | Web interface | Web interface | API only | Self-hosted or Cloud API |
-| **Pricing** | Unknown | Pro subscription ($200/mo) | Pro subscription ($200/mo) | Uses Claude API pricing ($3/M input, $15/M output) | Free (self-hosted) or $0.05/step (Cloud) |
+| **Pricing** | Unknown (currently invite-only) | Pro subscription ($200/mo) | Pro subscription ($200/mo) | Uses Claude API pricing ($3/M input, $15/M output) | Free (self-hosted) or $0.05/step (Cloud) |
 | **Model Support** | Claude 3.7 | o3 | Custom CUA model | Claude | Multiple (OpenAI, Claude, etc.) |
-| **Customization** | Limited | Limited | Limited | Limited | Extensive |
+| **Customization** | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited | Extensive |
 
 ### Head-to-Head Comparison
 
@@ -186,35 +187,14 @@ When given the same prompt to <a href="https://www.youtube.com/watch?v=50jhhDEh6
 
 If you can't access Manus yet or want something you can deploy yourself, consider using one of these open-source alternatives:
 
-### <a href="https://github.com/camel-ai/owl/" target="_blank" rel="noopener">OWL</a>
+- <a href="https://github.com/camel-ai/owl/" target="_blank" rel="noopener">OWL</a> (Optimized Workforce Learning for General Multi-Agent Assistance): Top-ranked open-source framework (58.18 on GAIA benchmark) built on CAMEL-AI. Supports multiple LLM backends and 20+ toolkits for search, browser automation, document parsing, and code execution.
 
-OWL (Optimized Workforce Learning for General Multi-Agent Assistance) is an impressive open-source framework that scores 58.18 on the GAIA benchmark—ranking #1 among open-source frameworks.
+- <a href="https://github.com/nikmcfly/ANUS/" rel="noreferrer" target="_blank">ANUS</a> (Autonomous Networked Utility System): Quite possibly the most memorable name in AI tools. Features hybrid agent architecture, flexible model support (OpenAI and open-source), comprehensive tools, and cross-platform compatibility. Highly extensible for developers wanting customization. 
 
-Key features:
-
-- Built on the CAMEL-AI Framework
-- Multi-agent collaboration architecture
-- Comprehensive toolkit ecosystem (web automation, document processing, code execution)
-- Support for various LLM backends (though performance varies by model)
-
-OWL supports over 20 toolkits including search, browser automation, document parsing, and code execution. While it requires a more technical setup than Manus, it provides similar capabilities with full transparency and customization options.
-
-### <a href="https://github.com/nikmcfly/ANUS/" rel="noreferrer" target="_blank">ANUS</a>
-
-With possibly the most memorable name in AI tools, ANUS (Autonomous Networked Utility System) offers another open-source alternative to Manus.
-
-Key features:
-
-- Hybrid agent architecture (single-agent simplicity with multi-agent capabilities)
-- Flexible model support (OpenAI, open-source models, or custom models)
-- Comprehensive tool ecosystem
-- Cross-platform compatibility
-
-ANUS provides detailed documentation and extensive extensibility options, making it suitable for developers who want to customize their agent system. 
 
 ## Conclusion
 
-Manus AI represents a meaningful advance in AI agent capabilities—not because it introduces fundamentally new technology, but because it integrates existing components into a seamless system that delivers impressive results.
+Manus AI is a pretty meaningful advance in AI agent capabilities—not because it introduces fundamentally new technology, but because it integrates existing components into a seamless system that delivers impressive results.
 
 Manus's impressive capabilities suggest that the path to better AI agents might lie in better orchestration and use of the tools we already have, rather than the development of more powerful ones.
 
@@ -240,7 +220,7 @@ Manus's impressive capabilities suggest that the path to better AI agents might 
     },
     {
       question: "Is my data safe with Manus AI?",
-      answer: "As with any cloud-based AI service, data shared with Manus is processed on their servers. They claim to collect some usage data for for security, analytics, fraud prevention, and service improvement. For sensitive projects, open-source alternatives that can be self-hosted may provide better privacy controls."
+      answer: "As with any cloud-based AI service, data shared with Manus is processed on their servers. They claim to collect some usage data for security, analytics, fraud prevention, and service improvement. For sensitive projects, open-source alternatives that can be self-hosted may provide better privacy controls."
     },
     {
       question: "How can I get access to Manus AI?",

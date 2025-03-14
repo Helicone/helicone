@@ -1,11 +1,11 @@
 { 
-  "title": "Comparing Manus AI to Operator and Computer Use (With Benchmarks)",
-  "title1": "Comparing Manus AI to Operator and Computer Use",
-  "title2": "Comparing Manus AI to Operator and Computer Use",
-  "description": "Explore Manus AI's capabilities, benchmark performance, and how it compares to other AI agent systems like Operator and Claude Computer Use. See real-world examples of what it can build and discover open-source alternatives you can use right now.",
-  "images": "/static/blog/chain-of-draft/chain-of-draft-cover.webp",
-  "time": "6 minute read",
+  "title": "What is Manus AI? Benchmarks & How it Compares to Operator and Computer Use",
+  "title1": "What is Manus AI? Benchmarks & How it Compares to Operator and Computer Use",
+  "title2": "What is Manus AI? Benchmarks & How it Compares to Operator and Computer Use",
+  "description": "Looking for an AI agent that delivers? Our analysis breaks down Manus' architecture, benchmarks, and compares it to alternatives like OpenAI Operator and Claude Computer Use. Let's take a look at real-world examples of what it's capable of.",
+  "images": "/static/blog/manus-benchmark-operator-comparison/manus-ai-vs-operator.webp",
+  "time": "9 minute read",
   "author": "Yusuf Ishola",
   "date": "March 13, 2025", 
-  "badge": "guide"
+  "badge": "Insight"
 }
