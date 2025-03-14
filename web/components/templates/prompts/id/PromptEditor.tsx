@@ -1147,28 +1147,6 @@ export default function PromptEditor({
             </Link>
           )}
 
-          {/* From Request or From Playground: Unsaved Changes Indicator */}
-          {(requestId || basePrompt) && state.isDirty && (
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex flex-row items-center gap-2 cursor-default">
-                  <div
-                    className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
-                  />
-                  <span className="text-sm text-secondary font-semibold">
-                    Unsaved Changes
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>
-                  <span className="font-semibold">Save As Prompt</span> to keep
-                  your progress
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {/* Metrics Drawer */}
           {promptId && (
             <Drawer>
@@ -1188,6 +1166,36 @@ export default function PromptEditor({
               </DrawerContent>
             </Drawer>
           )}
+
+          {/* From Request or From Playground: Unsaved Changes Indicator */}
+          {(requestId || basePrompt || isImportedFromCode === true) &&
+            state.isDirty && (
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-row items-center gap-2 cursor-default">
+                    <div
+                      className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                    />
+                    <span className="text-sm text-secondary font-semibold">
+                      Unsaved Changes
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="max-w-64 text-center">
+                    {isImportedFromCode === true
+                      ? "This prompt cannot be managed by Helicone because it was imported from code. "
+                      : ""}
+                    <span className="font-semibold">
+                      {isImportedFromCode === true
+                        ? "Save As Editor Prompt"
+                        : "Save As Prompt"}
+                    </span>{" "}
+                    to keep your progress.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
         </div>
 
         {/* Right Side: Actions */}
@@ -1207,6 +1215,7 @@ export default function PromptEditor({
           {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
           {(requestId || basePrompt || isImportedFromCode === true) && (
             <Button
+              className="text-white"
               variant="action"
               size="sm"
               onClick={handleSaveAsPrompt}
@@ -1217,6 +1226,8 @@ export default function PromptEditor({
                   <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
+              ) : isImportedFromCode === true ? (
+                "Save as Editor Prompt"
               ) : (
                 "Save As Prompt"
               )}
@@ -1253,7 +1264,7 @@ export default function PromptEditor({
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
-                    : state.isDirty && promptId
+                    : state.isDirty && promptId && isImportedFromCode === false
                     ? "Save & Run"
                     : "Run"}
                 </span>
@@ -1288,7 +1299,7 @@ export default function PromptEditor({
               <span className="mr-2">
                 {isStreaming
                   ? "Stop"
-                  : state.isDirty && promptId
+                  : state.isDirty && promptId && isImportedFromCode === false
                   ? "Save & Run"
                   : "Run"}
               </span>
