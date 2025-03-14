@@ -1,6 +1,5 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -52,6 +51,7 @@ import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
+import { Row } from "@/components/layout/common";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -799,18 +799,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     ? {
                         showSelectedCount: true,
                         children: (
-                          <ProFeatureWrapper featureName="Datasets">
-                            <GenericButton
-                              onClick={() => {
-                                setModalOpen(true);
-                              }}
-                              icon={
-                                <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                              }
-                              text="Add to dataset"
-                              className="h-8 py-0"
-                            />
-                          </ProFeatureWrapper>
+                          <GenericButton
+                            onClick={() => {
+                              setModalOpen(true);
+                            }}
+                            icon={
+                              <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                            }
+                            text="Add to dataset"
+                            className="h-8 py-0"
+                          />
                         ),
                       }
                     : undefined
@@ -858,18 +856,43 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     />
                   ) : undefined
                 }
-              ></ThemedTable>
-              <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
-                <TableFooter
-                  currentPage={page}
-                  pageSize={pageSize}
-                  isCountLoading={isCountLoading}
-                  count={count || 0}
-                  onPageChange={(n) => handlePageChange(n)}
-                  onPageSizeChange={(n) => setCurrentPageSize(n)}
-                  pageSizeOptions={[25, 50, 100, 250, 500]}
-                />
-              </div>
+              >
+                {_selectMode && (
+                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
+                    <div className="flex flex-row gap-2 items-center">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                        Request Selection:
+                      </span>
+                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                        {selectedIds.length} selected
+                      </span>
+                    </div>
+                    {selectedIds.length > 0 && (
+                      <GenericButton
+                        onClick={() => {
+                          setModalOpen(true);
+                        }}
+                        icon={
+                          <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                        }
+                        text="Add to dataset"
+                      />
+                    )}
+                  </Row>
+                )}
+              </ThemedTable>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
+              <TableFooter
+                currentPage={page}
+                pageSize={pageSize}
+                isCountLoading={isCountLoading}
+                count={count || 0}
+                onPageChange={(n) => handlePageChange(n)}
+                onPageSizeChange={(n) => setCurrentPageSize(n)}
+                pageSizeOptions={[25, 50, 100, 250, 500]}
+              />
             </div>
           </div>
         )}
