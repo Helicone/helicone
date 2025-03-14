@@ -11,6 +11,8 @@ import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { getMockCountries } from "../mockDashboardData";
 
 interface CountryPanelProps {
   timeFilter: TimeFilter;
@@ -19,15 +21,20 @@ interface CountryPanelProps {
 
 const CountryPanel = (props: CountryPanelProps) => {
   const { timeFilter, userFilters } = props;
+  const org = useOrg();
+  const shouldShowMockData = org?.currentOrg?.has_onboarded === false;
 
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState(5);
 
-  const { isLoading: isCountriesLoading, countries } = useCountries(
-    timeFilter,
-    limit,
-    userFilters
-  );
+  const { isLoading: isCountriesLoading, countries: realCountries } =
+    useCountries(timeFilter, limit, userFilters);
+
+  // Get mock data when user hasn't onboarded
+  const mockCountries = shouldShowMockData ? getMockCountries() : null;
+
+  // Use either mock or real data
+  const countries = shouldShowMockData ? mockCountries : realCountries;
 
   const countryMapper = (country: CountryData, index: number) => {
     const countryInfo = COUTNRY_CODE_DIRECTORY.find(
@@ -48,7 +55,7 @@ const CountryPanel = (props: CountryPanelProps) => {
       <StyledAreaChart
         title={`Top Countries`}
         value={undefined}
-        isDataOverTimeLoading={isCountriesLoading}
+        isDataOverTimeLoading={isCountriesLoading && !shouldShowMockData}
       >
         <div className="flex flex-row justify-between items-center pb-2">
           <p className="text-xs font-semibold text-gray-700">Country</p>
