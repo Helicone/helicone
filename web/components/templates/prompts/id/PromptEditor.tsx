@@ -13,6 +13,9 @@ import CustomScrollbar, {
 import VersionSelector from "@/components/shared/universal/VersionSelector";
 import { Button } from "@/components/ui/button";
 
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   ResizableHandle,
@@ -25,9 +28,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { readStream } from "@/lib/api/llm/read-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
@@ -74,18 +79,13 @@ import {
 import {
   useCreatePrompt,
   usePrompt,
+  usePrompts,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
-import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { usePrompts } from "../../../../services/hooks/prompts/prompts";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -335,6 +335,7 @@ export default function PromptEditor({
         );
 
         // 3.B. Extract additional variables contained in message content
+        stateMessages = (templateData.messages ?? []) as Message[]; // Typeguard and cast templateData to Message[]
         stateMessages.forEach((msg) => {
           const vars = extractVariables(msg.content || "", "helicone");
           vars.forEach((v) => {
@@ -360,9 +361,6 @@ export default function PromptEditor({
         // 3.D. Deduplicate variables
         inputs = deduplicateVariables(inputs);
       }
-
-      // 4. Typeguard and cast templateData to Message[]
-      stateMessages = (templateData.messages ?? []) as Message[];
 
       // 5. Validate model-provider or closest match or default
       const provider = findClosestProvider(
