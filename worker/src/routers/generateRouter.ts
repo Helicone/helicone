@@ -128,49 +128,45 @@ const generateHandler = async (
       );
     }
     // b. Set basic headers
-    const requestHeaders = new Headers();
-    requestHeaders.set("Content-Type", "application/json");
-    requestHeaders.set(
+    const forwardHeaders = new Headers();
+    forwardHeaders.set("Content-Type", "application/json");
+    forwardHeaders.set(
       "Helicone-Auth",
       `${requestWrapper.getHeaders().get("Helicone-Auth")}`
     );
     // Use the provider-specific auth header configuration
-    requestHeaders.set(
+    forwardHeaders.set(
       authHeaderConfig.headerName,
       authHeaderConfig.valuePrefix
         ? `${authHeaderConfig.valuePrefix}${providerApiKey}`
         : providerApiKey
     );
-    requestHeaders.set("Accept-Encoding", "identity");
+    forwardHeaders.set("Accept-Encoding", "identity");
     // Add provider-specific default headers if they exist
     if (defaultHeaders) {
       Object.entries(defaultHeaders).forEach(([key, value]) => {
-        requestHeaders.set(key, value);
+        forwardHeaders.set(key, value);
       });
     }
     // c. Set properties parameters as headers
     if (parameters.properties?.userId) {
-      requestHeaders.set("Helicone-User-Id", parameters.properties.userId);
+      forwardHeaders.set("Helicone-User-Id", parameters.properties.userId);
     }
     if (parameters.properties?.sessionId) {
-      requestHeaders.set(
+      forwardHeaders.set(
         "Helicone-Session-Id",
         parameters.properties.sessionId
       );
     }
     if (parameters.properties?.cache) {
-      requestHeaders.set(
+      forwardHeaders.set(
         "Helicone-Cache",
         parameters.properties.cache.toString()
       );
     }
     // d. Set prompt properties
-    requestHeaders.set("Helicone-Prompt-Id", parameters.promptId);
-    requestHeaders.set("Helicone-Prompt-Version", promptResult.data.id);
-    requestHeaders.set(
-      "Helicone-Prompt-Inputs",
-      JSON.stringify(parameters.inputs)
-    ); // This header is used with templateWithInputs logging (used for saving prompt_input_records)
+    forwardHeaders.set("Helicone-Prompt-Id", parameters.promptId);
+    forwardHeaders.set("Helicone-Prompt-Version", promptResult.data.id);
 
     // 6. FILL INPUTS AND MAP FROM HELICONE TEMPLATE TO PROVIDER BODY
     // a. Autofill inputs
@@ -191,39 +187,42 @@ const generateHandler = async (
     // 7. FORWARD REQUEST TO PROVIDER
     const newRequest = new Request(targetUrl, {
       method: "POST",
-      headers: requestHeaders,
+      headers: forwardHeaders,
       body: JSON.stringify(requestTemplate),
     });
     console.log("New request:", {
       targetUrl,
-      headers: requestHeaders,
+      headers: forwardHeaders,
       body: JSON.stringify(requestTemplate),
     });
 
     // 8. EXECUTE REQUEST TO PROVIDER
-    const newWrapperResult = await RequestWrapper.create(newRequest, env);
-    if (newWrapperResult.error || !newWrapperResult.data) {
+    const { data: forwardRequestWrapper } = await RequestWrapper.create(
+      newRequest,
+      env
+    );
+    if (!forwardRequestWrapper) {
       return createErrorResponse(
-        "Failed to create request wrapper: " +
-          (newWrapperResult.error || "No wrapper created"),
+        "Failed to create request wrapper: ",
         "request_creation_failed",
         500
       );
     }
+    // Set prompt inputs (used for storing in prompt_input_record)
+    forwardRequestWrapper.setPromptInputs(parameters.inputs);
 
-    // Get the response from the provider
-    const response = await gatewayForwarder(
+    // -> Await/Return response from Gateway
+    return await gatewayForwarder(
       {
         targetBaseUrl: targetUrl,
-        setBaseURLOverride: newWrapperResult.data.setBaseURLOverride.bind(
-          newWrapperResult.data
+        setBaseURLOverride: forwardRequestWrapper.setBaseURLOverride.bind(
+          forwardRequestWrapper
         ),
       },
-      newWrapperResult.data,
+      forwardRequestWrapper,
       env,
       ctx
     );
-    return response;
   } catch (e: unknown) {
     console.error("Error in generate route:", e);
     return createErrorResponse(

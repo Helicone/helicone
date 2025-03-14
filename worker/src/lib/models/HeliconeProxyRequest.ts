@@ -80,12 +80,12 @@ export class HeliconeProxyRequestMapper {
       const { templateWithInputs } = parseJSXObject(
         JSON.parse(await this.request.getRawText())
       );
-      // If the promptInputs header is set, use these inputs instead
-      if (this.request.heliconeHeaders.promptHeaders.promptInputs) {
-        templateWithInputs.inputs = JSON.parse(
-          this.request.heliconeHeaders.promptHeaders.promptInputs
-        );
+
+      // Use promptInputs from requestWrapper instead when provided
+      if (this.request.promptSettings.promptInputs) {
+        templateWithInputs.inputs = this.request.promptSettings.promptInputs;
       }
+
       return templateWithInputs;
     }
     return null;
