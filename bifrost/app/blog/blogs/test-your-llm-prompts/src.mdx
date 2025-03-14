@@ -1,4 +1,4 @@
-Large Language Models (LLMs) are **<span style={{color: '#0ea5e9'}}>sensitive to prompt changes</span>**, where even minor wording changes can dramatically alter output. Untested prompts risk generating factually incorrect information, irrelevant responses, or unnecessary and expensive API calls.
+Large Language Models (LLMs) are **sensitive to prompt changes**, where even minor wording changes can dramatically alter output. Untested prompts risk generating factually incorrect information, irrelevant responses, or unnecessary and expensive API calls.
 
 ![How to test your LLM prompts (with examples)](/static/blog/test-your-llm-prompts/cover.webp)
 
@@ -36,21 +36,21 @@ We hand-picked a few tools that support all of the following, along with compreh
 
 ### Data collection
 
-You need high-quality input variables to create high-quality prompts. A common practice is to use “**<span style={{color: '#0ea5e9'}}>golden datasets</span>**” - data that’s meticulously cleaned and labeled - to tune your prompt for problems that are easily reproducible.
+You need high-quality input variables to create high-quality prompts. A common practice is to use “**golden datasets**” - data that’s meticulously cleaned and labeled - to tune your prompt for problems that are easily reproducible.
 
 Teams like QA Wolf use a new approach by <a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" rel="noopener" target="_blank">randomly sampling production data</a>, which represents actual user interactions and offers a more accurate representation of real-world use cases. QA Wolf leverages Helicone to monitor their agents and run systematic experiments, iteratively refining them to achieve 100% accuracy.
 
 ### Prompt management
 
-Think of it like Git for prompts. <a href="https://www.helicone.ai/blog/prompt-management" rel="noopener" target="_blank">Prompt management</a> tools are specialized tools to help engineers **<span style={{color: '#0ea5e9'}}>version, manage or improve prompts</span>**, and roll back to a previous version easily.
+Think of it like Git for prompts. <a href="https://www.helicone.ai/blog/prompt-management" rel="noopener" target="_blank">Prompt management</a> tools are specialized tools to help engineers **version, manage or improve prompts**, and roll back to a previous version easily.
 
 ### Prompt playgrounds
 
-Playgrounds are **<span style={{color: '#0ea5e9'}}>interactive environments</span>** that helps engineers iteratively test and refine their prompts. Notably, playgrounds enable rapid prompt iteration, testing against real-world data, and fine-tuning of model parameters and metadata configurations like `top_k`.
+Playgrounds are **interactive environments** that helps engineers iteratively test and refine their prompts. Notably, playgrounds enable rapid prompt iteration, testing against real-world data, and fine-tuning of model parameters and metadata configurations like `top_k`.
 
 ### Evaluators & scores
 
-Feedback is essential for continuous improvement. The best tools analyze LLM outputs by assigning **<span style={{color: '#0ea5e9'}}>qualitative and quantitative scores</span>** such as tone alignment and Semantic Similarity. They make it easy to compare different prompt variations and help engineers justify prompt changes with data before pushing to production
+Feedback is essential for continuous improvement. The best tools analyze LLM outputs by assigning **qualitative and quantitative scores** such as tone alignment and Semantic Similarity. They make it easy to compare different prompt variations and help engineers justify prompt changes with data before pushing to production
 
 <CallToAction
   title="Prevent prompt regression with Helicone ⚡️"
@@ -140,7 +140,7 @@ Human evaluation is highly reliable for nuanced situations but is resource-inten
 
 ### 3. LLM-as-a-judge
 
-An alternative to human evaluation is using an LLM with an **<span style={{color: '#0ea5e9'}}>evaluation prompt</span>** to rate the generated outputs based on a criteria, especially for tasks like chatbot responses or complex text generation. This methods works well for both **<span style={{color: '#0ea5e9'}}>offline and online evaluations</span>**.
+An alternative to human evaluation is using an LLM with an **evaluation prompt** to rate the generated outputs based on a criteria, especially for tasks like chatbot responses or complex text generation. This methods works well for both **offline and online evaluations**.
 
 <BottomLine
   title="💡 What is online or offline evaluation?"
@@ -163,11 +163,11 @@ LLM-as-a-judge is useful for scenarios where outputs are predictable and well-de
 
 **Bottom Line**
 
-This approach can **<span style={{color: '#0ea5e9'}}>approximate human judgment</span>** while being more scalable and efficient. But keep in mind that LLM-assisted evaluations can inherit biases from training data, and may or may not outperform human evaluations. Creating an effective evaluation prompt is critical for this method to see reliable results.
+This approach can approximate human judgment while being more scalable and efficient. But keep in mind that LLM-assisted evaluations can inherit biases from training data, and may or may not outperform human evaluations. Creating an effective evaluation prompt is critical for this method to see reliable results.
 
 ## Why evaluating prompts is important (and difficult)
 
-To optimize your LLM application, you need a way to **<span style={{color: '#0ea5e9'}}>quantify its performance</span>**. Choosing the right evaluation method is just as important as the evaluation itself because different evaluators are better suited for certain use cases. For example:
+To optimize your LLM application, you need a way to quantify its performance. Choosing the right evaluation method is just as important as the evaluation itself because different evaluators are better suited for certain use cases. For example:
 
 An LLM chatbot designed for **technical support** will need metrics like:
 
@@ -183,7 +183,7 @@ An LLM handles **creative tasks** (i.e. stories or marketing copy) will need met
 
 ## Choosing the right metrics
 
-At the end of the day, the choice of evaluation metrics depends on your application’s goals. For example, **<span style={{color: '#0ea5e9'}}>faithfulness</span>** is ideal for Retrieval-Augmented Generation (RAG) applications to measure how well the AI response adheres to the provide context, while metrics like **<span style={{color: '#0ea5e9'}}>BLEU</span>** or **<span style={{color: '#0ea5e9'}}>ROUGE</span>** are better for translation-specific tasks and text-summarization tasks respectively.
+At the end of the day, the choice of evaluation metrics depends on your application’s goals. For example, **faithfulness** is ideal for Retrieval-Augmented Generation (RAG) applications to measure how well the AI response adheres to the provide context, while metrics like **BLEU** or **ROUGE** are better for translation-specific tasks and text-summarization tasks respectively.
 
 ---
 
