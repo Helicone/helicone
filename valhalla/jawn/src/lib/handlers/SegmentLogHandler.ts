@@ -107,7 +107,12 @@ export class SegmentLogHandler extends AbstractLogHandler {
       try {
         const response = await sendSegmentEvent(segmentEvent);
         if (!response.ok) {
-          console.error("Failed to send segment event", await response.text());
+          const responseText = await response.text();
+          if (responseText.includes("invalid write key")) {
+            // console.error("Invalid write key", responseText);
+          } else {
+            console.error("Failed to send segment event", responseText);
+          }
         }
       } catch (error) {
         console.error(error);
