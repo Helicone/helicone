@@ -142,7 +142,11 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {allNames.isLoading ? (
+        {allNames.isLoading ||
+        allNames.isRefetching ||
+        isLoading ||
+        names.isLoading ||
+        names.isRefetching ? (
           <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
             <LoadingAnimation />
           </div>
