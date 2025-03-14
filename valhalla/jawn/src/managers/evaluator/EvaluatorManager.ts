@@ -57,13 +57,12 @@ export function getEvaluatorScoreName(evaluatorName: string) {
 
 export function getFullEvaluatorScoreName(
   evaluatorName: string,
-  isBoolean: boolean
 ) {
   return (
     evaluatorName
       .toLowerCase()
       .replace(" ", "_")
-      .replace(/[^a-z0-9]+/g, "_") + (isBoolean ? "-hcone-bool" : "")
+      .replace(/[^a-z0-9]+/g, "_")
   );
 }
 
@@ -283,8 +282,7 @@ export class EvaluatorManager extends BaseManager {
         return err(scoreResult.error);
       }
 
-      const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
-      const scoreName = getFullEvaluatorScoreName(evaluator.name, isBoolean);
+      const scoreName = getFullEvaluatorScoreName(evaluator.name);
 
       const scoreManager = new ScoreManager(this.authParams);
       if (
@@ -359,11 +357,7 @@ export class EvaluatorManager extends BaseManager {
         }
         const evaluationPromises: Promise<Result<null, string>>[] = [];
         for (const evaluator of evaluators.data ?? []) {
-          const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
-          const scoreName = getFullEvaluatorScoreName(
-            evaluator.name,
-            isBoolean
-          );
+          const scoreName = getFullEvaluatorScoreName(evaluator.name);
           if (!(request.scores && scoreName in request.scores)) {
             evaluationPromises.push(
               this.runEvaluatorAndPostScore({
@@ -411,8 +405,7 @@ export class EvaluatorManager extends BaseManager {
     let shouldRun = false;
     for (const request of experimentData.data ?? []) {
       for (const evaluator of evaluators.data ?? []) {
-        const isBoolean = evaluator.scoring_type === "LLM-BOOLEAN";
-        const scoreName = getFullEvaluatorScoreName(evaluator.name, isBoolean);
+        const scoreName = getFullEvaluatorScoreName(evaluator.name);
         if (!(request.scores && scoreName in request.scores)) {
           shouldRun = true;
         }
@@ -688,12 +681,7 @@ export class EvaluatorManager extends BaseManager {
         });
       }
 
-      // Get evaluator name for scoring using getFullEvaluatorScoreName function
-      const isBoolean = evaluator.data.scoring_type === "LLM-BOOLEAN";
-      const scoreName = getFullEvaluatorScoreName(
-        evaluator.data.name,
-        isBoolean
-      );
+      const scoreName = getFullEvaluatorScoreName(evaluator.data.name);
 
       // Query to get the average score and total uses from clickhouse
       const statsQuery = `
