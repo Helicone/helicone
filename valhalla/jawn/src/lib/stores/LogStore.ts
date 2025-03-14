@@ -371,7 +371,9 @@ export class LogStore {
        SELECT unnest($1::text[]), $2, $3
        ON CONFLICT (key, prompt_version) DO NOTHING`,
           [
-            `{${Object.keys(heliconeTemplate.inputs).join(",")}}`,
+            `{${Object.keys(heliconeTemplate.inputs)
+              .map((key) => `"${key}"`)
+              .join(",")}}`,
             versionId,
             newPromptRecord.createdAt.toISOString(),
           ]
