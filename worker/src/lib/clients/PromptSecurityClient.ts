@@ -10,6 +10,7 @@ export async function checkPromptSecurity(
     advanced,
   });
 
+  return false;
   const response = await fetch(`${env.VALHALLA_URL}/v1/public/security`, {
     method: "POST",
     headers: {

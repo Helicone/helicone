@@ -22,6 +22,14 @@ prompt_guard_model_path = os.path.join(
     os.path.dirname(__file__), "./prompt-guard-86m")
 
 
+# TEmp sleep forever
+
+while True:
+    import time
+    print("python: Sleeping forever")
+    time.sleep(1000)
+
+
 def download_prompt_guard_model():
     import os
     import boto3

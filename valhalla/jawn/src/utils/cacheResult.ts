@@ -26,7 +26,6 @@ export async function cacheResultCustom<T, K>(
 
   const cachedValue = await kvCache.get(cacheKey);
   if (cachedValue) {
-    console.log("Cache hit for", cacheKey);
     return cachedValue as Result<T, K>;
   }
 

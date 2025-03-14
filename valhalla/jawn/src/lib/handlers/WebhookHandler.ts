@@ -150,7 +150,11 @@ export class WebhookHandler extends AbstractLogHandler {
           );
 
           if (result.error) {
-            console.error("Error sending webhook:", result.error);
+            if (result.error.includes("429")) {
+              // console.error("Webhook rate limited:", result.error);
+            } else {
+              console.error("Error sending webhook:", result.error);
+            }
           }
         } catch (error: any) {
           Sentry.captureException(error, {
