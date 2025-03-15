@@ -126,7 +126,7 @@ const NavLinks = () => {
         },
         {
           href: "/projects",
-          label: "Community Projects",
+          label: "Community",
           description: "Open-source projects built with Helicone",
           icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
@@ -192,7 +192,7 @@ const NavLinks = () => {
                       <DropdownMenuItem asChild>
                         <Link
                           href={item.href}
-                          className="w-full cursor-pointer flex items-center gap-2 p-3 text-slate-700 hover:text-black"
+                          className="w-full cursor-pointer flex items-center gap-2 py-2.5 px-3 text-slate-700 hover:text-black"
                         >
                           <div className="flex-shrink-0 self-start">
                             {item.icon}
@@ -319,7 +319,7 @@ const MobileNav = () => {
     },
     {
       href: "/projects",
-      label: "Community Projects",
+      label: "Community",
       icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
   ];
