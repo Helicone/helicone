@@ -156,13 +156,16 @@ export class LogManager {
       })
     );
 
-    await this.logRateLimits(rateLimitHandler, batchContext);
-    await this.logHandlerResults(loggingHandler, batchContext, logMessages);
+    // Run all handlers in parallel and await their completion together
+    await Promise.all([
+      this.logRateLimits(rateLimitHandler, batchContext),
+      this.logHandlerResults(loggingHandler, batchContext, logMessages),
+      this.logPosthogEvents(posthogHandler, batchContext),
+      this.logLytixEvents(lytixHandler, batchContext),
+      this.logSegmentEvents(segmentHandler, batchContext),
+      this.logWebhooks(webhookHandler, batchContext),
+    ]);
 
-    await this.logPosthogEvents(posthogHandler, batchContext);
-    await this.logLytixEvents(lytixHandler, batchContext);
-    await this.logSegmentEvents(segmentHandler, batchContext);
-    await this.logWebhooks(webhookHandler, batchContext);
     console.log(`Finished processing batch ${batchContext.batchId}`);
   }
 

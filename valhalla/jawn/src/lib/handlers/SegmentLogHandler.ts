@@ -103,23 +103,25 @@ export class SegmentLogHandler extends AbstractLogHandler {
   }
 
   public async handleResults(): PromiseGenericResult<string> {
-    for (const segmentEvent of this.segmentEvents) {
-      try {
-        const response = await sendSegmentEvent(segmentEvent);
-        if (!response.ok) {
-          const responseText = await response.text();
-          if (responseText.includes("invalid write key")) {
-            // console.error("Invalid write key", responseText);
-          } else {
-            console.error("Failed to send segment event", responseText);
+    this.segmentEvents.forEach((segmentEvent) => {
+      // Fire and forget approach - don't await segment event sending
+      sendSegmentEvent(segmentEvent)
+        .then(async (response) => {
+          if (!response.ok) {
+            const responseText = await response.text();
+            if (responseText.includes("invalid write key")) {
+              // invalid write key error - silently handled
+            } else {
+              console.error("Failed to send segment event", responseText);
+            }
           }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    });
 
-    return ok("Successfully handled segment logs");
+    return ok("Successfully initiated segment log events");
   }
 
   private mapSegmentEvent(

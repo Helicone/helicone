@@ -140,23 +140,20 @@ export class WebhookHandler extends AbstractLogHandler {
     }
     console.log("Sending to webhooks: ", this.webhookPayloads.length);
 
-    await Promise.all(
-      this.webhookPayloads.map(async (webhookPayload) => {
-        try {
-          // Ensure we're sending the most up-to-date data
-          const result = await sendToWebhook(
-            webhookPayload.payload,
-            webhookPayload.webhook
-          );
-
+    // Fire and forget approach - don't await webhook sending
+    this.webhookPayloads.forEach((webhookPayload) => {
+      // Use Promise to handle async operation without blocking
+      sendToWebhook(webhookPayload.payload, webhookPayload.webhook)
+        .then((result) => {
           if (result.error) {
             if (result.error.includes("429")) {
-              // console.error("Webhook rate limited:", result.error);
+              // Rate limit error - silently handled
             } else {
               console.error("Error sending webhook:", result.error);
             }
           }
-        } catch (error: any) {
+        })
+        .catch((error: any) => {
           Sentry.captureException(error, {
             tags: {
               type: "WebhookError",
@@ -167,10 +164,9 @@ export class WebhookHandler extends AbstractLogHandler {
               webhook: webhookPayload.webhook,
             },
           });
-        }
-      })
-    );
+        });
+    });
 
-    return ok(`Successfully sent to webhooks`);
+    return ok(`Successfully initiated webhook sending`);
   }
 }

@@ -5,22 +5,22 @@
 FROM --platform=linux/amd64 node:20
 
 
-WORKDIR /usr/src/app/valhalla/prompt_security
+# WORKDIR /usr/src/app/valhalla/prompt_security
 
-SHELL ["/bin/bash", "-c"]
-RUN apt-get update && apt-get install -y python3-venv python3
-RUN python3 -m venv venv
+# SHELL ["/bin/bash", "-c"]
+# RUN apt-get update && apt-get install -y python3-venv python3
+# RUN python3 -m venv venv
 
-COPY ./valhalla/prompt_security/requirements.txt ./
-RUN . venv/bin/activate && \
-    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
-    pip3 install "transformers[torch]"
+# COPY ./valhalla/prompt_security/requirements.txt ./
+# RUN . venv/bin/activate && \
+#     pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+#     pip3 install "transformers[torch]"
 
-RUN . venv/bin/activate && \
-    pip3 install tokenizers safetensors fastapi tqdm uvicorn boto3
+# RUN . venv/bin/activate && \
+#     pip3 install tokenizers safetensors fastapi tqdm uvicorn boto3
 
-RUN . venv/bin/activate && \
-    pip3 install regex numpy packaging requests tqdm filelock typing-extensions
+# RUN . venv/bin/activate && \
+#     pip3 install regex numpy packaging requests tqdm filelock typing-extensions
 
 
 WORKDIR /usr/src/app/valhalla/jawn
@@ -52,7 +52,7 @@ ENV DLQ_MESSAGES_PER_MINI_BATCH=1
 ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
-ENV ENABLE_PROMPT_SECURITY="true"
+ENV ENABLE_PROMPT_SECURITY="false"
 
 # Install supervisor
 RUN apt-get update && apt-get install -y supervisor
