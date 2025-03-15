@@ -349,7 +349,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm group"
+                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
                           <th
                             className={clsx(
