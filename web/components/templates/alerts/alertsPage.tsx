@@ -15,7 +15,7 @@ import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { H3, Muted, P, Small } from "@/components/ui/typography";
-import { Bell, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

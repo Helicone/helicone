@@ -9,7 +9,6 @@ import {
   ChevronDownIcon,
   SquareArrowOutUpRight,
   Trash2,
-  Beaker,
   Plus,
   FlaskConical,
 } from "lucide-react";

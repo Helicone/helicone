@@ -20,7 +20,6 @@ import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 // Import ShadcnUI components
 import AuthHeader from "@/components/shared/authHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -39,7 +38,6 @@ import {
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { ExternalLinkIcon } from "lucide-react";
-import { PiWebhooksLogo } from "react-icons/pi";
 
 interface WebhooksPageProps {
   user: User;
