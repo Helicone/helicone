@@ -113,7 +113,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
             "Evaluator updated successfully",
             "success"
           );
-          await invalidateEvaluators.invalidate();
+          invalidateEvaluators.invalidate();
           onSubmit();
         }
       } else {
@@ -134,7 +134,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
             "Evaluator created successfully",
             "success"
           );
-          await invalidateEvaluators.invalidate();
+          invalidateEvaluators.invalidate();
           onSubmit();
         }
       }
