@@ -46,7 +46,6 @@ interface PromptsPageProps {
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
-  // STATE & HOOKS
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
   const router = useRouter();
@@ -54,16 +53,12 @@ const PromptsPage = (props: PromptsPageProps) => {
   const searchParams = useSearchParams();
   const promptCount = prompts?.length ?? 0;
   const { canCreate, freeLimit } = useFeatureLimit("prompts", promptCount);
-
-  // DERIVED STATE
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
 
-  // EVENT HANDLERS
   const handleCreatePrompt = async () => {
     try {
-      // Create a basic prompt with default settings
       const basePrompt: LLMRequestBody = {
         model: "gpt-4o-mini",
         messages: [
@@ -93,40 +88,13 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
-  // Show empty state if there are no prompts and not loading
   if (!isLoading && promptCount === 0) {
     return (
       <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
         <div className="flex flex-1 h-full">
           <EmptyStateCard
             feature="prompts"
-            customActions={
-              <>
-                <FreeTierLimitWrapper feature="prompts" itemCount={promptCount}>
-                  <Button
-                    variant="default"
-                    onClick={handleCreatePrompt}
-                    disabled={isCreating || !canCreate}
-                  >
-                    {isCreating ? (
-                      <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
-                    ) : (
-                      <PiPlusBold className="h-4 w-4 mr-2" />
-                    )}
-                    {isCreating ? "Creating..." : "Create First Prompt"}
-                  </Button>
-                </FreeTierLimitWrapper>
-                <Link
-                  href="https://docs.helicone.ai/features/prompts"
-                  target="_blank"
-                >
-                  <Button variant="outline" className="gap-2">
-                    View Docs
-                    <SquareArrowOutUpRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </>
-            }
+            onPrimaryClick={handleCreatePrompt}
           />
         </div>
       </div>
@@ -135,13 +103,11 @@ const PromptsPage = (props: PromptsPageProps) => {
 
   return (
     <main className="min-h-screen flex flex-col gap-4">
-      {/* Header */}
       <AuthHeader
         className="min-w-full"
         title="Prompts"
         actions={
           <>
-            {/* Always show create button but use FreeTierLimitWrapper to block if limit reached */}
             <FreeTierLimitWrapper feature="prompts" itemCount={promptCount}>
               <Button
                 variant="action"

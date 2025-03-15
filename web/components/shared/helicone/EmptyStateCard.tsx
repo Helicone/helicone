@@ -12,6 +12,7 @@ import {
   Bell,
   Archive,
   Shield,
+  Plus,
 } from "lucide-react";
 import { createHighlighter } from "shiki";
 import { H2, P } from "@/components/ui/typography";
@@ -27,7 +28,7 @@ interface EmptyStateFeature {
   description: string;
   icon?: React.ElementType;
   featureImage: {
-    type: "image" | "video" | "code";
+    type: "image" | "video" | "code" | "none";
     content: string;
     language?: string;
     maxWidth?: string;
@@ -35,7 +36,9 @@ interface EmptyStateFeature {
   cta?: {
     primary?: {
       text: string;
-      link: string;
+      link?: string;
+      onClick?: boolean;
+      showPlusIcon?: boolean;
     };
     secondary?: {
       text: string;
@@ -195,13 +198,14 @@ Helicone-Property-UseCase: email_campaign`,
       "Set up webhooks to automate your workflow and integrate with external tools.",
     icon: GitBranch,
     featureImage: {
-      type: "image",
-      content: "/static/featureUpgrade/webhooks.webp",
+      type: "none",
+      content: "",
     },
     cta: {
       primary: {
-        text: "Get Started",
-        link: "https://docs.helicone.ai/features/webhooks",
+        text: "Add Webhook",
+        onClick: true,
+        showPlusIcon: true,
       },
       secondary: {
         text: "View Docs",
@@ -210,21 +214,19 @@ Helicone-Property-UseCase: email_campaign`,
     },
   },
   alerts: {
-    title: "No Alerts Configured",
-    description: "Set up real-time alerts to stay on top of critical issues.",
+    title: "Create Your First Alert",
+    description:
+      "Receive real-time notifications in Slack or via email when something goes wrong.",
     icon: Bell,
     featureImage: {
-      type: "image",
-      content: "/static/featureUpgrade/alerts.webp",
+      type: "none",
+      content: "",
     },
     cta: {
       primary: {
-        text: "Get Started",
-        link: "https://docs.helicone.ai/features/alerts",
-      },
-      secondary: {
-        text: "View Docs",
-        link: "https://docs.helicone.ai/features/alerts",
+        text: "Create Alert",
+        onClick: true,
+        showPlusIcon: true,
       },
     },
   },
@@ -232,9 +234,9 @@ Helicone-Property-UseCase: email_campaign`,
 
 export type EmptyStateFeatureKey = keyof typeof EMPTY_STATE_FEATURES;
 
-interface EmptyStateCardProps {
-  feature: EmptyStateFeatureKey;
-  customActions?: React.ReactNode;
+export interface EmptyStateCardProps {
+  feature: keyof typeof EMPTY_STATE_FEATURES;
+  onPrimaryClick?: () => void;
 }
 
 // Custom component for Shiki highlighted code
@@ -273,10 +275,10 @@ const ShikiHighlightedCode: React.FC<{
   );
 };
 
-export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
+export const EmptyStateCard = ({
   feature,
-  customActions,
-}) => {
+  onPrimaryClick,
+}: EmptyStateCardProps) => {
   const featureDefaults = feature
     ? EMPTY_STATE_FEATURES[feature]
     : ({
@@ -299,6 +301,38 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
           },
         },
       } as EmptyStateFeature);
+
+  const renderCTA = () => {
+    const cta = featureDefaults.cta;
+    if (!cta) return null;
+
+    return (
+      <div className="flex gap-4">
+        {cta.primary &&
+          (cta.primary.onClick ? (
+            <Button variant="default" onClick={onPrimaryClick}>
+              {cta.primary.showPlusIcon && <Plus className="h-4 w-4 mr-2" />}
+              {cta.primary.text}
+            </Button>
+          ) : cta.primary.link ? (
+            <Link href={cta.primary.link} target="_blank">
+              <Button variant="default">
+                {cta.primary.showPlusIcon && <Plus className="h-4 w-4 mr-2" />}
+                {cta.primary.text}
+              </Button>
+            </Link>
+          ) : null)}
+        {cta.secondary && (
+          <Link href={cta.secondary.link} target="_blank">
+            <Button variant="outline" className="gap-2">
+              {cta.secondary.text}
+              <SquareArrowOutUpRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
+      </div>
+    );
+  };
 
   // Standard layout for all empty states based on the properties format
   return (
@@ -323,63 +357,46 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
         </div>
 
         {/* Feature Image */}
-        <div className="w-full">
-          {featureDefaults.featureImage.type === "code" ? (
-            <ShikiHighlightedCode
-              code={featureDefaults.featureImage.content}
-              language={featureDefaults.featureImage.language || "http"}
-              maxWidth={featureDefaults.featureImage.maxWidth}
-            />
-          ) : featureDefaults.featureImage.type === "video" ? (
-            <div
-              className={`overflow-hidden relative rounded-lg border border-border max-w-${
-                featureDefaults.featureImage.maxWidth || "xl"
-              } mx-auto`}
-            >
-              <video
-                className="w-full max-h-[500px] object-contain"
-                src={featureDefaults.featureImage.content}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
+        {featureDefaults.featureImage.type !== "none" && (
+          <div className="w-full">
+            {featureDefaults.featureImage.type === "code" ? (
+              <ShikiHighlightedCode
+                code={featureDefaults.featureImage.content}
+                language={featureDefaults.featureImage.language || "http"}
+                maxWidth={featureDefaults.featureImage.maxWidth}
               />
-            </div>
-          ) : (
-            <img
-              src={featureDefaults.featureImage.content}
-              alt={featureDefaults.title}
-              className={`w-full h-auto rounded-lg border border-border max-w-${
-                featureDefaults.featureImage.maxWidth || "xl"
-              } mx-auto`}
-            />
-          )}
-        </div>
+            ) : featureDefaults.featureImage.type === "video" ? (
+              <div
+                className={`overflow-hidden relative rounded-lg border border-border max-w-${
+                  featureDefaults.featureImage.maxWidth || "xl"
+                } mx-auto`}
+              >
+                <video
+                  className="w-full max-h-[500px] object-contain"
+                  src={featureDefaults.featureImage.content}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                />
+              </div>
+            ) : (
+              featureDefaults.featureImage.type === "image" && (
+                <img
+                  src={featureDefaults.featureImage.content}
+                  alt={featureDefaults.title}
+                  className={`w-full h-auto rounded-lg border border-border max-w-${
+                    featureDefaults.featureImage.maxWidth || "xl"
+                  } mx-auto`}
+                />
+              )
+            )}
+          </div>
+        )}
 
         {/* Buttons */}
-        <div className="flex flex-row gap-3 pt-4">
-          {customActions || (
-            <>
-              {featureDefaults.cta?.primary && (
-                <Link href={featureDefaults.cta.primary.link} target="_blank">
-                  <Button variant="default" className="gap-2">
-                    {featureDefaults.cta.primary.text}
-                    <SquareArrowOutUpRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              )}
-              {featureDefaults.cta?.secondary && (
-                <Link href={featureDefaults.cta.secondary.link} target="_blank">
-                  <Button variant="outline" className="gap-2">
-                    {featureDefaults.cta.secondary.text}
-                    <SquareArrowOutUpRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              )}
-            </>
-          )}
-        </div>
+        {renderCTA()}
       </div>
     </div>
   );
