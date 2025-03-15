@@ -235,8 +235,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
   if (users.length === 0) {
     return (
-      <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
-        <EmptyStateCard feature="users" />
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard feature="users" />
+        </div>
       </div>
     );
   }

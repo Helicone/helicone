@@ -15,11 +15,11 @@ import AddWebhookForm from "./addWebhookForm";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 // Import ShadcnUI components
 import AuthHeader from "@/components/shared/authHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { ExternalLinkIcon } from "lucide-react";
-import { PiWebhooksLogo } from "react-icons/pi";
 
 interface WebhooksPageProps {
   user: User;
@@ -165,6 +164,10 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     },
   });
 
+  const handleAddWebhook = () => {
+    setAddWebhookOpen(true);
+  };
+
   const toggleHmacVisibility = (id: string) => {
     setVisibleHmacKeys((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -174,155 +177,49 @@ const WebhooksPage = (props: WebhooksPageProps) => {
     setNotification("Copied to clipboard!", "success");
   };
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
+  if (!org?.currentOrg?.tier) {
+    return null;
+  }
+
+  if (!isLoading && webhookCount === 0) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard
+            feature="webhooks"
+            onPrimaryClick={handleAddWebhook}
+          />
+        </div>
+        <Dialog open={addWebhookOpen} onOpenChange={setAddWebhookOpen}>
+          <DialogContent className="max-w-2xl">
+            <AddWebhookForm
+              onSubmit={(data) => {
+                createWebhook.mutate({
+                  destination: data.destination,
+                  config: data.config,
+                  includeData: data.includeData,
+                });
+              }}
+              isLoading={createWebhook.isLoading}
+              error={webhookError}
+              onCancel={() => setAddWebhookOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <div className="space-y-2">
           <Skeleton className="h-4 w-[250px]" />
           <Skeleton className="h-4 w-[200px]" />
           <Skeleton className="h-4 w-[300px]" />
         </div>
-      );
-    }
-
-    if (!webhooks?.data?.data || webhooks.data.data.length === 0) {
-      return (
-        <div className="flex flex-col w-full h-96 justify-center items-center">
-          <Card className="w-full max-w-md">
-            <CardContent className="flex flex-col items-center pt-6 space-y-4">
-              <PiWebhooksLogo className="h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-xl mb-2">
-                No Webhooks Created
-              </CardTitle>
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                Create a webhook to start receiving real-time updates
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-
-    return (
-      <Table className="w-full bg-white border rounded-md shadow-sm">
-        <TableHeader className="bg-gray-50">
-          <TableRow>
-            <TableHead className="font-medium">Destination</TableHead>
-            <TableHead className="font-medium">Created</TableHead>
-            <TableHead className="font-medium">Version</TableHead>
-            <TableHead className="font-medium">Sample Rate</TableHead>
-            <TableHead className="font-medium">Property Filters</TableHead>
-            <TableHead className="font-medium">Include Data</TableHead>
-            <TableHead className="font-medium">HMAC Key</TableHead>
-            <TableHead className="font-medium">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {webhooks?.data?.data?.map((webhook) => (
-            <TableRow key={webhook.id} className="hover:bg-gray-50">
-              <TableCell className="max-w-[200px] truncate">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger className="text-left truncate">
-                      {webhook.destination}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{webhook.destination}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </TableCell>
-              <TableCell>{getUSDateFromString(webhook.created_at!)}</TableCell>
-              <TableCell>{webhook.version}</TableCell>
-              <TableCell>
-                {(webhook.config as any)?.["sampleRate"] ?? 100}%
-              </TableCell>
-              <TableCell>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      {
-                        (
-                          ((webhook.config as any)?.propertyFilters ?? []) as {
-                            key: string;
-                            value: string;
-                          }[]
-                        ).length
-                      }
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <ul className="list-disc pl-4">
-                        {(
-                          ((webhook.config as any)?.propertyFilters ?? []) as {
-                            key: string;
-                            value: string;
-                          }[]
-                        ).map((filter, index) => (
-                          <li key={index}>
-                            {filter.key}: {filter.value}
-                          </li>
-                        ))}
-                      </ul>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </TableCell>
-              <TableCell>
-                {(webhook.config as any)?.["includeData"] !== false ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Enabled
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Disabled
-                  </span>
-                )}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  {visibleHmacKeys[webhook.id] ? (
-                    <>
-                      <span className="text-xs font-mono">
-                        {webhook.hmac_key}
-                      </span>
-                      <button onClick={() => toggleHmacVisibility(webhook.id)}>
-                        <EyeSlashIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-mono">••••••••</span>
-                      <button onClick={() => toggleHmacVisibility(webhook.id)}>
-                        <EyeIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      </button>
-                    </>
-                  )}
-                  <button onClick={() => copyToClipboard(webhook.hmac_key)}>
-                    <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                  </button>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="ml-2 text-white"
-                  onClick={() => {
-                    deleteWebhook.mutate(webhook.id);
-                  }}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      </div>
     );
-  };
-
-  if (!org?.currentOrg?.tier) {
-    return null;
   }
 
   return (
@@ -365,7 +262,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                   variant="default"
                   size="sm"
                   className="flex items-center gap-1"
-                  onClick={() => setAddWebhookOpen(true)}
+                  onClick={handleAddWebhook}
                 >
                   <PlusIcon className="h-4 w-4" />
                   Add Webhook
@@ -404,7 +301,130 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           </Dialog>
         </div>
 
-        <div className="mx-8">{renderContent()}</div>
+        <div className="mx-8">
+          <Table className="w-full bg-white border rounded-md shadow-sm">
+            <TableHeader className="bg-gray-50">
+              <TableRow>
+                <TableHead className="font-medium">Destination</TableHead>
+                <TableHead className="font-medium">Created</TableHead>
+                <TableHead className="font-medium">Version</TableHead>
+                <TableHead className="font-medium">Sample Rate</TableHead>
+                <TableHead className="font-medium">Property Filters</TableHead>
+                <TableHead className="font-medium">Include Data</TableHead>
+                <TableHead className="font-medium">HMAC Key</TableHead>
+                <TableHead className="font-medium">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {webhooks?.data?.data?.map((webhook) => (
+                <TableRow key={webhook.id} className="hover:bg-gray-50">
+                  <TableCell className="max-w-[200px] truncate">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger className="text-left truncate">
+                          {webhook.destination}
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{webhook.destination}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell>
+                    {getUSDateFromString(webhook.created_at!)}
+                  </TableCell>
+                  <TableCell>{webhook.version}</TableCell>
+                  <TableCell>
+                    {(webhook.config as any)?.["sampleRate"] ?? 100}%
+                  </TableCell>
+                  <TableCell>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          {
+                            (
+                              ((webhook.config as any)?.propertyFilters ??
+                                []) as {
+                                key: string;
+                                value: string;
+                              }[]
+                            ).length
+                          }
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <ul className="list-disc pl-4">
+                            {(
+                              ((webhook.config as any)?.propertyFilters ??
+                                []) as {
+                                key: string;
+                                value: string;
+                              }[]
+                            ).map((filter, index) => (
+                              <li key={index}>
+                                {filter.key}: {filter.value}
+                              </li>
+                            ))}
+                          </ul>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell>
+                    {(webhook.config as any)?.["includeData"] !== false ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Enabled
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Disabled
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      {visibleHmacKeys[webhook.id] ? (
+                        <>
+                          <span className="text-xs font-mono">
+                            {webhook.hmac_key}
+                          </span>
+                          <button
+                            onClick={() => toggleHmacVisibility(webhook.id)}
+                          >
+                            <EyeSlashIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-mono">••••••••</span>
+                          <button
+                            onClick={() => toggleHmacVisibility(webhook.id)}
+                          >
+                            <EyeIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                          </button>
+                        </>
+                      )}
+                      <button onClick={() => copyToClipboard(webhook.hmac_key)}>
+                        <ClipboardIcon className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                      </button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="ml-2 text-white"
+                      onClick={() => {
+                        deleteWebhook.mutate(webhook.id);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </>
   );

@@ -39,13 +39,13 @@ import PromptUsageChart from "./promptUsageChart";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 interface PromptsPageProps {
   defaultIndex: number;
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
-  // STATE & HOOKS
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
   const router = useRouter();
@@ -53,16 +53,12 @@ const PromptsPage = (props: PromptsPageProps) => {
   const searchParams = useSearchParams();
   const promptCount = prompts?.length ?? 0;
   const { canCreate, freeLimit } = useFeatureLimit("prompts", promptCount);
-
-  // DERIVED STATE
   const filteredPrompts = prompts?.filter((prompt) =>
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase())
   );
 
-  // EVENT HANDLERS
   const handleCreatePrompt = async () => {
     try {
-      // Create a basic prompt with default settings
       const basePrompt: LLMRequestBody = {
         model: "gpt-4o-mini",
         messages: [
@@ -92,15 +88,26 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
+  if (!isLoading && promptCount === 0) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard
+            feature="prompts"
+            onPrimaryClick={handleCreatePrompt}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen flex flex-col gap-4">
-      {/* Header */}
       <AuthHeader
         className="min-w-full"
         title="Prompts"
         actions={
           <>
-            {/* Always show create button but use FreeTierLimitWrapper to block if limit reached */}
             <FreeTierLimitWrapper feature="prompts" itemCount={promptCount}>
               <Button
                 variant="action"
