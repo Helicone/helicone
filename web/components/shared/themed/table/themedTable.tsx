@@ -253,12 +253,12 @@ export default function ThemedTable<T extends { id?: string }>(
           advancedFilters={
             advancedFilters
               ? {
-                filterMap: advancedFilters.filterMap,
-                filters: advancedFilters.filters,
-                searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                show: advancedFilters.show,
-              }
+                  filterMap: advancedFilters.filterMap,
+                  filters: advancedFilters.filters,
+                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
+                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                  show: advancedFilters.show,
+                }
               : undefined
           }
           savedFilters={savedFilters}
@@ -268,18 +268,18 @@ export default function ThemedTable<T extends { id?: string }>(
           timeFilter={
             timeFilter
               ? {
-                defaultValue: timeFilter.defaultValue,
-                onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                currentTimeFilter: timeFilter.currentTimeFilter,
-              }
+                  defaultValue: timeFilter.defaultValue,
+                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                  currentTimeFilter: timeFilter.currentTimeFilter,
+                }
               : undefined
           }
           viewToggle={
             makeCard
               ? {
-                currentView: view,
-                onViewChange: setView,
-              }
+                  currentView: view,
+                  onViewChange: setView,
+                }
               : undefined
           }
           rows={exportData}
@@ -349,38 +349,35 @@ export default function ThemedTable<T extends { id?: string }>(
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
+                          className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm group"
                         >
                           <th
                             className={clsx(
                               "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
-                              checkboxMode === "never" && "hidden"
+                              checkboxMode === "never" && "hidden",
+                              checkboxMode === "on_hover" &&
+                                (selectedIds && selectedIds.length > 0
+                                  ? "opacity-100"
+                                  : "opacity-0 group-hover:opacity-100 transition-opacity duration-150"),
+                              checkboxMode === "always_visible" && "opacity-100"
                             )}
                           >
-                            <div
-                              className={clsx(
-                                checkboxMode === "on_hover" &&
-                                "opacity-40 hover:opacity-100 transition-opacity duration-150"
-                              )}
-                            >
-                              <Checkbox
-                                variant="blue"
-                                onCheckedChange={handleSelectAll}
-                                checked={selectedIds?.length === rows.length}
-                                ref={(ref) => {
-                                  if (ref) {
-                                    (
-                                      ref as unknown as HTMLInputElement
-                                    ).indeterminate =
-                                      selectedIds !== undefined &&
-                                      selectedIds.length > 0 &&
-                                      selectedIds.length < rows.length;
-                                  }
-                                }}
-                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                              />
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                            <Checkbox
+                              variant="blue"
+                              onCheckedChange={handleSelectAll}
+                              checked={selectedIds?.length === rows.length}
+                              ref={(ref) => {
+                                if (ref) {
+                                  (
+                                    ref as unknown as HTMLInputElement
+                                  ).indeterminate =
+                                    selectedIds !== undefined &&
+                                    selectedIds.length > 0 &&
+                                    selectedIds.length < rows.length;
+                                }
+                              }}
+                              className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                            />
                           </th>
                           {headerGroup.headers.map((header, index) => (
                             <th
@@ -388,7 +385,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               className={clsx(
                                 "relative",
                                 index === headerGroup.headers.length - 1 &&
-                                "border-r border-slate-300 dark:border-slate-700"
+                                  "border-r border-slate-300 dark:border-slate-700"
                               )}
                             >
                               <DraggableColumnHeader
@@ -429,11 +426,11 @@ export default function ThemedTable<T extends { id?: string }>(
                               "w-8 px-2 border-t border-slate-300 dark:border-slate-700",
                               checkboxMode === "on_hover"
                                 ? clsx(
-                                  "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                                  selectedIds?.includes(
-                                    row.original?.id ?? ""
-                                  ) && "!opacity-100"
-                                )
+                                    "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+                                    selectedIds?.includes(
+                                      row.original?.id ?? ""
+                                    ) && "!opacity-100"
+                                  )
                                 : "",
                               checkboxMode === "never" && "hidden"
                             )}
@@ -443,7 +440,7 @@ export default function ThemedTable<T extends { id?: string }>(
                               checked={selectedIds?.includes(
                                 row.original?.id ?? ""
                               )}
-                              onChange={() => { }}
+                              onChange={() => {}}
                               className="text-slate-700 dark:text-slate-400"
                             />
                           </td>
@@ -453,21 +450,21 @@ export default function ThemedTable<T extends { id?: string }>(
                               className={clsx(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
                                 i === 0 &&
-                                checkboxMode === "always_visible" &&
-                                "pl-2",
+                                  checkboxMode === "always_visible" &&
+                                  "pl-2",
                                 i === 0 &&
-                                checkboxMode === "on_hover" &&
-                                "pl-2",
+                                  checkboxMode === "on_hover" &&
+                                  "pl-2",
                                 i === 0 && checkboxMode === "never" && "pl-10",
                                 // For selected rows in hover mode
                                 i === 0 &&
-                                checkboxMode === "on_hover" &&
-                                selectedIds?.includes(
-                                  row.original?.id ?? ""
-                                ) &&
-                                "!pl-2",
+                                  checkboxMode === "on_hover" &&
+                                  selectedIds?.includes(
+                                    row.original?.id ?? ""
+                                  ) &&
+                                  "!pl-2",
                                 i === row.getVisibleCells().length - 1 &&
-                                "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
                               style={{
                                 maxWidth: cell.column.getSize(),
@@ -477,8 +474,8 @@ export default function ThemedTable<T extends { id?: string }>(
                               }}
                             >
                               {dataLoading &&
-                                (cell.column.id == "requestText" ||
-                                  cell.column.id == "responseText") ? (
+                              (cell.column.id == "requestText" ||
+                                cell.column.id == "responseText") ? (
                                 <span
                                   className={clsx(
                                     "w-full flex flex-grow",
