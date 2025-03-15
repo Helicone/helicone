@@ -1,0 +1,472 @@
+Anthropic's **Model Context Protocol (MCP)** is gaining massive traction as a game-changing standard for connecting Large Language Models (LLMs) to external data sources and tools. 
+
+![Claude MCP](/static/blog/mcp-full-developer-guide/claude-mcp.webp)
+
+Let's take a deep dive into just exactly what MCP is, and how you can begin using it in your projects.
+
+<TableOfContents excludeHeadings={["Table of Contents", "What is the difference between MCP vs function calling? 💡", "💡 Hot tip: Let LLMs do the heavy lifting", "Easily Debug LLM Workflows with Helicone ⚡️", "Conclusion", "Frequently Asked Questions"]} maxLevel={2} />
+
+## What is Model Context Protocol (MCP)?
+
+MCP is an open protocol that **standardizes how applications provide context to LLMs**. 
+
+Think of MCP like a "USB-C port for AI applications". Just as USB-C provides a standardized way to connect your devices to various peripherals and accessories, MCP provides a standardized way to connect AI models to external data sources and tools.
+
+### MCP Architecture
+
+The protocol follows a client-server architecture with three main components:
+
+1. **Hosts**: LLM applications (like Claude Desktop or IDEs) that initiate connections
+2. **Clients**: Components within hosts that maintain connections with servers
+3. **Servers**: Lightweight programs that expose specific capabilities through the protocol
+
+![MCP Architecture](/static/blog/mcp-full-developer-guide/mcp-architecture.webp)
+
+For example, in a workflow using Claude to analyze company sales data stored in a PostgreSQL database:
+
+- The **host** is the Claude Desktop app
+- The **client** is the MCP client module within Claude Desktop that manages connections to MCP servers 
+- The **server** is the PostgreSQL MCP server that securely connects to the company database
+
+For details, check out the <a href="https://modelcontextprotocol.io/introduction" target="_blank" rel="noopener">official documentation</a>. 
+
+### Why MCP Exists
+
+Before MCP, developers had to build custom integrations from scratch whenever they wanted LLMs to access external systems (files, APIs, databases). 
+
+Each implementation was different, required significant code, and wouldn't work with desktop apps. MCP provides a standardized framework for these integrations that works consistently across implementations, with a common communication protocol between systems and AI tools.
+
+## Core Capabilities of MCP
+
+MCP offers three primary capabilities:
+
+1. **Resources**: File-like data that LLMs can read (API responses, file contents)
+2. **Tools**: Functions that LLMs can call to perform actions
+3. **Prompts**: Pre-written templates that help users accomplish specific tasks
+
+<BottomLine
+  title="What is the difference between MCP vs function calling? 💡"
+  description="Function calling is how LLMs decide what code to run when you ask them to perform tasks. Every LLM provider implements function calling differently in their APIs. MCP creates a standardized layer that sits on top of function calling—it handles discovering available functions, executing them securely, and returning results consistently regardless of which LLM you're using."
+/>
+
+## Getting Started with MCP
+
+We will walk you through 3 implementation approaches to get started with MCP based on your needs and experience level.
+
+- **Basic 🟢**: Using pre-built MCP servers with Claude Desktop
+- **Intermediate 🟡**: Building custom MCP servers with Cloudflare Workers
+- **Advanced 🔴**: Creating custom MCP clients and servers from scratch
+
+### Basic Setup: Connecting Pre-built MCP Servers (🟢)
+
+Let's set up a simple MCP configuration to access file system and web search capabilities with Claude Desktop.
+
+#### Step 1: Install Claude Desktop
+
+<a href="https://claude.ai/download" target="_blank" rel="noopener">Download</a> and install Claude Desktop.
+
+#### Step 2: Configure MCP Servers
+
+Create or edit the configuration file at:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the following configuration:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/files"]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "your_brave_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Step 3: Restart Claude Desktop
+
+After saving the configuration, restart Claude Desktop for the changes to take effect.
+
+#### Step 4: Test Your Setup
+
+Now you can ask Claude to use these tools:
+
+- "Search the web for the latest news on Anthropic and save a summary to my documents folder."
+- "List all files in my allowed files directory."
+
+When Claude needs to use an MCP tool, it will request your permission before proceeding.
+
+### Intermediate Setup: Building Custom MCP Servers with Cloudflare Workers (🟡)
+
+Cloudflare Workers offer a simplified approach to building MCP servers. Let's create an image generation server:
+
+#### Step 1: Set Up Cloudflare Worker and Configure to Support MCP
+
+```bash
+# Create a new Cloudflare project
+npx create-cloudflare@latest mcp-imagegen
+cd mcp-imagegen
+
+# Install the workers-mcp package
+npm install workers-mcp
+
+# Configure to support MCP
+npx workers-mcp setup
+```
+
+#### Step 2: Implement the Image Generation Server
+
+Replace the content of `src/index.ts` with:
+
+```typescript
+import { WorkerEntrypoint } from 'cloudflare:workers'
+import { ProxyToSelf } from 'workers-mcp'
+
+export default class ImageGenerator extends WorkerEntrypoint<Env> {
+  /**
+   * Generate an image using an AI model.
+   * @param prompt {string} A text description of the image you want to generate.
+   * @param steps {number} The number of diffusion steps; higher values can improve quality but take longer.
+   * @return {string} URL to the generated image.
+   */
+  async generateImage(prompt: string, steps: number = 30): Promise<Response> {
+    const response = await this.env.AI.run('@cf/black-forest-labs/flux-1-schnell', {
+      prompt,
+      steps,
+    });
+    
+    // Convert from base64 string
+    const binaryString = atob(response.image);
+    // Create byte representation
+    const img = Uint8Array.from(binaryString, (m) => m.codePointAt(0)!);
+    
+    return new Response(img, {
+      headers: {
+        'Content-Type': 'image/jpeg',
+      },
+    });
+  }
+
+  /**
+   * @ignore
+   */
+  async fetch(request: Request): Promise<Response> {
+    return new ProxyToSelf(this).fetch(request)
+  }
+}
+```
+
+#### Step 3: Deploy Your Worker
+
+```bash
+npm run deploy
+```
+
+#### Step 4: Configure Claude Desktop (Optional)
+
+To add your newly-created MCP to Claude Desktop for example, update your `claude_desktop_config.json` to include your Cloudflare Worker:
+
+```json
+{
+  "mcpServers": {
+    "image-generator": {
+      "command": "npx",
+      "args": ["wrangler", "dev", "--local"]
+    }
+  }
+}
+```
+
+Now you can ask Claude to generate images, and it will use your Cloudflare Worker to do so!
+
+For more information on configuring MCPs with other Clients, such as Cursor, <a href="https://modelcontextprotocol.io" target="_blank" rel="noreferrer">check out the documentation</a>.
+
+<BottomLine
+title="💡 Hot tip: Let LLMs do the heavy lifting"
+description="You can use AI tools like Claude to build MCPs. You can just dumnp useful info such as docs and code samples into Claude and have it create your MCP for you!"
+/>
+
+### Advanced Setup: Creating Custom MCP Clients (🔴)
+
+Building an MCP client allows you to create a custom application to connect to MCP servers. For detailed instructions, visit <a href="https://modelcontextprotocol.io/quickstart/client" target="_blank" rel="noreferrer">Anthropic's official guide</a> to learn how to build a client in Python, NodeJS, or Java.
+
+{/* ### Step 1: Set Up Your Environment
+
+```bash
+# Create a new Python project
+uv init mcp-client
+cd mcp-client
+# Create virtual environment
+uv venv
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Install required packages
+uv add mcp anthropic python-dotenv
+# Create our main file
+touch client.py
+```
+
+### Step 2: Implement the Client
+
+Create a simple client that connects to MCP servers and processes queries:
+
+```python
+import asyncio
+from typing import Optional
+from contextlib import AsyncExitStack
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+from anthropic import Anthropic
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # load environment variables from .env
+
+class MCPClient:
+    def __init__(self):
+        # Initialize session and client objects
+        self.session: Optional[ClientSession] = None
+        self.exit_stack = AsyncExitStack()
+        self.anthropic = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    async def connect_to_server(self, server_script_path: str):
+        """Connect to an MCP server
+        Args:
+            server_script_path: Path to the server script (.py or .js)
+        """
+        is_python = server_script_path.endswith('.py')
+        is_js = server_script_path.endswith('.js')
+        
+        if not (is_python or is_js):
+            raise ValueError("Server script must be a .py or .js file")
+        
+        command = "python" if is_python else "node"
+        server_params = StdioServerParameters(
+            command=command,
+            args=[server_script_path],
+            env=None
+        )
+        
+        stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
+        self.stdio, self.write = stdio_transport
+        self.session = await self.exit_stack.enter_async_context(ClientSession(self.stdio, self.write))
+        await self.session.initialize()
+        
+        # List available tools
+        response = await self.session.list_tools()
+        tools = response.tools
+        print("\nConnected to server with tools:", [tool.name for tool in tools])
+
+    async def process_query(self, query: str) -> str:
+        """Process a query using Claude and available tools"""
+        messages = [
+            {
+                "role": "user",
+                "content": query
+            }
+        ]
+        
+        response = await self.session.list_tools()
+        available_tools = [{
+            "name": tool.name,
+            "description": tool.description,
+            "input_schema": tool.inputSchema
+        } for tool in response.tools]
+        
+        # Initial Claude API call
+        response = self.anthropic.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1000,
+            messages=messages,
+            tools=available_tools
+        )
+        
+        # Process response and handle tool calls
+        final_text = []
+        assistant_message_content = []
+        
+        for content in response.content:
+            if content.type == 'text':
+                final_text.append(content.text)
+                assistant_message_content.append(content)
+            elif content.type == 'tool_use':
+                tool_name = content.name
+                tool_args = content.input
+                
+                # Execute tool call
+                result = await self.session.call_tool(tool_name, tool_args)
+                final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+                assistant_message_content.append(content)
+                
+                messages.append({
+                    "role": "assistant",
+                    "content": assistant_message_content
+                })
+                
+                messages.append({
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": content.id,
+                            "content": result.content
+                        }
+                    ]
+                })
+                
+                # Get next response from Claude
+                response = self.anthropic.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=1000,
+                    messages=messages,
+                    tools=available_tools
+                )
+                
+                final_text.append(response.content[0].text)
+        
+        return "\n".join(final_text)
+
+    async def chat_loop(self):
+        """Run an interactive chat loop"""
+        print("\nMCP Client Started!")
+        print("Type your queries or 'quit' to exit.")
+        
+        while True:
+            try:
+                query = input("\nQuery: ").strip()
+                if query.lower() == 'quit':
+                    break
+                
+                response = await self.process_query(query)
+                print("\n" + response)
+            except Exception as e:
+                print(f"\nError: {str(e)}")
+
+    async def cleanup(self):
+        """Clean up resources"""
+        await self.exit_stack.aclose()
+
+async def main():
+    if len(sys.argv) < 2:
+        print("Usage: python client.py <path_to_server_script>")
+        sys.exit(1)
+    
+    client = MCPClient()
+    try:
+        await client.connect_to_server(sys.argv[1])
+        await client.chat_loop()
+    finally:
+        await client.cleanup()
+
+if __name__ == "__main__":
+    import sys
+    asyncio.run(main())
+```
+
+### Step 3: Run Your Client
+
+To use your client with the image generation server we created earlier:
+
+```bash
+python client.py /path/to/weather/weather.py
+```
+
+You'll get an interactive chat interface where you can ask questions about the weather, and the client will use Claude to generate images and call the appropriate tools. */}
+
+## Common MCPs and Their Use Cases
+
+| **MCP** | **Description** | **Example Commands** | **Adoption Level** |
+|---------|---------------|---------------------|---------------------|
+| <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem" target="_blank" rel="noreferrer"><strong>FileSystem</strong></a> | Access and manipulate files securely. | - "Create a summary of the text files in my project folder." <br/> - "Find all Python files containing database connections." |  High |
+| <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/github" target="_blank" rel="noreferrer"><strong>GitHub Integration</strong></a> | Access repositories and manage issues. | - "Find all open issues related to authentication in my repository." <br/> - "Show me the recent commits to the main branch." |  Medium |
+| <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/postgres" target="_blank" rel="noreferrer"><strong>Database Integration</strong></a> | Query databases securely. | - "Show me the schema of the users table." <br/> - "Find all customers who made purchases in the last month." |  Medium |
+| <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search" target="_blank" rel="noreferrer"><strong>Web Search</strong></a> | Search the web for information. | - "Find recent articles about AI safety." <br/> - "Research the latest developments in quantum computing." |  High |
+
+## Where to Find MCPs
+
+Here are several sources for finding pre-built MCP servers for your LLM applications:
+
+- <a href="https://modelcontextprotocol.io/examples" target="_blank" rel="noreferrer">Example Servers</a> on the MCP website (a curated list)
+- <a href="https://www.npmjs.com/" target="_blank" rel="noreferrer">NPM</a> packages with the pattern `@modelcontextprotocol/server-*`
+- Python implementations with naming convention `mcp-server-*` on <a href="https://pypi.org/" target="_blank" rel="noreferrer">PyPI</a>
+- <a href="https://glama.ai/mcp/servers" target="_blank" rel="noreferrer">Glama AI's collection</a> of MCP servers for various integrations
+- <a href="http://smithery.ai/" target="_blank" rel="noreferrer">Smithery.ai</a> directory of MCP servers for AI development
+- <a href="https://cursor.directory/" target="_blank" rel="noreferrer">Cursor Directory</a> for Cursor IDE-specific MCPs
+- <a href="https://lmsystems.ai/marketplace" target="_blank" rel="noreferrer">LM Systems Marketplace</a> collection of MCP servers and tools
+
+## How to Debug and Troubleshooting MCPs
+
+1. **Use the MCP Inspector** - An interactive tool for directly testing MCP servers, their resources, tools, and prompts outside of any client application
+
+2. **Use Claude Desktop's Developer Tools** - Access Chrome DevTools within Claude Desktop to inspect client-side behavior, network requests, and console logs
+
+3. **Analyse Logs** - View detailed logs generated by MCP servers and Claude Desktop to identify connection issues and runtime errors
+
+4. **Use the MCP CLI** - Use command-line tools to inspect and test MCP servers and their capabilities
+
+5. **Implement Server-Side Logging** - Implement custom logging in your MCP server to track execution flow, input validation, and error states
+
+6. **Use Network Analysis Tools** - For HTTP-based MCP servers, use proxies and network analyzers to inspect the communication between clients and servers
+
+7. **Perform Standalone Testing** - Test MCP servers in isolation before integrating them with clients to identify server-specific issues
+
+8. **Environment Validation** - Verify that environment variables, file paths, and permissions are correctly configured
+
+For details, check out the <a href="https://modelcontextprotocol.io/docs/tools/debugging" target="_blank" rel="noreferrer">official documentation</a>.
+
+<CallToAction
+  title="Easily Debug LLM Workflows with Helicone ⚡️"
+  description="With MCP enabling powerful agent development, bugs are inevitable. Helicone helps you trace your agent’s actions effortlessly, pinpointing potential issues. Start debugging smarter today. "
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="View Docs"
+  secondaryButtonLink="https://docs.helicone.ai"
+/>
+
+## Conclusion
+
+MCP represents a significant step forward in connecting AI models to external systems. 
+
+By providing a standardized way for LLMs to interact with data sources and tools, MCP makes it easier to build powerful, context-aware AI applications—including, of course, powerful agentic systems. 
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/evaluating-claude-code" target="_blank" rel="noopener">Claude Code: A Complete Setup Guide and Honest Evaluation</a>**
+- **<a href="https://www.helicone.ai/blog/browser-use-vs-computer-use-vs-operator" target="_blank" rel="noopener">The Best Web Agents: Computer Use vs Operator vs Browser Use</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code for Developers</a>**
+
+<FAQ 
+  items={[
+    {
+      question: "What is MCP and how does it differ from function calling?",
+      answer: "MCP (Model Context Protocol) is a standardized way for AI models to connect to data sources and tools. While function calling is about LLMs translating prompts into structured instructions, MCP standardizes how those instructions are executed across different systems."
+    },
+    {
+      question: "Does MCP only work with Claude?",
+      answer: "Currently, Claude is the primary AI assistant that supports MCP natively, but the protocol is open and designed to work with any LLM. More providers may adopt it in the future."
+    },
+    {
+      question: "Can I build my own MCP servers?",
+      answer: "Yes, you can build custom MCP servers using either the standard SDKs from Anthropic (available in TypeScript and Python) or simplified approaches like Cloudflare Workers."
+    },
+    {
+      question: "Is MCP secure?",
+      answer: "MCP includes security features like user-in-the-loop approval for tool execution and resource access. Server implementations should also implement proper validation and access controls."
+    },
+    {
+      question: "Where can I find pre-built MCP servers?",
+      answer: "Pre-built servers are available on various sources including the MCP website NPM, PyPI, Glama AI, Smithery, and Cursor Directory."
+    }
+  ]}
+/>
+
+<Questions />
