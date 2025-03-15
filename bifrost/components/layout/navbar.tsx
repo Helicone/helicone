@@ -101,10 +101,10 @@ const NavLinks = () => {
       label: "Resources",
       items: [
         {
-          href: "/community/customers",
-          label: "Enterprise",
+          href: "/customers",
+          label: "Customer Stories",
           description: "Built for scale, security, and control",
-          icon: <Gem className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
+          icon: <UserGroupIcon className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
         {
           href: "/changelog",
@@ -119,14 +119,14 @@ const NavLinks = () => {
           icon: <BookHeart className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
         {
-          href: "/community/integrations",
+          href: "/integrations",
           label: "Integrations",
           description: "Tools and platforms that integrate with Helicone",
           icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
         {
-          href: "/community/projects",
-          label: "Community",
+          href: "/projects",
+          label: "Community Projects",
           description: "Open-source projects built with Helicone",
           icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
@@ -298,9 +298,9 @@ const MobileNav = () => {
 
   const resourcesLinks: NavLink[] = [
     {
-      href: "/community/customers",
-      label: "Enterprise",
-      icon: <Gem className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
+      href: "/customers",
+      label: "Customer Stories",
+      icon: <UserGroupIcon className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
     {
       href: "/changelog",
@@ -313,13 +313,13 @@ const MobileNav = () => {
       icon: <BookHeart className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
     {
-      href: "/community/integrations",
+      href: "/integrations",
       label: "Integrations",
       icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
     {
-      href: "/community/projects",
-      label: "Community",
+      href: "/projects",
+      label: "Community Projects",
       icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
   ];
