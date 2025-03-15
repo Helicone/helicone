@@ -110,10 +110,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
           continue;
         }
 
-        const scoreName = getFullEvaluatorScoreName(
-          onlineEval.evaluator_name,
-          typeof result.data?.score === "boolean"
-        );
+        const scoreName = getFullEvaluatorScoreName(onlineEval.evaluator_name);
 
         context.processedLog.request.scores =
           context.processedLog.request.scores ?? {};

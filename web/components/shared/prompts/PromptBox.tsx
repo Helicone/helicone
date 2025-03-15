@@ -181,8 +181,8 @@ export default function PromptBox({
 
         const stream = await generateStream(
           {
-            provider: "ANTHROPIC",
-            model: "claude-3-5-haiku:beta",
+            provider: "OPENROUTER",
+            model: "anthropic/claude-3.5-haiku:beta",
             messages: [
               $system(prompt.system),
               $user(prompt.user),
@@ -518,8 +518,8 @@ export default function PromptBox({
 
       const stream = await generateStream(
         {
-          provider: "ANTHROPIC",
-          model: "claude-3-5-haiku:beta",
+          provider: "OPENROUTER",
+          model: "anthropic/claude-3.5-haiku:beta",
           messages: [
             $system(prompt.system),
             $user(prompt.user),

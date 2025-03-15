@@ -78,6 +78,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     properties: string[];
   };
   hideView?: boolean;
+  hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
   savedFilters?: {
@@ -131,6 +132,7 @@ export default function ThemedTable<T extends { id?: string }>(
     makeCard,
     makeRow,
     hideView, // hides the view columns button
+    hideHeader,
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
@@ -245,51 +247,54 @@ export default function ThemedTable<T extends { id?: string }>(
 
   return (
     <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
-      <div className="p-1 flex-shrink-0">
-        <ThemedTableHeader
-          search={search}
-          onDataSet={onDataSet}
-          isDatasetsPage={isDatasetsPage}
-          advancedFilters={
-            advancedFilters
-              ? {
-                  filterMap: advancedFilters.filterMap,
-                  filters: advancedFilters.filters,
-                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                  show: advancedFilters.show,
-                }
-              : undefined
-          }
-          savedFilters={savedFilters}
-          activeColumns={activeColumns}
-          setActiveColumns={setActiveColumns}
-          columns={hideView ? [] : table.getAllColumns()}
-          timeFilter={
-            timeFilter
-              ? {
-                  defaultValue: timeFilter.defaultValue,
-                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                  currentTimeFilter: timeFilter.currentTimeFilter,
-                }
-              : undefined
-          }
-          viewToggle={
-            makeCard
-              ? {
-                  currentView: view,
-                  onViewChange: setView,
-                }
-              : undefined
-          }
-          rows={exportData}
-          customButtons={customButtons}
-          selectedRows={{
-            count: selectedIds?.length,
-            children: selectedRows?.children,
-          }}
-        />
-      </div>
+      {!hideHeader && (
+        <div className="p-1 flex-shrink-0">
+          <ThemedTableHeader
+            search={search}
+            onDataSet={onDataSet}
+            isDatasetsPage={isDatasetsPage}
+            advancedFilters={
+              advancedFilters
+                ? {
+                    filterMap: advancedFilters.filterMap,
+                    filters: advancedFilters.filters,
+                    searchPropertyFilters:
+                      advancedFilters.searchPropertyFilters,
+                    setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                    show: advancedFilters.show,
+                  }
+                : undefined
+            }
+            savedFilters={savedFilters}
+            activeColumns={activeColumns}
+            setActiveColumns={setActiveColumns}
+            columns={hideView ? [] : table.getAllColumns()}
+            timeFilter={
+              timeFilter
+                ? {
+                    defaultValue: timeFilter.defaultValue,
+                    onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                    currentTimeFilter: timeFilter.currentTimeFilter,
+                  }
+                : undefined
+            }
+            viewToggle={
+              makeCard
+                ? {
+                    currentView: view,
+                    onViewChange: setView,
+                  }
+                : undefined
+            }
+            rows={exportData}
+            customButtons={customButtons}
+            selectedRows={{
+              count: selectedIds?.length,
+              children: selectedRows?.children,
+            }}
+          />
+        </div>
+      )}
 
       {children && <div className="flex-shrink-0">{children}</div>}
       <ResizablePanelGroup
@@ -349,35 +354,38 @@ export default function ThemedTable<T extends { id?: string }>(
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm group"
+                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
                           <th
                             className={clsx(
                               "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
-                              checkboxMode === "never" && "hidden",
-                              checkboxMode === "on_hover" &&
-                                (selectedIds && selectedIds.length > 0
-                                  ? "opacity-100"
-                                  : "opacity-0 group-hover:opacity-100 transition-opacity duration-150"),
-                              checkboxMode === "always_visible" && "opacity-100"
+                              checkboxMode === "never" && "hidden"
                             )}
                           >
-                            <Checkbox
-                              variant="blue"
-                              onCheckedChange={handleSelectAll}
-                              checked={selectedIds?.length === rows.length}
-                              ref={(ref) => {
-                                if (ref) {
-                                  (
-                                    ref as unknown as HTMLInputElement
-                                  ).indeterminate =
-                                    selectedIds !== undefined &&
-                                    selectedIds.length > 0 &&
-                                    selectedIds.length < rows.length;
-                                }
-                              }}
-                              className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                            />
+                            <div
+                              className={clsx(
+                                checkboxMode === "on_hover" &&
+                                  "opacity-40 hover:opacity-100 transition-opacity duration-150"
+                              )}
+                            >
+                              <Checkbox
+                                variant="blue"
+                                onCheckedChange={handleSelectAll}
+                                checked={selectedIds?.length === rows.length}
+                                ref={(ref) => {
+                                  if (ref) {
+                                    (
+                                      ref as unknown as HTMLInputElement
+                                    ).indeterminate =
+                                      selectedIds !== undefined &&
+                                      selectedIds.length > 0 &&
+                                      selectedIds.length < rows.length;
+                                  }
+                                }}
+                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                              />
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                           </th>
                           {headerGroup.headers.map((header, index) => (
                             <th
