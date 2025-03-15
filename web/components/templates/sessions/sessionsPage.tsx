@@ -216,8 +216,10 @@ const SessionsPage = (props: SessionsPageProps) => {
             <LoadingAnimation />
           </div>
         ) : (
-          <div className="flex flex-col w-full min-h-screen items-center bg-[hsl(var(--background))]">
-            <EmptyStateCard feature="sessions" />
+          <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+            <div className="flex flex-1 h-full">
+              <EmptyStateCard feature="sessions" />
+            </div>
           </div>
         )}
       </div>

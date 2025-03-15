@@ -12,8 +12,10 @@ import clsx from "clsx";
 import { useTestDataStore } from "../testing/testingStore";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { H3, P } from "@/components/ui/typography";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
+import { LineChart, SquareArrowOutUpRight } from "lucide-react";
+import Link from "next/link";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -93,6 +95,47 @@ export const MainPanel = () => {
     return null;
   }
 
+  if (!evaluators.isLoading && simpleEvaluators.length === 0) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <GenericEmptyState
+            title="Create Your First Evaluator"
+            description="Create an evaluator to score your LLM outputs and measure their quality."
+            icon={<LineChart size={28} className="text-accent-foreground" />}
+            className="w-full"
+            actions={
+              <>
+                <FreeTierLimitWrapper
+                  feature="evals"
+                  itemCount={evaluatorCount}
+                >
+                  <Button
+                    onClick={openCreatePanel}
+                    variant="default"
+                    disabled={!canCreateEvaluator}
+                  >
+                    Create Evaluator
+                    <PiPlusBold className="h-4 w-4 ml-2" />
+                  </Button>
+                </FreeTierLimitWrapper>
+                <Link
+                  href="https://docs.helicone.ai/features/evaluation"
+                  target="_blank"
+                >
+                  <Button variant="outline" className="gap-2">
+                    View Docs
+                    <SquareArrowOutUpRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full h-screen">
       <AuthHeader
@@ -146,29 +189,6 @@ export const MainPanel = () => {
                 </div>
               </Card>
             ))}
-          </div>
-        </div>
-      ) : simpleEvaluators.length === 0 ? (
-        // Empty state
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
-            <div className="flex flex-col items-center justify-center gap-2">
-              <H3>No evaluators yet</H3>
-              <P className="text-muted-foreground">
-                Create an evaluator to score your LLM outputs
-              </P>
-            </div>
-            <div className="flex flex-row gap-2">
-              <FreeTierLimitWrapper feature="evals" itemCount={evaluatorCount}>
-                <Button
-                  onClick={openCreatePanel}
-                  variant="action"
-                  disabled={!canCreateEvaluator}
-                >
-                  Create Evaluator
-                </Button>
-              </FreeTierLimitWrapper>
-            </div>
           </div>
         </div>
       ) : (
