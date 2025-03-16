@@ -102,7 +102,6 @@ export async function anthropicAIStream(
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.error("Error parsing line", line);
         return {};
       }
     })

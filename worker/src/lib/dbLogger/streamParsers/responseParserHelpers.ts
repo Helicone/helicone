@@ -41,57 +41,59 @@ export function consolidateTextFields(responseBody: any[]): any {
         }
         return {
           ...acc,
-          choices: acc.choices.map((c: any, i: number) => {
-            if (!cur.choices) {
-              return c;
-            } else if (
-              c.delta !== undefined &&
-              cur.choices[i]?.delta !== undefined
-            ) {
-              return {
-                delta: {
-                  ...c.delta,
-                  content: c.delta.content
-                    ? c.delta.content + (cur.choices[i].delta.content ?? "")
-                    : cur.choices[i].delta.content,
-                  function_call: c.delta.function_call
-                    ? recursivelyConsolidate(
-                        c.delta.function_call,
-                        cur.choices[i].delta.function_call ?? {}
-                      )
-                    : cur.choices[i].delta.function_call,
-                },
-              };
-            } else if (
-              c.text !== undefined &&
-              cur.choices[i]?.text !== undefined
-            ) {
-              return {
-                ...c,
-                text: c.text + (cur.choices[i].text ?? ""),
-              };
-            } else {
-              return c;
-            }
-          }),
+          choices:
+            acc.choices?.map((c: any, i: number) => {
+              if (!cur.choices) {
+                return c;
+              } else if (
+                c.delta !== undefined &&
+                cur.choices[i]?.delta !== undefined
+              ) {
+                return {
+                  delta: {
+                    ...c.delta,
+                    content: c.delta.content
+                      ? c.delta.content + (cur.choices[i].delta.content ?? "")
+                      : cur.choices[i].delta.content,
+                    function_call: c.delta.function_call
+                      ? recursivelyConsolidate(
+                          c.delta.function_call,
+                          cur.choices[i].delta.function_call ?? {}
+                        )
+                      : cur.choices[i].delta.function_call,
+                  },
+                };
+              } else if (
+                c.text !== undefined &&
+                cur.choices[i]?.text !== undefined
+              ) {
+                return {
+                  ...c,
+                  text: c.text + (cur.choices[i].text ?? ""),
+                };
+              } else {
+                return c;
+              }
+            }) ?? [],
         };
       }
     }, {});
 
-    consolidated.choices = consolidated.choices.map((c: any) => {
-      if (c.delta !== undefined) {
-        return {
-          ...c,
-          // delta: undefined,
-          message: {
-            ...c.delta,
-            content: c.delta.content,
-          },
-        };
-      } else {
-        return c;
-      }
-    });
+    consolidated.choices =
+      consolidated.choices?.map((c: any) => {
+        if (c.delta !== undefined) {
+          return {
+            ...c,
+            // delta: undefined,
+            message: {
+              ...c.delta,
+              content: c.delta.content,
+            },
+          };
+        } else {
+          return c;
+        }
+      }) ?? [];
     return consolidated;
   } catch (e) {
     console.error("Error consolidating text fields", e);

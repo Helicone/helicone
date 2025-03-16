@@ -14,7 +14,6 @@ export async function parseOpenAIStream(
     try {
       return JSON.parse(line.replace("data:", ""));
     } catch (e) {
-      console.error("Error parsing line", line);
       return {};
     }
   });
