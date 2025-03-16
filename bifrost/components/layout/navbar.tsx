@@ -124,12 +124,12 @@ const NavLinks = () => {
         //   description: "Tools and platforms that integrate with Helicone",
         //   icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         // },
-        {
-          href: "/projects",
-          label: "Community",
-          description: "Open-source projects built with Helicone",
-          icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
-        },
+        // {
+        //   href: "/projects",
+        //   label: "Community",
+        //   description: "Open-source projects built with Helicone",
+        //   icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
+        // },
       ],
     },
     {
@@ -317,11 +317,11 @@ const MobileNav = () => {
     //   label: "Integrations",
     //   icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     // },
-    {
-      href: "/projects",
-      label: "Community",
-      icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
-    },
+    // {
+    //   href: "/projects",
+    //   label: "Community",
+    //   icon: <CookingPot className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
+    // },
   ];
 
   const toolsLinks: NavLink[] = [
