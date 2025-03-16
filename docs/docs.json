@@ -12,7 +12,7 @@
     "tabs": [
       {
         "tab": "Welcome",
-        "pages": ["getting-started/quick-start"]
+        "pages": ["welcome/welcome", "integrate/quickstart", "integrate/step2"]
       },
       {
         "tab": "Documentation",
