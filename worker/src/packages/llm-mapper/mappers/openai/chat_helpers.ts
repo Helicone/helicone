@@ -57,7 +57,7 @@ export const handleObjectContent = (content: any): string => {
 };
 
 export const handleToolCalls = (message: any): Message => ({
-  content: "",
+  content: message.content || "",
   role: message.role ?? "assistant",
   tool_calls: message.function_call
     ? [
