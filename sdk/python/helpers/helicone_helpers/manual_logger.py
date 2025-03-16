@@ -119,7 +119,7 @@ class HeliconeManualLogger:
                 "seconds": int(end_time),
                 "milliseconds": int((end_time - int(end_time)) * 1000)
             },
-            "timeToFirstToken": options.get("time_to_first_token") if options.get("time_to_first_token") is not None else None
+            "timeToFirstToken": options.get("time_to_first_token_ms") if options.get("time_to_first_token_ms") is not None else None
         }
 
         fetch_options = {
