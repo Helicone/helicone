@@ -5,6 +5,15 @@ import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 const CACHE_BACKOFF_RETRIES = 5;
+
+function isGoogleAuthHeader(value: string): boolean {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  return value.split(" ").some((part) => part.startsWith("ya29."));
+}
+
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
   freeIndex: number,
@@ -18,18 +27,20 @@ export async function kvKeyFromRequest(
     if (key.toLowerCase() === "helicone-auth") {
       headers.set(key, value);
     }
-    if (!key.startsWith("ya29.") && key.toLowerCase() === "authorization") {
+    if (key.toLowerCase() === "authorization" && !isGoogleAuthHeader(value)) {
       headers.set(key, value);
     }
   }
 
-  return await hash(
+  const key = await hash(
     (cacheSeed ?? "") +
       request.url +
       (await request.requestWrapper.getText()) +
       JSON.stringify([...headers.entries()]) +
       (freeIndex >= 1 ? freeIndex.toString() : "")
   );
+
+  return key;
 }
 
 interface SaveToCacheOptions {
@@ -62,6 +73,7 @@ async function trySaveToCache(options: SaveToCacheOptions) {
       cacheKv,
       cacheSeed
     );
+    console.log("freeIndexes", freeIndexes);
     if (freeIndexes.length > 0) {
       const result = await safePut({
         key: cacheKv,
@@ -74,6 +86,7 @@ async function trySaveToCache(options: SaveToCacheOptions) {
           expirationTtl,
         },
       });
+      console.log("result", result);
       if (!result.success) {
         console.error("Error saving to cache:", result.error);
       }
@@ -186,6 +199,7 @@ export async function getCachedResponse(
       }[];
       freeIndexes: number[];
     };
+    console.log("requestCaches", requestCaches);
 
     if (freeIndexes.length > 0) {
       return null;
