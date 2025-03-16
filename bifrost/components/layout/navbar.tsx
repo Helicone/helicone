@@ -104,7 +104,7 @@ const NavLinks = () => {
           href: "/customers",
           label: "Customer Stories",
           description: "Built for scale, security, and control",
-          icon: <UserGroupIcon className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
+          icon: <Gem className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
         {
           href: "/changelog",
@@ -118,12 +118,12 @@ const NavLinks = () => {
           description: "Insights on AI development and best practices",
           icon: <BookHeart className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
         },
-        {
-          href: "/integrations",
-          label: "Integrations",
-          description: "Tools and platforms that integrate with Helicone",
-          icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
-        },
+        // {
+        //   href: "/integrations",
+        //   label: "Integrations",
+        //   description: "Tools and platforms that integrate with Helicone",
+        //   icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1" />,
+        // },
         {
           href: "/projects",
           label: "Community",
@@ -300,7 +300,7 @@ const MobileNav = () => {
     {
       href: "/customers",
       label: "Customer Stories",
-      icon: <UserGroupIcon className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
+      icon: <Gem className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
     {
       href: "/changelog",
@@ -312,11 +312,11 @@ const MobileNav = () => {
       label: "Blog",
       icon: <BookHeart className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
     },
-    {
-      href: "/integrations",
-      label: "Integrations",
-      icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
-    },
+    // {
+    //   href: "/integrations",
+    //   label: "Integrations",
+    //   icon: <Cable className="h-4 w-4 text-sky-500 stroke-[1.5px] fill-none" />,
+    // },
     {
       href: "/projects",
       label: "Community",
