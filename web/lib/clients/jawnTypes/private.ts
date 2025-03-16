@@ -1090,6 +1090,8 @@ Json: JsonObject;
       includeInputs?: boolean;
       isPartOfExperiment?: boolean;
       isScored?: boolean;
+      /** Format: double */
+      bodySubstringLength?: number;
     };
     ResultSuccess_HeliconeRequest_: {
       data: components["schemas"]["HeliconeRequest"];
@@ -2972,7 +2974,8 @@ export interface operations {
          *   },
          *   "includeInputs": false,
          *   "isScored": false,
-         *   "isPartOfExperiment": false
+         *   "isPartOfExperiment": false,
+         *   "bodySubstringLength": 500
          * }
          */
         "application/json": components["schemas"]["RequestQueryParams"];

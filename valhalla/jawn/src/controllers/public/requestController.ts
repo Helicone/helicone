@@ -63,6 +63,7 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  bodySubstringLength?: number;
 }
 
 @Route("v1/request")
@@ -126,7 +127,8 @@ export class RequestController extends Controller {
    *  },
    *  "includeInputs": false,
    *  "isScored": false,
-   *  "isPartOfExperiment": false
+   *  "isPartOfExperiment": false,
+   *  "bodySubstringLength": 500
    * }
    * @param request
    * @returns
@@ -142,6 +144,7 @@ export class RequestController extends Controller {
     },
     isScored: false,
     isPartOfExperiment: false,
+    bodySubstringLength: 500,
   })
   public async getRequestsClickhouse(
     @Body()

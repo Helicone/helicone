@@ -1,5 +1,6 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
+import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -42,23 +43,22 @@ import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
-import RequestCard from "./requestCard";
-import RequestDiv from "./requestDiv";
-import StreamWarning from "./StreamWarning";
-import TableFooter from "./tableFooter";
-import UnauthorizedView from "./UnauthorizedView";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
-import { Row } from "@/components/layout/common";
-import RequestsEmptyState from "./RequestsEmptyState";
 import {
   getMockFilterMap,
   getMockProperties,
   getMockRequestCount,
   getMockRequests,
 } from "./mockRequestsData";
+import RequestCard from "./requestCard";
+import RequestDiv from "./requestDiv";
+import RequestsEmptyState from "./RequestsEmptyState";
+import StreamWarning from "./StreamWarning";
+import TableFooter from "./tableFooter";
+import UnauthorizedView from "./UnauthorizedView";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -322,7 +322,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     },
     sortLeaf,
     isCached,
-    isLive
+    isLive,
+    1000
   );
 
   const count = shouldShowMockData ? mockCount : realCount;

@@ -86,7 +86,8 @@ export const useGetRequestsWithBodies = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isLive: boolean = false,
-  isCached: boolean = false
+  isCached: boolean = false,
+  bodySubstringLength: number
 ) => {
   const org = useOrg();
 
@@ -99,6 +100,7 @@ export const useGetRequestsWithBodies = (
       sortLeaf,
       isCached,
       org?.currentOrg?.id,
+      bodySubstringLength,
     ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
@@ -107,6 +109,7 @@ export const useGetRequestsWithBodies = (
       const sortLeaf = query.queryKey[4];
       const isCached = query.queryKey[5];
       const orgId = query.queryKey[6] as string;
+      const bodySubstringLength = query.queryKey[7] as number;
       const jawn = getJawnClient(orgId);
 
       const response = await jawn.POST("/v1/request/query-clickhouse", {
@@ -116,6 +119,7 @@ export const useGetRequestsWithBodies = (
           limit: currentPageSize,
           sort: sortLeaf as any,
           isCached: isCached as any,
+          bodySubstringLength: bodySubstringLength,
         },
       });
 
@@ -128,10 +132,25 @@ export const useGetRequestsWithBodies = (
 
   const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
 
+  // Only fetch from S3 if we don't have the body data from ClickHouse
   const urlQueries = useQueries({
     queries: requestsWithSignedUrls.map((request) => ({
       queryKey: ["request-content", request.signed_body_url],
       queryFn: async () => {
+        // If we already have request_body and response_body with actual content (not the placeholder message),
+        // we don't need to fetch from S3
+        if (
+          request.request_body &&
+          request.response_body &&
+          typeof request.request_body === "string" &&
+          typeof request.response_body === "string"
+        ) {
+          return {
+            request: request.request_body,
+            response: request.response_body,
+          };
+        }
+
         if (requestBodyCache.has(request.request_id)) {
           return requestBodyCache.get(request.request_id);
         }
@@ -152,12 +171,30 @@ export const useGetRequestsWithBodies = (
         return null;
       },
       keepPreviousData: true,
-      enabled: !!request.signed_body_url,
+      enabled:
+        !!request.signed_body_url &&
+        !(
+          request.request_body &&
+          request.response_body &&
+          typeof request.request_body === "string" &&
+          typeof request.response_body === "string"
+        ),
     })),
   });
 
   const requests = useMemo(() => {
     return requestsWithSignedUrls.map((request, index) => {
+      // If we already have request_body and response_body with actual content from ClickHouse,
+      // use that directly
+      if (
+        request.request_body &&
+        request.response_body &&
+        typeof request.request_body === "string" &&
+        typeof request.response_body === "string"
+      ) {
+        return request;
+      }
+
       const content = urlQueries[index].data;
       if (!content) return request;
 
@@ -189,7 +226,8 @@ const useGetRequests = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
-  isLive: boolean = false
+  isLive: boolean = false,
+  bodySubstringLength: number
 ) => {
   return {
     requests: useGetRequestsWithBodies(
@@ -198,7 +236,8 @@ const useGetRequests = (
       advancedFilter,
       sortLeaf,
       isLive,
-      isCached
+      isCached,
+      bodySubstringLength
     ),
     count: useQuery({
       queryKey: [

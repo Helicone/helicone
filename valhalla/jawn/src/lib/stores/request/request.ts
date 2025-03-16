@@ -1,29 +1,19 @@
+import { clickhousePriceCalcNonAggregated } from "../../../packages/cost";
+import { HeliconeRequest } from "../../../packages/llm-mapper/types";
+import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { S3Client } from "../../shared/db/s3Client";
 import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
 } from "../../shared/filters/filters";
+import { Result, err, ok, resultMap } from "../../shared/result";
 import {
   SortLeafRequest,
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../shared/result";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
-import { LlmSchema } from "../../shared/requestResponseModel";
-import { mapGeminiPro } from "./mappers";
-import { S3Client } from "../../shared/db/s3Client";
-import { Provider } from "../../../packages/llm-mapper/types";
-import { HeliconeRequest } from "../../../packages/llm-mapper/types";
-import {
-  clickhousePriceCalc,
-  clickhousePriceCalcNonAggregated,
-} from "../../../packages/cost";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -68,7 +58,8 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -154,7 +145,12 @@ export async function getRequests(
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+  const results = await mapLLMCalls(
+    requests.data,
+    s3Client,
+    orgId,
+    bodySubstringLength
+  );
   return resultMap(results, (data) => {
     return data;
   });
@@ -164,7 +160,8 @@ export async function getRequestsClickhouseNoSort(
   orgId: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   console.log("getRequestsClickhouseNoSort");
   if (isNaN(offset) || isNaN(limit)) {
@@ -182,11 +179,19 @@ export async function getRequestsClickhouseNoSort(
 
   const query = `
     SELECT response_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(request_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as request_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(response_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -227,7 +232,12 @@ export async function getRequestsClickhouseNoSort(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
+  const mappedRequests = await mapLLMCalls(
+    requests.data,
+    s3Client,
+    orgId,
+    bodySubstringLength
+  );
 
   return mappedRequests;
 }
@@ -237,7 +247,8 @@ export async function getRequestsClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
@@ -257,11 +268,19 @@ export async function getRequestsClickhouse(
 
   const query = `
     SELECT response_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(request_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as request_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(response_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -300,7 +319,12 @@ export async function getRequestsClickhouse(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
+  const mappedRequests = await mapLLMCalls(
+    requests.data,
+    s3Client,
+    orgId,
+    bodySubstringLength
+  );
 
   return mappedRequests;
 }
@@ -312,7 +336,8 @@ export async function getRequestsCachedClickhouse(
   limit: number,
   sort: SortLeafRequest,
   isPartOfExperiment?: boolean,
-  isScored?: boolean
+  isScored?: boolean,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -337,11 +362,19 @@ export async function getRequestsCachedClickhouse(
   const query = `
   SELECT
     rmt.response_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(rmt.request_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as request_body,
+      ${
+        bodySubstringLength
+          ? `substring(toString(rmt.response_body), 1, ${bodySubstringLength})`
+          : `map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information')`
+      } as response_body,
     rmt.response_created_at,
     rmt.status AS response_status,
     rmt.request_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
     rmt.request_created_at,
     rmt.user_id AS request_user_id,
     rmt.properties AS request_properties,
@@ -384,7 +417,12 @@ export async function getRequestsCachedClickhouse(
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
 
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+  const results = await mapLLMCalls(
+    requests.data,
+    s3Client,
+    orgId,
+    bodySubstringLength
+  );
 
   return resultMap(results, (data) => {
     return data;
@@ -398,7 +436,8 @@ export async function getRequestsCached(
   limit: number,
   sort: SortLeafRequest,
   isPartOfExperiment?: boolean,
-  isScored?: boolean
+  isScored?: boolean,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -479,7 +518,12 @@ export async function getRequestsCached(
     process.env.S3_BUCKET_NAME ?? "",
     (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
   );
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
+  const results = await mapLLMCalls(
+    requests.data,
+    s3Client,
+    orgId,
+    bodySubstringLength
+  );
 
   return resultMap(results, (data) => {
     return data;
@@ -489,7 +533,8 @@ export async function getRequestsCached(
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
   s3Client: S3Client,
-  orgId: string
+  orgId: string,
+  bodySubstringLength?: number
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
@@ -498,7 +543,8 @@ async function mapLLMCalls(
       const requestCreatedAt = new Date(heliconeRequest.request_created_at);
       if (
         (process.env.S3_ENABLED ?? "true") === "true" &&
-        requestCreatedAt > s3ImplementationDate
+        requestCreatedAt > s3ImplementationDate &&
+        !bodySubstringLength // Skip S3 URL fetching if we're using substring mode
       ) {
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
