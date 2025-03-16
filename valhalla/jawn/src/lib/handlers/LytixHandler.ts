@@ -23,9 +23,11 @@ export class LytixHandler extends AbstractLogHandler {
     super();
   }
 
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     if (!context.message.heliconeMeta.lytixKey) {
-      return await super.handle(context);
+      return await super.handleNext(context);
     }
 
     this.lytixModelIO.push({
@@ -45,7 +47,7 @@ export class LytixHandler extends AbstractLogHandler {
       logId: context.message.log.request.id ?? "",
     });
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {

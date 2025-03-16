@@ -13,7 +13,9 @@ import { HandlerContext, toHeliconeRequest } from "./HandlerContext";
 const kvCache = new KVCache(60); // 1 minutes
 
 export class OnlineEvalHandler extends AbstractLogHandler {
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     const orgId = context.orgParams?.id;
     if (!orgId) {
       return err(`Org ID not found in context`);
@@ -27,7 +29,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
     );
 
     if (hasOnlineEvals.data === false) {
-      return await super.handle(context);
+      return await super.handleNext(context);
     }
 
     const onlineEvals = await onlineEvalStore.getOnlineEvalsByOrgId(orgId);
@@ -125,6 +127,6 @@ export class OnlineEvalHandler extends AbstractLogHandler {
       }
     }
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 }

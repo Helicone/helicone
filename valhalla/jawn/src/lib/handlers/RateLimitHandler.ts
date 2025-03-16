@@ -14,7 +14,9 @@ export class RateLimitHandler extends AbstractLogHandler {
     this.rateLimitLogs = [];
   }
 
-  async handle(context: HandlerContext): PromiseGenericResult<string> {
+  async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     if (!context.orgParams?.id) {
       return err("Organization ID not found in org params");
     }
@@ -39,7 +41,7 @@ export class RateLimitHandler extends AbstractLogHandler {
         return ok("Rate limited.");
         // Do not continue to the next handler if rate limited
       } else {
-        return await super.handle(context);
+        return await super.handleNext(context);
       }
     } catch (error: any) {
       return err(
