@@ -1,26 +1,28 @@
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { Muted } from "@/components/ui/typography";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { PiPlayBold } from "react-icons/pi";
+import { useGetRequestWithBodies } from "../../../services/hooks/requests";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDiv from "../../shared/themed/themedDiv";
 import RequestRow from "./requestRow";
-import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
   open: boolean;
@@ -47,20 +49,37 @@ const RequestDiv = (props: RequestDivProps) => {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
-
   const org = useOrg();
+  const jawn = useJawnClient();
 
-  const setOpenHandler = (divOpen: boolean) => {
-    setOpen(divOpen);
-    if (!divOpen) {
-      const { pathname, query } = router;
-      if (router.query.requestId) {
-        delete router.query.requestId;
-        router.replace({ pathname, query }, undefined, { shallow: true });
-      }
+  // Fetch the full request body only when the component is opened and we have a request ID
+  const {
+    data: requestWithBody,
+    isLoading: isLoadingFullRequest,
+    error: requestError,
+  } = useGetRequestWithBodies(open && !!request?.id ? request?.id || "" : "");
+
+  const fullRequest = useMemo(() => {
+    if (open && requestWithBody?.data && !isLoadingFullRequest) {
+      // Convert the HeliconeRequest to MappedLLMRequest
+      return heliconeRequestToMappedContent(requestWithBody.data);
     }
-  };
+    return request;
+  }, [open, requestWithBody, isLoadingFullRequest, request]);
+
+  const setOpenHandler = useCallback(
+    (divOpen: boolean) => {
+      setOpen(divOpen);
+      if (!divOpen) {
+        const { pathname, query } = router;
+        if (router.query.requestId) {
+          delete router.query.requestId;
+          router.replace({ pathname, query }, undefined, { shallow: true });
+        }
+      }
+    },
+    [router, setOpen]
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -82,18 +101,16 @@ const RequestDiv = (props: RequestDivProps) => {
     };
   }, [onNextHandler, onPrevHandler, setOpen]);
 
-  const jawn = useJawnClient();
-
   const promptId = useMemo(
     () =>
-      request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
+      fullRequest?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
       null,
-    [request?.heliconeMetadata.customProperties]
+    [fullRequest?.heliconeMetadata.customProperties]
   );
+
   const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     queryFn: async (query) => {
-      const jawn = getJawnClient(query.queryKey[2]);
       const prompt = await jawn.POST("/v1/prompt/query", {
         body: {
           filter: {
@@ -107,7 +124,54 @@ const RequestDiv = (props: RequestDivProps) => {
       });
       return prompt.data?.data?.[0];
     },
+    enabled: !!promptId && !!org?.currentOrg?.id,
   });
+
+  const handleCopyToClipboard = useCallback(() => {
+    try {
+      navigator.clipboard.writeText(
+        JSON.stringify(fullRequest?.schema || {}, null, 4)
+      );
+      setNotification("Copied to clipboard", "success");
+    } catch (error) {
+      setNotification("Failed to copy to clipboard", "error");
+    }
+  }, [fullRequest?.schema, setNotification]);
+
+  const handleCreateExperiment = useCallback(() => {
+    if (!fullRequest?.id) return;
+
+    jawn
+      .POST("/v2/experiment/create/from-request/{requestId}", {
+        params: {
+          path: {
+            requestId: fullRequest.id,
+          },
+        },
+      })
+      .then((res) => {
+        if (res.error || !res.data.data?.experimentId) {
+          setNotification("Failed to create experiment", "error");
+          return;
+        }
+        router.push(`/experiments/${res.data.data?.experimentId}`);
+      })
+      .catch(() => {
+        setNotification("Failed to create experiment", "error");
+      });
+  }, [fullRequest?.id, jawn, router, setNotification]);
+
+  const handleTestPrompt = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (promptDataQuery.data?.id) {
+        router.push(`/prompts/${promptDataQuery.data?.id}`);
+      } else if (fullRequest) {
+        router.push(`/prompts/fromRequest/${fullRequest.id}`);
+      }
+    },
+    [promptDataQuery.data?.id, fullRequest, router]
+  );
 
   return (
     <ThemedDiv
@@ -120,14 +184,7 @@ const RequestDiv = (props: RequestDivProps) => {
               <TooltipTrigger asChild>
                 <Link
                   href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (promptDataQuery.data?.id) {
-                      router.push(`/prompts/${promptDataQuery.data?.id}`);
-                    } else if (request) {
-                      router.push(`/prompts/fromRequest/${request.id}`);
-                    }
-                  }}
+                  onClick={handleTestPrompt}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
                 >
                   <PiPlayBold className="h-4 w-4" />
@@ -140,28 +197,8 @@ const RequestDiv = (props: RequestDivProps) => {
                 <Button
                   variant={"ghost"}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
-                  onClick={() => {
-                    jawn
-                      .POST("/v2/experiment/create/from-request/{requestId}", {
-                        params: {
-                          path: {
-                            requestId: request?.id!,
-                          },
-                        },
-                      })
-                      .then((res) => {
-                        if (res.error || !res.data.data?.experimentId) {
-                          setNotification(
-                            "Failed to create experiment",
-                            "error"
-                          );
-                          return;
-                        }
-                        router.push(
-                          `/experiments/${res.data.data?.experimentId}`
-                        );
-                      });
-                  }}
+                  onClick={handleCreateExperiment}
+                  disabled={!fullRequest?.id}
                 >
                   <FlaskConicalIcon className="h-4 w-4" />
                 </Button>
@@ -172,13 +209,9 @@ const RequestDiv = (props: RequestDivProps) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => {
-                    setNotification("Copied to clipboard", "success");
-                    navigator.clipboard.writeText(
-                      JSON.stringify(request?.schema || {}, null, 4)
-                    );
-                  }}
+                  onClick={handleCopyToClipboard}
                   className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                  disabled={!fullRequest?.schema}
                 >
                   <ClipboardDocumentIcon className="h-4 w-4" />
                 </button>
@@ -223,15 +256,26 @@ const RequestDiv = (props: RequestDivProps) => {
         </div>
       }
     >
-      {request ? (
+      {isLoadingFullRequest ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Muted>Loading full request details...</Muted>
+          <LoadingAnimation />
+        </div>
+      ) : requestError ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Muted>Error loading request</Muted>
+        </div>
+      ) : fullRequest ? (
         <RequestRow
-          request={request}
+          request={fullRequest}
           properties={properties}
           open={open}
           promptData={promptDataQuery.data}
         />
       ) : (
-        <p>Loading...</p>
+        <div className="flex flex-col items-center justify-center h-full">
+          <Muted>No request data available</Muted>
+        </div>
       )}
     </ThemedDiv>
   );
