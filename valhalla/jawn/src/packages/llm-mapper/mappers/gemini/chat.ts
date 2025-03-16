@@ -246,8 +246,8 @@ export const mapGeminiPro: MapperFn<any, any> = ({
   return {
     schema,
     preview: {
-      request: getRequestText(request),
-      response: getResponseText(response, statusCode),
+      request: getRequestText(request) || String(request),
+      response: getResponseText(response, statusCode) || String(response),
       concatenatedMessages: [
         ...requestMessages,
         ...(responseMessages ? [responseMessages] : []),
