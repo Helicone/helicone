@@ -17,6 +17,7 @@ import {
   HeliconeProxyRequest,
   RetryOptions,
 } from "../models/HeliconeProxyRequest";
+import { getBodyInterceptor } from "./getResponseBody";
 
 export type ProxyResult = {
   loggable: DBLoggable;
@@ -68,36 +69,7 @@ export async function handleProxyRequest(
     responseOverride
   );
 
-  const interceptor = response.body
-    ? new ReadableInterceptor(response.body, proxyRequest.isStream)
-    : null;
-  let body = interceptor ? interceptor.stream : null;
-
-  if (
-    proxyRequest.requestWrapper.heliconeHeaders.featureFlags.streamForceFormat
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let buffer: any = null;
-    const transformer = new TransformStream({
-      transform(chunk, controller) {
-        if (chunk.length < 50) {
-          buffer = chunk;
-        } else {
-          if (buffer) {
-            const mergedArray = new Uint8Array(buffer.length + chunk.length);
-            mergedArray.set(buffer);
-            mergedArray.set(chunk, buffer.length);
-            controller.enqueue(mergedArray);
-          } else {
-            controller.enqueue(chunk);
-          }
-          buffer = null;
-        }
-      },
-    });
-    body = body?.pipeThrough(transformer) ?? null;
-  }
-
+  const { body, interceptor } = getBodyInterceptor(proxyRequest, response);
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", proxyRequest.requestId);
