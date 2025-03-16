@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FilterASTEditor from "@/filterAST/FilterASTEditor";
-import { H1, H4, P, Small } from "@/components/ui/typography";
-import {
-  FilterExpression,
-  ConditionExpression,
-  AndExpression,
-} from "@/filterAST/filterAst";
-import BasePageV2 from "@/components/layout/basePageV2";
+import { H1, H4, P } from "@/components/ui/typography";
+import { FilterExpression, AndExpression } from "@/filterAST/filterAst";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +30,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -117,7 +111,14 @@ export const TestFilterPage: React.FC = () => {
     setFilterName("Untitled Filter");
     filterStore.setFilter({
       type: "and",
-      expressions: [],
+      expressions: [
+        {
+          type: "condition",
+          field: { column: "status" },
+          operator: "eq",
+          value: "",
+        },
+      ],
     });
   };
 

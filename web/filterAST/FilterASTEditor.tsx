@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { AndExpression, FilterExpression } from "./filterAst";
-import { useFilterStore } from "./store/filterStore";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
@@ -19,13 +18,19 @@ import SaveFilterDialog from "./components/SaveFilterDialog";
 import SavedFiltersList from "./components/SavedFiltersList";
 
 // Import hooks
-import { useFilterActions } from "./hooks/useFilterActions";
 import { useFilterAST } from "./context/filterContext";
 
 // Define a default filter structure
 const DEFAULT_FILTER: AndExpression = {
   type: "and",
-  expressions: [],
+  expressions: [
+    {
+      type: "condition",
+      field: { column: "status" },
+      operator: "eq",
+      value: "",
+    },
+  ],
 };
 
 interface FilterASTEditorProps {

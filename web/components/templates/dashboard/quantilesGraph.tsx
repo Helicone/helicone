@@ -6,6 +6,8 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { getMockQuantiles } from "./mockDashboardData";
 
 type QuantilesGraphProps = {
   uiFilters: FilterNode;
@@ -29,6 +31,8 @@ export const QuantilesGraph = ({
   ]);
 
   const [currentMetric, setCurrentMetric] = useState("Latency");
+  const org = useOrg();
+  const shouldShowMockData = org?.currentOrg?.has_onboarded === false;
 
   const { quantiles, isQuantilesLoading: quantilesIsLoading } = useQuantiles({
     uiFilters,
@@ -38,12 +42,19 @@ export const QuantilesGraph = ({
     metric: quantilesMetrics.get(currentMetric) ?? "latency",
   });
 
+  const mockQuantiles = shouldShowMockData
+    ? getMockQuantiles(quantilesMetrics.get(currentMetric))
+    : null;
+
   function max(arr: number[]) {
     return arr.reduce((p, c) => (p > c ? p : c), 0);
   }
 
+  const quantilesData = shouldShowMockData
+    ? mockQuantiles?.data
+    : quantiles?.data;
   const maxQuantile = max(
-    quantiles?.data?.map((d) => d.p99).filter((d) => d !== 0) ?? []
+    quantilesData?.map((d) => d.p99).filter((d) => d !== 0) ?? []
   );
 
   return (
@@ -64,7 +75,7 @@ export const QuantilesGraph = ({
           )}
         </div>
         <div>
-          {!quantilesIsLoading && (
+          {(!quantilesIsLoading || shouldShowMockData) && (
             <Select
               placeholder="Select property"
               value={currentMetric}
@@ -87,7 +98,7 @@ export const QuantilesGraph = ({
           height: "212px",
         }}
       >
-        {quantilesIsLoading ? (
+        {quantilesIsLoading && !shouldShowMockData ? (
           <div className="h-full w-full bg-gray-200 dark:bg-gray-800 rounded-md pt-4">
             <LoadingAnimation height={175} width={175} />
           </div>
@@ -95,7 +106,7 @@ export const QuantilesGraph = ({
           <LineChart
             className="h-[14rem]"
             data={
-              quantiles?.data?.map((r) => {
+              quantilesData?.map((r) => {
                 const time = new Date(r.time);
                 // return all of the values on a 0-100 scale where 0 is the min value and 100 is the max value of
                 return {

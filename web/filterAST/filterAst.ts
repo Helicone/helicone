@@ -636,7 +636,6 @@ export type {
   RequestResponseRMT,
   FilterOperator,
   FilterExpression,
-  BaseExpression,
   AllExpression,
   FieldSpec,
   ConditionExpression,

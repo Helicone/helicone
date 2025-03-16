@@ -67,11 +67,21 @@ export const useContextHelpers = ({
   };
 
   const newEmptyFilter = async () => {
+    // Create a default condition
+    const defaultCondition = {
+      type: "condition",
+      field: {
+        column: "status",
+      },
+      operator: "eq",
+      value: "",
+    };
+
     const result = await filterCrud.createFilter.mutateAsync({
       name: "Untitled Filter",
       filter: {
         type: "and",
-        expressions: [],
+        expressions: [defaultCondition],
       },
     });
 

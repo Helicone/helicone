@@ -13,7 +13,16 @@ export const useFilterActions = () => {
   // Create an empty default filter
   const DEFAULT_FILTER: AndExpression = {
     type: "and",
-    expressions: [],
+    expressions: [
+      {
+        type: "condition",
+        field: {
+          column: "status",
+        },
+        operator: "eq",
+        value: "",
+      },
+    ],
   };
 
   /**
