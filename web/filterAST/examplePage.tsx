@@ -347,7 +347,7 @@ export const TestFilterPage: React.FC = () => {
                   {store.hasUnsavedChanges && (
                     <div className="flex items-center text-muted-foreground bg-muted px-2 py-1 rounded-md text-xs">
                       <Clock size={12} className="mr-1" />
-                      Unsaved
+                      Saving
                     </div>
                   )}
                   <Dialog

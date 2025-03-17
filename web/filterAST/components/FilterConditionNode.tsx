@@ -1,6 +1,5 @@
 import React from "react";
 import { ConditionExpression, FilterOperator } from "../filterAst";
-import { FilterUIDefinition } from "../filterUIDefinitions/types";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,11 +50,13 @@ const FILTER_OPERATOR_DESCRIPTIVE_LABELS: Record<FilterOperator, string> = {
 interface FilterConditionNodeProps {
   condition: ConditionExpression;
   path: number[];
+  isOnlyCondition?: boolean;
 }
 
 export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   condition,
   path,
+  isOnlyCondition = false,
 }) => {
   const filterStore = useFilterStore();
   const { filterDefinitions: filterDefs, isLoading } = useFilterUIDefinitions();
@@ -161,14 +162,16 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
             Please select a valid field or remove this condition
           </span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleRemove}
-          className="h-8 w-8 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
-        >
-          <Trash2 size={16} />
-        </Button>
+        {!isOnlyCondition && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRemove}
+            className="h-8 w-8 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+          >
+            <Trash2 size={16} />
+          </Button>
+        )}
       </div>
     );
   }
@@ -253,14 +256,16 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
       <div className="flex-grow">{renderValueInput()}</div>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleRemove}
-        className="flex-shrink-0 ml-1"
-      >
-        <Trash2 size={16} className="text-muted-foreground" />
-      </Button>
+      {!isOnlyCondition && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleRemove}
+          className="flex-shrink-0 ml-1"
+        >
+          <Trash2 size={16} className="text-muted-foreground" />
+        </Button>
+      )}
     </div>
   );
 };

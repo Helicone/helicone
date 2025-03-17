@@ -168,9 +168,16 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                 </div>
               );
             } else if (expr.type === "condition") {
+              // Check if this is the only condition in the group
+              const isOnlyCondition = group.expressions.length === 1;
+
               return (
                 <div key={`condition-${index}`}>
-                  <FilterConditionNode condition={expr} path={newPath} />
+                  <FilterConditionNode
+                    condition={expr}
+                    path={newPath}
+                    isOnlyCondition={isOnlyCondition}
+                  />
                 </div>
               );
             }
