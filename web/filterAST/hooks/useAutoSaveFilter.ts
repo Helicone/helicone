@@ -5,9 +5,12 @@ interface AutoSaveOptions {
   activeFilterId: string | null;
   hasUnsavedChanges: boolean;
   filter: any;
-  savedFilters: StoreFilterType[];
-  updateFilter: (filter: StoreFilterType) => Promise<any>;
+  updateFilterById: (
+    filterId: string,
+    updates: Partial<StoreFilterType>
+  ) => Promise<void>;
   autoSaveDelay?: number;
+  filterName: string;
 }
 
 /**
@@ -17,9 +20,9 @@ export const useAutoSaveFilter = ({
   activeFilterId,
   hasUnsavedChanges,
   filter,
-  savedFilters,
-  updateFilter,
+  updateFilterById,
   autoSaveDelay = 1000,
+  filterName,
 }: AutoSaveOptions) => {
   // Auto-save timer ref
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -30,17 +33,11 @@ export const useAutoSaveFilter = ({
   const autoSaveFilter = useCallback(() => {
     if (!activeFilterId || !hasUnsavedChanges || !filter) return;
 
-    const filterToUpdate = savedFilters.find(
-      (f: StoreFilterType) => f.id === activeFilterId
-    );
-
-    if (filterToUpdate) {
-      updateFilter({
-        ...filterToUpdate,
-        filter: filter,
-      });
-    }
-  }, [activeFilterId, hasUnsavedChanges, filter, savedFilters, updateFilter]);
+    updateFilterById(activeFilterId, {
+      filter: filter,
+      name: filterName,
+    });
+  }, [activeFilterId, hasUnsavedChanges, filter, updateFilterById, filterName]);
 
   // Effect to handle auto-saving
   useEffect(() => {

@@ -25,6 +25,9 @@ export const useContextHelpers = ({
       if (filterToLoad && filterToLoad?.filter) {
         filterStore.setFilter(filterToLoad?.filter as FilterExpression);
         filterStore.setActiveFilterId(filterId);
+        filterStore.setActiveFilterName(
+          filterToLoad?.name || "Untitled Filter"
+        );
         const params = new URLSearchParams(searchParams?.toString());
         params.set("filter_id", filterId);
         router.push(`${pathname}?${params.toString()}`);
@@ -112,11 +115,23 @@ export const useContextHelpers = ({
     filterId: string,
     updates: Partial<StoreFilterType>
   ) => {
-    const filterToUpdate = filterCrud.savedFilters.find(
-      (filter: StoreFilterType) => filter.id === filterId
-    );
+    let filterToUpdate: StoreFilterType | undefined =
+      filterCrud.savedFilters.find(
+        (filter: StoreFilterType) => filter.id === filterId
+      );
 
-    if (!filterToUpdate) return;
+    if (!filterToUpdate) {
+      const result = await filterCrud.getFilterById(filterId);
+      if (result) {
+        filterToUpdate = {
+          ...result,
+          id: filterId,
+        };
+      } else {
+        console.error("Filter not found");
+        return;
+      }
+    }
 
     const updatedFilter = { ...filterToUpdate, ...updates };
 

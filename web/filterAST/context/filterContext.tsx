@@ -54,12 +54,14 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     activeFilterId: filterStore.activeFilterId,
     hasUnsavedChanges: filterStore.hasUnsavedChanges,
     filter: filterStore.filter,
-    savedFilters: filterCrud.savedFilters,
-    updateFilter: async (filter) => {
-      await filterCrud.updateFilter.mutateAsync(filter);
-      filterStore.setHasUnsavedChanges(false);
+    updateFilterById: async (
+      filterId: string,
+      updates: Partial<StoreFilterType>
+    ) => {
+      await helpers.updateFilterById(filterId, updates);
     },
     autoSaveDelay: 1000,
+    filterName: filterStore.activeFilterName || "Untitled Filter",
   });
   // Initial URL hook
   useEffect(() => {

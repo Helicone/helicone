@@ -14,6 +14,9 @@ export interface FilterState {
   // Whether the filter has unsaved changes
   hasUnsavedChanges: boolean;
 
+  // The name of the currently active saved filter (if any)
+  activeFilterName: string | null;
+
   // Actions
   setFilter: (filter: FilterExpression | null) => void;
   updateFilterExpression: (
@@ -30,6 +33,7 @@ export interface FilterState {
   setActiveFilterId: (id: string | null) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearActiveFilter: () => void;
+  setActiveFilterName: (name: string | null) => void;
 }
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
@@ -37,6 +41,7 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   activeFilterId: null,
   initialFilterId: null,
   hasUnsavedChanges: false,
+  activeFilterName: null,
 
   setInitialFilterId: (id: string | null) => {
     if (get().initialFilterId !== null) return;
@@ -190,5 +195,9 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       activeFilterId: null,
       hasUnsavedChanges: false,
     });
+  },
+
+  setActiveFilterName: (name) => {
+    set({ activeFilterName: name });
   },
 }));

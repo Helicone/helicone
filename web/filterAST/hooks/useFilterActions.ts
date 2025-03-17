@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFilterStore } from "../store/filterStore";
 import { AndExpression, ConditionExpression } from "../filterAst";
+import { StoreFilterType } from "../hooks/useFilterCrud";
 
 /**
  * Custom hook for common filter actions
@@ -62,6 +63,7 @@ export const useFilterActions = () => {
    */
   const clearFilter = () => {
     filterStore.setFilter(DEFAULT_FILTER);
+    filterStore.setActiveFilterName("Untitled Filter");
   };
 
   /**
@@ -108,9 +110,22 @@ export const useFilterActions = () => {
     return "Simple condition";
   };
 
+  /**
+   * Update the filter name
+   * @param name - The new name for the filter
+   */
+  const updateFilterName = (name: string) => {
+    filterStore.setActiveFilterName(name);
+    // Mark filter as having unsaved changes when name is updated
+    if (filterStore.activeFilterId) {
+      filterStore.setHasUnsavedChanges(true);
+    }
+  };
+
   return {
     saveDialogOpen,
     setSaveDialogOpen,
+    updateFilterName,
     hasActiveFilters,
     createSimpleFilter,
     clearFilter,
