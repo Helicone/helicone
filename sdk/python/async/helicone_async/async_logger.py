@@ -72,16 +72,7 @@ class HeliconeAsyncLogger:
         This reinitializes the Traceloop SDK with a fresh exporter instance.
         """
         if not self._logging_enabled:
-            self.exporter = OTLPSpanExporter(
-                endpoint=self.base_url,
-                headers={"Authorization": f"Bearer {self.api_key}"}
-            )
-
-            Traceloop.init(
-                exporter=self.exporter,
-                disable_batch=True,
-                should_enrich_metrics=False,
-                instruments=SUPPORTED_INSTRUMENTS,
-            )
-            
+            # Create a new exporter instance
+            self.exporter.__init__(endpoint=self.base_url, headers={
+                                   "Authorization": f"Bearer {self.api_key}"})
             self._logging_enabled = True
