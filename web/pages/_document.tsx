@@ -5,6 +5,7 @@ import Document, {
   NextScript,
   DocumentContext,
 } from "next/document";
+import { Toaster } from "@/components/ui/sonner";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
@@ -24,6 +25,7 @@ class MyDocument extends Document {
         </Head>
         <body className={isOpenStatsPage ? "open-stats-body" : ""}>
           <Main />
+          <Toaster />
           <NextScript />
         </body>
       </Html>
