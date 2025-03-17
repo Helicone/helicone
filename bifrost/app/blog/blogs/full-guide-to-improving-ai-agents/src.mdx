@@ -83,7 +83,43 @@ In the evaluator-optimizer workflow, one LLM generates content while another eva
 
 ## Best Practices for Building Effective Agents
 
-### 1. Document Your Tools
+### 1. Use the Right Tooling
+
+Many platforms have emerged to make building agents easier and faster and choosing the right one for your specific use case can significantly impact your success. 
+
+Here are a few popular ones:
+
+- **Dify**: Excellent for rapid prototyping with its no-code interface, making it ideal for teams with mixed technical skills
+- **AutoGen**: Strong for multi-agent systems that require deep customization and advanced code execution
+- **LlamaIndex**: Optimized for data-intensive applications requiring robust indexing and retrieval
+- **LangChain**: Provides modular architecture with reusable components for flexible AI application development
+- **CrewAI**: Specializes in creating role-specific AI agents for collaborative tasks
+- **Pydantic AI**: Focused on production-grade applications requiring structured output and type safety
+
+When evaluating agent-building platforms, consider your team's **level of technicality**, **project complexity** and other requirements like **scalability**.
+
+Remember that the right tool isn't necessarily the most complex one. In fact, simpler solutions can often lead to more reliable agents.
+
+Read more about choosing the best AI Agent for your project <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noreferrer">here</a>.
+
+### 2. Use Dedicated Agents
+
+When building AI agents, consider breaking complex workflows into multiple dedicated agents rather than overloading a single agent. 
+
+There's a performance threshold where single agents become ineffective—typically when handling more than 5-10 tools, managing complex context, or requiring multiple areas of specialization.
+
+Multi-agent architectures provide several advantages:
+
+- **Modularity**: Easier to develop, test, and maintain individual components
+- **Specialization**: Expert agents focused on particular domains (math, coding, planning) tend to perform better
+- **Context management**: Allow for better utilization of a limited context window 
+- **Controlled communication**: Enable the definition of explicit communication patterns, ensuring controlled and efficient information sharing
+
+{/* <a href="https://langchain-ai.github.io/langgraph/concepts/multi_agent/#multi-agent-architectures" target="_blank" rel="noreferrer">Common architectures</a> include supervisor agents (where one agent routes to specialized sub-agents), hierarchical systems (layered supervision), or custom cognitive architectures tailored to your specific domain. When implementing multi-agent systems, carefully consider how agents will communicate - either through shared state objects or via tool-calling parameters. */}
+
+Remember that the goal isn't complexity for its own sake. A thoughtfully designed multi-agent system should improve both reliability and scalability.
+
+### 3. Document Your Tools
 
 > People spend lots of effort on their prompts but then give the model tools with parameters named 'a' and 'b' with no documentation.
 
@@ -98,7 +134,7 @@ Your tools are only as good to an LLM as their documentation. Treat tool documen
 
 Think of the LLM as a new team member who needs to learn your API. The clearer your documentation, the more effectively it will use your tools.
 
-### 2. Implement Proper Verification
+### 4. Implement Proper Verification
 
 The more you verify LLM outputs at each step of the way, the more you can rely on your system to get the job done. 
 
@@ -111,18 +147,18 @@ For coding agents, verification is easier because you can run tests. However, yo
 
 <BottomLine
   title="💡 Use Helicone for Evaluating your LLM Agents"
-  description="“Observability tools like Helicone were specifically desgined to make evaluating LLM outputs while building agents very easy.“"
+  description="“Observability tools like Helicone were specifically designed to make evaluating LLM outputs while building agents very easy.“"
 />
 
-### 3. Start Simple and Scale Gradually
+### 5. Start Simple and Scale Gradually
 
-As with any attempt at automation, don't aim to do eveything all at once. Instead:
+As with any attempt at automation, don't aim to do everything all at once. Instead:
 
 1. Start with a single workflow for a very specific problem
 2. Perfect that workflow before adding complexity
 3. Use categorization to limit the scope of what your agent handles
 
-### 4. Measure Everything
+### 6. Measure Everything
 
 Effective agent development hinges on measuring performance and iterating on implementations. Without comprehensive measurement, you're building blind. 
 
@@ -132,7 +168,7 @@ Establish clear metrics for success—task completion rate, accuracy, or user sa
 
 A good LLM observability platform like <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> can provide the measurement infrastructure you need to keep your agents in good shape.
 
-### 5. Add Guardrails
+### 7. Add Guardrails
 
 Guard rails are protective constraints that prevent the system from producing harmful, incorrect, or irrelevant outputs. You typically want to implement some or all of the following:
 
