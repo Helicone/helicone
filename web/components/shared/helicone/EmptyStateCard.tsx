@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { H2, P } from "@/components/ui/typography";
 import {
+  Archive,
+  Bell,
+  GitBranch,
+  Layers,
+  Plus,
+  Shield,
   SquareArrowOutUpRight,
   Tag,
-  Layers,
   User,
-  GitBranch,
-  Bell,
-  Archive,
-  Shield,
-  Plus,
 } from "lucide-react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { createHighlighter } from "shiki";
-import { H2, P } from "@/components/ui/typography";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -65,7 +65,8 @@ headers: { "Helicone-Prompt-Id": "explain_topic" }`,
     cta: {
       primary: {
         text: "Create First Prompt",
-        link: "/prompts/new",
+        onClick: true,
+        showPlusIcon: true,
       },
       secondary: {
         text: "View Docs",
