@@ -41,16 +41,31 @@ const NavItem: React.FC<NavItemProps> = ({
   const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
 
+  // Get the filter_id from the current URL query parameters
+  const { filter_id } = router.query;
+
+  // Function to append filter_id to href if it exists
+  const getHrefWithFilter = (baseHref: string) => {
+    if (filter_id) {
+      // Check if the URL already has query parameters
+      const hasQueryParams = baseHref.includes("?");
+      return `${baseHref}${hasQueryParams ? "&" : "?"}filter_id=${filter_id}`;
+    }
+    return baseHref;
+  };
+
   if (isCollapsed) {
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Link
-            href={hasSubItems ? link.subItems![0].href : link.href}
+            href={getHrefWithFilter(
+              hasSubItems ? link.subItems![0].href : link.href
+            )}
             onClick={(e) => {
               if (hasSubItems) {
                 e.preventDefault();
-                router.push(link.subItems![0].href);
+                router.push(getHrefWithFilter(link.subItems![0].href));
               }
             }}
             className={cn(
@@ -89,7 +104,7 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <div className={cn(isSubItem)}>
       <Link
-        href={hasSubItems ? "#" : link.href}
+        href={hasSubItems ? "#" : getHrefWithFilter(link.href)}
         onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems

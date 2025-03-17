@@ -1,21 +1,4 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Small } from "@/components/ui/typography";
-import {
-  PlusCircle,
-  Save,
-  X,
-  BookOpen,
-  Loader2,
-  RefreshCw,
-  Share2,
-  Link,
-  Clock,
-  Info,
-} from "lucide-react";
-import React, { useState } from "react";
-import { AndExpression, FilterExpression } from "./filterAst";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -24,28 +7,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Small } from "@/components/ui/typography";
+import {
+  Clock,
+  Info,
+  Link,
+  Loader2,
+  PlusCircle,
+  RefreshCw,
+  Share2,
+} from "lucide-react";
+import React, { useState } from "react";
 import { toast } from "sonner";
+import { FilterExpression } from "./filterAst";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
 import SaveFilterDialog from "./components/SaveFilterDialog";
-import SavedFiltersList from "./components/SavedFiltersList";
+import ClearFilterDropdown from "./components/ClearFilterDropdown";
+import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 
 // Import hooks
 import { useFilterAST } from "./context/filterContext";
-
-// Define a default filter structure
-const DEFAULT_FILTER: AndExpression = {
-  type: "and",
-  expressions: [
-    {
-      type: "condition",
-      field: { column: "status" },
-      operator: "eq",
-      value: "",
-    },
-  ],
-};
 
 interface FilterASTEditorProps {
   onFilterChange?: (filter: FilterExpression) => void;
@@ -62,7 +46,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
       setSaveDialogOpen,
       hasActiveFilters,
       updateFilterName,
-      clearFilter,
+      executeClearFilter,
     },
     helpers,
   } = useFilterAST();
@@ -111,15 +95,17 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   return (
     <div className="space-y-3 w-full bg-white dark:bg-slate-950 rounded-md p-3">
       <div className="flex items-center justify-between">
-        <div className="flex  flex-col items-center gap-1.5">
-          <div className="border-b pb-2">
-            <Input
-              value={filterStore.activeFilterName || "Untitled Filter"}
-              onChange={(e) => updateFilterName(e.target.value)}
-              className="text-sm font-medium border-none p-0 h-auto w-full focus-visible:ring-0"
-              placeholder="Untitled Filter"
-            />
-          </div>
+        <div className="flex flex-col items-center gap-1.5">
+          {filterStore.activeFilterName && (
+            <div className="border-b pb-2">
+              <Input
+                value={filterStore.activeFilterName || "Untitled Filter"}
+                onChange={(e) => updateFilterName(e.target.value)}
+                className="text-sm font-medium border-none p-0 h-auto w-full focus-visible:ring-0"
+                placeholder="Untitled Filter"
+              />
+            </div>
+          )}
 
           {filterStore.activeFilterName === "Untitled Filter" && (
             <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center">
@@ -136,25 +122,17 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               Saving
             </div>
           )}
-          <Button variant="ghost" size="xs" onClick={toggleSavedFilters}>
-            <BookOpen size={12} className="mr-1" />
-            <span className="text-[10px] font-normal">
-              {showSavedFilters ? "Hide" : "Saved"}
-            </span>
-            {!showSavedFilters && crud.savedFilters.length > 0 && (
-              <Badge
-                variant="secondary"
-                className="ml-1 px-1 py-0 h-3.5 text-[10px] font-normal"
-              >
-                {crud.savedFilters.length}
-              </Badge>
-            )}
-          </Button>
 
-          <Button variant="ghost" size="xs" onClick={clearFilter}>
-            <X size={12} className="mr-1" />
-            <span className="text-[10px] font-normal">Clear</span>
-          </Button>
+          <SavedFiltersDropdown
+            showSavedFilters={showSavedFilters}
+            toggleSavedFilters={toggleSavedFilters}
+          />
+
+          <ClearFilterDropdown
+            onConfirm={executeClearFilter}
+            hasActiveFilters={hasActiveFilters()}
+          />
+
           <Button
             variant="ghost"
             size="xs"
@@ -163,6 +141,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             <RefreshCw size={12} className="mr-1" />
             <span className="text-[10px] font-normal">New</span>
           </Button>
+
           <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
             <DialogTrigger asChild>
               <Button
@@ -171,7 +150,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                 disabled={!filterStore.activeFilterId}
               >
                 <Share2 size={12} className="mr-1" />
-
                 <span className="text-[10px] font-normal">Share</span>
               </Button>
             </DialogTrigger>
@@ -179,13 +157,21 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               <DialogHeader>
                 <DialogTitle>Share Filter</DialogTitle>
                 <DialogDescription>
-                  Copy this URL to share your filter with others
+                  Copy the URL below to share this filter with others.
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex items-center space-x-2 mt-4">
-                <Input value={helpers.getShareableUrl() || ""} readOnly />
-                <Button onClick={handleCopyShareableUrl}>
-                  <Link size={16} className="mr-1" />
+              <div className="flex items-center space-x-2">
+                <Input
+                  value={helpers.getShareableUrl() || ""}
+                  readOnly
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyShareableUrl}
+                >
+                  <Link size={14} className="mr-1" />
                   Copy
                 </Button>
               </div>
@@ -193,7 +179,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
           </Dialog>
         </div>
       </div>
-      {/* Main filter content */}
+
       <div className="space-y-2">
         {filterStore.filter &&
         (filterStore.filter.type === "and" ||
@@ -219,17 +205,8 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             </div>
           </div>
         )}
-
-        {/* Display saved filters */}
-        {showSavedFilters && (
-          <div className="mt-2 border rounded-md p-3 bg-slate-50 dark:bg-slate-900">
-            <Small className="font-normal text-[10px] mb-2 block">
-              Saved Filters
-            </Small>
-            <SavedFiltersList onClose={() => setShowSavedFilters(false)} />
-          </div>
-        )}
       </div>
+
       {/* Save filter dialog */}
       <SaveFilterDialog
         open={saveDialogOpen}

@@ -43,13 +43,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     id: "request_body",
     label: "Request Body",
     type: "string",
-    operators: ["like", "ilike", "contains"],
+    operators: ["contains", "like", "ilike"],
   },
   {
     id: "response_body",
     label: "Response Body",
     type: "string",
-    operators: ["like", "ilike", "contains"],
+    operators: ["contains", "like", "ilike"],
   },
 
   // Number fields

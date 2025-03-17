@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useFilterStore } from "../store/filterStore";
 import { AndExpression, ConditionExpression } from "../filterAst";
-import { StoreFilterType } from "../hooks/useFilterCrud";
 
 /**
  * Custom hook for common filter actions
@@ -60,8 +59,9 @@ export const useFilterActions = () => {
 
   /**
    * Clear the current filter
+   * This is the actual implementation that clears the filter
    */
-  const clearFilter = () => {
+  const executeClearFilter = () => {
     filterStore.setFilter(DEFAULT_FILTER);
     filterStore.setActiveFilterName("Untitled Filter");
   };
@@ -128,7 +128,7 @@ export const useFilterActions = () => {
     updateFilterName,
     hasActiveFilters,
     createSimpleFilter,
-    clearFilter,
+    executeClearFilter,
     addTimestampCondition,
     getFilterDescription,
   };

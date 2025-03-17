@@ -9,6 +9,7 @@ import {
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
 import { getSupabaseServer } from "../lib/supabaseServer";
+import { FilterProvider } from "@/filterAST/context/filterContext";
 
 interface DashboardProps {
   user: User;

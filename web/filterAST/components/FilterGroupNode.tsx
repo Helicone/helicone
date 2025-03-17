@@ -31,23 +31,13 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
-    // Use status as the default field (common and useful default)
-    const defaultField = "status";
-    const defaultFieldDef = filterDefinitions.find(
-      (def) => def.id === defaultField
-    );
-
-    // If status field is found, use its first operator, otherwise fallback to eq
-    const defaultOperator = defaultFieldDef?.operators[0] || "eq";
-
     filterStore.addFilterExpression(path, {
       type: "condition",
       field: {
-        column: defaultField,
-        subtype: defaultFieldDef?.subType,
+        column: "status",
       },
-      operator: defaultOperator,
-      value: "",
+      operator: "eq",
+      value: 200,
     });
   };
 

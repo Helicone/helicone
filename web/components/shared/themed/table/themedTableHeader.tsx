@@ -121,20 +121,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const displayFilters = window.sessionStorage.getItem("showFilters") || null;
-    setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
-  }, []);
-
-  useEffect(() => {
     if (isSearchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchExpanded]);
-
-  const showFilterHandler = () => {
-    setShowFilters(!showFilters);
-    window.sessionStorage.setItem("showFilters", JSON.stringify(!showFilters));
-  };
 
   const getDefaultValue = () => {
     const currentTimeFilter = searchParams.get("t");

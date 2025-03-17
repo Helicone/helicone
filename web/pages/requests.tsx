@@ -81,19 +81,17 @@ const RequestsV2 = (props: RequestsV2Props) => {
   }, []);
 
   return (
-    <FilterProvider>
-      <RequestsPageV2
-        currentPage={currentPage}
-        pageSize={pageSize}
-        sort={sort}
-        initialRequestId={
-          initialRequestId === null ? undefined : initialRequestId
-        }
-        currentFilter={currentFilter}
-        organizationLayout={orgLayout}
-        organizationLayoutAvailable={true}
-      />
-    </FilterProvider>
+    <RequestsPageV2
+      currentPage={currentPage}
+      pageSize={pageSize}
+      sort={sort}
+      initialRequestId={
+        initialRequestId === null ? undefined : initialRequestId
+      }
+      currentFilter={currentFilter}
+      organizationLayout={orgLayout}
+      organizationLayoutAvailable={true}
+    />
   );
 };
 

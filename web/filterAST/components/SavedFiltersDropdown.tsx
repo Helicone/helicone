@@ -1,0 +1,106 @@
+import React, { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Trash2, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Small } from "@/components/ui/typography";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+
+interface SavedFiltersDropdownProps {
+  showSavedFilters: boolean;
+  toggleSavedFilters: () => void;
+}
+
+export const SavedFiltersDropdown: React.FC<SavedFiltersDropdownProps> = ({
+  showSavedFilters,
+  toggleSavedFilters,
+}) => {
+  const [open, setOpen] = useState(false);
+  const { crud, helpers, store } = useFilterAST();
+
+  const handleSelectFilter = (filterId: string) => {
+    helpers.loadFilterById(filterId);
+    setOpen(false);
+  };
+
+  const handleDeleteFilter = (e: React.MouseEvent, filterId: string) => {
+    e.stopPropagation();
+    helpers.deleteFilter(filterId);
+  };
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="xs">
+          <BookOpen size={12} className="mr-1" />
+          <span className="text-[10px] font-normal">Saved</span>
+          {crud.savedFilters.length > 0 && (
+            <Badge
+              variant="secondary"
+              className="ml-1 px-1 py-0 h-3.5 text-[10px] font-normal"
+            >
+              {crud.savedFilters.length}
+            </Badge>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="px-2 py-1.5">
+          <Small className="font-medium text-xs">Saved Filters</Small>
+        </div>
+        <DropdownMenuSeparator />
+
+        {crud.isLoading ? (
+          <div className="p-2 text-center">
+            <Small className="text-muted-foreground">Loading...</Small>
+          </div>
+        ) : crud.savedFilters.length === 0 ? (
+          <div className="p-2 text-center">
+            <Small className="text-muted-foreground">No saved filters</Small>
+          </div>
+        ) : (
+          <div className="max-h-[300px] overflow-y-auto py-1">
+            {crud.savedFilters.map((filter) => (
+              <DropdownMenuItem
+                key={filter.id}
+                className="flex justify-between items-center px-2 py-2 cursor-pointer"
+                onClick={() => handleSelectFilter(filter.id || "")}
+              >
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{filter.name}</span>
+                  <Small className="text-muted-foreground text-[10px]">
+                    {filter.createdAt
+                      ? new Date(filter.createdAt).toLocaleDateString()
+                      : "Unknown date"}
+                  </Small>
+                </div>
+                <div className="flex items-center gap-1">
+                  {store.activeFilterId === filter.id && (
+                    <Check size={14} className="text-primary" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-50 hover:opacity-100 hover:bg-destructive/10"
+                    onClick={(e) => handleDeleteFilter(e, filter.id || "")}
+                    disabled={crud.isDeleting}
+                  >
+                    <Trash2 size={14} className="text-destructive" />
+                  </Button>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default SavedFiltersDropdown;

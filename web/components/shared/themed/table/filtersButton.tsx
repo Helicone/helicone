@@ -3,6 +3,7 @@ import {
   ArrowPathIcon,
   Square2StackIcon,
   TrashIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../../layout/org/organizationContext";
@@ -15,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +27,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Small } from "@/components/ui/typography";
 
 interface FilterButtonProps {
   filters?: OrganizationFilter[];
@@ -77,12 +80,24 @@ export default function FiltersButton({
                       </span>
                     </>
                   ) : (
-                    "Saved Filters"
+                    "Saved Filters (Legacy)"
                   )}
                 </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
+              <div className="px-3 py-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-100 dark:border-amber-900/50 rounded-t-md">
+                <div className="flex items-start gap-2">
+                  <ExclamationTriangleIcon className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <Small className="text-amber-800 dark:text-amber-300 text-[11px] leading-tight">
+                    This legacy filter system will be replaced soon with our new
+                    enhanced filters. Your filters will be automatically
+                    migrated.
+                  </Small>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+
               {filters && filters.length > 0 ? (
                 filters.map((filter, idx) => (
                   <DropdownMenuItem
