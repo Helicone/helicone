@@ -69,15 +69,14 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
     // Create updated field with default operator
     const defaultOperator = filterDef.operators[0] || "eq";
-    const field = {
-      column: fieldId,
-      subtype: filterDef.subType,
-    };
 
     // Create updated condition with new field and default operator
     const updated: ConditionExpression = {
       ...condition,
-      field,
+      field: {
+        column: fieldId as any, // Use 'any' to bypass type checking temporarily
+        subtype: filterDef.subType,
+      },
       operator: defaultOperator,
       value: "", // Reset value since field changed
     };

@@ -165,7 +165,7 @@ function condition(
     type: "condition",
     field: {
       table: "request_response_rmt",
-      column,
+      column: column as keyof RequestResponseRMT,
     },
     operator,
     value,
