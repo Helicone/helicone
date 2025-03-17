@@ -10,21 +10,6 @@ export const useFilterActions = () => {
   const filterStore = useFilterStore();
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  // Create an empty default filter
-  const DEFAULT_FILTER: AndExpression = {
-    type: "and",
-    expressions: [
-      {
-        type: "condition",
-        field: {
-          column: "status",
-        },
-        operator: "eq",
-        value: "",
-      },
-    ],
-  };
-
   /**
    * Check if there are any active filters
    */
@@ -62,7 +47,7 @@ export const useFilterActions = () => {
    * This is the actual implementation that clears the filter
    */
   const executeClearFilter = () => {
-    filterStore.setFilter(DEFAULT_FILTER);
+    filterStore.setFilter(null);
     filterStore.setActiveFilterName("Untitled Filter");
   };
 
