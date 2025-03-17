@@ -1,3 +1,6 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -7,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { cn } from "@/lib/utils";
 import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import {
@@ -16,8 +20,6 @@ import {
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { SquareArrowOutUpRight } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
@@ -36,10 +38,6 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -225,48 +223,7 @@ const chatCompletion = await openai.chat.completions.create(
           )}
 
           {/* Content Based on State */}
-          {promptCount === 0 ? (
-            // No Prompts to Display - show this to everyone
-            <div className="flex items-center justify-center mt-[20rem]">
-              <div className="flex flex-col items-center justify-center gap-12 px-4 text-center max-w-lg">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <h3 className="text-2xl font-semibold">
-                    No prompts created yet
-                  </h3>
-
-                  <p className="text-gray-500 text-md">
-                    Get started by creating your first prompt. You can design,
-                    test, and version control your AI prompts all in one place.
-                  </p>
-                </div>
-                <div className="flex flex-row gap-2">
-                  <Button
-                    variant="action"
-                    className="gap-2"
-                    onClick={handleCreatePrompt}
-                    disabled={isCreating}
-                  >
-                    {isCreating ? (
-                      <PiSpinnerGapBold className="animate-spin h-4 w-4 mr-2" />
-                    ) : (
-                      <PiPlusBold className="h-4 w-4 mr-2" />
-                    )}
-                    {isCreating ? "Creating..." : "Create First Prompt"}
-                  </Button>
-
-                  <Link
-                    href="https://docs.helicone.ai/features/prompts"
-                    target="_blank"
-                  >
-                    <Button variant="outline" className="gap-2 text-slate-700">
-                      View Docs
-                      <SquareArrowOutUpRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ) : filteredPrompts && filteredPrompts.length > 0 ? (
+          {filteredPrompts && filteredPrompts.length > 0 ? (
             searchParams.get("view") === "card" ? (
               // Card View
               <ul
