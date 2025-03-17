@@ -87,7 +87,7 @@ export const useGetRequestsWithBodies = (
   sortLeaf: SortLeafRequest,
   isLive: boolean = false,
   isCached: boolean = false,
-  bodySubstringLength: number
+  bodySubstringLength?: number
 ) => {
   const org = useOrg();
 
@@ -227,7 +227,7 @@ const useGetRequests = (
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
   isLive: boolean = false,
-  bodySubstringLength: number
+  bodySubstringLength?: number
 ) => {
   return {
     requests: useGetRequestsWithBodies(
