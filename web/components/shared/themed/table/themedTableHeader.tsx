@@ -36,6 +36,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import FilterASTEditor from "@/filterAST/FilterASTEditor";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -106,13 +108,16 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
 
   const searchParams = useSearchParams();
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useLocalStorage("showFilters", false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Add state variables to manage the popover's open state and pin status
   const [isFiltersPopoverOpen, setIsFiltersPopoverOpen] = useState(false);
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const [isFiltersPinned, setIsFiltersPinned] = useLocalStorage(
+    "isFiltersPinned",
+    false
+  );
   const popoverContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -218,17 +223,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     onInteractOutside={(e) => {}}
                     onClick={handlePopoverInteraction}
                   >
-                    <AdvancedFilters
-                      filterMap={advancedFilters.filterMap}
-                      filters={advancedFilters.filters}
-                      setAdvancedFilters={advancedFilters.setAdvancedFilters}
-                      searchPropertyFilters={
-                        advancedFilters.searchPropertyFilters
-                      }
-                      savedFilters={savedFilters?.filters}
-                      onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-                      layoutPage={savedFilters?.layoutPage ?? "requests"}
-                    />
+                    <FilterASTEditor onFilterChange={() => {}} />
                     <div className="flex justify-end ml-4">
                       <Button
                         variant="ghostLinear"
@@ -391,15 +386,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
         {advancedFilters && showFilters && isFiltersPinned && (
           <div className="flex justify-start min-w-[50rem] w-full mt-1">
             <div className="flex-1 rounded-lg">
-              <AdvancedFilters
-                filterMap={advancedFilters.filterMap}
-                filters={advancedFilters.filters}
-                setAdvancedFilters={advancedFilters.setAdvancedFilters}
-                searchPropertyFilters={advancedFilters.searchPropertyFilters}
-                savedFilters={savedFilters?.filters}
-                onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-                layoutPage={savedFilters?.layoutPage ?? "requests"}
-              />
+              <FilterASTEditor onFilterChange={() => {}} />
             </div>
             <Button
               variant="ghost"

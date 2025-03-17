@@ -9,6 +9,7 @@ import {
 } from "../services/lib/organization_layout/organization_layout";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { getSupabaseServer } from "../lib/supabaseServer";
+import { FilterProvider } from "@/filterAST/context/filterContext";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `
@@ -80,17 +81,19 @@ const RequestsV2 = (props: RequestsV2Props) => {
   }, []);
 
   return (
-    <RequestsPageV2
-      currentPage={currentPage}
-      pageSize={pageSize}
-      sort={sort}
-      initialRequestId={
-        initialRequestId === null ? undefined : initialRequestId
-      }
-      currentFilter={currentFilter}
-      organizationLayout={orgLayout}
-      organizationLayoutAvailable={true}
-    />
+    <FilterProvider>
+      <RequestsPageV2
+        currentPage={currentPage}
+        pageSize={pageSize}
+        sort={sort}
+        initialRequestId={
+          initialRequestId === null ? undefined : initialRequestId
+        }
+        currentFilter={currentFilter}
+        organizationLayout={orgLayout}
+        organizationLayoutAvailable={true}
+      />
+    </FilterProvider>
   );
 };
 

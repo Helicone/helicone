@@ -1,13 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { H4, P } from "@/components/ui/typography";
+import { Small } from "@/components/ui/typography";
 import {
-  Filter as FilterIcon,
   PlusCircle,
   Save,
   X,
   BookOpen,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import React, { useState } from "react";
 import { AndExpression, FilterExpression } from "./filterAst";
@@ -68,76 +68,86 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   if (crud.isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin" />
+        <Loader2 className="animate-spin h-4 w-4" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-3 w-full bg-white dark:bg-slate-950 rounded-md p-3">
       {/* Header with actions */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FilterIcon size={20} />
-          <H4>Filters</H4>
-          {hasActiveFilters() && (
-            <Badge variant="outline" className="ml-2">
-              Active
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={toggleSavedFilters}>
-            <BookOpen size={16} className="mr-1" />
-            {showSavedFilters ? "Hide Saved" : "Saved Filters"}
+        <div className="flex items-center gap-1.5">
+          <Button variant="ghost" size="xs" onClick={toggleSavedFilters}>
+            <BookOpen size={12} className="mr-1" />
+            <span className="text-[10px] font-normal">
+              {showSavedFilters ? "Hide" : "Saved"}
+            </span>
             {!showSavedFilters && crud.savedFilters.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
+              <Badge
+                variant="secondary"
+                className="ml-1 px-1 py-0 h-3.5 text-[10px] font-normal"
+              >
                 {crud.savedFilters.length}
               </Badge>
             )}
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="xs"
             onClick={() => setSaveDialogOpen(true)}
             disabled={!hasActiveFilters()}
           >
-            <Save size={16} className="mr-1" />
-            Save Filter
+            <Save size={12} className="mr-1" />
+            <span className="text-[10px] font-normal">Save</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={clearFilter}>
-            <X size={16} className="mr-1" />
-            Clear
+          <Button variant="ghost" size="xs" onClick={clearFilter}>
+            <X size={12} className="mr-1" />
+            <span className="text-[10px] font-normal">Clear</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => helpers.newEmptyFilter()}
+          >
+            <RefreshCw size={12} className="mr-1" />
+            <span className="text-[10px] font-normal">Reset</span>
           </Button>
         </div>
       </div>
 
       {/* Main filter content */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         {filterStore.filter &&
         (filterStore.filter.type === "and" ||
           filterStore.filter.type === "or") ? (
           <FilterGroupNode group={filterStore.filter} path={[]} isRoot={true} />
         ) : (
-          <div className="text-center py-8">
-            <P className="text-muted-foreground">No filters applied</P>
-            <Button
-              onClick={() => {
-                helpers.newEmptyFilter();
-              }}
-              className="mt-2"
-              variant="default"
-            >
-              <PlusCircle size={16} className="mr-1" />
-              New Filter
-            </Button>
+          <div className="text-center py-6 bg-slate-50 dark:bg-slate-900 rounded-md">
+            <Small className="text-muted-foreground text-[10px] font-normal">
+              No filters applied
+            </Small>
+            <div className="mt-2">
+              <Button
+                onClick={() => {
+                  helpers.newEmptyFilter();
+                }}
+                variant="default"
+                size="xs"
+              >
+                <PlusCircle size={12} className="mr-1" />
+                <span className="text-[10px] font-normal">New Filter</span>
+              </Button>
+            </div>
           </div>
         )}
 
         {/* Display saved filters */}
         {showSavedFilters && (
-          <div className="mt-4 border rounded-md p-4 bg-card">
-            <H4 className="mb-2">Saved Filters</H4>
+          <div className="mt-2 border rounded-md p-3 bg-slate-50 dark:bg-slate-900">
+            <Small className="font-normal text-[10px] mb-2 block">
+              Saved Filters
+            </Small>
             <SavedFiltersList onClose={() => setShowSavedFilters(false)} />
           </div>
         )}

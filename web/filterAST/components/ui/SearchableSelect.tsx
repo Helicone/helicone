@@ -60,17 +60,23 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(`justify-between w-[${width}]`, className)}
+          className={cn(
+            `justify-between w-[${width}] font-normal text-[10px]`,
+            className
+          )}
           disabled={disabled}
         >
           {getCurrentLabel()}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={`w-[${width}] p-0`}>
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9" />
-          <CommandEmpty>{emptyMessage}</CommandEmpty>
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="h-7 text-[10px]"
+          />
+          <CommandEmpty className="text-[10px]">{emptyMessage}</CommandEmpty>
           <CommandGroup>
             <CommandList>
               {options.map((option) => (
@@ -81,10 +87,11 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     onValueChange(selectedValue);
                     setOpen(false);
                   }}
+                  className="text-[10px]"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-3 w-3",
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />

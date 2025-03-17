@@ -152,14 +152,13 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   if (!filterDef) {
     return (
-      <div className="p-3 border border-amber-300 rounded-md bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">
+      <div className="p-2 border border-amber-300 rounded-md bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-sm text-amber-800 dark:text-amber-300 font-medium">
-            Invalid filter field: &quot;{condition.field.column || "empty"}
-            &quot;
+          <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+            Invalid field: &quot;{condition.field.column || "empty"}&quot;
           </span>
-          <span className="text-xs text-amber-600 dark:text-amber-400">
-            Please select a valid field or remove this condition
+          <span className="text-[10px] text-amber-600 dark:text-amber-400">
+            Please select a valid field or remove
           </span>
         </div>
         {!isOnlyCondition && (
@@ -167,9 +166,9 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
             variant="ghost"
             size="icon"
             onClick={handleRemove}
-            className="h-8 w-8 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+            className="h-6 w-6 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
           >
-            <Trash2 size={16} />
+            <Trash2 size={12} />
           </Button>
         )}
       </div>
@@ -188,7 +187,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           placeholder="Type to search..."
           emptyMessage="No results found"
           disabled={!condition.field.column || !condition.operator}
-          className="w-full h-9"
+          className="w-full h-7"
         />
       );
     }
@@ -204,7 +203,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           searchPlaceholder="Search value..."
           emptyMessage="No value found."
           disabled={!condition.field.column || !condition.operator}
-          className="w-full h-9"
+          className="w-full h-7 text-[10px]"
         />
       );
     }
@@ -216,13 +215,13 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         onChange={(e) => handleValueChange(e.target.value)}
         disabled={!condition.field.column || !condition.operator}
         placeholder="Enter value"
-        className="w-full h-9"
+        className="w-full h-7 text-[10px]"
       />
     );
   };
 
   return (
-    <div className="flex flex-row items-center gap-2 p-3 border rounded-md bg-card">
+    <div className="flex flex-row items-center gap-1.5 p-2 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-950 shadow-sm">
       <SearchableSelect
         options={fieldOptions}
         value={condition.field.column}
@@ -230,8 +229,8 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         placeholder="Select field"
         searchPlaceholder="Search field..."
         emptyMessage="No field found."
-        width="180px"
-        className="flex-shrink-0 h-9"
+        width="150px"
+        className="flex-shrink-0 h-7 text-[10px]"
       />
 
       <Select
@@ -239,7 +238,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         onValueChange={handleOperatorChange}
         disabled={!condition.field.column}
       >
-        <SelectTrigger className="w-[60px] h-9 px-2 flex-shrink-0 text-center">
+        <SelectTrigger className="w-[45px] h-7 px-1.5 flex-shrink-0 text-center text-[10px] font-normal">
           <SelectValue placeholder="Op">
             {condition.operator &&
               FILTER_OPERATOR_LABELS[condition.operator as FilterOperator]}
@@ -247,7 +246,11 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         </SelectTrigger>
         <SelectContent>
           {operatorOptions.map((op) => (
-            <SelectItem key={op.value} value={op.value}>
+            <SelectItem
+              key={op.value}
+              value={op.value}
+              className="text-[10px] font-normal"
+            >
               {op.label}
             </SelectItem>
           ))}
@@ -261,9 +264,9 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           variant="ghost"
           size="icon"
           onClick={handleRemove}
-          className="flex-shrink-0 ml-1"
+          className="flex-shrink-0 h-6 w-6"
         >
-          <Trash2 size={16} className="text-muted-foreground" />
+          <Trash2 size={12} className="text-muted-foreground" />
         </Button>
       )}
     </div>
