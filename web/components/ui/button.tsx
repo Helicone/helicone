@@ -22,7 +22,7 @@ const buttonVariants = cva(
           "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
         link: "text-[hsl(var(--primary))] underline-offset-4 hover:underline",
         action:
-          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90 border border-[hsl(var(--border))] interactive",
+          "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 border border-[hsl(var(--border))] interactive",
         glass:
           "glass border border-slate-200 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
       },
