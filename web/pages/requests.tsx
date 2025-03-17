@@ -9,7 +9,6 @@ import {
 } from "../services/lib/organization_layout/organization_layout";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { getSupabaseServer } from "../lib/supabaseServer";
-import { FilterProvider } from "@/filterAST/context/filterContext";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `

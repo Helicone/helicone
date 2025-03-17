@@ -9,7 +9,7 @@ import {
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { Result } from "../../../lib/result";
 import { TimeInterval } from "../../../lib/timeCalculations/time";

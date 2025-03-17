@@ -30,20 +30,30 @@ const operatorMap: Record<string, string> = {
 };
 
 /**
+ * Checks if a field name should be treated as a property
+ * This includes both explicitly marked properties and keys that follow property naming conventions
+ */
+function isPropertyField(field: FieldSpec): boolean {
+  // Explicitly marked as property
+  if (field.subtype === "property") {
+    return true;
+  }
+
+  // Check if the column name contains hyphens, which is a common pattern for properties
+  // like "Helicone-Session-Name"
+  if (typeof field.column === "string" && field.column.includes("-")) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Converts a field specification to the appropriate table name for the legacy filter
  */
 function getTableFromField(field: FieldSpec): string {
   // Default to request_response_rmt
   const table = field.table || "request_response_rmt";
-
-  // Handle special subtypes
-  if (field.subtype === "property") {
-    return "properties";
-  }
-
-  if (field.subtype === "score") {
-    return "scores";
-  }
 
   // Map tables to legacy names
   switch (table) {
@@ -73,18 +83,58 @@ export function toFilterNode(filter: FilterExpression): FilterNode {
     const table = getTableFromField(condition.field);
     const operator = operatorMap[condition.operator] || condition.operator;
 
-    // Handle property or score with key
+    // Handle property with key
     if (
-      (condition.field.subtype === "property" ||
-        condition.field.subtype === "score") &&
+      condition.field.subtype === "property" &&
       condition.field.valueMode === "value" &&
       condition.field.key
     ) {
-      // Create a nested structure for properties or scores
+      // Create a nested structure for properties under request_response_rmt
       const result: FilterLeaf = {
         [table]: {
-          [condition.field.key]: {
-            [operator]: condition.value,
+          properties: {
+            [condition.field.key]: {
+              [operator]: condition.value,
+            },
+          },
+        },
+      };
+
+      return result;
+    }
+
+    // Handle property-like column names (e.g., "Helicone-Session-Name")
+    if (isPropertyField(condition.field)) {
+      // Use the column name as the property key
+      const propertyKey = condition.field.column.toString();
+
+      // Create a nested structure for properties under request_response_rmt
+      const result: FilterLeaf = {
+        [table]: {
+          properties: {
+            [propertyKey]: {
+              [operator]: condition.value,
+            },
+          },
+        },
+      };
+
+      return result;
+    }
+
+    // Handle score with key
+    if (
+      condition.field.subtype === "score" &&
+      condition.field.valueMode === "value" &&
+      condition.field.key
+    ) {
+      // Create a nested structure for scores under request_response_rmt
+      const result: FilterLeaf = {
+        [table]: {
+          scores: {
+            [condition.field.key]: {
+              [operator]: condition.value,
+            },
           },
         },
       };

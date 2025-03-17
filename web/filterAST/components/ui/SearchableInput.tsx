@@ -120,9 +120,7 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
               onChange={handleInputChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              onFocus={() =>
-                inputValue && onSearch(inputValue).then(setOptions)
-              }
+              onFocus={() => onSearch(inputValue).then(setOptions)}
               placeholder={placeholder}
               disabled={disabled}
               className={cn("w-full", className)}

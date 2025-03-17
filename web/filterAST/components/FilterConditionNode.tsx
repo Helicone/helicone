@@ -115,6 +115,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   const fieldOptions: SearchableSelectOption[] = filterDefs.map((def) => ({
     label: def.label,
     value: def.id,
+    subType: def.subType,
   }));
 
   // Convert operators to SearchableSelectOption format

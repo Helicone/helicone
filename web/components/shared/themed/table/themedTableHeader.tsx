@@ -9,7 +9,6 @@ import { useEffect, useState, useRef } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { AdvancedFilters } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "./columns/viewColumns";
