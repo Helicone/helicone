@@ -1,4 +1,5 @@
 import React from "react";
+import { JsonRenderer } from "./single/JsonRenderer";
 
 interface JsonViewProps {
   requestBody: any;
@@ -17,7 +18,7 @@ export const JsonView: React.FC<JsonViewProps> = ({
             Request
           </p>
           <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-            {JSON.stringify(requestBody, null, 2)}
+            <JsonRenderer data={requestBody} />
           </pre>
         </div>
       )}
@@ -27,7 +28,7 @@ export const JsonView: React.FC<JsonViewProps> = ({
             Response
           </p>
           <pre className="bg-white dark:bg-[#17191d] text-xs whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-gray-300 dark:border-gray-700">
-            {JSON.stringify(responseBody, null, 2)}
+            <JsonRenderer data={responseBody} />
           </pre>
         </div>
       )}
