@@ -2,6 +2,33 @@ import crypto from "crypto";
 import zlib from "zlib";
 import { PromiseGenericResult, err, ok } from "../lib/shared/result";
 
+/**
+ * Safely parses a JSON string and returns the parsed value or null if parsing fails
+ * This version is type-safe and provides detailed error information
+ *
+ * @param text The string to parse as JSON
+ * @param errorMsg Optional context message to include in error logs
+ * @returns The parsed object of type T or null if parsing failed
+ */
+export function safeJsonParse<T>(text: string, errorMsg?: string): T | null {
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch (error) {
+    console.error(
+      `JSON parsing error${errorMsg ? ` (${errorMsg})` : ""}: ${error}`,
+      `Input excerpt: ${text.substring(0, 100)}${
+        text.length > 100 ? "..." : ""
+      }`
+    );
+    return null;
+  }
+}
+
+/**
+ * @deprecated Use safeJsonParse<T> instead for type safety and better error handling
+ */
 export function tryParse(text: string, errorMsg?: string): any {
   try {
     return JSON.parse(text);
