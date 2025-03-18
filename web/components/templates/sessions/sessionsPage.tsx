@@ -47,7 +47,7 @@ const TABS = [
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex } = props;
+  const { sort } = props;
 
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -86,7 +86,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     []
   );
 
-  const { sessions, refetch, isLoading } = useSessions(
+  const { sessions, isLoading } = useSessions(
     timeFilter,
     debouncedSessionIdSearch ?? "",
     filterUITreeToFilterNode(
@@ -95,8 +95,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     ) as any,
     selectedName
   );
-
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
 
   const hasSomeSessions = useMemo(() => {
     return allNames.sessions.length > 0;
@@ -111,30 +109,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSomeSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
-    }
-  }, [
-    hasSomeSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
-
   return (
     <Tabs
       value={currentTab}
@@ -142,15 +116,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {allNames.isLoading ||
-        allNames.isRefetching ||
-        isLoading ||
-        names.isLoading ||
-        names.isRefetching ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <LoadingAnimation />
-          </div>
-        ) : hasSomeSessions ? (
+        {hasSomeSessions || isLoading ? (
           <>
             <AuthHeader
               isWithinIsland={true}
@@ -201,7 +167,14 @@ const SessionsPage = (props: SessionsPageProps) => {
                 sessionIdSearch={sessionIdSearch ?? ""}
                 setSessionIdSearch={setSessionIdSearch}
                 sessions={sessions}
-                isLoading={isLoading}
+                isLoading={
+                  isLoading ||
+                  allNames.isLoading ||
+                  allNames.isRefetching ||
+                  isLoading ||
+                  names.isLoading ||
+                  names.isRefetching
+                }
                 sort={sort}
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
@@ -211,10 +184,6 @@ const SessionsPage = (props: SessionsPageProps) => {
               />
             </Row>
           </>
-        ) : allNames.isRefetching ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <LoadingAnimation />
-          </div>
         ) : (
           <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
             <div className="flex flex-1 h-full">
