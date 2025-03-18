@@ -1,6 +1,7 @@
 import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
+import { safeJsonParse } from "../../utils/helpers";
 import { KafkaProducer } from "../clients/KafkaProducer";
 import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
@@ -36,9 +37,9 @@ export function webSocketProxyForwarder(
       messageBuffer.push({ data, isBinary });
       // Also log the message
       const dataCopy = Buffer.from(data);
-      const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-      const content =
-        typeof message === "string" ? JSON.parse(message) : message;
+      // Always convert to string for message logging
+      const message = dataCopy.toString("utf-8");
+      const content = safeJsonParse(message) ?? {};
       messages.push({
         type: "message",
         content,
@@ -73,7 +74,7 @@ export function webSocketProxyForwarder(
           /*                            Append Message Events                           */
           /* -------------------------------------------------------------------------- */
           if (messageType === "message") {
-            const content = typeof data === "string" ? JSON.parse(data) : data;
+            const content = safeJsonParse(data as string) ?? {};
             messages.push({
               type: messageType,
               content,
@@ -171,7 +172,7 @@ async function linkWebSocket({
       | "pong"
       | "unexpected-response",
     from: "client" | "target",
-    data: any
+    data: string | Error
   ) => Promise<void>;
 }) {
   // MESSAGE EVENTS
@@ -179,15 +180,17 @@ async function linkWebSocket({
     targetWs.send(data, { binary: isBinary });
 
     const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "client", message.toString());
+    // Always convert to string for consistency when sending to the callback
+    const message = dataCopy.toString("utf-8");
+    await on("message", "client", message);
   });
   targetWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
     clientWs.send(data, { binary: isBinary });
 
     const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "target", message.toString());
+    // Always convert to string for consistency when sending to the callback
+    const message = dataCopy.toString("utf-8");
+    await on("message", "target", message);
   });
 
   // CLOSE EVENTS
