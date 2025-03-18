@@ -109,6 +109,32 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
+  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
+
+  useEffect(() => {
+    if (
+      !hasAccess &&
+      hasSomeSessions &&
+      selectedName === undefined &&
+      !allNames.isLoading
+    ) {
+      const sortedSessions = [...allNames.sessions].sort(
+        (a, b) =>
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+      );
+
+      if (sortedSessions.length > 0) {
+        setSelectedName(sortedSessions[0].name);
+      }
+    }
+  }, [
+    hasSomeSessions,
+    allNames.sessions,
+    allNames.isLoading,
+    selectedName,
+    hasAccess,
+  ]);
+
   return (
     <Tabs
       value={currentTab}
