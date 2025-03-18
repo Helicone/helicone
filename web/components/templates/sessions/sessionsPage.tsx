@@ -142,7 +142,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {(hasSomeSessions || isLoading) && hasAccess ? (
+        {hasSomeSessions || isLoading ? (
           <>
             <AuthHeader
               isWithinIsland={true}
