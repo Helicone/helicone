@@ -2713,6 +2713,10 @@
 					},
 					"isScored": {
 						"type": "boolean"
+					},
+					"bodySubstringLength": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -8019,7 +8023,8 @@
 												"created_at": "desc"
 											},
 											"isScored": false,
-											"isPartOfExperiment": false
+											"isPartOfExperiment": false,
+											"bodySubstringLength": 500
 										}
 									}
 								}
@@ -8055,7 +8060,8 @@
 								},
 								"includeInputs": false,
 								"isScored": false,
-								"isPartOfExperiment": false
+								"isPartOfExperiment": false,
+								"bodySubstringLength": 500
 							}
 						}
 					}

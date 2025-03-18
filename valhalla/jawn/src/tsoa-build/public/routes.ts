@@ -1302,6 +1302,7 @@ const models: TsoaRoute.Models = {
             "includeInputs": {"dataType":"boolean"},
             "isPartOfExperiment": {"dataType":"boolean"},
             "isScored": {"dataType":"boolean"},
+            "bodySubstringLength": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

@@ -23,7 +23,8 @@ const useRequestsPageV2 = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean,
-  isLive: boolean
+  isLive: boolean,
+  bodySubstringLength: number = 500 // Default to 500 characters
 ) => {
   const [timeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("all"),
@@ -83,7 +84,8 @@ const useRequestsPageV2 = (
     filter,
     sortLeaf,
     isCached,
-    isLive
+    isLive,
+    bodySubstringLength
   );
 
   const isDataLoading = requests.isLoading || isPropertiesLoading;

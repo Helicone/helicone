@@ -217,7 +217,9 @@ const sanitizeMappedContent = (
           2
         );
       }
-    } catch (e) {}
+    } catch (e) {
+      // continue;
+    }
   }
 
   return {
