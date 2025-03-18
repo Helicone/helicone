@@ -109,6 +109,8 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
+  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
+
   return (
     <Tabs
       value={currentTab}
@@ -116,7 +118,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {hasSomeSessions || isLoading ? (
+        {(hasSomeSessions || isLoading) && hasAccess ? (
           <>
             <AuthHeader
               isWithinIsland={true}
