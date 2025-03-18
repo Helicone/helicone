@@ -1,6 +1,5 @@
 import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
