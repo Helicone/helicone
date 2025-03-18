@@ -10,7 +10,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
 
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(false);
   const requests = useGetRequests(
     1,
     1000,
@@ -43,13 +43,15 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
   const session = sessionFromHeliconeRequests(requests.requests.requests ?? []);
 
   return (
-    <SessionContent
-      session={session}
-      session_id={session_id as string}
-      requests={requests}
-      isLive={isLive}
-      setIsLive={setIsLive}
-    />
+    <>
+      <SessionContent
+        session={session}
+        session_id={session_id as string}
+        requests={requests}
+        isLive={isLive}
+        setIsLive={setIsLive}
+      />
+    </>
   );
 };
 
