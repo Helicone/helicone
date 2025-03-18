@@ -1675,28 +1675,22 @@
 					"llm_type": {
 						"$ref": "#/components/schemas/LlmType"
 					},
+					"provider": {
+						"type": "string"
+					},
 					"model": {
 						"type": "string"
 					},
-					"provider": {
-						"type": "string"
+					"messages": {
+						"items": {
+							"$ref": "#/components/schemas/Message"
+						},
+						"type": "array",
+						"nullable": true
 					},
 					"prompt": {
 						"type": "string",
 						"nullable": true
-					},
-					"input": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							}
-						]
 					},
 					"max_tokens": {
 						"type": "number",
@@ -1709,6 +1703,11 @@
 						"nullable": true
 					},
 					"top_p": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"seed": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
@@ -1727,6 +1726,20 @@
 						"format": "double",
 						"nullable": true
 					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						],
+						"nullable": true
+					},
 					"reasoning_effort": {
 						"type": "string",
 						"enum": [
@@ -1737,30 +1750,15 @@
 						],
 						"nullable": true
 					},
-					"n": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"stop": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array",
-						"nullable": true
-					},
-					"messages": {
-						"items": {
-							"$ref": "#/components/schemas/Message"
-						},
-						"type": "array",
-						"nullable": true
-					},
 					"tools": {
 						"items": {
 							"$ref": "#/components/schemas/Tool"
 						},
 						"type": "array"
+					},
+					"parallel_tool_calls": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"tool_choice": {
 						"properties": {
@@ -1770,10 +1768,23 @@
 							"type": {
 								"type": "string",
 								"enum": [
-									"auto",
 									"none",
+									"auto",
+									"any",
 									"tool"
 								]
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
 							}
 						},
 						"required": [
@@ -1786,6 +1797,30 @@
 					},
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
+					},
+					"input": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						]
+					},
+					"n": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"size": {
+						"type": "string"
+					},
+					"quality": {
+						"type": "string"
 					}
 				},
 				"type": "object",
@@ -4638,6 +4673,126 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"StoreFilterType": {
+				"properties": {
+					"createdAt": {
+						"type": "string"
+					},
+					"filter": {},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"filter",
+					"name"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_StoreFilterType-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/StoreFilterType"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_StoreFilterType-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_StoreFilterType-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_StoreFilterType_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/StoreFilterType"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_StoreFilterType.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_StoreFilterType_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ChatCompletionTokenLogprob.TopLogprob": {
 				"properties": {
 					"token": {
@@ -4925,11 +5080,6 @@
 			"CompletionUsage.CompletionTokensDetails": {
 				"description": "Breakdown of tokens used in a completion.",
 				"properties": {
-					"accepted_prediction_tokens": {
-						"type": "number",
-						"format": "double",
-						"description": "When using Predicted Outputs, the number of tokens in the prediction that\nappeared in the completion."
-					},
 					"audio_tokens": {
 						"type": "number",
 						"format": "double",
@@ -4939,11 +5089,6 @@
 						"type": "number",
 						"format": "double",
 						"description": "Tokens generated by the model for reasoning."
-					},
-					"rejected_prediction_tokens": {
-						"type": "number",
-						"format": "double",
-						"description": "When using Predicted Outputs, the number of tokens in the prediction that did\nnot appear in the completion. However, like reasoning tokens, these tokens are\nstill counted in the total completion tokens for purposes of billing, output,\nand context window limits."
 					}
 				},
 				"type": "object",
@@ -5040,7 +5185,7 @@
 							null
 						],
 						"nullable": true,
-						"description": "The service tier used for processing the request."
+						"description": "The service tier used for processing the request. This field is only included if\nthe `service_tier` parameter is specified in the request."
 					},
 					"system_fingerprint": {
 						"type": "string",
@@ -5114,45 +5259,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ChatCompletionDeveloperMessageParam": {
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages.",
-				"properties": {
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"$ref": "#/components/schemas/ChatCompletionContentPartText"
-								},
-								"type": "array"
-							}
-						],
-						"description": "The contents of the developer message."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"developer"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `developer`."
-					},
-					"name": {
-						"type": "string",
-						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
-					}
-				},
-				"required": [
-					"content",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ChatCompletionSystemMessageParam": {
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, use `developer` messages\nfor this purpose instead.",
 				"properties": {
 					"content": {
 						"anyOf": [
@@ -5201,7 +5308,7 @@
 							"low",
 							"high"
 						],
-						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding)."
+						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision/low-or-high-fidelity-image-understanding)."
 					}
 				},
 				"required": [
@@ -5291,7 +5398,6 @@
 				"description": "Learn about\n[text inputs](https://platform.openai.com/docs/guides/text-generation)."
 			},
 			"ChatCompletionUserMessageParam": {
-				"description": "Messages sent by an end user, containing prompts or additional context\ninformation.",
 				"properties": {
 					"content": {
 						"anyOf": [
@@ -5383,7 +5489,6 @@
 				"deprecated": true
 			},
 			"ChatCompletionAssistantMessageParam": {
-				"description": "Messages sent by the model in response to user messages.",
 				"properties": {
 					"role": {
 						"type": "string",
@@ -5525,9 +5630,6 @@
 			"ChatCompletionMessageParam": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ChatCompletionDeveloperMessageParam"
-					},
-					{
 						"$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
 					},
 					{
@@ -5542,8 +5644,7 @@
 					{
 						"$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
 					}
-				],
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages."
+				]
 			},
 			"Record_string.unknown_": {
 				"properties": {},
@@ -10787,6 +10888,183 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/filter": {
+			"get": {
+				"operationId": "GetFilters",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_StoreFilterType-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Filter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Filter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StoreFilterType"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/filter/{id}": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_StoreFilterType.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Filter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Filter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Filter"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"filters": {}
+								},
+								"required": [
+									"filters"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/demo/completion": {
