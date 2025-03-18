@@ -2,17 +2,18 @@ import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { promises as fs } from "fs";
 import { serialize } from "next-mdx-remote/serialize";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import path from "path";
 import { RemoteMdxPage } from "./mdxRenderer";
 import remarkGfm from "remark-gfm";
+import remarkToc from "remark-toc";
 import rehypeHighlight from "rehype-highlight";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import "highlight.js/styles/atom-one-dark.css";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronRight, ChevronLeft, Calendar, Clock } from "lucide-react";
+import { Check, ChevronRight, ChevronLeft } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
-import { Metadata } from "next";
 
 // Define headshots mapping
 const HEADSHOTS = {
@@ -45,8 +46,21 @@ export default async function Home({
 
   const mdxSource = await serialize(source, {
     mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypeHighlight],
+      remarkPlugins: [
+        remarkGfm,
+        [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
+      ],
+      rehypePlugins: [
+        rehypeSlug,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: "wrap",
+            properties: { className: ["anchor-link"] },
+          },
+        ],
+        rehypeHighlight,
+      ],
     },
   });
 
@@ -105,20 +119,28 @@ export default async function Home({
 
           <section className="rounded-xl overflow-hidden border border-sky-100 shadow-sm">
             <div className="bg-sky-50 p-4 space-y-2">
-              <h3 className="font-semibold text-slate-700 text-sm">Join Helicone</h3>
+              <h3 className="font-semibold text-slate-700 text-sm">
+                Join Helicone
+              </h3>
 
               <div className="flex flex-col space-y-1.5 pb-2">
                 <div className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">Real-time monitoring</span>
+                  <span className="text-slate-600 text-sm">
+                    Real-time monitoring
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">Cost optimization</span>
+                  <span className="text-slate-600 text-sm">
+                    Cost optimization
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-slate-600 text-sm">Advanced analytics</span>
+                  <span className="text-slate-600 text-sm">
+                    Advanced analytics
+                  </span>
                 </div>
               </div>
               <Link href="https://us.helicone.ai/signin" className="block">
@@ -140,8 +162,13 @@ export default async function Home({
           {/* Desktop date display */}
           <div className="hidden md:flex items-center gap-2 -mt-4 mb-8">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 text-sm font-medium">{String(metadata.date)}</span>
-              <span className="text-slate-400 text-sm font-medium"> · {String(metadata.time)}</span>
+              <span className="text-slate-500 text-sm font-medium">
+                {String(metadata.date)}
+              </span>
+              <span className="text-slate-400 text-sm font-medium">
+                {" "}
+                · {String(metadata.time)}
+              </span>
             </div>
           </div>
 

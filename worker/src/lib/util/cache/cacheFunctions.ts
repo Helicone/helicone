@@ -5,6 +5,15 @@ import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 const CACHE_BACKOFF_RETRIES = 5;
+
+function isGoogleAuthHeader(value: string): boolean {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  return value.split(" ").some((part) => part.startsWith("ya29."));
+}
+
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
   freeIndex: number,
@@ -18,7 +27,7 @@ export async function kvKeyFromRequest(
     if (key.toLowerCase() === "helicone-auth") {
       headers.set(key, value);
     }
-    if (!key.startsWith("ya29.") && key.toLowerCase() === "authorization") {
+    if (key.toLowerCase() === "authorization" && !isGoogleAuthHeader(value)) {
       headers.set(key, value);
     }
   }

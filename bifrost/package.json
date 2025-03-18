@@ -52,8 +52,11 @@
     "react-qr-code": "^2.0.15",
     "react-simple-maps": "^3.0.0",
     "recharts": "^2.13.3",
+    "rehype-autolink-headings": "^7.1.0",
     "rehype-highlight": "^7.0.1",
+    "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
+    "remark-toc": "^9.0.0",
     "rss": "^1.2.2",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"

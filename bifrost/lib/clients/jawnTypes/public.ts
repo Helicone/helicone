@@ -290,6 +290,9 @@ export interface paths {
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
+  "/v1/property/{propertyKey}/search": {
+    post: operations["SearchProperties"];
+  };
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
@@ -313,6 +316,9 @@ export interface paths {
   };
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
+  };
+  "/v1/models": {
+    get: operations["GetModels"];
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
@@ -1962,6 +1968,14 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -4259,6 +4273,28 @@ export interface operations {
       };
     };
   };
+  SearchProperties: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          searchTerm: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
   GetTopCosts: {
     parameters: {
       path: {
@@ -4369,6 +4405,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };

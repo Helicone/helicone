@@ -1,4 +1,4 @@
-Building AI agents but not sure which of **<span style={{color: '#03A9F4'}}>LlamaIndex</span>** and **<span style={{color: '#03A9F4'}}>LangChain</span>** is a better option? You're not alone. Both frameworks have earned their stripes in production environments and are strongly supported in the **<span style={{color: '#03A9F4'}}>open-source</span>** community.
+Building AI agents but not sure which of **LlamaIndex** and **LangChain** is a better option? You're not alone. Both frameworks have earned their stripes in production environments and are strongly supported in the **open-source** community.
 
 But we find that it’s not always about choosing one over the other.
 
@@ -30,13 +30,13 @@ In this guide, we will explore:
 
 ## What is LlamaIndex?
 
-LlamaIndex's focus on **<span style={{color: '#03A9F4'}}>efficient data handling, indexing, and retrieval</span>** makes it particularly useful for applications that need to augment LLM responses with specific, domain-relevant information, effectively implementing Retrieval-Augmented Generation (RAG).
+LlamaIndex's focus on **efficient data handling, indexing, and retrieval** makes it particularly useful for applications that need to augment LLM responses with specific, domain-relevant information, effectively implementing Retrieval-Augmented Generation (RAG).
 
 ### How LlamaIndex Works
 
 LlamaIndex has many available plugins you could load (or ingest) data from many sources easily, and generate vector embeddings using an embedding model.
 
-One key feature of LlamaIndex is that it is optimized for **<span style={{color: '#03A9F4'}}>index querying</span>**. After the data is ingested, an index is created. This **<span style={{color: '#03A9F4'}}>index</span>** represents your vectorized data and can be easily queried like so:
+One key feature of LlamaIndex is that it is optimized for **index querying**. After the data is ingested, an index is created. This **index** represents your vectorized data and can be easily queried like so:
 
 ```python
 
@@ -54,11 +54,11 @@ LlamaIndex simplifies this process by taking your query `"How to build an AI age
 
 ## What is LangChain?
 
-LangChain is a framework designed to facilitate LLM application development. It provides a comprehensive set of tools and components that allow developers to easily **<span style={{color: '#03A9F4'}}>build, manage, and deploy LLM-powered applications</span>**.
+LangChain is a framework designed to facilitate LLM application development. It provides a comprehensive set of tools and components that allow developers to easily **build, manage, and deploy LLM-powered applications**.
 
 ### How LangChain Works
 
-**<span style={{color: '#03A9F4'}}>Chains</span>** are key components of LangChain, allowing you to connect different components together to create complex workflows.
+**Chains** are key components of LangChain, allowing you to connect different components together to create complex workflows.
 
 #### Prompt Template
 
@@ -96,7 +96,7 @@ Both frameworks require careful consideration of performance factors for product
 
 ### LlamaIndex
 
-- Efficient for specific RAG tasks, **<span style={{color: '#03A9F4'}}>limited flexibility for complex Natural Language Processing (NLP) tasks</span>**.
+- Efficient for specific RAG tasks, **limited flexibility for complex Natural Language Processing (NLP) tasks**.
 - Performance tied to indexing efficiency.
 - Requires scaling considerations for large datasets or high query volumes.
 
@@ -105,7 +105,7 @@ Both frameworks require careful consideration of performance factors for product
 - Complex architecture (multi-layered abstractions) requires careful management
 - Abstraction = limited control over agent design
 - Multiple API calls can impact latency (optimize API call frequency and implement caching)
-- **<span style={{color: '#03A9F4'}}>Resource usage like CPU usage and operational costs requires [monitoring](https://www.notion.so/Choosing-Between-LangChain-and-LlamaIndex-128c78c0f25e804785a8c97df6aee318?pvs=21).</span>**
+- **Resource usage like CPU usage and operational costs requires monitoring**
 
 ## Comparing Multi-Modal Capabilities
 
@@ -160,13 +160,13 @@ _Image: <a href="https://datasciencedojo.com/blog/llamaindex-vs-langchain/" targ
 
 ### Combined Approach
 
-**<span style={{color: '#03A9F4'}}>(Data Layer)</span> Use LlamaIndex as a LangChain tool for:**
+**(Data Layer) Use LlamaIndex as a LangChain tool for:**
 
 - Efficient data indexing
 - Optimized retrieval systems
 - Multi-modal data handling
 
-**<span style={{color: '#03A9F4'}}>(Application Layer)</span> Use LangChain for:**
+**(Application Layer) Use LangChain for:**
 
 - Complex workflow management
 - Agent-based systems
@@ -198,8 +198,8 @@ LangChain is a good option if you need quick prototyping and flexibility or comp
 
 ## You might find these useful:
 
-- **<a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">6 Awesome Frameworks for Building AI Agents (Open-Source)</a>**
-- **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging AI Agents with Helicone's Sessions</a>**
-- **<a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank" rel="noopener">Optimizing AI agents by replaying LLM Sessions</a>**
+- <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">6 Awesome Frameworks for Building AI Agents (Open-Source)</a>
+- <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging AI Agents with Helicone's Sessions</a>
+- <a href="https://www.helicone.ai/blog/replaying-llm-sessions" target="_blank" rel="noopener">Optimizing AI agents by replaying LLM Sessions</a>
 
 <Questions />

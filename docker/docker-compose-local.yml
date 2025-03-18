@@ -101,26 +101,17 @@ services:
       dockerfile: ../docker/dockerfiles/dockerfile_worker
     ports:
       - 8787:8787
-    profiles: ["unstable"]
     volumes:
       - ./volumes/worker:/usr/src/app:cached
+    profiles: ["include-worker"]
     environment:
       - PORT=8787
       - WORKER_TYPE=OPENAI_PROXY
-
-  worker-anthropic-proxy:
-    image: worker-local
-    build:
-      context: ../worker
-      dockerfile: ../docker/dockerfiles/dockerfile_worker
-    ports:
-      - 8789:8789
-    profiles: ["unstable"]
-    volumes:
-      - ./volumes/worker:/usr/src/app:cached
-    environment:
-      - PORT=8789
-      - WORKER_TYPE=ANTHROPIC_PROXY
+      - WORKER_PORT=8787
+      - CLICKHOUSE_HOST=http://clickhouse-db:8123
+      - VALHALLA_URL=http://host.docker.internal:8585
+      - S3_ENDPOINT=http://minio:9000
+      - SUPABASE_URL=http://host.docker.internal:54321
 
   worker-helicone-api:
     image: worker-local
@@ -129,12 +120,75 @@ services:
       dockerfile: ../docker/dockerfiles/dockerfile_worker
     ports:
       - 8788:8788
-    profiles: ["unstable"]
     volumes:
       - ./volumes/worker:/usr/src/app:cached
+    profiles: ["include-worker"]
     environment:
       - PORT=8788
       - WORKER_TYPE=HELICONE_API
+      - WORKER_PORT=8788
+      - CLICKHOUSE_HOST=http://clickhouse-db:8123
+      - VALHALLA_URL=http://host.docker.internal:8585
+      - S3_ENDPOINT=http://minio:9000
+      - SUPABASE_URL=http://host.docker.internal:54321
+
+  worker-gateway-api:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    ports:
+      - 8789:8789
+    volumes:
+      - ./volumes/worker:/usr/src/app:cached
+    profiles: ["include-worker"]
+    environment:
+      - PORT=8789
+      - WORKER_TYPE=GATEWAY_API
+      - WORKER_PORT=8789
+      - GATEWAY_TARGET=https://openrouter.ai
+      - CLICKHOUSE_HOST=http://clickhouse-db:8123
+      - VALHALLA_URL=http://host.docker.internal:8585
+      - S3_ENDPOINT=http://minio:9000
+      - SUPABASE_URL=http://host.docker.internal:54321
+
+  worker-anthropic-proxy:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    ports:
+      - 8790:8790
+    volumes:
+      - ./volumes/worker:/usr/src/app:cached
+    profiles: ["include-worker"]
+    environment:
+      - PORT=8790
+      - WORKER_TYPE=ANTHROPIC_PROXY
+      - WORKER_PORT=8790
+      - CLICKHOUSE_HOST=http://clickhouse-db:8123
+      - VALHALLA_URL=http://host.docker.internal:8585
+      - S3_ENDPOINT=http://minio:9000
+      - SUPABASE_URL=http://host.docker.internal:54321
+
+  worker-generate-api:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: ../docker/dockerfiles/dockerfile_worker
+    ports:
+      - 8791:8791
+    volumes:
+      - ./volumes/worker:/usr/src/app:cached
+    profiles: ["include-worker"]
+    environment:
+      - PORT=8791
+      - WORKER_TYPE=GENERATE_API
+      - WORKER_PORT=8791
+      - CLICKHOUSE_HOST=http://clickhouse-db:8123
+      - VALHALLA_URL=http://host.docker.internal:8585
+      - S3_ENDPOINT=http://minio:9000
+      - SUPABASE_URL=http://host.docker.internal:54321
 
 # End Helicone workers
 ########################################################

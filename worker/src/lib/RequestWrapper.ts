@@ -31,11 +31,13 @@ export type PromptSettings =
       promptId: string;
       promptVersion: string;
       promptMode: "production" | "testing";
+      promptInputs?: Record<string, string>;
     }
   | {
       promptId: undefined;
       promptVersion: string;
       promptMode: "testing" | "deactivated";
+      promptInputs?: Record<string, string>;
     };
 
 export class RequestWrapper {
@@ -171,10 +173,12 @@ export class RequestWrapper {
       this.heliconeHeaders.promptHeaders.promptMode ?? undefined
     );
 
+    // Initialize with undefined promptInputs - will be set explicitly via setPromptInputs
     return {
       promptId,
       promptVersion,
       promptMode,
+      promptInputs: undefined,
     } as PromptSettings;
   }
 
@@ -574,6 +578,17 @@ export class RequestWrapper {
       async () =>
         await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
     );
+  }
+
+  /**
+   * Sets prompt inputs directly on the promptSettings object
+   * @param inputs The inputs to associate with the prompt
+   */
+  setPromptInputs(inputs: Record<string, string>): void {
+    this.promptSettings = {
+      ...this.promptSettings,
+      promptInputs: inputs,
+    };
   }
 }
 

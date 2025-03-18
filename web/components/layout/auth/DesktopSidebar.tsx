@@ -135,6 +135,12 @@ const DesktopSidebar = ({
       }
     };
 
+    const sidebarWidth = isCollapsed ? 64 : 208;
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      `${sidebarWidth}px`
+    );
+
     // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
     window.addEventListener("keydown", handleKeyDown);
