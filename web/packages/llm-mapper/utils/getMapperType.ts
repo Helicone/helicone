@@ -112,7 +112,15 @@ export const getMapperType = ({
     return "openai-chat";
   }
 
-  if (/^claude/.test(model) || provider === "ANTHROPIC") {
+  // Check for any Anthropic model regardless of provider
+  if (
+    /^claude/.test(model) ||
+    model.includes("claude") ||
+    model.includes("anthropic") ||
+    provider === "ANTHROPIC" ||
+    (provider === "AWS" &&
+      (model.includes("claude") || model.includes("anthropic")))
+  ) {
     return "anthropic-chat";
   }
 
