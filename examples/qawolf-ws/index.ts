@@ -190,6 +190,34 @@ function stopRecording() {
 ws.on("open", function open() {
   console.log("Connected to server.");
 
+  /* -------------------------------------------------------------------------- */
+  /*               Simulate bug with Socket.IO socket.emit format               */
+  /* -------------------------------------------------------------------------- */
+  const callId = "simulated_call_" + Date.now();
+  // Original requested format: socket.emit("conversation.item.create", {...})
+  console.log("Simulating socket.emit with the following payload:");
+  console.log(`socket.emit("conversation.item.create", {
+    item: {
+      call_id: ${callId},
+      output: "success",
+      type: "function_call_output",
+    },
+  });`);
+
+  // Actually send using WebSocket
+  ws.send(
+    JSON.stringify({
+      type: "conversation.item.create",
+      item: {
+        call_id: callId,
+        output: "success",
+        type: "function_call_output",
+      },
+    })
+  );
+  console.log("Sent simulated function_call_output with call_id:", callId);
+  /* ------------------------------------------------------------------------- */
+
   // Send session update immediately
   console.log("Sending immediate session update...");
   ws.send(JSON.stringify(sessionUpdate));
