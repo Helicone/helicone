@@ -1,4 +1,5 @@
 import { LlmSchema, Message } from "../../types";
+import { isJSON } from "../../utils/contentHelpers";
 import { MapperFn } from "../types";
 
 export const mapRealtimeRequest: MapperFn<any, any> = ({
@@ -285,7 +286,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 tool_calls: [
                   {
                     name: output.name,
-                    arguments: JSON.parse(output.arguments),
+                    arguments: isJSON(output.arguments)
+                      ? JSON.parse(output.arguments)
+                      : output.arguments,
                   },
                 ],
                 timestamp: msg.timestamp,
@@ -306,7 +309,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               tool_calls: [
                 {
                   name: undefined,
-                  arguments: JSON.parse(item.output),
+                  arguments: isJSON(item.output)
+                    ? JSON.parse(item.output)
+                    : item.output,
                 },
               ],
               timestamp: msg.timestamp,
