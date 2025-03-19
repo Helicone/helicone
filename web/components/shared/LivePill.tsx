@@ -12,11 +12,11 @@ interface LiveButtonProps {
 export default function LiveButton(props: LiveButtonProps) {
   const { isLive, setIsLive, isDataLoading, isRefetching, refetch } = props;
   return (
-    <div className="h-9 w-full flex flex-row items-center justify-center bg-white dark:bg-slate-950 rounded-full">
+    <div className="h-9 w-full flex flex-row items-center justify-between bg-white dark:bg-black rounded-full border border-border">
       <Button
         variant="none"
         size="none"
-        className="h-full pl-3 flex flex-row gap-1 items-center rounded-l-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
+        className="h-full px-3 flex flex-row gap-2 items-center rounded-l-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
         onClick={() => setIsLive(!isLive)}
       >
         <div
@@ -25,7 +25,7 @@ export default function LiveButton(props: LiveButtonProps) {
             "h-2 w-2 rounded-full"
           )}
         />
-        <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
           {isLive ? "Live" : "Start Live"}
         </span>
       </Button>
@@ -33,7 +33,7 @@ export default function LiveButton(props: LiveButtonProps) {
       <Button
         variant="none"
         size="none"
-        className="h-full px-2.5 rounded-r-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800 transition-colors duration-200 ease-in-out"
+        className="h-full px-3 flex flex-row gap-1 items-center rounded-r-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
         onClick={() => {
           refetch();
         }}
@@ -41,7 +41,7 @@ export default function LiveButton(props: LiveButtonProps) {
         <ArrowPathIcon
           className={clsx(
             isDataLoading || isRefetching ? "animate-spin" : "",
-            "h-4 w-4 inline duration-500 ease-in-out"
+            "h-4 w-4 inline text-muted-foreground duration-500 ease-in-out"
           )}
         />
       </Button>
