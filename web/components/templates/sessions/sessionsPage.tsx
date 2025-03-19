@@ -134,6 +134,23 @@ const SessionsPage = (props: SessionsPageProps) => {
     hasAccess,
   ]);
 
+  const isAnyLoading = useMemo(() => {
+    return (
+      isLoading ||
+      allNames.isLoading ||
+      allNames.isRefetching ||
+      isLoading ||
+      names.isLoading ||
+      names.isRefetching
+    );
+  }, [
+    isLoading,
+    allNames.isLoading,
+    allNames.isRefetching,
+    names.isLoading,
+    names.isRefetching,
+  ]);
+
   return (
     <Tabs
       value={currentTab}
@@ -141,7 +158,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {hasSomeSessions || isLoading ? (
+        {hasSomeSessions || isAnyLoading ? (
           <>
             <AuthHeader
               isWithinIsland={true}
@@ -192,14 +209,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 sessionIdSearch={sessionIdSearch ?? ""}
                 setSessionIdSearch={setSessionIdSearch}
                 sessions={sessions}
-                isLoading={
-                  isLoading ||
-                  allNames.isLoading ||
-                  allNames.isRefetching ||
-                  isLoading ||
-                  names.isLoading ||
-                  names.isRefetching
-                }
+                isLoading={isAnyLoading}
                 sort={sort}
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
