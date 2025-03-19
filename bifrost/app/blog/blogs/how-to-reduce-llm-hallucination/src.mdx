@@ -1,0 +1,149 @@
+LLM hallucinations can turn an otherwise impressive AI application into an unreliable mess. When your language model confidently fabricates information or contradicts its own statements, user trust plummets and potential risks skyrocket.
+
+This guide provides a comprehensive, **step-by-step** approach to reducing hallucinations in your LLM applications. 
+
+We'll start with simple techniques anyone can implement today and gradually progress to more sophisticated solutions for production environments.
+
+## Understanding LLM Hallucinations: Types of LLM Hallucination with Examples 
+
+{/* Just for better SEO */}
+
+Before diving into solutions, let's clarify what we're dealing with. LLM hallucinations occur when models generate information that is incorrect, nonsensical, or unrelated to the input provided.
+
+Here are the types LLM Hallucination with examples:
+
+1. **Fact-conflicting hallucinations**: When LLMs generate information that contradicts known facts. *Example: Claiming a triangle has four sides*
+
+2. **Input-conflicting hallucinations**: When outputs diverge from what was specifically requested or contradict the input material. *Example: When asked to summarize a document about climate change, the model includes statistics about renewable energy that aren't mentioned in the original text*.
+
+3. **Context-conflicting hallucinations**: When LLMs produce self-contradictory responses, particularly notable in longer outputs. Example: "Abraham Lincoln was born on February 12, 1809, in LaRue County, Kentucky" (conflicting with an earlier stated fact that he was born in Hardin County, which later became LaRue County).
+
+<BottomLine
+  title="Fun Fact 💡"
+  description="According to some reports, hallucination rates in publicly available LLMs range roughly between 3% and 16%. But if you asked me, I'd tell you it's way more"
+/>
+
+Now that that's out of the way let's get into how to mitigate this pesky problem.
+
+## Step 1: Use Prompt Engineering Techniques
+
+The simplest place to start is with your prompts. Using strategic prompt engineering to reduce hallucinations is a lot easier than it sounds. The following tips can help.
+
+- **Be Specific and Clear**: Vague prompts lead to vague (and often hallucinated) responses. Include specific instructions about accuracy requirements e.g explicitly requesting the LLM admits it doesn't know the answer to something.
+
+- **Use Structured Formats**: Request outputs in <a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">structured formats</a> to constrain the model's freedom to hallucinate:
+
+- **Implement Chain-of-Thought Prompting**: Encourage the model to break down its reasoning, which often reveals and prevents logical errors. You may also use a reasoning model—which has that built in. Reasoning often uses more tokens, so consider a technique like <a href="https://www.helicone.ai/blog/chain-of-draft" target="_blank" rel="noopener">Chain-of-Draft</a> to save on costs.
+
+Read our article on <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">Prompt Engineering</a> for more in-depth info on the best prompting techniques.
+
+## Step 2: Implement Retrieval-Augmented Generation (RAG)
+
+RAG addresses hallucinations by grounding LLM responses in factual information from reliable sources.
+
+### Optimizing RAG for Hallucination Reduction
+
+The effectiveness of RAG depends heavily on:
+
+1. **Content quality**: Use authoritative, well-vetted sources
+2. **Retrieval effectiveness**: Tune your similarity thresholds and search algorithms
+3. **Clear instructions**: Tell the model explicitly to rely on the provided context
+4. **Monitoring**: Track when and where hallucinations still occur
+
+The monitoring step is especially important as without visibility into what data an LLM is retrieving—especially in a multi-step/multi-LLM workflow—confidently deploying it to production is impossible. 
+
+Helicone can provide this much-needed visibility with its Sessions feature. Read more about <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">how to debug RAG chatbots</a> with Helicone.
+
+<CallToAction
+  title="Eliminate LLM Hallucinations with Helicone"
+  description="Detect, measure, and minimize hallucinations in your AI applications with Helicone's comprehensive suite of tools for experimentation, evaluation, and monitoring. Integrate with one line of code."
+  primaryButtonText="Get Started Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="View Documentation"
+  secondaryButtonLink="https://docs.helicone.ai/features/experiments"
+>
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: `https://oai.helicone.ai/v1`,
+    defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    },
+});
+```
+</CallToAction>
+
+## Step 3: Implement Robust Evaluation 
+
+You can't improve what you don't measure. This is why setting up robust evaluation (measuring and assessing a model's performance) methods is critical for identifying and reducing hallucinations in production.
+
+Consider: 
+
+* **Adding User Feedback Collection**: One of the simplest ways to start tracking hallucinations is by collecting user feedback. Helicone provides <a href="https://docs.helicone.ai/features/advanced-usage/feedback" target="_blank" rel="noopener">built-in tools</a> to collect and analyze this feedback.
+
+* **Scoring LLM outputs**: Use prebuilt scoring metrics or define ones specific to your domain needs and log them with desired requests. With Helicone you can score outputs manually or via the API. These scores can then be reviewed later to detech hallucination rates.
+
+* **Use LLM-as-Judge Evaluators**: Set up automated evaluators to score responses for hallucinations without requiring human review for every response.
+
+* **Running Prompt Experiments**: Test different prompting approaches side-by-side with Helicone's experiment feature to quantify which techniques reduce hallucinations most effectively.
+
+* **Setting up an alerting system**: With Helicone's alerts, you can track when hallucinations are occurring more than usual and swiftly take action.
+
+<BottomLine
+  title="Tip 💡"
+  description="When designing your evaluation system, combine automatic metrics with selective human review of edge cases. This hybrid approach gives you both breadth of coverage and depth of understanding."
+/>
+
+### Step 4: Implement Advanced Techniques for Hallucination Reduction
+
+Once you've implemented basic strategies, these advanced techniques can further minimize hallucinations:
+
+* **Fine-tune with High-quality Data**: Create targeted datasets focusing on areas where your model frequently hallucinates. Try including explicit examples showing when to say "I don't know" rather than guess. Helicone's <a href="https://docs.helicone.ai/features/fine-tuning#datasets-and-fine-tuning" target="_blank" rel="noopener">Datasets</a> feature is perfect for curating datasets for fine-tuning.
+
+* **Implement Guardrails**: Add rule-based safety controls that monitor interactions and verify factual accuracy against trusted sources. These guardrails can ensure outputs remain grounded in source material.
+
+* **A/B Test Hallucination Reduction Strategies**: Experiment with different approaches by directing traffic to system variants (e.g. a fine-tuned vs. RAG-based system) and comparing hallucination rates. Helicone's experimentation features make this straightforward to implement.
+
+* **Combine RAG with Fine-tuning**: While each approach has strengths, using both retrieval and fine-tuned models together can provide better results than either alone for domain-specific applications.
+
+<BottomLine
+  title="Tip 💡"
+  description="These are most effective when targeted at specific types of hallucinations you've identified through your evaluation metrics—which is why evaluation is so crucial. Focus your efforts on the most frequent or highest-impact issues first."
+/>
+
+## Conclusion
+
+Reducing LLM hallucinations requires a multi-faceted approach that evolves with your application's needs. Start with the simple techniques—better prompting and basic RAG—and progressively implement more sophisticated solutions as you scale.
+
+Remember that hallucination reduction is an ongoing process—there's currently no one-time fix. 
+
+Continuously monitor and evaluate your LLMs' outputs, gather user feedback, update your strategies accordingly, and you should be just fine.
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/when-to-finetune" target="_blank" rel="noopener">The Case Against Fine-Tuning</a>**
+- **<a href="https://www.helicone.ai/blog/prompt-evaluation-for-llms" target="_blank" rel="noopener">Prompt Evaluation Explained: Random Sampling vs. Golden Datasets</a>**
+- **<a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to test your LLM prompts (with examples)</a>**
+
+<FAQ items={[
+  {
+    question: "What are the most common types of LLM hallucinations?",
+    answer: "The three main types are fact-conflicting hallucinations (contradicting known facts), input-conflicting hallucinations (diverging from what was requested), and context-conflicting hallucinations (producing self-contradictory responses). Understanding these distinctions helps in applying the right mitigation strategies."
+  },
+  {
+    question: "Is RAG always better than fine-tuning for reducing hallucinations?",
+    answer: "Not necessarily. RAG works well for factual information where you can provide reliable reference data, while fine-tuning is often better for teaching domain-specific reasoning patterns or consistent behavior. Many production systems combine both approaches for optimal results."
+  },
+  {
+    question: "How does Helicone help with reducing hallucinations?",
+    answer: "Helicone provides tools for tracking and analyzing LLM responses, allowing you to monitor hallucination rates across different prompts and models, set up detection metrics and alerts for potential hallucinations, analyze patterns in hallucinations to improve your system, and A/B test different hallucination reduction strategies."
+  },
+  {
+    question: "Which models hallucinate the least?",
+    answer: "Generally, larger models tend to hallucinate less than smaller ones when given the same prompt, as they have more knowledge and better reasoning capabilities. However, even the largest models can still hallucinate. The quality of prompting, RAG implementation, and evaluation systems remain crucial regardless of model size."
+  }
+]} />
+
+<Questions />

@@ -1,0 +1,11 @@
+{ 
+  "title": "How to Reduce LLM Hallucination in Production Apps: The Complete Step-by-Step Guide for Developers",
+  "title1": "How to Reduce LLM Hallucination in Production Apps: The Complete Step-by-Step Guide for Developers",
+  "title2": "How to Reduce LLM Hallucination in Production Apps: The Complete Step-by-Step Guide for Developers",
+  "description": "LLM hallucinations can break user trust and derail your AI product. This guide walks developers through using proven techniques—prompt engineering, RAG, evaluation, fine-tuning, and more—to detect, reduce, and manage hallucinations in production environments.",
+  "images": "/static/blog/chain-of-draft/chain-of-draft-cover.webp",
+  "time": "6 minute read",
+  "author": "Yusuf Ishola",
+  "date": "March 19, 2025", 
+  "badge": "guide"
+}
