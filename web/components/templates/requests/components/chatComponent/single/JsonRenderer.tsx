@@ -122,9 +122,8 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         )}
 
         {expanded && (
-          <div>
-            {indent}
-            <span className="text-slate-600 dark:text-slate-300">]</span>
+          <div className="inline-flex items-center ml-0">
+            <span className="ml-3 text-slate-600 dark:text-slate-300">]</span>
           </div>
         )}
       </div>
@@ -139,6 +138,19 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
 
   return (
     <div className="relative">
+      {level === 0 && showCopyButton && (
+        <button
+          onClick={handleCopy}
+          className="absolute right-0 top-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+          title="Copy JSON"
+        >
+          {copied ? (
+            <ClipboardDocumentCheckIcon className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+          ) : (
+            <ClipboardIcon className="h-4 w-4" />
+          )}
+        </button>
+      )}
       <div
         className="inline-flex items-center cursor-pointer group"
         onClick={() => setExpanded(!expanded)}
@@ -179,9 +191,8 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         </div>
       )}
       {expanded && (
-        <div>
-          {indent}
-          <span className="text-slate-600 dark:text-slate-300">{"}"}</span>
+        <div className="inline-flex items-center ml-0">
+          <span className="ml-3 text-slate-600 dark:text-slate-300">{"}"}</span>
         </div>
       )}
     </div>

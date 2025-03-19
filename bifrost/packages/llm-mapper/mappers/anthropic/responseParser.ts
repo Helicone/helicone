@@ -81,8 +81,32 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
   } else {
     const messages: Message[] = [];
 
+    // Handle AWS Bedrock Anthropic format
+    if (response.output?.message?.content) {
+      if (Array.isArray(response.output.message.content)) {
+        for (const content of response.output.message.content) {
+          const message = anthropicContentToMessage(
+            content,
+            response.output.message.role || "assistant"
+          );
+          if (typeof message.content === "string") {
+            message.content = message.content.replace(/undefined/g, "").trim();
+          }
+          messages.push(message);
+        }
+      } else {
+        const message = anthropicContentToMessage(
+          response.output.message.content,
+          response.output.message.role || "assistant"
+        );
+        if (typeof message.content === "string") {
+          message.content = message.content.replace(/undefined/g, "").trim();
+        }
+        messages.push(message);
+      }
+    }
     // Handle new Claude 3 format and message_stop type
-    if (
+    else if (
       (response?.type === "message" || response?.type === "message_stop") &&
       response?.content
     ) {

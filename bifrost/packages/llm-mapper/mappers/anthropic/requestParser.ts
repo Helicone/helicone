@@ -27,6 +27,17 @@ const getMessageContent = (message: any) => {
 
 const anthropicMessageToMessage = (message: any, role?: string): Message => {
   const messageRole = role || message.role;
+
+  // Handle AWS Bedrock format with content array containing text objects
+  if (Array.isArray(message.content) && message.content[0]?.text) {
+    return {
+      content: message.content.map((c: any) => c.text).join(" "),
+      role: messageRole,
+      _type: "message",
+      id: randomId(),
+    };
+  }
+
   // Handle array content (for images + text, tool use, tool results)
   if (Array.isArray(message.content)) {
     return {
@@ -84,7 +95,10 @@ export const getRequestMessages = (request: any) => {
   const requestMessages: Message[] = [];
 
   // Add system message first if it exists
-  if (request?.system) {
+  if (
+    request?.system &&
+    !(Array.isArray(request.system) && request.system.length === 0)
+  ) {
     requestMessages.push({
       id: randomId(),
       role: "system",
