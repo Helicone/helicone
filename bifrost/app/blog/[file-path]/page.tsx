@@ -9,7 +9,6 @@ import remarkGfm from "remark-gfm";
 import remarkToc from "remark-toc";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import "highlight.js/styles/atom-one-dark.css";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronRight, ChevronLeft } from "lucide-react";
@@ -52,13 +51,6 @@ export default async function Home({
       ],
       rehypePlugins: [
         rehypeSlug,
-        [
-          rehypeAutolinkHeadings,
-          {
-            behavior: "wrap",
-            properties: { className: ["anchor-link"] },
-          },
-        ],
         rehypeHighlight,
       ],
     },
