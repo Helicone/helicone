@@ -12,7 +12,7 @@ interface LiveButtonProps {
 export default function LiveButton(props: LiveButtonProps) {
   const { isLive, setIsLive, isDataLoading, isRefetching, refetch } = props;
   return (
-    <div className="h-9 w-full flex flex-row items-center justify-between bg-white dark:bg-black rounded-full border border-border">
+    <div className="h-9 w-full flex flex-row items-center justify-between bg-slate-50 dark:bg-slate-950 rounded-full border border-border">
       <Button
         variant="none"
         size="none"
