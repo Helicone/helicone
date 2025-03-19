@@ -1,6 +1,8 @@
-import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
-import { Button } from "@/components/ui/button";
+import { Row } from "@/components/layout/common";
+import Header from "@/components/shared/Header";
+import LiveButton from "@/components/shared/LivePill";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
@@ -37,28 +39,26 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
-import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
-import RequestCard from "./requestCard";
-import RequestDiv from "./requestDiv";
-import StreamWarning from "./StreamWarning";
-import TableFooter from "./tableFooter";
-import UnauthorizedView from "./UnauthorizedView";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
-import { Row } from "@/components/layout/common";
-import RequestsEmptyState from "./RequestsEmptyState";
 import {
   getMockFilterMap,
   getMockProperties,
   getMockRequestCount,
   getMockRequests,
 } from "./mockRequestsData";
+import RequestCard from "./requestCard";
+import RequestDiv from "./requestDiv";
+import RequestsEmptyState from "./RequestsEmptyState";
+import StreamWarning from "./StreamWarning";
+import TableFooter from "./tableFooter";
+import UnauthorizedView from "./UnauthorizedView";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -710,45 +710,58 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           </div>
         )}
         {!userId && !shouldShowMockData && (
-          <AuthHeader
+          <Header
             title={isCached ? "Cached Requests" : "Requests"}
-            headerActions={
-              <div className="flex flex-row gap-2 items-center">
-                <button
-                  onClick={() => {
-                    refetch();
-                  }}
-                  className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
-                >
-                  <ArrowPathIcon
-                    className={clsx(
-                      isDataLoading || isRefetching ? "animate-spin" : "",
-                      "h-4 w-4 inline duration-500 ease-in-out"
-                    )}
-                  />
-                </button>
-                <Button
-                  variant="ghost"
-                  className={clsx(
-                    "flex flex-row gap-2 items-center",
-                    isLive ? "text-green-500 animate-pulse" : "text-slate-500"
-                  )}
-                  size="sm_sleek"
-                  onClick={() => setIsLive(!isLive)}
-                >
-                  <div
-                    className={clsx(
-                      isLive ? "bg-green-500" : "bg-slate-500",
-                      "h-2 w-2 rounded-full"
-                    )}
-                  ></div>
-                  <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                    {isLive ? "Live" : "Start Live"}
-                  </span>
-                </Button>
-              </div>
+            leftActions={
+              <LiveButton
+                isLive={isLive}
+                setIsLive={setIsLive}
+                isDataLoading={isDataLoading}
+                isRefetching={isRefetching}
+                refetch={refetch}
+              />
             }
+            rightActions={<div></div>}
           />
+          // <AuthHeader
+          //   title={isCached ? "Cached Requests" : "Requests"}
+          //   headerActions={
+          //     <div className="flex flex-row gap-2 items-center">
+          //       <button
+          //         onClick={() => {
+          //           refetch();
+          //         }}
+          //         className="font-medium text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700 dark:hover:text-sky-300"
+          //       >
+          //         <ArrowPathIcon
+          //           className={clsx(
+          //             isDataLoading || isRefetching ? "animate-spin" : "",
+          //             "h-4 w-4 inline duration-500 ease-in-out"
+          //           )}
+          //         />
+          //       </button>
+          //       <Button
+          //         variant="ghost"
+          //         className={clsx(
+          //           "flex flex-row gap-2 items-center",
+          //           isLive ? "text-green-500 animate-pulse" : "text-slate-500"
+          //         )}
+          //         size="sm_sleek"
+          //         onClick={() => setIsLive(!isLive)}
+          //       >
+          //         <div
+          //           className={clsx(
+          //             isLive ? "bg-green-500" : "bg-slate-500",
+          //             "h-2 w-2 rounded-full"
+          //           )}
+          //         ></div>
+          //         <span className="text-xs italic font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+          //           {isLive ? "Live" : "Start Live"}
+          //         </span>
+          //       </Button>
+          //     </div>
+          //   }
+          // />
         )}
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
