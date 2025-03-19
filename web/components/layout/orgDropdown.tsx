@@ -6,15 +6,17 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
 import { Database } from "@/db/database.types";
+import { cn } from "@/lib/utils";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { LogOutIcon } from "lucide-react";
+import { CheckIcon, LogOutIcon, PlusIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -28,7 +30,6 @@ import {
 } from "../templates/organization/orgConstants";
 import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { useOrg } from "./org/organizationContext";
-import OrgMoreDropdown from "./orgMoreDropdown";
 import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 
 interface OrgDropdownProps {}
@@ -99,41 +100,156 @@ export default function OrgDropdown({}: OrgDropdownProps) {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            className="flex flex-row gap-2 justify-start px-2 py-2 h-full w-full"
+            variant="none"
+            size="none"
+            className="w-40 flex flex-row gap-2 items-center p-2 h-full bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-none"
           >
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row gap-2 items-center">
-                {currentIcon && (
-                  <currentIcon.icon
-                    className={clsx(
-                      `text-${currentColor?.name}-500`,
-                      "flex-shrink-0 h-4 w-4"
-                    )}
-                    aria-hidden="true"
-                  />
+            {currentIcon && (
+              <currentIcon.icon
+                className={clsx(
+                  `text-${currentColor?.name}-500`,
+                  "shrink-0 h-6 w-6"
                 )}
-                <h3 className="text-sm font-medium text-left truncate max-w-24">
-                  {orgContext?.currentOrg?.name}
-                </h3>
-              </div>
-
-              <p className="ml-6 text-xs text-slate-400 font-medium max-w-[6rem] truncate">
+                aria-hidden="true"
+              />
+            )}
+            <div className="w-28 flex flex-col">
+              <h3 className="w-full text-sm font-medium text-left truncate">
+                {orgContext?.currentOrg?.name}
+              </h3>
+              <p className="w-full text-xs font-light text-muted-foreground text-left truncate">
                 {user?.email}
               </p>
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[15rem] ml-2 mt-2 max-h-[90vh] flex flex-col border-slate-200">
+        <DropdownMenuContent
+          className="w-[15rem] max-h-[90vh] flex flex-col border-slate-200"
+          sideOffset={0}
+          side="bottom"
+        >
           <DropdownMenuGroup>
-            <OrgMoreDropdown
-              ownedOrgs={ownedOrgs}
-              memberOrgs={memberOrgs}
-              customerOrgs={customerOrgs}
-              createNewOrgHandler={createNewOrgHandler}
-              currentOrgId={orgContext?.currentOrg?.id}
-              setCurrentOrg={orgContext?.setCurrentOrg}
-            />
+            <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
+              Your Organizations
+              {ownedOrgs.length > 7 && ` (${ownedOrgs.length})`}
+            </DropdownMenuLabel>
+            {ownedOrgs && ownedOrgs.length > 0 && (
+              <div className="h-[150px] max-h-[150px] overflow-hidden">
+                <ScrollArea className="h-full w-full">
+                  {ownedOrgs.map((org, idx) => {
+                    const icon = ORGANIZATION_ICONS.find(
+                      (icon) => icon.name === org.icon
+                    );
+                    return (
+                      <DropdownMenuItem
+                        key={idx}
+                        onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                      >
+                        <div className="flex items-center justify-between w-full text-xs">
+                          <div className="flex items-center space-x-2">
+                            {icon && (
+                              <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                            )}
+                            <span className="truncate max-w-[7.5rem]">
+                              {org.name}
+                            </span>
+                          </div>
+                          {org.id === orgContext?.currentOrg?.id && (
+                            <CheckIcon className="h-4 w-4 text-primary" />
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </ScrollArea>
+              </div>
+            )}
+            <DropdownMenuItem
+              className="text-xs cursor-pointer"
+              onClick={createNewOrgHandler}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create New Org
+            </DropdownMenuItem>
+
+            {memberOrgs && memberOrgs.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
+                  Member Organizations
+                  {memberOrgs.length > 7 && ` (${memberOrgs.length})`}
+                </DropdownMenuLabel>
+                <div className="h-[150px] max-h-[150px] overflow-hidden">
+                  <ScrollArea className="h-full w-full">
+                    {memberOrgs.map((org, idx) => {
+                      const icon = ORGANIZATION_ICONS.find(
+                        (icon) => icon.name === org.icon
+                      );
+                      return (
+                        <DropdownMenuItem
+                          key={idx}
+                          onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                        >
+                          <div className="flex items-center justify-between w-full text-xs">
+                            <div className="flex items-center space-x-2">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="truncate max-w-[7.5rem]">
+                                {org.name}
+                              </span>
+                            </div>
+                            {org.id === orgContext?.currentOrg?.id && (
+                              <CheckIcon className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </ScrollArea>
+                </div>
+              </>
+            )}
+
+            {customerOrgs && customerOrgs.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
+                  Customers
+                  {customerOrgs.length > 7 && ` (${customerOrgs.length})`}
+                </DropdownMenuLabel>
+                <div className="h-[150px] max-h-[150px] overflow-hidden">
+                  <ScrollArea className="h-full w-full">
+                    {customerOrgs.map((org, idx) => {
+                      const icon = ORGANIZATION_ICONS.find(
+                        (icon) => icon.name === org.icon
+                      );
+                      return (
+                        <DropdownMenuItem
+                          key={idx}
+                          onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                        >
+                          <div className="flex items-center justify-between w-full text-xs">
+                            <div className="flex items-center space-x-2">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="truncate max-w-[7.5rem]">
+                                {org.name}
+                              </span>
+                            </div>
+                            {org.id === orgContext?.currentOrg?.id && (
+                              <CheckIcon className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </ScrollArea>
+                </div>
+              </>
+            )}
+
             <DropdownMenuSeparator />
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem
