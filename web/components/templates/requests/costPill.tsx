@@ -5,7 +5,7 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 const CostPill = () => {
   return (
     <Link
-      href={"https://github.com/Helicone/helicone/tree/main/costs"}
+      href={"https://github.com/Helicone/helicone/blob/main/packages/README.md"}
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(
