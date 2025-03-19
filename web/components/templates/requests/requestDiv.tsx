@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -7,6 +8,7 @@ import {
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -18,9 +20,7 @@ import { PiPlayBold } from "react-icons/pi";
 import { useOrg } from "../../layout/org/organizationContext";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
-import ThemedDiv from "../../shared/themed/themedDiv";
 import RequestRow from "./requestRow";
-import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 
 interface RequestDivProps {
   open: boolean;
@@ -110,119 +110,112 @@ const RequestDiv = (props: RequestDivProps) => {
   });
 
   return (
-    <ThemedDiv
-      open={open}
-      setOpen={setOpenHandler}
-      actions={
-        <div className="w-full flex flex-row justify-between items-center">
-          <div className="flex flex-row items-center space-x-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (promptDataQuery.data?.id) {
-                      router.push(`/prompts/${promptDataQuery.data?.id}`);
-                    } else if (request) {
-                      router.push(`/prompts/fromRequest/${request.id}`);
-                    }
-                  }}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
-                >
-                  <PiPlayBold className="h-4 w-4" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Test Prompt</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={"ghost"}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
-                  onClick={() => {
-                    jawn
-                      .POST("/v2/experiment/create/from-request/{requestId}", {
-                        params: {
-                          path: {
-                            requestId: request?.id!,
-                          },
+    <ScrollArea className="h-full">
+      <div className="w-full flex flex-row justify-between items-center">
+        <div className="flex flex-row items-center space-x-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="#"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (promptDataQuery.data?.id) {
+                    router.push(`/prompts/${promptDataQuery.data?.id}`);
+                  } else if (request) {
+                    router.push(`/prompts/fromRequest/${request.id}`);
+                  }
+                }}
+                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
+              >
+                <PiPlayBold className="h-4 w-4" />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Test Prompt</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"ghost"}
+                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400 inline-block"
+                onClick={() => {
+                  jawn
+                    .POST("/v2/experiment/create/from-request/{requestId}", {
+                      params: {
+                        path: {
+                          requestId: request?.id!,
                         },
-                      })
-                      .then((res) => {
-                        if (res.error || !res.data.data?.experimentId) {
-                          setNotification(
-                            "Failed to create experiment",
-                            "error"
-                          );
-                          return;
-                        }
-                        router.push(
-                          `/experiments/${res.data.data?.experimentId}`
-                        );
-                      });
-                  }}
-                >
-                  <FlaskConicalIcon className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Experiment</TooltipContent>
-            </Tooltip>
+                      },
+                    })
+                    .then((res) => {
+                      if (res.error || !res.data.data?.experimentId) {
+                        setNotification("Failed to create experiment", "error");
+                        return;
+                      }
+                      router.push(
+                        `/experiments/${res.data.data?.experimentId}`
+                      );
+                    });
+                }}
+              >
+                <FlaskConicalIcon className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Experiment</TooltipContent>
+          </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  setNotification("Copied to clipboard", "success");
+                  navigator.clipboard.writeText(
+                    JSON.stringify(request?.schema || {}, null, 4)
+                  );
+                }}
+                className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+              >
+                <ClipboardDocumentIcon className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Copy</TooltipContent>
+          </Tooltip>
+        </div>
+        {(hasPrevious || hasNext) && (
+          <div className="flex flex-row items-center space-x-1.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => {
-                    setNotification("Copied to clipboard", "success");
-                    navigator.clipboard.writeText(
-                      JSON.stringify(request?.schema || {}, null, 4)
-                    );
-                  }}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                  onClick={onPrevHandler}
+                  disabled={!hasPrevious}
+                  className={clsx(
+                    !hasPrevious && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                  )}
                 >
-                  <ClipboardDocumentIcon className="h-4 w-4" />
+                  <ArrowUpIcon className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent>Copy</TooltipContent>
+              <TooltipContent>Previous</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={onNextHandler}
+                  disabled={!hasNext}
+                  className={clsx(
+                    !hasNext && "opacity-50 hover:cursor-not-allowed",
+                    "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
+                  )}
+                >
+                  <ArrowDownIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Next</TooltipContent>
             </Tooltip>
           </div>
-          {(hasPrevious || hasNext) && (
-            <div className="flex flex-row items-center space-x-1.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onPrevHandler}
-                    disabled={!hasPrevious}
-                    className={clsx(
-                      !hasPrevious && "opacity-50 hover:cursor-not-allowed",
-                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
-                    )}
-                  >
-                    <ArrowUpIcon className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Previous</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onNextHandler}
-                    disabled={!hasNext}
-                    className={clsx(
-                      !hasNext && "opacity-50 hover:cursor-not-allowed",
-                      "hover:bg-gray-200 dark:hover:bg-gray-800 rounded-md p-1 text-slate-700 dark:text-slate-400"
-                    )}
-                  >
-                    <ArrowDownIcon className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Next</TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-        </div>
-      }
-    >
+        )}
+      </div>
+
       {request ? (
         <RequestRow
           request={request}
@@ -233,7 +226,7 @@ const RequestDiv = (props: RequestDivProps) => {
       ) : (
         <p>Loading...</p>
       )}
-    </ThemedDiv>
+    </ScrollArea>
   );
 };
 
