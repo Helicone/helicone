@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { Headers, Response } from "node-fetch";
 import { SocketMessage } from "../../types/realtime";
+import { safeJSONStringify } from "../../utils/sanitize";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { DBLoggable } from "./DBLoggable";
 
@@ -84,12 +85,12 @@ export async function handleSocketSession(
         country_code: null,
         experimentColumnId: null,
         experimentRowIndex: null,
-        bodyText: JSON.stringify(requestBody),
+        bodyText: safeJSONStringify(requestBody),
       },
       response: {
         responseId,
         getResponseBody: async () => ({
-          body: JSON.stringify(responseBody),
+          body: safeJSONStringify(responseBody),
           endTime,
         }),
         status: async () => 200,
