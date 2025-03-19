@@ -2,7 +2,7 @@ As the use of Large Language Models (LLMs) grows, selecting the right observabil
 
 ![Braintrust vs. Helicone, which one is better?](/static/blog/braintrust-alternatives/helicone-vs-braintrust.webp)
 
-In this post, we'll compare two key players: **<span style={{color: '#0ea5e9'}}>Braintrust</span>** and **<span style={{color: '#0ea5e9'}}>Helicone</span>**, focusing on their features, strengths, and which might be the best fit for your needs.
+In this post, we'll compare two key players: <a href="https://www.helicone.ai/" rel="noopener" target="_blank">Helicone</a> and <a href="https://www.braintrust.dev/" rel="noopener" target="_blank">Braintrust</a>, focusing on their features, strengths, and which might be the best fit for your needs.
 
 Let's get into it!
 
@@ -10,19 +10,15 @@ Let's get into it!
 
 ### 1. Helicone is easy to set up
 
-Helicone's key strengths lie in its **<span style={{color: '#0ea5e9'}}>extremely simple setup</span>** for the cloud offering, **<span style={{color: '#0ea5e9'}}>built-in caching</span>**, and intuitive **<span style={{color: '#0ea5e9'}}>prompt experimentation</span>** and **<span style={{color: '#0ea5e9'}}>evaluation</span>** features to optimize application performance.
+Helicone is designed to be extremely simple to set up for the cloud offering. The proxy comes with <a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">built-in caching</a>, intuitive <a href="https://docs.helicone.ai/features/experiments" rel="noopener" target="_blank">prompt experimentation</a> and <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Sessions</a> to trace your LLM workflow.
 
-Beyond the easy developer experience, we try to be as transparent as possible about <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">our pricing</a>. You do not need to provide your credit card to try the free tier.
-
-Compare this to Braintrust which requires more technical knowledge to set up and has opaque pricing, primarily aimed towards large enterprises with massive budgets.
-
-Helicone is designed to minimize costs as much as possible. See our <a href="https://www.helicone.ai/llm-cost" rel="noopener" target="_blank">API Cost Calculator</a> for a rough estimate of how much you can save with different model providers.
+We also try to be as transparent as possible about <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">our pricing</a>. Our generous free tier comes with 10k logs/month and supports integrations with all the major LLM providers. No credit card required.
 
 ### 2. Helicone is designed for teams
 
-Helicone is a complete observability tool that **<span style={{color: '#0ea5e9'}}>covers the full LLM lifecycle</span>**, from logging and experimentation to evaluation and deployment. Braintrust, however, is more geared strictly towards LLM evaluation.
+Helicone is a complete observability tool that supports <a href="https://www.helicone.ai/blog/introducing-helicone-v2" rel="noopener" target="_blank">the full LLM lifecycle</a>, from logging and experimentation to evaluation and deployment. 
 
-Helicone is more suited for cross-functional teams given the ability to have non-technical members involved in prompt design and evaluation.
+Helicone is suited for cross-functional teams given the ability to have non-technical members involved in prompt design and evaluation.
 
 ## At a Glance: Helicone vs. Braintrust
 
@@ -30,32 +26,34 @@ Here's an overview of how Braintrust compares to Helicone:
 
 | Aspect       | Helicone                                                                    | Braintrust                                                                                                                  |
 | ------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Best For     | **<span style={{color: '#0ea5e9'}}>All Teams (Small to Enterprise)</span>** | Enterprise Teams Focused on Evaluations                                                                                     |
-| Pricing      | Generous free tier and discounts available. Pricing Starts at `$20/seat/month`            | Less transparent enterprise pricing. Free tier available                                                                                          |
-| Integration  | One-line proxy integration or async logging                                 | Requires SDK and more code to set up. Supports proxy but provides limited features.                                                                                            |
+| Best For     | **All Teams (Startups to Enterprise)** | Enterprise Teams Focused on Evaluations                                                                                     |
+| Pricing      | Generous free tier. Paid plans start at `$20/seat/month`            | Custom enterprise pricing. Free tier available.                                                                                           |
+| Integration  | One-line proxy integration or async logging                                 | Requires SDK to set up. Supports proxy with limited features.                                                                                            |
 | Architecture | Distributed (Cloudflare Workers, ClickHouse, Kafka)                         | Partially centralized architecture separate planes for data and UI (control)                                                                                                    |
-| Scale        | Processed over 2.4 billion requests and 3.3 trillion tokens                 | Limited scalability                                                                                                         |
-| Key Strength | Comprehensive features, High scalability, Data Aggregation                  | Advanced evaluations, CI/CD integration                                                                                     |
-| Drawback     | Lacking built-in advanced evaluations (coming soon)                         | **<span style={{color: '#0ea5e9'}}>No intuitive dashboard or advanced analytics</span>**, Confusing UI, Limited scalability |
+| Scalability        | Processed over 2.4 billion requests and 3.3 trillion tokens                 | -                                                                                                         |
+| Strengths | Comprehensive logging, high reliabilty and scalability, data aggregation                  | Advanced evaluations, CI/CD integration                                                                                     |
+| Drawback     | Simple built-in evaluations (advanced coming soon)                         | Simple analytics and limited dashboard features |
+
 
 ## Platform & Features
 
 | Feature                                                                          | Helicone                                  | Braintrust      |
 | -------------------------------------------------------------------------------- | ----------------------------------------- | --------------- |
-| **One-line Integration** <br/>Integrate with minimal code                        | ✅                                        | ❌              |
-| **Cost Analysis** <br/>Track and optimize your LLM API expenses                  | ✅ Comprehensive                          | 🟠 Basic        |
-| **Open-Source**                              | ✅                                        |   ❌ Not fully            |
-| **Self-hosting** <br/>Deploy and manage on your own infrastructure               | ✅                                        | ✅              |
-| **Prompt Management** <br/>Version and organize your prompts                     | ✅                                        | ✅              |
-| **Experimentation** <br/>Test and compare different prompt variations            | ✅                               | ✅    |
-| **Evaluation** <br/>Assess the quality and performance of LLM outputs            | ✅  | ✅    |
+| **One-line Integration**                         | ✅                                        | ❌              |
+| **Open-Source**                              | ✅                                        |   ❌             |
+| **Self-hosting**     | ✅                                        | ✅              |
+| **Cost Analysis**                | ✅                           | 🟠        |
+| **Prompt Management** <br/>Version and test your prompts                     | ✅                                        | ✅              |
+| **Experimentation** <br/>Test and compare prompt variations            | ✅                               | ✅    |
+| **Evaluation** <br/>LLM-as-a-judge, online and offline evaluations            | ✅  | ✅    |
 | **Tracing** <br/>Track multi-step LLM workflows and agent interactions           | ✅                                        | ✅              |
 | **User Tracking** <br/>Monitor end-user interactions with your LLM app           | ✅                    | ❌              |
 | **Gateway Features** <br/>Manage request routing, caching, and rate limits       | ✅    | ✅              |
-| **Dashboard & Analytics** <br/>Visualize and analyze LLM performance metrics     | ✅ Highly detailed and customizable     | 🟠 Less detailed and less customizable              |
-| **Security Features** <br/>Protect against prompt injections and manage API keys | ✅ Advanced protections out-of-the-box                   | ❌ No out-of-the-box security features   |
-| **Supported LLM providers and Framework** <br/>Connect with language model providers and development frameworks             | ✅ Wide support                           | 🟠 More limited support |
-| **Supported Languages** <br/>Use various programming languages             | ✅ Python and JS/TS. No SDK required                           | ✅ Python and JS/TS. SDK required for full feature set |
+| **LLM Security** <br/>Out-of-the-box to protect against prompt injections | ✅                    | ❌    |
+| **Key Vault** <br/>Manage and distribute API keys safely | ✅                    | ✅     |
+| **Dashboard & Analytics**    | ✅     | 🟠              |
+| **Supported Providers & Frameworks**              | ✅ Wide support                           | 🟠 More limited support |
+| **Supported Languages**             | Python and JS/TS. No SDK required                           | Python and JS/TS. SDK required for full feature set |
 
 ## UI & Dashboard Comparison
 
@@ -83,9 +81,9 @@ Here's an overview of how Braintrust compares to Helicone:
 
 |                     | **Helicone**                                                          | **Braintrust**                                                          |
 | ------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| **Data Retention**  | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | Ambiguous |
-| **HIPPA-compliant** | ✅                                                                    | ❌                                                                |
-| **GDPR-compliant**  | ✅                                                                    | ❌                                                                |
+| **Data Retention**  | 1 month for Free<br/>3 months for Pro/Team<br/>forever for Enterprise | Undisclosed |
+| **HIPPA-compliant** | ✅                                                                    | ❓                                                                |
+| **GDPR-compliant**  | ✅                                                                    | ✅                                                                |
 | **SOC 2**           | ✅                                                                    | ✅                                                                |
 | **Self-hosted**     | ✅                                                                    | ✅                                                                |
 
@@ -98,7 +96,7 @@ Here's an overview of how Braintrust compares to Helicone:
   secondaryButtonLink="https://www.helicone.ai/contact"
 />
 
-### Helicone
+## Helicone
 
 **Designed for:** All Teams (Small to Enterprise)
 
@@ -106,14 +104,7 @@ Here's an overview of how Braintrust compares to Helicone:
 href="https://github.com/Helicone/helicone"
 target="\_blank"
 rel="noopener noreferrer"
-
-> <img
-
-    alt="GitHub Repo stars"
-    src="https://img.shields.io/github/stars/Helicone/helicone?style=social"
-
-/>
-
+> <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Helicone/helicone?style=social" />
 </a>
 
 ![Helicone Dashboard Image](/static/blog/langfuse-alternatives/helicone-dashboard.webp)
@@ -153,7 +144,7 @@ Designed for scalability, it is built on Cloudflare Workers, ClickHouse, and Kaf
    - Safeguard your apps with out-of-the-box security integrations, such as Prompt Armor.
    - Customize your dashboards with PostHog.
 
-### Braintrust
+## Braintrust
 
 **Designed for:** Enterprise Teams Focused on Evaluations
 
@@ -183,6 +174,9 @@ Braintrust, like Helicone, integrates with CI/CD pipelines, allowing for continu
    - Supports a seamless human review process for evaluating and comparing experiments.
 
 ## Which tool is best for your team?
+
+Braintrust, however, is more geared strictly towards LLM evaluation.
+
 
 Both platforms offer valuable observability and evaluation features, but they cater to different team needs and priorities. Here's a guide to help you decide:
 
