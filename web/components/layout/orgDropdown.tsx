@@ -108,7 +108,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               <currentIcon.icon
                 className={clsx(
                   `text-${currentColor?.name}-500`,
-                  "shrink-0 h-6 w-6"
+                  "shrink-0 h-5 w-5"
                 )}
                 aria-hidden="true"
               />
