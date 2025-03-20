@@ -118,6 +118,8 @@ const DesktopSidebar = ({
 
   const { theme, setTheme } = useTheme();
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     calculateAvailableSpace();
 
@@ -145,15 +147,30 @@ const DesktopSidebar = ({
     window.addEventListener("resize", calculateAvailableSpace);
     window.addEventListener("keydown", handleKeyDown);
 
+    // Close mobile menu on navigation
+    const handleRouteChange = () => {
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    router.events.on("routeChangeStart", handleRouteChange);
+
     // Remove event listeners on cleanup
     return () => {
       window.removeEventListener("resize", calculateAvailableSpace);
       window.removeEventListener("keydown", handleKeyDown);
+      router.events.off("routeChangeStart", handleRouteChange);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  }, [
+    isCollapsed,
+    expandedItems,
+    setIsCollapsed,
+    setTheme,
+    theme,
+    router,
+    isMobileMenuOpen,
+  ]);
 
   const handleCollapseToggle = () => {
     if (window.innerWidth < 768) {
@@ -181,6 +198,13 @@ const DesktopSidebar = ({
       setChangelogToView(changelog[0]);
     }
     setModalOpen(open);
+  };
+
+  // Simplified callback for NavItem that doesn't interfere with navigation
+  const handleNavItemClick = () => {
+    if (window.innerWidth < 768) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -302,10 +326,7 @@ const DesktopSidebar = ({
                         isCollapsed={isCollapsed}
                         expandedItems={expandedItems}
                         toggleExpand={toggleExpand}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          setIsMobileMenuOpen(false);
-                        }}
+                        onClick={handleNavItemClick}
                         deep={0}
                       />
                     ))}
