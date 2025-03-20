@@ -1,8 +1,8 @@
-As the use of Large Language Models (LLMs) grows, selecting the right observability and evaluation tools becomes crucial for the success of AI-powered applications. 
+As the use of Large Language Models (LLMs) grows, selecting the right observability and evaluation tools becomes crucial for the success of AI-powered applications. In this blog, we'll compare two key players: <a href="https://www.helicone.ai/" rel="noopener" target="_blank">Helicone</a> and <a href="https://www.braintrust.dev/" rel="noopener" target="_blank">Braintrust</a>, focusing on their features, strengths, and which might be the best fit for your needs.
+
 
 ![Braintrust vs. Helicone, which one is better?](/static/blog/braintrust-alternatives/helicone-vs-braintrust.webp)
 
-In this post, we'll compare two key players: <a href="https://www.helicone.ai/" rel="noopener" target="_blank">Helicone</a> and <a href="https://www.braintrust.dev/" rel="noopener" target="_blank">Braintrust</a>, focusing on their features, strengths, and which might be the best fit for your needs.
 
 Let's get into it!
 
@@ -10,15 +10,13 @@ Let's get into it!
 
 ### 1. Helicone is easy to set up
 
-Helicone is designed to be extremely simple to set up for the cloud offering. The proxy comes with <a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">built-in caching</a>, intuitive <a href="https://docs.helicone.ai/features/experiments" rel="noopener" target="_blank">prompt experimentation</a> and <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Sessions</a> to trace your LLM workflow.
+Helicone is designed to be extremely simple to set up for the cloud offering. The proxy comes with <a href="https://docs.helicone.ai/features/advanced-usage/caching" rel="noopener" target="_blank">built-in caching</a>, intuitive <a href="https://docs.helicone.ai/features/experiments" rel="noopener" target="_blank">prompt experiments</a> and <a href="https://docs.helicone.ai/features/sessions" rel="noopener" target="_blank">Sessions</a> to trace your LLM workflow.
 
-We also try to be as transparent as possible about <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">our pricing</a>. Our generous free tier comes with 10k logs/month and supports integrations with all the major LLM providers. No credit card required.
+We also try to be as transparent as possible about <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">our pricing</a>. Our generous free tier comes with `10k logs/month` and supports integrations with all the major LLM providers. No credit card required.
 
 ### 2. Helicone is designed for teams
 
-Helicone is a complete observability tool that supports <a href="https://www.helicone.ai/blog/introducing-helicone-v2" rel="noopener" target="_blank">the full LLM lifecycle</a>, from logging and experimentation to evaluation and deployment. 
-
-Helicone is suited for cross-functional teams given the ability to have non-technical members involved in prompt design and evaluation.
+Helicone is a complete observability tool that supports <a href="https://www.helicone.ai/blog/introducing-helicone-v2" rel="noopener" target="_blank">the full LLM lifecycle</a>, from logging and experimentation to evaluation and deployment. Helicone is suited for cross-functional teams given the ability to have non-technical members involved in prompt design and evaluation.
 
 ## At a Glance: Helicone vs. Braintrust
 
@@ -39,9 +37,11 @@ Here's an overview of how Braintrust compares to Helicone:
 
 | Feature                                                                          | Helicone                                  | Braintrust      |
 | -------------------------------------------------------------------------------- | ----------------------------------------- | --------------- |
-| **One-line Integration**                         | ✅                                        | ❌              |
-| **Open-Source**                              | ✅                                        |   ❌             |
-| **Self-hosting**     | ✅                                        | ✅              |
+| **One-Line Integration**                         | ✅                                        |  ✅              |
+| **Open-Source**                              | ✅                                        | 🟠 The AI proxy is open-source             |
+| **Self-Hosting**     | ✅                                        | ✅              |
+| **Supported Providers & Frameworks**              | ✅ All providers supported (See <a href="https://docs.helicone.ai/getting-started/integration-method/gateway" target="_blank" rel="noopener">Gateway</a> integration)                           | 🟠 Over 100 providers |
+| **Dashboard & Analytics**    | ✅ Comprehensive dashboard with detailed analytics     | 🟠 Basic analytics for logs             |
 | **Cost Analysis**                | ✅                           | 🟠        |
 | **Prompt Management** <br/>Version and test your prompts                     | ✅                                        | ✅              |
 | **Experimentation** <br/>Test and compare prompt variations            | ✅                               | ✅    |
@@ -50,22 +50,20 @@ Here's an overview of how Braintrust compares to Helicone:
 | **User Tracking** <br/>Monitor end-user interactions with your LLM app           | ✅                    | ❌              |
 | **Gateway Features** <br/>Manage request routing, caching, and rate limits       | ✅    | ✅              |
 | **LLM Security** <br/>Out-of-the-box to protect against prompt injections | ✅                    | ❌    |
-| **Key Vault** <br/>Manage and distribute API keys safely | ✅                    | ✅     |
-| **Dashboard & Analytics**    | ✅     | 🟠              |
-| **Supported Providers & Frameworks**              | ✅ Wide support                           | 🟠 More limited support |
 | **Supported Languages**             | Python and JS/TS. No SDK required                           | Python and JS/TS. SDK required for full feature set |
+| **Workflow Style** <br/> UI-based vs. code-heavy      | Mainly code-based. Some features offer UI workflow such as prompts and experiments.               | More code-based workflows                       |
 
 ## UI & Dashboard Comparison
 
-![Helicone Dashboard Interface](/static/blog/braintrust-alternatives/helicone-dashboard-ui.webp)
+For Helicone users, the dashboard is the main way to view your data. For Braintrust users, the dashboard is more of a secondary feature. 
 
-![Braintrust Dashboard Interface](/static/blog/braintrust-alternatives/braintrust-dashboard-ui.webp)
+In Helicone, you can drill down into the data to get more details, segment them by custom properties, users, models, etc. to get more insights.
 
-| Feature                                               | Helicone                                           | Braintrust                                        |
-|--------------------------------------------------------|----------------------------------------------------|----------------------------------------------------|
-| **Dashboard**   | ✅ Detailed and intuitive, with centralized view of key metrics                        | 🟠 Less detailed and intuitive. Lacks centralized view                    |
-| **Learning Curve**                                    | ✅ Intuitive and user-friendly                     | 🟠 Steeper learning curve                          |
-| **Workflow Style** <br/> UI-based vs. code-heavy      | ✅ More UI-based workflows supported               | 🟠 More code-based workflows                       |
+**Helicone Dashboard**
+![Helicone Dashboard Interface](/static/blog/braintrust-alternatives/helicone-dashboard-2.webp)
+
+**Braintrust Dashboard**
+![Braintrust Dashboard Interface](/static/blog/braintrust-alternatives/braintrust-dashboard.webp)
 
 ### LLM Monitoring
 
@@ -76,6 +74,7 @@ Here's an overview of how Braintrust compares to Helicone:
 | **Cost & Usage Tracking** <br/>Detailed cost tracking with rich dashboards                               | ✅           | ❌       |
 | **Alerting & Webhooks** <br/>Automate LLM workflows, trigger actions, and get alerts for critical events | ✅           | ❌       |
 | **Security Features** <br/> Out-of-the-box security, including Key Vault for API key management          | ✅           | ❌       |
+| **Key Vault** <br/>Manage and distribute API keys safely | ✅                    | ✅     |
 
 ### Security, Compliance, Privacy
 
