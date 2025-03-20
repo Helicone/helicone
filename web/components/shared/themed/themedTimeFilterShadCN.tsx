@@ -1,11 +1,12 @@
-import * as React from "react";
 import { CalendarIcon } from "@heroicons/react/20/solid";
-import { addDays, format, addHours, differenceInDays } from "date-fns";
+import { addDays, addHours, differenceInDays, format } from "date-fns";
+import * as React from "react";
 import { DateRange } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -19,9 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useProFeature } from "@/hooks/useProFeature";
-import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
 
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -48,7 +48,7 @@ export function ThemedTimeFilterShadCN({
         }
       );
     }
-  }, [initialDateRange]);
+  }, [initialDateRange, date]);
 
   const predefinedRanges = [
     {
@@ -155,11 +155,8 @@ export function ThemedTimeFilterShadCN({
           <Button
             id="date"
             variant={"outline"}
-            className={cn(
-              " dark:text-slate-400",
-              "justify-start text-left font-normal"
-            )}
-            size="md_sleek"
+            className="justify-start text-left font-normal text-xs rounded-full"
+            size="sm"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from && date?.to ? (

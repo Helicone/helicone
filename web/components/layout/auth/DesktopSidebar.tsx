@@ -184,14 +184,14 @@ const DesktopSidebar = ({
         className={cn(
           "hidden md:block",
           largeWith,
-          "transition-all duration-300"
+          "transition-all duration-100 ease-in-out"
         )}
       />
 
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 transition-all duration-300 h-screen bg-slate-100 dark:bg-slate-900",
+          "h-screen flex flex-col z-50 bg-slate-100 dark:bg-slate-900 transition-all duration-100 ease-in-out",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
