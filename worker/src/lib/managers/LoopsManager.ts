@@ -145,7 +145,6 @@ export async function updateLoopUsers(env: Env) {
       setTimeout(resolve, sleepTime * (1 + sleepPadding))
     );
 
-    const isNewContact = !cachedUserEmails.some((u) => u.email === user.email);
     const isOnboarded = user.id ? onboardedOwnerIds.has(user.id) : false;
 
     const body: Record<string, unknown> = {
