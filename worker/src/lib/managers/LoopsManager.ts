@@ -89,6 +89,7 @@ export async function updateLoopUsers(env: Env) {
     email: string;
     tags: string[];
     has_onboarded?: boolean;
+    has_onboarded_date?: string;
   }[] = JSON.parse((await env.UTILITY_KV.get("loop_user_emails_v10")) ?? "[]");
 
   const newestUser = allUsers
@@ -148,12 +149,29 @@ export async function updateLoopUsers(env: Env) {
     // Check if this is a new contact (not in our cache)
     const isNewContact = !cachedUserEmails.some((u) => u.email === user.email);
 
+    // Determine if this user has onboarded
+    const isOnboarded = user.id ? onboardedOwnerIds.has(user.id) : false;
+
+    // Check if this is a status change from not onboarded to onboarded
+    const previousCachedUser = cachedUserEmails.find(
+      (u) => u.email === user.email
+    );
+    const onboardingStatusChanged =
+      previousCachedUser &&
+      previousCachedUser.has_onboarded === false &&
+      isOnboarded === true;
+
     const body: Record<string, unknown> = {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      has_onboarded: user.id ? onboardedOwnerIds.has(user.id) : false,
+      has_onboarded: isOnboarded,
     };
+
+    // Add onboarding date if status changed to true
+    if (onboardingStatusChanged) {
+      body.has_onboarded_date = new Date().toISOString();
+    }
 
     // Only include created_at for new contacts
     if (isNewContact) {
@@ -176,13 +194,11 @@ export async function updateLoopUsers(env: Env) {
     newCache.push({
       email: user.email,
       tags: user.tags,
-      has_onboarded: user.id ? onboardedOwnerIds.has(user.id) : false,
+      has_onboarded: isOnboarded,
+      has_onboarded_date: onboardingStatusChanged
+        ? new Date().toISOString()
+        : previousCachedUser?.has_onboarded_date,
     });
-
-    console.log(
-      `Updated user ${user.email} with result ${await result.text()}`
-    );
-    console.log(`adding back cached emails`, newCache.length);
 
     await safePut({
       key: env.UTILITY_KV,
