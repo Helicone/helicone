@@ -21,7 +21,7 @@ import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import RequestsPageV2 from "../requests/RequestsPage";
+import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 
 const RateLimitPage = (props: {}) => {
@@ -184,7 +184,7 @@ const RateLimitPage = (props: {}) => {
           )}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          <RequestsPageV2
+          <RequestsPage
             currentPage={1}
             pageSize={25}
             sort={{

@@ -1,7 +1,7 @@
 import { User } from "@supabase/auth-helpers-react";
 import { ReactElement, useEffect } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
-import RequestsPageV2 from "../components/templates/requests/RequestsPage";
+import RequestsPage from "../components/templates/requests/RequestsPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { getSupabaseServer } from "../lib/supabaseServer";
 import {
@@ -80,7 +80,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   }, []);
 
   return (
-    <RequestsPageV2
+    <RequestsPage
       currentPage={currentPage}
       pageSize={pageSize}
       sort={sort}
