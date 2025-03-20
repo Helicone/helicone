@@ -3,6 +3,9 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import { AdvancedFilters } from "@/components/shared/themed/themedAdvancedFilters";
+import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
+import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -17,8 +20,11 @@ import {
   UIFilterRowTree,
 } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
+import { Popover } from "@headlessui/react";
+import { PinIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PiFunnelBold } from "react-icons/pi";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
@@ -193,6 +199,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+
+  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const popoverContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -698,6 +708,20 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
   }, [orgContext]);
 
+  const getDefaultValue = () => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  };
+
+  const handlePopoverInteraction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return shouldShowMockData ? (
     <div
       className={`transition-opacity duration-500 ease-in-out ${
@@ -734,7 +758,108 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {!userId && (
         <Header
           title={isCached ? "Cached Requests" : "Requests"}
-          leftActions={<div></div>}
+          leftActions={
+            <div className="flex flex-row items-center gap-2">
+              {advancedFilters && (
+                <Popover className="relative flex items-center">
+                  {({ open }) => (
+                    <>
+                      <Popover.Button
+                        as={Button}
+                        variant="outline"
+                        asPill
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => {
+                          if (isFiltersPinned) {
+                            setShowFilters(!showFilters);
+                          } else {
+                            setShowFilters(false);
+                          }
+                        }}
+                      >
+                        <PiFunnelBold className="h-4 w-4" />
+                        <span className="hidden sm:inline font-normal text-[13px]">
+                          {isFiltersPinned
+                            ? showFilters
+                              ? "Hide Filters"
+                              : "Show Filters"
+                            : "Filters"}
+                        </span>
+                      </Popover.Button>
+
+                      <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
+                        <div
+                          className="w-full"
+                          ref={popoverContentRef}
+                          onClick={handlePopoverInteraction}
+                        >
+                          <AdvancedFilters
+                            filterMap={filterMap}
+                            filters={advancedFilters}
+                            setAdvancedFilters={onSetAdvancedFiltersHandler}
+                            searchPropertyFilters={searchPropertyFilters}
+                            savedFilters={
+                              transformedFilters && orgLayout?.data?.id
+                                ? transformedFilters
+                                : undefined
+                            }
+                            onSaveFilterCallback={async () => {
+                              await orgLayoutRefetch();
+                            }}
+                            layoutPage={"requests"}
+                          />
+                          <div className="flex justify-end ml-4">
+                            <Button
+                              variant="ghostLinear"
+                              onClick={() => {
+                                setIsFiltersPinned(!isFiltersPinned);
+                                setShowFilters(!isFiltersPinned);
+                              }}
+                              className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
+                            >
+                              {isFiltersPinned ? (
+                                <PinIcon className="h-5 w-5 text-primary" />
+                              ) : (
+                                <PinIcon className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </Popover.Panel>
+                    </>
+                  )}
+                </Popover>
+              )}
+              <ThemedTimeFilter
+                currentTimeFilter={getTimeRange()}
+                timeFilterOptions={[]}
+                onSelect={function (key: string, value: string): void {
+                  onTimeSelectHandler(key as TimeInterval, value);
+                }}
+                isFetching={false}
+                defaultValue={getDefaultValue()}
+                custom={true}
+              />
+
+              {/* TODO: Move inside the popover */}
+              {/* {organizationLayoutAvailable && (
+                <FiltersButton
+                  filters={
+                    transformedFilters && orgLayout?.data?.id
+                      ? transformedFilters
+                      : undefined
+                  }
+                  currentFilter={currFilter ?? undefined}
+                  onFilterChange={onLayoutFilterChange}
+                  onDeleteCallback={() => {
+                    orgLayoutRefetch();
+                  }}
+                  layoutPage={"requests"}
+                />
+              )} */}
+            </div>
+          }
           rightActions={
             <LivePill
               isLive={isLive}
@@ -764,15 +889,19 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               skeletonLoading={isDataLoading}
               dataLoading={isBodyLoading}
               sortable={sort}
-              advancedFilters={{
-                filterMap: filterMap,
-                filters: advancedFilters,
-                setAdvancedFilters: onSetAdvancedFiltersHandler,
-                searchPropertyFilters: searchPropertyFilters,
-                show: userId ? false : true,
-              }}
+              advancedFilters={
+                userId
+                  ? undefined
+                  : {
+                      filterMap: filterMap,
+                      filters: advancedFilters,
+                      setAdvancedFilters: onSetAdvancedFiltersHandler,
+                      searchPropertyFilters: searchPropertyFilters,
+                      show: !userId,
+                    }
+              }
               savedFilters={
-                organizationLayoutAvailable
+                organizationLayoutAvailable && !userId
                   ? {
                       currentFilter: currFilter ?? undefined,
                       filters:
@@ -807,11 +936,15 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 });
                 return flattenedRequest;
               })}
-              timeFilter={{
-                currentTimeFilter: timeRange,
-                defaultValue: "1m",
-                onTimeSelectHandler: onTimeSelectHandler,
-              }}
+              timeFilter={
+                !userId
+                  ? {
+                      currentTimeFilter: timeRange,
+                      defaultValue: "1m",
+                      onTimeSelectHandler: onTimeSelectHandler,
+                    }
+                  : undefined
+              }
               onRowSelect={onRowSelectHandler}
               makeCard={(row: MappedLLMRequest) => {
                 return <RequestCard request={row} properties={properties} />;
@@ -911,7 +1044,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {/* TODO: Fix not showing */}
+      {/* Table Footer */}
       <TableFooter
         currentPage={page}
         pageSize={pageSize}
