@@ -28,7 +28,6 @@ import {
 } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
-import ThemedTableHeader from "./themedTableHeader";
 
 import useOnboardingContext, {
   ONBOARDING_STEPS,
@@ -42,7 +41,7 @@ import { RequestViews } from "./RequestViews";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableV5Props<T extends { id?: string }> {
+interface ThemedTableProps<T extends { id?: string }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -111,9 +110,8 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   rowLink?: (row: T) => string;
   showFilters?: boolean;
 }
-
 export default function ThemedTable<T extends { id?: string }>(
-  props: ThemedTableV5Props<T>
+  props: ThemedTableProps<T>
 ) {
   const {
     id,
@@ -232,63 +230,13 @@ export default function ThemedTable<T extends { id?: string }>(
 
   return (
     <div className="h-full flex flex-col border-border divide-y divide-border sentry-mask-me">
-      {!hideHeader && (
-        <div className="p-1 flex-shrink-0">
-          <ThemedTableHeader
-            search={search}
-            onDataSet={onDataSet}
-            isDatasetsPage={isDatasetsPage}
-            advancedFilters={
-              advancedFilters
-                ? {
-                    filterMap: advancedFilters.filterMap,
-                    filters: advancedFilters.filters,
-                    searchPropertyFilters:
-                      advancedFilters.searchPropertyFilters,
-                    setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                    show: advancedFilters.show,
-                  }
-                : undefined
-            }
-            showFilters={showFilters}
-            savedFilters={savedFilters}
-            activeColumns={activeColumns}
-            setActiveColumns={setActiveColumns}
-            columns={hideView ? [] : table.getAllColumns()}
-            timeFilter={
-              timeFilter
-                ? {
-                    defaultValue: timeFilter.defaultValue,
-                    onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                    currentTimeFilter: timeFilter.currentTimeFilter,
-                  }
-                : undefined
-            }
-            viewToggle={
-              makeCard
-                ? {
-                    currentView: view,
-                    onViewChange: setView,
-                  }
-                : undefined
-            }
-            rows={exportData}
-            customButtons={customButtons}
-            selectedRows={{
-              count: selectedIds?.length,
-              children: selectedRows?.children,
-            }}
-          />
-        </div>
-      )}
-
       {children && <div className="flex-shrink-0">{children}</div>}
 
       <div className="h-full overflow-auto bg-white dark:bg-slate-800">
         {skeletonLoading ? (
           <LoadingAnimation title="Loading Data..." />
         ) : rows.length === 0 ? (
-          <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <div className="bg-white dark:bg-black h-48 w-full  border-border py-2 px-4 flex flex-col space-y-3 justify-center items-center">
             <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
             <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               No Data Found
@@ -296,14 +244,14 @@ export default function ThemedTable<T extends { id?: string }>(
             {noDataCTA}
           </div>
         ) : table.getVisibleFlatColumns().length === 0 ? (
-          <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+          <div className="bg-white dark:bg-black h-48 w-full  border-border py-2 px-4 flex flex-col space-y-3 justify-center items-center">
             <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
             <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
               No Columns Selected
             </p>
           </div>
         ) : makeCard && view === "card" ? (
-          <ul className="flex flex-col space-y-8 divide-y divide-slate-300 dark:divide-slate-700 bg-white dark:bg-black rounded-lg border border-slate-300 dark:border-slate-700">
+          <ul className="flex flex-col space-y-8 divide-y divide-border bg-white dark:bg-black rounded-lg border border-border">
             {rows.map((row, i) => (
               <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
             ))}
@@ -316,7 +264,7 @@ export default function ThemedTable<T extends { id?: string }>(
             properties={makeRow.properties}
           />
         ) : (
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full w-full" orientation="both">
             <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
               <div
                 className=""
@@ -337,22 +285,17 @@ export default function ThemedTable<T extends { id?: string }>(
                     {table.getHeaderGroups().map((headerGroup) => (
                       <tr
                         key={headerGroup.id}
-                        className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
+                        className="sticky top-0 glass shadow-sm"
                       >
                         <th
                           className={clsx(
-                            "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
+                            "w-8 h-full",
                             checkboxMode === "never" && "hidden"
                           )}
                         >
-                          <div
-                            className={clsx(
-                              checkboxMode === "on_hover" &&
-                                "opacity-40 hover:opacity-100 transition-opacity duration-150"
-                            )}
-                          >
+                          <div className="flex justify-center items-center h-full">
                             <Checkbox
-                              variant="blue"
+                              variant="helicone"
                               onCheckedChange={handleSelectAll}
                               checked={selectedIds?.length === rows.length}
                               ref={(ref) => {
@@ -394,7 +337,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       </tr>
                     ))}
                   </thead>
-                  <tbody className="text-[13px] ">
+                  <tbody className="text-[13px] divide-y divide-border">
                     {rows.map((row, index) => (
                       <tr
                         key={row.original?.id}
@@ -414,7 +357,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       >
                         <td
                           className={clsx(
-                            "w-8 px-2 border-t border-slate-300 dark:border-slate-700",
+                            "w-8 h-full px-2",
                             checkboxMode === "on_hover"
                               ? clsx(
                                   "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
@@ -425,21 +368,22 @@ export default function ThemedTable<T extends { id?: string }>(
                               : "",
                             checkboxMode === "never" && "hidden"
                           )}
+                          style={{ verticalAlign: "middle" }}
                         >
-                          <Checkbox
-                            variant="blue"
-                            checked={selectedIds?.includes(
-                              row.original?.id ?? ""
-                            )}
-                            onChange={() => {}}
-                            className="text-slate-700 dark:text-slate-400"
-                          />
+                          <div className="flex justify-center items-center h-full">
+                            <Checkbox
+                              variant="helicone"
+                              checked={selectedIds?.includes(
+                                row.original?.id ?? ""
+                              )}
+                            />
+                          </div>
                         </td>
                         {row.getVisibleCells().map((cell, i) => (
                           <td
                             key={i}
                             className={clsx(
-                              "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
+                              "py-3 px-2 text-slate-700 dark:text-slate-300",
                               i === 0 &&
                                 checkboxMode === "always_visible" &&
                                 "pl-2",
@@ -451,7 +395,7 @@ export default function ThemedTable<T extends { id?: string }>(
                                 selectedIds?.includes(row.original?.id ?? "") &&
                                 "!pl-2",
                               i === row.getVisibleCells().length - 1 &&
-                                "pr-10 border-r border-slate-300 dark:border-slate-700"
+                                "pr-10 border-r border-border"
                             )}
                             style={{
                               maxWidth: cell.column.getSize(),

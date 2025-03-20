@@ -24,7 +24,7 @@ import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import ModelPill from "../requests/modelPill";
-import RequestsPageV2 from "../requests/RequestsPage";
+import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
@@ -298,7 +298,7 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
                     pageType="cache"
                   />
                 ) : (
-                  <RequestsPageV2
+                  <RequestsPage
                     currentPage={currentPage}
                     pageSize={pageSize}
                     sort={sort}
