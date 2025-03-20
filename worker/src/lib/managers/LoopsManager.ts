@@ -9,6 +9,7 @@ const MAX_USER_PAGES = 100;
 
 async function getAllUser(supabaseServer: SupabaseClient<Database>) {
   const allUsers: {
+    id?: string;
     email: string;
     msft: boolean;
     first_name?: string;
@@ -61,6 +62,7 @@ async function getAllUser(supabaseServer: SupabaseClient<Database>) {
             allUsers.find((u) => u.email === user.email) === undefined
         )
         .map((user) => ({
+          id: user.id,
           msft: false,
           email: user.email ?? "",
           created_at: user.created_at,
@@ -77,12 +79,18 @@ export async function updateLoopUsers(env: Env) {
   );
   const allUsers = await getAllUser(supabaseServer);
 
+  const { data: onboardedOrgs } = await supabaseServer
+    .from("organization")
+    .select("owner")
+    .eq("has_onboarded", true)
+    .eq("is_main_org", true);
+
   const cachedUserEmails: {
     email: string;
     tags: string[];
+    has_onboarded?: boolean;
   }[] = JSON.parse((await env.UTILITY_KV.get("loop_user_emails_v10")) ?? "[]");
 
-  console.log("Found", cachedUserEmails.length, "cached emails");
   const newestUser = allUsers
     .reduce((acc, user) => {
       const existingUser = acc.find((u) => u.email === user.email);
@@ -96,6 +104,7 @@ export async function updateLoopUsers(env: Env) {
         }
         acc.push({
           email: user.email,
+          id: user.id,
           tags: [user.tag ?? ""],
           firstName: user.first_name ?? "",
           lastName: user.last_name ?? "",
@@ -104,40 +113,58 @@ export async function updateLoopUsers(env: Env) {
         });
       }
       return acc;
-    }, [] as { email: string; tags: string[]; firstName: string; lastName: string; created_at: string; updated_at: string }[])
+    }, [] as { email: string; id?: string; tags: string[]; firstName: string; lastName: string; created_at: string; updated_at: string }[])
     .filter((user) => {
       const found = cachedUserEmails.find((u) => {
         const allTagsMatch = u.tags.every((t) => user.tags.includes(t));
-        return u.email === user.email && allTagsMatch;
+        const sameOnboardingStatus =
+          u.has_onboarded ===
+          (user.id
+            ? onboardedOrgs?.some((org) => org.owner === user.id) ?? false
+            : false);
+        return u.email === user.email && allTagsMatch && sameOnboardingStatus;
       });
       return !found;
     });
 
-  console.log(`Adding ${newestUser.length} users`);
-  // console.log(`Found ${newestUser.filter((u) => u.msft).length} msft users`);
-  // console.log(
-  //   `Found ${newestUser.filter((u) => !u.msft).length} non-msft users`
-  // );
   const newCache = cachedUserEmails.filter((u) =>
     newestUser.find((nu) => {
       return nu.email !== u.email || u.tags.every((t) => nu.tags.includes(t));
     })
   );
 
+  // Create a Set of user IDs who have onboarded their organization
+  const onboardedOwnerIds = new Set(
+    onboardedOrgs?.map((org) => org.owner) || []
+  );
+
+  console.log(
+    `Found ${onboardedOwnerIds.size} users with onboarded organizations`
+  );
+
+  console.log(`Newest user: ${JSON.stringify(newestUser)}`);
+
   for (const user of newestUser) {
-    console.log(`Updating user ${user.email}`);
     const sleepPadding = 0.1;
     const sleepTime = 1000 / MAX_REQUESTS_PER_SECOND;
     await new Promise((resolve) =>
       setTimeout(resolve, sleepTime * (1 + sleepPadding))
     );
 
+    // Check if this is a new contact (not in our cache)
+    const isNewContact = !cachedUserEmails.some((u) => u.email === user.email);
+
     const body: Record<string, unknown> = {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      created_at: user.created_at,
+      has_onboarded: user.id ? onboardedOwnerIds.has(user.id) : false,
     };
+
+    // Only include created_at for new contacts
+    if (isNewContact) {
+      body.created_at = user.created_at;
+    }
 
     for (const tag of user.tags) {
       body[tag] = true;
@@ -155,6 +182,7 @@ export async function updateLoopUsers(env: Env) {
     newCache.push({
       email: user.email,
       tags: user.tags,
+      has_onboarded: user.id ? onboardedOwnerIds.has(user.id) : false,
     });
 
     console.log(
