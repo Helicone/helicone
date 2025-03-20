@@ -138,12 +138,6 @@ export async function updateLoopUsers(env: Env) {
     onboardedOrgs?.map((org) => org.owner) || []
   );
 
-  console.log(
-    `Found ${onboardedOwnerIds.size} users with onboarded organizations`
-  );
-
-  console.log(`Newest user: ${JSON.stringify(newestUser)}`);
-
   for (const user of newestUser) {
     const sleepPadding = 0.1;
     const sleepTime = 1000 / MAX_REQUESTS_PER_SECOND;
