@@ -205,6 +205,9 @@ export interface paths {
   "/v1/request/{requestId}/score": {
     post: operations["AddScores"];
   };
+  "/v1/session/has-session": {
+    get: operations["HasSession"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -3835,6 +3838,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  HasSession: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
         };
       };
     };
