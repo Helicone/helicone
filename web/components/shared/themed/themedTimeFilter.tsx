@@ -1,10 +1,10 @@
+import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import { clsx } from "../clsx";
 import useNotification from "../notification/useNotification";
-import useSearchParams from "../utils/useSearchParams";
-import { TimeFilter } from "@/types/timeFilter";
 import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
+import useSearchParams from "../utils/useSearchParams";
 import { ThemedTimeFilterShadCN } from "./themedTimeFilterShadCN";
 
 interface ThemedTimeFilterProps {
@@ -84,11 +84,11 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   return (
     <Menu
       as="div"
-      className="relative inline-flex text-left z-10 shadow-sm h-fit w-fit isolate rounded-lg"
+      className="relative inline-flex text-left z-10 h-9 w-fit isolate rounded-full"
     >
       {custom && (
         <ThemedTimeFilterShadCN
-          className="rounded-l-lg"
+          className="rounded-full"
           onDateChange={(newDate) => {
             if (newDate?.from && newDate?.to) {
               const start = new Date(newDate.from);
