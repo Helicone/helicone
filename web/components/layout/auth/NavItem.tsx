@@ -45,33 +45,57 @@ const NavItem: React.FC<NavItemProps> = ({
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          <Link
-            href={hasSubItems ? link.subItems![0].href : link.href}
-            onClick={(e) => {
-              if (hasSubItems) {
-                e.preventDefault();
+          {hasSubItems ? (
+            // For items with subitems, create a button that navigates to first subitem
+            <button
+              onClick={() => {
                 router.push(link.subItems![0].href);
-              }
-            }}
-            className={cn(
-              buttonVariants({
-                variant: "ghost",
-                size: "icon",
-              }),
-              "h-9 w-9",
-              link.current && "bg-accent hover:bg-accent"
-            )}
-          >
-            {link.icon && (
-              <link.icon
-                className={cn(
-                  "h-4 w-4 text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200"
-                )}
-              />
-            )}
-            <span className="sr-only">{link.name}</span>
-          </Link>
+                onClick(); // UI state updates
+              }}
+              className={cn(
+                buttonVariants({
+                  variant: "ghost",
+                  size: "icon",
+                }),
+                "h-9 w-9",
+                link.current && "bg-accent hover:bg-accent"
+              )}
+            >
+              {link.icon && (
+                <link.icon
+                  className={cn(
+                    "h-4 w-4 text-slate-500",
+                    link.current && "text-slate-800 dark:text-slate-200"
+                  )}
+                />
+              )}
+              <span className="sr-only">{link.name}</span>
+            </button>
+          ) : (
+            // For normal items, use Link
+            <Link
+              href={link.href}
+              onClick={onClick} // Just UI state updates, navigation handled by Link
+              className={cn(
+                buttonVariants({
+                  variant: "ghost",
+                  size: "icon",
+                }),
+                "h-9 w-9",
+                link.current && "bg-accent hover:bg-accent"
+              )}
+            >
+              {link.icon && (
+                <link.icon
+                  className={cn(
+                    "h-4 w-4 text-slate-500",
+                    link.current && "text-slate-800 dark:text-slate-200"
+                  )}
+                />
+              )}
+              <span className="sr-only">{link.name}</span>
+            </Link>
+          )}
         </TooltipTrigger>
         <TooltipContent
           side="right"
@@ -86,25 +110,73 @@ const NavItem: React.FC<NavItemProps> = ({
     );
   }
 
+  // Non-collapsed view
+  if (hasSubItems) {
+    // For items with subitems, render a header with toggle
+    return (
+      <div className={cn(isSubItem)}>
+        <button
+          onClick={() => toggleExpand(link.name)}
+          className="flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2 w-full justify-start hover:text-slate-500 dark:hover:text-slate-300"
+        >
+          <div className="flex items-center">
+            {link.icon && (
+              <link.icon
+                className={cn(
+                  "mr-2 h-3.5 w-3.5 text-slate-500",
+                  link.current && "text-slate-800 dark:text-slate-200"
+                )}
+              />
+            )}
+            {link.name}
+            {link.isNew && (
+              <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
+                New
+              </div>
+            )}
+          </div>
+          <ChevronDownIcon
+            className={cn(
+              "h-3 w-3 transition-transform text-slate-400",
+              !expandedItems.includes(link.name) && "-rotate-90"
+            )}
+          />
+        </button>
+        {expandedItems.includes(link.name) && (
+          <div className="mt-1">
+            {link.subItems!.map((subItem) => (
+              <NavItem
+                key={subItem.name}
+                link={subItem}
+                isCollapsed={isCollapsed}
+                isSubItem={true}
+                expandedItems={expandedItems}
+                toggleExpand={toggleExpand}
+                deep={deep ? deep + 1 : 1}
+                onClick={onClick}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Regular link item
   return (
     <div className={cn(isSubItem)}>
       <Link
-        href={hasSubItems ? "#" : link.href}
-        onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
+        href={link.href}
+        onClick={onClick} // Just for UI state updates, navigation handled by Link
         className={cn(
-          hasSubItems
-            ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
-            : cn(
-                buttonVariants({
-                  variant: link.current ? "secondary" : "ghost",
-                  size: "xs",
-                }),
-                deep && deep > 1 ? "h-6" : "h-8",
-                "justify-start w-full font-normal",
-                "text-sm  text-[12px] text-slate-500",
-                link.current && "text-slate-800 dark:text-slate-200"
-              ),
-          ""
+          buttonVariants({
+            variant: link.current ? "secondary" : "ghost",
+            size: "xs",
+          }),
+          deep && deep > 1 ? "h-6" : "h-8",
+          "justify-start w-full font-normal",
+          "text-sm text-[12px] text-slate-500",
+          link.current && "text-slate-800 dark:text-slate-200"
         )}
       >
         <div className="flex items-center">
@@ -123,31 +195,7 @@ const NavItem: React.FC<NavItemProps> = ({
             </div>
           )}
         </div>
-        {hasSubItems && (
-          <ChevronDownIcon
-            className={cn(
-              "h-3 w-3 transition-transform text-slate-400",
-              !expandedItems.includes(link.name) && "-rotate-90"
-            )}
-          />
-        )}
       </Link>
-      {hasSubItems && expandedItems.includes(link.name) && (
-        <div className="mt-1">
-          {link.subItems!.map((subItem) => (
-            <NavItem
-              key={subItem.name}
-              link={subItem}
-              isCollapsed={isCollapsed}
-              isSubItem={true}
-              expandedItems={expandedItems}
-              toggleExpand={toggleExpand}
-              deep={deep ? deep + 1 : 1}
-              onClick={onClick}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
