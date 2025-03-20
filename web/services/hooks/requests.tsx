@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
@@ -89,6 +89,7 @@ export const useGetRequestsWithBodies = (
   isCached: boolean = false
 ) => {
   const org = useOrg();
+  const [stableRequests, setStableRequests] = useState<HeliconeRequest[]>([]);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
@@ -153,23 +154,34 @@ export const useGetRequestsWithBodies = (
       },
       keepPreviousData: true,
       enabled: !!request.signed_body_url,
+      staleTime: isLive ? 2000 : 0,
     })),
   });
 
   const requests = useMemo(() => {
-    return requestsWithSignedUrls.map((request, index) => {
+    if (requestsWithSignedUrls.length === 0) {
+      return stableRequests;
+    }
+
+    const updatedRequests = requestsWithSignedUrls.map((request, index) => {
       const content = urlQueries[index].data;
       if (!content) return request;
 
-      let updatedRequest = {
+      return {
         ...request,
         request_body: content.request,
         response_body: content.response,
       };
-
-      return updatedRequest;
     });
-  }, [requestsWithSignedUrls, urlQueries]);
+
+    return updatedRequests;
+  }, [requestsWithSignedUrls, urlQueries, stableRequests]);
+
+  useEffect(() => {
+    if (requests.length > 0) {
+      setStableRequests(requests);
+    }
+  }, [requests]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
@@ -177,7 +189,8 @@ export const useGetRequestsWithBodies = (
     isLoading: isLoading,
     refetch,
     isRefetching: isRefetching || isUrlsFetching,
-    requests: requests,
+    requests:
+      stableRequests.length > 0 && isRefetching ? stableRequests : requests,
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: requestsWithSignedUrls.length,
   };
@@ -226,7 +239,6 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
-      // cache the count for 5 minutes
       cacheTime: 5 * 60 * 1000,
     }),
   };
