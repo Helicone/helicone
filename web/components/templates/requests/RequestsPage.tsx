@@ -2,7 +2,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
-import LiveButton from "@/components/shared/LivePill";
+import LivePill from "@/components/shared/LivePill";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -149,7 +149,7 @@ function getCreatedAtColumn(isCached: boolean): string {
   return isCached ? "created_at" : "request_created_at";
 }
 
-const RequestsPageV2 = (props: RequestsPageV2Props) => {
+export default function RequestsPage(props: RequestsPageV2Props) {
   // TODO CLEAN UP AND SIMPLIFY ALL THIS STATE
   const {
     currentPage,
@@ -734,8 +734,9 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       {!userId && (
         <Header
           title={isCached ? "Cached Requests" : "Requests"}
-          leftActions={
-            <LiveButton
+          leftActions={<div></div>}
+          rightActions={
+            <LivePill
               isLive={isLive}
               setIsLive={setIsLive}
               isDataLoading={isDataLoading}
@@ -743,7 +744,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
               refetch={refetch}
             />
           }
-          rightActions={<div></div>}
         />
       )}
 
@@ -937,6 +937,4 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       />
     </main>
   );
-};
-
-export default RequestsPageV2;
+}
