@@ -11,22 +11,13 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { Rocket } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
-import { ChangelogItem } from "./types";
-
-export interface NavigationItem {
-  name: string;
-  href: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
-  current: boolean;
-  featured?: boolean;
-  subItems?: NavigationItem[];
-}
+import { ChangelogItem, NavigationItem } from "./types";
 
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
@@ -38,6 +29,7 @@ interface SidebarProps {
 const DesktopSidebar = ({
   changelog,
   NAVIGATION,
+  setOpen,
   sidebarRef,
 }: SidebarProps) => {
   const orgContext = useOrg();
@@ -49,23 +41,69 @@ const DesktopSidebar = ({
     false
   );
 
-  const shouldShowInfoBox = useMemo(() => {
-    return tier === "pro" || tier === "growth";
-  }, [tier]);
-
-  const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
-    "expandedItems",
-    ["Developer", "Segments", "Improve"]
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+    {}
   );
+  const [changelogModalOpen, setChangelogModalOpen] = useState(false);
+  const [selectedChangelog, setSelectedChangelog] = useState<
+    ChangelogItem | undefined
+  >();
+  const homeRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const toggleExpand = (name: string) => {
-    const prev = expandedItems || [];
-    setExpandedItems(
-      prev.includes(name)
-        ? prev.filter((item) => item !== name)
-        : [...prev, name]
-    );
-  };
+  // Memoize the toggleExpand function to avoid recreating it on every render
+  const toggleExpand = useCallback((name: string) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  }, []);
+
+  // Memoize the handleChangelogClick function
+  const handleChangelogClick = useCallback((changelogItem: ChangelogItem) => {
+    setSelectedChangelog(changelogItem);
+    setChangelogModalOpen(true);
+  }, []);
+
+  // Memoize the handleModalOpen function
+  const handleModalOpen = useCallback((open: boolean) => {
+    setChangelogModalOpen(open);
+  }, []);
+
+  // Memoize the handleCollapseToggle function
+  const handleCollapseToggle = useCallback(() => {
+    if (window.innerWidth < 768) {
+      // Mobile breakpoint
+      setIsMobileMenuOpen(false);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
+  }, [isCollapsed, setIsCollapsed]);
+
+  // Memoize the handleUpgradeClick function
+  const handleUpgradeClick = useCallback(() => {
+    setOpen(true);
+  }, [setOpen]);
+
+  // Calculate if any navigation items should be auto-expanded
+  useEffect(() => {
+    const pathname = router.pathname;
+    const newExpandedItems: Record<string, boolean> = {};
+
+    NAVIGATION.forEach((item) => {
+      if (item.subItems) {
+        const shouldExpand = item.subItems.some((subItem) =>
+          pathname.includes(subItem.href)
+        );
+        if (shouldExpand) {
+          newExpandedItems[item.name] = true;
+        }
+      }
+    });
+
+    setExpandedItems(newExpandedItems);
+  }, [NAVIGATION, router.pathname]);
+
   const largeWith = useMemo(
     () => cn(isCollapsed ? "w-16" : "w-52"),
     [isCollapsed]
@@ -74,7 +112,7 @@ const DesktopSidebar = ({
   const NAVIGATION_ITEMS = useMemo(() => {
     if (isCollapsed) {
       return NAVIGATION.flatMap((item) => {
-        if (item.subItems && expandedItems.includes(item.name)) {
+        if (item.subItems && expandedItems[item.name]) {
           return [
             item,
             ...item.subItems.filter((subItem) => subItem.icon !== null),
@@ -100,9 +138,10 @@ const DesktopSidebar = ({
 
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Function to calculate if there's enough space to show the InfoBox
-  const calculateAvailableSpace = () => {
+  const calculateAvailableSpaceForInfoBox = useCallback(() => {
     if (sidebarRef.current && navItemsRef.current) {
       const sidebarHeight = sidebarRef.current.offsetHeight;
       const navItemsHeight = navItemsRef.current.offsetHeight;
@@ -114,12 +153,30 @@ const DesktopSidebar = ({
 
       setCanShowInfoBox(availableHeight >= infoBoxHeight);
     }
-  };
+  }, [sidebarRef]);
 
-  const { theme, setTheme } = useTheme();
+  // Memoize the render of navigation items to avoid recreating them on every render
+  const renderNavigationItems = useMemo(() => {
+    return NAVIGATION.map((item) => (
+      <NavItem
+        key={item.name}
+        item={item}
+        isCollapsed={isCollapsed}
+        isExpanded={expandedItems[item.name] || false}
+        toggleExpand={toggleExpand}
+        onClick={() => {
+          if (window.innerWidth < 768) {
+            setIsMobileMenuOpen(false);
+          }
+        }}
+      />
+    ));
+  }, [NAVIGATION, isCollapsed, expandedItems, toggleExpand]);
 
   useEffect(() => {
-    calculateAvailableSpace();
+    const handleResize = () => {
+      calculateAvailableSpaceForInfoBox();
+    };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -128,10 +185,10 @@ const DesktopSidebar = ({
         orgContext?.currentOrg?.tier !== "demo"
       ) {
         event.preventDefault();
-        setIsCollapsed(!isCollapsed);
+        handleCollapseToggle();
       } else if (event.metaKey && event.shiftKey && event.key === "l") {
         event.preventDefault();
-        setTheme(theme === "dark" ? "light" : "dark");
+        setTheme(resolvedTheme === "dark" ? "light" : "dark");
       }
     };
 
@@ -142,46 +199,26 @@ const DesktopSidebar = ({
     );
 
     // Add event listeners
-    window.addEventListener("resize", calculateAvailableSpace);
+    window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", handleKeyDown);
+
+    // Initialize calculations
+    calculateAvailableSpaceForInfoBox();
 
     // Remove event listeners on cleanup
     return () => {
-      window.removeEventListener("resize", calculateAvailableSpace);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("keydown", handleKeyDown);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleCollapseToggle = () => {
-    if (window.innerWidth < 768) {
-      // Mobile breakpoint
-      setIsMobileMenuOpen(false);
-    } else {
-      setIsCollapsed(!isCollapsed);
-    }
-  };
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [changelogToView, setChangelogToView] = useState<ChangelogItem | null>(
-    null
-  );
-
-  const handleChangelogClick = (changelog: ChangelogItem) => {
-    setChangelogToView(changelog);
-    setModalOpen(true);
-  };
-
-  const handleModalOpen = (open: boolean) => {
-    if (!open) {
-      setChangelogToView(null);
-    } else {
-      setChangelogToView(changelog[0]);
-    }
-    setModalOpen(open);
-  };
+  }, [
+    isCollapsed,
+    expandedItems,
+    handleCollapseToggle,
+    resolvedTheme,
+    setTheme,
+    calculateAvailableSpaceForInfoBox,
+    orgContext?.currentOrg?.tier,
+  ]);
 
   return (
     <>
@@ -295,20 +332,7 @@ const DesktopSidebar = ({
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2"
                 >
                   <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {NAVIGATION_ITEMS.map((link) => (
-                      <NavItem
-                        key={link.name}
-                        link={link}
-                        isCollapsed={isCollapsed}
-                        expandedItems={expandedItems}
-                        toggleExpand={toggleExpand}
-                        onClick={() => {
-                          setIsCollapsed(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        deep={0}
-                      />
-                    ))}
+                    {renderNavigationItems}
 
                     {orgContext?.currentOrg?.tier === "demo" && (
                       <Button
@@ -351,6 +375,7 @@ const DesktopSidebar = ({
                   <div className="px-2 py-2">
                     <ProFeatureWrapper featureName="pro" enabled={false}>
                       <Button
+                        onClick={handleUpgradeClick}
                         variant="action"
                         size="icon"
                         className="w-full h-8 bg-sky-500 hover:bg-sky-600 text-white"
@@ -371,6 +396,7 @@ const DesktopSidebar = ({
                       <ProFeatureWrapper featureName="pro" enabled={false}>
                         <Button
                           variant="action"
+                          onClick={handleUpgradeClick}
                           className="w-full text-xs h-8 bg-sky-500 hover:bg-sky-600 text-white"
                         >
                           Start Pro Free Trial
@@ -396,12 +422,13 @@ const DesktopSidebar = ({
       </div>
 
       <ChangelogModal
-        open={modalOpen}
+        open={changelogModalOpen}
         setOpen={handleModalOpen}
-        changelog={changelogToView}
+        changelog={selectedChangelog || null}
       />
     </>
   );
 };
 
-export default DesktopSidebar;
+DesktopSidebar.displayName = "DesktopSidebar";
+export default memo(DesktopSidebar);

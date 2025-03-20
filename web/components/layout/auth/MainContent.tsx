@@ -1,6 +1,7 @@
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
 import OrgContext, { useOrg } from "../org/organizationContext";
+import { memo } from "react";
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -56,14 +57,12 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
             </div>
           </div>
         )}
-        <div className={clsx("bg-background h-full min-h-screen")}>
+        <div
+          key={pathname}
+          className={clsx("bg-background h-full min-h-screen")}
+        >
           <OrgContext.Provider value={org}>
-            <div
-              className="mr-auto w-full min-h-screen"
-              key={`${pathname}-${org?.renderKey}`}
-            >
-              {children}
-            </div>
+            <div className="px-5 py-5">{children}</div>
           </OrgContext.Provider>
         </div>
       </main>
@@ -71,4 +70,4 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
   );
 };
 
-export default MainContent;
+export default memo(MainContent);

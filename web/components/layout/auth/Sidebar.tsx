@@ -2,7 +2,7 @@
 
 import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
 
@@ -30,140 +30,131 @@ interface SidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
+// Create the base navigation items outside of the component to avoid recreating them on every render
+const BASE_NAVIGATION_ITEMS = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    name: "Requests",
+    href: "/requests",
+    icon: SheetIcon,
+  },
+  {
+    name: "Segments",
+    href: "/segments",
+    icon: null,
+    subItems: [
+      {
+        name: "Sessions",
+        href: "/sessions",
+        icon: ListTreeIcon,
+      },
+      {
+        name: "Properties",
+        href: "/properties",
+        icon: TagIcon,
+      },
+      {
+        name: "Users",
+        href: "/users",
+        icon: UsersIcon,
+      },
+    ],
+  },
+  {
+    name: "Improve",
+    href: "/improve",
+    icon: null,
+    subItems: [
+      {
+        name: "Prompts",
+        href: "/prompts",
+        icon: ScrollTextIcon,
+        isNew: true,
+      },
+      {
+        name: "Experiments",
+        href: "/experiments",
+        icon: FlaskConicalIcon,
+      },
+      {
+        name: "Evaluators",
+        href: "/evaluators",
+        icon: ChartLineIcon,
+      },
+      {
+        name: "Datasets",
+        href: "/datasets",
+        icon: DatabaseIcon,
+      },
+      {
+        name: "Playground",
+        href: "/prompts/fromPlayground",
+        icon: TestTube2,
+      },
+    ],
+  },
+  {
+    name: "Developer",
+    href: "/developer",
+    icon: null,
+    subItems: [
+      {
+        name: "Cache",
+        href: "/cache",
+        icon: ArchiveIcon,
+      },
+      {
+        name: "Rate Limits",
+        href: "/rate-limit",
+        icon: ShieldCheckIcon,
+      },
+      {
+        name: "Alerts",
+        href: "/alerts",
+        icon: BellIcon,
+      },
+      {
+        name: "Webhooks",
+        href: "/webhooks",
+        icon: Webhook,
+      },
+    ],
+  },
+];
+
+const SidebarComponent = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
   const user = useUser();
   const org = useOrg();
-  const NAVIGATION: NavigationItem[] = useMemo(
-    () => [
-      {
-        name: "Dashboard",
-        href: "/dashboard",
-        icon: Home,
-        current: pathname.includes("/dashboard"),
-      },
-      {
-        name: "Requests",
-        href: "/requests",
-        icon: SheetIcon,
-        current: pathname.includes("/requests"),
-      },
 
-      {
-        name: "Segments",
-        href: "/segments",
-        icon: null,
-        current: false,
-        subItems: [
-          {
-            name: "Sessions",
-            href: "/sessions",
-            icon: ListTreeIcon,
-            current: pathname.includes("/sessions"),
-          },
-          {
-            name: "Properties",
-            href: "/properties",
-            icon: TagIcon,
-            current: pathname.includes("/properties"),
-          },
-
-          {
-            name: "Users",
-            href: "/users",
-            icon: UsersIcon,
-            current: pathname.includes("/users"),
-          },
-        ],
-      },
-      {
-        name: "Improve",
-        href: "/improve",
-        icon: null,
-        current: false,
-        subItems: [
-          {
-            name: "Prompts",
-            href: "/prompts",
-            icon: ScrollTextIcon,
-            current: pathname.includes("/prompts"),
-            isNew: true,
-          },
-          {
-            name: "Experiments",
-            href: "/experiments",
-            icon: FlaskConicalIcon,
-            current: pathname.includes("/experiments"),
-          },
-          {
-            name: "Evaluators",
-            href: "/evaluators",
-            icon: ChartLineIcon,
-            current: pathname.includes("/evaluators"),
-          },
-          {
-            name: "Datasets",
-            href: "/datasets",
-            icon: DatabaseIcon,
-            current: pathname.includes("/datasets"),
-          },
-          {
-            name: "Playground",
-            href: "/prompts/fromPlayground",
-            icon: TestTube2,
-            current: pathname.includes("/prompts/fromPlayground"),
-          },
-        ],
-      },
-
-      {
-        name: "Developer",
-        href: "/developer",
-        icon: null,
-        current: pathname.includes("/developer"),
-        subItems: [
-          {
-            name: "Cache",
-            href: "/cache",
-            icon: ArchiveIcon,
-            current: pathname.includes("/cache"),
-          },
-          {
-            name: "Rate Limits",
-            href: "/rate-limit",
-            icon: ShieldCheckIcon,
-            current: pathname === "/rate-limit",
-          },
-          {
-            name: "Alerts",
-            href: "/alerts",
-            icon: BellIcon,
-            current: pathname.includes("/alerts"),
-          },
-          {
-            name: "Webhooks",
-            href: "/webhooks",
-            icon: Webhook,
-            current: pathname.includes("/webhooks"),
-          },
-          // {
-          //   name: "Providers",
-          //   href: "/providers",
-          //   icon: ServerIcon,
-          //   current: pathname.includes("/providers"),
-          // },
-          // {
-          //   name: "Vault",
-          //   href: "/vault",
-          //   icon: LockIcon,
-          //   current: pathname.includes("/vault"),
-          // },
-        ],
-      },
-    ],
-    [pathname]
-  );
+  // Only calculate the "current" property when the pathname changes
+  const NAVIGATION: NavigationItem[] = useMemo(() => {
+    return BASE_NAVIGATION_ITEMS.map((item) => {
+      if (item.subItems) {
+        return {
+          ...item,
+          current: item.subItems.some((subItem) =>
+            pathname.includes(subItem.href)
+          ),
+          subItems: item.subItems.map((subItem) => ({
+            ...subItem,
+            current:
+              pathname.includes(subItem.href) ||
+              (subItem.href === "/rate-limit" && pathname === "/rate-limit"),
+          })),
+        };
+      }
+      return {
+        ...item,
+        current: pathname.includes(item.href),
+      };
+    });
+  }, [pathname]);
 
   return (
     <DesktopSidebar
@@ -175,4 +166,9 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   );
 };
 
+// Set display name for the memoized component
+SidebarComponent.displayName = "SidebarComponent";
+
+// Export the memoized component
+const Sidebar = memo(SidebarComponent);
 export default Sidebar;
