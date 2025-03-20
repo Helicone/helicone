@@ -11,7 +11,7 @@ import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
-import RequestsPageV2 from "../../requests/RequestsPage";
+import RequestsPage from "../../requests/RequestsPage";
 import { formatNumber } from "../initialColumns";
 
 interface UserIdPageProps {
@@ -202,7 +202,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                 </TabsContent>
                 <TabsContent value="1">
                   <div className="py-2">
-                    <RequestsPageV2
+                    <RequestsPage
                       currentPage={1}
                       pageSize={25}
                       sort={{

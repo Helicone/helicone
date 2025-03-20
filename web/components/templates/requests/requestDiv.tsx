@@ -110,7 +110,7 @@ const RequestDiv = (props: RequestDivProps) => {
   });
 
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea className="h-full p-4">
       <div className="w-full flex flex-row justify-between items-center">
         <div className="flex flex-row items-center space-x-2">
           <Tooltip>
