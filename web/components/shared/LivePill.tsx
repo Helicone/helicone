@@ -25,7 +25,7 @@ export default function LivePill(props: LivePillProps) {
             "h-2 w-2 rounded-full"
           )}
         />
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <span className="text-xs whitespace-nowrap">
           {isLive ? "Live" : "Start Live"}
         </span>
       </Button>
@@ -41,7 +41,7 @@ export default function LivePill(props: LivePillProps) {
         <ArrowPathIcon
           className={clsx(
             isDataLoading || isRefetching ? "animate-spin" : "",
-            "h-4 w-4 inline text-muted-foreground duration-500 ease-in-out"
+            "h-4 w-4 inline duration-500 ease-in-out"
           )}
         />
       </Button>
