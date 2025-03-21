@@ -102,7 +102,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       requests.requests.requests.length === 0
     ) {
       return {
-        isRealtime: null,
+        isRealtime: false,
         effectiveRequests: [],
         originalRequest: null,
       };
