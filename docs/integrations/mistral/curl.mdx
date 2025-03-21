@@ -1,0 +1,36 @@
+# Mistral cURL Integration
+
+This guide explains how to integrate Mistral AI with Helicone for logging and monitoring Mistral API usage using cURL.
+
+## Account Setup
+
+1. Create a Helicone account or log in at [helicone.ai](https://helicone.ai)
+2. Generate a Helicone API key from the [developer portal](https://helicone.ai/keys)
+
+## API Configuration
+
+To use Helicone with Mistral, you'll need to:
+1. Use Helicone's proxy URL (`https://mistral.helicone.ai/v1`)
+2. Add your Helicone API key in the headers
+3. Include your Mistral API key in the Authorization header
+
+Here's a complete example showing how to make a chat completion request through Helicone:
+
+
+
+Replace `<MISTRAL_API_KEY>` with your Mistral API key and `<HELICONE_API_KEY>` with your Helicone API key.
+
+## Supported Models
+
+Helicone supports all Mistral models including:
+- open-mistral-7b
+- open-mixtral-8x7b
+- mistral-small-latest
+- mistral-medium-latest
+- mistral-large-latest
+- mistral-embed
+
+## Prerequisites
+- Mistral API key
+- Helicone account and API key
+- cURL installed on your system
