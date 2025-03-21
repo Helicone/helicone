@@ -19,7 +19,9 @@ function truncMap(
 }
 
 export class RequestBodyHandler extends AbstractLogHandler {
-  async handle(context: HandlerContext): PromiseGenericResult<string> {
+  async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     try {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);
@@ -60,7 +62,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
           context.message.log.request.properties;
       }
 
-      return await super.handle(context);
+      return await super.handleNext(context);
     } catch (error: any) {
       return err(
         `Error processing request body: ${error}, Context: ${this.constructor.name}`

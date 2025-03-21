@@ -6,7 +6,9 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
 export class AuthenticationHandler extends AbstractLogHandler {
-  async handle(context: HandlerContext): PromiseGenericResult<string> {
+  async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     try {
       const authResult = await this.authenticateEntry(context);
       if (authResult.error || !authResult.data) {
@@ -21,7 +23,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
       context.authParams = authResult.data;
       context.orgParams = orgResult.data;
 
-      return await super.handle(context);
+      return await this.handleNext(context);
     } catch (error) {
       return err(
         `Error processing authentication: ${error}, Context: ${this.constructor.name}`

@@ -5,7 +5,9 @@ import { HandlerContext } from "./HandlerContext";
 import { sanitizeObject } from "../../utils/sanitize";
 
 export class PromptHandler extends AbstractLogHandler {
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     // Process Helicone Template
     if (
       context.message.log.request.promptId &&
@@ -50,6 +52,6 @@ export class PromptHandler extends AbstractLogHandler {
       }
     }
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 }

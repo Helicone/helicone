@@ -80,7 +80,9 @@ export class SegmentLogHandler extends AbstractLogHandler {
     super();
   }
 
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     const segmentConfig = await cacheResultCustom(
       `segment-config-${context.authParams?.organizationId}`,
       async () => getSegmentConfig(context.authParams?.organizationId ?? ""),
@@ -99,7 +101,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
 
     this.segmentEvents.push(segmentEvent);
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {

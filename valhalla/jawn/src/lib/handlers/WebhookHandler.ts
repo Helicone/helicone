@@ -26,7 +26,9 @@ export class WebhookHandler extends AbstractLogHandler {
     );
   }
 
-  async handle(context: HandlerContext): PromiseGenericResult<string> {
+  async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     const orgId = context.orgParams?.id;
 
     if (!orgId) {
@@ -112,7 +114,7 @@ export class WebhookHandler extends AbstractLogHandler {
       });
     }
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 
   private async getSignedUrl(
