@@ -364,8 +364,8 @@ export default function PromptEditor({
         parameters: {
           provider: provider,
           model: model,
-          temperature: templateData.temperature ?? 1,
-          tools: templateData.tools ?? [],
+          temperature: templateData.temperature ?? undefined,
+          tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
