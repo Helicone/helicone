@@ -743,7 +743,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     </div>
   ) : (
     <main className="h-screen flex flex-col">
-      {/* Headers */}
+      {/* Header */}
       {!userId && (
         <div
           className={
@@ -764,6 +764,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 <Popover className="relative flex items-center">
                   {({ open }) => (
                     <>
+                      {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
                       <Popover.Button
                         as={Button}
                         variant="outline"
@@ -842,7 +843,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 custom={true}
               />
 
-              {/* TODO: Move inside the popover */}
+              {/* TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
               {/* {organizationLayoutAvailable && (
                 <FiltersButton
                   filters={
@@ -1004,7 +1005,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         <ResizableHandle />
 
         {/* Request Drawer */}
-        <ResizablePanel defaultSize={50} minSize={25}>
+        <ResizablePanel defaultSize={50} minSize={33}>
           <RequestDiv
             open={open}
             setOpen={setOpen}
