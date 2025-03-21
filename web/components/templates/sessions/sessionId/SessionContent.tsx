@@ -1,5 +1,4 @@
 import { Row } from "@/components/layout/common";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
