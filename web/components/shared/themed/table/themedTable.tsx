@@ -285,34 +285,30 @@ export default function ThemedTable<T extends { id?: string }>(
                     {table.getHeaderGroups().map((headerGroup) => (
                       <tr
                         key={headerGroup.id}
-                        className="sticky top-0 glass shadow-sm"
+                        className="sticky top-0 glass border-b border-border"
                       >
-                        <th
-                          className={clsx(
-                            "w-8 h-full",
-                            checkboxMode === "never" && "hidden"
-                          )}
-                        >
-                          <div className="flex justify-center items-center h-full">
-                            <Checkbox
-                              variant="helicone"
-                              onCheckedChange={handleSelectAll}
-                              checked={selectedIds?.length === rows.length}
-                              ref={(ref) => {
-                                if (ref) {
-                                  (
-                                    ref as unknown as HTMLInputElement
-                                  ).indeterminate =
-                                    selectedIds !== undefined &&
-                                    selectedIds.length > 0 &&
-                                    selectedIds.length < rows.length;
-                                }
-                              }}
-                              className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                            />
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                        </th>
+                        {checkboxMode !== "never" && (
+                          <th>
+                            <div className="flex justify-center items-center h-full">
+                              <Checkbox
+                                variant="helicone"
+                                onCheckedChange={handleSelectAll}
+                                checked={selectedIds?.length === rows.length}
+                                ref={(ref) => {
+                                  if (ref) {
+                                    (
+                                      ref as unknown as HTMLInputElement
+                                    ).indeterminate =
+                                      selectedIds !== undefined &&
+                                      selectedIds.length > 0 &&
+                                      selectedIds.length < rows.length;
+                                  }
+                                }}
+                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                              />
+                            </div>
+                          </th>
+                        )}
                         {headerGroup.headers.map((header, index) => (
                           <th
                             key={`header-${index}`}
