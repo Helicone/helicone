@@ -11,6 +11,7 @@ import { costOf } from "@/packages/cost";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 import { hashAuth } from "../../../../lib/hashClient";
 import generateApiKey from "generate-api-key";
+import { WebClient } from "@slack/web-api";
 
 const ADDON_PRICES: Record<string, keyof Addons> = {
   [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
@@ -272,6 +273,174 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
   });
 }
 
+async function createSlackChannelAndInviteMembers(
+  orgId: string | undefined,
+  orgName: string | undefined
+) {
+  if (!orgId || !orgName || !process.env.SLACK_BOT_TOKEN) {
+    console.log("Missing organization ID, name, or Slack token");
+    return;
+  }
+
+  const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
+
+  const channelName = formatChannelName(orgName, orgId);
+  console.log(`Creating Slack channel: ${channelName}`);
+
+  const createChannelResponse = await slackClient.conversations.create({
+    name: channelName,
+    is_private: false,
+  });
+
+  const channelId = createChannelResponse.channel?.id as string;
+
+  // Have the bot join the channel
+  await slackClient.conversations.join({
+    channel: channelId,
+  });
+
+  // Get the organization members' emails for welcome message
+  const { data: orgMembers } = await getSupabaseServer()
+    .from("organization_member")
+    .select("member")
+    .eq("organization", orgId);
+
+  const emails = await Promise.all(
+    orgMembers?.map((member) => getUserEmail(member.member)) || []
+  ).then((emails) => emails.filter((email) => email !== null) as string[]);
+
+  // Invite all workspace members
+  console.log("Inviting all workspace members to the channel");
+  const allMembers = await slackClient.users.list({
+    limit: 200, // Fetch up to 200 users at once
+  });
+
+  if (allMembers.ok && allMembers.members && allMembers.members.length > 0) {
+    // Filter out bots, deleted users, and restricted users
+    const realUsers = allMembers.members.filter(
+      (member) => !member.is_bot && !member.deleted && !member.is_restricted
+    );
+
+    if (realUsers.length > 0) {
+      console.log(`Found ${realUsers.length} real workspace members`);
+
+      // Collect all user IDs and invite them
+      const userIds = realUsers
+        .filter((user) => user.id)
+        .map((user) => user.id)
+        .join(",");
+
+      if (userIds) {
+        await slackClient.conversations.invite({
+          channel: channelId,
+          users: userIds,
+        });
+        console.log(
+          `Invited ${realUsers.length} workspace members to the channel`
+        );
+      }
+    }
+  }
+
+  // Get support team user group ID
+  const userGroupId = "S08JS8UK211"; // Team support group ID
+  console.log(
+    `Associating channel ${channelId} with support group ${userGroupId}`
+  );
+
+  // Associate the channel with the Team user group
+  const userGroupsListResponse = await slackClient.usergroups.list({
+    include_users: false,
+  });
+
+  const targetGroup = userGroupsListResponse.usergroups?.find(
+    (group) => group.id === userGroupId
+  );
+
+  if (targetGroup) {
+    // Get existing channels from the prefs
+    const existingChannels = targetGroup.prefs?.channels || [];
+
+    // Add the new channel to the list if not already present
+    if (!existingChannels.includes(channelId)) {
+      existingChannels.push(channelId);
+    }
+
+    // Update the user group with the new list of channels
+    await slackClient.usergroups.update({
+      usergroup: userGroupId,
+      channels: existingChannels.join(","), // Slack expects a comma-separated string
+    });
+    console.log(`Successfully associated channel with support group`);
+  }
+
+  // Post welcome message to the channel with email list
+  // Format a list of emails to display
+  const emailList =
+    emails.length > 0
+      ? emails.map((email) => `• ${email}`).join("\n")
+      : "• No member emails found";
+
+  // Post welcome message to the channel with email list
+  await slackClient.chat.postMessage({
+    channel: channelId,
+    text:
+      `:wave: Welcome to your dedicated Helicone support channel, *${orgName}*!\n\n` +
+      `Our team is here to help you get the most out of Helicone. Feel free to ask any questions or request assistance here.\n\n` +
+      `Organization members to invite to Slack:\n${emailList}\n\n` +
+      `(These users will need to be manually invited to the Slack workspace)`,
+  });
+
+  console.log(
+    `Successfully created Slack channel and added team members for ${orgName}`
+  );
+}
+
+function formatChannelName(
+  organizationName: string,
+  organizationId?: string
+): string {
+  // Start with the team prefix
+  let name = "team-";
+
+  // Add organization name in lowercase
+  name += organizationName.toLowerCase();
+
+  // Replace spaces and special chars with hyphens
+  name = name.replace(/[^a-z0-9_-]/g, "-");
+
+  // Remove consecutive hyphens
+  name = name.replace(/-+/g, "-");
+
+  // Remove trailing hyphens (but keep the leading "team-" prefix)
+  name = name.replace(/-+$/g, "");
+
+  // Add org ID suffix for uniqueness if provided
+  if (organizationId) {
+    const shortId = organizationId.substring(0, 6);
+    name = `${name.substring(0, 70)}-${shortId}`;
+  }
+
+  // Enforce max length (Slack limit is 80, but we're being cautious)
+  return name.substring(0, 80);
+}
+
+async function getUserEmail(
+  userId: string | undefined
+): Promise<string | null> {
+  if (!userId) return null;
+
+  try {
+    const { data } = await getSupabaseServer().auth.admin.getUserById(userId);
+
+    return data?.user?.email || null;
+  } catch (error) {
+    console.error("Error fetching owner email:", error);
+    return null;
+  }
+}
+
+// Fix the TeamVersion20250130 implementation
 const TeamVersion20250130 = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
@@ -282,12 +451,11 @@ const TeamVersion20250130 = {
     // Get the existing subscription from the organization
     const { data: orgData } = await getSupabaseServer()
       .from("organization")
-      .select("stripe_subscription_id")
+      .select("stripe_subscription_id, name, owner")
       .eq("id", orgId || "")
       .single();
 
     // Cancel old subscription if it exists
-    console.log("Subscription ID", subscriptionId);
     if (orgData?.stripe_subscription_id) {
       try {
         console.log("Cancelling old subscription");
@@ -320,6 +488,9 @@ const TeamVersion20250130 = {
 
     // Invite members after org is updated
     await inviteOnboardingMembers(orgId);
+
+    // Create Slack channel and invite team members
+    await createSlackChannelAndInviteMembers(orgId, orgData?.name);
   },
 
   handleUpdate: async (event: Stripe.Event) => {
@@ -344,7 +515,6 @@ const PricingVersion20240913 = {
     const addons: Addons = {};
 
     subscription.items.data.forEach((item) => {
-      console.log(`Price ID: ${item.price.id}`);
       const addonKey = ADDON_PRICES[item.price.id];
       if (addonKey) {
         addons[addonKey] =
@@ -506,7 +676,6 @@ const InvoiceHandlers = {
         }
       } else {
         console.log("Invoice is not draft, skipping finalization");
-        console.log(invoice);
       }
     } catch (error) {
       console.error("Error handling invoice creation:", error);
@@ -515,8 +684,6 @@ const InvoiceHandlers = {
   },
 
   async handleInvoiceUpcoming(event: Stripe.Event) {
-    console.log("Invoice upcoming");
-
     const invoice = event.data.object as Stripe.Invoice;
 
     try {
@@ -566,8 +733,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (event.type === "test_helpers.test_clock.advancing") {
       return res.status(200).end();
     }
-
-    console.log(event.type);
 
     const knownUnhandledEvents = [
       "invoiceitem.created",
