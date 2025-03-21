@@ -42,6 +42,9 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/evaluator/{evaluatorId}/statsWithFilter": {
+    post: operations["GetEvaluatorStatsWithFilter"];
+  };
   "/v2/experiment/create/empty": {
     post: operations["CreateEmptyExperiment"];
   };
@@ -280,6 +283,11 @@ export interface paths {
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
   };
+  "/v1/monitoring/dashboard": {
+    get: operations["GetMonitoringDashboard"];
+    put: operations["UpsertMonitoringDashboard"];
+    delete: operations["DeleteMonitoringDashboard"];
+  };
   "/v1/log/request": {
     post: operations["GetRequests"];
   };
@@ -388,6 +396,24 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    LLMBooleanConfig: {
+      /** @enum {string} */
+      type: "boolean";
+    };
+    LLMRangeConfig: {
+      /** Format: double */
+      rangeMin: number;
+      /** Format: double */
+      rangeMax: number;
+    };
+    LLMChoiceConfig: {
+      choices: {
+          description: string;
+          /** Format: double */
+          score: number;
+        }[];
+    };
+    LLMJudgeConfig: components["schemas"]["LLMBooleanConfig"] | components["schemas"]["LLMRangeConfig"] | components["schemas"]["LLMChoiceConfig"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -398,6 +424,7 @@ export interface components {
       name: string;
       code_template: unknown;
       last_mile_config: unknown;
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
     };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
@@ -410,12 +437,17 @@ export interface components {
       error: string;
     };
     "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    EvaluatorModelOptions: "gpt-4o" | "gpt-4o-mini" | "gpt-3.5-turbo";
     CreateEvaluatorParams: {
       scoring_type: string;
       llm_template?: unknown;
       name: string;
       code_template?: unknown;
       last_mile_config?: unknown;
+      description?: string;
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
+      model?: components["schemas"]["EvaluatorModelOptions"];
     };
     "ResultSuccess_EvaluatorResult-Array_": {
       data: components["schemas"]["EvaluatorResult"][];
@@ -429,6 +461,9 @@ export interface components {
       code_template?: unknown;
       name?: string;
       last_mile_config?: unknown;
+      description?: string;
+      model?: components["schemas"]["EvaluatorModelOptions"];
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
     };
     ResultSuccess_null_: {
       /** @enum {number|null} */
@@ -449,6 +484,7 @@ export interface components {
     };
     "Result_EvaluatorExperiment-Array.string_": components["schemas"]["ResultSuccess_EvaluatorExperiment-Array_"] | components["schemas"]["ResultError_string_"];
     OnlineEvaluatorByEvaluatorId: {
+      name?: string;
       config: unknown;
       id: string;
     };
@@ -463,6 +499,7 @@ export interface components {
       [key: string]: unknown;
     };
     CreateOnlineEvaluatorParams: {
+      name?: string;
       config: components["schemas"]["Record_string.any_"];
     };
     "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
@@ -571,6 +608,15 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    TimeFilter: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
+    GetEvaluatorStatsRequest: {
+      timeFilter: components["schemas"]["TimeFilter"];
+    };
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -1451,6 +1497,22 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    /** @enum {string} */
+    ChartView: "time" | "distribution" | "pie";
+    ChartSelection: {
+      evaluatorId: string;
+      onlineEvaluatorId: string;
+      chartTypes: components["schemas"]["ChartView"][];
+    };
+    MonitoringDashboard: {
+      config: components["schemas"]["ChartSelection"][];
+    };
+    "ResultSuccess_ChartSelection-Array_": {
+      data: components["schemas"]["ChartSelection"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ChartSelection-Array.string_": components["schemas"]["ResultSuccess_ChartSelection-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
       heliconeManualAccessKey?: string;
       lytixHost?: string;
@@ -2514,6 +2576,26 @@ export interface operations {
     parameters: {
       path: {
         evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorStats.string_"];
+        };
+      };
+    };
+  };
+  GetEvaluatorStatsWithFilter: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetEvaluatorStatsRequest"];
       };
     };
     responses: {
@@ -3918,6 +4000,41 @@ export interface operations {
         };
       };
     };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetMonitoringDashboard: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ChartSelection-Array.string_"];
+        };
+      };
+    };
+  };
+  UpsertMonitoringDashboard: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MonitoringDashboard"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteMonitoringDashboard: {
     responses: {
       /** @description Ok */
       200: {

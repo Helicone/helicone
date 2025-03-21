@@ -27,6 +27,7 @@ import { useEvaluatorDetails } from "./hooks";
 interface OnlineEvaluatorsSectionProps {
   onlineEvaluators: Array<{
     id: string;
+    name?: string;
     config: any;
   }>;
   createOnlineEvaluator: ReturnType<
@@ -78,11 +79,17 @@ export const OnlineEvaluatorsSection = ({
       </span>
       <Col className="space-y-2">
         <SimpleTable<{
+          name: string;
           sampleRate: number;
           properties: any;
           actions: any;
         }>
           columns={[
+            {
+              key: "name",
+              header: "Name",
+              render: (item) => item.name,
+            },
             {
               key: "sampleRate",
               header: "Sample Rate",
@@ -109,6 +116,7 @@ export const OnlineEvaluatorsSection = ({
           ]}
           data={
             onlineEvaluators?.map((item) => ({
+              name: item.name ?? "Untitled",
               sampleRate: (item.config as { sampleRate: number }).sampleRate,
               properties: (
                 item.config as {

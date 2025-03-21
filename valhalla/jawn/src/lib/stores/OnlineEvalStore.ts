@@ -20,6 +20,7 @@ export type OnlineEvaluatorByOrgId = {
 export type OnlineEvaluatorByEvaluatorId = {
   id: string;
   config: any;
+  name?: string;
 };
 
 export class OnlineEvalStore extends BaseStore {
@@ -74,7 +75,8 @@ export class OnlineEvalStore extends BaseStore {
     const { data, error } = await dbExecute<OnlineEvaluatorByOrgId>(
       `SELECT 
         online_evaluators.id,
-        online_evaluators.config
+        online_evaluators.config,
+        online_evaluators.name
       FROM online_evaluators 
       WHERE online_evaluators.evaluator = $1`,
       [evaluatorId]

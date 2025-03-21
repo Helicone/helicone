@@ -23,16 +23,57 @@ import { UpgradeProDialog } from "@/components/templates/organization/plan/upgra
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 
+const PREDEFINED_RANGES = [
+  {
+    label: "1h",
+    value: () => ({ from: addHours(new Date(), -1), to: new Date() }),
+  },
+  {
+    label: "3h",
+    value: () => ({ from: addHours(new Date(), -3), to: new Date() }),
+  },
+  {
+    label: "12h",
+    value: () => ({ from: addHours(new Date(), -12), to: new Date() }),
+  },
+  {
+    label: "1d",
+    value: () => ({ from: addDays(new Date(), -1), to: new Date() }),
+  },
+  {
+    label: "3d",
+    value: () => ({ from: addDays(new Date(), -3), to: new Date() }),
+  },
+  {
+    label: "7d",
+    value: () => ({ from: addDays(new Date(), -7), to: new Date() }),
+  },
+  {
+    label: "30d",
+    value: () => ({ from: addDays(new Date(), -30), to: new Date() }),
+  },
+  {
+    label: "90d",
+    value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
+  },
+  {
+    label: "1y",
+    value: () => ({ from: addDays(new Date(), -365), to: new Date() }),
+  },
+];
+
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
   onDateChange: (date: DateRange | undefined) => void;
   initialDateRange?: DateRange;
+  quickSelectOptions?: { label: string; value: () => DateRange }[];
 }
 
 export function ThemedTimeFilterShadCN({
   className,
   onDateChange,
   initialDateRange,
+  quickSelectOptions = PREDEFINED_RANGES,
 }: ThemedTimeFilterShadCNProps) {
   const [date, setDate] = useState<DateRange | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -49,45 +90,6 @@ export function ThemedTimeFilterShadCN({
       );
     }
   }, [initialDateRange]);
-
-  const predefinedRanges = [
-    {
-      label: "1h",
-      value: () => ({ from: addHours(new Date(), -1), to: new Date() }),
-    },
-    {
-      label: "3h",
-      value: () => ({ from: addHours(new Date(), -3), to: new Date() }),
-    },
-    {
-      label: "12h",
-      value: () => ({ from: addHours(new Date(), -12), to: new Date() }),
-    },
-    {
-      label: "1d",
-      value: () => ({ from: addDays(new Date(), -1), to: new Date() }),
-    },
-    {
-      label: "3d",
-      value: () => ({ from: addDays(new Date(), -3), to: new Date() }),
-    },
-    {
-      label: "7d",
-      value: () => ({ from: addDays(new Date(), -7), to: new Date() }),
-    },
-    {
-      label: "30d",
-      value: () => ({ from: addDays(new Date(), -30), to: new Date() }),
-    },
-    {
-      label: "90d",
-      value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
-    },
-    {
-      label: "1y",
-      value: () => ({ from: addDays(new Date(), -365), to: new Date() }),
-    },
-  ];
 
   const [customNumber, setCustomNumber] = useState<number>(1);
   const [customUnit, setCustomUnit] = useState<"hour" | "day" | "week">("hour");
@@ -176,7 +178,7 @@ export function ThemedTimeFilterShadCN({
           {/* Predefined ranges */}
           <span className="font-semibold text-sm pt-4">Quick Select:</span>
           <div className="grid gap-2 grid-cols-6">
-            {predefinedRanges.map((range) => (
+            {quickSelectOptions.map((range) => (
               <Button
                 key={range.label}
                 variant="outline"

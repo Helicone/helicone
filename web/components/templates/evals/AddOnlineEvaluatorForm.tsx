@@ -39,10 +39,12 @@ const AddOnlineEvaluatorForm = ({
       sampleRate: number;
       propertyFilters: { key: string; value: string }[];
     };
+    name: string;
   }) => void;
   isLoading: boolean;
   close: () => void;
 }) => {
+  const [name, setName] = useState("");
   const [sampleRate, setSampleRate] = useState(100);
   const [propertyFilters, setPropertyFilters] = useState<
     { key: string; value: string }[]
@@ -73,6 +75,16 @@ const AddOnlineEvaluatorForm = ({
         </div>
       ) : (
         <div className="space-y-4">
+          <div className="space-y-2 max-w-xl">
+            <Label htmlFor="online-evaluator-name">Online Evaluator Name</Label>
+            <Input
+              id="online-evaluator-name"
+              placeholder="Enter online evaluator name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full"
+            />
+          </div>
           <div className="space-y-2 max-w-xl">
             <Label htmlFor="sample-rate" className="flex items-center gap-2">
               Sample Rate:{" "}
@@ -197,8 +209,13 @@ const AddOnlineEvaluatorForm = ({
           Cancel
         </Button>
         <Button
-          onClick={() => onSubmit({ config: { sampleRate, propertyFilters } })}
-          disabled={isLoading}
+          onClick={() =>
+            onSubmit({
+              config: { sampleRate, propertyFilters },
+              name,
+            })
+          }
+          disabled={isLoading || name.trim() === ""}
         >
           Add Webhook
         </Button>

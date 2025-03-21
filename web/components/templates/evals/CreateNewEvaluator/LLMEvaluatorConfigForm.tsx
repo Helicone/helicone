@@ -416,7 +416,10 @@ const ScoringTypeSection = ({
                 ];
               }
 
-              if (valueType === "range") {
+              if (
+                valueType === "range" &&
+                (!configFormParams.rangeMin || !configFormParams.rangeMax)
+              ) {
                 updates.rangeMin = 0;
                 updates.rangeMax = 100;
               }

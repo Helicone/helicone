@@ -5,6 +5,72 @@ import { useInvalidateEvaluators } from "../EvaluatorHook";
 import { LLMEvaluatorConfigFormPreset } from "../CreateNewEvaluator/LLMEvaluatorConfigForm";
 import { useEvalFormStore } from "../store/evalFormStore";
 
+export interface LLMRangeConfig {
+  rangeMin: number;
+  rangeMax: number;
+}
+
+export interface LLMChoiceConfig {
+  choices: Array<{ score: number; description: string }>;
+}
+
+export interface LLMBooleanConfig {
+  type: "boolean";
+}
+
+export type LLMJudgeConfig =
+  | LLMBooleanConfig
+  | LLMRangeConfig
+  | LLMChoiceConfig;
+export type EvaluatorModelOptions = "gpt-4o" | "gpt-4o-mini" | "gpt-3.5-turbo";
+
+export function isLLMBooleanConfig(
+  config: LLMJudgeConfig
+): config is LLMBooleanConfig {
+  return (
+    typeof config === "object" && "type" in config && config.type === "boolean"
+  );
+}
+
+export function isLLMRangeConfig(
+  config: LLMJudgeConfig
+): config is LLMRangeConfig {
+  return (
+    typeof config === "object" && "rangeMin" in config && "rangeMax" in config
+  );
+}
+
+export function isLLMChoiceConfig(
+  config: LLMJudgeConfig
+): config is LLMChoiceConfig {
+  return typeof config === "object" && "choices" in config;
+}
+
+// Helper function to get the correct judge configuration based on evaluator type
+const getJudgeConfig = (
+  configFormParams: LLMEvaluatorConfigFormPreset
+): LLMJudgeConfig => {
+  switch (configFormParams.expectedValueType) {
+    case "boolean":
+      return {
+        type: "boolean",
+      };
+    case "choice":
+      return {
+        choices: configFormParams.choiceScores || [],
+      };
+    case "range":
+      return {
+        rangeMin: configFormParams.rangeMin || 0,
+        rangeMax: configFormParams.rangeMax || 100,
+      };
+    default:
+      return {
+        type: "boolean",
+      };
+  }
+};
+
 // LLM Evaluator Submit Hook
 export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
   const jawn = useJawnClient();
@@ -25,6 +91,7 @@ export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
       setIsSubmitting(true);
       try {
         if (existingEvaluatorId) {
+          const isBoolean = configFormParams.expectedValueType === "boolean";
           const result = await jawn.PUT("/v1/evaluator/{evaluatorId}", {
             params: {
               path: {
@@ -33,6 +100,9 @@ export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
             },
             body: {
               name: configFormParams.name,
+              description: configFormParams.description,
+              model: configFormParams.model as EvaluatorModelOptions,
+              judge_config: getJudgeConfig(configFormParams),
               llm_template: openAIFunction,
               scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
             },
@@ -52,6 +122,9 @@ export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
           const result = await jawn.POST("/v1/evaluator", {
             body: {
               name: configFormParams.name,
+              description: configFormParams.description,
+              model: configFormParams.model as EvaluatorModelOptions,
+              judge_config: getJudgeConfig(configFormParams),
               llm_template: openAIFunction,
               scoring_type: `LLM-${configFormParams.expectedValueType.toUpperCase()}`,
             },
@@ -109,6 +182,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
             },
             body: {
               name,
+              description,
               code_template: { code },
               scoring_type: "PYTHON",
             },
@@ -128,6 +202,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
           const result = await jawn.POST("/v1/evaluator", {
             body: {
               name,
+              description,
               code_template: { code },
               scoring_type: "PYTHON",
             },
@@ -185,6 +260,7 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
             },
             body: {
               name,
+              description,
               last_mile_config: config,
               scoring_type: "LAST_MILE",
             },
@@ -204,6 +280,7 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
           const result = await jawn.POST("/v1/evaluator", {
             body: {
               name,
+              description,
               last_mile_config: config,
               scoring_type: "LAST_MILE",
             },

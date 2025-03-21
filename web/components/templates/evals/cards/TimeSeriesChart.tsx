@@ -16,6 +16,7 @@ import { Small } from "@/components/ui/typography";
 interface TimeSeriesChartProps {
   timeSeriesData: EvaluatorStats["timeSeriesData"];
   className?: string;
+  formatDate?: (dateString: string) => string;
 }
 
 /**
@@ -24,13 +25,12 @@ interface TimeSeriesChartProps {
 export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   timeSeriesData,
   className = "",
-}) => {
-  // Format date helper function (e.g., "2025-02-19" to "2/19")
-  const formatDate = (dateString: string) => {
+  formatDate = (dateString: string) => {
+    // Format date helper function (e.g., "2025-02-19" to "2/19")
     const date = new Date(dateString);
     return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
-
+  },
+}) => {
   // Check if we have real data
   const hasData = timeSeriesData && timeSeriesData.length > 0;
 
