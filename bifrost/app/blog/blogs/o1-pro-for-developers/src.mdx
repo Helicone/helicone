@@ -59,7 +59,10 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="your-api-key",
-    base_url="https://oai.helicone.ai/v1"
+    base_url="https://oai.helicone.ai/v1",
+    default_headers= {
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
 )
 
 response = client.responses.create(
