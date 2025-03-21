@@ -1,10 +1,10 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border border-[hsl(var(--border))] px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
+  "h-6 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -21,6 +21,7 @@ const badgeVariants = cva(
           "h-5 border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)] rounded-md text-xs font-normal",
         label:
           "border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-light hover:bg-[hsl(var(--primary))]/90 tracking-wide",
+        none: "",
       },
     },
     defaultVariants: {
