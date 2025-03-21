@@ -10,7 +10,7 @@ import {
   getRootFilterNode,
 } from "@/services/lib/filters/uiFilterRowTree";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
