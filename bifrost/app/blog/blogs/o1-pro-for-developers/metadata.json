@@ -2,10 +2,10 @@
   "title": "OpenAI o1-Pro API: Everything Developers Need to Know",
   "title1": "OpenAI o1-Pro API: Everything Developers Need to Know",
   "title2": "OpenAI o1-Pro API: Everything Developers Need to Know",
-  "description": "OpenAI's most expensive model yet is now available via API. Learn everything about the new o1-Pro's performance, from its advanced reasoning capabilities to new API integration requirements, use cases, and whether its premium price is justified for your development needs.",
-  "images": "/static/blog/how-to-reduce-llm-hallucination/llm-hallucination-cover.webp",
+  "description": "OpenAI's most expensive model yet is now available via API. Here's everything you need to know about the new o1-Pro's performance, from its advanced reasoning capabilities to new API integration requirements, use cases, and whether its premium price is justified for your development needs.",
+  "images": "/static/blog/o1-pro-for-developers/openai-o1-pro.webp",
   "time": "8 minute read",
   "author": "Yusuf Ishola",
   "date": "March 21, 2025", 
-  "badge": "guide"
+  "badge": "News"
 }

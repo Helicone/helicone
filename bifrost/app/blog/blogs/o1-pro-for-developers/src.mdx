@@ -1,31 +1,37 @@
 OpenAI has just released its **o1-Pro** model to its API, bringing its most powerful reasoning model to developers. Previously only available to ChatGPT Pro subscribers, this model comes with remarkable capabilities—and a price tag to match. 
 
-At $150 per million input tokens and $600 per million output tokens, it's now officially OpenAI's most expensive model, eclipsing GPT-4.5 by a factor of 2x for input and 4x for output costs.
+At $150 per million input tokens and $600 per million output tokens, it's now officially OpenAI's **most expensive model**, eclipsing GPT-4.5 by a factor of 2x for input and 4x for output costs.
 
 But is it worth the premium? Let's examine what this model offers, how it performs, and whether it justifies its steep price for your development needs.
 
+![o1-pro-for-developers](/static/blog/o1-pro-for-developers/openai-o1-pro.webp)
+
 ## What's New in o1-Pro: The Quick Rundown
 
-- **Advanced Reasoning**: Uses more compute than standard o1 for "thinking harder" on complex problems
-- **Pricing**: $150/million input tokens, $600/million output tokens (10x more expensive than regular o1)
-- **Context Window**: 200,000 tokens (same as o1)
-- **Output Limit**: 100,000 tokens maximum per completion
-- **Knowledge Cutoff**: October 2023 (same as other recent OpenAI models)
-- **API Access**: Only available through the new Responses API (not Chat Completions)
-- **Function Calling**: Supported, alongside structured outputs
-- **Image Input**: Can process images as input, but output is text-only
-- **Streaming**: Not supported—another first for an OpenAI model
+| **Feature** | **Details** |
+| ----------- | ----------- |
+| **Advanced Reasoning** | Uses more compute than standard o1 for "thinking harder" on complex problems |
+| **Pricing** | $150/million input tokens <br /> $600/million output tokens <br /> (10x more expensive than regular o1) |
+| **Context Window** | 200,000 tokens (same as o1) |
+| **Output Limit** | 100,000 tokens maximum per completion |
+| **Knowledge Cutoff** | October 2023 (same as other recent OpenAI models) |
+| **API Access** | Only available through the new Responses API (not Chat Completions) |
+| **Function Calling** | Supported, alongside structured outputs |
+| **Image Input** | Can process images as input, but output is text-only |
+| **Streaming** | Not supported—another first for an OpenAI model |
 
-## o1-Pro in Depth: Technical Capabilities
+## o1-Pro's Technical Capabilities 
 
-o1-Pro represents OpenAI's next step in reasoning models. Unlike standard o1, which already excels at mathematical and logical reasoning, o1-Pro allocates additional computational resources to the reasoning process. This means it "thinks harder" about problems, potentially leading to more reliable solutions for complex tasks.
+o1-Pro is OpenAI's next step in reasoning models. Unlike standard o1, which already excels at mathematical and logical reasoning, o1-Pro allocates additional computational resources to the reasoning process. 
+
+This means it "thinks harder" about problems, potentially leading to more reliable solutions for complex tasks.
 
 <BottomLine
-  title="Key Note 💡"
+  title="💡 Please note:"
   description="o1-Pro is the first OpenAI model that's only available through their newer Responses API—not the standard Chat Completions endpoint that most developers are familiar with. This means you'll need to update your integration code to use this model."
 />
 
-Basic example of using o1-Pro:
+### Basic example of using o1-Pro:
 
 ```javascript
 // Using the newer Responses API required for o1-Pro
@@ -64,13 +70,13 @@ print(response.content)
 ```
 </CallToAction>
 
-## OpenAI o1-Pro Pricing: Premium Costs for Premium Results
+## o1-Pro Pricing: Premium Costs for Premium Results
 
 o1-Pro's pricing makes it OpenAI's most expensive model by a significant margin:
 
 | Model | Input Cost | Output Cost |
 |-------|------------|-------------|
-| **o1-pro** | $150.00/1M tokens | $600.00/1M tokens |
+| **o1-pro** | **$150.00/1M tokens** | **$600.00/1M tokens** |
 | gpt-4.5 | $75.00/1M tokens | $150.00/1M tokens |
 | o1 | $15.00/1M tokens | $60.00/1M tokens |
 | o3-mini | $1.10/1M tokens | $4.40/1M tokens |
@@ -86,16 +92,16 @@ o1-Pro's real-world performance has been met with mixed reviews. For some tasks,
 
 > If you're in the habit of breaking down problems to Sonnet-sized pieces you won't see a benefit. The win is that o1pro lets you stop breaking down one level up from what you're used to
 
-— <a href="https://news.ycombinator.com/item?id=43417885" target="_blank" rel="noopener">Hacker News User</a>
+— <a href="https://news.ycombinator.com/item?id=43417885" target="_blank" rel="noopener">A Hacker News user</a>
 
-### OpenAI o1-Pro Limitations
+## OpenAI o1-Pro Limitations
 
-- **Vision Capabilities**: Despite handling image inputs, early testing has shown that o1-Pro <a href="https://simonwillison.net/" target="_blank" rel="noopener">struggles</a> with basic vision tasks like counting fingers, identifying unusual body postures, and reading analog clocks.
-- **Processing Speed**: Many users report that o1-Pro is significantly slower than other models, making it less suitable for interactive applications requiring quick responses.
-- **Cost Prohibitive**: The extreme pricing creates significant barriers to experimentation and iterative development. One user <a href="https://x.com/taesiri/status/1902955371855282387" target="_blank" rel="noopener">reported</a> spending $10 on just five simple vision task prompts, with three tests failing.
+- **Vision Capabilities**: Despite handling image inputs, early testing has shown that o1-Pro <a href="https://simonwillison.net/" target="_blank" rel="noopener">struggles with basic vision tasks</a> like counting fingers, identifying unusual body postures, and reading analog clocks.
+- **Processing Speed**: Many users report that o1-Pro is **significantly slower** than other models, making it less suitable for interactive applications requiring quick responses.
+- **Cost Prohibitive**: The extreme pricing creates significant barriers to experimentation and iterative development. One user reported <a href="https://x.com/taesiri/status/1902955371855282387" target="_blank" rel="noopener">spending $10 on just five simple vision task prompts</a>, with three tests failing.
 - **Unpredictable Costs**: Users report that large context windows can sometimes cause the model to error out, requiring multiple attempts and increasing costs unexpectedly.
 
-## OpenAI o1-Pro vs GPT-4.5, o3-Mini, o1, and Others
+## Models Comparison: o1-Pro, GPT-4.5, o3-Mini, o1, and GPT-4
 
 | **Model** | **Launch Date** | **Key Features** | **Input Cost** | **Output Cost** | **Context Window** | **Knowledge Cutoff** |
 |-----------|-----------------|------------------|----------------|----------------|---------------------|----------------------|
