@@ -2,7 +2,7 @@
 
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useRouter } from "next/router";
-import { useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState, useEffect } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
@@ -18,21 +18,51 @@ interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
+// Memoize the sidebar component to prevent unnecessary re-renders
+const MemoizedSidebar = memo(Sidebar);
+
 const AuthLayout = (props: AuthLayoutProps) => {
   const { children } = props;
   const router = useRouter();
-  const { pathname } = router;
+  const { pathname, asPath } = router;
 
+  // State for upgrade modal
   const [open, setOpen] = useState(false);
 
-  const currentPage = useMemo(() => {
-    const path = pathname.split("/")[1];
-    return path.charAt(0).toUpperCase() + path.slice(1);
-  }, [pathname]);
+  // Force re-render on route change
+  const [key, setKey] = useState(asPath);
 
+  // Update key when path changes to force re-render
+  useEffect(() => {
+    setKey(asPath);
+  }, [asPath]);
+
+  // Fetch data with SWR's caching to prevent refetching on each navigation
   const { alertBanners } = useAlertBanners();
+  const { changelog } = useChangelog();
   const orgContext = useOrg();
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Process changelog data once and memoize it
+  const processedChangelog = useMemo(() => {
+    return changelog
+      ? changelog.slice(0, 2).map((item) => ({
+          title: item.title || "",
+          image: item.enclosure,
+          description: item.description || "",
+          link: item.link || "",
+          content: item.content || "",
+          "content:encoded": item["content:encoded"] || "",
+          "content:encodedSnippet": item["content:encodedSnippet"] || "",
+          contentSnippet: item.contentSnippet || "",
+          isoDate: item.isoDate || "",
+          pubDate: item.pubDate || "",
+        }))
+      : [];
+  }, [changelog]);
+
+  // Calculate banner once when data changes
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
     if (activeBanner) {
@@ -66,11 +96,18 @@ const AuthLayout = (props: AuthLayoutProps) => {
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, orgContext?.currentOrg?.tier, router]);
+  }, [
+    alertBanners?.data,
+    orgContext?.currentOrg?.tier,
+    orgContext?.allOrgs,
+    router,
+  ]);
 
-  const { changelog, isLoading: isChangelogLoading } = useChangelog();
-
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  // Calculate page title once when pathname changes
+  const currentPage = useMemo(() => {
+    const path = pathname.split("/")[1];
+    return path.charAt(0).toUpperCase() + path.slice(1);
+  }, [pathname]);
 
   return (
     <MetaData title={currentPage}>
@@ -78,32 +115,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
         <DemoModal />
         <OnboardingProvider sidebarRef={sidebarRef}>
           <Row className="flex-col md:flex-row">
-            <div className=" w-full md:w-min ">
-              <Sidebar
+            <div className="w-full md:w-min">
+              <MemoizedSidebar
                 sidebarRef={sidebarRef}
-                changelog={
-                  changelog
-                    ? changelog.slice(0, 2).map((item) => ({
-                        title: item.title || "",
-                        image: item.enclosure,
-                        description: item.description || "",
-                        link: item.link || "",
-                        content: item.content || "",
-                        "content:encoded": item["content:encoded"] || "",
-                        "content:encodedSnippet":
-                          item["content:encodedSnippet"] || "",
-                        contentSnippet: item.contentSnippet || "",
-                        isoDate: item.isoDate || "",
-                        pubDate: item.pubDate || "",
-                      }))
-                    : []
-                }
+                changelog={processedChangelog}
                 setOpen={setOpen}
               />
             </div>
             <div className="flex-grow max-w-full overflow-hidden relative">
               <OnboardingBackground />
-              <MainContent banner={banner} pathname={pathname}>
+              <MainContent key={key} banner={banner} pathname={pathname}>
                 <ErrorBoundary>{children}</ErrorBoundary>
               </MainContent>
             </div>
