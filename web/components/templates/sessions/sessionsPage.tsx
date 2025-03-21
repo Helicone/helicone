@@ -10,7 +10,7 @@ import {
   getRootFilterNode,
 } from "@/services/lib/filters/uiFilterRowTree";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
@@ -85,7 +85,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     []
   );
 
-  const { sessions, isLoading } = useSessions(
+  const { sessions, isLoading, hasSessions } = useSessions(
     timeFilter,
     debouncedSessionIdSearch ?? "",
     filterUITreeToFilterNode(
@@ -94,10 +94,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     ) as any,
     selectedName
   );
-
-  const hasSomeSessions = useMemo(() => {
-    return allNames.sessions.length > 0;
-  }, [allNames.sessions.length]);
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -113,7 +109,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   useEffect(() => {
     if (
       !hasAccess &&
-      hasSomeSessions &&
+      hasSessions &&
       selectedName === undefined &&
       !allNames.isLoading
     ) {
@@ -127,7 +123,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       }
     }
   }, [
-    hasSomeSessions,
+    hasSessions,
     allNames.sessions,
     allNames.isLoading,
     selectedName,
@@ -141,7 +137,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {hasSomeSessions || isLoading ? (
+        {hasSessions || isLoading ? (
           <>
             <AuthHeader
               isWithinIsland={true}

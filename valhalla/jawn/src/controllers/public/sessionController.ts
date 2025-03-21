@@ -7,8 +7,9 @@ import {
   Post,
   Request,
   Path,
+  Get,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   SessionManager,
@@ -16,6 +17,9 @@ import {
   SessionResult,
 } from "../../managers/SessionManager";
 import { RequestFilterNode } from "./requestController";
+import { KVCache } from "../../lib/cache/kvCache";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { result } from "lodash";
 
 export interface SessionQueryParams {
   search: string;
@@ -35,10 +39,50 @@ export interface SessionNameQueryParams {
   useInterquartile?: boolean;
 }
 
+const kvCache = new KVCache(60 * 1000); // 5 minutes
+
 @Route("v1/session")
 @Tags("Session")
 @Security("api_key")
 export class SessionController extends Controller {
+  @Get("/has-session")
+  public async hasSession(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<boolean, string>> {
+    const found = await cacheResultCustom<boolean, string>(
+      `has-session-${request.authParams.organizationId}`,
+      async () => {
+        const sessionManager = new SessionManager(request.authParams);
+        const result = await sessionManager.getSessions({
+          filter: "all",
+          search: "",
+          timeFilter: {
+            startTimeUnixMs: new Date().getTime() - 1000 * 60 * 60 * 30,
+            endTimeUnixMs: new Date().getTime(),
+          },
+          timezoneDifference: 0,
+        });
+        if (result.error || !result.data) {
+          return err("Error finding sessions");
+        } else {
+          if (result.data.length > 0) {
+            return ok(true);
+          } else {
+            return err("No sessions found");
+          }
+        }
+      },
+      kvCache
+    );
+    if (found.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return found;
+  }
+
   @Post("query")
   public async getSessions(
     @Body()
