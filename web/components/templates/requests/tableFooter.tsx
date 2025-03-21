@@ -147,7 +147,7 @@ const TableFooter = (props: TableFooterProps) => {
       </div>
 
       {/* Right Actions (empty) */}
-      <div />
+      <div className="w-[107px]" />
     </div>
   );
 };
