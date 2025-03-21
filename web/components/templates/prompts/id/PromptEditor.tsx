@@ -662,6 +662,10 @@ export default function PromptEditor({
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         ...state.parameters,
+        tools:
+          state.parameters.tools?.length === 0
+            ? undefined
+            : state.parameters.tools, // TODO: Only here for backwards compatibility
         provider: undefined, // TODO: Move provider to the prompt?
         messages: state.messages,
       };
@@ -983,10 +987,11 @@ export default function PromptEditor({
               parameters: {
                 provider: provider,
                 model: model,
-                temperature: mappedContent.schema.request.temperature ?? 1,
+                temperature:
+                  mappedContent.schema.request.temperature ?? undefined,
                 max_tokens:
                   mappedContent.schema.request.max_tokens ?? undefined,
-                tools: mappedContent.schema.request.tools ?? [],
+                tools: mappedContent.schema.request.tools ?? undefined,
                 reasoning_effort:
                   mappedContent.schema.request.reasoning_effort ?? undefined,
               },
@@ -1022,9 +1027,9 @@ export default function PromptEditor({
               parameters: {
                 provider: provider,
                 model: model,
-                temperature: basePrompt.body.temperature ?? 1,
+                temperature: basePrompt.body.temperature ?? undefined,
                 max_tokens: basePrompt.body.max_tokens ?? undefined,
-                tools: basePrompt.body.tools ?? [],
+                tools: basePrompt.body.tools ?? undefined,
                 reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
               },
               inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
