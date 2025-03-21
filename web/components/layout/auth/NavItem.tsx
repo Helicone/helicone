@@ -38,7 +38,6 @@ const NavItem: React.FC<NavItemProps> = ({
   deep,
   onClick,
 }) => {
-  const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
 
   if (isCollapsed) {
@@ -47,12 +46,6 @@ const NavItem: React.FC<NavItemProps> = ({
         <TooltipTrigger asChild>
           <Link
             href={hasSubItems ? link.subItems![0].href : link.href}
-            onClick={(e) => {
-              if (hasSubItems) {
-                e.preventDefault();
-                router.push(link.subItems![0].href);
-              }
-            }}
             className={cn(
               buttonVariants({
                 variant: "ghost",
