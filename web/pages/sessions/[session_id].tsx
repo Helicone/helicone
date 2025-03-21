@@ -10,7 +10,7 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
 
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(false);
   const requests = useGetRequests(
     1,
     1000,
