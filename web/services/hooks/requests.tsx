@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { getJawnClient } from "../../lib/clients/jawn";
@@ -89,8 +89,8 @@ export const useGetRequestsWithBodies = (
   isCached: boolean = false
 ) => {
   const org = useOrg();
-  const [stableRequests, setStableRequests] = useState<HeliconeRequest[]>([]);
 
+  // Main query to fetch requests with signed URLs
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "requestsData",
@@ -127,30 +127,50 @@ export const useGetRequestsWithBodies = (
     keepPreviousData: true,
   });
 
-  const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
+  const requestsWithSignedUrls = data?.data ?? [];
 
+  // Fetch request bodies for each request with a signed URL
   const urlQueries = useQueries({
     queries: requestsWithSignedUrls.map((request) => ({
-      queryKey: ["request-content", request.signed_body_url],
+      queryKey: [
+        "request-content",
+        request.request_id,
+        request.signed_body_url,
+      ],
       queryFn: async () => {
+        // Check cache first
         if (requestBodyCache.has(request.request_id)) {
-          return requestBodyCache.get(request.request_id);
+          return {
+            request,
+            bodyContent: requestBodyCache.get(request.request_id),
+          };
         }
-        if (!request.signed_body_url) return null;
-        const contentResponse = await fetch(request.signed_body_url);
-        if (contentResponse.ok) {
-          const text = await contentResponse.text();
-          let content = JSON.parse(text);
-          if (request.asset_urls) {
-            content = placeAssetIdValues(request.asset_urls, content);
+
+        if (!request.signed_body_url) return { request, bodyContent: null };
+
+        try {
+          const contentResponse = await fetch(request.signed_body_url);
+          if (contentResponse.ok) {
+            const text = await contentResponse.text();
+            let content = JSON.parse(text);
+
+            if (request.asset_urls) {
+              content = placeAssetIdValues(request.asset_urls, content);
+            }
+
+            // Update cache
+            requestBodyCache.set(request.request_id, content);
+            if (requestBodyCache.size > 1000) {
+              requestBodyCache.clear();
+            }
+
+            return { request, bodyContent: content };
           }
-          requestBodyCache.set(request.request_id, content);
-          if (requestBodyCache.size > 1000) {
-            requestBodyCache.clear();
-          }
-          return content;
+        } catch (error) {
+          console.error("Error fetching request body:", error);
         }
-        return null;
+
+        return { request, bodyContent: null };
       },
       keepPreviousData: true,
       enabled: !!request.signed_body_url,
@@ -158,39 +178,36 @@ export const useGetRequestsWithBodies = (
     })),
   });
 
-  const requests = useMemo(() => {
-    if (requestsWithSignedUrls.length === 0) {
-      return stableRequests;
+  // Process the requests with their bodies
+  const processedRequests = useMemo(() => {
+    const results: HeliconeRequest[] = [];
+
+    for (const query of urlQueries) {
+      if (query.data) {
+        const { request, bodyContent } = query.data;
+
+        if (bodyContent) {
+          results.push({
+            ...request,
+            request_body: bodyContent.request,
+            response_body: bodyContent.response,
+          });
+        } else {
+          results.push(request);
+        }
+      }
     }
 
-    const updatedRequests = requestsWithSignedUrls.map((request, index) => {
-      const content = urlQueries[index].data;
-      if (!content) return request;
-
-      return {
-        ...request,
-        request_body: content.request,
-        response_body: content.response,
-      };
-    });
-
-    return updatedRequests;
-  }, [requestsWithSignedUrls, urlQueries, stableRequests]);
-
-  useEffect(() => {
-    if (requests.length > 0) {
-      setStableRequests(requests);
-    }
-  }, [requests]);
+    return results;
+  }, [urlQueries]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
   return {
-    isLoading: isLoading,
+    isLoading,
     refetch,
     isRefetching: isRefetching || isUrlsFetching,
-    requests:
-      stableRequests.length > 0 && isRefetching ? stableRequests : requests,
+    requests: processedRequests,
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: requestsWithSignedUrls.length,
   };
