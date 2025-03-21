@@ -229,20 +229,90 @@ const RequestDiv = (props: RequestDivProps) => {
   }
 
   return (
-    <ScrollArea className="h-full">
-      {/* Header */}
-      <div className="w-full flex flex-col items-center sticky top-0 z-[1] border-b border-border">
-        {/* First Row */}
-        <div className="h-11 w-full flex flex-row justify-between items-center gap-2 px-3 border-b border-border bg-slate-50 dark:bg-slate-950">
-          {/* Hide Drawer */}
-          <Button
-            variant={"none"}
-            size={"square_icon"}
-            className="w-fit"
-            onClick={() => setOpenHandler(false)}
-          >
-            <LuPanelRightClose className="w-4 h-4" />
-          </Button>
+    <div className="w-full h-full flex flex-col">
+      {/* Info Section */}
+      <div className="w-full flex flex-col gap-2 bg-slate-50 dark:slate-950 py-3 border-b border-border">
+        {/* Properties */}
+        <ScrollableRow
+          items={
+            currentProperties?.map((prop) => ({
+              key: Object.keys(prop)[0],
+              value: prop[Object.keys(prop)[0]],
+            })) || []
+          }
+          onAdd={onAddPropertyHandler}
+          placeholder="No Properties"
+          tooltipText="Add a Property to this request"
+          tooltipLink={{
+            url: "https://docs.helicone.ai/features/advanced-usage/custom-properties",
+            text: "Learn about Properties",
+          }}
+        />
+
+        {/* Scores */}
+        <ScrollableRow
+          placeholder="No Scores"
+          items={
+            currentScores
+              ? Object.entries(currentScores)
+                  .filter(([key]) => key !== "helicone-score-feedback")
+                  .map(([key, value]) => ({ key, value }))
+              : []
+          }
+          onAdd={onAddScoreHandler}
+          valueType="number"
+          tooltipText="Add a Score to this request"
+          tooltipLink={{
+            url: "https://docs.helicone.ai/features/advanced-usage/scores",
+            text: "Learn about Scores",
+          }}
+        />
+
+        {/* Parameters */}
+        <div className="h-6 flex flex-row justify-end px-3">
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  size={"square_icon"}
+                  asPill
+                  onClick={() => setShowDetails(!showDetails)}
+                >
+                  <LuEllipsis className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">
+                {showDetails ? "Hide Details" : "Show More"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Expandable Details Section */}
+        {showDetails && (
+          <div className="flex flex-col gap-6 p-4 border-t border-border"></div>
+        )}
+      </div>
+      <ScrollArea className="h-full min-h-full">
+        {/* Header */}
+        <div className="h-11 w-full flex flex-row justify-between items-center gap-2 px-3 border-b border-border glass top-0 sticky z-[1]">
+          {/* Left Side */}
+          <div className="flex flex-row items-center gap-3">
+            {/* Hide Drawer */}
+            <Button
+              variant={"none"}
+              size={"square_icon"}
+              className="w-fit"
+              onClick={() => setOpenHandler(false)}
+            >
+              <LuPanelRightClose className="w-4 h-4" />
+            </Button>
+            {/* Model Name */}
+            <P className="font-medium text-secondary text-nowrap">
+              {request.model}
+            </P>
+          </div>
 
           {/* Badges */}
           <div className="flex flex-row items-center gap-2">
@@ -262,197 +332,135 @@ const RequestDiv = (props: RequestDivProps) => {
           </div>
         </div>
 
-        <div className="w-full flex flex-col gap-2 bg-white dark:bg-black py-2.5">
-          {/* Second Row */}
-          <div className="w-full flex flex-row justify-between items-center gap-2 px-3">
-            {/* Model Name */}
-            <P className="font-medium text-secondary">{request.model}</P>
-
-            {/* More Info */}
-            <Button
-              variant={"ghost"}
-              size={"square_icon"}
-              asPill
-              onClick={() => setShowDetails(!showDetails)}
-            >
-              <LuEllipsis className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Third Row */}
-          {/* <div className="w-full flex flex-row items-center gap-4">
-            <XSmall className="text-muted-foreground truncate max-w-48">
-              {request.heliconeMetadata.user}
-            </XSmall>
-
-            <XSmall className="text-muted-foreground truncate max-w-48">
-              {request.heliconeMetadata.path}
-            </XSmall>
-
-            <XSmall className="text-muted-foreground truncate max-w-48">
-              {promptId || "No Prompt ID"}
-            </XSmall>
-          </div> */}
-
-          {/* Properties Row */}
-          <ScrollableRow
-            items={
-              currentProperties?.map((prop) => ({
-                key: Object.keys(prop)[0],
-                value: prop[Object.keys(prop)[0]],
-              })) || []
-            }
-            onAdd={onAddPropertyHandler}
-          />
-
-          {/* Scores Row */}
-          <ScrollableRow
-            items={
-              currentScores
-                ? Object.entries(currentScores)
-                    .filter(([key]) => key !== "helicone-score-feedback")
-                    .map(([key, value]) => ({ key, value }))
-                : []
-            }
-            onAdd={onAddScoreHandler}
-            valueType="number"
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-col">
-        {/* Request Content */}
+        {/* Mapped Request */}
         <RenderMappedRequest
           mapperContent={request}
           promptData={promptDataQuery.data}
         />
 
-        {/* Expandable Details Section */}
-        {showDetails && (
-          <div className="flex flex-col gap-6 p-4 border-t border-border">
-            {/* Feedback Section */}
-            <div className="flex flex-col gap-4">
-              <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                Feedback
-              </div>
-              <FeedbackButtons
-                requestId={request.id}
-                defaultValue={
-                  request.heliconeMetadata.scores?.[
-                    "helicone-score-feedback"
-                  ] === 1
-                }
-              />
+        {/* Footer */}
+        <div className="h-11 flex flex-row justify-between items-center gap-2 px-3 bg-slate-100 dark:slate-900 border-t border-border bottom-0 sticky z-[1]">
+          {/* Feedback Section */}
+          <div className="flex flex-col gap-4">
+            <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              Feedback
             </div>
+            <FeedbackButtons
+              requestId={request.id}
+              defaultValue={
+                request.heliconeMetadata.scores?.["helicone-score-feedback"] ===
+                1
+              }
+            />
+          </div>
 
-            {/* Dataset Section */}
-            <div className="flex flex-col gap-4">
-              <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
-                Add to Dataset
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => setNewDatasetModalOpen(true)}
-                        className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
-                      >
-                        <PlusIcon className="h-3 w-3 text-gray-500" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>Add to Dataset</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            {/* Actions Section */}
-            <div className="flex flex-row items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      if (promptDataQuery.data?.id) {
-                        router.push(`/prompts/${promptDataQuery.data?.id}`);
-                      } else {
-                        router.push(`/prompts/fromRequest/${request.id}`);
-                      }
-                    }}
-                  >
-                    <PiPlayBold className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Test Prompt</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      jawn
-                        .POST(
-                          "/v2/experiment/create/from-request/{requestId}",
-                          {
-                            params: {
-                              path: {
-                                requestId: request.id,
-                              },
-                            },
-                          }
-                        )
-                        .then((res) => {
-                          if (res.error || !res.data.data?.experimentId) {
-                            setNotification(
-                              "Failed to create experiment",
-                              "error"
-                            );
-                            return;
-                          }
-                          router.push(
-                            `/experiments/${res.data.data?.experimentId}`
-                          );
-                        });
-                    }}
-                  >
-                    <FlaskConicalIcon className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Create Experiment</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        JSON.stringify(request.schema || {}, null, 2)
-                      );
-                      setNotification("Copied to clipboard", "success");
-                    }}
-                  >
-                    <ClipboardDocumentIcon className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Copy Request</TooltipContent>
-              </Tooltip>
+          {/* Dataset Section */}
+          <div className="flex flex-col gap-4">
+            <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm items-center flex">
+              Add to Dataset
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setNewDatasetModalOpen(true)}
+                      className="ml-1.5 p-0.5 shadow-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md h-fit"
+                    >
+                      <PlusIcon className="h-3 w-3 text-gray-500" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Add to Dataset</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
-        )}
-      </div>
 
-      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
-        <NewDataset
-          request_ids={[request.id]}
-          onComplete={() => setNewDatasetModalOpen(false)}
-        />
-      </ThemedModal>
-    </ScrollArea>
+          {/* Actions Section */}
+          <div className="flex flex-row items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    if (promptDataQuery.data?.id) {
+                      router.push(`/prompts/${promptDataQuery.data?.id}`);
+                    } else {
+                      router.push(`/prompts/fromRequest/${request.id}`);
+                    }
+                  }}
+                >
+                  <PiPlayBold className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Test Prompt</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    jawn
+                      .POST("/v2/experiment/create/from-request/{requestId}", {
+                        params: {
+                          path: {
+                            requestId: request.id,
+                          },
+                        },
+                      })
+                      .then((res) => {
+                        if (res.error || !res.data.data?.experimentId) {
+                          setNotification(
+                            "Failed to create experiment",
+                            "error"
+                          );
+                          return;
+                        }
+                        router.push(
+                          `/experiments/${res.data.data?.experimentId}`
+                        );
+                      });
+                  }}
+                >
+                  <FlaskConicalIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Create Experiment</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      JSON.stringify(request.schema || {}, null, 2)
+                    );
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                >
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copy Request</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Floating Elements */}
+        <ThemedModal
+          open={newDatasetModalOpen}
+          setOpen={setNewDatasetModalOpen}
+        >
+          <NewDataset
+            request_ids={[request.id]}
+            onComplete={() => setNewDatasetModalOpen(false)}
+          />
+        </ThemedModal>
+      </ScrollArea>
+    </div>
   );
 };
 

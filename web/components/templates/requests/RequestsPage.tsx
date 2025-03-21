@@ -742,7 +742,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       />
     </div>
   ) : (
-    <main className="h-screen flex flex-col">
+    <main className="h-screen w-full flex flex-col">
       {/* Header */}
       {!userId && (
         <div
@@ -873,9 +873,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         />
       )}
 
-      <ResizablePanelGroup direction="horizontal" className="h-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
         {/* Requests Table */}
-        <ResizablePanel defaultSize={50} minSize={25}>
+        <ResizablePanel defaultSize={50} minSize={25} className="h-full w-full">
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
@@ -1005,7 +1005,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         <ResizableHandle />
 
         {/* Request Drawer */}
-        <ResizablePanel defaultSize={50} minSize={33}>
+        <ResizablePanel defaultSize={50} minSize={33} className="h-full w-full">
           <RequestDiv
             open={open}
             setOpen={setOpen}
