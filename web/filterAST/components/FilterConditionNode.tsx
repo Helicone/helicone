@@ -47,6 +47,152 @@ const FILTER_OPERATOR_DESCRIPTIVE_LABELS: Record<FilterOperator, string> = {
   in: "In (∈)",
 };
 
+// Component for number input with suggestions
+const NumberInput: React.FC<{
+  value: string | number;
+  onValueChange: (value: number) => void;
+  suggestions?: { label: string; value: number }[];
+  disabled?: boolean;
+  className?: string;
+}> = ({
+  value,
+  onValueChange,
+  suggestions = [],
+  disabled = false,
+  className = "",
+}) => {
+  const [open, setOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Format display value to remove leading zeros but preserve decimals
+  const formatDisplayValue = (val: string | number): string => {
+    if (val === 0 || val === "0") return "0";
+
+    if (typeof val === "string") {
+      // If it's a string with leading zeros (not a decimal)
+      if (val.startsWith("0") && val.length > 1 && val[1] !== ".") {
+        return parseFloat(val).toString();
+      }
+    }
+    return val.toString();
+  };
+
+  // Handle direct input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+
+    // For empty input, use 0
+    if (inputValue === "") {
+      onValueChange(0);
+      return;
+    }
+
+    // If it has leading zeros (but is not a decimal), remove them
+    if (
+      inputValue.startsWith("0") &&
+      inputValue.length > 1 &&
+      inputValue[1] !== "."
+    ) {
+      const cleanValue = inputValue.replace(/^0+/, "");
+      const numericValue = Number(cleanValue);
+      if (!isNaN(numericValue)) {
+        onValueChange(numericValue);
+      }
+      return;
+    }
+
+    // Parse the input as a number
+    const numericValue = Number(inputValue);
+
+    // Only update if it's a valid number
+    if (!isNaN(numericValue)) {
+      onValueChange(numericValue);
+    }
+  };
+
+  // Handle clicking outside to close dropdown
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Convert suggestions to SearchableSelectOption format
+  const selectOptions: SearchableSelectOption[] = suggestions.map((opt) => ({
+    label: opt.label,
+    value: String(opt.value),
+  }));
+
+  const toggleDropdown = () => {
+    if (!disabled && selectOptions.length > 0) {
+      setOpen(!open);
+    }
+  };
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      <div className="flex">
+        <Input
+          type="number"
+          value={formatDisplayValue(value)}
+          onChange={handleInputChange}
+          disabled={disabled}
+          className={`w-full h-7 text-[10px] ${className}`}
+        />
+        {selectOptions.length > 0 && (
+          <div
+            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
+            onClick={toggleDropdown}
+          >
+            <svg
+              width="10"
+              height="6"
+              viewBox="0 0 10 6"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={`transition-transform ${open ? "rotate-180" : ""}`}
+            >
+              <path
+                d="M1 1L5 5L9 1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
+      </div>
+      {open && selectOptions.length > 0 && (
+        <div className="absolute w-full top-8 left-0 z-10 bg-white dark:bg-slate-950 border border-border rounded-md shadow-md max-h-[200px] overflow-y-auto">
+          {selectOptions.map((option) => (
+            <div
+              key={option.value}
+              className="px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-[10px]"
+              onClick={() => {
+                onValueChange(Number(option.value));
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface FilterConditionNodeProps {
   condition: ConditionExpression;
   path: number[];
@@ -177,6 +323,31 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   // Render value input based on field type
   const renderValueInput = () => {
+    // For number fields with valueOptions
+    if (filterDef?.type === "number") {
+      // Convert value to number for NumberInput
+      let numValue: number = 0;
+
+      if (typeof condition.value === "boolean") {
+        numValue = condition.value ? 1 : 0;
+      } else if (typeof condition.value === "string") {
+        // For strings, parse as float (handles both integers and decimals)
+        numValue = parseFloat(condition.value) || 0;
+      } else if (typeof condition.value === "number") {
+        numValue = condition.value;
+      }
+
+      return (
+        <NumberInput
+          value={numValue}
+          onValueChange={(val) => handleValueChange(val)}
+          suggestions={valueOptions as { label: string; value: number }[]}
+          disabled={!condition.field.column || !condition.operator}
+          className="w-full"
+        />
+      );
+    }
+
     // For searchable fields with onSearch function
     if (filterDef?.type === "searchable" && filterDef.onSearch) {
       return (

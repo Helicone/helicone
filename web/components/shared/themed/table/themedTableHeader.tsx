@@ -87,6 +87,7 @@ interface ThemedTableHeaderProps<T> {
     count?: number;
     children?: React.ReactNode;
   };
+  showFilters?: boolean;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -103,6 +104,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     isDatasetsPage,
     search,
     selectedRows,
+    showFilters: showFiltersProp,
   } = props;
 
   const searchParams = useSearchParams();
@@ -160,7 +162,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               <div />
             )}
             <div className="flex flex-row">
-              {advancedFilters && (
+              {(advancedFilters || showFiltersProp) && (
                 <Popover
                   open={isFiltersPopoverOpen}
                   onOpenChange={setIsFiltersPopoverOpen}
@@ -372,7 +374,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
         </div>
 
-        {advancedFilters && showFilters && isFiltersPinned && (
+        {(advancedFilters || showFiltersProp) && isFiltersPinned && (
           <div className="flex justify-start min-w-[50rem] w-full mt-1">
             <div className="flex-1 rounded-lg">
               <FilterASTEditor onFilterChange={() => {}} />

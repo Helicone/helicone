@@ -1,3 +1,4 @@
+import { TabsContent } from "@/components/ui/tabs";
 import { useRouter } from "next/router";
 import {
   getTimeIntervalAgo,
@@ -8,10 +9,6 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
-
-import { TabsContent } from "@/components/ui/tabs";
-import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import SessionMetrics from "./SessionMetrics";
 
 type TSessions = {
@@ -46,8 +43,6 @@ interface SessionDetailsProps {
   };
   setTimeFilter: (filter: { start: Date; end: Date }) => void;
   setInterval: (interval: TimeInterval) => void;
-  advancedFilters: UIFilterRowTree;
-  onSetAdvancedFiltersHandler: (filters: UIFilterRowTree) => void;
 }
 
 const SessionDetails = ({
@@ -61,8 +56,6 @@ const SessionDetails = ({
   timeFilter,
   setTimeFilter,
   setInterval,
-  advancedFilters,
-  onSetAdvancedFiltersHandler,
 }: SessionDetailsProps) => {
   const router = useRouter();
 
@@ -81,15 +74,7 @@ const SessionDetails = ({
           }}
           dataLoading={false}
           sortable={sort}
-          advancedFilters={{
-            filterMap: SESSIONS_TABLE_FILTERS,
-            setAdvancedFilters: onSetAdvancedFiltersHandler,
-            filters: advancedFilters,
-            searchPropertyFilters: async () => ({
-              data: null,
-              error: "Not implemented",
-            }),
-          }}
+          showFilters
           timeFilter={{
             currentTimeFilter: timeFilter,
             defaultValue: "all",

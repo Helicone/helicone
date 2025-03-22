@@ -1,26 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
-import { UIFilterRowTree } from "../lib/filters/types";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { toFilterNode } from "@/filterAST/toFilterNode";
+import { FilterExpression } from "@/filterAST/filterAst";
 
-const useSessions = (
+const useSessions = ({
+  timeFilter,
+  sessionIdSearch,
+  selectedName,
+}: {
   timeFilter: {
     start: Date;
     end: Date;
-  },
-  sessionIdSearch: string,
-  advancedFilters: UIFilterRowTree,
-  nameEquals?: string
-) => {
+  };
+  sessionIdSearch: string;
+  selectedName?: string;
+}) => {
   const org = useOrg();
+  const filterStore = useFilterAST();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "sessions",
       org?.currentOrg?.id,
       timeFilter,
       sessionIdSearch,
-      nameEquals,
-      advancedFilters,
+      selectedName,
+      filterStore.store.filter,
     ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -32,18 +38,19 @@ const useSessions = (
       const sessionIdSearch = query.queryKey[3] as string;
       const nameEquals = query.queryKey[4] as string;
 
+      const filter = query.queryKey[5] as FilterExpression;
       const jawnClient = getJawnClient(orgId);
 
       return await jawnClient.POST("/v1/session/query", {
         body: {
-          search: sessionIdSearch,
+          search: sessionIdSearch ?? "",
           timeFilter: {
             endTimeUnixMs: timeFilter.end.getTime(),
             startTimeUnixMs: timeFilter.start.getTime(),
           },
-          nameEquals: nameEquals,
+          nameEquals: nameEquals ?? "",
           timezoneDifference: 0,
-          filter: advancedFilters as any,
+          filter: filter ? (toFilterNode(filter) as any) : "all",
         },
       });
     },
@@ -162,8 +169,8 @@ const updateSessionFeedback = async (sessionId: string, rating: boolean) => {
 };
 
 export {
-  useSessions,
-  useSessionNames,
-  useSessionMetrics,
   updateSessionFeedback,
+  useSessionMetrics,
+  useSessionNames,
+  useSessions,
 };

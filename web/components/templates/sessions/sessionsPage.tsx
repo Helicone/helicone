@@ -74,27 +74,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     undefined
   );
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree) => {
-      setAdvancedFilters(filters);
-    },
-    []
-  );
-
-  const { sessions, refetch, isLoading } = useSessions(
+  const { sessions, refetch, isLoading } = useSessions({
     timeFilter,
-    debouncedSessionIdSearch ?? "",
-    filterUITreeToFilterNode(
-      SESSIONS_TABLE_FILTERS,
-      debouncedAdvancedFilters
-    ) as any,
-    selectedName
-  );
+    sessionId: debouncedSessionIdSearch ?? "",
+    selectedName: selectedName,
+  });
 
   const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
 
@@ -206,8 +190,6 @@ const SessionsPage = (props: SessionsPageProps) => {
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
                 setInterval={() => {}}
-                advancedFilters={advancedFilters}
-                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
               />
             </Row>
           </>
