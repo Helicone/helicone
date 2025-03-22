@@ -113,6 +113,9 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/evaluator/{evaluatorId}/statsWithFilter": {
+    post: operations["GetEvaluatorStatsWithFilter"];
+  };
   "/v2/experiment/create/empty": {
     post: operations["CreateEmptyExperiment"];
   };
@@ -834,6 +837,24 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    LLMBooleanConfig: {
+      /** @enum {string} */
+      type: "boolean";
+    };
+    LLMRangeConfig: {
+      /** Format: double */
+      rangeMin: number;
+      /** Format: double */
+      rangeMax: number;
+    };
+    LLMChoiceConfig: {
+      choices: {
+          description: string;
+          /** Format: double */
+          score: number;
+        }[];
+    };
+    LLMJudgeConfig: components["schemas"]["LLMBooleanConfig"] | components["schemas"]["LLMRangeConfig"] | components["schemas"]["LLMChoiceConfig"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -844,6 +865,7 @@ export interface components {
       name: string;
       code_template: unknown;
       last_mile_config: unknown;
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
     };
     ResultSuccess_EvaluatorResult_: {
       data: components["schemas"]["EvaluatorResult"];
@@ -851,12 +873,17 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorResult.string_": components["schemas"]["ResultSuccess_EvaluatorResult_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    EvaluatorModelOptions: "gpt-4o" | "gpt-4o-mini" | "gpt-3.5-turbo";
     CreateEvaluatorParams: {
       scoring_type: string;
       llm_template?: unknown;
       name: string;
       code_template?: unknown;
       last_mile_config?: unknown;
+      description?: string;
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
+      model?: components["schemas"]["EvaluatorModelOptions"];
     };
     "ResultSuccess_EvaluatorResult-Array_": {
       data: components["schemas"]["EvaluatorResult"][];
@@ -870,6 +897,9 @@ export interface components {
       code_template?: unknown;
       name?: string;
       last_mile_config?: unknown;
+      description?: string;
+      model?: components["schemas"]["EvaluatorModelOptions"];
+      judge_config?: components["schemas"]["LLMJudgeConfig"];
     };
     EvaluatorExperiment: {
       experiment_name: string;
@@ -883,6 +913,7 @@ export interface components {
     };
     "Result_EvaluatorExperiment-Array.string_": components["schemas"]["ResultSuccess_EvaluatorExperiment-Array_"] | components["schemas"]["ResultError_string_"];
     OnlineEvaluatorByEvaluatorId: {
+      name?: string;
       config: unknown;
       id: string;
     };
@@ -893,6 +924,7 @@ export interface components {
     };
     "Result_OnlineEvaluatorByEvaluatorId-Array.string_": components["schemas"]["ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"] | components["schemas"]["ResultError_string_"];
     CreateOnlineEvaluatorParams: {
+      name?: string;
       config: components["schemas"]["Record_string.any_"];
     };
     "ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
@@ -997,6 +1029,15 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    TimeFilter: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
+    GetEvaluatorStatsRequest: {
+      timeFilter: components["schemas"]["TimeFilter"];
+    };
     "ResultSuccess__experimentId-string__": {
       data: {
         experimentId: string;
@@ -2471,7 +2512,7 @@ Json: JsonObject;
      */
     TimeSpan: "7d" | "1m" | "3m";
     /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
+    ModelName: "gpt-4o" | "gpt-4o-mini" | "gpt-3.5" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "Llama" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
     /** @enum {string} */
     OpenStatsProviderName: "OPENAI" | "ANTHROPIC" | "OPENROUTER" | "MISTRAL" | "META";
     DataIsBeautifulRequestBody: {
@@ -3253,6 +3294,26 @@ export interface operations {
     parameters: {
       path: {
         evaluatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_EvaluatorStats.string_"];
+        };
+      };
+    };
+  };
+  GetEvaluatorStatsWithFilter: {
+    parameters: {
+      path: {
+        evaluatorId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetEvaluatorStatsRequest"];
       };
     };
     responses: {

@@ -7,6 +7,81 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"LLMBooleanConfig": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"boolean"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMRangeConfig": {
+				"properties": {
+					"rangeMin": {
+						"type": "number",
+						"format": "double"
+					},
+					"rangeMax": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"rangeMin",
+					"rangeMax"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMChoiceConfig": {
+				"properties": {
+					"choices": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"score": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"description",
+								"score"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"choices"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMJudgeConfig": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/LLMBooleanConfig"
+					},
+					{
+						"$ref": "#/components/schemas/LLMRangeConfig"
+					},
+					{
+						"$ref": "#/components/schemas/LLMChoiceConfig"
+					}
+				]
+			},
 			"EvaluatorResult": {
 				"properties": {
 					"id": {
@@ -29,7 +104,10 @@
 						"type": "string"
 					},
 					"code_template": {},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					}
 				},
 				"required": [
 					"id",
@@ -95,6 +173,14 @@
 					}
 				]
 			},
+			"EvaluatorModelOptions": {
+				"type": "string",
+				"enum": [
+					"gpt-4o",
+					"gpt-4o-mini",
+					"gpt-3.5-turbo"
+				]
+			},
 			"CreateEvaluatorParams": {
 				"properties": {
 					"scoring_type": {
@@ -105,7 +191,16 @@
 						"type": "string"
 					},
 					"code_template": {},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"description": {
+						"type": "string"
+					},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					},
+					"model": {
+						"$ref": "#/components/schemas/EvaluatorModelOptions"
+					}
 				},
 				"required": [
 					"scoring_type",
@@ -157,7 +252,16 @@
 					"name": {
 						"type": "string"
 					},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"description": {
+						"type": "string"
+					},
+					"model": {
+						"$ref": "#/components/schemas/EvaluatorModelOptions"
+					},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -250,6 +354,9 @@
 			},
 			"OnlineEvaluatorByEvaluatorId": {
 				"properties": {
+					"name": {
+						"type": "string"
+					},
 					"config": {},
 					"id": {
 						"type": "string"
@@ -302,6 +409,9 @@
 			},
 			"CreateOnlineEvaluatorParams": {
 				"properties": {
+					"name": {
+						"type": "string"
+					},
 					"config": {
 						"$ref": "#/components/schemas/Record_string.any_"
 					}
@@ -764,6 +874,36 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"TimeFilter": {
+				"properties": {
+					"start": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"end": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"start",
+					"end"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GetEvaluatorStatsRequest": {
+				"properties": {
+					"timeFilter": {
+						"$ref": "#/components/schemas/TimeFilter"
+					}
+				},
+				"required": [
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
@@ -4149,6 +4289,85 @@
 			"OnboardingStatus": {
 				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
+			"ChartView": {
+				"type": "string",
+				"enum": [
+					"time",
+					"distribution",
+					"pie"
+				]
+			},
+			"ChartSelection": {
+				"properties": {
+					"evaluatorId": {
+						"type": "string"
+					},
+					"onlineEvaluatorId": {
+						"type": "string"
+					},
+					"chartTypes": {
+						"items": {
+							"$ref": "#/components/schemas/ChartView"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"evaluatorId",
+					"onlineEvaluatorId",
+					"chartTypes"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MonitoringDashboard": {
+				"properties": {
+					"config": {
+						"items": {
+							"$ref": "#/components/schemas/ChartSelection"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"config"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ChartSelection-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ChartSelection"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ChartSelection-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ChartSelection-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"HeliconeMeta": {
 				"properties": {
 					"heliconeManualAccessKey": {
@@ -6882,6 +7101,51 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/statsWithFilter": {
+			"post": {
+				"operationId": "GetEvaluatorStatsWithFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorStats.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GetEvaluatorStatsRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v2/experiment/create/empty": {
@@ -10475,6 +10739,107 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/monitoring/dashboard": {
+			"put": {
+				"operationId": "UpsertMonitoringDashboard",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"config": [
+												{
+													"evaluatorId": "1",
+													"onlineEvaluatorId": "1",
+													"chartTypes": [
+														"time",
+														"distribution",
+														"pie"
+													]
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Monitoring"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MonitoringDashboard"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetMonitoringDashboard",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ChartSelection-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Monitoring"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "DeleteMonitoringDashboard",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Monitoring"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/log/request": {

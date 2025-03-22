@@ -6,9 +6,10 @@ import useSearchParams from "../utils/useSearchParams";
 import { TimeFilter } from "@/types/timeFilter";
 import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
 import { ThemedTimeFilterShadCN } from "./themedTimeFilterShadCN";
-
+import { DateRange } from "react-day-picker";
 interface ThemedTimeFilterProps {
   timeFilterOptions: { key: string; value: string }[];
+  quickSelectOptions?: { label: string; value: () => DateRange }[];
   onSelect: (key: string, value: string) => void;
   isFetching: boolean;
   defaultValue: string;
@@ -32,6 +33,7 @@ function formatDateToInputString(date: Date): string {
 const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
   const {
     timeFilterOptions,
+    quickSelectOptions,
     onSelect,
     defaultValue,
     isFetching,
@@ -105,6 +107,7 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
             from: currentTimeFilter?.start,
             to: currentTimeFilter?.end,
           }}
+          quickSelectOptions={quickSelectOptions}
         />
       )}
 

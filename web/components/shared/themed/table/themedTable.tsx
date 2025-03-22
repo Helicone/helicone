@@ -354,38 +354,35 @@ export default function ThemedTable<T extends { id?: string }>(
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
-                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
+                          className="sticky top-0 bg-slate-50 dark:bg-slate-900 shadow-sm group"
                         >
                           <th
                             className={clsx(
                               "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
-                              checkboxMode === "never" && "hidden"
+                              checkboxMode === "never" && "hidden",
+                              checkboxMode === "on_hover" &&
+                                (selectedIds && selectedIds.length > 0
+                                  ? "opacity-100"
+                                  : "opacity-0 group-hover:opacity-100 transition-opacity duration-150"),
+                              checkboxMode === "always_visible" && "opacity-100"
                             )}
                           >
-                            <div
-                              className={clsx(
-                                checkboxMode === "on_hover" &&
-                                  "opacity-40 hover:opacity-100 transition-opacity duration-150"
-                              )}
-                            >
-                              <Checkbox
-                                variant="blue"
-                                onCheckedChange={handleSelectAll}
-                                checked={selectedIds?.length === rows.length}
-                                ref={(ref) => {
-                                  if (ref) {
-                                    (
-                                      ref as unknown as HTMLInputElement
-                                    ).indeterminate =
-                                      selectedIds !== undefined &&
-                                      selectedIds.length > 0 &&
-                                      selectedIds.length < rows.length;
-                                  }
-                                }}
-                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                              />
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                            <Checkbox
+                              variant="blue"
+                              onCheckedChange={handleSelectAll}
+                              checked={selectedIds?.length === rows.length}
+                              ref={(ref) => {
+                                if (ref) {
+                                  (
+                                    ref as unknown as HTMLInputElement
+                                  ).indeterminate =
+                                    selectedIds !== undefined &&
+                                    selectedIds.length > 0 &&
+                                    selectedIds.length < rows.length;
+                                }
+                              }}
+                              className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                            />
                           </th>
                           {headerGroup.headers.map((header, index) => (
                             <th

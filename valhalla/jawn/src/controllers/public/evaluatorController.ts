@@ -11,8 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, ok, Result, resultMap } from "../../lib/shared/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { err, ok, Result } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
@@ -25,8 +24,8 @@ import {
   LLMAsAJudge,
   EvaluatorScoreResult,
 } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
-import { OPENAI_KEY } from "../../lib/clients/constant";
 import { LastMileConfigForm } from "../../managers/evaluator/types";
+import { TimeFilter } from "../../lib/shared/filters/timeFilter";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;
@@ -34,6 +33,37 @@ export interface CreateEvaluatorParams {
   name: string;
   code_template?: any;
   last_mile_config?: any;
+  description?: string;
+  judge_config?: LLMJudgeConfig;
+  model?: EvaluatorModelOptions;
+}
+
+export interface LLMRangeConfig {
+  rangeMin: number;
+  rangeMax: number;
+}
+
+export interface LLMChoiceConfig {
+  choices: Array<{ score: number; description: string }>;
+}
+
+export interface LLMBooleanConfig {
+  type: "boolean";
+}
+
+export type LLMJudgeConfig = LLMBooleanConfig | LLMRangeConfig | LLMChoiceConfig;
+export type EvaluatorModelOptions = "gpt-4o" | "gpt-4o-mini" | "gpt-3.5-turbo";
+
+export function isLLMBooleanConfig(config: LLMJudgeConfig): config is LLMBooleanConfig {
+  return typeof config === "object" && "type" in config && config.type === "boolean";
+}
+
+export function isLLMRangeConfig(config: LLMJudgeConfig): config is LLMRangeConfig {
+  return typeof config === "object" && "rangeMin" in config && "rangeMax" in config;
+}
+
+export function isLLMChoiceConfig(config: LLMJudgeConfig): config is LLMChoiceConfig {
+  return typeof config === "object" && "choices" in config;
 }
 
 export interface UpdateEvaluatorParams {
@@ -42,6 +72,9 @@ export interface UpdateEvaluatorParams {
   code_template?: any;
   name?: string;
   last_mile_config?: any;
+  description?: string;
+  model?: EvaluatorModelOptions;
+  judge_config?: LLMJudgeConfig;
 }
 
 export interface EvaluatorResult {
@@ -54,6 +87,7 @@ export interface EvaluatorResult {
   name: string;
   code_template: any;
   last_mile_config: any;
+  judge_config?: LLMJudgeConfig;
 }
 
 type EvaluatorExperiment = {
@@ -64,7 +98,12 @@ type EvaluatorExperiment = {
 
 type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
+  name?: string;
 };
+
+export interface GetEvaluatorStatsRequest {
+  timeFilter: TimeFilter;
+}
 
 export type TestInput = {
   inputBody: string;
@@ -249,8 +288,8 @@ export class EvaluatorController extends Controller {
     }
 
     const result = await dbExecute(
-      `INSERT INTO online_evaluators (evaluator, organization, config)
-        VALUES ($1, $2, $3)`,
+      `INSERT INTO online_evaluators (evaluator, organization, config, name)
+        VALUES ($1, $2, $3, $4)`,
       [
         evaluatorId,
         request.authParams.organizationId,
@@ -261,6 +300,7 @@ export class EvaluatorController extends Controller {
             value: propertyFilter.value,
           })),
         }),
+        requestBody.name
       ]
     );
     if (result.error || !result.data) {
@@ -406,6 +446,26 @@ export class EvaluatorController extends Controller {
   ): Promise<Result<EvaluatorStats, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.getEvaluatorStats(evaluatorId);
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("{evaluatorId}/statsWithFilter")
+  public async getEvaluatorStatsWithFilter(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() evaluatorId: string,
+    @Body() requestBody: GetEvaluatorStatsRequest
+  ): Promise<Result<EvaluatorStats, string>> {
+    const evaluatorManager = new EvaluatorManager(request.authParams);
+    const result = await evaluatorManager.getEvaluatorStatsWithFilter(
+      evaluatorId,
+      requestBody.timeFilter
+    );
 
     if (result.error || !result.data) {
       this.setStatus(500);

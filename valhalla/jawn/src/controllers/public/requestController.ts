@@ -86,7 +86,7 @@ export class RequestController extends Controller {
    * @param request
    * @returns
    */
-  @Post("query")
+  @Post("/query")
   @Example<RequestQueryParams>({
     filter: "all",
     isCached: false,
@@ -131,7 +131,7 @@ export class RequestController extends Controller {
    * @param request
    * @returns
    */
-  @Post("query-clickhouse")
+  @Post("/query-clickhouse")
   @Example<RequestQueryParams>({
     filter: "all",
     isCached: false,

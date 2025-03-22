@@ -1271,6 +1271,81 @@
 					}
 				]
 			},
+			"LLMBooleanConfig": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"boolean"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMRangeConfig": {
+				"properties": {
+					"rangeMin": {
+						"type": "number",
+						"format": "double"
+					},
+					"rangeMax": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"rangeMin",
+					"rangeMax"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMChoiceConfig": {
+				"properties": {
+					"choices": {
+						"items": {
+							"properties": {
+								"description": {
+									"type": "string"
+								},
+								"score": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"description",
+								"score"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"choices"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMJudgeConfig": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/LLMBooleanConfig"
+					},
+					{
+						"$ref": "#/components/schemas/LLMRangeConfig"
+					},
+					{
+						"$ref": "#/components/schemas/LLMChoiceConfig"
+					}
+				]
+			},
 			"EvaluatorResult": {
 				"properties": {
 					"id": {
@@ -1293,7 +1368,10 @@
 						"type": "string"
 					},
 					"code_template": {},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					}
 				},
 				"required": [
 					"id",
@@ -1339,6 +1417,14 @@
 					}
 				]
 			},
+			"EvaluatorModelOptions": {
+				"type": "string",
+				"enum": [
+					"gpt-4o",
+					"gpt-4o-mini",
+					"gpt-3.5-turbo"
+				]
+			},
 			"CreateEvaluatorParams": {
 				"properties": {
 					"scoring_type": {
@@ -1349,7 +1435,16 @@
 						"type": "string"
 					},
 					"code_template": {},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"description": {
+						"type": "string"
+					},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					},
+					"model": {
+						"$ref": "#/components/schemas/EvaluatorModelOptions"
+					}
 				},
 				"required": [
 					"scoring_type",
@@ -1401,7 +1496,16 @@
 					"name": {
 						"type": "string"
 					},
-					"last_mile_config": {}
+					"last_mile_config": {},
+					"description": {
+						"type": "string"
+					},
+					"model": {
+						"$ref": "#/components/schemas/EvaluatorModelOptions"
+					},
+					"judge_config": {
+						"$ref": "#/components/schemas/LLMJudgeConfig"
+					}
 				},
 				"type": "object",
 				"additionalProperties": false
@@ -1460,6 +1564,9 @@
 			},
 			"OnlineEvaluatorByEvaluatorId": {
 				"properties": {
+					"name": {
+						"type": "string"
+					},
 					"config": {},
 					"id": {
 						"type": "string"
@@ -1506,6 +1613,9 @@
 			},
 			"CreateOnlineEvaluatorParams": {
 				"properties": {
+					"name": {
+						"type": "string"
+					},
 					"config": {
 						"$ref": "#/components/schemas/Record_string.any_"
 					}
@@ -1960,6 +2070,36 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"TimeFilter": {
+				"properties": {
+					"start": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"end": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"start",
+					"end"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GetEvaluatorStatsRequest": {
+				"properties": {
+					"timeFilter": {
+						"$ref": "#/components/schemas/TimeFilter"
+					}
+				},
+				"required": [
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess__experimentId-string__": {
 				"properties": {
@@ -7747,9 +7887,9 @@
 			"ModelName": {
 				"type": "string",
 				"enum": [
-					"gpt-3.5",
 					"gpt-4o",
 					"gpt-4o-mini",
+					"gpt-3.5",
 					"gpt-4",
 					"gpt-4-turbo",
 					"claude-3-opus",
@@ -9828,6 +9968,51 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/statsWithFilter": {
+			"post": {
+				"operationId": "GetEvaluatorStatsWithFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorStats.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GetEvaluatorStatsRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v2/experiment/create/empty": {

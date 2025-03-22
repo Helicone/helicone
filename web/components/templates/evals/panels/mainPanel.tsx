@@ -16,6 +16,7 @@ import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
 import { LineChart, SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -23,6 +24,7 @@ export const MainPanel = () => {
     useEvalPanelStore();
   const org = useOrg();
   const { setTestConfig } = useTestDataStore();
+  const router = useRouter();
 
   // Get a simplified list of evaluators from the API response
   const simpleEvaluators = useMemo(() => {
@@ -141,22 +143,34 @@ export const MainPanel = () => {
       <AuthHeader
         title="Evaluators"
         actions={[
-          <FreeTierLimitWrapper
-            key="create-evaluator-wrapper"
-            feature="evals"
-            itemCount={evaluatorCount}
-          >
+          <div key="button-container" className="flex items-center gap-6">
             <Button
-              key="create-evaluator"
-              onClick={() => openCreatePanel()}
-              variant="action"
+              key="view-monitoring"
+              onClick={() => router.push("/monitoring?t=24hr")}
+              variant="outline"
               size="sm"
               className="gap-1 items-center"
             >
-              <PiPlusBold className="h-3.5 w-3.5" />
-              Create Evaluator
+              <LineChart className="h-3.5 w-3.5" />
+              View Monitoring
             </Button>
-          </FreeTierLimitWrapper>,
+            <FreeTierLimitWrapper
+              key="create-evaluator-wrapper"
+              feature="evals"
+              itemCount={evaluatorCount}
+            >
+              <Button
+                key="create-evaluator"
+                onClick={() => openCreatePanel()}
+                variant="action"
+                size="sm"
+                className="gap-1 items-center"
+              >
+                <PiPlusBold className="h-3.5 w-3.5" />
+                Create Evaluator
+              </Button>
+            </FreeTierLimitWrapper>
+          </div>,
         ]}
       />
 

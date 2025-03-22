@@ -1,3 +1,5 @@
+import { LLMJudgeConfig } from "../hooks/useEvaluatorSubmit";
+
 export interface Evaluator {
   id: string;
   created_at: string;
@@ -8,4 +10,5 @@ export interface Evaluator {
   name: string;
   code_template: unknown;
   last_mile_config?: unknown;
+  judge_config?: LLMJudgeConfig;
 }

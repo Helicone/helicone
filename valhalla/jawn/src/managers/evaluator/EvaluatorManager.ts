@@ -4,10 +4,14 @@ import {
   TestInput,
   UpdateEvaluatorParams,
   EvaluatorStats,
+  LLMJudgeConfig,
+  isLLMBooleanConfig,
+  isLLMRangeConfig,
+  isLLMChoiceConfig,
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { Result, err, isError, isSuccess, ok, resultMap } from "../../lib/shared/result";
 import {
   ExperimentOutputForScores,
   ExperimentV2Manager,
@@ -21,6 +25,9 @@ import { runLastMileEvaluator } from "./lastmile/run";
 import { pythonEvaluator } from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { TimeFilter } from "../../lib/shared/filters/timeFilter";
+import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
@@ -497,9 +504,9 @@ export class EvaluatorManager extends BaseManager {
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name, last_mile_config
+      INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config, description, model, judge_config)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, name, last_mile_config, description, model, judge_config
       `,
       [
         params.scoring_type,
@@ -508,6 +515,9 @@ export class EvaluatorManager extends BaseManager {
         params.name,
         params.code_template,
         params.last_mile_config,
+        params.description,
+        params.model,
+        params.judge_config,
       ]
     );
 
@@ -519,7 +529,7 @@ export class EvaluatorManager extends BaseManager {
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config, name
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config, name, description, model, judge_config
       FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
@@ -532,7 +542,7 @@ export class EvaluatorManager extends BaseManager {
   async queryEvaluators(): Promise<Result<EvaluatorResult[], string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
-      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template, last_mile_config
+      SELECT id, created_at, scoring_type, llm_template, organization_id, updated_at, name, code_template, last_mile_config, description, model, judge_config
       FROM evaluator
       WHERE organization_id = $1
       ORDER BY created_at DESC
@@ -571,6 +581,21 @@ export class EvaluatorManager extends BaseManager {
       updateValues.push(params.last_mile_config);
     }
 
+    if (params.description !== undefined) {
+      updateFields.push(`description = $${paramIndex++}`);
+      updateValues.push(params.description);
+    }
+
+    if (params.model !== undefined) {
+      updateFields.push(`model = $${paramIndex++}`);
+      updateValues.push(params.model);
+    }
+
+    if (params.judge_config !== undefined) {
+      updateFields.push(`judge_config = $${paramIndex++}`);
+      updateValues.push(params.judge_config);
+    }
+
     if (updateFields.length === 0) {
       return err("No fields to update");
     }
@@ -580,7 +605,7 @@ export class EvaluatorManager extends BaseManager {
       UPDATE evaluator
       SET ${updateFields.join(", ")}
       WHERE id = $${paramIndex++} AND organization_id = $${paramIndex++}
-      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
+      RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config, name, description, model, judge_config
       `,
       [...updateValues, evaluatorId, this.authParams.organizationId]
     );
@@ -798,5 +823,243 @@ export class EvaluatorManager extends BaseManager {
       console.error("Error getting evaluator stats:", error);
       return err("Error fetching evaluator statistics");
     }
+  }
+
+  public async getEvaluatorStatsWithFilter(
+    evaluatorId: string,
+    timeFilter: TimeFilter,
+  ): Promise<Result<EvaluatorStats, string>> {
+    // Only allow 31 days to prevent excessive load
+    if (timeFilter.start && timeFilter.end) {
+      const daysDifference = Math.ceil((timeFilter.end.getTime() - timeFilter.start.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDifference > 31) {
+        return err("Time range cannot exceed 31 days");
+      }
+    }
+    try {
+      const evaluator = await this.getEvaluator(evaluatorId);
+      if (evaluator.error || !evaluator.data) {
+        return err(evaluator.error || "Evaluator not found");
+      }
+
+      if (!evaluator.data.name || !evaluator.data.scoring_type) {
+        console.warn(
+          `Evaluator ${evaluatorId} has missing name or scoring_type, returning default stats`
+        );
+        return err("Evaluator has missing name or scoring_type");
+      }
+
+      const isBoolean = evaluator.data.scoring_type === "LLM-BOOLEAN";
+      const scoreName = getFullEvaluatorScoreName(
+        evaluator.data.name,
+      );
+
+      const builtFilter = await buildFilterWithAuthClickHouse({
+        org_id: this.authParams.organizationId,
+        filter: timeFilter ? timeFilterToFilterNode(timeFilter, "request_response_rmt") : "all",
+        argsAcc: [],
+      });
+
+      // hardcoded to 1 and 2 because we only have 2 params in the filter
+      const startTimeParamIdx = 1;
+      const endTimeParamIdx = 2;
+      const scoreParamIdx = builtFilter.argsAcc.length;
+      builtFilter.argsAcc.push(scoreName);
+      const scoreFilter = `AND has(mapKeys(scores), {val_${scoreParamIdx} : String})`;
+      
+      // Query to get the average score and total uses from clickhouse
+      const statsQuery = `
+        SELECT
+          avg(mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})]) as average_score,
+          count(*) as total_uses
+        FROM request_response_rmt
+        WHERE ((${builtFilter.filter}))
+          ${scoreFilter}
+      `;
+
+      const statsResult = await dbQueryClickhouse<{
+        average_score: number;
+        total_uses: number;
+      }>(statsQuery, builtFilter.argsAcc);
+
+      if (
+        statsResult.error ||
+        !statsResult.data ||
+        statsResult.data.length === 0
+      ) {
+        console.error("Could not query stats, error:", statsResult.error);
+        return err("Could not query stats");
+      }
+      
+      const recentTrendQuery = `
+        WITH 
+          {val_${startTimeParamIdx} : DateTime} AS start_time,
+          {val_${endTimeParamIdx} : DateTime} AS end_time,
+          addSeconds(start_time, toInt32((toUnixTimestamp(end_time) - toUnixTimestamp(start_time)) / 2)) AS mid_time
+        SELECT
+          avg(IF(request_created_at >= mid_time AND request_created_at <= end_time, mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})], NULL)) as recent_avg,
+          avg(IF(request_created_at >= start_time AND request_created_at < mid_time, mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})], NULL)) as previous_avg
+        FROM request_response_rmt
+        WHERE ((${builtFilter.filter}))
+          ${scoreFilter}
+      `;
+
+      const trendResult = await dbQueryClickhouse<{
+        recent_avg: number;
+        previous_avg: number;
+      }>(recentTrendQuery, builtFilter.argsAcc);
+
+      let trend: "up" | "down" | "stable" = "stable";
+      if (trendResult.data && trendResult.data.length > 0) {
+        const { recent_avg, previous_avg } = trendResult.data[0];
+        if (recent_avg > previous_avg) {
+          trend = "up";
+        } else if (recent_avg < previous_avg) {
+          trend = "down";
+        }
+      }
+
+      // Query score distribution
+      if (!evaluator.data.judge_config) {
+        // alternatively, we could try to parse the raw text of llm_template to get the judge config
+        // (this would happen if e.g. the evaluator was created before the monitoring feature was released)
+        return err("Evaluator has no judge config, please re-create it");
+      }
+      const distributionQuery = this.getFilteredDistributionQuery(builtFilter.filter, scoreParamIdx, scoreFilter, evaluator.data.judge_config, isBoolean);
+      if (isError(distributionQuery)) {
+        console.error("Could not query distribution, error:", distributionQuery.error);
+        return err(distributionQuery.error);
+      }
+
+      const distributionResult = await dbQueryClickhouse<{
+        range: string;
+        count: number;
+      }>(distributionQuery.data, builtFilter.argsAcc);
+
+      const scoreDistribution = distributionResult.data || [];
+
+      // Get the appropriate time granularity based on the time range
+      const dateTimeFunction = this.getDateTimeFunction(timeFilter);
+
+      // Query time series data with appropriate granularity
+      const timeSeriesQuery = `
+        SELECT
+          ${dateTimeFunction} as date,
+          avg(mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})]) as value
+        FROM request_response_rmt
+        WHERE ((${builtFilter.filter}))
+          ${scoreFilter}
+        GROUP BY date
+        ORDER BY date
+      `;
+
+      const timeSeriesResult = await dbQueryClickhouse<{
+        date: string;
+        value: number;
+      }>(timeSeriesQuery, builtFilter.argsAcc);
+
+      const timeSeriesData = timeSeriesResult.data || [];
+
+      // Return the combined stats
+      return ok({
+        averageScore: statsResult.data[0].average_score,
+        totalUses: statsResult.data[0].total_uses,
+        recentTrend: trend,
+        scoreDistribution,
+        timeSeriesData,
+      });
+    } catch (error) {
+      console.error("Error getting evaluator stats:", error);
+      return err("Error fetching evaluator statistics");
+    }
+  }
+
+  /**
+   * Gets the appropriate date/time function for ClickHouse queries based on the time range
+   * @param timeFilter The time filter containing start and end dates
+   * @returns The appropriate ClickHouse date/time function to use
+   */
+    private getDateTimeFunction(timeFilter: TimeFilter): string {
+      if (timeFilter.start && timeFilter.end) {
+        const millisDifference = timeFilter.end.getTime() - timeFilter.start.getTime();
+        const hoursDifference = millisDifference / (1000 * 60 * 60);
+        
+        if (hoursDifference <= 1) {
+          // Every 1min when range < 1 hour
+          return 'toStartOfMinute(request_created_at)';
+        } else if (hoursDifference <= 12) {
+          // Every 5min when range < 12 hours
+          return 'toStartOfFiveMinutes(request_created_at)';
+        } else if (hoursDifference <= 72) {
+          // Every 1hr when range < 3 days
+          return 'toStartOfHour(request_created_at)';
+        } else if (hoursDifference <= 168) {
+          // Every 4hr when range < 7 days
+          return 'toDateTime(toStartOfInterval(request_created_at, INTERVAL 4 hour))';
+        } else {
+          // Every day when range > 7 days
+          return 'toDate(request_created_at)';
+        }
+      }
+      
+      // Default to daily if no time range specified
+      return 'toDate(request_created_at)';
+    }
+
+  getFilteredDistributionQuery(builtFilter: string, scoreParamIdx: number, scoreFilter: string, llmJudgeConfig?: LLMJudgeConfig, isBoolean: boolean = false): Result<string, string> {
+    if (isBoolean || llmJudgeConfig && isLLMBooleanConfig(llmJudgeConfig)) {
+      return ok(`
+        SELECT
+          toString(bucket) as range,
+          count(*) as count
+        FROM (
+          SELECT
+            mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})] as bucket
+          FROM request_response_rmt
+          WHERE ((${builtFilter}))
+            ${scoreFilter}
+        )
+        GROUP BY bucket
+        ORDER BY bucket
+      `);
+    } else if (llmJudgeConfig && isLLMRangeConfig(llmJudgeConfig)) {
+      const bucketSize = Math.ceil((llmJudgeConfig.rangeMax - llmJudgeConfig.rangeMin) / 5);
+      return ok(`
+        SELECT
+          concat(toString(bucket * ${bucketSize}), '-', toString((bucket + 1) * ${bucketSize})) as range,
+          count(*) as count
+        FROM (
+          SELECT
+            floor(mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})] / ${bucketSize}) as bucket
+          FROM request_response_rmt
+          WHERE ((${builtFilter}))
+            ${scoreFilter}
+        )
+        GROUP BY bucket
+        ORDER BY bucket
+      `);
+    } else if (llmJudgeConfig && isLLMChoiceConfig(llmJudgeConfig)) {
+      return ok(`
+        WITH choice_mapping AS (
+          SELECT 
+            arrayJoin([${llmJudgeConfig.choices.map((choice, idx) => `(${idx}, ${choice.score})`).join(', ')}]) AS choice_map
+        )
+        SELECT
+          toString(choice_map.2) as range,
+          count(*) as count
+        FROM (
+          SELECT
+            mapValues(scores)[indexOf(mapKeys(scores), {val_${scoreParamIdx} : String})] as bucket
+          FROM request_response_rmt
+          WHERE ((${builtFilter}))
+            ${scoreFilter}
+        ) scores_data
+        LEFT JOIN choice_mapping choice_map ON choice_map.1 = scores_data.bucket
+        GROUP BY range
+        ORDER BY min(scores_data.bucket)
+      `);
+    }
+
+    return err("Invalid judge config");
   }
 }
