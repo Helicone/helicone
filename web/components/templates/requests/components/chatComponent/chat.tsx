@@ -82,7 +82,7 @@ export const Chat: React.FC<ChatProps> = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm  dark:bg-black",
+          "w-full flex flex-col text-left space-y-2 text-sm dark:bg-black max-w-full overflow-hidden",
           className
         )}
       >
