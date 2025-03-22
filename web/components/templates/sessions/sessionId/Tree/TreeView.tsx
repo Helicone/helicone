@@ -21,9 +21,17 @@ import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
 import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common";
-import { Row } from "../../../../layout/common/row";
 import { TraceSpan } from "../Span";
 import { Tree } from "./Tree";
+
+// Custom wrapper with specific styling for RenderHeliconeRequest
+const RequestWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="w-full max-w-full overflow-y-auto overflow-x-hidden">
+      <div className="min-w-0">{children}</div>
+    </div>
+  );
+};
 
 interface TreeViewProps {
   session: Session;
@@ -157,168 +165,149 @@ const TreeView: React.FC<TreeViewProps> = ({
   }, [isRealtime, highlighterRange]);
 
   return (
-    <>
-      <Col className="h-full gap-4">
-        {showSpan && (
-          <ResizablePanelGroup direction="vertical" className="h-full w-full">
-            <ResizablePanel
-              defaultSize={40}
-              minSize={25}
-              className="relative bg-white dark:bg-black h-full"
-            >
-              <div className="h-full">
-                <TraceSpan
-                  session={session}
-                  selectedRequestIdDispatch={[
-                    selectedRequestId,
-                    setSelectedRequestId,
-                  ]}
-                  height="100%"
-                  realtimeData={realtimeData}
-                  onHighlighterChange={handleHighlighterRangeChange}
-                />
-              </div>
-            </ResizablePanel>
-
-            <ResizableHandle />
-
-            <ResizablePanel defaultSize={60} minSize={25}>
-              <Row
-                className={
-                  "h-full border-t border-r border-b border-slate-200 dark:border-slate-800"
-                }
-              >
-                {!isRealtime && (
-                  <div
-                    className={`flex-shrink-0 ${
-                      isRealtime ? "w-full" : "w-[30em]"
-                    }`}
-                  >
-                    <ScrollArea className="h-full">
-                      <Col className="border-r border-slate-200 dark:border-slate-700 pb-10">
-                        <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  className="rounded-none"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => setCollapseAll(!collapseAll)}
-                                >
-                                  {collapseAll ? (
-                                    <ChevronsUpDownIcon
-                                      width={16}
-                                      height={16}
-                                    />
-                                  ) : (
-                                    <ChevronsDownUpIcon
-                                      width={16}
-                                      height={16}
-                                    />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Collapse All</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <Tree
-                          data={treeData!}
-                          className="min-h-[1000px] max-h-screen w-full"
-                          selectedRequestIdDispatch={[
-                            selectedRequestId,
-                            setSelectedRequestId,
-                          ]}
-                          collapseAll={collapseAll}
-                          setShowDrawer={setShowDrawer}
-                          onBoardingRequestTrace={onBoardingRequestTrace}
-                          sessionId={session.session_id}
-                          realtimeData={realtimeData}
-                        />
-                      </Col>
-                    </ScrollArea>
-                  </div>
-                )}
-                <ScrollArea className="h-full w-full bg-white dark:bg-black">
-                  <div className="flex flex-col gap-5 w-full">
-                    <div className="flex-grow [&_.border]:border-none">
-                      {displayedRequest && (
-                        <RenderHeliconeRequest
-                          heliconeRequest={displayedRequest}
-                          hideTopBar={isRealtime}
-                          realtimeMessageFilter={
-                            isRealtime &&
-                            !highlighterRange.active &&
-                            selectedRequestId
-                              ? selectedRequestRole
-                              : undefined
-                          }
-                          messageIndexFilter={messageIndexFilter}
-                          key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </ScrollArea>
-              </Row>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        )}
-        {!showSpan && (
-          <Row
-            className={
-              "h-full border-t border-r border-b border-slate-200 dark:border-slate-800"
-            }
+    <Col className="h-full">
+      {showSpan && (
+        <ResizablePanelGroup direction="vertical" className="h-full w-full">
+          <ResizablePanel
+            defaultSize={40}
+            minSize={25}
+            className="relative bg-white dark:bg-black"
           >
-            {!isRealtime && (
-              <div
-                className={`flex-shrink-0 ${
-                  isRealtime ? "w-full" : "w-[30em]"
-                }`}
-              >
-                <ScrollArea className="h-full">
-                  <Col className="border-r border-slate-200 dark:border-slate-700 pb-10">
-                    <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              className="rounded-none"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setCollapseAll(!collapseAll)}
-                            >
-                              {collapseAll ? (
-                                <ChevronsUpDownIcon width={16} height={16} />
-                              ) : (
-                                <ChevronsDownUpIcon width={16} height={16} />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Collapse All</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+            <TraceSpan
+              session={session}
+              selectedRequestIdDispatch={[
+                selectedRequestId,
+                setSelectedRequestId,
+              ]}
+              height="100%"
+              realtimeData={realtimeData}
+              onHighlighterChange={handleHighlighterRangeChange}
+            />
+          </ResizablePanel>
+
+          <ResizableHandle />
+
+          <ResizablePanel defaultSize={60} minSize={25}>
+            <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
+              {!isRealtime && (
+                <div className="flex-shrink-0 w-[30em] h-full">
+                  <ScrollArea className="h-full">
+                    <div className="border-r border-slate-200 dark:border-slate-700 pb-10">
+                      <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                className="rounded-none"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setCollapseAll(!collapseAll)}
+                              >
+                                {collapseAll ? (
+                                  <ChevronsUpDownIcon width={16} height={16} />
+                                ) : (
+                                  <ChevronsDownUpIcon width={16} height={16} />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {collapseAll ? "Expand All" : "Collapse All"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <Tree
+                        data={treeData!}
+                        className="min-h-[1000px] w-full"
+                        selectedRequestIdDispatch={[
+                          selectedRequestId,
+                          setSelectedRequestId,
+                        ]}
+                        collapseAll={collapseAll}
+                        setShowDrawer={setShowDrawer}
+                        onBoardingRequestTrace={onBoardingRequestTrace}
+                        sessionId={session.session_id}
+                        realtimeData={realtimeData}
+                      />
                     </div>
-                    <Tree
-                      data={treeData!}
-                      className="min-h-[1000px] max-h-screen w-full"
-                      selectedRequestIdDispatch={[
-                        selectedRequestId,
-                        setSelectedRequestId,
-                      ]}
-                      collapseAll={collapseAll}
-                      setShowDrawer={setShowDrawer}
-                      onBoardingRequestTrace={onBoardingRequestTrace}
-                      sessionId={session.session_id}
-                      realtimeData={realtimeData}
+                  </ScrollArea>
+                </div>
+              )}
+
+              <div className="flex-grow h-full overflow-auto">
+                {displayedRequest && (
+                  <RequestWrapper>
+                    <RenderHeliconeRequest
+                      heliconeRequest={displayedRequest}
+                      hideTopBar={isRealtime}
+                      realtimeMessageFilter={
+                        isRealtime &&
+                        !highlighterRange.active &&
+                        selectedRequestId
+                          ? selectedRequestRole
+                          : undefined
+                      }
+                      messageIndexFilter={messageIndexFilter}
+                      key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
                     />
-                  </Col>
-                </ScrollArea>
+                  </RequestWrapper>
+                )}
               </div>
-            )}
-            <ScrollArea className="h-full w-full bg-white dark:bg-black">
-              {displayedRequest && (
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      )}
+
+      {!showSpan && (
+        <div className="h-full border-t border-r border-b border-slate-200 dark:border-slate-800 flex">
+          {!isRealtime && (
+            <div className="flex-shrink-0 w-[30em] h-full">
+              <ScrollArea className="h-full">
+                <div className="border-r border-slate-200 dark:border-slate-700 pb-10">
+                  <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            className="rounded-none"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setCollapseAll(!collapseAll)}
+                          >
+                            {collapseAll ? (
+                              <ChevronsUpDownIcon width={16} height={16} />
+                            ) : (
+                              <ChevronsDownUpIcon width={16} height={16} />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {collapseAll ? "Expand All" : "Collapse All"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Tree
+                    data={treeData!}
+                    className="min-h-[1000px] w-full"
+                    selectedRequestIdDispatch={[
+                      selectedRequestId,
+                      setSelectedRequestId,
+                    ]}
+                    collapseAll={collapseAll}
+                    setShowDrawer={setShowDrawer}
+                    onBoardingRequestTrace={onBoardingRequestTrace}
+                    sessionId={session.session_id}
+                    realtimeData={realtimeData}
+                  />
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+
+          <div className="flex-grow h-full overflow-auto">
+            {displayedRequest && (
+              <RequestWrapper>
                 <RenderHeliconeRequest
                   heliconeRequest={displayedRequest}
                   hideTopBar={isRealtime}
@@ -330,11 +319,12 @@ const TreeView: React.FC<TreeViewProps> = ({
                   messageIndexFilter={messageIndexFilter}
                   key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
                 />
-              )}
-            </ScrollArea>
-          </Row>
-        )}
-      </Col>
+              </RequestWrapper>
+            )}
+          </div>
+        </div>
+      )}
+
       {!isRealtime && showDrawer && requestIdToShow && displayedRequest && (
         <RequestDrawerV2
           open={showDrawer}
@@ -343,7 +333,7 @@ const TreeView: React.FC<TreeViewProps> = ({
           properties={[]}
         />
       )}
-    </>
+    </Col>
   );
 };
 
