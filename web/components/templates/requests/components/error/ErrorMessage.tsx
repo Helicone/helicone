@@ -7,7 +7,6 @@ import {
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { AlertTriangle } from "lucide-react";
-import MarkdownEditor from "@/components/shared/markdownEditor";
 import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
 
 interface ErrorMessageProps {
