@@ -139,10 +139,21 @@ describe("OpenAI Chat Mapper", () => {
       expect(result.schema.request?.messages).toBeDefined();
       expect(result.schema.request?.messages).toHaveLength(1);
       expect(result.schema.request?.messages?.[0]).toEqual({
+        _type: "contentArray",
+        contentArray: [
+          {
+            _type: "message",
+            content: "[REDACTED TEXT]",
+            role: "user",
+          },
+          {
+            _type: "image",
+            content: "",
+            image_url: "https://redacted.amazonaws.com/example-image.jpg",
+            role: "user",
+          },
+        ],
         role: "user",
-        _type: "image",
-        image_url: "https://redacted.amazonaws.com/example-image.jpg",
-        content: "[REDACTED TEXT]",
       } as Message);
 
       // Verify schema structure
