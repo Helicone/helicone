@@ -7,7 +7,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
 import { Rocket } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";

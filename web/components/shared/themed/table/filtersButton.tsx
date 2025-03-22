@@ -58,6 +58,9 @@ export default function FiltersButton({
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
+  if (!filters || filters.length === 0) {
+    return null;
+  }
 
   return (
     <>

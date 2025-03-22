@@ -9,24 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Small } from "@/components/ui/typography";
-import {
-  Clock,
-  Info,
-  Link,
-  Loader2,
-  Plus,
-  PlusCircle,
-  RefreshCw,
-  Share2,
-} from "lucide-react";
+import { Info, Link, Loader2, Plus, PlusCircle, Share2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import {
-  AndExpression,
-  F,
-  OrExpression,
-  OrExpressionilterExpression,
-} from "./filterAst";
+import { AndExpression, OrExpression, FilterExpression } from "./filterAst";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
