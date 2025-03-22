@@ -1,7 +1,7 @@
 import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { FilterExpression } from "../filterAst";
+import { DEFAULT_FILTER_EXPRESSION, FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 
 /**
@@ -23,11 +23,11 @@ export const useContextHelpers = ({
       const filterToLoad = await filterCrud.getFilterById(filterId);
 
       if (filterToLoad && filterToLoad?.filter) {
-        filterStore.setFilter(filterToLoad?.filter as FilterExpression);
-        filterStore.setActiveFilterId(filterId);
-        filterStore.setActiveFilterName(
-          filterToLoad?.name || "Untitled Filter"
-        );
+        filterStore.loadFilterContents({
+          filter: filterToLoad?.filter as FilterExpression,
+          filterId,
+          filterName: filterToLoad?.name || "Untitled Filter",
+        });
         const params = new URLSearchParams(searchParams?.toString());
         params.set("filter_id", filterId);
         router.push(`${pathname}?${params.toString()}`);
@@ -38,6 +38,13 @@ export const useContextHelpers = ({
     },
     [filterCrud, filterStore, pathname, searchParams, router]
   );
+
+  const clearFilter = useCallback(() => {
+    filterStore.clearActiveFilter();
+    const params = new URLSearchParams(searchParams?.toString());
+    params.delete("filter_id");
+    router.push(`${pathname}?${params.toString()}`);
+  }, [filterStore, pathname, searchParams, router]);
 
   const saveFilter = async (
     name: string = "Untitled Filter",
@@ -70,21 +77,11 @@ export const useContextHelpers = ({
   };
 
   const newEmptyFilter = async () => {
-    // Create a default condition
-    const defaultCondition = {
-      type: "condition",
-      field: {
-        column: "status",
-      },
-      operator: "eq",
-      value: "",
-    };
-
     const result = await filterCrud.createFilter.mutateAsync({
       name: "Untitled Filter",
       filter: {
         type: "and",
-        expressions: [defaultCondition],
+        expressions: [DEFAULT_FILTER_EXPRESSION],
       },
     });
 
@@ -162,5 +159,6 @@ export const useContextHelpers = ({
     deleteFilter,
     updateFilterById,
     getShareableUrl,
+    clearFilter,
   };
 };

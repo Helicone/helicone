@@ -48,11 +48,11 @@ const DesktopSidebar = ({
 
   // Function to append filter_id to href if it exists
   const getHrefWithFilter = (baseHref: string) => {
-    if (filter_id) {
-      // Check if the URL already has query parameters
-      const hasQueryParams = baseHref.includes("?");
-      return `${baseHref}${hasQueryParams ? "&" : "?"}filter_id=${filter_id}`;
-    }
+    // if (filter_id) {
+    //   // Check if the URL already has query parameters
+    //   const hasQueryParams = baseHref.includes("?");
+    //   return `${baseHref}${hasQueryParams ? "&" : "?"}filter_id=${filter_id}`;
+    // }
     return baseHref;
   };
 

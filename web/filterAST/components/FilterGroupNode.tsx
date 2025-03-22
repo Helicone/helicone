@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Small } from "@/components/ui/typography";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { Plus, PlusCircle, Trash2 } from "lucide-react";
 import FilterConditionNode from "./FilterConditionNode";
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 
@@ -23,7 +23,6 @@ interface FilterGroupNodeProps {
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
-
   isRoot = false,
 }) => {
   const filterStore = useFilterStore();
@@ -92,7 +91,13 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   };
 
   return (
-    <div className="p-2 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-950 shadow-sm">
+    <div
+      className={` rounded-md bg-white dark:bg-slate-950${
+        isRoot
+          ? "bg-transparent"
+          : " p-2  border border-slate-200 dark:border-slate-800 "
+      }`}
+    >
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-1.5">
           <Button
@@ -100,7 +105,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
             size="xs"
             asPill
             onClick={handleToggleGroupOperator}
-            className={`min-w-[40px] px-2 py-0 text-[10px] ${
+            className={`min-w-[40px] px-2 py-0 h-5 text-[10px] flex items-center ${
               group.type === "and"
                 ? "bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 dark:bg-sky-900 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-800"
                 : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700"
@@ -108,35 +113,22 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           >
             {group.type === "and" ? "AND" : "OR"}
           </Button>
-          <Small className="text-muted-foreground text-[10px]">
+          <div className="text-[10px] bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-full px-2 h-5 flex items-center">
             {group.expressions.length}{" "}
             {group.expressions.length === 1 ? "condition" : "conditions"}
-          </Small>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {path.length === 0 ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="xs">
-                  <PlusCircle size={12} className="mr-1" />
-                  <span className="text-[10px] font-normal">Add</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => handleAddGroup("and")}
-                  className="text-[10px]"
-                >
-                  Add AND Group
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleAddGroup("or")}
-                  className="text-[10px]"
-                >
-                  Add OR Group
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="secondary"
+              size="xs"
+              className="flex items-center gap-1"
+              onClick={() => handleAddGroup("and")}
+            >
+              <PlusCircle size={12} />
+              <span className="text-[10px] font-normal">Add Filter Group</span>
+            </Button>
           ) : undefined}
           {!isRoot && (
             <Button
@@ -151,7 +143,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         </div>
       </div>
 
-      <div className="pl-3 space-y-1.5">
+      <div className={`space-y-1.5 ${isRoot ? "" : "pl-3"}`}>
         {group.expressions.length === 0 ? (
           <Small className="text-muted-foreground py-1.5 block">
             No conditions. Click &quot;Add&quot; to create one.
@@ -187,15 +179,15 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         )}
 
         {/* Quick add button - show at all levels */}
-        <div className="flex justify-center mt-1">
+        <div className="flex justify-start mt-1">
           <Button
-            variant="ghost"
-            size="xs"
+            variant="glass"
             onClick={handleAddCondition}
-            className="h-5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900 rounded-md px-1.5 py-0.5 font-normal"
+            size="sm_sleek"
+            className="flex items-center gap-1"
           >
-            <PlusCircle size={10} className="mr-1" />
-            Add condition
+            <Plus size={10} />
+            <span className="text-[10px] font-normal">Add Condition</span>
           </Button>
         </div>
       </div>

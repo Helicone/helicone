@@ -640,3 +640,9 @@ export type {
   AndExpression,
   OrExpression,
 };
+
+export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
+  "status",
+  "eq",
+  "200"
+);

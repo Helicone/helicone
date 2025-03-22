@@ -43,15 +43,6 @@ export const useFilterActions = () => {
   };
 
   /**
-   * Clear the current filter
-   * This is the actual implementation that clears the filter
-   */
-  const executeClearFilter = () => {
-    filterStore.setFilter(null);
-    filterStore.setActiveFilterName("Untitled Filter");
-  };
-
-  /**
    * Add a timestamp condition to the current filter
    * Useful for common filtering patterns
    */
@@ -101,10 +92,6 @@ export const useFilterActions = () => {
    */
   const updateFilterName = (name: string) => {
     filterStore.setActiveFilterName(name);
-    // Mark filter as having unsaved changes when name is updated
-    if (filterStore.activeFilterId) {
-      filterStore.setHasUnsavedChanges(true);
-    }
   };
 
   return {
@@ -113,7 +100,7 @@ export const useFilterActions = () => {
     updateFilterName,
     hasActiveFilters,
     createSimpleFilter,
-    executeClearFilter,
+
     addTimestampCondition,
     getFilterDescription,
   };

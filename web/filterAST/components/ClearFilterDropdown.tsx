@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { X, AlertTriangle } from "lucide-react";
+import { X, AlertTriangle, EraserIcon } from "lucide-react";
 
 interface ClearFilterDropdownProps {
   onConfirm: () => void;
@@ -21,8 +21,13 @@ export const ClearFilterDropdown: React.FC<ClearFilterDropdownProps> = ({
   // If there are no active filters, just render a simple button
   if (!hasActiveFilters) {
     return (
-      <Button variant="ghost" size="xs" onClick={onConfirm}>
-        <X size={12} className="mr-1" />
+      <Button
+        variant="glass"
+        size="xs"
+        onClick={onConfirm}
+        className="flex items-center gap-1"
+      >
+        <EraserIcon size={12} />
         <span className="text-[10px] font-normal">Clear</span>
       </Button>
     );
@@ -36,8 +41,8 @@ export const ClearFilterDropdown: React.FC<ClearFilterDropdownProps> = ({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="xs">
-          <X size={12} className="mr-1" />
+        <Button variant="glass" size="xs" className="flex items-center gap-1">
+          <EraserIcon size={12} />
           <span className="text-[10px] font-normal">Clear</span>
         </Button>
       </DropdownMenuTrigger>

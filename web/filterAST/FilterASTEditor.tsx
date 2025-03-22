@@ -14,13 +14,19 @@ import {
   Info,
   Link,
   Loader2,
+  Plus,
   PlusCircle,
   RefreshCw,
   Share2,
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { FilterExpression } from "./filterAst";
+import {
+  AndExpression,
+  F,
+  OrExpression,
+  OrExpressionilterExpression,
+} from "./filterAst";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
@@ -46,19 +52,11 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
       setSaveDialogOpen,
       hasActiveFilters,
       updateFilterName,
-      executeClearFilter,
     },
     helpers,
   } = useFilterAST();
   const [showSavedFilters, setShowSavedFilters] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [filterName, setFilterName] = useState(
-    filterStore.activeFilterId
-      ? crud.savedFilters.find(
-          (filter) => filter.id === filterStore.activeFilterId
-        )?.name
-      : "Untitled Filter"
-  );
 
   // Call the onFilterChange callback whenever the filter changes
   React.useEffect(() => {
@@ -94,63 +92,42 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
 
   return (
     <div className="space-y-3 w-full bg-white dark:bg-slate-950 rounded-md p-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b pb-2">
         <div className="flex flex-col items-center gap-1.5">
-          {filterStore.activeFilterName && (
-            <div className="border-b pb-2">
+          {filterStore.activeFilterName !== null && (
+            <div className="flex items-center gap-1">
               <Input
-                value={filterStore.activeFilterName || "Untitled Filter"}
-                onChange={(e) => updateFilterName(e.target.value)}
-                className="text-sm font-medium border-none p-0 h-auto w-full focus-visible:ring-0"
+                value={filterStore.activeFilterName}
+                onChange={(e) => {
+                  updateFilterName(e.target.value);
+                }}
+                className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0"
                 placeholder="Untitled Filter"
               />
+              {filterStore.hasUnsavedChanges && (
+                <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
+                  Saving...
+                </div>
+              )}
+              {filterStore.activeFilterName === "Untitled Filter" && (
+                <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center text-nowrap">
+                  <Info size={12} className="mr-1" />
+                  Change the name to save
+                </Small>
+              )}
             </div>
-          )}
-
-          {filterStore.activeFilterName === "Untitled Filter" && (
-            <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center">
-              <Info size={12} className="mr-1" />
-              Change the name to save
-            </Small>
           )}
         </div>
 
         <div className="flex items-center gap-1.5">
-          {filterStore.hasUnsavedChanges && (
-            <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
-              <Clock size={10} className="mr-1" />
-              Saving
-            </div>
-          )}
-
-          <SavedFiltersDropdown
-            showSavedFilters={showSavedFilters}
-            toggleSavedFilters={toggleSavedFilters}
-          />
-
-          <ClearFilterDropdown
-            onConfirm={executeClearFilter}
-            hasActiveFilters={hasActiveFilters()}
-          />
-
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={() => helpers.newEmptyFilter()}
-          >
-            <RefreshCw size={12} className="mr-1" />
-            <span className="text-[10px] font-normal">New</span>
-          </Button>
-
           <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                variant="ghost"
+                variant="glass"
                 size="xs"
                 disabled={!filterStore.activeFilterId}
               >
-                <Share2 size={12} className="mr-1" />
-                <span className="text-[10px] font-normal">Share</span>
+                <Share2 size={12} />
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -177,14 +154,35 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               </div>
             </DialogContent>
           </Dialog>
+
+          <ClearFilterDropdown
+            onConfirm={helpers.clearFilter}
+            hasActiveFilters={hasActiveFilters()}
+          />
+
+          <SavedFiltersDropdown
+            showSavedFilters={showSavedFilters}
+            toggleSavedFilters={toggleSavedFilters}
+          />
+
+          <Button
+            variant="glass"
+            size="xs"
+            onClick={() => helpers.newEmptyFilter()}
+          >
+            <Plus size={12} />
+            <span className="text-[10px] font-normal">New Filter</span>
+          </Button>
         </div>
       </div>
 
       <div className="space-y-2">
-        {filterStore.filter &&
-        (filterStore.filter.type === "and" ||
-          filterStore.filter.type === "or") ? (
-          <FilterGroupNode group={filterStore.filter} path={[]} isRoot={true} />
+        {filterStore.filter ? (
+          <FilterGroupNode
+            group={filterStore.filter as AndExpression | OrExpression}
+            path={[]}
+            isRoot={true}
+          />
         ) : (
           <div className="text-center py-6 bg-slate-50 dark:bg-slate-900 rounded-md">
             <Small className="text-muted-foreground text-[10px] font-normal">
@@ -194,7 +192,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               <Button
                 onClick={() => {
                   helpers.newEmptyFilter();
-                  setFilterName("");
                 }}
                 variant="default"
                 size="xs"

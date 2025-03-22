@@ -221,7 +221,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   };
 
   return (
-    <div className="flex flex-row items-center gap-1.5 p-2 border border-slate-200 dark:border-slate-800 rounded-md bg-white dark:bg-slate-950 shadow-sm">
+    <div className="flex flex-row items-center gap-1.5 rounded-md bg-white dark:bg-slate-950">
       <SearchableSelect
         options={fieldOptions}
         value={condition.field.column}
@@ -229,7 +229,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         placeholder="Select field"
         searchPlaceholder="Search field..."
         emptyMessage="No field found."
-        width="150px"
+        width="200px"
         className="flex-shrink-0 h-7 text-[10px]"
       />
 
@@ -238,7 +238,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         onValueChange={handleOperatorChange}
         disabled={!condition.field.column}
       >
-        <SelectTrigger className="w-[45px] h-7 px-1.5 flex-shrink-0 text-center text-[10px] font-normal">
+        <SelectTrigger className="w-[40px] h-7 px-1 flex-shrink-0 text-center text-[10px] font-normal">
           <SelectValue placeholder="Op">
             {condition.operator &&
               FILTER_OPERATOR_LABELS[condition.operator as FilterOperator]}

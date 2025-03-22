@@ -65,18 +65,9 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
   });
   // Initial URL hook
   useEffect(() => {
-    if (filterStore.initialFilterId && !filterStore.activeFilterId) {
-      const filterToLoad = filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterStore.initialFilterId
-      );
-
-      if (filterToLoad) {
-        helpers.loadFilterById(filterStore.initialFilterId);
-      }
-    }
     const newInitialFilterId = searchParams?.get("filter_id");
-    if (newInitialFilterId) {
-      filterStore.setInitialFilterId(newInitialFilterId);
+    if (!filterStore.alreadyLoadedOnce && newInitialFilterId) {
+      helpers.loadFilterById(newInitialFilterId);
     }
   }, [searchParams, filterStore, filterCrud]);
 

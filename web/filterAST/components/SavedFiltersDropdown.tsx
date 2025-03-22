@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Trash2, Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Small } from "@/components/ui/typography";
 import { useFilterAST } from "@/filterAST/context/filterContext";
+import { BookmarkIcon, Check, Trash2 } from "lucide-react";
+import React, { useState } from "react";
 
 interface SavedFiltersDropdownProps {
   showSavedFilters: boolean;
@@ -37,8 +37,8 @@ export const SavedFiltersDropdown: React.FC<SavedFiltersDropdownProps> = ({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="xs">
-          <BookOpen size={12} className="mr-1" />
+        <Button variant="glass" size="xs" className="flex items-center gap-1">
+          <BookmarkIcon size={12} className="" />
           <span className="text-[10px] font-normal">Saved</span>
           {crud.savedFilters.length > 0 && (
             <Badge
