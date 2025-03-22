@@ -41,10 +41,7 @@ const DesktopSidebar = ({
   sidebarRef,
 }: SidebarProps) => {
   const orgContext = useOrg();
-  const user = useUser();
-  const tier = orgContext?.currentOrg?.tier;
   const router = useRouter();
-  const { filter_id } = router.query;
 
   // Function to append filter_id to href if it exists
   const getHrefWithFilter = (baseHref: string) => {
@@ -60,10 +57,6 @@ const DesktopSidebar = ({
     "isSideBarCollapsed",
     false
   );
-
-  const shouldShowInfoBox = useMemo(() => {
-    return tier === "pro" || tier === "growth";
-  }, [tier]);
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",

@@ -92,89 +92,94 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
 
   return (
     <div className="space-y-3 w-full bg-white dark:bg-slate-950 rounded-md p-3">
-      <div className="flex items-center justify-between border-b pb-2">
-        <div className="flex flex-col items-center gap-1.5">
-          {filterStore.activeFilterName !== null && (
-            <div className="flex items-center gap-1">
-              <Input
-                value={filterStore.activeFilterName}
-                onChange={(e) => {
-                  updateFilterName(e.target.value);
-                }}
-                className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0"
-                placeholder="Untitled Filter"
-              />
-              {filterStore.hasUnsavedChanges && (
-                <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
-                  Saving...
-                </div>
-              )}
-              {filterStore.activeFilterName === "Untitled Filter" && (
-                <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center text-nowrap">
-                  <Info size={12} className="mr-1" />
-                  Change the name to save
-                </Small>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="glass"
-                size="xs"
-                disabled={!filterStore.activeFilterId}
-              >
-                <Share2 size={12} />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Share Filter</DialogTitle>
-                <DialogDescription>
-                  Copy the URL below to share this filter with others.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex items-center space-x-2">
+      {filterStore.filter && (
+        <div className="flex items-center justify-between border-b pb-2">
+          <div className="flex flex-col items-center gap-1.5">
+            {filterStore.activeFilterName !== null && (
+              <div className="flex items-center gap-1">
                 <Input
-                  value={helpers.getShareableUrl() || ""}
-                  readOnly
-                  className="flex-1"
+                  value={filterStore.activeFilterName}
+                  onChange={(e) => {
+                    updateFilterName(e.target.value);
+                  }}
+                  className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0"
+                  placeholder="Untitled Filter"
                 />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyShareableUrl}
-                >
-                  <Link size={14} className="mr-1" />
-                  Copy
-                </Button>
+                {filterStore.hasUnsavedChanges && (
+                  <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
+                    Saving...
+                  </div>
+                )}
+                {filterStore.activeFilterName === "Untitled Filter" && (
+                  <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center text-nowrap">
+                    <Info size={12} className="mr-1" />
+                    Change the name to save
+                  </Small>
+                )}
               </div>
-            </DialogContent>
-          </Dialog>
+            )}
+          </div>
 
-          <ClearFilterDropdown
-            onConfirm={helpers.clearFilter}
-            hasActiveFilters={hasActiveFilters()}
-          />
+          <div className="flex items-center gap-1.5">
+            <Dialog
+              open={isShareDialogOpen}
+              onOpenChange={setIsShareDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="glass"
+                  size="xs"
+                  disabled={!filterStore.activeFilterId}
+                >
+                  <Share2 size={12} />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share Filter</DialogTitle>
+                  <DialogDescription>
+                    Copy the URL below to share this filter with others.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={helpers.getShareableUrl() || ""}
+                    readOnly
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyShareableUrl}
+                  >
+                    <Link size={14} className="mr-1" />
+                    Copy
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
-          <SavedFiltersDropdown
-            showSavedFilters={showSavedFilters}
-            toggleSavedFilters={toggleSavedFilters}
-          />
+            <ClearFilterDropdown
+              onConfirm={helpers.clearFilter}
+              hasActiveFilters={hasActiveFilters()}
+            />
 
-          <Button
-            variant="glass"
-            size="xs"
-            onClick={() => helpers.newEmptyFilter()}
-          >
-            <Plus size={12} />
-            <span className="text-[10px] font-normal">New Filter</span>
-          </Button>
+            <SavedFiltersDropdown
+              showSavedFilters={showSavedFilters}
+              toggleSavedFilters={toggleSavedFilters}
+            />
+
+            <Button
+              variant="glass"
+              size="xs"
+              onClick={() => helpers.newEmptyFilter()}
+            >
+              <Plus size={12} />
+              <span className="text-[10px] font-normal">New Filter</span>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-2">
         {filterStore.filter ? (
@@ -184,11 +189,15 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             isRoot={true}
           />
         ) : (
-          <div className="text-center py-6 bg-slate-50 dark:bg-slate-900 rounded-md">
+          <div className="text-center py-6 rounded-md flex flex-col items-center gap-2">
             <Small className="text-muted-foreground text-[10px] font-normal">
               No filters applied
             </Small>
-            <div className="mt-2">
+            <div className="flex items-center gap-2">
+              <SavedFiltersDropdown
+                showSavedFilters={showSavedFilters}
+                toggleSavedFilters={toggleSavedFilters}
+              />
               <Button
                 onClick={() => {
                   helpers.newEmptyFilter();
