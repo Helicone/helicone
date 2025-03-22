@@ -7,6 +7,8 @@ import {
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { AlertTriangle } from "lucide-react";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
 
 interface ErrorMessageProps {
   mapperContent: MappedLLMRequest;
@@ -161,14 +163,7 @@ export const ErrorMessage = ({ mapperContent }: ErrorMessageProps) => {
           </div>
           <p className="font-semibold text-sm">Request</p>
           <pre className="p-2 border rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-            {mode === "JSON"
-              ? JSON.stringify(mapperContent.raw.request, null, 2)
-              : mapperContent?.schema.request?.messages &&
-                JSON.stringify(
-                  mapperContent?.schema.request?.messages,
-                  null,
-                  2
-                )}
+            <JsonRenderer data={mapperContent.raw.request} />
           </pre>
         </div>
       </div>
