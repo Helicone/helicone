@@ -5,6 +5,7 @@ import {
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 type JsonValue =
   | string
@@ -20,6 +21,49 @@ interface JsonRendererProps {
   isExpanded?: boolean;
   showCopyButton?: boolean;
 }
+
+interface StringRendererProps {
+  data: string;
+  maxLength?: number;
+}
+
+const StringRenderer: React.FC<StringRendererProps> = ({
+  data,
+  maxLength = 10000,
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const isTruncated = data.length > maxLength;
+
+  return (
+    <span className="text-violet-600 dark:text-violet-400">
+      &quot;{expanded || !isTruncated ? data : data.slice(0, maxLength)}
+      {isTruncated && !expanded && (
+        <span className="text-slate-400 dark:text-slate-500">...</span>
+      )}
+      &quot;
+      {isTruncated && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="ml-2 inline-flex items-center text-xs px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+        >
+          {expanded ? (
+            <>
+              <EyeSlashIcon className="h-3 w-3 mr-1" />
+              <span>Show less</span>
+            </>
+          ) : (
+            <>
+              <EyeIcon className="h-3 w-3 mr-1" />
+              <span>
+                Show {(data.length - maxLength).toLocaleString()} more chars
+              </span>
+            </>
+          )}
+        </button>
+      )}
+    </span>
+  );
+};
 
 export const JsonRenderer: React.FC<JsonRendererProps> = ({
   data,
@@ -57,11 +101,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   }
 
   if (typeof data === "string") {
-    return (
-      <span className="text-violet-600 dark:text-violet-400">
-        &quot;{data}&quot;
-      </span>
-    );
+    return <StringRenderer data={data} />;
   }
 
   if (Array.isArray(data)) {
@@ -122,9 +162,8 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         )}
 
         {expanded && (
-          <div>
-            {indent}
-            <span className="text-slate-600 dark:text-slate-300">]</span>
+          <div className="inline-flex items-center ml-0">
+            <span className="ml-3 text-slate-600 dark:text-slate-300">]</span>
           </div>
         )}
       </div>
@@ -139,6 +178,19 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
 
   return (
     <div className="relative">
+      {level === 0 && showCopyButton && (
+        <button
+          onClick={handleCopy}
+          className="absolute right-0 top-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+          title="Copy JSON"
+        >
+          {copied ? (
+            <ClipboardDocumentCheckIcon className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+          ) : (
+            <ClipboardIcon className="h-4 w-4" />
+          )}
+        </button>
+      )}
       <div
         className="inline-flex items-center cursor-pointer group"
         onClick={() => setExpanded(!expanded)}
@@ -179,9 +231,8 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
         </div>
       )}
       {expanded && (
-        <div>
-          {indent}
-          <span className="text-slate-600 dark:text-slate-300">{"}"}</span>
+        <div className="inline-flex items-center ml-0">
+          <span className="ml-3 text-slate-600 dark:text-slate-300">{"}"}</span>
         </div>
       )}
     </div>

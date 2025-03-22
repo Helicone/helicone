@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 interface NavigationItem {
   name: string;
   href: string;
@@ -38,8 +37,8 @@ const NavItem: React.FC<NavItemProps> = ({
   deep,
   onClick,
 }) => {
-  const router = useRouter();
   const hasSubItems = link.subItems && link.subItems.length > 0;
+  const router = useRouter();
 
   // Get the filter_id from the current URL query parameters
   const { filter_id } = router.query;
@@ -62,12 +61,6 @@ const NavItem: React.FC<NavItemProps> = ({
             href={getHrefWithFilter(
               hasSubItems ? link.subItems![0].href : link.href
             )}
-            onClick={(e) => {
-              if (hasSubItems) {
-                e.preventDefault();
-                router.push(getHrefWithFilter(link.subItems![0].href));
-              }
-            }}
             className={cn(
               buttonVariants({
                 variant: "ghost",

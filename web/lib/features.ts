@@ -1,16 +1,12 @@
 // Define all possible features
-export const ADDON_FEATURES = [
-  "evals",
-  "experiments",
-  "prompts",
-  "datasets",
-  "alerts",
-] as const;
+export const ADDON_FEATURES = ["evals", "experiments", "prompts"] as const;
 export const NON_FREE_FEATURES = [
   "sessions",
   "properties",
   "users",
   "webhooks",
+  "datasets",
+  "alerts",
 ] as const;
 
 // Create a combined type of all features

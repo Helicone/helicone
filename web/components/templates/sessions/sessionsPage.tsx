@@ -1,17 +1,12 @@
 import AuthHeader from "@/components/shared/authHeader";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
-import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-} from "@/services/lib/filters/uiFilterRowTree";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
@@ -19,8 +14,6 @@ import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -47,7 +40,7 @@ const TABS = [
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex } = props;
+  const { sort } = props;
 
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
@@ -74,17 +67,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     undefined
   );
 
-  const { sessions, refetch, isLoading } = useSessions({
+  const { sessions, isLoading, hasSessions } = useSessions({
     timeFilter,
-    sessionId: debouncedSessionIdSearch ?? "",
-    selectedName: selectedName,
+    sessionIdSearch: debouncedSessionIdSearch ?? "",
+    selectedName,
   });
-
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
-
-  const hasSomeSessions = useMemo(() => {
-    return allNames.sessions.length > 0;
-  }, [allNames.sessions.length]);
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -95,10 +82,12 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
+  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
+
   useEffect(() => {
     if (
       !hasAccess &&
-      hasSomeSessions &&
+      hasSessions &&
       selectedName === undefined &&
       !allNames.isLoading
     ) {
@@ -112,7 +101,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       }
     }
   }, [
-    hasSomeSessions,
+    hasSessions,
     allNames.sessions,
     allNames.isLoading,
     selectedName,
@@ -126,15 +115,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       className="w-full"
     >
       <div>
-        {allNames.isLoading ||
-        allNames.isRefetching ||
-        isLoading ||
-        names.isLoading ||
-        names.isRefetching ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <LoadingAnimation />
-          </div>
-        ) : hasSomeSessions ? (
+        {hasSessions || isLoading ? (
           <>
             <AuthHeader
               isWithinIsland={true}
@@ -185,7 +166,14 @@ const SessionsPage = (props: SessionsPageProps) => {
                 sessionIdSearch={sessionIdSearch ?? ""}
                 setSessionIdSearch={setSessionIdSearch}
                 sessions={sessions}
-                isLoading={isLoading}
+                isLoading={
+                  isLoading ||
+                  allNames.isLoading ||
+                  allNames.isRefetching ||
+                  isLoading ||
+                  names.isLoading ||
+                  names.isRefetching
+                }
                 sort={sort}
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
@@ -193,10 +181,6 @@ const SessionsPage = (props: SessionsPageProps) => {
               />
             </Row>
           </>
-        ) : allNames.isRefetching ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <LoadingAnimation />
-          </div>
         ) : (
           <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
             <div className="flex flex-1 h-full">

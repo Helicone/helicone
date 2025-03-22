@@ -20,10 +20,10 @@ Default URLs:
 ### Helicone container builds
 
 ```
-docker build --platform linux/amd64 -t helicone/supabase-migration-runner -f dockerfiles/dockerfile_supabase_migration_runner ../supabase
+docker build -t helicone/supabase-migration-runner -f dockerfiles/dockerfile_supabase_migration_runner ../supabase
 docker build -t helicone/worker -f dockerfiles/dockerfile_worker ../worker
 docker build -t helicone/web -f dockerfiles/dockerfile_web ../web
-docker build -t helicone/clickhouse-migration-runner -f dockerfiles/dockerfile_clickhouse_migration_runner ../clickhouse --no-cache
+docker build -t helicone/clickhouse-migration-runner -f dockerfiles/dockerfile_clickhouse_migration_runner ../clickhouse
 ```
 
 Note: we are in the process of updating our `docker-compose.yml` file.
@@ -81,21 +81,24 @@ Start the infrastructure components via docker compose:
 
 ```
 cd docker
-docker compose -f docker-compose-local.yml up -d
+docker compose -f docker-compose-local.yml --profile include-worker up -d
 ```
 
 ### Workers
+
+*Note*: If you are developing locally on the workers, simply exclude the
+`--profile include-worker` arguments and instead start each worker you need
+manually from the command line with the following commands:
 
 ```
 cd worker
 yarn
 # Start OpenAI Proxy Worker
 # WORKER_TYPEs: [OPENAI_PROXY, ANTHROPIC_PROXY, HELICONE_API]
-# For most development, simply running only the OpenAI worker is okay
 npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 --test-scheduled
 ```
 
-### Jawn
+### Jawn (Backend)
 
 In a new terminal, from the root of the repo:
 

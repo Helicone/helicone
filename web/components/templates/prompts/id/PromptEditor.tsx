@@ -1,3 +1,5 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
@@ -11,11 +13,8 @@ import CustomScrollbar, {
   CustomScrollbarRef,
 } from "@/components/shared/universal/Scrollbar";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
-import { Button } from "@/components/ui/button";
-
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
+import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   ResizableHandle,
@@ -87,6 +86,12 @@ import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
+type EditorMode =
+  | "fromCode"
+  | "fromEditor"
+  | "fromRequest"
+  | "fromPlayground"
+  | null;
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
   requestId?: string; // Request Id Mode
@@ -112,26 +117,12 @@ export default function PromptEditor({
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
 
-  const [promptUpgradeDialogOpen, setPromptUpgradeDialogOpen] = useState(false);
-  const [playgroundUpgradeDialogOpen, setPlaygroundUpgradeDialogOpen] =
-    useState(false);
-
-  const [promptLimitUpgradeDialogOpen, setPromptLimitUpgradeDialogOpen] =
-    useState(false);
-
-  const {
-    playgroundRunCount,
-    promptRunCount,
-    incrementPlaygroundRun,
-    incrementPromptRun,
-  } = usePromptRunsStore();
-
   // HOOKS
   // - Router
   const router = useRouter();
   // - Jawn Client
   const jawnClient = useJawnClient();
-  // - Request Data (if loading from request)
+  // - Request Data
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
   // - Prompt Table
@@ -152,54 +143,80 @@ export default function PromptEditor({
   const { newFromPromptVersion } = useExperiment();
   // - Create Prompt
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
-  // - Free Tier Limit
+
+  // FREE TIER LIMITS
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const {
+    playgroundRunCount,
+    promptRunCount,
+    incrementPlaygroundRun,
+    incrementPromptRun,
+  } = usePromptRunsStore();
+  // - Prompts Count
+  const { prompts: promptsData } = usePrompts();
+  const promptCount = promptsData?.length || 0;
+  const {
+    canCreate: withinPromptsLimit,
+    upgradeMessage: promptsLimitUpgradeMessage,
+  } = useFeatureLimit("prompts", promptCount);
+  // - Prompt Versions Count
   const versionCount = promptVersionsData?.length ?? 0;
-  const { canCreate: canCreateVersion } = useFeatureLimit(
+  const { canCreate: withinVersionsLimit } = useFeatureLimit(
     "prompts",
     versionCount,
     "versions"
   );
-
-  const { prompts: promptsData } = usePrompts();
-  const promptCount = promptsData?.length || 0;
-
-  const isPlaygroundMode = !!basePrompt && !promptId && !requestId;
-
+  // - Prompt Runs
   const {
-    canCreate: canRunPlayground,
+    canCreate: withinPrompRunsLimit,
+    freeLimit: maxPromptRuns,
+    upgradeMessage: promptRunsUpgradeMessage,
+    hasAccess: hasPromptAccess,
+  } = useFeatureLimit("prompts", promptRunCount, "runs");
+  // - Playground Runs
+  const {
+    canCreate: withinPlaygroundRunsLimit,
     freeLimit: maxPlaygroundRuns,
-    upgradeMessage: playgroundUpgradeMessage,
+    upgradeMessage: playgroundRunsUpgradeMessage,
     hasAccess: hasPlaygroundAccess,
   } = useFeatureLimit("prompts", playgroundRunCount, "playground_runs");
 
-  const {
-    canCreate: canRunPrompt,
-    freeLimit: maxPromptRuns,
-    upgradeMessage: promptUpgradeMessage,
-    hasAccess: hasPromptAccess,
-  } = useFeatureLimit("prompts", promptRunCount, "runs");
-
-  const {
-    canCreate: canCreatePrompt,
-    upgradeMessage: promptLimitUpgradeMessage,
-  } = useFeatureLimit("prompts", promptCount);
-
   // VALIDATION
-  // - Is Imported From Code
-  const isImportedFromCode = useMemo(() => {
-    // Case 1: If we're in playground mode (basePrompt exists), it's not imported from code
-    if (basePrompt) return false;
+  // - Centralized prompt mode validation
+  const editorMode = useMemo<EditorMode>(() => {
+    // If we're still loading data, return null
+    if (
+      (promptId && (isPromptLoading || isVersionsLoading)) ||
+      (requestId && isRequestLoading)
+    ) {
+      return null;
+    }
 
-    // Case 2: If we're in request mode, it's not imported from code
-    if (requestId) return false;
+    // Check for each mode in priority order
+    if (requestId) {
+      return "fromRequest";
+    } else if (basePrompt) {
+      return "fromPlayground";
+    } else if (promptId) {
+      // Check if we have metadata to determine if it's from code or editor
+      if (promptData?.metadata?.createdFromUi === true) {
+        return "fromEditor";
+      } else {
+        return "fromCode";
+      }
+    }
 
-    // Case 3: If prompt data is still loading or not available, we don't know yet
-    if (isPromptLoading || !promptData) return null;
-
-    // Case 4: If we have metadata, check the createdFromUi flag
-    // Explicitly imported from code if createdFromUi is NOT true
-    return promptData.metadata?.createdFromUi !== true;
-  }, [promptData, isPromptLoading, basePrompt, requestId]);
+    // Fallback (should never happen with proper props)
+    return null;
+  }, [
+    promptId,
+    requestId,
+    basePrompt,
+    promptData,
+    isPromptLoading,
+    isVersionsLoading,
+    isRequestLoading,
+  ]);
   // - Can Run
   const canRun = useMemo(() => {
     // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
@@ -231,29 +248,12 @@ export default function PromptEditor({
   }, [state?.messages, state?.parameters?.provider]);
 
   // CALLBACKS
-  // - Load Version Data into State
+  // - Loads Version Data for modes fromCode and fromEditor
   const loadVersionData = useCallback(
     (ver: any) => {
-      if (!ver && !requestId) return;
+      if (!ver) return;
 
-      // Ensure we have full knowledge of isImportedFromCode before proceeding
-      if (promptId && isImportedFromCode === null) {
-        console.log(
-          "Cannot load version data: isImportedFromCode is not yet determined"
-        );
-        return;
-      }
-
-      console.log(
-        `Loading ${
-          isImportedFromCode === true
-            ? "imported"
-            : isImportedFromCode === false
-            ? "created"
-            : "unknown"
-        } version row:`,
-        ver
-      );
+      console.log(`Loading version data:`, ver);
 
       let templateData: any = {};
       let metadata: {
@@ -268,119 +268,104 @@ export default function PromptEditor({
       let inputs: StateInputs[] = [];
       let masterVersion: number | undefined;
 
-      // 1. Load prompt either from:
-      // A. Request data
-      if (requestId && requestData?.data) {
-        const mappedContent = heliconeRequestToMappedContent(requestData.data);
+      // Get version template and metadata
+      const versionTemplate = ver.helicone_template;
+      const versionMetadata = ver.metadata;
 
-        templateData = mappedContent.schema.request;
-        // TODO: Use findClosestProvider and findClosestModel here instead?
-        metadata = {
-          provider: undefined,
-          isProduction: true,
-          inputs: undefined,
-        };
-      }
-      // B. Prompt data
-      else if (promptId && promptData && promptVersionsData) {
-        const versionTemplate = ver.helicone_template;
-        const versionMetadata = ver.metadata;
-
-        // I. Imported from Code
-        if (isImportedFromCode === true) {
-          const mapperType = getMapperType({
+      // Process based on editor mode
+      if (editorMode === "fromCode") {
+        // For imported from code: use mapper to transform the template
+        const mapperType = getMapperType({
+          model: versionTemplate.model,
+          provider: versionMetadata.provider || "OPENAI",
+        });
+        const mapper = MAPPERS[mapperType];
+        const mappedResult = mapper({
+          request: versionTemplate,
+          response: {
+            choices: [],
             model: versionTemplate.model,
-            provider: versionMetadata.provider || "OPENAI",
-          });
-          const mapper = MAPPERS[mapperType];
-          const mappedResult = mapper({
-            request: versionTemplate,
-            response: {
-              choices: [],
-              model: versionTemplate.model,
-            }, // This information is not available
-            statusCode: 200,
-            model: versionTemplate.model,
-          });
-
-          templateData = mappedResult.schema.request;
-          metadata = versionMetadata;
-        } else {
-          // II. Created from UI
-          templateData =
-            typeof versionTemplate === "string"
-              ? JSON.parse(versionTemplate)
-              : versionTemplate || {};
-          metadata =
-            typeof versionMetadata === "string"
-              ? JSON.parse(versionMetadata)
-              : versionMetadata || {};
-        }
-
-        // 2. Derive "masterVersion" if needed
-        masterVersion =
-          metadata?.isProduction === true
-            ? ver.major_version
-            : promptVersionsData?.find(
-                (v) => (v.metadata as { isProduction?: boolean })?.isProduction
-              )?.major_version ?? ver.major_version;
-
-        // 3.A. First collect all variables and their default values from the metadata inputs
-        inputs = Object.entries(metadata?.inputs || {}).map(
-          ([name, value]) => ({
-            name,
-            value: value as string,
-            isValid: isValidVariableName(name),
-          })
-        );
-
-        // 3.B. Extract additional variables contained in message content
-        stateMessages = (templateData.messages ?? []) as Message[]; // Typeguard and cast templateData to Message[]
-        stateMessages.forEach((msg) => {
-          const vars = extractVariables(msg.content || "", "helicone");
-          vars.forEach((v) => {
-            inputs.push({
-              name: v.name,
-              value: metadata?.inputs?.[v.name] ?? v.value ?? "",
-              isValid: v.isValid ?? true,
-            });
-          });
+          },
+          statusCode: 200,
+          model: versionTemplate.model,
         });
 
-        // 3.C. Add message auto-inputs to the list
-        stateMessages.forEach((msg) => {
-          msg.idx !== undefined &&
-            inputs.push({
-              name: `message_${msg.idx}`,
-              value: "",
-              isValid: true,
-              idx: msg.idx,
-            });
-        });
-
-        // 3.D. Deduplicate variables
-        inputs = deduplicateVariables(inputs);
+        templateData = mappedResult.schema.request;
+        metadata = versionMetadata;
+      } else {
+        // For UI-created prompts: parse template and metadata
+        templateData =
+          typeof versionTemplate === "string"
+            ? JSON.parse(versionTemplate)
+            : versionTemplate || {};
+        metadata =
+          typeof versionMetadata === "string"
+            ? JSON.parse(versionMetadata)
+            : versionMetadata || {};
       }
 
-      // 5. Validate model-provider or closest match or default
+      // Determine master version (production version)
+      masterVersion =
+        metadata?.isProduction === true
+          ? ver.major_version
+          : promptVersionsData?.find(
+              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+            )?.major_version ?? ver.major_version;
+
+      // Process variables and inputs
+      // 1. First collect all variables from metadata inputs
+      inputs = Object.entries(metadata?.inputs || {}).map(([name, value]) => ({
+        name,
+        value: value as string,
+        isValid: isValidVariableName(name),
+      }));
+
+      // 2. Extract messages and variables from content
+      stateMessages = (templateData.messages ?? []) as Message[];
+      stateMessages.forEach((msg) => {
+        const vars = extractVariables(msg.content || "", "helicone");
+        vars.forEach((v) => {
+          inputs.push({
+            name: v.name,
+            value: metadata?.inputs?.[v.name] ?? v.value ?? "",
+            isValid: v.isValid ?? true,
+          });
+        });
+      });
+
+      // 3. Add message auto-inputs
+      stateMessages.forEach((msg) => {
+        msg.idx !== undefined &&
+          inputs.push({
+            name: `message_${msg.idx}`,
+            value: "",
+            isValid: true,
+            idx: msg.idx,
+          });
+      });
+
+      // 4. Deduplicate variables
+      inputs = deduplicateVariables(inputs);
+
+      // Find closest provider and model
       const provider = findClosestProvider(
         templateData.provider || metadata?.provider || "OPENAI"
       );
       const model = findClosestModel(provider, templateData.model || "gpt-4");
 
-      // 6. Update state with the processed data
+      // Update state with processed data
       setState({
         promptId: promptId,
         masterVersion,
-        version: ver?.major_version,
-        versionId: ver?.id,
+        version: ver.major_version,
+        versionId: ver.id,
 
         messages: stateMessages,
         parameters: {
           provider: provider,
           model: model,
-          temperature: templateData.temperature ?? 1,
-          tools: templateData.tools ?? [],
+          temperature: templateData.temperature ?? undefined,
+          tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
         },
@@ -391,14 +376,7 @@ export default function PromptEditor({
         isDirty: false,
       });
     },
-    [
-      promptId,
-      promptData,
-      promptVersionsData,
-      requestId,
-      requestData,
-      isImportedFromCode,
-    ]
+    [promptId, promptVersionsData, editorMode]
   );
   // - Update State
   const updateState = useCallback(
@@ -410,8 +388,12 @@ export default function PromptEditor({
     ) => {
       setState((prev) => {
         if (!prev) return null;
+
+        // Handle function or direct updates
         const newUpdates =
           typeof updates === "function" ? updates(prev) : updates;
+
+        // Return updated state with isDirty flag set appropriately
         return {
           ...prev,
           ...newUpdates,
@@ -641,14 +623,14 @@ export default function PromptEditor({
     }
 
     // Check limits based on mode
-    if (isPlaygroundMode) {
-      if (!canRunPlayground) {
-        setPlaygroundUpgradeDialogOpen(true);
+    if (editorMode === "fromPlayground") {
+      if (!withinPlaygroundRunsLimit) {
+        setUpgradeDialogOpen(true);
         return;
       }
-    } else if (promptId) {
-      if (!canRunPrompt) {
-        setPromptUpgradeDialogOpen(true);
+    } else {
+      if (!withinPrompRunsLimit) {
+        setUpgradeDialogOpen(true);
         return;
       }
     }
@@ -657,7 +639,7 @@ export default function PromptEditor({
     setIsStreaming(true);
     updateState({ response: "" }, false);
 
-    if (isPlaygroundMode) {
+    if (editorMode === "fromPlayground") {
       if (!hasPlaygroundAccess) {
         incrementPlaygroundRun();
       }
@@ -673,13 +655,17 @@ export default function PromptEditor({
     );
 
     // 3. SAVE: If in promptId mode, not imported from code, and dirty
-    if (promptId && isImportedFromCode === false && state.isDirty) {
+    if (promptId && editorMode === "fromEditor" && state.isDirty) {
       const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         ...state.parameters,
+        tools:
+          state.parameters.tools?.length === 0
+            ? undefined
+            : state.parameters.tools, // TODO: Only here for backwards compatibility
         provider: undefined, // TODO: Move provider to the prompt?
         messages: state.messages,
       };
@@ -771,9 +757,8 @@ export default function PromptEditor({
     state,
     isStreaming,
     canRun,
-    isPlaygroundMode,
-    canRunPlayground,
-    canRunPrompt,
+    withinPlaygroundRunsLimit,
+    withinPrompRunsLimit,
     hasPlaygroundAccess,
     hasPromptAccess,
     incrementPlaygroundRun,
@@ -784,7 +769,7 @@ export default function PromptEditor({
     loadVersionData,
     updateState,
     promptVersionsData,
-    isImportedFromCode,
+    editorMode,
   ]);
   // - Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -939,8 +924,8 @@ export default function PromptEditor({
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
-    if (!canCreatePrompt) {
-      setPromptLimitUpgradeDialogOpen(true);
+    if (!withinPromptsLimit) {
+      setUpgradeDialogOpen(true);
       return;
     }
 
@@ -973,67 +958,101 @@ export default function PromptEditor({
       console.error("Error creating prompt:", error);
       setNotification("Failed to create prompt", "error");
     }
-  }, [state, canCreatePrompt, createPrompt, router, setNotification]);
+  }, [state, withinPromptsLimit, createPrompt, router, setNotification]);
 
   // EFFECTS
   // - Load Initial State
   useEffect(() => {
     // Don't proceed with loading if we don't know whether the prompt is imported from code yet
-    if (promptId && isImportedFromCode === null) {
-      return;
-    }
+    if (editorMode === null) return;
 
+    // Initialize state only if it hasn't been set yet
     if (!state) {
-      if (requestId && requestData?.data) {
-        loadVersionData(null);
-      } else if (
-        promptVersionsData &&
-        promptVersionsData.length > 0 &&
-        !isVersionsLoading
-      ) {
-        // Load from prompt version data
-        loadVersionData(promptVersionsData[0]);
-      } else if (basePrompt) {
-        // Load directly from basePrompt
-        const provider = findClosestProvider(
-          basePrompt.metadata.provider || "OPENAI"
-        );
-        const model = findClosestModel(
-          provider,
-          basePrompt.body.model || "gpt-4o-mini"
-        );
+      switch (editorMode) {
+        case "fromRequest":
+          if (requestData?.data) {
+            const mappedContent = heliconeRequestToMappedContent(
+              requestData.data
+            );
+            const provider = findClosestProvider(
+              mappedContent.schema.request.provider || "OPENAI"
+            );
+            const model = findClosestModel(
+              provider,
+              mappedContent.schema.request.model || "gpt-4"
+            );
 
-        setState({
-          messages: basePrompt.body.messages || [],
-          parameters: {
-            provider: provider,
-            model: model,
-            temperature: basePrompt.body.temperature ?? 1,
-            max_tokens: basePrompt.body.max_tokens ?? undefined,
-            tools: basePrompt.body.tools ?? [],
-            reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
-          },
-          inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
-            ([name, value]) => ({
-              name,
-              value: value as string,
-              isValid: isValidVariableName(name),
-            })
-          ),
-          isDirty: false,
-        });
+            setState({
+              messages: mappedContent.schema.request.messages || [],
+              parameters: {
+                provider: provider,
+                model: model,
+                temperature:
+                  mappedContent.schema.request.temperature ?? undefined,
+                max_tokens:
+                  mappedContent.schema.request.max_tokens ?? undefined,
+                tools: mappedContent.schema.request.tools ?? undefined,
+                reasoning_effort:
+                  mappedContent.schema.request.reasoning_effort ?? undefined,
+              },
+              inputs: [],
+              isDirty: false,
+            });
+          }
+          break;
+
+        case "fromEditor":
+        case "fromCode":
+          if (
+            promptVersionsData &&
+            promptVersionsData.length > 0 &&
+            !isVersionsLoading
+          ) {
+            loadVersionData(promptVersionsData[0]);
+          }
+          break;
+
+        case "fromPlayground":
+          if (basePrompt) {
+            const provider = findClosestProvider(
+              basePrompt.metadata.provider || "OPENAI"
+            );
+            const model = findClosestModel(
+              provider,
+              basePrompt.body.model || "gpt-4o-mini"
+            );
+
+            setState({
+              messages: basePrompt.body.messages || [],
+              parameters: {
+                provider: provider,
+                model: model,
+                temperature: basePrompt.body.temperature ?? undefined,
+                max_tokens: basePrompt.body.max_tokens ?? undefined,
+                tools: basePrompt.body.tools ?? undefined,
+                reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
+              },
+              inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
+                ([name, value]) => ({
+                  name,
+                  value: value as string,
+                  isValid: isValidVariableName(name),
+                })
+              ),
+              isDirty: false,
+            });
+          }
+          break;
       }
     }
   }, [
-    isVersionsLoading,
-    loadVersionData,
-    promptVersionsData,
+    editorMode,
     state,
-    requestId,
     requestData,
+    promptVersionsData,
+    isVersionsLoading,
     basePrompt,
-    promptId,
-    isImportedFromCode,
+    loadVersionData,
   ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
@@ -1041,7 +1060,7 @@ export default function PromptEditor({
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === "Enter" &&
-        isImportedFromCode === false
+        editorMode === "fromEditor"
       ) {
         event.preventDefault();
         handleSaveAndRun();
@@ -1050,7 +1069,7 @@ export default function PromptEditor({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveAndRun, isImportedFromCode]);
+  }, [handleSaveAndRun, editorMode]);
 
   // HELPERS
   // - Add Messages
@@ -1086,19 +1105,14 @@ export default function PromptEditor({
   };
 
   // RENDER
-  // TODO: Prompt or request not found page (use mutations I think)
-  // - Loading Page
-  if (
-    (promptId && (isPromptLoading || isVersionsLoading)) ||
-    (requestId && isRequestLoading) ||
-    (promptId && isImportedFromCode === null) ||
-    !state
-  ) {
+  // TODO: Prompt or request not found page with more info (use mutations I think)
+  // - Loading
+  if (editorMode === null || !state) {
     return (
       <div className="flex h-screen items-center justify-center">
         <LoadingAnimation
           title={
-            promptId && isImportedFromCode === null
+            promptId && editorMode === null
               ? "Determining prompt source..."
               : "Loading prompt..."
           }
@@ -1106,7 +1120,7 @@ export default function PromptEditor({
       </div>
     );
   }
-  // - Page
+  // - Editor
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
@@ -1168,7 +1182,9 @@ export default function PromptEditor({
           )}
 
           {/* From Request or From Playground: Unsaved Changes Indicator */}
-          {(requestId || basePrompt || isImportedFromCode === true) &&
+          {(editorMode === "fromRequest" ||
+            editorMode === "fromPlayground" ||
+            editorMode === "fromCode") &&
             state.isDirty && (
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
@@ -1183,11 +1199,11 @@ export default function PromptEditor({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
                   <p className="max-w-64 text-center">
-                    {isImportedFromCode === true
+                    {editorMode === "fromCode"
                       ? "This prompt cannot be managed by Helicone because it was imported from code. "
                       : ""}
                     <span className="font-semibold">
-                      {isImportedFromCode === true
+                      {editorMode === "fromCode"
                         ? "Save As Editor Prompt"
                         : "Save As Prompt"}
                     </span>{" "}
@@ -1201,7 +1217,7 @@ export default function PromptEditor({
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* Auto-Improve Button */}
-          {promptId && isImportedFromCode === false && (
+          {editorMode === "fromEditor" && (
             <Button
               variant="link"
               onClick={() => setIsAutoImproveOpen(true)}
@@ -1213,7 +1229,9 @@ export default function PromptEditor({
           )}
 
           {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
-          {(requestId || basePrompt || isImportedFromCode === true) && (
+          {(editorMode === "fromRequest" ||
+            editorMode === "fromPlayground" ||
+            editorMode === "fromCode") && (
             <Button
               className="text-white"
               variant="action"
@@ -1226,7 +1244,7 @@ export default function PromptEditor({
                   <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
-              ) : isImportedFromCode === true ? (
+              ) : editorMode === "fromCode" ? (
                 "Save as Editor Prompt"
               ) : (
                 "Save As Prompt"
@@ -1235,7 +1253,7 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          {promptId && isImportedFromCode === false && state.isDirty ? (
+          {editorMode === "fromEditor" && state.isDirty ? (
             <FreeTierLimitWrapper
               feature="prompts"
               subfeature="versions"
@@ -1247,11 +1265,7 @@ export default function PromptEditor({
                     ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                     : ""
                 }`}
-                variant={
-                  promptId && isImportedFromCode === false
-                    ? "action"
-                    : "outline"
-                }
+                variant="action"
                 size="sm"
                 disabled={!canRun}
                 onClick={handleSaveAndRun}
@@ -1264,7 +1278,7 @@ export default function PromptEditor({
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
-                    : state.isDirty && promptId && isImportedFromCode === false
+                    : state.isDirty && editorMode === "fromEditor"
                     ? "Save & Run"
                     : "Run"}
                 </span>
@@ -1284,9 +1298,7 @@ export default function PromptEditor({
                   ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                   : ""
               }`}
-              variant={
-                promptId && isImportedFromCode === false ? "action" : "outline"
-              }
+              variant={editorMode === "fromEditor" ? "action" : "outline"}
               size="sm"
               disabled={!canRun}
               onClick={handleSaveAndRun}
@@ -1299,7 +1311,7 @@ export default function PromptEditor({
               <span className="mr-2">
                 {isStreaming
                   ? "Stop"
-                  : state.isDirty && promptId && isImportedFromCode === false
+                  : state.isDirty && editorMode === "fromEditor"
                   ? "Save & Run"
                   : "Run"}
               </span>
@@ -1338,7 +1350,7 @@ export default function PromptEditor({
               promptId={promptId}
               userDefinedId={promptData?.user_defined_id || "my-prompt-id"}
               state={state}
-              isImportedFromCode={isImportedFromCode === true}
+              isImportedFromCode={editorMode === "fromCode"}
             />
           )}
         </div>
@@ -1369,7 +1381,7 @@ export default function PromptEditor({
       )}
 
       {/* Version limit warning banner */}
-      {!canCreateVersion && promptId && isImportedFromCode === false && (
+      {!withinVersionsLimit && editorMode === "fromEditor" && (
         <FreeTierLimitBanner
           feature="prompts"
           subfeature="versions"
@@ -1379,20 +1391,22 @@ export default function PromptEditor({
       )}
 
       {/* Playground run limit warning banner */}
-      {isPlaygroundMode && !canRunPlayground && playgroundRunCount > 0 && (
-        <FreeTierLimitBanner
-          feature="prompts"
-          subfeature="playground_runs"
-          itemCount={playgroundRunCount}
-          freeLimit={maxPlaygroundRuns}
-          message={`You've used ${playgroundRunCount}/${maxPlaygroundRuns} playground runs. Upgrade to Pro Tier for unlimited access.`}
-          buttonText="Upgrade"
-          buttonSize="sm"
-        />
-      )}
+      {editorMode === "fromPlayground" &&
+        !withinPlaygroundRunsLimit &&
+        playgroundRunCount > 0 && (
+          <FreeTierLimitBanner
+            feature="prompts"
+            subfeature="playground_runs"
+            itemCount={playgroundRunCount}
+            freeLimit={maxPlaygroundRuns}
+            message={`You've used ${playgroundRunCount}/${maxPlaygroundRuns} playground runs. Upgrade to Pro Tier for unlimited access.`}
+            buttonText="Upgrade"
+            buttonSize="sm"
+          />
+        )}
 
       {/* Prompt run limit warning banner */}
-      {promptId && !canRunPrompt && promptRunCount > 0 && (
+      {promptId && !withinPrompRunsLimit && promptRunCount > 0 && (
         <FreeTierLimitBanner
           feature="prompts"
           subfeature="runs"
@@ -1482,32 +1496,18 @@ export default function PromptEditor({
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {/* Playground Upgrade Dialog */}
-      {isPlaygroundMode && (
-        <UpgradeProDialog
-          open={playgroundUpgradeDialogOpen}
-          onOpenChange={setPlaygroundUpgradeDialogOpen}
-          featureName="Playground"
-          limitMessage={playgroundUpgradeMessage}
-        />
-      )}
-
-      {/* Prompts Upgrade Dialog */}
-      {promptId && (
-        <UpgradeProDialog
-          open={promptUpgradeDialogOpen}
-          onOpenChange={setPromptUpgradeDialogOpen}
-          featureName="Prompts"
-          limitMessage={promptUpgradeMessage}
-        />
-      )}
-
-      {/* Prompt Limit Upgrade Dialog */}
+      {/* Helicone Upgrade Dialog */}
       <UpgradeProDialog
-        open={promptLimitUpgradeDialogOpen}
-        onOpenChange={setPromptLimitUpgradeDialogOpen}
-        featureName="Prompts"
-        limitMessage={promptLimitUpgradeMessage}
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        featureName={editorMode === "fromPlayground" ? "Playground" : "Prompts"}
+        limitMessage={
+          !withinPromptsLimit
+            ? promptsLimitUpgradeMessage
+            : editorMode === "fromPlayground" && !withinPlaygroundRunsLimit
+            ? playgroundRunsUpgradeMessage
+            : promptRunsUpgradeMessage
+        }
       />
     </main>
   );

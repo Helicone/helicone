@@ -65,6 +65,13 @@ const useSessions = ({
     refetch,
     isLoading,
     isRefetching,
+    hasSessions: useQuery({
+      queryKey: ["has-sessions", org?.currentOrg?.id],
+      queryFn: async () => {
+        const jawnClient = getJawnClient(org?.currentOrg?.id);
+        return await jawnClient.GET("/v1/session/has-session");
+      },
+    }),
   };
 };
 
