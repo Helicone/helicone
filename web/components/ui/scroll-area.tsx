@@ -8,6 +8,7 @@ const ScrollArea = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
     showBottomGradient?: boolean;
     orientation?: "vertical" | "horizontal" | "both";
+    type?: "hover" | "scroll" | "always" | "auto";
   }
 >(
   (
@@ -16,6 +17,7 @@ const ScrollArea = React.forwardRef<
       children,
       showBottomGradient = false,
       orientation = "vertical",
+      type = "hover",
       ...props
     },
     ref
@@ -41,6 +43,7 @@ const ScrollArea = React.forwardRef<
       <ScrollAreaPrimitive.Root
         ref={ref}
         className={cn("relative overflow-hidden", className)}
+        type={type}
         {...props}
       >
         <ScrollAreaPrimitive.Viewport
