@@ -2,7 +2,6 @@ import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import React, { useMemo, useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";
-import ThemedModal from "../../../../shared/themed/themedModal";
 import { ChatContent } from "./ChatContent";
 import { ChatTopBar, ChatTopBarProps, PROMPT_MODES } from "./chatTopBar";
 
@@ -86,7 +85,8 @@ export const Chat: React.FC<ChatProps> = ({
           className
         )}
       >
-        <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        {/* TODO: REMOVE FOR UNIVERSAL */}
+        <div className="w-full border border-border divide-y divide-gray-300 dark:divide-gray-700 h-full">
           {!hideTopBar && (
             <ChatTopBar
               allExpanded={allExpanded}
@@ -115,25 +115,6 @@ export const Chat: React.FC<ChatProps> = ({
           />
         </div>
       </div>
-      <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
-          <>
-            <ChatTopBar {...chatTopBarProps} isModal={true} />
-            <ChatContent
-              mode={mode}
-              mappedRequest={mappedRequest}
-              messagesToRender={messagesToRender}
-              showAllMessages={showAllMessages}
-              expandedChildren={expandedChildren}
-              setExpandedChildren={setExpandedChildren}
-              selectedProperties={selectedProperties}
-              isHeliconeTemplate={isHeliconeTemplate}
-              autoInputs={autoInputs}
-              setShowAllMessages={setShowAllMessages}
-            />
-          </>
-        </div>
-      </ThemedModal>
     </>
   );
 };

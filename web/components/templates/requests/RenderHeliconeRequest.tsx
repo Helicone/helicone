@@ -47,11 +47,7 @@ export const RenderMappedRequest = (
       mapperContent.heliconeMetadata.status.code >= 200 &&
       mapperContent.heliconeMetadata.status.code < 300
     ) {
-      return (
-        <>
-          <Chat mappedRequest={mapperContent} {...props} />
-        </>
-      );
+      return <Chat mappedRequest={mapperContent} {...props} />;
     } else {
       return <ErrorMessage mapperContent={mapperContent} />;
     }
