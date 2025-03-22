@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { XSmall } from "@/components/ui/typography";
 import Link from "next/link";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   LuCheck,
   LuExternalLink,
@@ -34,7 +34,7 @@ const SPECIAL_PROPERTY_KEYS: Record<
   },
 };
 
-interface ScrollableRowProps {
+interface ScrollableBadgesProps {
   title?: string;
   items: { key: string; value: string | number }[];
   onAdd: (key: string, value: string) => Promise<void>;
@@ -47,7 +47,7 @@ interface ScrollableRowProps {
     text: string;
   };
 }
-export default function ScrollableRow({
+export default function ScrollableBadges({
   title,
   items,
   onAdd,
@@ -56,11 +56,31 @@ export default function ScrollableRow({
   placeholder,
   tooltipText,
   tooltipLink,
-}: ScrollableRowProps) {
+}: ScrollableBadgesProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
   const keyInputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const scrollToEnd = () => {
+    if (scrollAreaRef.current) {
+      const scrollArea = scrollAreaRef.current;
+      scrollArea.scrollLeft = scrollArea.scrollWidth;
+    }
+  };
+
+  // Scroll to end when add button is clicked
+  useEffect(() => {
+    if (isAdding) {
+      scrollToEnd();
+    }
+  }, [isAdding]);
+
+  // Scroll to end when items change (new item added)
+  useEffect(() => {
+    scrollToEnd();
+  }, [items.length]);
 
   const handleAdd = async () => {
     if (!newKey || !newValue) return;
@@ -70,19 +90,6 @@ export default function ScrollableRow({
       setNewKey("");
       setNewValue("");
       setIsAdding(false);
-
-      //   // Scroll to the right after a short delay to allow for DOM update
-      //   setTimeout(() => {
-      //     const scrollContainer = scrollViewportRef.current?.closest(
-      //       "[data-radix-scroll-area-viewport]"
-      //     );
-      //     if (scrollContainer) {
-      //       (scrollContainer as HTMLElement).scrollTo({
-      //         left: (scrollContainer as HTMLElement).scrollWidth,
-      //         behavior: "smooth",
-      //       });
-      //     }
-      //   }, 100);
     } catch (error) {
       console.error("Error adding item:", error);
     }
@@ -109,20 +116,30 @@ export default function ScrollableRow({
         <XSmall className="font-medium text-secondary shrink-0">{title}</XSmall>
       )}
 
-      <div className="h-full w-full min-w-max relative overflow-x-auto">
-        <ScrollArea orientation="horizontal" className="h-full w-full">
-          <div className="w-full flex flex-row gap-2">
-            {items.length === 0 && placeholder && (
-              <div className="ml-3 text-xs text-muted-foreground/40">
+      <div className="h-full w-full relative overflow-x-auto">
+        <ScrollArea orientation="horizontal">
+          <div
+            ref={scrollAreaRef}
+            className="h-full w-full flex flex-row items-center gap-2"
+          >
+            {items.length === 0 && placeholder && !isAdding && (
+              <p className="h-6 flex items-center shrink-0 ml-3 text-xs text-muted-foreground/40">
                 {placeholder}
-              </div>
+              </p>
             )}
+
             {items.map((item, i) => (
               <ItemBadge key={i} item={item} isFirst={i === 0} />
             ))}
+
             {isAdding && (
-              <div className="flex flex-row gap-1 items-center shrink-0">
+              <div
+                className={`h-full flex flex-row gap-1 items-center shrink-0 ${
+                  items.length === 0 ? "ml-3" : ""
+                }`}
+              >
                 <Input
+                  variant="helicone"
                   ref={keyInputRef}
                   type="text"
                   value={newKey}
@@ -133,6 +150,7 @@ export default function ScrollableRow({
                   autoFocus
                 />
                 <Input
+                  variant="helicone"
                   type={valueType === "number" ? "number" : "text"}
                   value={newValue}
                   onChange={(e) => setNewValue(e.target.value)}
@@ -152,7 +170,8 @@ export default function ScrollableRow({
       </div>
 
       <TooltipProvider>
-        <Tooltip delayDuration={100}>
+        {/* Disabled when adding */}
+        <Tooltip delayDuration={100} open={!isAdding && undefined}>
           <TooltipTrigger asChild>
             <Button
               variant={"ghost"}
