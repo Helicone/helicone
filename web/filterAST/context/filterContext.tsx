@@ -54,27 +54,20 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     activeFilterId: filterStore.activeFilterId,
     hasUnsavedChanges: filterStore.hasUnsavedChanges,
     filter: filterStore.filter,
-    savedFilters: filterCrud.savedFilters,
-    updateFilter: async (filter) => {
-      await filterCrud.updateFilter.mutateAsync(filter);
-      filterStore.setHasUnsavedChanges(false);
+    updateFilterById: async (
+      filterId: string,
+      updates: Partial<StoreFilterType>
+    ) => {
+      await helpers.updateFilterById(filterId, updates);
     },
     autoSaveDelay: 1000,
+    filterName: filterStore.activeFilterName || "Untitled Filter",
   });
   // Initial URL hook
   useEffect(() => {
-    if (filterStore.initialFilterId && !filterStore.activeFilterId) {
-      const filterToLoad = filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterStore.initialFilterId
-      );
-
-      if (filterToLoad) {
-        helpers.loadFilterById(filterStore.initialFilterId);
-      }
-    }
     const newInitialFilterId = searchParams?.get("filter_id");
-    if (newInitialFilterId) {
-      filterStore.setInitialFilterId(newInitialFilterId);
+    if (!filterStore.alreadyLoadedOnce && newInitialFilterId) {
+      helpers.loadFilterById(newInitialFilterId);
     }
   }, [searchParams, filterStore, filterCrud]);
 

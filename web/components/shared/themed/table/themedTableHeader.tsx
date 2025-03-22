@@ -9,7 +9,6 @@ import { useEffect, useState, useRef } from "react";
 import { Result } from "../../../../lib/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { AdvancedFilters } from "../themedAdvancedFilters";
 import ThemedTimeFilter from "../themedTimeFilter";
 import ExportButton from "./exportButton";
 import ViewColumns from "./columns/viewColumns";
@@ -36,6 +35,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import FilterASTEditor from "@/filterAST/FilterASTEditor";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 interface ThemedTableHeaderProps<T> {
   rows?: T[];
@@ -86,6 +87,7 @@ interface ThemedTableHeaderProps<T> {
     count?: number;
     children?: React.ReactNode;
   };
+  showFilters?: boolean;
 }
 
 export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
@@ -102,34 +104,28 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     isDatasetsPage,
     search,
     selectedRows,
+    showFilters: showFiltersProp,
   } = props;
 
   const searchParams = useSearchParams();
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useLocalStorage("showFilters", false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Add state variables to manage the popover's open state and pin status
   const [isFiltersPopoverOpen, setIsFiltersPopoverOpen] = useState(false);
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const [isFiltersPinned, setIsFiltersPinned] = useLocalStorage(
+    "isFiltersPinned",
+    false
+  );
   const popoverContentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const displayFilters = window.sessionStorage.getItem("showFilters") || null;
-    setShowFilters(displayFilters ? JSON.parse(displayFilters) : false);
-  }, []);
 
   useEffect(() => {
     if (isSearchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [isSearchExpanded]);
-
-  const showFilterHandler = () => {
-    setShowFilters(!showFilters);
-    window.sessionStorage.setItem("showFilters", JSON.stringify(!showFilters));
-  };
 
   const getDefaultValue = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -166,7 +162,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
               <div />
             )}
             <div className="flex flex-row">
-              {advancedFilters && (
+              {(advancedFilters || showFiltersProp) && (
                 <Popover
                   open={isFiltersPopoverOpen}
                   onOpenChange={setIsFiltersPopoverOpen}
@@ -218,17 +214,7 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                     onInteractOutside={(e) => {}}
                     onClick={handlePopoverInteraction}
                   >
-                    <AdvancedFilters
-                      filterMap={advancedFilters.filterMap}
-                      filters={advancedFilters.filters}
-                      setAdvancedFilters={advancedFilters.setAdvancedFilters}
-                      searchPropertyFilters={
-                        advancedFilters.searchPropertyFilters
-                      }
-                      savedFilters={savedFilters?.filters}
-                      onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-                      layoutPage={savedFilters?.layoutPage ?? "requests"}
-                    />
+                    <FilterASTEditor onFilterChange={() => {}} />
                     <div className="flex justify-end ml-4">
                       <Button
                         variant="ghostLinear"
@@ -388,18 +374,10 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
           </div>
         </div>
 
-        {advancedFilters && showFilters && isFiltersPinned && (
+        {(advancedFilters || showFiltersProp) && isFiltersPinned && (
           <div className="flex justify-start min-w-[50rem] w-full mt-1">
             <div className="flex-1 rounded-lg">
-              <AdvancedFilters
-                filterMap={advancedFilters.filterMap}
-                filters={advancedFilters.filters}
-                setAdvancedFilters={advancedFilters.setAdvancedFilters}
-                searchPropertyFilters={advancedFilters.searchPropertyFilters}
-                savedFilters={savedFilters?.filters}
-                onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-                layoutPage={savedFilters?.layoutPage ?? "requests"}
-              />
+              <FilterASTEditor onFilterChange={() => {}} />
             </div>
             <Button
               variant="ghost"

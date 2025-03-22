@@ -8,8 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { P, Small } from "@/components/ui/typography";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { Small } from "@/components/ui/typography";
+import { Plus, PlusCircle, Trash2 } from "lucide-react";
 import FilterConditionNode from "./FilterConditionNode";
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 
@@ -23,7 +23,6 @@ interface FilterGroupNodeProps {
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
-
   isRoot = false,
 }) => {
   const filterStore = useFilterStore();
@@ -31,23 +30,13 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
-    // Use status as the default field (common and useful default)
-    const defaultField = "status";
-    const defaultFieldDef = filterDefinitions.find(
-      (def) => def.id === defaultField
-    );
-
-    // If status field is found, use its first operator, otherwise fallback to eq
-    const defaultOperator = defaultFieldDef?.operators[0] || "eq";
-
     filterStore.addFilterExpression(path, {
       type: "condition",
       field: {
-        column: defaultField,
-        subtype: defaultFieldDef?.subType,
+        column: "status",
       },
-      operator: defaultOperator,
-      value: "",
+      operator: "eq",
+      value: 200,
     });
   };
 
@@ -102,15 +91,21 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   };
 
   return (
-    <div className="p-3 border rounded-md bg-card">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+    <div
+      className={` rounded-md bg-white dark:bg-slate-950${
+        isRoot
+          ? "bg-transparent"
+          : " p-2  border border-slate-200 dark:border-slate-800 "
+      }`}
+    >
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-1.5">
           <Button
             variant="ghost"
-            size="sm_sleek"
+            size="xs"
             asPill
             onClick={handleToggleGroupOperator}
-            className={`min-w-[50px] px-3 py-0.5 text-xs font-medium ${
+            className={`min-w-[40px] px-2 py-0 h-5 text-[10px] flex items-center ${
               group.type === "and"
                 ? "bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 dark:bg-sky-900 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-800"
                 : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700"
@@ -118,49 +113,47 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           >
             {group.type === "and" ? "AND" : "OR"}
           </Button>
-          <Small className="text-muted-foreground">
+          <div className="text-[10px] bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-full px-2 h-5 flex items-center">
             {group.expressions.length}{" "}
             {group.expressions.length === 1 ? "condition" : "conditions"}
-          </Small>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {path.length === 0 ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <PlusCircle size={16} className="mr-1" />
-                  Add
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleAddGroup("and")}>
-                  Add AND Group
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddGroup("or")}>
-                  Add OR Group
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="secondary"
+              size="xs"
+              className="flex items-center gap-1"
+              onClick={() => handleAddGroup("and")}
+            >
+              <PlusCircle size={12} />
+              <span className="text-[10px] font-normal">Add Filter Group</span>
+            </Button>
           ) : undefined}
           {!isRoot && (
-            <Button variant="ghost" size="icon" onClick={handleRemove}>
-              <Trash2 size={16} className="text-muted-foreground" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRemove}
+              className="h-6 w-6"
+            >
+              <Trash2 size={12} className="text-muted-foreground" />
             </Button>
           )}
         </div>
       </div>
 
-      <div className="pl-4 space-y-2">
+      <div className={`space-y-1.5 ${isRoot ? "" : "pl-3"}`}>
         {group.expressions.length === 0 ? (
-          <P className="text-muted-foreground py-2">
+          <Small className="text-muted-foreground py-1.5 block">
             No conditions. Click &quot;Add&quot; to create one.
-          </P>
+          </Small>
         ) : (
           group.expressions.map((expr, index) => {
             const newPath = [...path, index];
             if (expr.type === "and" || expr.type === "or") {
               return (
-                <div key={`group-${index}`} className="mt-2">
+                <div key={`group-${index}`} className="mt-1.5">
                   <FilterGroupNode
                     group={expr as AndExpression | OrExpression}
                     path={newPath}
@@ -186,15 +179,15 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         )}
 
         {/* Quick add button - show at all levels */}
-        <div className="flex justify-center mt-1">
+        <div className="flex justify-start mt-1">
           <Button
-            variant="ghost"
-            size="sm_sleek"
+            variant="glass"
             onClick={handleAddCondition}
-            className="h-6 text-xs text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md px-2 py-1"
+            size="sm_sleek"
+            className="flex items-center gap-1"
           >
-            <PlusCircle size={12} className="mr-1.5" />
-            Add condition
+            <Plus size={10} />
+            <span className="text-[10px] font-normal">Add Condition</span>
           </Button>
         </div>
       </div>

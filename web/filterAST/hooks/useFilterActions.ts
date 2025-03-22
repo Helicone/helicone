@@ -10,21 +10,6 @@ export const useFilterActions = () => {
   const filterStore = useFilterStore();
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  // Create an empty default filter
-  const DEFAULT_FILTER: AndExpression = {
-    type: "and",
-    expressions: [
-      {
-        type: "condition",
-        field: {
-          column: "status",
-        },
-        operator: "eq",
-        value: "",
-      },
-    ],
-  };
-
   /**
    * Check if there are any active filters
    */
@@ -55,13 +40,6 @@ export const useFilterActions = () => {
 
     filterStore.setFilter(simpleFilter);
     return simpleFilter;
-  };
-
-  /**
-   * Clear the current filter
-   */
-  const clearFilter = () => {
-    filterStore.setFilter(DEFAULT_FILTER);
   };
 
   /**
@@ -108,12 +86,21 @@ export const useFilterActions = () => {
     return "Simple condition";
   };
 
+  /**
+   * Update the filter name
+   * @param name - The new name for the filter
+   */
+  const updateFilterName = (name: string) => {
+    filterStore.setActiveFilterName(name);
+  };
+
   return {
     saveDialogOpen,
     setSaveDialogOpen,
+    updateFilterName,
     hasActiveFilters,
     createSimpleFilter,
-    clearFilter,
+
     addTimestampCondition,
     getFilterDescription,
   };

@@ -345,8 +345,8 @@ export const TestFilterPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   {store.hasUnsavedChanges && (
-                    <div className="flex items-center text-muted-foreground bg-muted px-2 py-1 rounded-md text-xs">
-                      <Clock size={12} className="mr-1" />
+                    <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
+                      <Clock size={10} className="mr-1" />
                       Saving
                     </div>
                   )}
@@ -357,10 +357,10 @@ export const TestFilterPage: React.FC = () => {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="xs"
                         disabled={!store.activeFilterId}
                       >
-                        <Share2 size={16} className="mr-1" />
+                        <Share2 size={12} className="mr-1" />
                         Share
                       </Button>
                     </DialogTrigger>
@@ -386,18 +386,18 @@ export const TestFilterPage: React.FC = () => {
 
                   <Button
                     variant="default"
-                    size="sm"
+                    size="xs"
                     onClick={handleSaveFilter}
                     disabled={crud.isSaving}
                   >
                     {crud.isSaving ? (
                       <>
-                        <Clock size={16} className="mr-1 animate-spin" />
+                        <Clock size={12} className="mr-1 animate-spin" />
                         Saving...
                       </>
                     ) : (
                       <>
-                        <Save size={16} className="mr-1" />
+                        <Save size={12} className="mr-1" />
                         Save
                       </>
                     )}
@@ -406,11 +406,11 @@ export const TestFilterPage: React.FC = () => {
                   {store.activeFilterId && (
                     <Button
                       variant="destructive"
-                      size="sm"
+                      size="xs"
                       onClick={handleDeleteFilter}
                       disabled={crud.isDeleting}
                     >
-                      <Trash2 size={16} className="mr-1" />
+                      <Trash2 size={12} className="mr-1" />
                       Delete
                     </Button>
                   )}

@@ -8,11 +8,17 @@ export interface FilterState {
   // The ID of the currently active saved filter (if any)
   activeFilterId: string | null;
 
+  // Whether the filter has been loaded from the URL
+  alreadyLoadedOnce: boolean;
+
   // initial filter id
   initialFilterId: string | null;
 
   // Whether the filter has unsaved changes
   hasUnsavedChanges: boolean;
+
+  // The name of the currently active saved filter (if any)
+  activeFilterName: string | null;
 
   // Actions
   setFilter: (filter: FilterExpression | null) => void;
@@ -30,6 +36,16 @@ export interface FilterState {
   setActiveFilterId: (id: string | null) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearActiveFilter: () => void;
+  setActiveFilterName: (name: string | null) => void;
+  loadFilterContents: ({
+    filter,
+    filterId,
+    filterName,
+  }: {
+    filter: FilterExpression;
+    filterId: string;
+    filterName: string;
+  }) => void;
 }
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
@@ -37,6 +53,29 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
   activeFilterId: null,
   initialFilterId: null,
   hasUnsavedChanges: false,
+  activeFilterName: null,
+  alreadyLoadedOnce: false,
+
+  loadFilterContents: ({
+    filter,
+    filterId,
+    filterName,
+  }: {
+    filter: FilterExpression;
+    filterId: string;
+    filterName: string;
+  }) => {
+    set({
+      filter,
+      activeFilterId: filterId,
+      activeFilterName: filterName,
+      alreadyLoadedOnce: true,
+    });
+  },
+
+  setAlreadyLoadedOnce: () => {
+    set({ alreadyLoadedOnce: true });
+  },
 
   setInitialFilterId: (id: string | null) => {
     if (get().initialFilterId !== null) return;
@@ -189,6 +228,12 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
     set({
       activeFilterId: null,
       hasUnsavedChanges: false,
+      filter: null,
+      activeFilterName: "Untitled Filter",
     });
+  },
+
+  setActiveFilterName: (name) => {
+    set({ activeFilterName: name, hasUnsavedChanges: true });
   },
 }));

@@ -1,5 +1,3 @@
-// import { FilterNode } from "@/services/lib/filters/filterDefs";
-
 /**
  * Represents a record/row from the request_response_rmt table
  * Contains all the fields that can be filtered on
@@ -99,8 +97,8 @@ interface AllExpression extends BaseExpression {
  * Describes what field is being filtered and how
  */
 interface FieldSpec {
-  table?: string;
-  column: string;
+  table?: "request_response_rmt";
+  column: keyof RequestResponseRMT;
   subtype?: "property" | "score";
   valueMode?: "value" | "key";
   key?: string;
@@ -167,7 +165,7 @@ function condition(
     type: "condition",
     field: {
       table: "request_response_rmt",
-      column,
+      column: column as keyof RequestResponseRMT,
     },
     operator,
     value,
@@ -642,3 +640,9 @@ export type {
   AndExpression,
   OrExpression,
 };
+
+export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
+  "status",
+  "eq",
+  "200"
+);

@@ -19,6 +19,10 @@ const badgeVariants = cva(
           "border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md text-[11px] font-medium py-1 px-2 leading-tight",
         "helicone-sky":
           "h-5 border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)] rounded-md text-xs font-normal",
+        "helicone-orange":
+          "h-5 border-transparent bg-[hsl(var(--orange))] text-[hsl(var(--orange-foreground))] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)] rounded-md text-xs font-normal",
+        "helicone-secondary":
+          "h-5 border-transparent bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.06)] rounded-md text-xs font-normal",
         label:
           "border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-light hover:bg-[hsl(var(--primary))]/90 tracking-wide",
       },

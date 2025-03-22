@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -19,6 +20,7 @@ import {
 export type SearchableSelectOption = {
   label: string;
   value: string;
+  subType?: "property" | "score";
 };
 
 interface SearchableSelectProps {
@@ -53,6 +55,20 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return option ? option.label : value;
   };
 
+  // Group options by subType
+  const groupedOptions = useMemo(() => {
+    const regular = options.filter((opt) => !opt.subType);
+    const properties = options.filter((opt) => opt.subType === "property");
+    const scores = options.filter((opt) => opt.subType === "score");
+
+    return {
+      regular,
+      properties,
+      scores,
+      hasSubTypes: properties.length > 0 || scores.length > 0,
+    };
+  }, [options]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -60,39 +76,103 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(`justify-between w-[${width}]`, className)}
+          className={cn(
+            `justify-between w-[${width}] font-normal text-[10px]`,
+            className
+          )}
           disabled={disabled}
         >
           {getCurrentLabel()}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={`w-[${width}] p-0`}>
         <Command>
-          <CommandInput placeholder={searchPlaceholder} className="h-9" />
-          <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup>
-            <CommandList>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={(selectedValue) => {
-                    onValueChange(selectedValue);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandList>
-          </CommandGroup>
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="h-7 text-[10px]"
+          />
+          <CommandEmpty className="text-[10px]">{emptyMessage}</CommandEmpty>
+          <CommandList>
+            {/* Regular options */}
+            {groupedOptions.regular.length > 0 && (
+              <CommandGroup>
+                {groupedOptions.regular.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(selectedValue) => {
+                      onValueChange(selectedValue);
+                      setOpen(false);
+                    }}
+                    className="text-[10px]"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-3 w-3",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Separator if we have both regular options and subtypes */}
+            {groupedOptions.hasSubTypes &&
+              groupedOptions.regular.length > 0 && <CommandSeparator />}
+
+            {/* Property subtype options */}
+            {groupedOptions.properties.length > 0 && (
+              <CommandGroup heading="Properties">
+                {groupedOptions.properties.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(selectedValue) => {
+                      onValueChange(selectedValue);
+                      setOpen(false);
+                    }}
+                    className="text-[10px]"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-3 w-3",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Score subtype options */}
+            {groupedOptions.scores.length > 0 && (
+              <CommandGroup heading="Scores">
+                {groupedOptions.scores.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(selectedValue) => {
+                      onValueChange(selectedValue);
+                      setOpen(false);
+                    }}
+                    className="text-[10px]"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-3 w-3",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

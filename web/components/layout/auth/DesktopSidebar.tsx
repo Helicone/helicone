@@ -7,7 +7,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
 import { Rocket } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
@@ -41,17 +40,22 @@ const DesktopSidebar = ({
   sidebarRef,
 }: SidebarProps) => {
   const orgContext = useOrg();
-  const user = useUser();
-  const tier = orgContext?.currentOrg?.tier;
   const router = useRouter();
+
+  // Function to append filter_id to href if it exists
+  const getHrefWithFilter = (baseHref: string) => {
+    // if (filter_id) {
+    //   // Check if the URL already has query parameters
+    //   const hasQueryParams = baseHref.includes("?");
+    //   return `${baseHref}${hasQueryParams ? "&" : "?"}filter_id=${filter_id}`;
+    // }
+    return baseHref;
+  };
+
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
     false
   );
-
-  const shouldShowInfoBox = useMemo(() => {
-    return tier === "pro" || tier === "growth";
-  }, [tier]);
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
@@ -271,7 +275,7 @@ const DesktopSidebar = ({
                       className="w-full dark:text-slate-400"
                       size="sm_sleek"
                       onClick={() => {
-                        router.push("/enterprise/portal");
+                        router.push(getHrefWithFilter("/enterprise/portal"));
                         if (
                           orgContext.currentOrg?.organization_type ===
                             "customer" &&
@@ -316,7 +320,7 @@ const DesktopSidebar = ({
                           orgContext.allOrgs.forEach((org) => {
                             if (org.is_main_org === true) {
                               orgContext.setCurrentOrg(org.id);
-                              router.push("/onboarding");
+                              router.push(getHrefWithFilter("/onboarding"));
                             }
                           });
                         }}
