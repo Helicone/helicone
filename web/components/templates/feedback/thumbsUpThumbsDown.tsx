@@ -1,16 +1,10 @@
-import {
-  HandThumbUpIcon,
-  HandThumbDownIcon,
-} from "@heroicons/react/24/outline";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
-import { clsx } from "../../shared/clsx";
+import { LuThumbsDown, LuThumbsUp } from "react-icons/lu";
+
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import useNotification from "../../shared/notification/useNotification";
 import { updateRequestFeedback } from "../../../services/lib/requests";
-import { Row } from "../../layout/common/row";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
 
 const FeedbackButtons = ({
   requestId,
@@ -49,9 +43,11 @@ const FeedbackButtons = ({
   };
 
   return (
-    <Row className="items-center space-x-4">
+    <div className="flex flex-row items-center">
       {requestFeedback.rating}
-      <button
+      <Button
+        variant="ghost"
+        size="square_icon"
         onClick={() => {
           if (requestFeedback.rating === true) {
             return;
@@ -60,12 +56,14 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === true ? (
-          <HTUp className={clsx("h-5 w-5 text-green-500")} />
+          <LuThumbsUp className={clsx("h-4 w-4 text-foreground")} />
         ) : (
-          <HandThumbUpIcon className="h-5 w-5 text-green-500" />
+          <LuThumbsUp className="h-4 w-4 text-foreground fill-muted-foreground/40" />
         )}
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="square_icon"
         onClick={() => {
           if (requestFeedback.rating === false) {
             return;
@@ -74,12 +72,12 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === false ? (
-          <HTDown className={clsx("h-5 w-5 text-red-500")} />
+          <LuThumbsDown className={clsx("h-4 w-4 text-foreground")} />
         ) : (
-          <HandThumbDownIcon className="h-5 w-5 text-red-500" />
+          <LuThumbsDown className="h-4 w-4 text-foreground fill-muted-foreground/40" />
         )}
-      </button>
-    </Row>
+      </Button>
+    </div>
   );
 };
 
