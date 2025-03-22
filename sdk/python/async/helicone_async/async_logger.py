@@ -75,3 +75,4 @@ class HeliconeAsyncLogger:
             # Create a new exporter instance
             self.exporter.__init__(endpoint=self.base_url, headers={
                                    "Authorization": f"Bearer {self.api_key}"})
+            self._logging_enabled = True
