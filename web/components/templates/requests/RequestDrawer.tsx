@@ -18,7 +18,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { LuEllipsis, LuPanelRightClose, LuPlus } from "react-icons/lu";
 import { PiPlayBold } from "react-icons/pi";
 import {
-  addRequestLabel,
+  addRequestProperty,
   addRequestScore,
 } from "../../../services/lib/requests";
 import { useOrg } from "../../layout/org/organizationContext";
@@ -32,27 +32,12 @@ import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
 
 interface RequestDivProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  hasPrevious?: boolean;
-  hasNext?: boolean;
-  onPrevHandler?: () => void;
-  onNextHandler?: () => void;
+  onCollapse: () => void;
+  onNavigate?: (direction: "prev" | "next") => void;
   request?: MappedLLMRequest;
-  properties: string[];
 }
-
 function RequestDrawer(props: RequestDivProps) {
-  const {
-    open,
-    setOpen,
-    hasPrevious,
-    hasNext,
-    onPrevHandler,
-    onNextHandler,
-    request,
-    properties,
-  } = props;
+  const { onCollapse, onNavigate, request } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -61,53 +46,15 @@ function RequestDrawer(props: RequestDivProps) {
   const jawn = useJawnClient();
 
   const [showDetails, setShowDetails] = useState(false);
-  const [newDatasetModalOpen, setNewDatasetModalOpen] = useState(false);
+  const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
 
-  // Memoize derived states to reduce recalculations
-  const currentProperties = useMemo(() => {
-    if (!request || !properties.length) return [];
-
-    return properties
-      .filter(
-        (property) =>
-          request.heliconeMetadata.customProperties &&
-          request.heliconeMetadata.customProperties.hasOwnProperty(property)
-      )
-      .map((property) => ({
-        [property]: request.heliconeMetadata.customProperties![
-          property
-        ] as string,
-      }));
-  }, [request?.heliconeMetadata.customProperties, properties]);
-
-  const currentScores = useMemo(
-    () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
-    [request?.heliconeMetadata.scores]
-  );
-
+  // Prompt Data
   const promptId = useMemo(
     () =>
       request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
       null,
     [request?.heliconeMetadata.customProperties]
   );
-
-  // Use a more efficient handler that avoids re-creating functions
-  const setOpenHandler = useCallback(
-    (divOpen: boolean) => {
-      setOpen(divOpen);
-      if (!divOpen) {
-        const { pathname, query } = router;
-        if (router.query.requestId) {
-          delete router.query.requestId;
-          router.replace({ pathname, query }, undefined, { shallow: true });
-        }
-      }
-    },
-    [router, setOpen]
-  );
-
-  // Prompt data query
   const promptDataQuery = useQuery({
     queryKey: ["prompt", promptId, org?.currentOrg?.id],
     enabled: !!promptId && !!org?.currentOrg?.id,
@@ -128,26 +75,17 @@ function RequestDrawer(props: RequestDivProps) {
     },
   });
 
-  // Keyboard event handler
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpenHandler(false);
-      } else if (event.key === "ArrowUp" && onPrevHandler) {
-        event.preventDefault();
-        onPrevHandler();
-      } else if (event.key === "ArrowDown" && onNextHandler) {
-        event.preventDefault();
-        onNextHandler();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onNextHandler, onPrevHandler, setOpenHandler]);
+  // Get current request Properties and Scores
+  const currentProperties = useMemo(
+    () =>
+      (request?.heliconeMetadata.customProperties as Record<string, string>) ||
+      {},
+    [request?.heliconeMetadata.customProperties]
+  );
+  const currentScores = useMemo(
+    () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
+    [request?.heliconeMetadata.scores]
+  );
 
   // Handlers for adding properties and scores
   const onAddPropertyHandler = useCallback(
@@ -158,7 +96,7 @@ function RequestDrawer(props: RequestDivProps) {
       }
 
       try {
-        const res = await addRequestLabel(
+        const res = await addRequestProperty(
           request.id,
           org.currentOrg.id,
           key,
@@ -177,7 +115,6 @@ function RequestDrawer(props: RequestDivProps) {
     },
     [org?.currentOrg?.id, request, setNotification]
   );
-
   const onAddScoreHandler = useCallback(
     async (key: string, value: string) => {
       if (!org?.currentOrg?.id || !request) {
@@ -251,17 +188,35 @@ function RequestDrawer(props: RequestDivProps) {
     }
   }, [promptDataQuery.data?.id, request, router]);
 
-  if (!request) {
-    return null;
-  }
+  // Update keyboard event handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCollapse();
+      } else if (event.key === "ArrowUp" && onNavigate) {
+        event.preventDefault();
+        onNavigate("prev");
+      } else if (event.key === "ArrowDown" && onNavigate) {
+        event.preventDefault();
+        onNavigate("next");
+      }
+    };
 
-  if (!open) {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCollapse, onNavigate]);
+
+  if (!request) {
     return null;
   }
 
   return (
     <div className="w-full h-full min-h-full flex flex-col">
-      <ScrollArea orientation="vertical" className="h-full w-full bg-white">
+      <ScrollArea
+        orientation="vertical"
+        className="h-full w-full bg-white dark:bg-black"
+      >
         {/* Header */}
         <div className="h-11 shrink-0 w-full flex flex-row justify-between items-center gap-2 px-3 border-b border-border glass top-0 sticky z-[1]">
           {/* Left Side */}
@@ -271,7 +226,7 @@ function RequestDrawer(props: RequestDivProps) {
               variant={"none"}
               size={"square_icon"}
               className="w-fit"
-              onClick={() => setOpenHandler(false)}
+              onClick={onCollapse}
             >
               <LuPanelRightClose className="w-4 h-4" />
             </Button>
@@ -336,9 +291,9 @@ function RequestDrawer(props: RequestDivProps) {
         <div className="w-full flex flex-col gap-2 bg-slate-50 dark:bg-slate-950">
           {/* Properties */}
           <ScrollableBadges
-            items={currentProperties.map((prop) => ({
-              key: Object.keys(prop)[0],
-              value: prop[Object.keys(prop)[0]],
+            items={Object.entries(currentProperties).map(([key, value]) => ({
+              key,
+              value: value as string,
             }))}
             onAdd={onAddPropertyHandler}
             placeholder="No Properties"
@@ -392,7 +347,7 @@ function RequestDrawer(props: RequestDivProps) {
               variant="outline"
               size="sm"
               className="flex flex-row items-center gap-1.5"
-              onClick={() => setNewDatasetModalOpen(true)}
+              onClick={() => setShowNewDatasetModal(true)}
             >
               <LuPlus className="h-4 w-4" />
               Dataset
@@ -409,10 +364,10 @@ function RequestDrawer(props: RequestDivProps) {
       </div>
 
       {/* Floating Elements */}
-      <ThemedModal open={newDatasetModalOpen} setOpen={setNewDatasetModalOpen}>
+      <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
         <NewDataset
           request_ids={[request.id]}
-          onComplete={() => setNewDatasetModalOpen(false)}
+          onComplete={() => setShowNewDatasetModal(false)}
         />
       </ThemedModal>
     </div>
