@@ -18,7 +18,7 @@ export const updateRequestFeedback = async (
   ).response;
 };
 
-export const addRequestLabel = async (
+export const addRequestProperty = async (
   requestId: string,
   orgId: string,
   key: string,
