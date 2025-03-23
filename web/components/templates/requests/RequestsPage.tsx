@@ -1,5 +1,3 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
-
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
@@ -21,9 +19,10 @@ import {
 } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { Popover } from "@headlessui/react";
-import { PinIcon } from "lucide-react";
+import { PinIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LuPlus } from "react-icons/lu";
 import { PiFunnelBold } from "react-icons/pi";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
@@ -62,8 +61,7 @@ import {
   getMockRequestCount,
   getMockRequests,
 } from "./mockRequestsData";
-import RequestCard from "./requestCard";
-import RequestDiv from "./requestDiv";
+import RequestDrawer from "./RequestDrawer";
 import RequestsEmptyState from "./RequestsEmptyState";
 import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
@@ -171,13 +169,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     organizationLayoutAvailable,
   } = props;
   const initialLoadRef = useRef(true);
-  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
   const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
   const [currFilter, setCurrFilter] = useState(
     searchParams.get("filter") ?? null
   );
+  const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
+  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
 
   // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
@@ -190,7 +189,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [open, setOpen] = useState(false);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const [selectedData, setSelectedData] = useState<
@@ -203,6 +201,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const [isFiltersPinned, setIsFiltersPinned] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const popoverContentRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<any>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -210,27 +209,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  const encodeFilters = (filters: UIFilterRowTree): string => {
-    const encode = (node: UIFilterRowTree): any => {
-      if (isFilterRowNode(node)) {
-        return {
-          type: "node",
-          operator: node.operator,
-          rows: node.rows.map(encode),
-        };
-      } else {
-        return {
-          type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
-        };
-      }
-    };
-
-    return JSON.stringify(encode(filters));
-  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -295,7 +273,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const timeRange = useMemo(getTimeRange, []);
+  const timeRange = useMemo(getTimeRange, [searchParams]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -370,9 +348,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           initialRequest.data.data as HeliconeRequest
         )
       );
-      setOpen(true);
+      drawerRef.current?.expand(); // Expand the drawer
+      drawerRef.current?.resize(drawerSize);
     }
-  }, [initialRequest, selectedData]);
+  }, [initialRequest, selectedData, drawerSize]);
 
   //convert this using useCallback
 
@@ -442,7 +421,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters]);
+  }, [filterMap, getAdvancedFilters, isDataLoading]);
 
   // TODO
   useEffect(() => {
@@ -638,21 +617,34 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     } else {
       setSelectedDataIndex(index);
       setSelectedData(row);
-      setOpen(true);
+      drawerRef.current?.expand(); // Expand the drawer
       searchParams.set("requestId", row.heliconeMetadata.requestId);
     }
   };
 
-  useEffect(() => {
-    if (searchParams.get("requestId")) {
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
-  }, [searchParams]);
-
   const onSetAdvancedFiltersHandler = useCallback(
     (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      const encodeFilters = (filters: UIFilterRowTree): string => {
+        const encode = (node: UIFilterRowTree): any => {
+          if (isFilterRowNode(node)) {
+            return {
+              type: "node",
+              operator: node.operator,
+              rows: node.rows.map(encode),
+            };
+          } else {
+            return {
+              type: "leaf",
+              filter: `${filterMap[node.filterMapIdx].label}:${
+                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+              }:${encodeURIComponent(node.value)}`,
+            };
+          }
+        };
+
+        return JSON.stringify(encode(filters));
+      };
+
       setAdvancedFilters(filters);
       if (
         layoutFilterId === null ||
@@ -664,7 +656,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         searchParams.set("filters", currentAdvancedFilters);
       }
     },
-    [searchParams]
+    [searchParams, filterMap]
   );
 
   const {
@@ -881,9 +873,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           ) : (
             <ThemedTable
               id="requests-table"
-              highlightedIds={
-                selectedData && open ? [selectedData.id] : selectedIds
-              }
+              highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
               defaultColumns={columnsWithProperties}
@@ -947,9 +937,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   : undefined
               }
               onRowSelect={onRowSelectHandler}
-              makeCard={(row: MappedLLMRequest) => {
-                return <RequestCard request={row} properties={properties} />;
-              }}
               makeRow={{
                 properties: properties,
               }}
@@ -991,7 +978,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                         setModalOpen(true);
                       }}
                       icon={
-                        <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                        <LuPlus className="h-5 w-5 text-slate-900 dark:text-slate-100" />
                       }
                       text="Add to dataset"
                     />
@@ -1005,40 +992,48 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         <ResizableHandle />
 
         {/* Request Drawer */}
-        <ResizablePanel defaultSize={50} minSize={33} className="h-full w-full">
-          <RequestDiv
-            open={open}
-            setOpen={setOpen}
+        <ResizablePanel
+          ref={drawerRef}
+          minSize={33}
+          defaultSize={0}
+          onResize={(size) => {
+            if (size > 0) {
+              setDrawerSize(size);
+            }
+          }}
+          onExpand={() => {
+            drawerRef.current?.resize(drawerSize);
+          }}
+          collapsible={true}
+          className="h-full w-full"
+        >
+          <RequestDrawer
             request={selectedData}
-            properties={properties}
-            hasPrevious={
-              selectedDataIndex !== undefined && selectedDataIndex > 0
-            }
-            hasNext={
-              selectedDataIndex !== undefined &&
-              selectedDataIndex < requests.length - 1
-            }
-            onPrevHandler={() => {
-              if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
-                setSelectedDataIndex(selectedDataIndex - 1);
-                setSelectedData(requests[selectedDataIndex - 1]);
-                searchParams.set(
-                  "requestId",
-                  requests[selectedDataIndex - 1].id
-                );
-              }
+            onCollapse={() => {
+              drawerRef.current?.collapse();
             }}
-            onNextHandler={() => {
-              if (
-                selectedDataIndex !== undefined &&
-                selectedDataIndex < requests.length - 1
-              ) {
-                setSelectedDataIndex(selectedDataIndex + 1);
-                setSelectedData(requests[selectedDataIndex + 1]);
-                searchParams.set(
-                  "requestId",
-                  requests[selectedDataIndex + 1].id
-                );
+            onNavigate={(direction) => {
+              if (direction === "prev") {
+                if (selectedDataIndex !== undefined && selectedDataIndex > 0) {
+                  setSelectedDataIndex(selectedDataIndex - 1);
+                  setSelectedData(requests[selectedDataIndex - 1]);
+                  searchParams.set(
+                    "requestId",
+                    requests[selectedDataIndex - 1].id
+                  );
+                }
+              } else if (direction === "next") {
+                if (
+                  selectedDataIndex !== undefined &&
+                  selectedDataIndex < requests.length - 1
+                ) {
+                  setSelectedDataIndex(selectedDataIndex + 1);
+                  setSelectedData(requests[selectedDataIndex + 1]);
+                  searchParams.set(
+                    "requestId",
+                    requests[selectedDataIndex + 1].id
+                  );
+                }
               }
             }}
           />
