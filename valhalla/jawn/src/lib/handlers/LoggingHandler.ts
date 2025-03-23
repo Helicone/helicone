@@ -82,7 +82,9 @@ export class LoggingHandler extends AbstractLogHandler {
     };
   }
 
-  async handle(context: HandlerContext): PromiseGenericResult<string> {
+  async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     // Perform all mappings first and check for failures before updating the batch payload
     try {
       const requestMapped = this.mapRequest(context);
@@ -153,7 +155,7 @@ export class LoggingHandler extends AbstractLogHandler {
         sanitizedRequestResponseVersionedCHMapped
       );
 
-      return await super.handle(context);
+      return await super.handleNext(context);
     } catch (error: any) {
       return err(
         `Failed to map data: ${error.message}, Context: ${this.constructor.name}`
