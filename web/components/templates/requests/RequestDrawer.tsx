@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { P } from "@/components/ui/typography";
+import { Muted, P, Small } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
@@ -15,7 +15,12 @@ import { useQuery } from "@tanstack/react-query";
 import { FlaskConicalIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { LuEllipsis, LuPanelRightClose, LuPlus } from "react-icons/lu";
+import {
+  LuChevronDown,
+  LuChevronUp,
+  LuPanelRightClose,
+  LuPlus,
+} from "react-icons/lu";
 import { PiPlayBold } from "react-icons/pi";
 import {
   addRequestProperty,
@@ -25,6 +30,7 @@ import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
+import { Badge } from "../../ui/badge";
 import NewDataset from "../datasets/NewDataset";
 import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
@@ -75,6 +81,34 @@ function RequestDrawer(props: RequestDivProps) {
     },
   });
 
+  /* -------------------------------------------------------------------------- */
+  /*                                    MEMOS                                   */
+  /* -------------------------------------------------------------------------- */
+  const isChatRequest = useMemo(
+    () =>
+      request?._type === "openai-chat" ||
+      request?._type === "anthropic-chat" ||
+      request?._type === "gemini-chat",
+    [request]
+  );
+
+  // TODO: Maybe these go in the Chat component?
+  const requestParameters = useMemo(() => {
+    const requestBody = request?.schema.request;
+    return {
+      max_tokens: requestBody?.max_tokens ?? undefined,
+      temperature: requestBody?.temperature ?? undefined,
+      top_p: requestBody?.top_p ?? undefined,
+      seed: requestBody?.seed ?? undefined,
+      stream: requestBody?.stream ?? undefined,
+      presence_penalty: requestBody?.presence_penalty ?? undefined,
+      frequency_penalty: requestBody?.frequency_penalty ?? undefined,
+      stop: requestBody?.stop ?? undefined,
+      reasoning_effort: requestBody?.reasoning_effort ?? undefined,
+      tools: requestBody?.tools?.map((tool) => tool.name) ?? undefined,
+    };
+  }, [request]);
+
   // Get current request Properties and Scores
   const currentProperties = useMemo(
     () =>
@@ -86,7 +120,6 @@ function RequestDrawer(props: RequestDivProps) {
     () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
     [request?.heliconeMetadata.scores]
   );
-
   // Handlers for adding properties and scores
   const onAddPropertyHandler = useCallback(
     async (key: string, value: string) => {
@@ -218,63 +251,195 @@ function RequestDrawer(props: RequestDivProps) {
         className="h-full w-full bg-white dark:bg-black"
       >
         {/* Header */}
-        <div className="h-11 shrink-0 w-full flex flex-row justify-between items-center gap-2 px-3 border-b border-border glass top-0 sticky z-[1]">
-          {/* Left Side */}
-          <div className="flex flex-row items-center gap-3">
-            {/* Hide Drawer */}
-            <Button
-              variant={"none"}
-              size={"square_icon"}
-              className="w-fit"
-              onClick={onCollapse}
-            >
-              <LuPanelRightClose className="w-4 h-4" />
-            </Button>
-            {/* Model Name */}
-            <P className="font-medium text-secondary text-nowrap">
-              {request.model}
-            </P>
-          </div>
-
-          {/* Right Side */}
-          <div className="flex flex-row items-center gap-2">
-            {/* Duration Badge */}
-            <div className="px-2 py-1 bg-slate-100 rounded-lg text-xs">
-              {Number(request.heliconeMetadata.latency) / 1000}ms
+        <div className="h-full w-full flex flex-col gap-3 px-3 border-b border-border bg-slate-50 dark:bg-slate-950 top-0 sticky z-[1]">
+          {/* Top Row */}
+          <div className="h-11 w-full shrink-0 flex flex-row justify-between items-center gap-2">
+            {/* Left Side */}
+            <div className="flex flex-row items-center gap-3">
+              {/* Hide Drawer */}
+              <Button
+                variant={"none"}
+                size={"square_icon"}
+                className="w-fit"
+                onClick={onCollapse}
+              >
+                <LuPanelRightClose className="w-4 h-4" />
+              </Button>
+              {/* Model Name */}
+              <P className="font-medium text-secondary text-nowrap">
+                {request.model}
+              </P>
             </div>
-            {/* Cost Badge */}
-            <div className="px-2 py-1 bg-slate-100 rounded-lg text-xs">
-              ${formatNumber(request.heliconeMetadata.cost || 0)}
-            </div>
-            {/* Status Badge */}
-            <StatusBadge
-              statusType={request.heliconeMetadata.status.statusType}
-              errorCode={request.heliconeMetadata.status.code}
-            />
 
-            {/* Show more Parameters Button */}
-            <TooltipProvider>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    size={"square_icon"}
-                    asPill
-                    onClick={() => setShowDetails(!showDetails)}
-                  >
-                    <LuEllipsis className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">
-                  {showDetails ? "Hide Details" : "Show More"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {/* Right Side */}
+            <div className="flex flex-row items-center gap-2">
+              {/* Duration Badge */}
+              <Badge variant={"secondary"} asPill={false}>
+                {Number(request.heliconeMetadata.latency) / 1000}s
+              </Badge>
+              {/* Cost Badge */}
+              <Badge variant={"secondary"} asPill={false}>
+                ${formatNumber(request.heliconeMetadata.cost || 0)}
+              </Badge>
+              {/* Status Badge */}
+              <StatusBadge
+                statusType={request.heliconeMetadata.status.statusType}
+                errorCode={request.heliconeMetadata.status.code}
+              />
+
+              {/* Show more Parameters Button */}
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"square_icon"}
+                      asPill
+                      onClick={() => setShowDetails(!showDetails)}
+                    >
+                      {showDetails ? (
+                        <LuChevronUp className="w-4 h-4" />
+                      ) : (
+                        <LuChevronDown className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {showDetails ? "Hide Details" : "Show Details"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           {/* Expandable Details Section */}
           {showDetails && (
-            <div className="flex flex-col gap-6 p-4 border-t border-border"></div>
+            <div className="h-full w-full flex flex-col gap-3 pb-3">
+              <div className="flex flex-row gap-6">
+                {/* Request Information */}
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Provider</Muted>
+                      <Small className="text-right">
+                        {request.heliconeMetadata.provider || "Unknown"}
+                      </Small>
+                    </div>
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Created At</Muted>
+                      <Small className="text-right">
+                        {new Date(
+                          request.heliconeMetadata.createdAt
+                        ).toLocaleString()}
+                      </Small>
+                    </div>
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Request ID</Muted>
+                      <Small className="text-right">{request.id}</Small>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Token Information */}
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Input Tokens</Muted>
+                      <Small>
+                        {request.heliconeMetadata.promptTokens || 0}
+                      </Small>
+                    </div>
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Output Tokens</Muted>
+                      <Small>
+                        {request.heliconeMetadata.completionTokens || 0}
+                      </Small>
+                    </div>
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <Muted>Total Tokens</Muted>
+                      <Small>{request.heliconeMetadata.totalTokens || 0}</Small>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Request Parameters */}
+                {Object.values(requestParameters).some(
+                  (value) => value !== undefined
+                ) && (
+                  <div className="flex flex-col gap-2 flex-1">
+                    {requestParameters.temperature !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Temperature</Muted>
+                        <Small>{requestParameters.temperature}</Small>
+                      </div>
+                    )}
+                    {requestParameters.max_tokens !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Max Tokens</Muted>
+                        <Small>{requestParameters.max_tokens}</Small>
+                      </div>
+                    )}
+                    {requestParameters.top_p !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Top P</Muted>
+                        <Small>{requestParameters.top_p}</Small>
+                      </div>
+                    )}
+                    {requestParameters.seed !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Seed</Muted>
+                        <Small>{requestParameters.seed}</Small>
+                      </div>
+                    )}
+                    {requestParameters.presence_penalty !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Presence Penalty</Muted>
+                        <Small>{requestParameters.presence_penalty}</Small>
+                      </div>
+                    )}
+                    {requestParameters.frequency_penalty !== undefined && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Frequency Penalty</Muted>
+                        <Small>{requestParameters.frequency_penalty}</Small>
+                      </div>
+                    )}
+                    {requestParameters.reasoning_effort && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Reasoning Effort</Muted>
+                        <Small>{requestParameters.reasoning_effort}</Small>
+                      </div>
+                    )}
+                    {requestParameters.stream && (
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <Muted>Stream</Muted>
+                        <Small>
+                          {requestParameters.stream ? "true" : "false"}
+                        </Small>
+                      </div>
+                    )}
+                    {requestParameters.tools &&
+                      requestParameters.tools.length > 0 && (
+                        <div className="flex flex-row gap-2 items-center justify-between col-span-2">
+                          <Muted>Tools</Muted>
+                          <Small className="text-right">
+                            {requestParameters.tools.join(", ")}
+                          </Small>
+                        </div>
+                      )}
+                    {requestParameters.stop && (
+                      <div className="flex flex-row gap-2 items-center justify-between col-span-2">
+                        <Muted>Stop Sequences</Muted>
+                        <Small className="text-right">
+                          {Array.isArray(requestParameters.stop)
+                            ? requestParameters.stop.join(", ")
+                            : requestParameters.stop}
+                        </Small>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
@@ -323,25 +488,29 @@ function RequestDrawer(props: RequestDivProps) {
         {/* Actions Row */}
         <div className="flex flex-row justify-between items-center gap-2 px-3">
           <div className="flex flex-row items-center gap-2">
-            <Button
-              variant="action"
-              size="sm"
-              className="flex flex-row items-center gap-1.5"
-              onClick={handleTestPrompt}
-            >
-              <PiPlayBold className="h-4 w-4" />
-              Test Prompt
-            </Button>
+            {isChatRequest && (
+              <Button
+                variant="action"
+                size="sm"
+                className="flex flex-row items-center gap-1.5"
+                onClick={handleTestPrompt}
+              >
+                <PiPlayBold className="h-4 w-4" />
+                Test Prompt
+              </Button>
+            )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex flex-row items-center gap-1.5"
-              onClick={handleCreateExperiment}
-            >
-              <FlaskConicalIcon className="h-4 w-4" />
-              Experiment
-            </Button>
+            {isChatRequest && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex flex-row items-center gap-1.5"
+                onClick={handleCreateExperiment}
+              >
+                <FlaskConicalIcon className="h-4 w-4" />
+                Experiment
+              </Button>
+            )}
 
             <Button
               variant="outline"
