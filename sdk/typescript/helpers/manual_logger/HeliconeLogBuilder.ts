@@ -180,6 +180,7 @@ export class HeliconeLogBuilder {
       });
     } catch (error) {
       console.error("Error sending log to Helicone:", error);
+      throw error;
     }
   }
 }
