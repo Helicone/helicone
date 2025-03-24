@@ -1,5 +1,137 @@
 import { FilterUIDefinition } from "./types";
 
+export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
+  {
+    id: "user_id",
+    label: "User ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "active_for",
+    label: "Active For (days)",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "first_active",
+    label: "First Active",
+    type: "datetime",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "last_active",
+    label: "Last Active",
+    type: "datetime",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "total_requests",
+    label: "Total Requests",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "average_requests_per_day_active",
+    label: "Avg Requests per Day",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "average_tokens_per_request",
+    label: "Avg Tokens per Request",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "total_completion_tokens",
+    label: "Total Completion Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "total_prompt_token",
+    label: "Total Prompt Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+  {
+    id: "cost",
+    label: "Total Cost",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "user_metrics",
+    subType: "user",
+  },
+];
+
+export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
+  {
+    id: "session_id",
+    label: "Session ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "total_tokens",
+    label: "Total Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "total_requests",
+    label: "Total Requests",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "total_completion_tokens",
+    label: "Total Completion Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+  },
+  {
+    id: "total_prompt_token",
+    label: "Total Prompt Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "cost",
+    label: "Total Cost",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+  },
+];
+
 // Static definitions that don't need to be fetched
 export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   // String fields
@@ -8,6 +140,7 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     label: "Response ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
 
   {
@@ -15,42 +148,49 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     label: "Request ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
   {
     id: "user_id",
     label: "User ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
   {
     id: "organization_id",
     label: "Organization ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
   {
     id: "proxy_key_id",
     label: "Proxy Key ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
   {
     id: "target_url",
     label: "Target URL",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "request_response_rmt",
   },
   {
     id: "request_body",
     label: "Request Body",
     type: "string",
     operators: ["contains", "like", "ilike"],
+    table: "request_response_rmt",
   },
   {
     id: "response_body",
     label: "Response Body",
     type: "string",
     operators: ["contains", "like", "ilike"],
+    table: "request_response_rmt",
   },
 
   // Number fields
@@ -67,42 +207,49 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
       { label: "Not Found (404)", value: 404 },
       { label: "Server Error (500)", value: 500 },
     ],
+    table: "request_response_rmt",
   },
   {
     id: "latency",
     label: "Latency (ms)",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "completion_tokens",
     label: "Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "prompt_tokens",
     label: "Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "prompt_cache_write_tokens",
     label: "Prompt Cache Write Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "prompt_cache_read_tokens",
     label: "Prompt Cache Read Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "time_to_first_token",
     label: "Time to First Token (ms)",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
 
   // Boolean fields
@@ -115,6 +262,7 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
       { label: "Yes", value: true },
       { label: "No", value: false },
     ],
+    table: "request_response_rmt",
   },
 
   // Datetime fields
@@ -123,29 +271,34 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     label: "Response Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "request_created_at",
     label: "Request Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "updated_at",
     label: "Updated At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "scores",
     label: "Scores",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
   },
   {
     id: "assets",
     label: "Assets",
     type: "string",
     operators: ["contains", "in"],
+    table: "request_response_rmt",
   },
 ];

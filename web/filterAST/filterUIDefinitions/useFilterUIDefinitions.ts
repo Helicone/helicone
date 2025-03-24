@@ -1,11 +1,15 @@
 import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FilterUIDefinition } from "./types";
-import { STATIC_FILTER_DEFINITIONS } from "./staticDefinitions";
+import {
+  STATIC_FILTER_DEFINITIONS,
+  STATIC_USER_VIEW_DEFINITIONS,
+  STATIC_SESSIONS_VIEW_DEFINITIONS,
+} from "./staticDefinitions";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
-
+import { useRouter } from "next/router";
 /**
  * Hook to fetch and combine static and dynamic filter UI definitions
  *
@@ -13,6 +17,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
  */
 export const useFilterUIDefinitions = () => {
   const org = useOrg();
+
   const properties = useQuery({
     queryKey: ["/v1/property/query", org?.currentOrg?.id],
     queryFn: async (query) => {
@@ -52,6 +57,7 @@ export const useFilterUIDefinitions = () => {
     },
   });
 
+  const router = useRouter();
   // Combine static definitions with dynamic ones
   const completeDefinitions = useMemo(() => {
     const dynamicDefinitions: FilterUIDefinition[] =
@@ -105,16 +111,30 @@ export const useFilterUIDefinitions = () => {
       (def) => !staticIdsToExclude.includes(def.id)
     );
 
-    return [
+    const definitions = [
       modelsDefinition,
       ...filteredStaticDefs,
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
-  }, [properties.data?.data, searchProperties]); // Include all dependencies
+
+    if (router.pathname.startsWith("/users")) {
+      definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
+    }
+    if (router.pathname.startsWith("/sessions")) {
+      definitions.push(...STATIC_SESSIONS_VIEW_DEFINITIONS);
+    }
+
+    return definitions;
+  }, [
+    properties.data?.data,
+    router.pathname,
+    searchProperties,
+    models.data?.data,
+  ]); // Include all dependencies
 
   return {
     filterDefinitions: completeDefinitions,
-    isLoading: properties.isLoading,
-    error: properties.error,
+    isLoading: properties.isLoading || models.isLoading,
+    error: properties.error || models.error,
   };
 };

@@ -1,5 +1,6 @@
 import { UserMetric } from "@/lib/api/users/UserMetric";
 
+export type FilterSubType = "property" | "score" | "sessions" | "user";
 /**
  * Represents a record/row from the request_response_rmt table
  * Contains all the fields that can be filtered on
@@ -33,7 +34,7 @@ interface RequestResponseRMT {
 }
 
 export interface Views {
-  user_metric: UserMetric;
+  user_metrics: UserMetric;
   session_metrics: {
     session_id: string;
     total_tokens: number;
@@ -111,7 +112,7 @@ interface AllExpression extends BaseExpression {
  * Describes what field is being filtered and how
  */
 interface BaseFieldSpec {
-  subtype?: "property" | "score";
+  subtype?: FilterSubType;
   valueMode?: "value" | "key";
   key?: string;
 }
@@ -122,8 +123,8 @@ type FieldSpec =
       column: keyof RequestResponseRMT;
     })
   | (BaseFieldSpec & {
-      table: "users_view";
-      column: keyof Views["user_metric"];
+      table: "user_metrics";
+      column: keyof Views["user_metrics"];
     })
   | (BaseFieldSpec & {
       table: "sessions_request_response_rmt";

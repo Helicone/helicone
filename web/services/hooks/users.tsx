@@ -14,6 +14,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { FilterExpression } from "@/filterAST/filterAst";
 import { toFilterNode } from "@/filterAST/toFilterNode";
+import { UserMetric } from "@/lib/api/users/UserMetric";
 
 const useUserId = (userId: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -44,7 +45,7 @@ const useUserId = (userId: string) => {
           },
           body: JSON.stringify({
             filter: {
-              users_view: {
+              user_metrics: {
                 user_id: {
                   equals: userId,
                 },

@@ -16,11 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { FilterSubType } from "@/filterAST/filterAst";
 
 export type SearchableSelectOption = {
   label: string;
   value: string;
-  subType?: "property" | "score";
+  subType?: FilterSubType;
 };
 
 interface SearchableSelectProps {
@@ -60,12 +61,20 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     const regular = options.filter((opt) => !opt.subType);
     const properties = options.filter((opt) => opt.subType === "property");
     const scores = options.filter((opt) => opt.subType === "score");
+    const sessions = options.filter((opt) => opt.subType === "sessions");
+    const users = options.filter((opt) => opt.subType === "user");
 
     return {
       regular,
       properties,
       scores,
-      hasSubTypes: properties.length > 0 || scores.length > 0,
+      sessions,
+      users,
+      hasSubTypes:
+        properties.length > 0 ||
+        scores.length > 0 ||
+        sessions.length > 0 ||
+        users.length > 0,
     };
   }, [options]);
 
@@ -94,9 +103,66 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           />
           <CommandEmpty className="text-[10px]">{emptyMessage}</CommandEmpty>
           <CommandList>
+            {/* Property subtype options */}
+            {groupedOptions.users.length > 0 && (
+              <CommandGroup heading="Users">
+                {groupedOptions.users.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(selectedValue) => {
+                      onValueChange(selectedValue);
+                      setOpen(false);
+                    }}
+                    className="text-[10px]"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-3 w-3",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Property subtype options */}
+            {groupedOptions.sessions.length > 0 && (
+              <CommandGroup heading="Sessions">
+                {groupedOptions.sessions.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(selectedValue) => {
+                      onValueChange(selectedValue);
+                      setOpen(false);
+                    }}
+                    className="text-[10px]"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-3 w-3",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
             {/* Regular options */}
             {groupedOptions.regular.length > 0 && (
-              <CommandGroup>
+              <CommandGroup
+                heading={
+                  groupedOptions.users.length > 0 ||
+                  groupedOptions.sessions.length > 0
+                    ? "Default"
+                    : undefined
+                }
+              >
                 {groupedOptions.regular.map((option) => (
                   <CommandItem
                     key={option.value}

@@ -404,7 +404,6 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         width="200px"
         className="flex-shrink-0 h-7 text-[10px]"
       />
-
       <Select
         value={condition.operator}
         onValueChange={handleOperatorChange}
@@ -428,9 +427,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           ))}
         </SelectContent>
       </Select>
-
       <div className="flex-grow">{renderValueInput()}</div>
-
       {!isOnlyCondition && (
         <Button
           variant="ghost"

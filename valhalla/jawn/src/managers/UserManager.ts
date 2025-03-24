@@ -238,6 +238,7 @@ export class UserManager extends BaseManager {
     );
 
     const results = await clickhouseDb.dbQuery<{
+      id: string;
       user_id: string;
       active_for: number;
       first_active: string;
@@ -248,7 +249,6 @@ export class UserManager extends BaseManager {
       total_completion_tokens: number;
       total_prompt_tokens: number;
       cost: number;
-      total: number;
     }>(query, builtFilter.argsAcc);
 
     const users = resultMap(results, (x) =>

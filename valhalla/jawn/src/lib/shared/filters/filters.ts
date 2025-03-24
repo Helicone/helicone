@@ -295,16 +295,14 @@ const whereKeyMappings: KeyMappings = {
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "request_response_rmt.last_active",
-    total_requests: "request_response_rmt.total_requests",
-    active_for: "request_response_rmt.active_for",
-    average_requests_per_day_active:
-      "request_response_rmt.average_requests_per_day_active",
-    average_tokens_per_request:
-      "request_response_rmt.average_tokens_per_request",
-    total_completion_tokens: "request_response_rmt.total_completion_tokens",
-    total_prompt_tokens: "request_response_rmt.total_prompt_tokens",
-    cost: "request_response_rmt.cost",
+    last_active: "last_active",
+    total_requests: "total_requests",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",

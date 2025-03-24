@@ -6,7 +6,7 @@ export interface FilterUIDefinition {
   label: string;
   table: FieldSpec["table"];
   type: "string" | "number" | "boolean" | "datetime" | "select" | "searchable";
-  subType?: "property" | "score";
+  subType?: "property" | "score" | "sessions" | "user";
   operators: FilterOperator[];
   valueOptions?: { label: string; value: string | number | boolean }[];
   // Callback for dynamic searching of options
