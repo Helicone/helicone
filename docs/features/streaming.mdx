@@ -68,6 +68,7 @@ We've made several improvements to our stream handling across different LLM prov
 
 The `HeliconeManualLogger` class now includes enhanced methods for working with streams:
 
+- **`logBuilder`**: The recommended method for handling streaming responses with better error handling and simplified workflow
 - **`logStream`**: Logs a streaming operation with full control over stream handling
 - **`logSingleStream`**: Simplified method for logging a single ReadableStream
 - **`logSingleRequest`**: Logs a single request with a response body
@@ -80,6 +81,54 @@ Our new asynchronous stream parser significantly improves performance when worki
 - Provides more reliable token counting for streamed responses
 - Accurately captures time-to-first-token metrics
 - Efficiently handles multiple concurrent streams
+
+## Using the LogBuilder Method (Recommended)
+
+The new `logBuilder` method provides a more streamlined approach to working with streaming responses, with better error handling:
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+const together = new Together();
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+export async function POST(request: Request) {
+  const { question } = await request.json();
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: true,
+  };
+
+  const heliconeLogBuilder = helicone.logBuilder(body, {
+    "Helicone-Property-Environment": "dev",
+  });
+
+  try {
+    const response = await together.chat.completions.create(body);
+    return new Response(heliconeLogBuilder.toReadableStream(response));
+  } catch (error) {
+    heliconeLogBuilder.setError(error);
+    throw error;
+  } finally {
+    after(async () => {
+      // This will be executed after the response is sent to the client
+      await heliconeLogBuilder.sendLog();
+    });
+  }
+}
+```
+
+The `logBuilder` approach offers several advantages:
+
+- Better error handling with `setError` method
+- Simplified stream handling with `toReadableStream`
+- More flexible async/await patterns with `sendLog`
+- Proper error status code tracking
 
 ## Using the Enhanced Streaming Features
 
