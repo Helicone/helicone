@@ -192,6 +192,10 @@ test("cost calc snapshot test", () => {
         "provider": "ANTHROPIC"
     },
     {
+        "name": "claude-3-7-sonnet-20250219",
+        "provider": "ANTHROPIC"
+    },
+    {
         "name": "claude-3-haiku-20240307",
         "provider": "ANTHROPIC"
     },
@@ -362,6 +366,7 @@ WHEN (request_response_rmt.model ILIKE 'claude-3-opus-20240229') THEN 15000 * re
 WHEN (request_response_rmt.model ILIKE 'claude-3-sonnet-20240229') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20240620') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE 'claude-3-7-sonnet-20250219') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-haiku-20240307') THEN 250 * request_response_rmt.prompt_tokens + 1250 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE 'claude-3-5-haiku-20241022') THEN 800 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
   ELSE 0
@@ -603,7 +608,10 @@ WHEN (request_response_rmt.model ILIKE '%gemini-1.5-flash%') THEN 350 * request_
 WHEN (request_response_rmt.model ILIKE 'gemini-flash-1.5-8b') THEN 38 * request_response_rmt.prompt_tokens + 150 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-1.5-pro%') THEN 3500 * request_response_rmt.prompt_tokens + 10500 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-2.0-flash%') THEN 100 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens
-WHEN (request_response_rmt.model ILIKE 'claude-3-5-sonnet-v2@20241022') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE '%claude-3-opus%') THEN 15000 * request_response_rmt.prompt_tokens + 75000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE '%claude-3-5-haiku%') THEN 800 * request_response_rmt.prompt_tokens + 4000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE '%claude-3-5-sonnet%') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model ILIKE '%claude-3-7-sonnet%') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
   ELSE 0
 END
 )
@@ -989,6 +997,7 @@ WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_r
 WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-3.5-turbo-%') THEN 3000 * request_response_rmt.prompt_tokens + 6000 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-mini-2024-07-18:%') THEN 300 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
+WHEN (request_response_rmt.model LIKE 'gpt-4o-mini-2024-07-18.ft-%') THEN 300 * request_response_rmt.prompt_tokens + 1200 * request_response_rmt.completion_tokens
 WHEN (request_response_rmt.model LIKE 'ft:gpt-4o-2024-08-06:%') THEN 3750 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens
   ELSE 0
 END
