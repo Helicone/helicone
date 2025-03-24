@@ -21,7 +21,7 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
-import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
+import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 
 type MessageType =
   | "text"
@@ -36,10 +36,12 @@ interface RealtimeProps {
     startIndex: number;
     endIndex: number;
   };
+  className?: string;
 }
 export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
   messageIndexFilter,
+  className,
 }) => {
   // Get all messages sorted by timestamp
   const sortedMessages = [
@@ -137,7 +139,11 @@ export const Realtime: React.FC<RealtimeProps> = ({
   };
 
   return (
-    <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
+    <div
+      className={`w-full flex flex-col gap-4 ${
+        filterInfo ? "" : "pt-4"
+      } ${className}`}
+    >
       {/* Filter Indicator */}
       {filterInfo && (
         <GlassHeader className="h-14 px-4 flex-shrink-0">
