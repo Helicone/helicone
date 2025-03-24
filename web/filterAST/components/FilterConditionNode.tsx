@@ -222,6 +222,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       field: {
         column: fieldId as any, // Use 'any' to bypass type checking temporarily
         subtype: filterDef.subType,
+        table: filterDef.table,
       },
       operator: defaultOperator,
       value: "", // Reset value since field changed

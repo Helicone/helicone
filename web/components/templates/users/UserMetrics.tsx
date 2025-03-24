@@ -67,7 +67,7 @@ const Chart: React.FC<ChartProps> = ({
   </Card>
 );
 
-export const UserMetrics = ({ filterNode }: { filterNode: FilterNode }) => {
+export const UserMetrics = () => {
   const [pSize, setPSize] = useLocalStorage<
     "p50" | "p75" | "p95" | "p99" | "p99.9"
   >("session-details-pSize", "p75");

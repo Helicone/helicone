@@ -1,3 +1,5 @@
+import { UserMetric } from "@/lib/api/users/UserMetric";
+
 /**
  * Represents a record/row from the request_response_rmt table
  * Contains all the fields that can be filtered on
@@ -28,6 +30,18 @@ interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+}
+
+export interface Views {
+  user_metric: UserMetric;
+  session_metrics: {
+    session_id: string;
+    total_tokens: number;
+    total_requests: number;
+    total_completion_tokens: number;
+    total_prompt_token: number;
+    cost: number;
+  };
 }
 
 /**
@@ -96,13 +110,25 @@ interface AllExpression extends BaseExpression {
  * Type for the field specification in a condition
  * Describes what field is being filtered and how
  */
-interface FieldSpec {
-  table?: "request_response_rmt";
-  column: keyof RequestResponseRMT;
+interface BaseFieldSpec {
   subtype?: "property" | "score";
   valueMode?: "value" | "key";
   key?: string;
 }
+
+type FieldSpec =
+  | (BaseFieldSpec & {
+      table: "request_response_rmt";
+      column: keyof RequestResponseRMT;
+    })
+  | (BaseFieldSpec & {
+      table: "users_view";
+      column: keyof Views["user_metric"];
+    })
+  | (BaseFieldSpec & {
+      table: "sessions_request_response_rmt";
+      column: keyof Views["session_metrics"];
+    });
 
 /**
  * Single condition expression that compares a field against a value

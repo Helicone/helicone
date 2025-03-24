@@ -31,7 +31,7 @@ export const useFilterActions = () => {
       expressions: [
         {
           type: "condition",
-          field: { column: "status" },
+          field: { column: "status", table: "request_response_rmt" },
           operator: "eq",
           value: 200,
         },
@@ -56,7 +56,7 @@ export const useFilterActions = () => {
 
     const timeCondition: ConditionExpression = {
       type: "condition",
-      field: { column: "response_created_at" },
+      field: { column: "response_created_at", table: "request_response_rmt" },
       operator: "gt",
       value: isoDate,
     };

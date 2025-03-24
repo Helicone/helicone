@@ -41,7 +41,7 @@ const useSessions = ({
       const filter = query.queryKey[5] as FilterExpression;
       const jawnClient = getJawnClient(orgId);
 
-      return await jawnClient.POST("/v1/session/query", {
+      const result = await jawnClient.POST("/v1/session/query", {
         body: {
           search: sessionIdSearch ?? "",
           timeFilter: {
@@ -53,9 +53,13 @@ const useSessions = ({
           filter: filter ? (toFilterNode(filter) as any) : "all",
         },
       });
+      if (result.error || result.data.error) {
+        throw new Error(result.error || result.data.error || "Unknown error");
+      }
+      return result;
     },
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 2,
     refetchIntervalInBackground: false,
     refetchInterval: false,
   });
@@ -85,15 +89,19 @@ const useSessionNames = (sessionNameSearch: string) => {
       const timezoneDifference = new Date().getTimezoneOffset();
 
       const jawnClient = getJawnClient(orgId);
-      return await jawnClient.POST("/v1/session/name/query", {
+      const result = await jawnClient.POST("/v1/session/name/query", {
         body: {
           nameContains: sessionNameSearch,
           timezoneDifference,
         },
       });
+      if (result.error || result.data.error) {
+        throw new Error(result.error || result.data.error || "Unknown error");
+      }
+      return result;
     },
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 2,
     refetchIntervalInBackground: false,
     refetchInterval: false,
   });
@@ -134,7 +142,7 @@ const useSessionMetrics = (
       const timezoneDifference = new Date().getTimezoneOffset();
 
       const jawnClient = getJawnClient(orgId);
-      return await jawnClient.POST("/v1/session/metrics/query", {
+      const result = await jawnClient.POST("/v1/session/metrics/query", {
         body: {
           nameContains: sessionNameSearch,
           timezoneDifference,
@@ -142,9 +150,13 @@ const useSessionMetrics = (
           useInterquartile,
         },
       });
+      if (result.error || result.data.error) {
+        throw new Error(result.error || result.data.error || "Unknown error");
+      }
+      return result;
     },
     refetchOnWindowFocus: false,
-    retry: false,
+    retry: 2,
     refetchIntervalInBackground: false,
     refetchInterval: false,
   });

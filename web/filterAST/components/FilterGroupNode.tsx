@@ -34,6 +34,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
       type: "condition",
       field: {
         column: "status",
+        table: "request_response_rmt",
       },
       operator: "eq",
       value: 200,
@@ -60,6 +61,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           field: {
             column: defaultField,
             subtype: defaultFieldDef?.subType,
+            table: "request_response_rmt",
           },
           operator: defaultOperator,
           value: "",

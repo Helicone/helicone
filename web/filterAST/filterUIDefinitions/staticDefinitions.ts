@@ -9,6 +9,7 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
   },
+
   {
     id: "request_id",
     label: "Request ID",

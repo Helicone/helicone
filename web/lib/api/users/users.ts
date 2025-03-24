@@ -10,7 +10,6 @@ import {
   SortLeafUsers,
 } from "../../../services/lib/sorts/users/sorts";
 import { clickhousePriceCalc } from "../../../packages/cost";
-import { UserMetric } from "./UserMetric";
 
 export async function userMetrics(
   org_id: string,

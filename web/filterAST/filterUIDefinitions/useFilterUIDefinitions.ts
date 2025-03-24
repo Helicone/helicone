@@ -75,6 +75,7 @@ export const useFilterUIDefinitions = () => {
             );
         },
         subType: "property",
+        table: "request_response_rmt",
       })) ?? [];
 
     const modelsDefinition: FilterUIDefinition = {
@@ -95,6 +96,7 @@ export const useFilterUIDefinitions = () => {
             })) ?? []
         );
       },
+      table: "request_response_rmt",
     };
 
     // Replace or add dynamic definitions to the static ones

@@ -1,5 +1,14 @@
 // src/users/usersController.ts
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result } from "../../lib/shared/result";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
@@ -11,7 +20,8 @@ import {
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { clickhousePriceCalc } from "../../packages/cost";
-import { PSize, UserManager } from "../../managers/UserManager";
+import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
+import { KVCache } from "../../lib/cache/kvCache";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -40,8 +50,10 @@ export interface UserMetricsQueryParams {
     endTimeUnixSeconds: number;
   };
   timeZoneDifferenceMinutes?: number;
+  sort?: SortLeafUsers;
 }
 export interface UserMetricsResult {
+  id: string;
   user_id: string;
   active_for: number;
   first_active: string;
@@ -81,7 +93,7 @@ export class UserController extends Controller {
     @Body()
     requestBody: UserMetricsQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<UserMetricsResult[], string>> {
+  ): Promise<Result<{ users: UserMetricsResult[]; count: number }, string>> {
     const userManager = new UserManager(request.authParams);
     if (requestBody.limit > 1000) {
       this.setStatus(400);
