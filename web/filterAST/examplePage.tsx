@@ -114,7 +114,10 @@ export const TestFilterPage: React.FC = () => {
       expressions: [
         {
           type: "condition",
-          field: { column: "status" },
+          field: {
+            table: "request_response_rmt",
+            column: "status",
+          },
           operator: "eq",
           value: "",
         },
@@ -141,13 +144,19 @@ export const TestFilterPage: React.FC = () => {
       expressions: [
         {
           type: "condition",
-          field: { column: "status" },
+          field: {
+            table: "request_response_rmt",
+            column: "status",
+          },
           operator: "eq",
           value: 200,
         },
         {
           type: "condition",
-          field: { column: "latency" },
+          field: {
+            table: "request_response_rmt",
+            column: "latency",
+          },
           operator: "gt",
           value: 1000,
         },
@@ -164,7 +173,10 @@ export const TestFilterPage: React.FC = () => {
       expressions: [
         {
           type: "condition",
-          field: { column: "user_id" },
+          field: {
+            table: "request_response_rmt",
+            column: "user_id",
+          },
           operator: "eq",
           value: "test-user-123",
         },
@@ -173,13 +185,19 @@ export const TestFilterPage: React.FC = () => {
           expressions: [
             {
               type: "condition",
-              field: { column: "status" },
+              field: {
+                table: "request_response_rmt",
+                column: "status",
+              },
               operator: "eq",
               value: 200,
             },
             {
               type: "condition",
-              field: { column: "status" },
+              field: {
+                table: "request_response_rmt",
+                column: "status",
+              },
               operator: "eq",
               value: 201,
             },
@@ -190,13 +208,19 @@ export const TestFilterPage: React.FC = () => {
           expressions: [
             {
               type: "condition",
-              field: { column: "latency" },
+              field: {
+                table: "request_response_rmt",
+                column: "latency",
+              },
               operator: "gte",
               value: 500,
             },
             {
               type: "condition",
-              field: { column: "latency" },
+              field: {
+                table: "request_response_rmt",
+                column: "latency",
+              },
               operator: "lte",
               value: 2000,
             },
@@ -216,9 +240,10 @@ export const TestFilterPage: React.FC = () => {
         {
           type: "condition",
           field: {
+            table: "request_response_rmt",
             column: "properties",
             subtype: "property",
-            key: "user_type",
+            key: "environment",
           },
           operator: "eq",
           value: "admin",

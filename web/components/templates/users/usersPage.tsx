@@ -1,6 +1,5 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { UserMetric } from "@/lib/api/users/UserMetric";
