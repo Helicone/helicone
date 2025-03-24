@@ -102,7 +102,7 @@ const PricingVersionOld = {
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
-        subscription_status: "active",
+        subscription_status: subscription.status,
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
         tier: "growth",
@@ -135,7 +135,7 @@ const PricingVersionOld = {
     }
 
     let updateFields: Database["public"]["Tables"]["organization"]["Update"] = {
-      subscription_status: isSubscriptionActive ? "active" : "inactive",
+      subscription_status: subscriptionUpdated.status,
     };
 
     if (isSubscriptionActive && growthPlanItem && !proPlanItem) {
@@ -167,7 +167,7 @@ const PricingVersionOld = {
       .from("organization")
       .update({
         tier: "free",
-        subscription_status: "inactive",
+        subscription_status: subscriptionDeleted.status,
         stripe_metadata: {
           addons: {},
         },
@@ -180,10 +180,23 @@ const PricingVersionOld = {
     const orgId = checkoutCompleted.metadata?.orgId;
     const tier = checkoutCompleted.metadata?.tier;
 
+    let subscriptionStatus = "active";
+
+    if (checkoutCompleted.subscription) {
+      try {
+        const subscription = await stripe.subscriptions.retrieve(
+          checkoutCompleted.subscription.toString()
+        );
+        subscriptionStatus = subscription.status;
+      } catch (error) {
+        console.error("Error retrieving subscription status:", error);
+      }
+    }
+
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
-        subscription_status: "active",
+        subscription_status: subscriptionStatus,
         stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
         tier: tier,
       })
@@ -535,7 +548,7 @@ const TeamVersion20250130 = {
     const { error } = await getSupabaseServer()
       .from("organization")
       .update({
-        subscription_status: "active",
+        subscription_status: subscription.status,
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
         tier: "team-20250130",
@@ -587,7 +600,7 @@ const PricingVersion20240913 = {
     const { data, error } = await getSupabaseServer()
       .from("organization")
       .update({
-        subscription_status: "active",
+        subscription_status: subscription.status,
         stripe_subscription_id: subscriptionId,
         stripe_subscription_item_id: subscriptionItemId,
         tier: "pro-20250202",
