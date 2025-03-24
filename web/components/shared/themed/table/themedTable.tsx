@@ -27,7 +27,6 @@ import {
   DragColumnItem,
 } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
-import RequestRowView from "./requestRowView";
 
 import useOnboardingContext, {
   ONBOARDING_STEPS,
@@ -35,9 +34,7 @@ import useOnboardingContext, {
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RequestViews } from "./RequestViews";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -69,11 +66,6 @@ interface ThemedTableProps<T extends { id?: string }> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T, index: number, event?: React.MouseEvent) => void;
-  makeCard?: (row: T) => React.ReactNode;
-  makeRow?: {
-    properties: string[];
-  };
-  hideView?: boolean;
   hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
@@ -124,9 +116,6 @@ export default function ThemedTable<T extends { id?: string }>(
     timeFilter,
     sortable,
     onRowSelect,
-    makeCard,
-    makeRow,
-    hideView, // hides the view columns button
     hideHeader,
     noDataCTA,
     onDataSet: onDataSet,
@@ -144,8 +133,6 @@ export default function ThemedTable<T extends { id?: string }>(
     rowLink,
     showFilters,
   } = props;
-
-  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `${id}-activeColumns`,
@@ -232,7 +219,7 @@ export default function ThemedTable<T extends { id?: string }>(
     <div className="h-full flex flex-col border-border divide-y divide-border sentry-mask-me">
       {children && <div className="flex-shrink-0">{children}</div>}
 
-      <div className="h-full overflow-auto bg-white dark:bg-slate-800">
+      <div className="h-full overflow-auto bg-slate-50 dark:bg-slate-950">
         {skeletonLoading ? (
           <LoadingAnimation title="Loading Data..." />
         ) : rows.length === 0 ? (
@@ -250,24 +237,10 @@ export default function ThemedTable<T extends { id?: string }>(
               No Columns Selected
             </p>
           </div>
-        ) : makeCard && view === "card" ? (
-          <ul className="flex flex-col space-y-8 divide-y divide-border bg-white dark:bg-black rounded-lg border border-border">
-            {rows.map((row, i) => (
-              <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
-            ))}
-          </ul>
-        ) : makeRow && view === "row" ? (
-          <RequestRowView
-            rows={rows.map(
-              (row) => row.original as unknown as MappedLLMRequest
-            )}
-            properties={makeRow.properties}
-          />
         ) : (
           <ScrollArea className="h-full w-full" orientation="both">
             <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
               <div
-                className=""
                 style={{
                   boxSizing: "border-box",
                 }}
@@ -281,11 +254,11 @@ export default function ThemedTable<T extends { id?: string }>(
                     },
                   }}
                 >
-                  <thead className="text-[12px] z-[2]">
+                  <thead className="text-[12px]">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <tr
                         key={headerGroup.id}
-                        className="sticky top-0 glass border-b border-border"
+                        className="sticky top-0 bg-slate-50 z-[2] dark:bg-slate-950 border-b border-border"
                       >
                         {checkboxMode !== "never" && (
                           <th>
