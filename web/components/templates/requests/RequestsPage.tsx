@@ -24,7 +24,6 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { PiFunnelBold } from "react-icons/pi";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
@@ -85,76 +84,7 @@ interface RequestsPageV2Props {
   organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
 }
-
-function getTimeIntervalAgo(interval: TimeInterval): Date {
-  const now = new Date();
-  const utcNow = Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    now.getUTCHours(),
-    now.getUTCMinutes(),
-    now.getUTCSeconds()
-  );
-
-  switch (interval) {
-    case "3m":
-      return new Date(utcNow - 3 * 30 * 24 * 60 * 60 * 1000);
-    case "1m":
-      return new Date(utcNow - 30 * 24 * 60 * 60 * 1000);
-    case "7d":
-      return new Date(utcNow - 7 * 24 * 60 * 60 * 1000);
-    case "24h":
-      return new Date(utcNow - 24 * 60 * 60 * 1000);
-    case "1h":
-      return new Date(utcNow - 60 * 60 * 1000);
-    case "all":
-      return new Date(0);
-    default:
-      return new Date(utcNow - 24 * 60 * 60 * 1000); // Default to 24h
-  }
-}
-
-function getSortLeaf(
-  sortKey: string | null,
-  sortDirection: SortDirection | null,
-  isCustomProperty: boolean,
-  isCached: boolean
-): SortLeafRequest {
-  if (isCached && sortKey === "created_at") {
-    sortKey = "cache_created_at";
-  }
-  if (sortKey && sortDirection && isCustomProperty) {
-    return {
-      properties: {
-        [sortKey]: sortDirection,
-      },
-    };
-  } else if (sortKey && sortDirection) {
-    return {
-      [sortKey]: sortDirection,
-    };
-  } else if (isCached) {
-    return {
-      cache_created_at: "desc",
-    };
-  } else {
-    return {
-      created_at: "desc",
-    };
-  }
-}
-
-function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request_response_rmt";
-}
-
-function getCreatedAtColumn(isCached: boolean): string {
-  return isCached ? "created_at" : "request_created_at";
-}
-
 export default function RequestsPage(props: RequestsPageV2Props) {
-  // TODO CLEAN UP AND SIMPLIFY ALL THIS STATE
   const {
     currentPage,
     pageSize,
@@ -168,48 +98,46 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     organizationLayout,
     organizationLayoutAvailable,
   } = props;
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    REFS                                    */
+  /* -------------------------------------------------------------------------- */
   const initialLoadRef = useRef(true);
-  const jawn = useJawnClient();
-  const orgContext = useOrg();
-  const searchParams = useSearchParams();
-  const [currFilter, setCurrFilter] = useState(
-    searchParams.get("filter") ?? null
-  );
-  const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
-  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
+  const drawerRef = useRef<any>(null);
+  const popoverContentRef = useRef<HTMLDivElement>(null);
 
-  // Track whether we should show mock data (for users who haven't onboarded)
-  const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
-
-  // Create mock data with useMemo to avoid recreating on every render
-  const mockRequests = useMemo(() => getMockRequests(pageSize), [pageSize]);
-  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
-  const mockProperties = useMemo(() => getMockProperties(), []);
-  const mockCount = useMemo(() => getMockRequestCount(), []);
-
-  const [page, setPage] = useState<number>(currentPage);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
-  const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
+  /* -------------------------------------------------------------------------- */
+  /*                                   STATES                                   */
+  /* -------------------------------------------------------------------------- */
+  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
   const [selectedData, setSelectedData] = useState<
     MappedLLMRequest | undefined
   >(undefined);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
+  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+  const [page, setPage] = useState<number>(currentPage);
+  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
+    getRootFilterNode()
+  );
 
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const popoverContentRef = useRef<HTMLDivElement>(null);
-  const drawerRef = useRef<any>(null);
+  // TODO: Is this efficient?
+  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+  /* -------------------------------------------------------------------------- */
+  /*                                    HOOKS                                   */
+  /* -------------------------------------------------------------------------- */
+  const orgContext = useOrg();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
+  const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
+  const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
+  const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
+  // TODO: Move this to a better place or turn into callback
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
@@ -249,7 +177,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       };
     }
   };
-
   const getTimeRange = () => {
     const currentTimeFilter = searchParams.get("t");
     let range: TimeFilter;
@@ -271,27 +198,15 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
     return range;
   };
-
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const timeRange = useMemo(getTimeRange, [searchParams]);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-
-  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedAdvancedFilter]);
-
+  // TODO: Should this ever use states?
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
     sort.isCustomProperty,
     isCached
   );
-
   const {
     count: realCount,
     isDataLoading: realIsDataLoading,
@@ -316,6 +231,43 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     isCached,
     isLive
   );
+  const [currFilter, setCurrFilter] = useState(
+    searchParams.get("filter") ?? null
+  );
+
+  const {
+    organizationLayout: orgLayout,
+    isLoading: isOrgLayoutLoading,
+    refetch: orgLayoutRefetch,
+    isRefetching: isOrgLayoutRefetching,
+  } = useOrganizationLayout(
+    orgContext?.currentOrg?.id!,
+    "requests",
+    organizationLayout
+      ? {
+          data: organizationLayout,
+          error: null,
+        }
+      : undefined
+  );
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    MEMOS                                   */
+  /* -------------------------------------------------------------------------- */
+  // Track whether we should show mock data (for users who haven't onboarded)
+  const shouldShowMockData = useMemo(() => {
+    // Return undefined if org data isn't loaded yet
+    if (orgContext?.currentOrg === undefined) {
+      return undefined;
+    }
+    return orgContext?.currentOrg?.has_onboarded === false;
+  }, [orgContext?.currentOrg]);
+  // Create mock data with useMemo to avoid recreating on every render
+  const mockRequests = useMemo(() => getMockRequests(pageSize), [pageSize]);
+  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
+  const mockProperties = useMemo(() => getMockProperties(), []);
+  const mockCount = useMemo(() => getMockRequestCount(), []);
+  const timeRange = useMemo(getTimeRange, [searchParams]);
 
   const count = shouldShowMockData ? mockCount : realCount;
   const isDataLoading = shouldShowMockData ? false : realIsDataLoading;
@@ -326,11 +278,51 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const properties = shouldShowMockData ? mockProperties : realProperties;
   const refetch = shouldShowMockData ? () => {} : realRefetch;
   const filterMap = shouldShowMockData ? (mockFilterMap as any) : realFilterMap;
+
+  const columnsWithProperties = useMemo(() => {
+    const initialColumns = getInitialColumns(isCached);
+    return [...initialColumns].concat(
+      properties.map((property) => {
+        return {
+          id: initialColumns.find((column) => column.id === property) // on id conflict, append property- to the property
+            ? `property-${property}`
+            : `${property}`,
+          accessorFn: (row) => {
+            const value = row.heliconeMetadata.customProperties
+              ? row.heliconeMetadata.customProperties[property]
+              : "";
+            return value;
+          },
+          header: property,
+          cell: (info) => {
+            return info.getValue();
+          },
+          meta: {
+            sortKey: property,
+            category: "Custom Property",
+          },
+        };
+      })
+    );
+  }, [properties, isCached]);
+
+  const {
+    selectMode: _selectMode,
+    toggleSelectMode: _toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    isShiftPressed,
+  } = useSelectMode({
+    items: requests,
+    getItemId: (request: MappedLLMRequest) =>
+      request.heliconeMetadata.requestId,
+  });
+
   const searchPropertyFilters = shouldShowMockData
     ? (_property: string, _search: string) =>
         Promise.resolve({ data: null, error: "" })
     : realSearchPropertyFilters;
-
   const requestWithoutStream = requests.find((r) => {
     return (
       r.raw?.request?.stream &&
@@ -339,22 +331,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
   });
 
-  const initialRequest = useGetRequestWithBodies(initialRequestId || "");
-
-  useEffect(() => {
-    if (initialRequest.data?.data && !selectedData) {
-      setSelectedData(
-        heliconeRequestToMappedContent(
-          initialRequest.data.data as HeliconeRequest
-        )
-      );
-      drawerRef.current?.expand(); // Expand the drawer
-      drawerRef.current?.resize(drawerSize);
+  const transformedFilters = useMemo(() => {
+    if (orgLayout?.data?.filters) {
+      return transformOrganizationLayoutFilters(orgLayout.data.filters);
     }
-  }, [initialRequest, selectedData, drawerSize]);
+    return [];
+  }, [orgLayout?.data?.filters]);
 
-  //convert this using useCallback
-
+  /* -------------------------------------------------------------------------- */
+  /*                                  CALLBACKS                                 */
+  /* -------------------------------------------------------------------------- */
   // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
     const decodeFilter = (encoded: any): UIFilterRowTree => {
@@ -414,47 +400,169 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
     return getRootFilterNode();
   }, [searchParams, filterMap]);
-
-  useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
-      const loadedFilters = getAdvancedFilters();
-      setAdvancedFilters(loadedFilters);
-      initialLoadRef.current = false;
-    }
-  }, [filterMap, getAdvancedFilters, isDataLoading]);
-
-  // TODO
-  useEffect(() => {
-    if (
-      !isFilterRowNode(advancedFilters) ||
-      advancedFilters.rows.length === 0
-    ) {
-      if (userId) {
-        const userFilterMapIndex = filterMap.findIndex(
-          (filter: any) => filter.label === "User"
-        );
-
-        if (userFilterMapIndex !== -1) {
-          setAdvancedFilters({
-            operator: "and",
-            rows: [
-              {
-                filterMapIdx: userFilterMapIndex,
-                operatorIdx: 0,
-                value: userId,
-              },
-            ],
-          } as UIFilterRowNode);
-        }
-      }
-    }
-  }, [advancedFilters, filterMap, userId]);
-
   const userFilterMapIndex = filterMap.findIndex(
     (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
   );
 
-  // TODO
+  const handlePopoverInteraction = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
+  // Update the page state and router query when the page changes
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  const onTimeSelectHandler = useCallback(
+    (key: TimeInterval, value: string) => {
+      const tableName = getTableName(isCached);
+      const createdAtColumn = getCreatedAtColumn(isCached);
+      if (key === "custom") {
+        const [start, end] = value.split("_");
+        const filter: FilterNode = {
+          left: {
+            [tableName]: {
+              [createdAtColumn]: {
+                gte: new Date(start).toISOString(),
+              },
+            },
+          },
+          operator: "and",
+          right: {
+            [tableName]: {
+              [createdAtColumn]: {
+                lte: new Date(end).toISOString(),
+              },
+            },
+          },
+        };
+        setTimeFilter(filter);
+      } else {
+        setTimeFilter({
+          [tableName]: {
+            [createdAtColumn]: {
+              gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+            },
+          },
+        });
+      }
+    },
+    [isCached, setTimeFilter]
+  );
+
+  // if shift is pressed, we select the rows in the highlighted range
+  // if metakey is pressed, we add the row to the selection
+  // if click was on a checkbox, we add the row to the selection
+  // else we open the side-tray with details on the request.
+  const onRowSelectHandler = useCallback(
+    (row: MappedLLMRequest, index: number, event?: React.MouseEvent) => {
+      // bit of a hack since pre-existing table behavior is noop
+      let isCheckboxClick =
+        event?.target instanceof HTMLElement &&
+        (event.target.tagName.toLowerCase() === "button" ||
+          event.target.closest("button") !== null);
+      if (isShiftPressed || event?.metaKey || isCheckboxClick) {
+        toggleSelection(row);
+        return;
+      } else {
+        setSelectedDataIndex(index);
+        setSelectedData(row);
+        drawerRef.current?.expand(); // Expand the drawer
+        searchParams.set("requestId", row.heliconeMetadata.requestId);
+      }
+    },
+    [
+      isShiftPressed,
+      toggleSelection,
+      setSelectedDataIndex,
+      setSelectedData,
+      searchParams,
+    ]
+  );
+
+  const onSetAdvancedFiltersHandler = useCallback(
+    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
+      const encodeFilters = (filters: UIFilterRowTree): string => {
+        const encode = (node: UIFilterRowTree): any => {
+          if (isFilterRowNode(node)) {
+            return {
+              type: "node",
+              operator: node.operator,
+              rows: node.rows.map(encode),
+            };
+          } else {
+            return {
+              type: "leaf",
+              filter: `${filterMap[node.filterMapIdx].label}:${
+                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+              }:${encodeURIComponent(node.value)}`,
+            };
+          }
+        };
+
+        return JSON.stringify(encode(filters));
+      };
+
+      setAdvancedFilters(filters);
+      if (
+        layoutFilterId === null ||
+        (isFilterRowNode(filters) && filters.rows.length === 0)
+      ) {
+        searchParams.delete("filters");
+      } else {
+        const currentAdvancedFilters = encodeFilters(filters);
+        searchParams.set("filters", currentAdvancedFilters);
+      }
+    },
+    [searchParams, filterMap]
+  );
+
+  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
+    if (layoutFilter !== null) {
+      const transformedFilter = transformFilter(layoutFilter.filter[0]);
+      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
+      setCurrFilter(layoutFilter.id);
+    } else {
+      setCurrFilter(null);
+      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
+    }
+  };
+
+  const getDefaultValue = useCallback(() => {
+    const currentTimeFilter = searchParams.get("t");
+
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      return "custom";
+    } else {
+      return currentTimeFilter || "24h";
+    }
+  }, [searchParams]);
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   EFFECTS                                  */
+  /* -------------------------------------------------------------------------- */
+  // Synchronize page state from URL query parameters
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page]);
+
+  // Apply rate limit filter when rateLimited is true
   useEffect(() => {
     if (rateLimited) {
       if (userFilterMapIndex === -1) {
@@ -495,246 +603,75 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
   }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
 
-  const router = useRouter();
-
-  // Update the page state and router query when the page changes
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { ...router.query, page: newPage.toString() },
-        },
-        undefined,
-        { shallow: true }
-      );
-    },
-    [router]
-  );
-
-  // Sync the page state with the router query on component mount
+  // Initialize advanced filters from URL on first load
   useEffect(() => {
-    const pageFromQuery = router.query.page;
-    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
-      const parsedPage = parseInt(pageFromQuery, 10);
-      if (!isNaN(parsedPage) && parsedPage !== page) {
-        setPage(parsedPage);
-      }
+    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
+      const loadedFilters = getAdvancedFilters();
+      setAdvancedFilters(loadedFilters);
+      initialLoadRef.current = false;
     }
-  }, [router.query.page, page]);
+  }, [filterMap, getAdvancedFilters, isDataLoading]);
 
-  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
-    if (key === "custom") {
-      const [start, end] = value.split("_");
-      const filter: FilterNode = {
-        left: {
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
-            },
-          },
-        },
-        operator: "and",
-        right: {
-          [tableName]: {
-            [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
-            },
-          },
-        },
-      };
-      setTimeFilter(filter);
-    } else {
-      setTimeFilter({
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(getTimeIntervalAgo(key)).toISOString(),
-          },
-        },
-      });
-    }
-  };
-
-  const columnsWithProperties = useMemo(() => {
-    const initialColumns = getInitialColumns(isCached);
-    return [...initialColumns].concat(
-      properties.map((property) => {
-        return {
-          id: initialColumns.find((column) => column.id === property) // on id conflict, append property- to the property
-            ? `property-${property}`
-            : `${property}`,
-          accessorFn: (row) => {
-            const value = row.heliconeMetadata.customProperties
-              ? row.heliconeMetadata.customProperties[property]
-              : "";
-            return value;
-          },
-          header: property,
-          cell: (info) => {
-            return info.getValue();
-          },
-          meta: {
-            sortKey: property,
-            category: "Custom Property",
-          },
-        };
-      })
-    );
-  }, [properties, isCached]);
-
-  const {
-    selectMode: _selectMode,
-    toggleSelectMode: _toggleSelectMode,
-    selectedIds,
-    toggleSelection,
-    selectAll,
-    isShiftPressed,
-  } = useSelectMode({
-    items: requests,
-    getItemId: (request: MappedLLMRequest) =>
-      request.heliconeMetadata.requestId,
-  });
-
-  // if shift is pressed, we select the rows in the highlighted range
-  // if metakey is pressed, we add the row to the selection
-  // if click was on a checkbox, we add the row to the selection
-  // else we open the side-tray with details on the request.
-  const onRowSelectHandler = (
-    row: MappedLLMRequest,
-    index: number,
-    event?: React.MouseEvent
-  ) => {
-    // bit of a hack since pre-existing table behavior is noop
-    let isCheckboxClick =
-      event?.target instanceof HTMLElement &&
-      (event.target.tagName.toLowerCase() === "button" ||
-        event.target.closest("button") !== null);
-    if (isShiftPressed || event?.metaKey || isCheckboxClick) {
-      toggleSelection(row);
-      return;
-    } else {
-      setSelectedDataIndex(index);
-      setSelectedData(row);
-      drawerRef.current?.expand(); // Expand the drawer
-      searchParams.set("requestId", row.heliconeMetadata.requestId);
-    }
-  };
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      const encodeFilters = (filters: UIFilterRowTree): string => {
-        const encode = (node: UIFilterRowTree): any => {
-          if (isFilterRowNode(node)) {
-            return {
-              type: "node",
-              operator: node.operator,
-              rows: node.rows.map(encode),
-            };
-          } else {
-            return {
-              type: "leaf",
-              filter: `${filterMap[node.filterMapIdx].label}:${
-                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-              }:${encodeURIComponent(node.value)}`,
-            };
-          }
-        };
-
-        return JSON.stringify(encode(filters));
-      };
-
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [searchParams, filterMap]
-  );
-
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(
-    orgContext?.currentOrg?.id!,
-    "requests",
-    organizationLayout
-      ? {
-          data: organizationLayout,
-          error: null,
-        }
-      : undefined
-  );
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
-
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
-
+  // Reset to page 1 when filters change
   useEffect(() => {
-    orgContext?.refetchOrgs();
+    setPage(1);
+  }, [debouncedAdvancedFilter]);
+
+  // Control onboarding popup visibility based on organization status
+  useEffect(() => {
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
     }
-  }, [orgContext]);
+  }, [orgContext?.currentOrg?.has_onboarded]);
 
-  const getDefaultValue = () => {
-    const currentTimeFilter = searchParams.get("t");
-
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      return "custom";
-    } else {
-      return currentTimeFilter || "24h";
+  // Load and display initial request data in drawer
+  useEffect(() => {
+    if (initialRequest.data?.data && !selectedData) {
+      setSelectedData(
+        heliconeRequestToMappedContent(
+          initialRequest.data.data as HeliconeRequest
+        )
+      );
+      drawerRef.current?.expand(); // Expand the drawer
+      drawerRef.current?.resize(drawerSize);
     }
-  };
+  }, [initialRequest, selectedData, drawerSize]);
 
-  const handlePopoverInteraction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
+  // Apply user filter when userId is provided
+  const userFilterAppliedRef = useRef(false);
+  useEffect(() => {
+    // Only run if we have a userId and haven't applied the filter yet
+    if (userId && !userFilterAppliedRef.current) {
+      const isEmpty =
+        !isFilterRowNode(advancedFilters) || advancedFilters.rows.length === 0;
 
-  return shouldShowMockData ? (
-    <div
-      className={`transition-opacity duration-500 ease-in-out ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
-    >
-      <RequestsEmptyState isVisible={shouldShowMockData} />
+      if (isEmpty) {
+        const userFilterMapIndex = filterMap.findIndex(
+          (filter: any) => filter.label === "User"
+        );
 
-      <ThemedTable
-        id="requests-table"
-        defaultData={requests}
-        defaultColumns={columnsWithProperties}
-        skeletonLoading={false}
-        dataLoading={false}
-        hideView={true}
-        hideHeader={true}
-        checkboxMode={"never"}
-      />
-    </div>
-  ) : (
-    <main className="h-screen w-full flex flex-col">
+        if (userFilterMapIndex !== -1) {
+          setAdvancedFilters({
+            operator: "and",
+            rows: [
+              {
+                filterMapIdx: userFilterMapIndex,
+                operatorIdx: 0,
+                value: userId,
+              },
+            ],
+          } as UIFilterRowNode);
+
+          // Mark that we've applied the filter
+          userFilterAppliedRef.current = true;
+        }
+      }
+    }
+  }, [userId, filterMap]);
+
+  return shouldShowMockData === undefined ? null : shouldShowMockData ===
+    false ? (
+    <main className="h-screen w-full flex flex-col animate-fade-in">
       {/* Header */}
       {!userId && (
         <div
@@ -937,9 +874,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   : undefined
               }
               onRowSelect={onRowSelectHandler}
-              makeRow={{
-                properties: properties,
-              }}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
               selectedRows={
@@ -994,8 +928,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         {/* Request Drawer */}
         <ResizablePanel
           ref={drawerRef}
-          minSize={33}
           defaultSize={0}
+          minSize={33}
           onResize={(size) => {
             if (size > 0) {
               setDrawerSize(size);
@@ -1065,5 +999,84 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         setOpen={setShowOnboardingPopUp}
       />
     </main>
+  ) : (
+    <div className="animate-fade-in">
+      <RequestsEmptyState isVisible={true} />
+
+      <ThemedTable
+        id="requests-table"
+        defaultData={requests}
+        defaultColumns={columnsWithProperties}
+        skeletonLoading={false}
+        dataLoading={false}
+        hideHeader={true}
+        checkboxMode={"never"}
+      />
+    </div>
   );
+}
+
+// TODO: Move these to util files or remove the need for them?
+function getTimeIntervalAgo(interval: TimeInterval): Date {
+  const now = new Date();
+  const utcNow = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    now.getUTCHours(),
+    now.getUTCMinutes(),
+    now.getUTCSeconds()
+  );
+
+  switch (interval) {
+    case "3m":
+      return new Date(utcNow - 3 * 30 * 24 * 60 * 60 * 1000);
+    case "1m":
+      return new Date(utcNow - 30 * 24 * 60 * 60 * 1000);
+    case "7d":
+      return new Date(utcNow - 7 * 24 * 60 * 60 * 1000);
+    case "24h":
+      return new Date(utcNow - 24 * 60 * 60 * 1000);
+    case "1h":
+      return new Date(utcNow - 60 * 60 * 1000);
+    case "all":
+      return new Date(0);
+    default:
+      return new Date(utcNow - 24 * 60 * 60 * 1000); // Default to 24h
+  }
+}
+function getSortLeaf(
+  sortKey: string | null,
+  sortDirection: SortDirection | null,
+  isCustomProperty: boolean,
+  isCached: boolean
+): SortLeafRequest {
+  if (isCached && sortKey === "created_at") {
+    sortKey = "cache_created_at";
+  }
+  if (sortKey && sortDirection && isCustomProperty) {
+    return {
+      properties: {
+        [sortKey]: sortDirection,
+      },
+    };
+  } else if (sortKey && sortDirection) {
+    return {
+      [sortKey]: sortDirection,
+    };
+  } else if (isCached) {
+    return {
+      cache_created_at: "desc",
+    };
+  } else {
+    return {
+      created_at: "desc",
+    };
+  }
+}
+function getTableName(isCached: boolean): string {
+  return isCached ? "cache_hits" : "request_response_rmt";
+}
+function getCreatedAtColumn(isCached: boolean): string {
+  return isCached ? "created_at" : "request_created_at";
 }

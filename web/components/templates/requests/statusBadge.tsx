@@ -1,4 +1,4 @@
-import { clsx } from "@/components/shared/clsx";
+import { Badge } from "@/components/ui/badge";
 
 interface StatusBadgeProps {
   statusType: string;
@@ -9,121 +9,83 @@ interface StatusBadgeProps {
 const StatusBadge = (props: StatusBadgeProps) => {
   const { statusType, errorCode } = props;
 
+  let colorClass: string;
+
   switch (statusType) {
     case "cached":
+      colorClass = "bg-amber-500 dark:bg-amber-600";
       return (
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-900 px-2 py-1 -my-1 text-xs font-medium text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20",
-            props.className
-          )}
-        >
+        <Badge variant="status" className={colorClass}>
           Cached
-        </span>
+        </Badge>
       );
     case "success":
     case "COMPLETED":
+      colorClass = "bg-green-500 dark:bg-green-600";
       return (
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20",
-            props.className
-          )}
-        >
+        <Badge variant="status" className={colorClass}>
           Success
-        </span>
+        </Badge>
       );
     case "pending":
     case "PENDING":
+      colorClass = "bg-slate-500 dark:bg-slate-600";
       return (
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
-            props.className
-          )}
-        >
+        <Badge variant="status" className={colorClass}>
           Pending
-        </span>
+        </Badge>
       );
     case "RUNNING":
+      colorClass = "bg-blue-500 dark:bg-blue-600";
       return (
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-md bg-blue-200 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
-            props.className
-          )}
-        >
+        <Badge variant="status" className={colorClass}>
           Running
-        </span>
+        </Badge>
       );
 
     case "error":
       if (errorCode === -2) {
+        colorClass = "bg-slate-500 dark:bg-slate-600";
         return (
-          <span
-            className={clsx(
-              "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
-              props.className
-            )}
-          >
-            {`Pending`}
-          </span>
+          <Badge variant="status" className={colorClass}>
+            Pending
+          </Badge>
         );
       } else if (errorCode === -3) {
+        colorClass = "bg-purple-500 dark:bg-purple-600";
         return (
-          <span
-            className={clsx(
-              "inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-900 px-2 py-1 -my-1 text-xs font-medium text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20",
-              props.className
-            )}
-          >
-            {`Cancelled`}
-          </span>
+          <Badge variant="status" className={colorClass}>
+            Cancelled
+          </Badge>
         );
       } else if (errorCode === -1) {
+        colorClass = "bg-rose-500 dark:bg-rose-600";
         return (
-          <span
-            className={clsx(
-              "inline-flex items-center rounded-md bg-red-50 dark:bg-red-900 px-2 py-1 -my-1 text-xs font-medium text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20",
-              props.className
-            )}
-          >
-            {`Timeout`}
-          </span>
+          <Badge variant="status" className={colorClass}>
+            Timeout
+          </Badge>
         );
       } else if (errorCode === -4) {
+        colorClass = "bg-yellow-500 dark:bg-yellow-600";
         return (
-          <span
-            className={clsx(
-              "inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900 px-2 py-1 -my-1 text-xs font-medium text-yellow-700 dark:text-yellow-300 ring-1 ring-inset ring-red-600/20",
-              props.className
-            )}
-          >
-            {`Threat`}
-          </span>
+          <Badge variant="status" className={colorClass}>
+            Threat
+          </Badge>
         );
       } else {
+        colorClass = "bg-red-500 dark:bg-red-600";
         return (
-          <span
-            className={clsx(
-              "inline-flex items-center rounded-md bg-red-50 dark:bg-red-900 px-2 py-1 -my-1 text-xs font-medium text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20",
-              props.className
-            )}
-          >
+          <Badge variant="status" className={colorClass}>
             {`${errorCode} Error`}
-          </span>
+          </Badge>
         );
       }
     default:
+      colorClass = "bg-gray-500 dark:bg-gray-600";
       return (
-        <span
-          className={clsx(
-            "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
-            props.className
-          )}
-        >
+        <Badge variant="status" className={colorClass}>
           Unknown
-        </span>
+        </Badge>
       );
   }
 };

@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "h-6 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
+  "h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -15,6 +15,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:bg-[hsl(var(--destructive))]/80",
         outline: "text-[hsl(var(--foreground))]",
+        status: "px-2 py-1 text-slate-50 dark:text-slate-100 font-semibold",
         helicone:
           "border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md text-[11px] font-medium py-1 px-2 leading-tight",
         "helicone-sky":
@@ -23,9 +24,14 @@ const badgeVariants = cva(
           "border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] font-light hover:bg-[hsl(var(--primary))]/90 tracking-wide",
         none: "",
       },
+      asPill: {
+        true: "rounded-full",
+        false: "rounded-lg",
+      },
     },
     defaultVariants: {
       variant: "default",
+      asPill: true,
     },
   }
 );
@@ -34,9 +40,12 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant, asPill, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div
+      className={cn(badgeVariants({ variant, asPill }), className)}
+      {...props}
+    />
   );
 }
 
