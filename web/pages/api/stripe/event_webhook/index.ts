@@ -31,6 +31,66 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
 });
 
+// Shared method to send cancellation notification to Loops
+async function sendSubscriptionCanceledEvent(
+  subscription: Stripe.Subscription
+) {
+  const isCanceling = subscription.cancel_at_period_end === true;
+  const isSubscriptionActive = subscription.status === "active";
+  const isTrialCanceled = subscription.status === "trialing" && isCanceling;
+  const isImmediatelyCanceled = subscription.status === "canceled";
+
+  if (
+    (isCanceling && isSubscriptionActive) ||
+    isTrialCanceled ||
+    isImmediatelyCanceled
+  ) {
+    try {
+      const customerId =
+        typeof subscription.customer === "string"
+          ? subscription.customer
+          : subscription.customer.id;
+
+      const customer = await stripe.customers.retrieve(customerId);
+
+      if (
+        customer &&
+        !customer.deleted &&
+        "email" in customer &&
+        customer.email
+      ) {
+        const requestBody = JSON.stringify({
+          email: customer.email,
+          eventName: "subscription_canceled",
+        });
+
+        const loopsResponse = await fetch(
+          "https://app.loops.so/api/v1/events/send",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
+            },
+            body: requestBody,
+          }
+        );
+      } else {
+        console.log(
+          `No valid customer email found. Customer object:`,
+          JSON.stringify(customer)
+        );
+      }
+    } catch (loopsError) {
+      console.error("Failed to send Loops event:", loopsError);
+    }
+  } else {
+    console.log(
+      `Subscription ${subscription.id} does not meet criteria for sending cancellation email`
+    );
+  }
+}
+
 const PricingVersionOld = {
   async handleCreate(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
@@ -55,6 +115,7 @@ const PricingVersionOld = {
     const subscriptionUpdated = event.data.object as Stripe.Subscription;
 
     const isSubscriptionActive = subscriptionUpdated.status === "active";
+
     let growthPlanItem = null;
     let proPlanItem = null;
     for (const item of subscriptionUpdated?.items?.data) {
@@ -94,6 +155,8 @@ const PricingVersionOld = {
     } else {
       console.log("Organization updated successfully: ", JSON.stringify(data));
     }
+
+    await sendSubscriptionCanceledEvent(subscriptionUpdated);
   },
 
   async handleDelete(event: Stripe.Event) {
@@ -494,9 +557,8 @@ const TeamVersion20250130 = {
   },
 
   handleUpdate: async (event: Stripe.Event) => {
-    // We don't need to do anything here because the subscription is already active
-    // All update states are handled in the jawn StripeManager
-    return;
+    const subscription = event.data.object as Stripe.Subscription;
+    await sendSubscriptionCanceledEvent(subscription);
   },
   handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
     // We don't need to do anything here because the subscription is already active
@@ -540,9 +602,8 @@ const PricingVersion20240913 = {
   },
 
   handleUpdate: async (event: Stripe.Event) => {
-    // We don't need to do anything here because the subscription is already active
-    // All update states are handled in the jawn StripeManager
-    return;
+    const subscription = event.data.object as Stripe.Subscription;
+    await sendSubscriptionCanceledEvent(subscription);
   },
   handleCheckoutSessionCompleted: async (event: Stripe.Event) => {
     // We don't need to do anything here because the subscription is already active

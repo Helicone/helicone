@@ -196,6 +196,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "o1-pro-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "how-to-reduce-llm-hallucination",
     },
   },
