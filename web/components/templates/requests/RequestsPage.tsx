@@ -802,9 +802,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         />
       )}
 
-      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+      <ResizablePanelGroup direction="horizontal">
         {/* Requests Table */}
-        <ResizablePanel defaultSize={50} minSize={25} className="h-full w-full">
+        <ResizablePanel>
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
@@ -939,7 +939,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
             drawerRef.current?.resize(drawerSize);
           }}
           collapsible={true}
-          className="h-full w-full"
         >
           <RequestDrawer
             request={selectedData}

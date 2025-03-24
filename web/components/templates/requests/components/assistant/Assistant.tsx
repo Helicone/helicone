@@ -14,11 +14,7 @@ interface AssistantProps {
   mappedRequest: MappedLLMRequest;
   className?: string;
 }
-
-export const Assistant = ({
-  mappedRequest,
-  className = "bg-slate-50",
-}: AssistantProps) => {
+export const Assistant = ({ mappedRequest, className }: AssistantProps) => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "assistant-mode",
@@ -35,13 +31,6 @@ export const Assistant = ({
     setMode,
   };
 
-  const content = (
-    <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
-      <ChatTopBar {...chatTopBarProps} />
-      <AssistantContent mode={mode} mappedRequest={mappedRequest} />
-    </div>
-  );
-
   return (
     <>
       <div
@@ -50,7 +39,9 @@ export const Assistant = ({
           className
         )}
       >
-        {content}
+        <div className="w-full border border-border divide-y divide-border h-full">
+          <AssistantContent mode={mode} mappedRequest={mappedRequest} />
+        </div>
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
         <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
