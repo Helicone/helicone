@@ -124,7 +124,7 @@ export default function ResponsePanel({
 }
 
 // Define custom components for ReactMarkdown
-const markdownComponents: Components = {
+export const markdownComponents: Components = {
   code({ className, children, ...props }) {
     // Check if this is an inline code block by examining the parent node
     const isInline = !className?.includes("language-");

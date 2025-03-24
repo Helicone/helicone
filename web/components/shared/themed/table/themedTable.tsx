@@ -247,11 +247,9 @@ export default function ThemedTable<T extends { id?: string }>(
               >
                 <table
                   className="h-full bg-white dark:bg-black"
-                  {...{
-                    style: {
-                      width: fullWidth ? "100%" : table.getCenterTotalSize(),
-                      overflow: "auto",
-                    },
+                  style={{
+                    width: fullWidth ? "100%" : table.getCenterTotalSize(),
+                    overflow: "auto",
                   }}
                 >
                   <thead className="text-[12px]">
