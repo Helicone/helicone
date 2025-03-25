@@ -36,7 +36,6 @@ import { XSmall } from "../ui/typography";
 import { useOrg } from "./org/organizationContext";
 
 interface OrgDropdownProps {}
-
 export default function OrgDropdown({}: OrgDropdownProps) {
   const orgContext = useOrg();
   const user = useUser();
