@@ -10,6 +10,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
+import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConicalIcon } from "lucide-react";
 import { useRouter } from "next/router";
@@ -322,9 +323,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                 <div className="w-full flex flex-row gap-2 items-center justify-between">
                   <Muted>Created At</Muted>
                   <Small className="text-right">
-                    {new Date(
-                      request.heliconeMetadata.createdAt
-                    ).toLocaleString()}
+                    {formatDate(request.heliconeMetadata.createdAt)}
                   </Small>
                 </div>
                 <div className="w-full flex flex-row gap-2 items-center justify-between">
