@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { XSmall } from "@/components/ui/typography";
 import Link from "next/link";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuCheck,
   LuExternalLink,
@@ -19,8 +19,8 @@ import {
   LuScroll,
 } from "react-icons/lu";
 
-// Special property keys map
-const SPECIAL_PROPERTY_KEYS: Record<
+// Special property or score keys map
+const SPECIAL_KEYS: Record<
   string,
   { icon: React.ReactNode; hrefPrefix: string }
 > = {
@@ -60,8 +60,36 @@ export default function ScrollableBadges({
   const [isAdding, setIsAdding] = useState(false);
   const [newKey, setNewKey] = useState("");
   const [newValue, setNewValue] = useState("");
+  const [pendingItems, setPendingItems] = useState<
+    { key: string; value: string | number }[]
+  >([]);
   const keyInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Clean up pending items when they appear in external items
+  useEffect(() => {
+    setPendingItems((prev) =>
+      prev.filter(
+        (pending) =>
+          !items.some(
+            (item) => item.key === pending.key && item.value === pending.value
+          )
+      )
+    );
+  }, [items]);
+
+  // Combine external items with pending items
+  const allItems = useMemo(
+    () =>
+      [...items, ...pendingItems].sort((a, b) => {
+        const aIsSpecial = SPECIAL_KEYS[a.key] !== undefined;
+        const bIsSpecial = SPECIAL_KEYS[b.key] !== undefined;
+        if (aIsSpecial && !bIsSpecial) return -1;
+        if (!aIsSpecial && bIsSpecial) return 1;
+        return 0;
+      }),
+    [items, pendingItems]
+  );
 
   const scrollToEnd = () => {
     if (scrollAreaRef.current) {
@@ -72,25 +100,27 @@ export default function ScrollableBadges({
 
   // Scroll to end when add button is clicked
   useEffect(() => {
-    if (isAdding) {
-      scrollToEnd();
-    }
+    if (isAdding) scrollToEnd();
   }, [isAdding]);
 
-  // Scroll to end when items change (new item added)
+  // Scroll to end when items change
   useEffect(() => {
     scrollToEnd();
-  }, [items.length]);
+  }, [allItems.length]);
 
   const handleAdd = async () => {
     if (!newKey || !newValue) return;
 
     try {
-      await onAdd(newKey, newValue);
+      setPendingItems((prev) => [...prev, { key: newKey, value: newValue }]);
       setNewKey("");
       setNewValue("");
       setIsAdding(false);
+      await onAdd(newKey, newValue);
     } catch (error) {
+      setPendingItems((prev) =>
+        prev.filter((item) => !(item.key === newKey && item.value === newValue))
+      );
       console.error("Error adding item:", error);
     }
   };
@@ -122,20 +152,24 @@ export default function ScrollableBadges({
             ref={scrollAreaRef}
             className="h-full w-full flex flex-row items-center gap-2"
           >
-            {items.length === 0 && placeholder && !isAdding && (
+            {allItems.length === 0 && placeholder && !isAdding && (
               <p className="h-6 flex items-center shrink-0 ml-3 text-xs text-muted-foreground/40">
                 {placeholder}
               </p>
             )}
 
-            {items.map((item, i) => (
-              <ItemBadge key={i} item={item} isFirst={i === 0} />
+            {allItems.map((item, i) => (
+              <ItemBadge
+                key={`${item.key}-${item.value}-${i}`}
+                item={item}
+                isFirst={i === 0}
+              />
             ))}
 
             {isAdding && (
               <div
                 className={`h-full flex flex-row gap-1 items-center shrink-0 ${
-                  items.length === 0 ? "ml-3" : ""
+                  allItems.length === 0 ? "ml-3" : ""
                 }`}
               >
                 <Input
@@ -225,7 +259,7 @@ const ItemBadge = memo(
     item: { key: string; value: string | number };
     isFirst: boolean;
   }) => {
-    const isSpecial = SPECIAL_PROPERTY_KEYS[item.key];
+    const isSpecial = SPECIAL_KEYS[item.key];
 
     if (isSpecial) {
       return (
