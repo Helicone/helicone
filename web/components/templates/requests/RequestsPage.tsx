@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import FiltersButton from "@/components/shared/themed/table/filtersButton";
 import { AdvancedFilters } from "@/components/shared/themed/themedAdvancedFilters";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
@@ -672,7 +673,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (
     <main className="h-screen w-full flex flex-col animate-fade-in">
-      {/* Header */}
+      {/* Warning */}
       {!userId && (
         <div
           className={
@@ -684,83 +685,82 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           />
         </div>
       )}
+      {/* Header */}
       {!userId && (
         <Header
           title={isCached ? "Cached Requests" : "Requests"}
           leftActions={
             <div className="flex flex-row items-center gap-2">
-              {advancedFilters && (
-                <Popover className="relative flex items-center">
-                  {({ open }) => (
-                    <>
-                      {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
-                      <Popover.Button
-                        as={Button}
-                        variant="outline"
-                        asPill
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => {
-                          if (isFiltersPinned) {
-                            setShowFilters(!showFilters);
-                          } else {
-                            setShowFilters(false);
-                          }
-                        }}
-                      >
-                        <PiFunnelBold className="h-4 w-4" />
-                        <span className="hidden sm:inline font-normal text-[13px]">
-                          {isFiltersPinned
-                            ? showFilters
-                              ? "Hide Filters"
-                              : "Show Filters"
-                            : "Filters"}
-                        </span>
-                      </Popover.Button>
+              <Popover className="relative flex items-center">
+                {({ open }) => (
+                  <>
+                    {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
+                    <Popover.Button
+                      as={Button}
+                      variant="outline"
+                      asPill
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        if (isFiltersPinned) {
+                          setShowFilters(!showFilters);
+                        } else {
+                          setShowFilters(false);
+                        }
+                      }}
+                    >
+                      <PiFunnelBold className="h-4 w-4" />
+                      <span className="hidden sm:inline font-normal text-[13px]">
+                        {isFiltersPinned
+                          ? showFilters
+                            ? "Hide Filters"
+                            : "Show Filters"
+                          : "Filters"}
+                      </span>
+                    </Popover.Button>
 
-                      <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
-                        <div
-                          className="w-full"
-                          ref={popoverContentRef}
-                          onClick={handlePopoverInteraction}
-                        >
-                          <AdvancedFilters
-                            filterMap={filterMap}
-                            filters={advancedFilters}
-                            setAdvancedFilters={onSetAdvancedFiltersHandler}
-                            searchPropertyFilters={searchPropertyFilters}
-                            savedFilters={
-                              transformedFilters && orgLayout?.data?.id
-                                ? transformedFilters
-                                : undefined
-                            }
-                            onSaveFilterCallback={async () => {
-                              await orgLayoutRefetch();
+                    <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
+                      <div
+                        className="w-full"
+                        ref={popoverContentRef}
+                        onClick={handlePopoverInteraction}
+                      >
+                        <AdvancedFilters
+                          filterMap={filterMap}
+                          filters={advancedFilters}
+                          setAdvancedFilters={onSetAdvancedFiltersHandler}
+                          searchPropertyFilters={searchPropertyFilters}
+                          savedFilters={
+                            transformedFilters && orgLayout?.data?.id
+                              ? transformedFilters
+                              : undefined
+                          }
+                          onSaveFilterCallback={async () => {
+                            await orgLayoutRefetch();
+                          }}
+                          layoutPage={"requests"}
+                        />
+                        <div className="flex justify-end ml-4">
+                          <Button
+                            variant="ghostLinear"
+                            onClick={() => {
+                              setIsFiltersPinned(!isFiltersPinned);
+                              setShowFilters(!isFiltersPinned);
                             }}
-                            layoutPage={"requests"}
-                          />
-                          <div className="flex justify-end ml-4">
-                            <Button
-                              variant="ghostLinear"
-                              onClick={() => {
-                                setIsFiltersPinned(!isFiltersPinned);
-                                setShowFilters(!isFiltersPinned);
-                              }}
-                              className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
-                            >
-                              {isFiltersPinned ? (
-                                <PinIcon className="h-5 w-5 text-primary" />
-                              ) : (
-                                <PinIcon className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </Button>
-                          </div>
+                            className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
+                          >
+                            {isFiltersPinned ? (
+                              <PinIcon className="h-5 w-5 text-primary" />
+                            ) : (
+                              <PinIcon className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </Button>
                         </div>
-                      </Popover.Panel>
-                    </>
-                  )}
-                </Popover>
-              )}
+                      </div>
+                    </Popover.Panel>
+                  </>
+                )}
+              </Popover>
               <ThemedTimeFilter
                 currentTimeFilter={getTimeRange()}
                 timeFilterOptions={[]}
@@ -773,7 +773,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               />
 
               {/* TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
-              {/* {organizationLayoutAvailable && (
+              {organizationLayoutAvailable && (
                 <FiltersButton
                   filters={
                     transformedFilters && orgLayout?.data?.id
@@ -787,7 +787,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   }}
                   layoutPage={"requests"}
                 />
-              )} */}
+              )}
             </div>
           }
           rightActions={
