@@ -17,6 +17,7 @@ import {
   LuListTree,
   LuPlus,
   LuScroll,
+  LuX,
 } from "react-icons/lu";
 
 // Special property or score keys map
@@ -192,6 +193,19 @@ export default function ScrollableBadges({
                   placeholder="Value"
                   className="h-6 w-20 text-xs px-2"
                 />
+                <Button
+                  variant={"ghost"}
+                  size={"none"}
+                  asPill
+                  className="h-6 w-6 p-0"
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewKey("");
+                    setNewValue("");
+                  }}
+                >
+                  <LuX className="w-4 h-4" />
+                </Button>
               </div>
             )}
             {/* Spacer to ensure right padding is scrollable (w-1 + gap-2 = w-3) */}
@@ -209,9 +223,9 @@ export default function ScrollableBadges({
           <TooltipTrigger asChild>
             <Button
               variant={"ghost"}
-              size={"square_icon"}
+              size={"none"}
+              className="h-6 w-6 p-0"
               asPill
-              className="shrink-0"
               onClick={() => {
                 if (isAdding) {
                   handleAdd();
@@ -266,7 +280,7 @@ const ItemBadge = memo(
         <Link href={`${isSpecial.hrefPrefix}${item.value}`} target="_blank">
           <Badge
             variant={"none"}
-            className={`flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+            className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
               isFirst ? "ml-3" : ""
             } border border-border hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer`}
           >
@@ -282,7 +296,7 @@ const ItemBadge = memo(
     return (
       <Badge
         variant={"none"}
-        className={`flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+        className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
           isFirst ? "ml-3" : ""
         }`}
       >
