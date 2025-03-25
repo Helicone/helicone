@@ -15,9 +15,17 @@ import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
 
-export default function RenderHeliconeRequest(
-  heliconeRequest: HeliconeRequest
-) {
+export default function RenderHeliconeRequest({
+  heliconeRequest,
+  messageIndexFilter,
+}: {
+  heliconeRequest: HeliconeRequest;
+  messageIndexFilter?: {
+    startIndex: number;
+    endIndex: number;
+    isHighlighterActive?: boolean;
+  };
+}) {
   const mapped = useMemo(() => {
     const mapperType = getMapperTypeFromHeliconeRequest(
       heliconeRequest,
@@ -36,15 +44,25 @@ export default function RenderHeliconeRequest(
     return <p>No mapped content</p>;
   }
 
-  return <RenderMappedRequest mappedRequest={mapped.content} />;
+  return (
+    <RenderMappedRequest
+      mappedRequest={mapped.content}
+      messageIndexFilter={messageIndexFilter}
+    />
+  );
 }
 
 export function RenderMappedRequest({
   mappedRequest,
   className,
+  messageIndexFilter,
 }: {
   mappedRequest: MappedLLMRequest;
   className?: string;
+  messageIndexFilter?: {
+    startIndex: number;
+    endIndex: number;
+  };
 }) {
   const [isJsonMode, setIsJsonMode] = useState(false);
 
@@ -110,6 +128,7 @@ export function RenderMappedRequest({
                 <Realtime
                   mappedRequest={mappedRequest}
                   className="pt-14 px-4"
+                  messageIndexFilter={messageIndexFilter}
                 />
               );
 
@@ -133,3 +152,5 @@ export function RenderMappedRequest({
     </ScrollArea>
   );
 }
+
+export { RenderHeliconeRequest };
