@@ -14,7 +14,7 @@ import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
-import RequestDrawerV2 from "../../requests/requestDrawerV2";
+import RequestDrawer from "../../requests/RequestDrawer";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
 import TreeView from "./Tree/TreeView";
@@ -240,7 +240,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           </TabsContent>
         </div>
 
-        <RequestDrawerV2
+        <RequestDrawer
           request={
             requests.requests.requests?.find(
               (r) => r.request_id === selectedRequestId
@@ -251,8 +251,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               )!
             )
           }
-          open={selectedRequestId !== "" && openDrawer}
-          setOpen={(open) => handleRequestIdChange("")}
+          onCollapse={() => {}}
         />
       </Tabs>
     </Col>
