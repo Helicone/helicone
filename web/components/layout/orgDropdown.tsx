@@ -14,14 +14,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { Database } from "@/db/database.types";
 import { cn } from "@/lib/utils";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { CheckIcon, LogOutIcon, PlusIcon } from "lucide-react";
+import { LuCheck, LuLogOut, LuPlus, LuSettings, LuUsers } from "react-icons/lu";
+
+import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
+import GlassHeader from "../shared/universal/GlassHeader";
 import AddMemberModal from "../templates/organization/addMemberModal";
 import CreateOrgForm from "../templates/organization/createOrgForm";
 import {
@@ -29,8 +31,9 @@ import {
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
 import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
+import { Badge } from "../ui/badge";
+import { XSmall } from "../ui/typography";
 import { useOrg } from "./org/organizationContext";
-import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 
 interface OrgDropdownProps {}
 
@@ -124,63 +127,94 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-[15rem] max-h-[90vh] flex flex-col border-slate-200"
+          className="w-56 max-h-[90vh] flex flex-col border-slate-200 p-0"
           sideOffset={0}
           side="bottom"
         >
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
-              Your Organizations
-              {ownedOrgs.length > 7 && ` (${ownedOrgs.length})`}
-            </DropdownMenuLabel>
-            {ownedOrgs && ownedOrgs.length > 0 && (
-              <div className="h-[150px] max-h-[150px] overflow-hidden">
-                <ScrollArea className="h-full w-full">
-                  {ownedOrgs.map((org, idx) => {
-                    const icon = ORGANIZATION_ICONS.find(
-                      (icon) => icon.name === org.icon
-                    );
-                    return (
-                      <DropdownMenuItem
-                        key={idx}
-                        onSelect={() => orgContext?.setCurrentOrg(org.id)}
-                      >
-                        <div className="flex items-center justify-between w-full text-xs">
-                          <div className="flex items-center space-x-2">
-                            {icon && (
-                              <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                            )}
-                            <span className="truncate max-w-[7.5rem]">
-                              {org.name}
-                            </span>
-                          </div>
-                          {org.id === orgContext?.currentOrg?.id && (
-                            <CheckIcon className="h-4 w-4 text-primary" />
-                          )}
-                        </div>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </ScrollArea>
-              </div>
-            )}
-            <DropdownMenuItem
-              className="text-xs cursor-pointer"
-              onClick={createNewOrgHandler}
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Create New Org
-            </DropdownMenuItem>
+          {/* Current Org Actions */}
+          {orgContext?.currentOrg?.tier !== "demo" && (
+            <DropdownMenuGroup className="p-1 flex flex-col border-b border-border">
+              {/* Invite Member */}
 
-            {memberOrgs && memberOrgs.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs font-semibold text-slate-500">
-                  Member Organizations
-                  {memberOrgs.length > 7 && ` (${memberOrgs.length})`}
-                </DropdownMenuLabel>
-                <div className="h-[150px] max-h-[150px] overflow-hidden">
-                  <ScrollArea className="h-full w-full">
+              <DropdownMenuItem
+                className="flex flex-row gap-2 justify-between items-center w-full"
+                onClick={() => {
+                  if (orgContext?.currentOrg?.tier === "free") {
+                    setUpgradeOpen(true);
+                  } else {
+                    setAddOpen(true);
+                  }
+                }}
+              >
+                <XSmall>Invite Members</XSmall>
+                <LuUsers className="h-4 w-4" />
+              </DropdownMenuItem>
+
+              {/* Billing */}
+              <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                <Link
+                  href="/settings/billing"
+                  className="h-7 flex flex-row gap-2 justify-between items-center w-full"
+                >
+                  <XSmall>Billing</XSmall>
+                  <Badge variant="none" className={tierDisplayInfo.className}>
+                    {tierDisplayInfo.text}
+                  </Badge>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          )}
+
+          {/* Orgs List */}
+          <DropdownMenuGroup className="border-b border-border">
+            {/* Owned Orgs + Member Orgs */}
+            <ScrollArea className="w-full h-48" showBottomGradient>
+              {ownedOrgs && ownedOrgs.length > 0 && (
+                <>
+                  <GlassHeader className="px-3 py-3">
+                    <XSmall className="text-secondary font-semibold">
+                      Your Organizations
+                      {`(${ownedOrgs.length})`}
+                    </XSmall>
+                  </GlassHeader>
+                  <div className="flex flex-col px-1">
+                    {ownedOrgs.map((org, idx) => {
+                      const icon = ORGANIZATION_ICONS.find(
+                        (icon) => icon.name === org.icon
+                      );
+                      return (
+                        <DropdownMenuItem
+                          key={idx}
+                          onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                        >
+                          <div className="flex items-center justify-between w-full text-xs">
+                            <div className="flex items-center space-x-2">
+                              {icon && (
+                                <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                              )}
+                              <span className="truncate max-w-[7.5rem]">
+                                {org.name}
+                              </span>
+                            </div>
+                            {org.id === orgContext?.currentOrg?.id && (
+                              <LuCheck className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              {memberOrgs && memberOrgs.length > 0 && (
+                <>
+                  <GlassHeader className="px-3 py-3">
+                    <XSmall className="text-secondary font-semibold">
+                      Member Organizations
+                      {`(${memberOrgs.length})`}
+                    </XSmall>
+                  </GlassHeader>
+                  <div className="flex flex-col px-1">
                     {memberOrgs.map((org, idx) => {
                       const icon = ORGANIZATION_ICONS.find(
                         (icon) => icon.name === org.icon
@@ -200,17 +234,18 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                               </span>
                             </div>
                             {org.id === orgContext?.currentOrg?.id && (
-                              <CheckIcon className="h-4 w-4 text-primary" />
+                              <LuCheck className="h-4 w-4 text-primary" />
                             )}
                           </div>
                         </DropdownMenuItem>
                       );
                     })}
-                  </ScrollArea>
-                </div>
-              </>
-            )}
+                  </div>
+                </>
+              )}
+            </ScrollArea>
 
+            {/* Customer Orgs */}
             {customerOrgs && customerOrgs.length > 0 && (
               <>
                 <DropdownMenuSeparator />
@@ -239,7 +274,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                               </span>
                             </div>
                             {org.id === orgContext?.currentOrg?.id && (
-                              <CheckIcon className="h-4 w-4 text-primary" />
+                              <LuCheck className="h-4 w-4 text-primary" />
                             )}
                           </div>
                         </DropdownMenuItem>
@@ -250,34 +285,20 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </>
             )}
 
-            <DropdownMenuSeparator />
-            {orgContext?.currentOrg?.tier !== "demo" && (
+            {/* New Org */}
+            <div className="p-1">
               <DropdownMenuItem
-                className="cursor-pointer text-xs"
-                onClick={() => {
-                  if (orgContext?.currentOrg?.tier === "free") {
-                    setUpgradeOpen(true);
-                  } else {
-                    setAddOpen(true);
-                  }
-                }}
+                className="flex flex-row gap-2 justify-between items-center w-full"
+                onClick={createNewOrgHandler}
               >
-                Invite members
+                <XSmall>New Org</XSmall>
+                <LuPlus className="h-4 w-4" />
               </DropdownMenuItem>
-            )}
-            {orgContext?.currentOrg?.tier !== "demo" && (
-              <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings/billing" className="flex flex-row gap-2 ">
-                  <span>Billing</span>
-                  <span className={tierDisplayInfo.className}>
-                    {tierDisplayInfo.text}
-                  </span>
-                </Link>
-              </DropdownMenuItem>
-            )}
+            </div>
           </DropdownMenuGroup>
 
-          <DropdownMenuGroup>
+          {/* Personal Settings */}
+          <DropdownMenuGroup className="p-1">
             <DropdownMenuItem
               className={cn("hover:bg-transparent cursor-default")}
               disableHover
@@ -292,24 +313,25 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 />
               </div>
             </DropdownMenuItem>
+
+            {orgContext?.currentOrg?.tier !== "demo" && (
+              <Link href="/settings" rel="noopener noreferrer">
+                <DropdownMenuItem className="text-xs">
+                  <LuSettings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
+            )}
+
+            <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
+              <LuLogOut className="h-4 w-4 mr-2" />
+              Sign out
+            </DropdownMenuItem>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-
-          {orgContext?.currentOrg?.tier !== "demo" && (
-            <Link href="/settings" rel="noopener noreferrer">
-              <DropdownMenuItem className="text-xs">
-                <Cog6ToothIcon className="h-4 w-4 mr-2" />
-                Settings
-              </DropdownMenuItem>
-            </Link>
-          )}
-
-          <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
-            <LogOutIcon className="h-4 w-4 mr-2" />
-            Sign out
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Floating Elements */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <CreateOrgForm
