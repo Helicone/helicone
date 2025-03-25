@@ -1,19 +1,19 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useMemo, useState } from "react";
-import {
-  ChatTopBar,
-  PROMPT_MODES,
-} from "../../components/chatComponent/chatTopBar";
-import { useLocalStorage } from "@/services/hooks/localStorage";
 import ThemedModal from "@/components/shared/themed/themedModal";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import { AlertTriangle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { PROMPT_MODES } from "../../components/chatComponent/chatTopBar";
 import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
 
 interface ErrorMessageProps {
   mapperContent: MappedLLMRequest;
+  className?: string;
 }
-
-export const ErrorMessage = ({ mapperContent }: ErrorMessageProps) => {
+export const ErrorMessage = ({
+  mapperContent,
+  className,
+}: ErrorMessageProps) => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "error-mode",
@@ -108,17 +108,9 @@ export const ErrorMessage = ({ mapperContent }: ErrorMessageProps) => {
 
   const renderErrorContent = (isModal = false) => {
     return (
-      <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
-        <ChatTopBar
-          allExpanded={allExpanded}
-          toggleAllExpanded={toggleAllExpanded}
-          requestBody={mapperContent.schema.request}
-          requestId={mapperContent.heliconeMetadata.requestId}
-          setOpen={setOpen}
-          mode={mode}
-          setMode={setMode}
-          isModal={isModal}
-        />
+      <div
+        className={`w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full ${className}`}
+      >
         <div className="w-full flex flex-col text-left space-y-8 text-sm p-4">
           <div className="w-full flex flex-col text-left space-y-1 text-sm">
             <p className="font-semibold text-sm">

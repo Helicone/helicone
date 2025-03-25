@@ -1,3 +1,8 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { IslandContainer } from "@/components/ui/islandContainer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BanknotesIcon,
   BookOpenIcon,
@@ -5,29 +10,24 @@ import {
   ClockIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { ElementType, useMemo, useState } from "react";
+import { useUser } from "@supabase/auth-helpers-react";
 import { BarChart } from "@tremor/react";
-import ThemedDrawer from "../../shared/themed/themedDrawer";
-import ThemedListItem from "../../shared/themed/themedListItem";
-import RequestsPageV2 from "../requests/requestsPageV2";
-import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
-import ModelPill from "../requests/modelPill";
-import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import { TimeFilter } from "../../../services/lib/filters/filterDefs";
-import { useCachePageClickHouse } from "./useCachePage";
-import UpgradeProModal from "../../shared/upgradeProModal";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import AuthHeader from "../../shared/authHeader";
-import { formatNumber } from "../users/initialColumns";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { ElementType, useMemo, useState } from "react";
+import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import { TimeFilter } from "../../../services/lib/filters/filterDefs";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import AuthHeader from "../../shared/authHeader";
+import ThemedDrawer from "../../shared/themed/themedDrawer";
+import ThemedListItem from "../../shared/themed/themedListItem";
+import UpgradeProModal from "../../shared/upgradeProModal";
+import ModelPill from "../requests/modelPill";
+import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
-import { useUser } from "@supabase/auth-helpers-react";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { useOrg } from "@/components/layout/org/organizationContext";
+import { formatNumber } from "../users/initialColumns";
+import { useCachePageClickHouse } from "./useCachePage";
 
 interface CachePageProps {
   currentPage: number;
@@ -298,7 +298,7 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
                     pageType="cache"
                   />
                 ) : (
-                  <RequestsPageV2
+                  <RequestsPage
                     currentPage={currentPage}
                     pageSize={pageSize}
                     sort={sort}
