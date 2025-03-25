@@ -9,6 +9,7 @@ import { Muted, P, Small } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
@@ -51,7 +52,10 @@ export default function RequestDrawer(props: RequestDivProps) {
   const org = useOrg();
   const jawn = useJawnClient();
 
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useLocalStorage(
+    "request-drawer-details",
+    false
+  );
   const [showNewDatasetModal, setShowNewDatasetModal] = useState(false);
 
   // Prompt Data
