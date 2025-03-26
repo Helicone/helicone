@@ -12,6 +12,12 @@ export function consolidateTextFields(responseBody: any[]): any {
         if (acc.choices.length === 0 && cur.choices?.length !== 0) {
           acc.choices.push(...cur.choices.slice(acc.choices.length));
         }
+
+        // Preserve x_groq field if it contains usage data
+        if (cur?.x_groq?.usage) {
+          acc.x_groq = cur.x_groq;
+        }
+
         if ("model" in cur && "model" in acc) {
           if (!acc.model) {
             acc.model = cur.model;
