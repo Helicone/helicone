@@ -59,7 +59,7 @@ export default function ParametersPanel({
 
   // Memoize the list of available creators to prevent unnecessary re-renders
   const creators: Creator[] = useMemo(
-    () => ["OpenAI", "Anthropic", "Google"],
+    () => Object.keys(modelMapping) as Creator[],
     []
   );
 
@@ -370,7 +370,7 @@ export default function ParametersPanel({
               value={currentModelName || ""}
               onValueChange={handleModelChange}
             >
-              <SelectTrigger className="w-36 h-8">
+              <SelectTrigger className="w-44 h-8">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
@@ -385,7 +385,7 @@ export default function ParametersPanel({
               value={parameters.provider as string}
               onValueChange={handleProviderChange}
             >
-              <SelectTrigger className="w-28 h-8">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>

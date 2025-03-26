@@ -7,7 +7,6 @@ import { PromptState } from "@/types/prompt-state";
 import {
   getEnvFileExample,
   getPromptDeploymentExample,
-  providerEnvVars,
 } from "@/utils/promptDeploy";
 import { InfoIcon } from "lucide-react";
 import Link from "next/link";
@@ -81,9 +80,7 @@ export default function DeployDialog({
           <>
             <Alert>
               <InfoIcon className="h-4 w-4" />
-              <AlertTitle>
-                Provider: {providerEnvVars[provider].name}
-              </AlertTitle>
+              <AlertTitle>Provider: {provider}</AlertTitle>
               <AlertDescription>
                 Required environment variables:
               </AlertDescription>

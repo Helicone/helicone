@@ -1,47 +1,21 @@
-import { Provider } from "@/packages/cost/unified/types";
+import { providerConfigs } from "@/packages/cost/unified/providers";
+import { Provider, ProviderConfig } from "@/packages/cost/unified/types";
 import { StateInputs, StateParameters } from "@/types/prompt-state";
 
 /**
  * Environment variables required for each provider
  */
-export const providerEnvVars: Record<
-  Provider,
-  { name: string; vars: string[] }
-> = {
-  OPENAI: {
-    name: "OpenAI",
-    vars: ["OPENAI_API_KEY"],
-  },
-  AZURE: {
-    name: "Azure OpenAI",
-    vars: ["AZURE_API_KEY", "AZURE_ENDPOINT", "AZURE_DEPLOYMENT"],
-  },
-  ANTHROPIC: {
-    name: "Anthropic",
-    vars: ["ANTHROPIC_API_KEY"],
-  },
-  BEDROCK: {
-    name: "AWS Bedrock",
-    vars: ["BEDROCK_API_KEY", "BEDROCK_REGION"],
-  },
-  GOOGLE_GEMINI: {
-    name: "Google Gemini",
-    vars: ["GOOGLE_GEMINI_API_KEY"],
-  },
-  GOOGLE_VERTEXAI: {
-    name: "Google Vertex AI",
-    vars: [
-      "GOOGLE_VERTEXAI_API_KEY",
-      "GOOGLE_VERTEXAI_REGION",
-      "GOOGLE_VERTEXAI_PROJECT",
-      "GOOGLE_VERTEXAI_LOCATION",
-    ],
-  },
-  OPENROUTER: {
-    name: "OpenRouter",
-    vars: ["OPENROUTER_API_KEY"],
-  },
-};
+export const providerEnvVars: Record<Provider, { vars: string[] }> =
+  Object.fromEntries(
+    Object.entries(providerConfigs as Record<Provider, ProviderConfig>).map(
+      ([provider, config]) => [
+        provider as Provider,
+        {
+          vars: config.envVars,
+        },
+      ]
+    )
+  ) as Record<Provider, { vars: string[] }>;
 
 /**
  * Generate a .env file example based on the provider
