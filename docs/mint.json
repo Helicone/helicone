@@ -212,7 +212,7 @@
     {
       "group": "Other Integrations",
       "pages": [
-        "getting-started/integration-method/posthog",
+        "other-integrations/langgraph",
         "other-integrations/ragas",
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
@@ -227,7 +227,8 @@
           ]
         },
         "other-integrations/firecrawl",
-        "other-integrations/bubble"
+        "other-integrations/bubble",
+        "getting-started/integration-method/posthog"
       ]
     },
     {
@@ -247,7 +248,7 @@
             "features/prompts/editor",
             "features/prompts/generate",
             "features/prompts/import"
-            ]
+          ]
         },
         "features/experiments",
         {
