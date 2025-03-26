@@ -32,6 +32,8 @@ export class HeliconeLogBuilder {
     alreadyAttached: false,
   };
 
+  private attachedStream: Stream<any> | null = null;
+
   /**
    * Creates a new HeliconeLogBuilder
    * @param logger - The HeliconeManualLogger instance to use for logging
@@ -120,6 +122,17 @@ export class HeliconeLogBuilder {
   }
 
   /**
+   * Attaches a stream to the log builder, this will consume the stream and log it on sendLog
+   * @param stream - The stream to attach
+   */
+  public async attachStream<T>(stream: Stream<T>): Promise<void> {
+    if (this.attachedStream) {
+      throw new Error("Cannot attach multiple streams");
+    }
+    this.attachedStream = stream;
+  }
+
+  /**
    * Sets the response body for non-streaming responses
    * @param body - The response body
    */
@@ -146,6 +159,16 @@ export class HeliconeLogBuilder {
    * @returns A Promise that resolves when logging is complete
    */
   public async sendLog(): Promise<void> {
+    if (this.attachedStream && !this.streamState.isPolling) {
+      const stream = this.toReadableStream(this.attachedStream);
+      const reader = stream.getReader();
+      while (true) {
+        const { done } = await reader.read();
+        if (done) {
+          break;
+        }
+      }
+    }
     await this.waitForStreamToFinish();
     if (this.endTime === 0) {
       this.endTime = Date.now();

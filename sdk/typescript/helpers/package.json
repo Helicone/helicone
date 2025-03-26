@@ -1,6 +1,6 @@
 {
   "name": "@helicone/helpers",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "A Node.js wrapper for some of Helicone's common functionalities",
