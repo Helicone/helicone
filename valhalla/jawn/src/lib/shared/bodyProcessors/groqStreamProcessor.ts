@@ -55,7 +55,6 @@ export class GroqStreamProcessor implements IBodyProcessor {
           promptTokens: groqUsage.prompt_tokens,
           heliconeCalculated: false,
         };
-        console.log("Found Groq usage data in x_groq field:", usage);
       } else if (consolidatedData?.x_groq?.usage) {
         // Fallback to consolidated data if direct chunk search failed
         const groqUsage = consolidatedData.x_groq.usage;
@@ -65,7 +64,6 @@ export class GroqStreamProcessor implements IBodyProcessor {
           promptTokens: groqUsage.prompt_tokens,
           heliconeCalculated: false,
         };
-        console.log("Found Groq usage data in consolidated x_groq:", usage);
       } else {
         // Fallback to regular usage field
         const chunkWithUsage = data.find(
@@ -80,7 +78,6 @@ export class GroqStreamProcessor implements IBodyProcessor {
             promptTokens: regularUsage.prompt_tokens,
             heliconeCalculated: false,
           };
-          console.log("Found standard usage data in chunk:", usage);
         } else if (consolidatedData.usage) {
           usage = {
             totalTokens: consolidatedData.usage.total_tokens,
@@ -88,10 +85,8 @@ export class GroqStreamProcessor implements IBodyProcessor {
             promptTokens: consolidatedData.usage.prompt_tokens,
             heliconeCalculated: false,
           };
-          console.log("Found usage data in consolidated data:", usage);
         } else {
           // If no usage data found, log this and return empty usage
-          console.log("No usage data found in Groq stream response");
           usage = {
             totalTokens: -1,
             completionTokens: -1,
