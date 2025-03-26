@@ -555,7 +555,7 @@ export default function ThemedTable<T extends { id?: string }>(
             ) : (
               <>
                 <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} maxSize={75}>
+                <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
                   <div className="h-full flex-shrink-0 flex flex-col">
                     {rightPanel}
                   </div>
