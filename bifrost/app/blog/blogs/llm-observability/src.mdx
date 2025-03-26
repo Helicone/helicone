@@ -8,22 +8,6 @@ Today, we'll walk you through the importance of observability for production app
 
 Let's dive in!
 
-<TableOfContents excludeHeadings={[
-  "Join Helicone", 
-  "Table of Contents", 
-  "Getting Started with Helicone in 1 Line of Code",
-  "1. Request and Response Logging",
-  "2. Online and Offline Evaluation",
-  "3. Performance Monitoring and Tracing",
-  "4. Anomaly Detection and Feedback Loops",
-  "5. Security and Compliance",
-  "1. Use Prompting Techniques to Reduce Hallucinations",
-  "2. Preventing Prompt Injections",
-  "3. Caching to Improve Performance and Latency",
-  "4. Tracking API Usage and Costs",
-  "5. Iterating on the Prompt"
-]} />
-
 ## What is LLM Observability?
 
 LLM observability refers to the comprehensive monitoring, tracing, and analysis of LLM-powered applications. It involves gaining deep insights into every aspect of the system, from <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, to monitoring model responses, to <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">testing prompts</a> and evaluating the LLM outputs.
@@ -74,9 +58,7 @@ Once your model's output accuracy reaches an acceptable level, the next thing to
 
 For example, tracking latency helps identify any bottlenecks in response generation. Tracking errors such as API failures or exceptions tells you how reliable your AI application is.
 
-<a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Tracing your multi-step workflows</a> helps you debug faster and gives you a deeper understanding of your user's journey.
-
-Here are <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">some useful examples</a> on debugging agents with Sessions.
+<a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Tracing your multi-step workflows</a> helps you debug faster and gives you a deeper understanding of your user's journey. Here are some <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">useful examples</a> on debugging agents with Sessions.
 
 
 ### 4. Anomaly Detection and Feedback Loops
@@ -93,13 +75,13 @@ Maintaining detailed audit trails promotes accountability and aids in meeting co
 
 ## Best Practices for Monitoring LLM Performance
 
-Deploying LLMs in production comes with its set of challenges. We'll walk through some of the most common ones and how you can address them with Helicone. 
+Deploying LLMs in production comes with specific challenges. Let's walk through the most common ones: 
 
-### 1. Use Prompting Techniques to Reduce Hallucinations
+### 1. Use prompting techniques to reduce hallucinations
 
 LLMs sometimes generate inaccurate outputs that sound plausible - also known as hallucination. Hallucinations can happen frequently and undermine your user's trust as your usage goes up.
 
-The good news is, you can mitigate this by using the right <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompting techniques</a>, or by <a href="https://docs.helicone.ai/features/experiments#4-create-and-run-custom-evaluators" target="_blank" rel="noopener">evaluating your LLM outputs</a> in Helicone.
+The good news is, you can mitigate this by using the right prompting techniques like chain-of-thought, tree-of-thought and <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">more</a> or by <a href="https://docs.helicone.ai/features/experiments#4-create-and-run-custom-evaluators" target="_blank" rel="noopener">evaluating your LLM outputs</a> in Helicone.
 
 ### 2. Preventing Prompt Injections
 
