@@ -12,6 +12,7 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
+import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
@@ -326,6 +327,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new GoogleStreamBodyProcessor();
     } else if (isStream && provider === "TOGETHER") {
       return new TogetherAIStreamProcessor();
+    } else if (isStream && provider === "GROQ") {
+      return new GroqStreamProcessor();
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {
