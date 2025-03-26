@@ -1,107 +1,231 @@
-Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers to develop, deploy and monitor their LLM applications and gain full visibility into their development. **But which is better?**
+{/* Both Helicone and LangSmith are both very capable observability platforms used by enterprises and startups to develop, deploy and monitor LLM applications. These tools are essential for gaining full visibility into how well your LLM apps are performing and optimizing them.  */}
+
+Both Helicone and LangSmith are capable, powerful DevOps platforms used by enterprises and developers to develop, deploy, and monitor their LLM applications and gain full visibility into their development. 
+
+**But which platform is better for production?** Let's compare.
 
 ![Helicone vs. LangSmith, which is better?](/static/blog/langsmith-vs-helicone/cover-image.webp)
 
-## Introduction
+## What Makes Helicone Different?
 
-With Helicone, the experience of observing and monitoring your LLM is intuitive and integrates well into any LLM observability tech stack. Being a Gateway, Helicone offers caching, prompt threat detection, moderation, vault, rate limiting, customer portal and other useful observability features. As a bonus, integrating with Helicone is as simple as adding two lines of code.
+### 1. Helicone is Open-Source
 
-_LangSmith is a great tool and there are some things we would recommend them over Helicone for, such as if you’re an enterprise that uses LangChain, develops AI agents, or prefers async solutions._
+Helicone is fully <a href="https://github.com/helicone/helicone" target="_blank" rel="noopener">open-source</a> and free to start. Companies can also <a href="https://docs.helicone.ai/getting-started/self-host/overview" target="_blank" rel="noopener">self-host</a> Helicone within their infrastructure. This ensures that you have full control over the application, flexibility, and customization tailored to specific business needs.
 
-→ <a href="https://us.helicone.ai/signup" target="_blank" rel="noopener">Try Helicone for Free</a>
+### 2. Ease of Integration
 
-## Comparing LangSmith and Helicone at a Glance
+Developers often choose Helicone for our <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">simple proxy setup</a>. Simply by changing the base URL, you can start logging everything with any providers.
 
-| Features               | LangSmith | Helicone |
-| :--------------------- | :-------- | :------- |
-| Gateway                | ❌        | ✔        |
-| Dashboards             | ✔         | ✔        |
-| Trace logging          | ✔         | ❌       |
-| LangChain integration  | ✔         | ✔        |
-| Caching                | ❌        | ✔        |
-| Open Source            | ❌        | ✔        |
-| Prompts                | ❌        | ✔        |
-| Experiments            | ✔         | ✔        |
-| Rate limiting          | ❌        | ✔        |
-| User tracking          | ❌        | ✔        |
-| Vector DB traces       | ✔         | ❌       |
-| Flexible pricing       | ❌        | ✔        |
-| Image support          | ❌        | ✔        |
-| No payload limitations | ❌        | ✔        |
+```python
+https://oai.helicone.ai/v1 # new baseURL
+https://api.openai.com/v1 # old baseURL
+```
 
-## Acting as a Gateway
+Being a proxy, Helicone offers caching, prompt threat detection, key vault, rate limiting, and other useful gateway features. 
 
-The biggest difference between LangSmith and Helicone is how we log your data. Helicone is Gateway whereas LangSmith is an async solution. To integrate with Helicone, it’s as easy as changing the base URL to point to Helicone, and we’ll handle every call you make. As a cherry on top, Helicone exists to fit into any existing tech stack. A minor difference is that LangSmith tracks logs per trace, Helicone tracks logs per request and can support extremely large request bodies.
+However, if you don't want to place Helicone in your critical path, you can use our <a href="https://docs.helicone.ai/getting-started/integration-method/openllmetry" target="_blank" rel="noopener">**async logging**</a> method. 
 
-![2-line code snippet to integrate with Helicone](/static/blog/langsmith-vs-helicone/code.webp)
+<BottomLine
+  title="Latency Impact & Reliability 💡"
+  description="Helicone is built on the edge using Cloudflare Workers to minimize time to response. This adds only ~50 ms for about 95% of the world's Internet-connected population. We're also proud of our 99.99% uptime in the last year."
+/>
 
-### Access to Gateway Features
+### 3. Scalable Usage-Based Pricing
 
-By using Helicone, you get access to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">caching</a>, <a href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits" target="_blank" rel="noopener">rate limiting</a>, <a href="https://docs.helicone.ai/features/advanced-usage/vault" target="_blank" rel="noopener">API key management</a>, <a href="https://docs.helicone.ai/features/advanced-usage/llm-security" target="_blank" rel="noopener">threat detection</a>, <a href="https://docs.helicone.ai/features/advanced-usage/moderations" target="_blank" rel="noopener">moderations</a> and many more. For example, Helicone customers use caching to test and save money by making fewer calls to OpenAI and other models. B2B customers also use us to rate limit their customers and stay compliant by storing OpenAI keys in Helicone vaults.
+Helicone is more cost-effective than LangSmith for two reasons. 
 
-### What about latency that comes with being a Gateway?
+First, we operate on a **volumetric pricing model** that gets cheaper the more requests you have. Second, our paid tier starts at  <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">$20/seat/month</a>, which gets you access to all features in Helicone, compared to $39/seat/month for LangSmith. Our seat-based pricing caps at **$200/mo** for fast-growing teams needing unlimited seats. 
 
-We know how much latency matters to our users. We deploy on the edge using Cloudflare Workers to minimize time to response. This adds only ~50 ms from about 95% of the world’s Internet-connected population (check out <a href="https://www.cloudflare.com/network/" target="_blank" rel="noopener">Cloudflare's stats</a>), for us to bring the additional features and convenience to you.
+**Here's how the pricing scales between Helicone and LangSmith:**
 
-Still not sure which one is better? Check out this update on how <a href="https://blog.cloudflare.com/2024-community-update" target="_blank" rel="noopener"> Cloudflare selected Helicone</a> as 1 of the 29 startups for the Cloudflare Workers Launchpad this cohort.
+![Helicone vs. LangSmith Pricing](/static/blog/langsmith-vs-helicone/helicone-vs-langsmith.webp)
 
-### Just Some Stats
-
-In the last 8 months, Helicone has not had any Gateway incidents with **99.9999% uptime** — that’s pretty good. Whether or not you take that into consideration, we want to give you peace of mind.
-
-## Helicone is Open-source
-
-Helicone is fully <a href="https://github.com/helicone/helicone" target="_blank" rel="noopener">open-source</a> and free to start. Companies can also self-host Helicone within their infrastructure. This ensures that you have full control over the application, flexibility and customization tailored to specific business needs.
-
-## Which is Cheaper?
-
-Helicone is also more cost-effective than LangSmith as it operates on a <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">volumetric pricing</a> model. This means companies only pay for what they use, which makes Helicone an easy and flexible platform for businesses to get started and scale their applications. **The first 10k requests every month are free.**
-
-## Why are companies choosing Helicone over LangSmith?
-
-### Achieve production quality faster
-
-Companies that are highly responsive to market changes or opportunities often use Helicone to achieve production quality faster. Helicone simplifies the innovation process, enabling businesses to stay competitive in the fast-paced AI revolution.
-
-### Handle a large volume of requests
-
-Helicone can handle a large volume of requests, making it a highly-dependable option for businesses with high traffic. Acting as a Gateway, Helicone offers a suite of both middleware and advanced features such as:
-
-- caching
-- prompt threat detection
-- moderation
-- vault
-- rate limiting
-- proxy keys
-- image support (Claude Vision, GPT-4 Vision, and DALL·E 3)
-- experiment `advanced` `coming soon`
-- fine-tune `advanced` `in beta`
-
-### Developer Experience
-
-Helicone places a strong focus on developer experience. Its simple integration, clear pricing and comprehensive features makes Helicone an efficient platform for managing and monitoring your LLM applications.
-
----
-
-## Other Related Comparisons
-
-- <a href="/blog/braintrust-alternatives" rel="noopener" target="_blank">
-    Comparing Braintrust vs Helicone
-  </a>
-- <a href="/blog/best-arize-alternatives" rel="noopener" target="_blank">
-    Comparing Arize AI vs Helicone
-  </a>
-- <a href="/blog/langsmith" rel="noopener" target="_blank">
-    Comparing Langsmith vs Helicone
-  </a>
+| **Logs per month** | **Helicone** | **LangSmith** |
+|------------|-------------|--------------|
+| **10,000 logs** | Free | Free | 
+| **25,000 logs** | $24.00 | $7.50 | 
+| **50,000 logs** | $44.00 | $20.00 | 
+| **100,000 logs** | $61.50 | $45.00 |
+| **2,000,000 logs** | $631.50 🟢 | $995.00 🔴 |
+| **15,000,000 logs** | $2,321.50 🟢 | $7,495.00 🔴 |
 
 <CallToAction
-  title="Stay ahead with Helicone"
-  description="Track your LLM usage, optimize costs, improve your prompts, and scale your LLM app with Helicone."
-  primaryButtonText="Try Helicone for free"
-  primaryButtonLink="https://www.helicone.ai/signup"
-  secondaryButtonText="Contact us"
-  secondaryButtonLink="https://www.helicone.ai/contact"
+  title="Good to know 💡"
+  description="If we don't have a feature you need, there's a good chance we are building it already. We're always listening to feedback and adding features that help you get the most out of your LLM applications."
+  primaryButtonText="Book a Call"
+  primaryButtonLink="https://helicone.ai/contact"
+  secondaryButtonText="Read the Docs"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/quick-start"
+/>
+
+## Comparing Helicone and LangSmith
+
+As a platform that focuses on optimizing your entire LLM lifecycle, Helicone isn't just a great <a href="https://www.helicone.ai/blog/best-langsmith-alternatives" target="_blank" rel="noopener">alternative to LangSmith</a>. It also outperforms in scalability and reliability compared to tools like <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Langfuse</a> and <a href="https://www.helicone.ai/blog/portkey-vs-helicone" target="_blank" rel="noopener">Portkey</a>. 
+
+|                  | **Helicone**                                                 | **LangSmith**                                                |
+| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **Best For**     | Teams looking for a holistic, user-friendly observability solution                 | Teams integrated with LangChain ecosystem                    |
+| **Pricing**      | Starting at `$20/user/month`. Free trial and <a href="https://www.helicone.ai/pricing" rel="noopener" target="_blank">multiple tiers</a> available             | Starting at `$39/user/month`. Limited free plan, <a href="https://www.langchain.com/pricing-langsmith" rel="noopener" target="_blank">multiple tiers</a> available |
+| **Integration**  | Proxy-based (popular with developers) or async SDK options                             | Async SDK option only                                  |
+| **Strengths**    | Easy setup, real-time observability features like <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a>, intuitive UI, supports any LLM provider               | Deep workflow tracing **for lang-products**, comprehensive evaluation tools        |
+| **Drawbacks**     | No built-in support for automatically scoring requests and experiments                              | Complex for simple tasks, layers of abstraction. Mixed opinions about production readiness, especially among experienced engineers. 
+
+## LLM Observability and Monitoring 
+
+| **Feature** | **Helicone** | **LangSmith** |
+|------------|-------------|--------------|
+| **Open-Source** | ✅  | ❌ |
+| **Self-Hosting** <br/> *Ability to deploy on your own infrastructure* | Highly flexible deployment options due to open-source nature | Only available to enterprise users |
+| **Real-Time Observability** <br/> *Reflect updates instantly* | ✅ <br/> See real-time updates on the dashboard as your agent is running | ❌ <br/>No real-time dashboard updates due to caching mechanism |
+| **Built-in Caching** <br/> *Cache common responses to reduce costs* | ✅  | ❌  |
+| **Prompt Management** <br/> *Tools to version, test, and optimize prompts* | ✅ | ✅ |
+| **LLM Workflow Tracing** <br/> *Track complex multi-step or agentic workflows* | ✅ | ✅ |
+| **Experimentation** <br/> *Tools to test and compare different approaches* | ✅ | ✅ |
+| **User Tracking** <br/> *Monitoring usage patterns by individual users* | ✅ | 🟠 <br/>Basic user tracking |
+| **Security Features** <br/> *Key vault, rate limiting, threat detection* | ✅ | 🟠 <br/>Basic security features |
+| **Supported LLMs** <br/> *Range of LLM providers compatible with the tool* | ✅ <br/>Wide provider support | 🟠 <br/>Fewer models, optimized for LangChain ecosystem |
+| **User Support** <br/> *Discord support, chat, email, dedicated Slack for Enterprise* | ✅ | ✅ | 
+
+## Security, Compliance, Privacy
+
+| **Feature** | **Helicone** | **LangSmith** |
+|------------|-------------|--------------|
+| **Data Retention**<br/>*Control how long data is stored* | 1 month (Free)<br/>3 months (Pro/Team)<br/>Forever (Enterprise) | From 14 to 400 days <br/> (longer retention costs more) |
+| **API Key Management**<br/>*Securely store and manage provider credentials* | ✅ | ✅ |
+| **Rate Limiting**<br/>*Prevent excessive usage and manage costs* | ✅ | ❌ |
+| **Threat Detection**<br/>*Identify prompt injection and other security risks* | ✅ | ❌ |
+| **Data Protection**<br/>*Control sensitive data logging/selective logging* | ✅ | ✅ |
+| **HIPAA-Compliant**<br/>*Support for healthcare data privacy requirements* | ✅ | ✅ |
+| **GDPR-Compliant**<br/>*Compliance with EU data protection standards* | ✅ | ✅ |
+| **SOC 2 Certified**<br/>*Audited security and data handling practices* | ✅ | ✅ |
+
+### Self-Hosting and Deployment Options
+
+| Option                  |  Helicone                     | LangSmith               |
+| ----------------------- | ---------------------------- | ----------------------- |
+| **Manual Installation** <br/> *Direct installation on servers*          | ✅                   | ❌          |
+| **Kubernetes** <br/> *Container orchestration deployment. Helm charts available*          | ✅ | ✅  |
+| **Docker Compose** <br/> *Multi-container deployment*      | ✅                   | ✅              |
+| **External Databases** <br/> *Connection to existing database systems* | ✅                   | ✅              |
+| **Licensing** <br/> *Licensing model for self-hosting*        | ✅ <br/>No license required         | ✅ <br/>Enterprise license required     |
+
+## UI Comparison: Helicone vs LangSmith
+
+{/* ### Helicone: Simple but Powerful Observability */}
+
+![Helicone Dashboard Image](/static/blog/langfuse-alternatives/helicone-dashboard.webp)
+
+We believe that observability should be simple and intuitive at Helicone, that's why we designed our platform to be easy to use and understand.
+It's reflected in both our UI and workflow that are designed to make you more productive as a developer.
+
+What's great is that you don't need to be a data analyst to understand the dashboard. It's designed for a wide range of technical experiences.
+
+### Integration Example
+
+Helicone's proxy integration requires minimal code changes. Here's an example of integration with <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">OpenAI</a>:
+
+```javascript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: { "Helicone-Auth": `Bearer ${HELICONE_API_KEY}` }
+});
+```
+
+See docs for <a href="https://docs.helicone.ai/integrations/anthropic/javascript" target="_blank" rel="noopener">Anthropic</a>, <a href="https://docs.helicone.ai/integrations/gemini/api/javascript" target="_blank" rel="noopener">Gemini</a> and more.
+
+### LangSmith Dashboard
+
+![LangSmith Dashboard Image](/static/blog/langsmith-vs-helicone/Langsmith-dashboard.png)
+
+LangSmith specializes in tracing complex AI workflows, particularly those built with LangChain (built by the same team). LangSmith organizes everything into:
+
+- **Runs**: Individual operations (like a single LLM call)
+- **Threads**: Groups of related operations that fulfill a user request
+- **Projects**: Collections of traces for different parts of your application
+
+LangSmith's interface is more technical than Helicone's but provides somewhat deeper visibility into complex workflows. 
+
+<BottomLine
+  title="💡 Please note:"
+  description="LangSmith's dashboard is customizable if you want to build your own analytics from scratch. If you want a pre-built dashboard with the most important LLM metrics, Helicone might be a better choice for you."
+/>
+
+### Integration Approach
+
+LangSmith uses an async SDK-based approach. This involves using function decorators to trace your code. For example:
+
+```python
+from langsmith import traceable
+
+@traceable
+def process_query(question):
+    # Application logic
+    return response
+```
+
+This method requires more code changes and is more technical but gives you detailed insights into each function.
+
+## Which platform should you choose?
+
+We hear our customers say that their experience of monitoring LLM application in Helicone is intuitive and integrates well into any LLM observability tech stack. LangSmith is a great tool, and there are some things we would recommend them over Helicone for, such as if you're an enterprise that is in the LangChain ecosystem.
+
+We've distilled the key features of Helicone and LangSmith into a table to help you decide which platform is best for your needs: 
+
+| **Choose Helicone if you need:**                                                                                  | **Choose LangSmith if you need:**                                                                                  |
+|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| 🔹 The easiest possible setup                                                                                     | ⬥ Deep integration with LangChain or LangGraph                                                                    |
+|  🔹 Robust out-of-the-box security features (key vault, rate limiting, threat detection)                                                            | ⬥ Detailed testing and evaluation tools                                                                           |
+| 🔹 A tool your entire team can easily use  (technical and non-technical)                                             | ⬥ A Python-first, developer-heavy workflow                                                                         |
+| 🔹 Support for multiple LLM providers                                                                             | ⬥ Comfort with a closed-source solution                                                                            |
+
+We recommend trying out both platforms to see which one is better for you. If you have any questions, please don't hesitate to <a href="https://www.helicone.ai/contact" rel="noopener" target="_blank">reach out</a>!
+
+### You might be interested in
+
+- <a href="https://docs.helicone.ai/getting-started/quick-start" rel="noopener" target="_blank">
+    Quick Start with Helicone (Docs)
+  </a>
+- <a href="/blog/best-langfuse-alternatives" rel="noopener" target="_blank">
+    Comparing Langfuse vs Helicone
+  </a>
+- <a href="/blog/portkey-vs-helicone" rel="noopener" target="_blank">
+    Comparing Portkey vs Helicone
+  </a>
+
+<FAQ 
+  items={[
+    {
+      question: "How hard is it to add Helicone or LangSmith to my existing app?",
+      answer: "Helicone can be added by changing a single line of code (for the proxy approach) or using their SDK for background async logging. LangSmith requires adding decorators to your functions and using their SDK throughout your code."
+    },
+    {
+      question: "Will these tools help me save money on my LLM costs?",
+      answer: "Helicone has built-in caching that can significantly reduce costs by reusing responses for similar requests. LangSmith doesn't have any features particularly geared towards cost saving besides basic cost tracking."
+    },
+    {
+      question: "Can I host these tools on my own servers?",
+      answer: "Yes, both offer self-hosting. Helicone gives you more options (manual setup, Kubernetes, Docker, cloud deployment) and can be hosted for free, while LangSmith focuses on Kubernetes and Docker and requires an Enterprise subscription."
+    },
+    {
+      question: "Do I need to be a developer to understand the dashboards?",
+      answer: "Helicone's dashboard is designed to be accessible to both technical and non-technical users. LangSmith has a more technical focus and assumes some development knowledge."
+    },
+    {
+      question: "Which one has better security?",
+      answer: "Helicone offers more security features, including key management, rate limiting, and protection against prompt injection attacks. LangSmith provides basic security controls like access management."
+    },
+    {
+      question: "Can these tools handle high traffic?",
+      answer: "Helicone is built on a highly distributed cloud infrastructure designed for massive scale. LangSmith is more centralized, however, and may face challenges with extremely high volumes."
+    },
+    {
+      question: "Do they work with all LLM providers?",
+      answer: "Helicone works with virtually all LLM providers, while LangSmith supports a more limited number of providers but works better within the LangChain ecosystem."
+    }
+  ]}
 />
 
 <Questions />
