@@ -37,7 +37,7 @@ class HeliconeLogBuilder:
 
     def __init__(self, logger, request, additional_headers=None):
         self.logger = logger
-        self.request = json.loads(json.dumps(request))
+        self.request = request.copy()
         self.additional_headers = additional_headers or {}
         self.start_time = time.time() * 1000  # Convert to milliseconds
         self.end_time = 0
