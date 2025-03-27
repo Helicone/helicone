@@ -21,56 +21,30 @@ const ScrollArea = React.forwardRef<
       ...props
     },
     ref
-  ) => {
-    const [isAtBottom, setIsAtBottom] = React.useState(false);
-    const viewportRef = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-      const viewport = viewportRef.current;
-      if (!viewport) return;
-
-      const handleScroll = () => {
-        const MARGIN = 10;
-        const { scrollTop, scrollHeight, clientHeight } = viewport;
-        setIsAtBottom(scrollHeight - scrollTop <= clientHeight + MARGIN);
-      };
-
-      viewport.addEventListener("scroll", handleScroll);
-      return () => viewport.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    return (
-      <ScrollAreaPrimitive.Root
-        ref={ref}
-        className={cn("relative overflow-hidden", className)}
-        type={type}
-        {...props}
-      >
-        <ScrollAreaPrimitive.Viewport
-          ref={viewportRef}
-          className="h-full w-full rounded-[inherit]"
-        >
-          {children}
-        </ScrollAreaPrimitive.Viewport>
-        {showBottomGradient && (
-          <div
-            className={`h-28 bg-gradient-to-b from-transparent to-white dark:to-neutral-950 absolute bottom-0 left-0 right-0 pointer-events-none transition-opacity duration-300 ${
-              isAtBottom ? "opacity-0" : "opacity-100"
-            }`}
-          />
-        )}
-        {orientation === "both" ? (
-          <>
-            <ScrollBar orientation="vertical" />
-            <ScrollBar orientation="horizontal" />
-          </>
-        ) : (
-          <ScrollBar orientation={orientation} />
-        )}
-        <ScrollAreaPrimitive.Corner />
-      </ScrollAreaPrimitive.Root>
-    );
-  }
+  ) => (
+    <ScrollAreaPrimitive.Root
+      ref={ref}
+      className={cn("relative overflow-hidden", className)}
+      type={type}
+      {...props}
+    >
+      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+        {children}
+      </ScrollAreaPrimitive.Viewport>
+      {showBottomGradient && (
+        <div className="h-28 bg-gradient-to-b from-transparent to-white dark:to-neutral-950 absolute bottom-0 left-0 right-0 pointer-events-none" />
+      )}
+      {orientation === "both" ? (
+        <>
+          <ScrollBar orientation="vertical" />
+          <ScrollBar orientation="horizontal" />
+        </>
+      ) : (
+        <ScrollBar orientation={orientation} />
+      )}
+      <ScrollAreaPrimitive.Corner />
+    </ScrollAreaPrimitive.Root>
+  )
 );
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
