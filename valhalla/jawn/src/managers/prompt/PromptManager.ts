@@ -45,6 +45,7 @@ export class PromptManager extends BaseManager {
       },
       prompt: requestResult.data.request_body,
       userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+      createdAt: requestResult.data.request_created_at ?? undefined,
     });
 
     if (prompt.error || !prompt.data) {
@@ -710,6 +711,7 @@ export class PromptManager extends BaseManager {
       messages: any[];
     };
     metadata: Record<string, any>;
+    createdAt?: string;
   }): Promise<Result<CreatePromptResponse, string>> {
     const existingPrompt = await dbExecute<{
       id: string;
@@ -751,7 +753,7 @@ export class PromptManager extends BaseManager {
     }>(
       `
     INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true, "provider": "OPENAI"}'::jsonb)
+    VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, NOW()), '{"isProduction": true, "provider": "OPENAI"}'::jsonb)
     RETURNING id
     `,
       [
@@ -761,6 +763,7 @@ export class PromptManager extends BaseManager {
         0, // Starting with minor version 0
         JSON.stringify(params.prompt),
         params.prompt.model,
+        params.createdAt,
       ]
     );
 

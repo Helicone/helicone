@@ -1,4 +1,5 @@
 import { HeliconeProperties } from "../models/HeliconeProxyRequest";
+import { safePut } from "../safePut";
 
 export interface RateLimitOptions {
   time_window: number;
@@ -161,7 +162,12 @@ export async function updateRateLimitCounter(
     });
   }
 
-  await rateLimitKV.put(kvKey, JSON.stringify(prunedTimestamps), {
-    expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
+  await safePut({
+    key: rateLimitKV,
+    keyName: kvKey,
+    value: JSON.stringify(prunedTimestamps),
+    options: {
+      expirationTtl: Math.ceil(timeWindowMillis / 1000), // Convert timeWindowMillis to seconds for expirationTtl
+    },
   });
 }

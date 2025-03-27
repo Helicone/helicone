@@ -206,6 +206,26 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "o1-pro-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "how-to-reduce-llm-hallucination",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "mcp-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "manus-benchmark-operator-comparison",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "browser-use-vs-computer-use-vs-operator",
     },
   },

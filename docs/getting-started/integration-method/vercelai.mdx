@@ -1,7 +1,7 @@
 ---
 title: "Vercel AI SDK Integration"
 sidebarTitle: "Vercel AI"
-description: "Use Vercel AI SDK to integrate with Helicone to log your OpenAI usage."
+description: "Integrate Vercel AI SDK with Helicone to monitor, debug, and improve your AI applications."
 "twitter:title": "Vercel AI SDK Integration - Helicone OSS LLM Observability"
 ---
 
@@ -10,11 +10,11 @@ description: "Use Vercel AI SDK to integrate with Helicone to log your OpenAI us
 <Steps>
   <Step title="Create an account + Generate an API Key">
     Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+    can generate an [API key](https://us.helicone.ai/settings/api-keys).
   </Step>
   <Step title="Set HELICONE_API_KEY as an environment variable">
 ``` javascript
-HELICONE_API_KEY=<your API key>
+HELICONE_API_KEY=your-helicone-api-key
 ```
   </Step>
   <Step title="Modify the base URL and add a Helicone-Auth header">
@@ -54,7 +54,7 @@ const response = streamText({
 });
 ```
 
-```javascript Google (gemini)
+```javascript Google (Gemini)
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const google = createGoogleGenerativeAI({
@@ -77,7 +77,8 @@ const response = streamText({
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 
 const bedrock = createAmazonBedrock({
-  region: "us-east-1",
+  region: process.env.AWS_REGION,
+  baseURL: `https://bedrock.helicone.ai/v1/${process.env.AWS_REGION}`,
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   sessionToken: process.env.AWS_SESSION_TOKEN, // Optional: for temporary credentials
@@ -90,7 +91,7 @@ const bedrock = createAmazonBedrock({
 });
 
 // Use AWS Bedrock to make API calls
-const response = streamText({
+const response = generateText({
   model: bedrock("anthropic.claude-v2"),
   prompt: "Hello world",
 });
@@ -99,3 +100,49 @@ const response = streamText({
 </CodeGroup>
   </Step>
 </Steps>
+
+## Configuring Helicone Features with Headers
+
+Enable Helicone features through headers, configurable at client initialization or individual request level.
+
+### Configure Client
+
+```javascript {3-6}
+const openai = createOpenAI({
+  baseURL: "https://oai.helicone.ai/v1",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Cache-Enabled": "true",
+  },
+});
+```
+
+### Generate Text
+
+```javascript {4-9}
+const response = generateText({
+  model: openai("gpt-4o"),
+  prompt: "Hello world",
+  headers: {
+    "Helicone-User-Id": "john@doe.com",
+    "Helicone-Session-Id": "uuid",
+    "Helicone-Session-Path": "/chat",
+    "Helicone-Session-Name": "Chatbot",
+  },
+});
+```
+
+### Stream Text
+
+```javascript {4-9}
+const response = streamText({
+  model: openai("gpt-4o"),
+  prompt: "Hello world",
+  headers: {
+    "Helicone-User-Id": "john@doe.com",
+    "Helicone-Session-Id": "uuid",
+    "Helicone-Session-Path": "/chat",
+    "Helicone-Session-Name": "Chatbot",
+  },
+});
+```

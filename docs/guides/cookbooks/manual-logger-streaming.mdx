@@ -37,11 +37,22 @@ const helicone = new HeliconeManualLogger({
 
 ## Streaming Methods
 
-The HeliconeManualLogger provides three main methods for working with streams:
+The HeliconeManualLogger provides several methods for working with streams:
 
-### 1. logStream
+### 1. logBuilder (New)
 
-The most flexible method that gives you full control over stream handling:
+The recommended method for handling streaming responses with improved error handling:
+
+```typescript
+logBuilder(
+  request: HeliconeLogRequest,
+  additionalHeaders?: Record<string, string>
+): HeliconeLogBuilder
+```
+
+### 2. logStream
+
+A flexible method that gives you full control over stream handling:
 
 ```typescript
 async logStream<T>(
@@ -51,7 +62,7 @@ async logStream<T>(
 ): Promise<T>
 ```
 
-### 2. logSingleStream
+### 3. logSingleStream
 
 A simplified method for logging a single ReadableStream:
 
@@ -63,7 +74,7 @@ async logSingleStream(
 ): Promise<void>
 ```
 
-### 3. logSingleRequest
+### 4. logSingleRequest
 
 For logging a single request with a response body:
 
@@ -74,6 +85,55 @@ async logSingleRequest(
   additionalHeaders?: Record<string, string>
 ): Promise<void>
 ```
+
+## Next.js App Router with LogBuilder (Recommended)
+
+The new `logBuilder` method provides better error handling and simplified stream management:
+
+```typescript
+// app/api/chat/route.ts
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+const together = new Together();
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+export async function POST(request: Request) {
+  const { question } = await request.json();
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: true,
+  };
+
+  const heliconeLogBuilder = helicone.logBuilder(body, {
+    "Helicone-Property-Environment": "dev",
+  });
+
+  try {
+    const response = await together.chat.completions.create(body);
+    return new Response(heliconeLogBuilder.toReadableStream(response));
+  } catch (error) {
+    heliconeLogBuilder.setError(error);
+    throw error;
+  } finally {
+    after(async () => {
+      // This will be executed after the response is sent to the client
+      await heliconeLogBuilder.sendLog();
+    });
+  }
+}
+```
+
+The `logBuilder` approach offers several advantages:
+
+- Better error handling with `setError` method
+- Simplified stream handling with `toReadableStream`
+- More flexible async/await patterns with `sendLog`
+- Proper error status code tracking
 
 ## Examples with Different LLM Providers
 
@@ -253,9 +313,6 @@ import Together from "together-ai";
 const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
 const helicone = new HeliconeManualLogger({
   apiKey: process.env.HELICONE_API_KEY!,
-  headers: {
-    "Helicone-Property-appname": "TogetherChat",
-  },
 });
 
 export async function POST(request: Request) {
@@ -291,8 +348,6 @@ export async function POST(request: Request) {
   return new Response(stream1.toReadableStream());
 }
 ```
-
-The `after` function from Next.js allows you to perform operations after the response has been sent to the client, which is ideal for logging. This approach ensures that logging doesn't delay the response to the user.
 
 ## Logging Custom Events
 
@@ -330,9 +385,18 @@ await helicone.logSingleRequest(
 
 ## Advanced Usage: Tracking Time to First Token
 
-The `logStream` and `logSingleStream` methods automatically track the time to first token, which is a valuable metric for understanding LLM response latency:
+The `logStream`, `logSingleStream`, and `logBuilder` methods automatically track the time to first token, which is a valuable metric for understanding LLM response latency:
 
 ```typescript
+// Using logBuilder (recommended)
+const heliconeLogBuilder = helicone.logBuilder(requestBody, {
+  "Helicone-User-Id": userId,
+});
+// The builder will automatically track when the first chunk arrives
+const stream = heliconeLogBuilder.toReadableStream(response);
+// Later, call sendLog() to complete the logging
+await heliconeLogBuilder.sendLog();
+
 // Using logStream
 helicone.logStream(
   requestBody,

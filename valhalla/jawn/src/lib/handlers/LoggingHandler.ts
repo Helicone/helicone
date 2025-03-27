@@ -447,6 +447,12 @@ export class LoggingHandler extends AbstractLogHandler {
     ) {
       return null;
     }
+    if (Array.isArray(context.processedLog.request.heliconeTemplate.template)) {
+      context.processedLog.request.heliconeTemplate.template = {
+        error: "Invalid helicone template",
+        message: "Helicone template is an array",
+      };
+    }
 
     const promptRecord: PromptRecord = {
       promptId: context.message.log.request.promptId,
@@ -493,7 +499,10 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     const requestResponseLog: RequestResponseRMT = {
-      user_id: request.userId,
+      user_id:
+        typeof request.userId === "string"
+          ? request.userId
+          : String(request.userId),
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,

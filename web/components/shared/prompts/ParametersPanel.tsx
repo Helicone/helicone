@@ -59,7 +59,7 @@ export default function ParametersPanel({
 
   // Memoize the list of available creators to prevent unnecessary re-renders
   const creators: Creator[] = useMemo(
-    () => ["OpenAI", "Anthropic", "Google"],
+    () => Object.keys(modelMapping) as Creator[],
     []
   );
 
@@ -370,7 +370,7 @@ export default function ParametersPanel({
               value={currentModelName || ""}
               onValueChange={handleModelChange}
             >
-              <SelectTrigger className="w-36 h-8">
+              <SelectTrigger className="w-44 h-8">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
@@ -385,7 +385,7 @@ export default function ParametersPanel({
               value={parameters.provider as string}
               onValueChange={handleProviderChange}
             >
-              <SelectTrigger className="w-28 h-8">
+              <SelectTrigger className="w-32 h-8">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
@@ -402,7 +402,7 @@ export default function ParametersPanel({
         {/* Temperature */}
         <div className="flex flex-row items-center justify-between gap-4 py-2">
           <div className="flex items-center gap-2">
-            {parameters.temperature < 1 ? (
+            {parameters.temperature ?? 1 < 1 ? (
               <PiTargetBold className="text-secondary" />
             ) : (
               <PiPaintBrushBold className="text-secondary" />
@@ -412,9 +412,11 @@ export default function ParametersPanel({
             </label>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm">{parameters.temperature.toFixed(1)}</span>
+            <span className="text-sm">
+              {(parameters.temperature ?? 1).toFixed(1)}
+            </span>
             <Slider
-              value={[parameters.temperature]}
+              value={[parameters.temperature ?? 1]}
               min={0}
               max={2}
               step={0.01}

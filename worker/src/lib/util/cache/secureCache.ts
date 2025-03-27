@@ -1,4 +1,5 @@
 import { Env, hash } from "../../..";
+import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
 
 export interface SecureCacheEnv {
@@ -101,17 +102,26 @@ export async function decrypt(
   return new TextDecoder().decode(decryptedContent);
 }
 
-export async function storeInCache(
+async function storeInCache(
   key: string,
   value: string,
   env: SecureCacheEnv
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
   const hashedKey = await hash(key);
-  await env.SECURE_CACHE.put(hashedKey, JSON.stringify(encrypted), {
-    // 10 minutes
-    expirationTtl: 600,
-  });
+  try {
+    await safePut({
+      key: env.SECURE_CACHE,
+      keyName: hashedKey,
+      value: JSON.stringify(encrypted),
+      options: {
+        // 10 minutes
+        expirationTtl: 600,
+      },
+    });
+  } catch (e) {
+    console.log("Error storing in cache", e);
+  }
   InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
 }
 

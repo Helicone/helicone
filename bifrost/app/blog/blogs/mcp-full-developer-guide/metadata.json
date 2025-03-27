@@ -1,0 +1,12 @@
+{
+    "title": "The Full Developer's Guide to Model Context Protocol",
+    "title1": "The Full Developer's Guide to Model Context Protocol",
+    "title2": "The Full Developer's Guide to Model Context Protocol",
+    "description": "Model Context Protocol (MCP) provides a standardized interface for connecting Large Language Models to external data sources and tools. Here's a full guide to help you get started.",
+    "images": "/static/blog/mcp-full-developer-guide/claude-mcp.webp",
+    "time": "10 minute read",
+    "author": "Yusuf Ishola",
+    "date": "March 13, 2025", 
+    "badge": "guide"
+  }
+  

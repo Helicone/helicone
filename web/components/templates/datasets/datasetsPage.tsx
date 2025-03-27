@@ -3,11 +3,12 @@ import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/helicone
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Database } from "lucide-react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { useState } from "react";
+import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface DatasetsPageProps {
   currentPage: number;
@@ -25,25 +26,19 @@ const DatasetsPage = (props: DatasetsPageProps) => {
   const { datasets, isLoading, isRefetching, refetch } =
     useGetHeliconeDatasets();
 
-  const router = useRouter();
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const { canCreate, freeLimit, upgradeMessage } = useFeatureLimit(
+    "datasets",
+    datasets?.length || 0
+  );
 
-  const org = useOrg();
+  const router = useRouter();
 
   return (
     <>
       {isLoading ? (
         <div className="flex flex-col space-y-2 w-full items-center">
           <Skeleton className="w-full h-full" />
-        </div>
-      ) : !isLoading && org?.currentOrg?.tier === "free" ? (
-        <div className="flex flex-col space-y-2 w-full items-center bg-white">
-          <FeatureUpgradeCard
-            title="Datasets"
-            headerTagline="Create datasets for evals and fine-tuning"
-            icon={<Database className="w-4 h-4 text-sky-500" />}
-            featureName="Datasets"
-            highlightedFeature="datasets"
-          />
         </div>
       ) : datasets?.length === 0 ? (
         <div className="flex flex-col w-full min-h-screen items-center bg-slate-50">
@@ -52,6 +47,15 @@ const DatasetsPage = (props: DatasetsPageProps) => {
       ) : (
         <>
           <AuthHeader title={"Datasets"} />
+
+          {!canCreate && (
+            <FreeTierLimitBanner
+              feature="datasets"
+              itemCount={datasets.length}
+              freeLimit={freeLimit}
+            />
+          )}
+
           <ThemedTable
             isDatasetsPage={true}
             defaultColumns={[
@@ -63,14 +67,14 @@ const DatasetsPage = (props: DatasetsPageProps) => {
                 header: "Created At",
                 accessorKey: "created_at",
                 minSize: 200,
-                accessorFn: (row) => {
+                accessorFn: (row: any) => {
                   return new Date(row.created_at ?? 0).toLocaleString();
                 },
               },
               {
                 header: "Dataset Type",
                 accessorKey: "dataset_type",
-                cell: ({ row }) => {
+                cell: ({ row }: { row: any }) => {
                   return row.original.dataset_type === "helicone" ? (
                     <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900 px-2 py-1 -my-1 text-xs font-medium text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-600/20">
                       Helicone
@@ -95,9 +99,19 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             id="datasets"
             skeletonLoading={false}
             onRowSelect={(row) => {
-              router.push(`/datasets/${row.id}`);
+              router.push({
+                pathname: `/datasets/${row.id}`,
+                query: { name: row.name || "Untitled Dataset" },
+              });
             }}
             fullWidth={true}
+          />
+
+          <UpgradeProDialog
+            open={upgradeDialogOpen}
+            onOpenChange={setUpgradeDialogOpen}
+            featureName="Datasets"
+            limitMessage={upgradeMessage}
           />
         </>
       )}

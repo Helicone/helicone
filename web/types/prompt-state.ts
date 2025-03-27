@@ -23,7 +23,7 @@ export interface PromptState {
 export interface StateParameters {
   provider: Provider;
   model: string;
-  temperature: number;
+  temperature?: number;
   reasoning_effort?: "low" | "medium" | "high";
   max_tokens?: number;
   tools?: Tool[];

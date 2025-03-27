@@ -1,0 +1,61 @@
+We're excited to introduce the `HeliconeLogBuilder`, a new approach to handling streaming responses with better error handling and a simplified workflow.
+
+### Introducing HeliconeLogBuilder
+
+The new `HeliconeLogBuilder` class provides a simplified way to handle streaming LLM responses with improved error handling and async support. This new approach makes it easier to:
+
+- Handle errors gracefully with the `setError` method
+- Simplify stream handling with the `toReadableStream` method
+- Use more flexible async/await patterns with `sendLog`
+- Track proper error status codes
+
+### Example Usage with Next.js App Router
+
+```typescript
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { after } from "next/server";
+import Together from "together-ai";
+
+const together = new Together();
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+});
+
+export async function POST(request: Request) {
+  const { question } = await request.json();
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: true,
+  };
+
+  const heliconeLogBuilder = helicone.logBuilder(body, {
+    "Helicone-Property-Environment": "dev",
+  });
+
+  try {
+    const response = await together.chat.completions.create(body);
+    return new Response(heliconeLogBuilder.toReadableStream(response));
+  } catch (error) {
+    heliconeLogBuilder.setError(error);
+    throw error;
+  } finally {
+    after(async () => {
+      // This will be executed after the response is sent to the client
+      await heliconeLogBuilder.sendLog();
+    });
+  }
+}
+```
+
+### Benefits Over Previous Methods
+
+The `logBuilder` approach offers several advantages over the previous streaming methods:
+
+- **Better Error Handling**: Automatically captures and logs errors with the `setError` method
+- **Simplified Stream Handling**: Combines stream processing and logging in one step
+- **More Flexible Async Patterns**: Better support for async workflows with the `sendLog` method
+- **Proper Status Code Tracking**: Accurately records HTTP status codes, including errors
+- **Improved Time-to-First-Token Metrics**: More reliable tracking of streaming performance
+
+This new approach is now the recommended way to handle streaming responses with Helicone. For more information, check out our [Manual Logger with Streaming](https://docs.helicone.ai/guides/cookbooks/manual-logger-streaming) guide.

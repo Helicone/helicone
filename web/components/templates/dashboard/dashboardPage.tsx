@@ -55,7 +55,13 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import { TimeFilter } from "@/types/timeFilter";
-import OnboardingFloatingPrompt from "./OnboardingFloatingPrompt";
+import DashboardEmptyState from "./DashboardEmptyState";
+import {
+  getMockMetrics,
+  getMockModels,
+  getMockOverTimeData,
+  getMockFilterMap,
+} from "./mockDashboardData";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -93,18 +99,12 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const orgContext = useOrg();
 
-  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(
-    orgContext?.currentOrg?.has_onboarded != undefined
-      ? !orgContext?.currentOrg?.has_onboarded
-      : false
-  );
+  // Track whether we should show mock data (for users who haven't onboarded)
+  const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
 
-  useEffect(() => {
-    orgContext?.refetchOrgs();
-    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
-      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
-    }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  const mockMetrics = useMemo(() => getMockMetrics(), []);
+  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
+  const mockModels = useMemo(() => getMockModels(), []);
 
   const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
     useOrganizationLayout(
@@ -172,6 +172,11 @@ const DashboardPage = (props: DashboardPageProps) => {
     [timeFilter]
   );
 
+  const mockOverTimeData = useMemo(
+    () => getMockOverTimeData(timeIncrement),
+    [timeIncrement]
+  );
+
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,14 +216,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
 
   const {
-    metrics,
-    filterMap,
+    metrics: realMetrics,
+    filterMap: realFilterMap,
     searchPropertyFilters,
-    overTimeData,
+    overTimeData: realOverTimeData,
     isAnyLoading,
     refetch,
     remove,
-    models,
+    models: realModels,
     isModelsLoading,
   } = useDashboardPage({
     timeFilter,
@@ -228,6 +233,13 @@ const DashboardPage = (props: DashboardPageProps) => {
     dbIncrement: timeIncrement,
     isLive,
   });
+
+  const metrics = shouldShowMockData ? mockMetrics : realMetrics;
+  const filterMap = shouldShowMockData ? mockFilterMap : realFilterMap;
+  const overTimeData = shouldShowMockData ? mockOverTimeData : realOverTimeData;
+  const models = shouldShowMockData
+    ? { data: mockModels.data, isLoading: false }
+    : realModels;
 
   const getAdvancedFilters = useCallback((): UIFilterRowTree => {
     const decodeFilter = (encoded: any): UIFilterRowTree => {
@@ -289,7 +301,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   useEffect(() => {
     if (initialLoadRef.current && filterMap.length > 0 && !isAnyLoading) {
-      console.log("load");
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
@@ -476,91 +487,103 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   };
 
-  const [showDemoDisclaimerModal, setShowDemoDisclaimerModal] = useLocalStorage(
-    "showDemoDisclaimerModal-DashboardPage",
-    true
-  );
-
   return (
     <>
       <div className="px-8">
-        <AuthHeader
-          isWithinIsland={true}
-          title={"Dashboard"}
-          headerActions={
-            <button
-              onClick={() => {
-                remove();
-                refetch();
-              }}
-              className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
-            >
-              <ArrowPathIcon
-                className={clsx(
-                  isAnyLoading ? "animate-spin" : "",
-                  "h-5 w-5 inline"
-                )}
-              />
-            </button>
-          }
-          actions={
-            <div>
-              <ThemedSwitch
-                checked={isLive}
-                onChange={setIsLive}
-                label="Live"
-              />
-            </div>
-          }
-        />
+        {!shouldShowMockData && (
+          <AuthHeader
+            isWithinIsland={true}
+            title={"Dashboard"}
+            headerActions={
+              <button
+                onClick={() => {
+                  remove();
+                  refetch();
+                }}
+                className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
+              >
+                <ArrowPathIcon
+                  className={clsx(
+                    isAnyLoading ? "animate-spin" : "",
+                    "h-5 w-5 inline"
+                  )}
+                />
+              </button>
+            }
+            actions={
+              <div>
+                <ThemedSwitch
+                  checked={isLive}
+                  onChange={setIsLive}
+                  label="Live"
+                />
+              </div>
+            }
+          />
+        )}
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className="space-y-4 mt-4">
+          <div className={`${shouldShowMockData ? "pt-6" : "mt-2 space-y-4"}`}>
             <ThemedTableHeader
               isFetching={isAnyLoading || isModelsLoading}
-              timeFilter={{
-                currentTimeFilter: timeFilter,
-                customTimeFilter: true,
-                timeFilterOptions: [],
-                defaultTimeFilter: interval,
-                onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                  if ((key as string) === "custom") {
-                    value = value.replace("custom:", "");
-                    const start = new Date(value.split("_")[0]);
-                    const end = new Date(value.split("_")[1]);
-                    setInterval(key);
-                    setTimeFilter({
-                      start,
-                      end,
-                    });
-                  } else {
-                    setInterval(key);
-                    setTimeFilter({
-                      start: getTimeIntervalAgo(key),
-                      end: new Date(),
-                    });
-                  }
-                },
-              }}
-              advancedFilter={{
-                filterMap,
-                onAdvancedFilter: onSetAdvancedFiltersHandler,
-                filters: advancedFilters,
-                searchPropertyFilters: searchPropertyFilters,
-              }}
-              savedFilters={{
-                currentFilter: currFilter ?? undefined,
-                filters:
-                  transformedFilters && orgLayout?.data?.id
-                    ? transformedFilters
-                    : undefined,
-                onFilterChange: onLayoutFilterChange,
-                onSaveFilterCallback: async () => {
-                  await orgLayoutRefetch();
-                },
-                layoutPage: "dashboard",
-              }}
+              timeFilter={
+                shouldShowMockData
+                  ? undefined
+                  : {
+                      currentTimeFilter: timeFilter,
+                      customTimeFilter: true,
+                      timeFilterOptions: [],
+                      defaultTimeFilter: interval,
+                      onTimeSelectHandler: (
+                        key: TimeInterval,
+                        value: string
+                      ) => {
+                        if ((key as string) === "custom") {
+                          value = value.replace("custom:", "");
+                          const start = new Date(value.split("_")[0]);
+                          const end = new Date(value.split("_")[1]);
+                          setInterval(key);
+                          setTimeFilter({
+                            start,
+                            end,
+                          });
+                        } else {
+                          setInterval(key);
+                          setTimeFilter({
+                            start: getTimeIntervalAgo(key),
+                            end: new Date(),
+                          });
+                        }
+                      },
+                    }
+              }
+              advancedFilter={
+                shouldShowMockData
+                  ? undefined
+                  : {
+                      filterMap,
+                      onAdvancedFilter: onSetAdvancedFiltersHandler,
+                      filters: advancedFilters,
+                      searchPropertyFilters: searchPropertyFilters,
+                    }
+              }
+              savedFilters={
+                shouldShowMockData
+                  ? undefined
+                  : {
+                      currentFilter: currFilter ?? undefined,
+                      filters:
+                        transformedFilters && orgLayout?.data?.id
+                          ? transformedFilters
+                          : undefined,
+                      onFilterChange: onLayoutFilterChange,
+                      onSaveFilterCallback: async () => {
+                        await orgLayoutRefetch();
+                      },
+                      layoutPage: "dashboard",
+                    }
+              }
             />
             <section id="panels" className="-m-2">
               <ResponsiveGridLayout
@@ -986,19 +1009,18 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
               </ResponsiveGridLayout>
+              <div className="relative">
+                {shouldShowMockData && <DashboardEmptyState isVisible={true} />}
+              </div>
             </section>
+            <SuggestionModal
+              open={openSuggestGraph}
+              setOpen={setOpenSuggestGraph}
+            />
+
+            <UpgradeProModal open={open} setOpen={setOpen} />
           </div>
         )}
-        <SuggestionModal
-          open={openSuggestGraph}
-          setOpen={setOpenSuggestGraph}
-        />
-
-        <UpgradeProModal open={open} setOpen={setOpen} />
-        <OnboardingFloatingPrompt
-          open={showOnboardingPopUp}
-          setOpen={setShowOnboardingPopUp}
-        />
       </div>
     </>
   );
