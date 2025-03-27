@@ -91,17 +91,30 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                   className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0"
                   placeholder="Untitled Filter"
                 />
-                {filterStore.hasUnsavedChanges && (
+                {(crud.isRefetching || crud.isSaving) && (
                   <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
                     Saving...
                   </div>
                 )}
-                {filterStore.activeFilterName === "Untitled Filter" && (
-                  <Small className="text-muted-foreground text-[10px] font-normal flex gap-1 items-center text-nowrap">
-                    <Info size={12} className="mr-1" />
-                    Change the name to save
-                  </Small>
-                )}
+                {filterStore.hasUnsavedChanges &&
+                  !(crud.isRefetching || crud.isSaving) && (
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      onClick={() => {
+                        if (filterStore.activeFilterId) {
+                          helpers.updateFilterById(filterStore.activeFilterId, {
+                            filter: filterStore.filter,
+                            name:
+                              filterStore.activeFilterName || "Untitled Filter",
+                          });
+                        }
+                      }}
+                      className="text-[10px] font-normal"
+                    >
+                      Save
+                    </Button>
+                  )}
               </div>
             )}
           </div>

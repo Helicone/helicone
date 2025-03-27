@@ -49,20 +49,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     filterStore,
     filterCrud,
   });
-  // Use the auto-save hook
-  useAutoSaveFilter({
-    activeFilterId: filterStore.activeFilterId,
-    hasUnsavedChanges: filterStore.hasUnsavedChanges,
-    filter: filterStore.filter,
-    updateFilterById: async (
-      filterId: string,
-      updates: Partial<StoreFilterType>
-    ) => {
-      await helpers.updateFilterById(filterId, updates);
-    },
-    autoSaveDelay: 1000,
-    filterName: filterStore.activeFilterName || "Untitled Filter",
-  });
+
   // Initial URL hook
   useEffect(() => {
     const newInitialFilterId = searchParams?.get("filter_id");
