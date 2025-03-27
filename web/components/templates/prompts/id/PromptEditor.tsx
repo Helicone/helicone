@@ -109,7 +109,9 @@ export default function PromptEditor({
   requestId,
   basePrompt,
 }: PromptEditorProps) {
-  // STATE
+  /* -------------------------------------------------------------------------- */
+  /*                                    State                                   */
+  /* -------------------------------------------------------------------------- */
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
@@ -117,7 +119,9 @@ export default function PromptEditor({
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
 
-  // HOOKS
+  /* -------------------------------------------------------------------------- */
+  /*                                    Hooks                                   */
+  /* -------------------------------------------------------------------------- */
   // - Router
   const router = useRouter();
   // - Jawn Client
@@ -181,7 +185,9 @@ export default function PromptEditor({
     hasAccess: hasPlaygroundAccess,
   } = useFeatureLimit("prompts", playgroundRunCount, "playground_runs");
 
-  // VALIDATION
+  /* -------------------------------------------------------------------------- */
+  /*                                 Validation                                 */
+  /* -------------------------------------------------------------------------- */
   // - Centralized prompt mode validation
   const editorMode = useMemo<EditorMode>(() => {
     // If we're still loading data, return null
@@ -247,7 +253,9 @@ export default function PromptEditor({
       );
   }, [state?.messages, state?.parameters?.provider]);
 
-  // CALLBACKS
+  /* -------------------------------------------------------------------------- */
+  /*                                 Callbacks                                  */
+  /* -------------------------------------------------------------------------- */
   // - Loads Version Data for modes fromCode and fromEditor
   const loadVersionData = useCallback(
     (ver: any) => {
@@ -960,7 +968,9 @@ export default function PromptEditor({
     }
   }, [state, withinPromptsLimit, createPrompt, router, setNotification]);
 
-  // EFFECTS
+  /* -------------------------------------------------------------------------- */
+  /*                                   Effects                                  */
+  /* -------------------------------------------------------------------------- */
   // - Load Initial State
   useEffect(() => {
     // Don't proceed with loading if we don't know whether the prompt is imported from code yet
@@ -1071,7 +1081,9 @@ export default function PromptEditor({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSaveAndRun, editorMode]);
 
-  // HELPERS
+  /* -------------------------------------------------------------------------- */
+  /*                                   Helpers                                  */
+  /* -------------------------------------------------------------------------- */
   // - Add Messages
   const handleAddMessages = (messages?: Message[]) => {
     updateState((prev) => {
@@ -1104,7 +1116,9 @@ export default function PromptEditor({
     });
   };
 
-  // RENDER
+  /* -------------------------------------------------------------------------- */
+  /*                                   Render                                   */
+  /* -------------------------------------------------------------------------- */
   // TODO: Prompt or request not found page with more info (use mutations I think)
   // - Loading
   if (editorMode === null || !state) {

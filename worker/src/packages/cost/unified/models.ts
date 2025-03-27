@@ -8,6 +8,58 @@ import { Creator, CreatorModelMapping, Parameters, Provider } from "./types";
  */
 export const modelMapping: CreatorModelMapping = {
   OpenAI: {
+    "GPT-4o mini": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "OPENAI",
+          modelString: "gpt-4o-mini",
+        },
+        {
+          provider: "AZURE",
+          modelString: "gpt-4o-mini",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "openai/gpt-4o-mini",
+        },
+      ],
+    },
+    "GPT-4o": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "OPENAI",
+          modelString: "gpt-4o",
+        },
+        {
+          provider: "AZURE",
+          modelString: "gpt-4o",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "openai/gpt-4o-2024-11-20",
+        },
+      ],
+    },
+    "ChatGPT-4o": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "OPENROUTER",
+          modelString: "openai/chatgpt-4o-latest",
+        },
+      ],
+    },
     "GPT-4.5 Preview": {
       defaultTokenCost: {
         input: 0,
@@ -71,58 +123,6 @@ export const modelMapping: CreatorModelMapping = {
         {
           provider: "OPENROUTER",
           modelString: "openai/o1",
-        },
-      ],
-    },
-    "GPT-4o": {
-      defaultTokenCost: {
-        input: 0,
-        output: 0,
-      },
-      providers: [
-        {
-          provider: "OPENAI",
-          modelString: "gpt-4o",
-        },
-        {
-          provider: "AZURE",
-          modelString: "gpt-4o",
-        },
-        {
-          provider: "OPENROUTER",
-          modelString: "openai/gpt-4o-2024-11-20",
-        },
-      ],
-    },
-    "GPT-4o mini": {
-      defaultTokenCost: {
-        input: 0,
-        output: 0,
-      },
-      providers: [
-        {
-          provider: "OPENAI",
-          modelString: "gpt-4o-mini",
-        },
-        {
-          provider: "AZURE",
-          modelString: "gpt-4o-mini",
-        },
-        {
-          provider: "OPENROUTER",
-          modelString: "openai/gpt-4o-mini",
-        },
-      ],
-    },
-    "ChatGPT-4o": {
-      defaultTokenCost: {
-        input: 0,
-        output: 0,
-      },
-      providers: [
-        {
-          provider: "OPENROUTER",
-          modelString: "openai/chatgpt-4o-latest",
         },
       ],
     },
@@ -282,6 +282,22 @@ export const modelMapping: CreatorModelMapping = {
         },
       ],
     },
+    "Gemini 2.0 Pro": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-2.0-pro-exp-02-05",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-2.0-pro-exp-02-05",
+        },
+      ],
+    },
     "Gemini 1.5 Pro": {
       defaultTokenCost: {
         input: 0,
@@ -299,6 +315,106 @@ export const modelMapping: CreatorModelMapping = {
         {
           provider: "OPENROUTER",
           modelString: "google/gemini-pro-1.5",
+        },
+      ],
+    },
+  },
+  Meta: {
+    "Llama 3.3 70B Instruct": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "AZURE",
+          modelString: "Llama-3.3-70B-Instruct",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "meta-llama/llama-3.3-70b-instruct",
+        },
+      ],
+    },
+    "Llama 3.2 1B Instruct": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "AZURE",
+          modelString: "Meta-Llama-3.2-1B-Instruct",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "meta-llama/llama-3.2-1b-instruct",
+        },
+      ],
+    },
+    "Llama 3.2 3B Instruct": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "AZURE",
+          modelString: "Meta-Llama-3.2-3B-Instruct",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "meta-llama/llama-3.2-3b-instruct",
+        },
+      ],
+    },
+    "Llama 3.1 8B Instruct": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "AZURE",
+          modelString: "Meta-Llama-3.1-8B-Instruct",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "meta-llama/llama-3.1-8b-instruct",
+        },
+      ],
+    },
+  },
+  DeepSeek: {
+    "DeepSeek V3": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "DEEPSEEK",
+          modelString: "deepseek-chat",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "deepseek/deepseek-chat-v3-0324",
+        },
+      ],
+    },
+    "DeepSeek R1": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      providers: [
+        {
+          provider: "DEEPSEEK",
+          modelString: "deepseek-reasoner",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "deepseek/deepseek-r1",
         },
       ],
     },

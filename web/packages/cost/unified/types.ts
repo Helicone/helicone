@@ -2,7 +2,7 @@ import { MapperName, PathMapper } from "../../llm-mapper/path-mapper";
 import { LLMRequestBody } from "../../llm-mapper/types";
 
 // Define the three main model creators we're focusing on
-export type Creator = "OpenAI" | "Anthropic" | "Google";
+export type Creator = "OpenAI" | "Anthropic" | "Google" | "Meta" | "DeepSeek";
 
 // Provider types
 export type Provider =
@@ -12,7 +12,8 @@ export type Provider =
   | "BEDROCK"
   | "GOOGLE_GEMINI"
   | "GOOGLE_VERTEXAI"
-  | "OPENROUTER";
+  | "OPENROUTER"
+  | "DEEPSEEK";
 
 // Provider configuration
 export interface ProviderConfig {
@@ -23,6 +24,7 @@ export interface ProviderConfig {
   };
   defaultEndpoint: string;
   defaultMapper: MapperName;
+  envVars: string[];
   defaultHeaders?: Record<string, string>;
 }
 

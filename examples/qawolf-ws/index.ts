@@ -17,13 +17,22 @@ import WebSocket from "ws";
 
 config({ path: ".env" });
 
-const url =
-  "ws://127.0.0.1:8585/v1/gateway/oai/realtime/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17";
+// Azure vs OpenAI Usage
+const isAzure = true;
+const resource = process.env.AZURE_RESOURCE;
+const deployment = process.env.AZURE_DEPLOYMENT;
+
+const url = isAzure
+  ? `ws://127.0.0.1:8585/v1/gateway/oai/realtime?resource=${resource}&deployment=${deployment}`
+  : "ws://127.0.0.1:8585/v1/gateway/oai/realtime?model=gpt-4o-realtime-preview-2024-12-17";
+
+const apiKey = isAzure ? process.env.AZURE_API_KEY : process.env.OPENAI_API_KEY;
+
 const ws = new WebSocket(url, {
   headers: {
-    Authorization: "Bearer " + process.env.OPENAI_API_KEY,
-    "OpenAI-Beta": "realtime=v1",
+    Authorization: `Bearer ${apiKey}`,
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
+    // + Any Helicone properties here:
     "Helicone-Session-Id": `session_${Date.now()}`,
     "Helicone-User-Id": "qawolf",
   },
