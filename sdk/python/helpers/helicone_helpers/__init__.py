@@ -1,3 +1,3 @@
-from .manual_logger import HeliconeManualLogger
+from .manual_logger import HeliconeManualLogger, HeliconeLogBuilder
 
-__all__ = ["HeliconeManualLogger"]
+__all__ = ["HeliconeManualLogger", "HeliconeLogBuilder"]
