@@ -43,9 +43,10 @@ interface RequestDivProps {
   onCollapse: () => void;
   onNavigate?: (direction: "prev" | "next") => void;
   request?: MappedLLMRequest;
+  showCollapse?: boolean;
 }
 export default function RequestDrawer(props: RequestDivProps) {
-  const { onCollapse, onNavigate, request } = props;
+  const { onCollapse, onNavigate, request, showCollapse = true } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -352,14 +353,16 @@ export default function RequestDrawer(props: RequestDivProps) {
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3">
               {/* Hide Drawer */}
-              <Button
-                variant={"none"}
-                size={"square_icon"}
-                className="w-fit text-muted-foreground hover:text-primary"
-                onClick={onCollapse}
-              >
-                <LuPanelRightClose className="w-4 h-4" />
-              </Button>
+              {showCollapse && (
+                <Button
+                  variant={"none"}
+                  size={"square_icon"}
+                  className="w-fit text-muted-foreground hover:text-primary"
+                  onClick={onCollapse}
+                >
+                  <LuPanelRightClose className="w-4 h-4" />
+                </Button>
+              )}
               {/* Model Name */}
               <P className="font-medium text-secondary text-nowrap">
                 {request.model}
@@ -409,42 +412,48 @@ export default function RequestDrawer(props: RequestDivProps) {
           </div>
 
           {/* Second Top Row */}
-          <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
-            {/* User */}
-            {specialProperties.userId && (
-              <Link
-                className="text-secondary hover:underline hover:text-primary"
-                href={`/users/${specialProperties.userId}`}
-              >
-                <XSmall>{specialProperties.userId}</XSmall>
-              </Link>
-            )}
+          {Object.values(specialProperties).some((value) => value) && (
+            <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
+              {/* User */}
+              {specialProperties.userId && (
+                <Link
+                  className="text-secondary hover:underline hover:text-primary"
+                  href={`/users/${specialProperties.userId}`}
+                >
+                  <XSmall>{specialProperties.userId}</XSmall>
+                </Link>
+              )}
 
-            {/* Prompt */}
-            {specialProperties.promptId && (
-              <Link
-                className="text-secondary hover:underline hover:text-primary"
-                href={`/prompts/${promptDataQuery.data?.id}`}
-              >
-                <XSmall>{specialProperties.promptId}</XSmall>
-              </Link>
-            )}
+              {/* Prompt */}
+              {specialProperties.promptId && (
+                <Link
+                  className="text-secondary hover:underline hover:text-primary"
+                  href={`/prompts/${promptDataQuery.data?.id}`}
+                >
+                  <XSmall>{specialProperties.promptId}</XSmall>
+                </Link>
+              )}
 
-            {/* Session */}
-            {specialProperties.sessionId && (
-              <Link
-                className="text-secondary hover:underline hover:text-primary"
-                href={`/sessions/${specialProperties.sessionId}`}
-              >
-                {specialProperties.sessionName && (
-                  <XSmall>{specialProperties.sessionName}</XSmall>
-                )}
-                {specialProperties.sessionPath && (
-                  <XSmall>{specialProperties.sessionPath}</XSmall>
-                )}
-              </Link>
-            )}
-          </div>
+              {/* Session */}
+              {specialProperties.sessionId && (
+                <Link
+                  className="text-secondary hover:underline hover:text-primary"
+                  href={`/sessions/${specialProperties.sessionId}`}
+                >
+                  {specialProperties.sessionName ||
+                    (specialProperties.sessionId && (
+                      <XSmall>
+                        {specialProperties.sessionName ??
+                          specialProperties.sessionId}
+                      </XSmall>
+                    ))}
+                  {specialProperties.sessionPath && (
+                    <XSmall>{specialProperties.sessionPath}</XSmall>
+                  )}
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Expandable Details Section */}
           {showDetails && (
