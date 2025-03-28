@@ -15,9 +15,9 @@ However, their reasoning ability also means you need to prompt them differently 
 
 ## Key Takeaways
 
-Thinking models require a different approach compared to standard LLMs. Here’s a quick summary before diving into details:
+Thinking models require a different approach compared to standard LLMs. Here’s a quick summary of the best practices for prompting reasoning models:
 
-### ✅ DOs
+{/* ### ✅ DOs
 
 - Use minimal prompting to let the model think independently.
 - Encourage more reasoning for better performance at complex tasks by prompting for additional processing time.
@@ -28,7 +28,15 @@ Thinking models require a different approach compared to standard LLMs. Here’s
 
 - Avoid <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> and <a href="https://docs.helicone.ai/guides/prompt-engineering/use-chain-of-thought-prompting" target="_blank" rel="noopener">CoT prompting</a>. Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
 - Don’t use thinking models for structured outputs unless absolutely necessary. They perform worse with structured outputs than traditional models.
-- Avoid overloading the model with unnecessary details. More context isn’t always better.
+- Avoid overloading the model with unnecessary details. More context isn’t always better. */}
+
+| ✅ DOs | ❌ DON’Ts |
+|--------|----------|
+| Use minimal prompting to let the model think independently. | Avoid <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> and <a href="https://docs.helicone.ai/guides/prompt-engineering/use-chain-of-thought-prompting" target="_blank" rel="noopener">CoT prompting</a>. Thinking models perform worse when overloaded with examples or asked to "reason" step-by-step. |
+| Encourage more reasoning for better performance at complex tasks by prompting for additional processing time. | Avoid overloading the model with unnecessary details. More context isn’t always better. |
+| Use delimiters for clarity to separate distinct parts of input, improving interpretation. | Don’t rely on thinking models for structured outputs unless absolutely necessary. They perform worse with structured outputs than traditional models. |
+| Use ensembling for highly complex tasks requiring high accuracy. | — |  
+| Use advanced techniques like <a href="https://www.helicone.ai/blog/chain-of-draft" target="_blank" rel="noopener">Chain-of-Draft (CoD)</a> prompting to minimize token use. | — |  
 
 **Disclaimer:** The insights come from <a href="https://arxiv.org/pdf/2411.03590" target="_blank" rel="noopener">research carried out by OpenAI and Microsoft</a> and our own personal experience.
 
@@ -66,7 +74,7 @@ Thinking models use **reasoning tokens**, which allow them to internally process
 ❌ How does renewable energy impact the economy? Answer quickly.
 ```
 
-Encouraging longer reasoning helps for **multi-step problems**, improving accuracy significantly.
+Encouraging longer reasoning helps with **multi-step problems**, improving accuracy significantly.
 
 ## 3. Avoid Few-Shot and Chain-of-Thought Prompting
 
@@ -157,6 +165,26 @@ Explain what causes climate change
 
 While ensembling boosts performance, it’s expensive and should only be used when high accuracy is critical.
 
+I'll add a 7th point about Chain-of-Draft prompting that matches the style and tone of the original article. Here it is:
+
+## 7. Use Chain-of-Draft Prompting to Minimize Token Usage
+
+Thinking models can be token-hungry when reasoning through complex problems. <a href="https://www.helicone.ai/blog/chain-of-draft" target="_blank" rel="noopener">Chain-of-Draft prompting</a> offers a solution by encouraging models to generate minimal yet informative reasoning steps.
+
+Unlike with traditional Chain-of-Thought, CoD prompts reasoning models to limit each reasoning step to just a few words (typically 5 or fewer), similar to how humans jot down concise notes rather than writing verbose explanations.
+
+CoD can reduce token usage by up to a whopping **80%** while maintaining similar accuracy to the normal reasoning method.
+
+```
+✅ [System Prompt]: Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most.
+
+What's the compound interest on $10,000 invested for 5 years at 8% annual interest rate?
+
+---
+
+❌ What's the compound interest on $10,000 invested for 5 years at 8% annual interest rate?
+```
+
 <CallToAction
   title="Observe your thinking models with Helicone 💡"
   description="Get full visibility into your thinking models with Helicone. Get started in 5 minutes."
@@ -183,5 +211,40 @@ With these guidelines, you can optimize your interactions with thinking models a
 - **<a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
 - **<a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts</a>**
 - **<a href="https://www.helicone.ai/blog/openai-structured-outputs" target="_blank" rel="noopener">Building a Simple Chatbot with OpenAI Structured Outputs</a>**
+
+<FAQ items={[
+  {
+    question: "What are thinking models like DeepSeek R1 and OpenAI o3?",
+    answer: "Thinking models (such as DeepSeek R1, OpenAI o1/o3, and other reasoning models) are language models specifically designed to reason internally rather than relying on explicit Chain-of-Thought prompting. They natively incorporate the Chain-of-Thought process, often leading to better results on complex multi-step problems."
+  },
+  {
+    question: "How should I prompt DeepSeek R1 differently than regular LLMs?",
+    answer: "For DeepSeek R1 and similar thinking models, use minimal, concise prompting instead of verbose instructions. Avoid few-shot examples and explicit Chain-of-Thought prompting, which can actually degrade performance. Let the model think independently by stating problems clearly without overloading it with context."
+  },
+  {
+    question: "How do I get better structured outputs from thinking models like DeepSeek R1?",
+    answer: "Thinking models, including DeepSeek R1, typically aren't ideal for structured outputs. But if you must, use delimiters and clear formatting instructions (e.g. a template), but consider that traditional LLMs may perform better for this specific use case."
+  },
+  {
+    question: "When should I use reasoning models like DeepSeek R1 versus traditional LLMs?",
+    answer: "Use reasoning models like DeepSeek R1 and OpenAI o3 for complex problems requiring 5+ reasoning steps, analytical tasks, and scenarios where accuracy outweighs token efficiency. For simpler tasks, structured outputs, or when examples are beneficial, traditional LLMs may be more appropriate and cost-effective."
+  },
+  {
+    question: "How can I prompt DeepSeek R1 for maximum effectiveness?",
+    answer: "To maximize DeepSeek R1's thinking process, encourage more processing time with phrases like 'Take your time and think carefully' for complex problems. Avoid interrupting its reasoning with step-by-step instructions. For critical tasks, consider using ensembling techniques by running multiple variations of your prompt."
+  },
+  {
+    question: "What is Chain-of-Draft (CoD) and how can I use it with thinking models?",
+    answer: "Chain-of-Draft is a prompting technique that encourages models to use minimal, concise reasoning steps (typically 5 words or less). With thinking models like DeepSeek R1 and OpenAI o3, implement CoD by adding 'Think step by step, but only keep a minimum draft for each thinking step' to your prompt. This reduces token usage by up to 80% while maintaining reasoning quality."
+  },
+  {
+    question: "Can I use Chain-of-Thought prompting with DeepSeek R1?",
+    answer: "Contrary to traditional LLMs, explicit Chain-of-Thought prompting typically reduces performance in thinking models like DeepSeek R1. These models already incorporate reasoning internally, and forcing a specific thinking path can interfere with their native reasoning capabilities. Use direct, minimal prompting instead."
+  },
+  {
+    question: "How do I create a DeepSeek R1 prompt template for consistent results?",
+    answer: "For consistent results with DeepSeek R1, use a simple prompt template that includes: 1) A minimal system message, 2) Clear task description, 3) Necessary context in a structured format, and 4) A direct instruction. Use delimiters to separate sections, and avoid lengthy instructions or examples that might interfere with the model's reasoning."
+  }
+]} />
 
 <Questions />
