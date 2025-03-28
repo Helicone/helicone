@@ -1,3 +1,4 @@
+import console from "console";
 import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
@@ -49,13 +50,44 @@ export function webSocketProxyForwarder(
     };
     clientWs.on("message", tempListener);
 
-    const targetUrl =
-      "wss://api.openai.com/v1/realtime" + requestWrapper.url.search;
+    // Create a new WebSocket connection depending on the endpoint
+    const searchParams = new URLSearchParams(requestWrapper.url.search);
+    const azureResource = searchParams.get("resource");
+    const azureDeployment = searchParams.get("deployment");
+    const azureApiVersion = "2024-10-01-preview"; // 2024-12-17 or 2024-10-01-preview
+    const isAzure = azureResource && azureDeployment;
+    const targetUrl = isAzure
+      ? `wss://${azureResource}.openai.azure.com/openai/realtime?api-version=${azureApiVersion}&deployment=${azureDeployment}`
+      : `wss://api.openai.com/v1/realtime${requestWrapper.url.search}`;
+
     const openaiWs = new WebSocket(targetUrl, {
       headers: {
-        Authorization: `${requestWrapper.getAuthorization()}`,
+        ...(isAzure
+          ? {
+              "api-key": requestWrapper.getAuthorization()?.split(" ")[1],
+            }
+          : {
+              Authorization: requestWrapper.getAuthorization(),
+            }),
         "OpenAI-Beta": "realtime=v1",
       },
+    });
+
+    openaiWs.on("error", (error) => {
+      console.error(
+        `WebSocket connection error: ${error.message} | Type: ${
+          error.name
+        } | Code: ${(error as any).code || "N/A"} | Stack: ${
+          error.stack?.split("\n")[1]?.trim() || "N/A"
+        } | Target URL: ${targetUrl} | Headers: ${JSON.stringify({
+          Authorization: requestWrapper.getAuthorization()
+            ? "Bearer [REDACTED]"
+            : "None",
+          "OpenAI-Beta": "realtime=v1",
+        })} | Request path: ${
+          requestWrapper.url.pathname
+        } | Azure params: resource=${azureResource}, deployment=${azureDeployment} | Timestamp: ${new Date().toISOString()}`
+      );
     });
 
     openaiWs.on("open", () => {

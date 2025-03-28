@@ -10,6 +10,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "openai-chat",
     defaultEndpoint: "/v1/chat/completions",
+    envVars: ["OPENAI_API_KEY"],
   },
   AZURE: {
     baseUrl: "https://{ENDPOINT}/openai/deployments/{DEPLOYMENT}",
@@ -18,6 +19,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "openai-chat",
     defaultEndpoint: "/chat/completions?api-version=2024-10-21", // KEEP UP TO DATE
+    envVars: ["AZURE_API_KEY", "AZURE_ENDPOINT", "AZURE_DEPLOYMENT"],
   },
   ANTHROPIC: {
     baseUrl: "https://api.anthropic.com",
@@ -29,6 +31,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "anthropic-chat",
     defaultEndpoint: "/v1/messages",
+    envVars: ["ANTHROPIC_API_KEY"],
   },
   BEDROCK: {
     baseUrl: "https://bedrock-runtime.{REGION}.amazonaws.com",
@@ -37,6 +40,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "anthropic-chat",
     defaultEndpoint: "/model/{modelString}/invoke",
+    envVars: ["BEDROCK_API_KEY", "BEDROCK_REGION"],
   },
   GOOGLE_GEMINI: {
     baseUrl: "https://generativelanguage.googleapis.com",
@@ -45,6 +49,7 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "gemini-chat",
     defaultEndpoint: "/v1beta/models/{modelString}:generateContent",
+    envVars: ["GOOGLE_GEMINI_API_KEY"],
   },
   GOOGLE_VERTEXAI: {
     baseUrl: "https://{REGION}-aiplatform.googleapis.com",
@@ -55,6 +60,12 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     defaultMapper: "gemini-chat",
     defaultEndpoint:
       "/v1/projects/{PROJECT}/locations/{LOCATION}/publishers/google/models/{modelString}:generateContent",
+    envVars: [
+      "GOOGLE_VERTEXAI_API_KEY",
+      "GOOGLE_VERTEXAI_REGION",
+      "GOOGLE_VERTEXAI_PROJECT",
+      "GOOGLE_VERTEXAI_LOCATION",
+    ],
   },
   OPENROUTER: {
     baseUrl: "https://api.openrouter.ai",
@@ -64,6 +75,17 @@ export const providerConfigs: Record<Provider, ProviderConfig> = {
     },
     defaultMapper: "openai-chat",
     defaultEndpoint: "/api/v1/chat/completions",
+    envVars: ["OPENROUTER_API_KEY"],
+  },
+  DEEPSEEK: {
+    baseUrl: "https://api.deepseek.com",
+    authHeaderConfig: {
+      headerName: "Authorization",
+      valuePrefix: "Bearer ",
+    },
+    defaultMapper: "openai-chat",
+    defaultEndpoint: "/chat/completions",
+    envVars: ["DEEPSEEK_API_KEY"],
   },
 };
 

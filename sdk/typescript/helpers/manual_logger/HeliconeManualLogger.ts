@@ -5,6 +5,9 @@ import {
   ProviderResponse,
   Timing,
 } from "./types";
+import { HeliconeLogBuilder } from "./HeliconeLogBuilder";
+
+export { HeliconeLogBuilder };
 
 export class HeliconeManualLogger {
   private apiKey: string;
@@ -16,6 +19,19 @@ export class HeliconeManualLogger {
     this.apiKey = opts.apiKey;
     this.headers = opts.headers || {};
     this.LOGGING_ENDPOINT = opts.loggingEndpoint || this.LOGGING_ENDPOINT;
+  }
+
+  /**
+   * Creates a log builder for more flexible stream handling with error management
+   * @param request - The request object to log
+   * @param additionalHeaders - Additional headers to send with the request
+   * @returns A HeliconeLogBuilder instance
+   */
+  public logBuilder(
+    request: HeliconeLogRequest,
+    additionalHeaders?: Record<string, string>
+  ): HeliconeLogBuilder {
+    return new HeliconeLogBuilder(this, request, additionalHeaders);
   }
 
   /**
@@ -41,6 +57,7 @@ export class HeliconeManualLogger {
         startTime,
         endTime,
         additionalHeaders,
+        status: 200,
       });
 
       return result;
@@ -83,6 +100,7 @@ export class HeliconeManualLogger {
       timeToFirstToken: firstChunkTimeUnix
         ? firstChunkTimeUnix - startTime
         : undefined,
+      status: 200,
     });
   }
 
@@ -104,6 +122,7 @@ export class HeliconeManualLogger {
       startTime,
       endTime: Date.now(),
       additionalHeaders,
+      status: 200,
     });
   }
 
@@ -147,6 +166,7 @@ export class HeliconeManualLogger {
           timeToFirstToken: resultRecorder.firstChunkTimeUnix
             ? resultRecorder.firstChunkTimeUnix - startTime
             : undefined,
+          status: 200,
         });
       });
       return result;
@@ -156,7 +176,7 @@ export class HeliconeManualLogger {
     }
   }
 
-  private async sendLog(
+  public async sendLog(
     request: HeliconeLogRequest,
     response: Record<string, any> | string,
     options: {
@@ -164,9 +184,10 @@ export class HeliconeManualLogger {
       endTime: number;
       additionalHeaders?: Record<string, string>;
       timeToFirstToken?: number;
+      status?: number;
     }
   ): Promise<void> {
-    const { startTime, endTime, additionalHeaders } = options;
+    const { startTime, endTime, additionalHeaders, status = 200 } = options;
 
     const providerRequest: ProviderRequest = {
       url: "custom-model-nopath",
@@ -180,7 +201,7 @@ export class HeliconeManualLogger {
 
     const providerResponse: ProviderResponse = {
       headers: this.headers,
-      status: 200,
+      status: status,
       json: isResponseString
         ? {}
         : {
