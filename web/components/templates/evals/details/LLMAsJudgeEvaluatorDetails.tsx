@@ -2,8 +2,8 @@ import { Col } from "@/components/layout/common";
 import {
   LLMEvaluatorConfigForm,
   LLMEvaluatorConfigFormPreset,
-  useLLMConfigStore,
 } from "@/components/templates/evals/CreateNewEvaluator/LLMEvaluatorConfigForm";
+import { useEvalConfigStore } from "../store/evalConfigStore";
 import React, { useEffect } from "react";
 import { useEvaluators } from "../EvaluatorHook";
 import { Evaluator } from "./types";
@@ -49,11 +49,11 @@ const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
   deleteEvaluator,
   setSelectedEvaluator,
 }) => {
-  const { setLLMEvaluatorConfigFormPreset } = useLLMConfigStore();
+  const { setLLMConfig } = useEvalConfigStore();
 
   useEffect(() => {
-    setLLMEvaluatorConfigFormPreset(getInitialState(evaluator));
-  }, [evaluator, setLLMEvaluatorConfigFormPreset]);
+    setLLMConfig(getInitialState(evaluator));
+  }, [evaluator, setLLMConfig]);
 
   return (
     <Col className="space-y-4">
