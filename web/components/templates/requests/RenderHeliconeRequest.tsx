@@ -4,10 +4,12 @@ import { XSmall } from "@/components/ui/typography";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
+import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 import { useMemo, useState } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
 import Chat from "./components/Chat";
+import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { Completion } from "./components/completion";
 import { ErrorMessage } from "./components/error/ErrorMessage";
 import Json from "./components/Json";
@@ -65,6 +67,8 @@ export function RenderMappedRequest({
   };
 }) {
   const [isJsonMode, setIsJsonMode] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  const isShiftPressed = useShiftKeyPress();
 
   // Check if request had an error first
   const hasError = !(
@@ -83,15 +87,27 @@ export function RenderMappedRequest({
         size={"sm"}
         asPill
         className="flex felx-row gap-1 absolute top-2.5 right-4 z-20"
-        onClick={() => setIsJsonMode(!isJsonMode)}
+        onClick={(e) => {
+          if (isShiftPressed) {
+            setIsDebugMode(!isDebugMode);
+          } else {
+            setIsJsonMode(!isJsonMode);
+          }
+        }}
       >
         <XSmall className="text-secondary font-medium">
-          {isJsonMode ? "JSON" : "Render"}
+          {isDebugMode ? "Debug" : isJsonMode ? "JSON" : "Markdown"}
         </XSmall>
         <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
       </Button>
 
-      {isJsonMode ? (
+      {isDebugMode ? (
+        <div className="p-4">
+          <pre className="whitespace-pre-wrap text-sm">
+            <JsonRenderer data={JSON.parse(JSON.stringify(mappedRequest))} />
+          </pre>
+        </div>
+      ) : isJsonMode ? (
         <Json mapperContent={mappedRequest} />
       ) : hasError ? (
         <ErrorMessage mapperContent={mappedRequest} className="p-4" />
