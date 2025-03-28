@@ -51,8 +51,7 @@ const NavItem: React.FC<NavItemProps> = ({
                 size: "icon",
               }),
               "h-9 w-9 hover:bg-white dark:hover:bg-black",
-              link.current &&
-                "shadow-sm bg-gradient-to-tr from-sky-100 via-white to-white border border-sky-100 dark:from-sky-900 dark:via-black dark:to-black dark:border-sky-900"
+              link.current && "shadow-sm bg-white dark:bg-black"
             )}
           >
             {link.icon && (
@@ -95,7 +94,7 @@ const NavItem: React.FC<NavItemProps> = ({
                 deep && deep > 1 ? "h-6" : "h-8",
                 "justify-start w-full font-normal text-slate-500 hover:bg-white dark:hover:bg-black",
                 link.current &&
-                  "text-slate-800 dark:text-slate-200 shadow-sm bg-gradient-to-tr from-sky-100 via-white to-white border border-sky-100 dark:from-sky-900 dark:via-black dark:to-black dark:border-sky-900"
+                  "text-slate-800 dark:text-slate-200 shadow-sm bg-white dark:bg-black"
               )
         )}
       >

@@ -15,7 +15,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:bg-[hsl(var(--destructive))]/80",
         outline: "text-[hsl(var(--foreground))]",
-        status: "px-2 py-1 text-slate-50 dark:text-slate-100 font-semibold",
+        status: "px-2 py-1 font-semibold",
         helicone:
           "border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md text-[11px] font-medium py-1 px-2 leading-tight",
         "helicone-sky":

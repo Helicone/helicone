@@ -672,139 +672,141 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (
-    <main className="h-screen w-full flex flex-col animate-fade-in">
-      {/* Warning */}
-      {!userId && (
-        <div
-          className={
-            "flex flex-col items-center justify-center align-center text-center"
-          }
-        >
-          <StreamWarning
-            requestWithStreamUsage={requestWithoutStream !== undefined}
-          />
-        </div>
-      )}
-      {/* Header */}
-      {!userId && (
-        <Header
-          title={isCached ? "Cached Requests" : "Requests"}
-          leftActions={
-            <div className="flex flex-row items-center gap-2">
-              <Popover className="relative flex items-center">
-                {({ open }) => (
-                  <>
-                    {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
-                    <Popover.Button
-                      as={Button}
-                      variant="outline"
-                      asPill
-                      size="sm"
-                      className="gap-2"
-                      onClick={() => {
-                        if (isFiltersPinned) {
-                          setShowFilters(!showFilters);
-                        } else {
-                          setShowFilters(false);
-                        }
-                      }}
-                    >
-                      <PiFunnelBold className="h-4 w-4" />
-                      <span className="hidden sm:inline font-normal text-[13px]">
-                        {isFiltersPinned
-                          ? showFilters
-                            ? "Hide Filters"
-                            : "Show Filters"
-                          : "Filters"}
-                      </span>
-                    </Popover.Button>
-
-                    <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
-                      <div
-                        className="w-full"
-                        ref={popoverContentRef}
-                        onClick={handlePopoverInteraction}
-                      >
-                        <AdvancedFilters
-                          filterMap={filterMap}
-                          filters={advancedFilters}
-                          setAdvancedFilters={onSetAdvancedFiltersHandler}
-                          searchPropertyFilters={searchPropertyFilters}
-                          savedFilters={
-                            transformedFilters && orgLayout?.data?.id
-                              ? transformedFilters
-                              : undefined
-                          }
-                          onSaveFilterCallback={async () => {
-                            await orgLayoutRefetch();
-                          }}
-                          layoutPage={"requests"}
-                        />
-                        <div className="flex justify-end ml-4">
-                          <Button
-                            variant="ghostLinear"
-                            onClick={() => {
-                              setIsFiltersPinned(!isFiltersPinned);
-                              setShowFilters(!isFiltersPinned);
-                            }}
-                            className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
-                          >
-                            {isFiltersPinned ? (
-                              <PinIcon className="h-5 w-5 text-primary" />
-                            ) : (
-                              <PinIcon className="h-5 w-5 text-muted-foreground" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </Popover.Panel>
-                  </>
-                )}
-              </Popover>
-              <ThemedTimeFilter
-                currentTimeFilter={getTimeRange()}
-                timeFilterOptions={[]}
-                onSelect={function (key: string, value: string): void {
-                  onTimeSelectHandler(key as TimeInterval, value);
-                }}
-                isFetching={false}
-                defaultValue={getDefaultValue()}
-                custom={true}
-              />
-
-              {/* TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
-              {organizationLayoutAvailable && (
-                <FiltersButton
-                  filters={
-                    transformedFilters && orgLayout?.data?.id
-                      ? transformedFilters
-                      : undefined
-                  }
-                  currentFilter={currFilter ?? undefined}
-                  onFilterChange={onLayoutFilterChange}
-                  onDeleteCallback={() => {
-                    orgLayoutRefetch();
-                  }}
-                  layoutPage={"requests"}
-                />
-              )}
-            </div>
-          }
-          rightActions={
-            <LivePill
-              isLive={isLive}
-              setIsLive={setIsLive}
-              isDataLoading={isDataLoading}
-              isRefetching={isRefetching}
-              refetch={refetch}
-            />
-          }
-        />
-      )}
-
+    <main className="h-screen w-full animate-fade-in">
       <ResizablePanelGroup direction="horizontal">
-        {/* Requests Table */}
-        <ResizablePanel>
+        {/* Header + Requests Table + Footer */}
+        <ResizablePanel className="flex flex-col">
+          {/* Requests Header */}
+          {/* Warning */}
+          {!userId && (
+            <div
+              className={
+                "flex flex-col items-center justify-center align-center text-center"
+              }
+            >
+              <StreamWarning
+                requestWithStreamUsage={requestWithoutStream !== undefined}
+              />
+            </div>
+          )}
+          {/* Header */}
+          {!userId && (
+            <Header
+              title={isCached ? "Cached Requests" : "Requests"}
+              leftActions={
+                <div className="flex flex-row items-center gap-2">
+                  <Popover className="relative flex items-center">
+                    {({ open }) => (
+                      <>
+                        {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
+                        <Popover.Button
+                          as={Button}
+                          variant="outline"
+                          asPill
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => {
+                            if (isFiltersPinned) {
+                              setShowFilters(!showFilters);
+                            } else {
+                              setShowFilters(false);
+                            }
+                          }}
+                        >
+                          <PiFunnelBold className="h-4 w-4" />
+                          <span className="hidden sm:inline font-normal text-[13px]">
+                            {isFiltersPinned
+                              ? showFilters
+                                ? "Hide Filters"
+                                : "Show Filters"
+                              : "Filters"}
+                          </span>
+                        </Popover.Button>
+
+                        <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
+                          <div
+                            className="w-full"
+                            ref={popoverContentRef}
+                            onClick={handlePopoverInteraction}
+                          >
+                            <AdvancedFilters
+                              filterMap={filterMap}
+                              filters={advancedFilters}
+                              setAdvancedFilters={onSetAdvancedFiltersHandler}
+                              searchPropertyFilters={searchPropertyFilters}
+                              savedFilters={
+                                transformedFilters && orgLayout?.data?.id
+                                  ? transformedFilters
+                                  : undefined
+                              }
+                              onSaveFilterCallback={async () => {
+                                await orgLayoutRefetch();
+                              }}
+                              layoutPage={"requests"}
+                            />
+                            <div className="flex justify-end ml-4">
+                              <Button
+                                variant="ghostLinear"
+                                onClick={() => {
+                                  setIsFiltersPinned(!isFiltersPinned);
+                                  setShowFilters(!isFiltersPinned);
+                                }}
+                                className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
+                              >
+                                {isFiltersPinned ? (
+                                  <PinIcon className="h-5 w-5 text-primary" />
+                                ) : (
+                                  <PinIcon className="h-5 w-5 text-muted-foreground" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </Popover.Panel>
+                      </>
+                    )}
+                  </Popover>
+                  <ThemedTimeFilter
+                    currentTimeFilter={getTimeRange()}
+                    timeFilterOptions={[]}
+                    onSelect={function (key: string, value: string): void {
+                      onTimeSelectHandler(key as TimeInterval, value);
+                    }}
+                    isFetching={false}
+                    defaultValue={getDefaultValue()}
+                    custom={true}
+                  />
+
+                  {/* TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
+                  {organizationLayoutAvailable && (
+                    <FiltersButton
+                      filters={
+                        transformedFilters && orgLayout?.data?.id
+                          ? transformedFilters
+                          : undefined
+                      }
+                      currentFilter={currFilter ?? undefined}
+                      onFilterChange={onLayoutFilterChange}
+                      onDeleteCallback={() => {
+                        orgLayoutRefetch();
+                      }}
+                      layoutPage={"requests"}
+                    />
+                  )}
+                </div>
+              }
+              rightActions={
+                <LivePill
+                  isLive={isLive}
+                  setIsLive={setIsLive}
+                  isDataLoading={isDataLoading}
+                  isRefetching={isRefetching}
+                  refetch={refetch}
+                />
+              }
+            />
+          )}
+
+          {/* Requests Table */}
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
@@ -921,6 +923,17 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               )}
             </ThemedTable>
           )}
+
+          {/* Table Footer */}
+          <TableFooter
+            currentPage={page}
+            pageSize={pageSize}
+            isCountLoading={isCountLoading}
+            count={count || 0}
+            onPageChange={(n) => handlePageChange(n)}
+            onPageSizeChange={(n) => setCurrentPageSize(n)}
+            pageSizeOptions={[25, 50, 100, 250, 500]}
+          />
         </ResizablePanel>
 
         <ResizableHandle />
@@ -972,17 +985,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           />
         </ResizablePanel>
       </ResizablePanelGroup>
-
-      {/* Table Footer */}
-      <TableFooter
-        currentPage={page}
-        pageSize={pageSize}
-        isCountLoading={isCountLoading}
-        count={count || 0}
-        onPageChange={(n) => handlePageChange(n)}
-        onPageSizeChange={(n) => setCurrentPageSize(n)}
-        pageSizeOptions={[25, 50, 100, 250, 500]}
-      />
 
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>

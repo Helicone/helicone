@@ -1,6 +1,12 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
+import { LockIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -16,16 +22,10 @@ import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { LockIcon } from "lucide-react";
-import { UserMetric } from "@/lib/api/users/UserMetric";
-import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface UsersPageV2Props {
   currentPage: number;

@@ -167,82 +167,84 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           {/* Orgs List */}
           <DropdownMenuGroup className="border-b border-border">
             {/* Owned Orgs + Member Orgs */}
-            <ScrollArea className="w-full h-48" showBottomGradient>
-              {ownedOrgs && ownedOrgs.length > 0 && (
-                <>
-                  <GlassHeader className="px-3 py-3">
-                    <XSmall className="text-secondary font-semibold">
-                      Your Organizations
-                      {`(${ownedOrgs.length})`}
-                    </XSmall>
-                  </GlassHeader>
-                  <div className="flex flex-col px-1">
-                    {ownedOrgs.map((org, idx) => {
-                      const icon = ORGANIZATION_ICONS.find(
-                        (icon) => icon.name === org.icon
-                      );
-                      return (
-                        <DropdownMenuItem
-                          key={idx}
-                          onSelect={() => orgContext?.setCurrentOrg(org.id)}
-                        >
-                          <div className="flex items-center justify-between w-full text-xs">
-                            <div className="flex items-center space-x-2">
-                              {icon && (
-                                <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            {(ownedOrgs || memberOrgs) && (
+              <ScrollArea className="w-full h-48" showBottomGradient>
+                {ownedOrgs && ownedOrgs.length > 0 && (
+                  <>
+                    <GlassHeader className="px-3 py-3">
+                      <XSmall className="text-secondary font-semibold">
+                        Your Organizations
+                        {`(${ownedOrgs.length})`}
+                      </XSmall>
+                    </GlassHeader>
+                    <div className="flex flex-col px-1">
+                      {ownedOrgs.map((org, idx) => {
+                        const icon = ORGANIZATION_ICONS.find(
+                          (icon) => icon.name === org.icon
+                        );
+                        return (
+                          <DropdownMenuItem
+                            key={idx}
+                            onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                          >
+                            <div className="flex items-center justify-between w-full text-xs">
+                              <div className="flex items-center space-x-2">
+                                {icon && (
+                                  <icon.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                                )}
+                                <span className="truncate max-w-[7.5rem]">
+                                  {org.name}
+                                </span>
+                              </div>
+                              {org.id === orgContext?.currentOrg?.id && (
+                                <LuCheck className="h-4 w-4 text-primary" />
                               )}
-                              <span className="truncate max-w-[7.5rem]">
-                                {org.name}
-                              </span>
                             </div>
-                            {org.id === orgContext?.currentOrg?.id && (
-                              <LuCheck className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-              {memberOrgs && memberOrgs.length > 0 && (
-                <>
-                  <GlassHeader className="px-3 py-3">
-                    <XSmall className="text-secondary font-semibold">
-                      Member Organizations
-                      {`(${memberOrgs.length})`}
-                    </XSmall>
-                  </GlassHeader>
-                  <div className="flex flex-col px-1">
-                    {memberOrgs.map((org, idx) => {
-                      const icon = ORGANIZATION_ICONS.find(
-                        (icon) => icon.name === org.icon
-                      );
-                      return (
-                        <DropdownMenuItem
-                          key={idx}
-                          onSelect={() => orgContext?.setCurrentOrg(org.id)}
-                        >
-                          <div className="flex items-center justify-between w-full text-xs">
-                            <div className="flex items-center space-x-2">
-                              {icon && (
-                                <icon.icon className="h-4 w-4 text-muted-foreground" />
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+                {memberOrgs && memberOrgs.length > 0 && (
+                  <>
+                    <GlassHeader className="px-3 py-3">
+                      <XSmall className="text-secondary font-semibold">
+                        Member Organizations
+                        {`(${memberOrgs.length})`}
+                      </XSmall>
+                    </GlassHeader>
+                    <div className="flex flex-col px-1">
+                      {memberOrgs.map((org, idx) => {
+                        const icon = ORGANIZATION_ICONS.find(
+                          (icon) => icon.name === org.icon
+                        );
+                        return (
+                          <DropdownMenuItem
+                            key={idx}
+                            onSelect={() => orgContext?.setCurrentOrg(org.id)}
+                          >
+                            <div className="flex items-center justify-between w-full text-xs">
+                              <div className="flex items-center space-x-2">
+                                {icon && (
+                                  <icon.icon className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="truncate max-w-[7.5rem]">
+                                  {org.name}
+                                </span>
+                              </div>
+                              {org.id === orgContext?.currentOrg?.id && (
+                                <LuCheck className="h-4 w-4 text-primary" />
                               )}
-                              <span className="truncate max-w-[7.5rem]">
-                                {org.name}
-                              </span>
                             </div>
-                            {org.id === orgContext?.currentOrg?.id && (
-                              <LuCheck className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </ScrollArea>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </ScrollArea>
+            )}
 
             {/* Customer Orgs */}
             {customerOrgs && customerOrgs.length > 0 && (

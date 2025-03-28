@@ -155,7 +155,7 @@ export function ThemedTimeFilterShadCN({
           <Button
             id="date"
             variant={"outline"}
-            className="justify-start text-left font-normal text-xs rounded-full"
+            className="justify-start text-left font-normal text-xs rounded-lg"
             size="sm"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
