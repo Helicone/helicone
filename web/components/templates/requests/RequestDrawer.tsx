@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Muted, P, Small } from "@/components/ui/typography";
+import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
@@ -14,6 +14,7 @@ import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConicalIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -109,17 +110,163 @@ export default function RequestDrawer(props: RequestDivProps) {
       frequency_penalty: requestBody?.frequency_penalty ?? undefined,
       stop: requestBody?.stop ?? undefined,
       reasoning_effort: requestBody?.reasoning_effort ?? undefined,
-      tools: requestBody?.tools?.map((tool) => tool.name) ?? undefined,
+      tools: requestBody?.tools?.length
+        ? requestBody.tools.map((tool) => tool.name)
+        : undefined,
     };
   }, [request]);
 
+  // Organized request details for rendering
+  const requestDetails = useMemo(() => {
+    if (!request) return { requestInfo: [], tokenInfo: [], parameterInfo: [] };
+
+    // Request Information
+    const requestInfo = [
+      {
+        label: "Provider",
+        value: request.heliconeMetadata.provider || "Unknown",
+      },
+      {
+        label: "Created At",
+        value: formatDate(request.heliconeMetadata.createdAt),
+      },
+      { label: "Request ID", value: request.id },
+    ];
+
+    // Token Information
+    const tokenInfo = [
+      {
+        label: "Input Tokens",
+        value: request.heliconeMetadata.promptTokens || 0,
+      },
+      {
+        label: "Output Tokens",
+        value: request.heliconeMetadata.completionTokens || 0,
+      },
+      {
+        label: "Total Tokens",
+        value: request.heliconeMetadata.totalTokens || 0,
+      },
+    ];
+
+    // Parameter Information (only include defined parameters)
+    const parameterInfo = Object.entries(requestParameters)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, value]) => {
+        // Format special values
+        let displayValue = value;
+        if (key === "stream") {
+          displayValue = value ? "true" : "false";
+        } else if (key === "tools" && Array.isArray(value)) {
+          displayValue = value.join(", ");
+        } else if (key === "stop") {
+          displayValue = Array.isArray(value) ? value.join(", ") : value;
+        }
+
+        return {
+          label: key
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
+          value: displayValue,
+          align: ["tools", "stop"].includes(key) ? "right" : "left",
+        };
+      });
+
+    return { requestInfo, tokenInfo, parameterInfo };
+  }, [request, requestParameters]);
+
+  // Create experiment handler
+  const handleCreateExperiment = useCallback(() => {
+    if (!request) return;
+
+    jawn
+      .POST("/v2/experiment/create/from-request/{requestId}", {
+        params: {
+          path: {
+            requestId: request.id,
+          },
+        },
+      })
+      .then((res) => {
+        if (res.error || !res.data.data?.experimentId) {
+          setNotification("Failed to create experiment", "error");
+          return;
+        }
+        router.push(`/experiments/${res.data.data?.experimentId}`);
+      });
+  }, [jawn, request, router, setNotification]);
+
+  // Test prompt handler
+  const handleTestPrompt = useCallback(() => {
+    if (!request) return;
+
+    if (promptDataQuery.data?.id) {
+      router.push(`/prompts/${promptDataQuery.data?.id}`);
+    } else {
+      router.push(`/prompts/fromRequest/${request.id}`);
+    }
+  }, [promptDataQuery.data?.id, request, router]);
+
+  // Update keyboard event handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCollapse();
+      } else if (event.key === "ArrowUp" && onNavigate) {
+        event.preventDefault();
+        onNavigate("prev");
+      } else if (event.key === "ArrowDown" && onNavigate) {
+        event.preventDefault();
+        onNavigate("next");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCollapse, onNavigate]);
+
+  // Get Helicone Special Properties
+  const specialProperties = useMemo(() => {
+    return {
+      userId:
+        request?.heliconeMetadata.customProperties?.["Helicone-User-Id"] ??
+        undefined,
+      promptId:
+        request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
+        undefined,
+      sessionId:
+        request?.heliconeMetadata.customProperties?.["Helicone-Session-Id"] ??
+        undefined,
+      sessionName:
+        request?.heliconeMetadata.customProperties?.["Helicone-Session-Name"] ??
+        undefined,
+      sessionPath:
+        request?.heliconeMetadata.customProperties?.["Helicone-Session-Path"] ??
+        undefined,
+    };
+  }, [request?.heliconeMetadata.customProperties]);
+
   // Get current request Properties and Scores
-  const currentProperties = useMemo(
-    () =>
+  const currentProperties = useMemo(() => {
+    const properties =
       (request?.heliconeMetadata.customProperties as Record<string, string>) ||
-      {},
-    [request?.heliconeMetadata.customProperties]
-  );
+      {};
+    // Filter out specific Helicone special keys, and leave out only custom properties
+    return Object.fromEntries(
+      Object.entries(properties).filter(
+        ([key]) =>
+          ![
+            "Helicone-Session-Id",
+            "Helicone-Session-Name",
+            "Helicone-Session-Path",
+            "Helicone-Prompt-Id",
+            "Helicone-User-Id",
+          ].includes(key)
+      )
+    );
+  }, [request?.heliconeMetadata.customProperties]);
   const currentScores = useMemo(
     () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
     [request?.heliconeMetadata.scores]
@@ -193,340 +340,275 @@ export default function RequestDrawer(props: RequestDivProps) {
     [org?.currentOrg?.id, request, setNotification]
   );
 
-  // Create experiment handler
-  const handleCreateExperiment = useCallback(() => {
-    if (!request) return;
-
-    jawn
-      .POST("/v2/experiment/create/from-request/{requestId}", {
-        params: {
-          path: {
-            requestId: request.id,
-          },
-        },
-      })
-      .then((res) => {
-        if (res.error || !res.data.data?.experimentId) {
-          setNotification("Failed to create experiment", "error");
-          return;
-        }
-        router.push(`/experiments/${res.data.data?.experimentId}`);
-      });
-  }, [jawn, request, router, setNotification]);
-
-  // Test prompt handler
-  const handleTestPrompt = useCallback(() => {
-    if (!request) return;
-
-    if (promptDataQuery.data?.id) {
-      router.push(`/prompts/${promptDataQuery.data?.id}`);
-    } else {
-      router.push(`/prompts/fromRequest/${request.id}`);
-    }
-  }, [promptDataQuery.data?.id, request, router]);
-
-  // Update keyboard event handler
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onCollapse();
-      } else if (event.key === "ArrowUp" && onNavigate) {
-        event.preventDefault();
-        onNavigate("prev");
-      } else if (event.key === "ArrowDown" && onNavigate) {
-        event.preventDefault();
-        onNavigate("next");
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onCollapse, onNavigate]);
-
   if (!request) {
     return null;
-  }
+  } else
+    return (
+      <section className="h-full min-h-full w-full flex flex-col">
+        {/* Header */}
+        <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
+          {/* Top Row */}
+          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
+            {/* Left Side */}
+            <div className="flex flex-row items-center gap-3">
+              {/* Hide Drawer */}
+              <Button
+                variant={"none"}
+                size={"square_icon"}
+                className="w-fit text-muted-foreground hover:text-primary"
+                onClick={onCollapse}
+              >
+                <LuPanelRightClose className="w-4 h-4" />
+              </Button>
+              {/* Model Name */}
+              <P className="font-medium text-secondary text-nowrap">
+                {request.model}
+              </P>
+            </div>
 
-  return (
-    <div className="h-full min-h-full w-full flex flex-col">
-      {/* Header */}
-      <div className="h-fit w-full flex flex-col gap-3 px-3 border-b border-border bg-slate-50 dark:bg-slate-950">
-        {/* Top Row */}
-        <div className="h-11 w-full shrink-0 flex flex-row justify-between items-center gap-2">
-          {/* Left Side */}
-          <div className="flex flex-row items-center gap-3">
-            {/* Hide Drawer */}
-            <Button
-              variant={"none"}
-              size={"square_icon"}
-              className="w-fit"
-              onClick={onCollapse}
-            >
-              <LuPanelRightClose className="w-4 h-4" />
-            </Button>
-            {/* Model Name */}
-            <P className="font-medium text-secondary text-nowrap">
-              {request.model}
-            </P>
+            {/* Right Side */}
+            <div className="flex flex-row items-center gap-2">
+              {/* Duration Badge */}
+              <Badge variant={"secondary"} asPill={false}>
+                {Number(request.heliconeMetadata.latency) / 1000}s
+              </Badge>
+              {/* Cost Badge */}
+              <Badge variant={"secondary"} asPill={false}>
+                ${formatNumber(request.heliconeMetadata.cost || 0)}
+              </Badge>
+              {/* Status Badge */}
+              <StatusBadge
+                statusType={request.heliconeMetadata.status.statusType}
+                errorCode={request.heliconeMetadata.status.code}
+              />
+
+              {/* Show more Parameters Button */}
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"square_icon"}
+                      className=""
+                      asPill
+                      onClick={() => setShowDetails(!showDetails)}
+                    >
+                      {showDetails ? (
+                        <LuChevronUp className="w-4 h-4" />
+                      ) : (
+                        <LuChevronDown className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {showDetails ? "Hide Details" : "Show Details"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
-          {/* Right Side */}
-          <div className="flex flex-row items-center gap-2">
-            {/* Duration Badge */}
-            <Badge variant={"secondary"} asPill={false}>
-              {Number(request.heliconeMetadata.latency) / 1000}s
-            </Badge>
-            {/* Cost Badge */}
-            <Badge variant={"secondary"} asPill={false}>
-              ${formatNumber(request.heliconeMetadata.cost || 0)}
-            </Badge>
-            {/* Status Badge */}
-            <StatusBadge
-              statusType={request.heliconeMetadata.status.statusType}
-              errorCode={request.heliconeMetadata.status.code}
+          {/* Second Top Row */}
+          <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
+            {/* User */}
+            {specialProperties.userId && (
+              <Link
+                className="text-secondary hover:underline hover:text-primary"
+                href={`/users/${specialProperties.userId}`}
+              >
+                <XSmall>{specialProperties.userId}</XSmall>
+              </Link>
+            )}
+
+            {/* Prompt */}
+            {specialProperties.promptId && (
+              <Link
+                className="text-secondary hover:underline hover:text-primary"
+                href={`/prompts/${promptDataQuery.data?.id}`}
+              >
+                <XSmall>{specialProperties.promptId}</XSmall>
+              </Link>
+            )}
+
+            {/* Session */}
+            {specialProperties.sessionId && (
+              <Link
+                className="text-secondary hover:underline hover:text-primary"
+                href={`/sessions/${specialProperties.sessionId}`}
+              >
+                {specialProperties.sessionName && (
+                  <XSmall>{specialProperties.sessionName}</XSmall>
+                )}
+                {specialProperties.sessionPath && (
+                  <XSmall>{specialProperties.sessionPath}</XSmall>
+                )}
+              </Link>
+            )}
+          </div>
+
+          {/* Expandable Details Section */}
+          {showDetails && (
+            <div className="h-full w-full flex flex-col gap-4 p-4 border-b border-border">
+              <div className="flex flex-row gap-8 justify-between">
+                {/* Request Information */}
+                <div className="w-full flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-2">
+                    {requestDetails.requestInfo.map((item) => (
+                      <div
+                        key={item.label}
+                        className="w-full flex flex-row gap-4 items-center justify-between"
+                      >
+                        <XSmall className="text-muted-foreground whitespace-nowrap">
+                          {item.label}
+                        </XSmall>
+                        <XSmall className="whitespace-nowrap">
+                          {item.value}
+                        </XSmall>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Token Information */}
+                <div className="w-full flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-2">
+                    {requestDetails.tokenInfo.map((item) => (
+                      <div
+                        key={item.label}
+                        className="w-full flex flex-row gap-4 items-center justify-between"
+                      >
+                        <XSmall className="text-muted-foreground whitespace-nowrap">
+                          {item.label}
+                        </XSmall>
+                        <XSmall className="whitespace-nowrap">
+                          {item.value}
+                        </XSmall>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Request Parameters */}
+              {requestDetails.parameterInfo.length > 0 && (
+                <div className="w-full flex flex-col gap-2">
+                  {requestDetails.parameterInfo.map((item) => (
+                    <div
+                      key={item.label}
+                      className="w-full flex flex-row gap-4 items-center justify-between"
+                    >
+                      <XSmall className="text-muted-foreground">
+                        {item.label}
+                      </XSmall>
+                      <XSmall className="truncate">{item.value}</XSmall>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Properties and Scores */}
+          <div className="w-full flex flex-col divide-y divide-border">
+            {/* Properties */}
+            <ScrollableBadges
+              className="px-4"
+              title="Properties"
+              placeholder="No Properties"
+              items={Object.entries(currentProperties).map(([key, value]) => ({
+                key,
+                value: value as string,
+              }))}
+              onAdd={onAddPropertyHandler}
+              tooltipText="Add a Property to this request"
+              tooltipLink={{
+                url: "https://docs.helicone.ai/features/advanced-usage/custom-properties",
+                text: "Learn about Properties",
+              }}
             />
 
-            {/* Show more Parameters Button */}
-            <TooltipProvider>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    size={"square_icon"}
-                    asPill
-                    onClick={() => setShowDetails(!showDetails)}
-                  >
-                    {showDetails ? (
-                      <LuChevronUp className="w-4 h-4" />
-                    ) : (
-                      <LuChevronDown className="w-4 h-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">
-                  {showDetails ? "Hide Details" : "Show Details"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {/* Scores */}
+            <ScrollableBadges
+              className="px-4"
+              title="Scores"
+              placeholder="No Scores"
+              items={Object.entries(currentScores)
+                .filter(([key]) => key !== "helicone-score-feedback")
+                .map(([key, value]) => ({ key, value }))}
+              onAdd={onAddScoreHandler}
+              valueType="number"
+              tooltipText="Add a Score to this request"
+              tooltipLink={{
+                url: "https://docs.helicone.ai/features/advanced-usage/scores",
+                text: "Learn about Scores",
+              }}
+            />
           </div>
-        </div>
+        </header>
 
-        {/* Expandable Details Section */}
-        {showDetails && (
-          <div className="h-full w-full flex flex-row gap-6 pb-3">
-            {/* Request Information */}
-            <div className="w-full flex flex-col gap-2">
-              <div className="w-full flex flex-col gap-2">
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Provider</Muted>
-                  <Small className="text-right">
-                    {request.heliconeMetadata.provider || "Unknown"}
-                  </Small>
-                </div>
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Created At</Muted>
-                  <Small className="text-right">
-                    {formatDate(request.heliconeMetadata.createdAt)}
-                  </Small>
-                </div>
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Request ID</Muted>
-                  <Small className="text-right">{request.id}</Small>
-                </div>
-              </div>
-            </div>
+        {/* Mapped Request */}
+        <RenderMappedRequest mappedRequest={request} />
 
-            {/* Token Information */}
-            <div className="w-full flex flex-col gap-2">
-              <div className="w-full flex flex-col gap-2">
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Input Tokens</Muted>
-                  <Small>{request.heliconeMetadata.promptTokens || 0}</Small>
-                </div>
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Output Tokens</Muted>
-                  <Small>
-                    {request.heliconeMetadata.completionTokens || 0}
-                  </Small>
-                </div>
-                <div className="w-full flex flex-row gap-2 items-center justify-between">
-                  <Muted>Total Tokens</Muted>
-                  <Small>{request.heliconeMetadata.totalTokens || 0}</Small>
-                </div>
-              </div>
-            </div>
+        {/* Footer */}
+        <footer className="w-full flex flex-col gap-2 py-3 border-t border-border bg-card">
+          {/* Actions Row */}
+          <div className="flex flex-row justify-between items-center gap-2 px-3">
+            <div className="flex flex-row items-center gap-2">
+              {isChatRequest && (
+                <Button
+                  variant="action"
+                  size="sm"
+                  className="flex flex-row items-center gap-1.5"
+                  onClick={handleTestPrompt}
+                >
+                  <PiPlayBold className="h-4 w-4" />
+                  Test Prompt
+                </Button>
+              )}
 
-            {/* Request Parameters */}
-            {Object.values(requestParameters).some(
-              (value) => value !== undefined
-            ) && (
-              <div className="w-full flex flex-col gap-2">
-                {requestParameters.temperature !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Temperature</Muted>
-                    <Small>{requestParameters.temperature}</Small>
-                  </div>
-                )}
-                {requestParameters.max_tokens !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Max Tokens</Muted>
-                    <Small>{requestParameters.max_tokens}</Small>
-                  </div>
-                )}
-                {requestParameters.top_p !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Top P</Muted>
-                    <Small>{requestParameters.top_p}</Small>
-                  </div>
-                )}
-                {requestParameters.seed !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Seed</Muted>
-                    <Small>{requestParameters.seed}</Small>
-                  </div>
-                )}
-                {requestParameters.presence_penalty !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Presence Penalty</Muted>
-                    <Small>{requestParameters.presence_penalty}</Small>
-                  </div>
-                )}
-                {requestParameters.frequency_penalty !== undefined && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Frequency Penalty</Muted>
-                    <Small>{requestParameters.frequency_penalty}</Small>
-                  </div>
-                )}
-                {requestParameters.reasoning_effort && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Reasoning Effort</Muted>
-                    <Small>{requestParameters.reasoning_effort}</Small>
-                  </div>
-                )}
-                {requestParameters.stream && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Stream</Muted>
-                    <Small>{requestParameters.stream ? "true" : "false"}</Small>
-                  </div>
-                )}
-                {requestParameters.tools &&
-                  requestParameters.tools.length > 0 && (
-                    <div className="w-full flex flex-row gap-2 items-center justify-between">
-                      <Muted>Tools</Muted>
-                      <Small className="text-right">
-                        {requestParameters.tools.join(", ")}
-                      </Small>
-                    </div>
-                  )}
-                {requestParameters.stop && (
-                  <div className="w-full flex flex-row gap-2 items-center justify-between">
-                    <Muted>Stop Sequences</Muted>
-                    <Small className="text-right">
-                      {Array.isArray(requestParameters.stop)
-                        ? requestParameters.stop.join(", ")
-                        : requestParameters.stop}
-                    </Small>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              {isChatRequest && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-row items-center gap-1.5"
+                  onClick={handleCreateExperiment}
+                >
+                  <FlaskConicalIcon className="h-4 w-4" />
+                  Experiment
+                </Button>
+              )}
 
-      {/* Mapped Request */}
-      <RenderMappedRequest mappedRequest={request} />
-
-      {/* Footer */}
-      <div className="w-full flex flex-col gap-2 py-3 border-t border-border">
-        {/* Properties and Scores */}
-        <div className="w-full flex flex-col gap-2 bg-slate-50 dark:bg-slate-950">
-          {/* Properties */}
-          <ScrollableBadges
-            items={Object.entries(currentProperties).map(([key, value]) => ({
-              key,
-              value: value as string,
-            }))}
-            onAdd={onAddPropertyHandler}
-            placeholder="No Properties"
-            tooltipText="Add a Property to this request"
-            tooltipLink={{
-              url: "https://docs.helicone.ai/features/advanced-usage/custom-properties",
-              text: "Learn about Properties",
-            }}
-          />
-
-          {/* Scores */}
-          <ScrollableBadges
-            placeholder="No Scores"
-            items={Object.entries(currentScores)
-              .filter(([key]) => key !== "helicone-score-feedback")
-              .map(([key, value]) => ({ key, value }))}
-            onAdd={onAddScoreHandler}
-            valueType="number"
-            tooltipText="Add a Score to this request"
-            tooltipLink={{
-              url: "https://docs.helicone.ai/features/advanced-usage/scores",
-              text: "Learn about Scores",
-            }}
-          />
-        </div>
-
-        {/* Actions Row */}
-        <div className="flex flex-row justify-between items-center gap-2 px-3">
-          <div className="flex flex-row items-center gap-2">
-            {isChatRequest && (
-              <Button
-                variant="action"
-                size="sm"
-                className="flex flex-row items-center gap-1.5"
-                onClick={handleTestPrompt}
-              >
-                <PiPlayBold className="h-4 w-4" />
-                Test Prompt
-              </Button>
-            )}
-
-            {isChatRequest && (
               <Button
                 variant="outline"
                 size="sm"
                 className="flex flex-row items-center gap-1.5"
-                onClick={handleCreateExperiment}
+                onClick={() => setShowNewDatasetModal(true)}
               >
-                <FlaskConicalIcon className="h-4 w-4" />
-                Experiment
+                <LuPlus className="h-4 w-4" />
+                Dataset
               </Button>
-            )}
+            </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex flex-row items-center gap-1.5"
-              onClick={() => setShowNewDatasetModal(true)}
-            >
-              <LuPlus className="h-4 w-4" />
-              Dataset
-            </Button>
+            <FeedbackButtons
+              requestId={request.id}
+              defaultValue={
+                request.heliconeMetadata.scores?.["helicone-score-feedback"] ===
+                1
+              }
+            />
           </div>
+        </footer>
 
-          <FeedbackButtons
-            requestId={request.id}
-            defaultValue={
-              request.heliconeMetadata.scores?.["helicone-score-feedback"] === 1
-            }
+        {/* Floating Elements */}
+        <ThemedModal
+          open={showNewDatasetModal}
+          setOpen={setShowNewDatasetModal}
+        >
+          <NewDataset
+            request_ids={[request.id]}
+            onComplete={() => setShowNewDatasetModal(false)}
           />
-        </div>
-      </div>
-
-      {/* Floating Elements */}
-      <ThemedModal open={showNewDatasetModal} setOpen={setShowNewDatasetModal}>
-        <NewDataset
-          request_ids={[request.id]}
-          onComplete={() => setShowNewDatasetModal(false)}
-        />
-      </ThemedModal>
-    </div>
-  );
+        </ThemedModal>
+      </section>
+    );
 }

@@ -26,11 +26,11 @@ const SPECIAL_KEYS: Record<
   { icon: React.ReactNode; hrefPrefix: string }
 > = {
   "Helicone-Prompt-Id": {
-    icon: <LuScroll className="w-3 h-3" />,
+    icon: <LuScroll className="w-4 h-4" />,
     hrefPrefix: "/prompts/",
   },
   "Helicone-Session-Id": {
-    icon: <LuListTree className="w-3 h-3" />,
+    icon: <LuListTree className="w-4 h-4" />,
     hrefPrefix: "/sessions/",
   },
 };
@@ -139,22 +139,22 @@ export default function ScrollableBadges({
 
   return (
     <div
-      className={`h-6 w-full flex flex-row justify-between items-center ${
-        !title ? "pr-3" : ""
+      className={`h-10 w-full flex flex-row grow-0 shrink-0 justify-between items-center ${
+        !title ? "pr-4" : ""
       } ${className}`}
     >
       {title && (
-        <XSmall className="font-medium text-secondary shrink-0">{title}</XSmall>
+        <XSmall className="font-semibold text-secondary">{title}</XSmall>
       )}
 
-      <div className="h-full w-full relative overflow-x-auto">
+      <div className="h-full w-full flex items-center relative overflow-x-auto">
         <ScrollArea orientation="horizontal">
           <div
             ref={scrollAreaRef}
             className="h-full w-full flex flex-row items-center gap-2"
           >
             {allItems.length === 0 && placeholder && !isAdding && (
-              <p className="h-6 flex items-center shrink-0 ml-3 text-xs text-muted-foreground/40">
+              <p className="h-full flex items-center ml-4 text-xs text-muted-foreground/40">
                 {placeholder}
               </p>
             )}
@@ -169,8 +169,8 @@ export default function ScrollableBadges({
 
             {isAdding && (
               <div
-                className={`h-full flex flex-row gap-1 items-center shrink-0 ${
-                  allItems.length === 0 ? "ml-3" : ""
+                className={`h-full flex flex-row gap-1 items-center ${
+                  allItems.length === 0 ? "ml-4" : ""
                 }`}
               >
                 <Input
@@ -195,9 +195,8 @@ export default function ScrollableBadges({
                 />
                 <Button
                   variant={"ghost"}
-                  size={"none"}
+                  size={"square_icon"}
                   asPill
-                  className="h-6 w-6 p-0"
                   onClick={() => {
                     setIsAdding(false);
                     setNewKey("");
@@ -209,12 +208,12 @@ export default function ScrollableBadges({
               </div>
             )}
             {/* Spacer to ensure right padding is scrollable (w-1 + gap-2 = w-3) */}
-            <div className="w-1 shrink-0" />
+            <div className="w-2 shrink-0" />
           </div>
         </ScrollArea>
         {/* Gradient overlays - positioned at extreme edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-950 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-slate-50 to-transparent dark:from-slate-950 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-card to-transparent pointer-events-none" />
       </div>
 
       <TooltipProvider>
@@ -223,8 +222,8 @@ export default function ScrollableBadges({
           <TooltipTrigger asChild>
             <Button
               variant={"ghost"}
-              size={"none"}
-              className="h-6 w-6 p-0"
+              size={"square_icon"}
+              className="shrink-0"
               asPill
               onClick={() => {
                 if (isAdding) {
@@ -281,7 +280,7 @@ const ItemBadge = memo(
           <Badge
             variant={"none"}
             className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
-              isFirst ? "ml-3" : ""
+              isFirst ? "ml-4" : ""
             } border border-border hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer`}
           >
             {isSpecial.icon}
@@ -297,7 +296,7 @@ const ItemBadge = memo(
       <Badge
         variant={"none"}
         className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
-          isFirst ? "ml-3" : ""
+          isFirst ? "ml-4" : ""
         }`}
       >
         <span className="text-muted-foreground text-nowrap">{item.key}</span>{" "}
