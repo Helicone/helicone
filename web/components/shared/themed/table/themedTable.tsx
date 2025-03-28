@@ -1,3 +1,8 @@
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
@@ -11,6 +16,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
@@ -18,7 +24,6 @@ import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import {
@@ -27,14 +32,6 @@ import {
   DragColumnItem,
 } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
-
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { Checkbox } from "@/components/ui/checkbox";
-
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRouter, useSearchParams } from "next/navigation";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -216,10 +213,9 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [isOnboardingVisible, currentStep]);
 
   return (
-    <div className="h-full flex flex-col border-border divide-y divide-border sentry-mask-me">
+    <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
       {children && <div className="flex-shrink-0">{children}</div>}
-
-      <div className="h-full overflow-auto bg-slate-50 dark:bg-slate-950">
+      <div className="h-full bg-slate-50 dark:bg-slate-950">
         {skeletonLoading ? (
           <LoadingAnimation title="Loading Data..." />
         ) : rows.length === 0 ? (
@@ -238,206 +234,190 @@ export default function ThemedTable<T extends { id?: string }>(
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-full w-full" orientation="both">
-            <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
-              <div
-                style={{
-                  boxSizing: "border-box",
-                }}
-              >
-                <table
-                  className="h-full bg-white dark:bg-black"
-                  style={{
-                    width: fullWidth ? "100%" : table.getCenterTotalSize(),
-                    overflow: "auto",
-                  }}
+          <table
+            className="bg-white dark:bg-black"
+            style={{
+              width: fullWidth ? "100%" : table.getCenterTotalSize(),
+            }}
+          >
+            <thead className="text-[12px]">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr
+                  key={headerGroup.id}
+                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2]"
                 >
-                  <thead className="text-[12px]">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <tr
-                        key={headerGroup.id}
-                        className="sticky top-0 bg-slate-50 z-[2] dark:bg-slate-950 border-b border-border"
-                      >
-                        {checkboxMode !== "never" && (
-                          <th>
-                            <div className="flex justify-center items-center h-full">
-                              <Checkbox
-                                variant="helicone"
-                                onCheckedChange={handleSelectAll}
-                                checked={selectedIds?.length === rows.length}
-                                ref={(ref) => {
-                                  if (ref) {
-                                    (
-                                      ref as unknown as HTMLInputElement
-                                    ).indeterminate =
-                                      selectedIds !== undefined &&
-                                      selectedIds.length > 0 &&
-                                      selectedIds.length < rows.length;
-                                  }
-                                }}
-                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                              />
-                            </div>
-                          </th>
-                        )}
-                        {headerGroup.headers.map((header, index) => (
-                          <th
-                            key={`header-${index}`}
-                            className={clsx(
-                              "relative",
-                              index === headerGroup.headers.length - 1 &&
-                                "border-r border-slate-300 dark:border-slate-700"
-                            )}
-                          >
-                            <DraggableColumnHeader
-                              header={header}
-                              sortable={sortable}
-                              index={index}
-                              totalColumns={headerGroup.headers.length}
-                            />
-                            {index < headerGroup.headers.length - 1 && (
-                              <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                          </th>
-                        ))}
-                      </tr>
-                    ))}
-                  </thead>
-                  <tbody className="text-[13px] divide-y divide-border">
-                    {rows.map((row, index) => (
-                      <tr
-                        key={row.original?.id}
-                        className={clsx(
-                          "hover:cursor-pointer group",
-                          checkedIds?.includes(row.original?.id ?? "")
-                            ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                            : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                          rowLink && "relative"
-                        )}
-                        onClick={
-                          onRowSelect &&
-                          ((e: React.MouseEvent) => {
-                            handleRowSelect(row.original, index, e);
-                          })
-                        }
-                      >
-                        <td
+                  {checkboxMode !== "never" && (
+                    <th>
+                      <div className="flex justify-center items-center h-full">
+                        <Checkbox
+                          variant="helicone"
+                          onCheckedChange={handleSelectAll}
+                          checked={selectedIds?.length === rows.length}
+                          ref={(ref) => {
+                            if (ref) {
+                              (
+                                ref as unknown as HTMLInputElement
+                              ).indeterminate =
+                                selectedIds !== undefined &&
+                                selectedIds.length > 0 &&
+                                selectedIds.length < rows.length;
+                            }
+                          }}
+                          className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                        />
+                      </div>
+                    </th>
+                  )}
+                  {headerGroup.headers.map((header, index) => (
+                    <th
+                      key={`header-${index}`}
+                      className={clsx(
+                        "relative",
+                        index === headerGroup.headers.length - 1 &&
+                          "border-r border-slate-300 dark:border-slate-700"
+                      )}
+                    >
+                      <DraggableColumnHeader
+                        header={header}
+                        sortable={sortable}
+                        index={index}
+                        totalColumns={headerGroup.headers.length}
+                      />
+                      {index < headerGroup.headers.length - 1 && (
+                        <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="text-[13px] divide-y divide-border">
+              {rows.map((row, index) => (
+                <tr
+                  key={row.original?.id}
+                  className={clsx(
+                    "hover:cursor-pointer group",
+                    checkedIds?.includes(row.original?.id ?? "")
+                      ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                      : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                    rowLink && "relative"
+                  )}
+                  onClick={
+                    onRowSelect &&
+                    ((e: React.MouseEvent) => {
+                      handleRowSelect(row.original, index, e);
+                    })
+                  }
+                >
+                  <td
+                    className={clsx(
+                      "w-8 h-full px-2",
+                      checkboxMode === "on_hover"
+                        ? clsx(
+                            "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+                            selectedIds?.includes(row.original?.id ?? "") &&
+                              "!opacity-100"
+                          )
+                        : "",
+                      checkboxMode === "never" && "hidden"
+                    )}
+                    style={{ verticalAlign: "middle" }}
+                  >
+                    <div className="flex justify-center items-center h-full">
+                      <Checkbox
+                        variant="helicone"
+                        checked={selectedIds?.includes(row.original?.id ?? "")}
+                      />
+                    </div>
+                  </td>
+                  {row.getVisibleCells().map((cell, i) => (
+                    <td
+                      key={i}
+                      className={clsx(
+                        "py-3 px-2 text-slate-700 dark:text-slate-300",
+                        i === 0 && checkboxMode === "always_visible" && "pl-2",
+                        i === 0 && checkboxMode === "on_hover" && "pl-2",
+                        i === 0 && checkboxMode === "never" && "pl-10",
+                        // For selected rows in hover mode
+                        i === 0 &&
+                          checkboxMode === "on_hover" &&
+                          selectedIds?.includes(row.original?.id ?? "") &&
+                          "!pl-2",
+                        i === row.getVisibleCells().length - 1 &&
+                          "pr-10 border-r border-border"
+                      )}
+                      style={{
+                        maxWidth: cell.column.getSize(),
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {dataLoading &&
+                      (cell.column.id == "requestText" ||
+                        cell.column.id == "responseText") ? (
+                        <span
                           className={clsx(
-                            "w-8 h-full px-2",
-                            checkboxMode === "on_hover"
-                              ? clsx(
-                                  "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                                  selectedIds?.includes(
-                                    row.original?.id ?? ""
-                                  ) && "!opacity-100"
-                                )
-                              : "",
-                            checkboxMode === "never" && "hidden"
-                          )}
-                          style={{ verticalAlign: "middle" }}
-                        >
-                          <div className="flex justify-center items-center h-full">
-                            <Checkbox
-                              variant="helicone"
-                              checked={selectedIds?.includes(
-                                row.original?.id ?? ""
-                              )}
-                            />
-                          </div>
-                        </td>
-                        {row.getVisibleCells().map((cell, i) => (
-                          <td
-                            key={i}
-                            className={clsx(
-                              "py-3 px-2 text-slate-700 dark:text-slate-300",
-                              i === 0 &&
-                                checkboxMode === "always_visible" &&
-                                "pl-2",
-                              i === 0 && checkboxMode === "on_hover" && "pl-2",
-                              i === 0 && checkboxMode === "never" && "pl-10",
-                              // For selected rows in hover mode
-                              i === 0 &&
-                                checkboxMode === "on_hover" &&
-                                selectedIds?.includes(row.original?.id ?? "") &&
-                                "!pl-2",
-                              i === row.getVisibleCells().length - 1 &&
-                                "pr-10 border-r border-border"
-                            )}
-                            style={{
-                              maxWidth: cell.column.getSize(),
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {dataLoading &&
+                            "w-full flex flex-grow",
                             (cell.column.id == "requestText" ||
-                              cell.column.id == "responseText") ? (
-                              <span
-                                className={clsx(
-                                  "w-full flex flex-grow",
-                                  (cell.column.id == "requestText" ||
-                                    cell.column.id == "responseText") &&
-                                    dataLoading
-                                    ? "animate-pulse bg-slate-200 rounded-md"
-                                    : "hidden"
-                                )}
-                              >
-                                &nbsp;
-                              </span>
-                            ) : (
-                              flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )
-                            )}
-                          </td>
-                        ))}
-                        {rowLink && (
-                          <td
-                            className="p-0 m-0 border-0"
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              padding: 0,
-                              margin: 0,
-                              border: "none",
-                              background: "transparent",
-                              pointerEvents: "none",
-                              zIndex: 2,
-                            }}
-                          >
-                            <Link
-                              href={rowLink(row.original)}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                height: "100%",
-                                opacity: 0,
-                                pointerEvents: "auto",
-                              }}
-                              onClick={(e: React.MouseEvent) => {
-                                if (onRowSelect) {
-                                  e.stopPropagation();
-                                }
-                              }}
-                              aria-hidden="true"
-                            />
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </ScrollArea>
+                              cell.column.id == "responseText") &&
+                              dataLoading
+                              ? "animate-pulse bg-slate-200 rounded-md"
+                              : "hidden"
+                          )}
+                        >
+                          &nbsp;
+                        </span>
+                      ) : (
+                        flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )
+                      )}
+                    </td>
+                  ))}
+                  {rowLink && (
+                    <td
+                      className="p-0 m-0 border-0"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        padding: 0,
+                        margin: 0,
+                        border: "none",
+                        background: "transparent",
+                        pointerEvents: "none",
+                        zIndex: 2,
+                      }}
+                    >
+                      <Link
+                        href={rowLink(row.original)}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          height: "100%",
+                          opacity: 0,
+                          pointerEvents: "auto",
+                        }}
+                        onClick={(e: React.MouseEvent) => {
+                          if (onRowSelect) {
+                            e.stopPropagation();
+                          }
+                        }}
+                        aria-hidden="true"
+                      />
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
