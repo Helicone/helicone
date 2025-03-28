@@ -775,18 +775,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                     )}
                   </Popover>
 
-                  <ThemedTimeFilter
-                    currentTimeFilter={getTimeRange()}
-                    timeFilterOptions={[]}
-                    onSelect={function (key: string, value: string): void {
-                      onTimeSelectHandler(key as TimeInterval, value);
-                    }}
-                    isFetching={false}
-                    defaultValue={getDefaultValue()}
-                    custom={true}
-                  />
-
-                  {/* TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
+                  {/* LEGACY TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
                   {organizationLayoutAvailable && (
                     <FiltersButton
                       filters={
@@ -803,6 +792,54 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                     />
                   )}
 
+                  <ThemedTimeFilter
+                    currentTimeFilter={getTimeRange()}
+                    timeFilterOptions={[]}
+                    onSelect={function (key: string, value: string): void {
+                      onTimeSelectHandler(key as TimeInterval, value);
+                    }}
+                    isFetching={false}
+                    defaultValue={getDefaultValue()}
+                    custom={true}
+                  />
+
+                  {/* View Columns button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ViewColumns
+                        columns={tableRef.current?.getAllColumns() || []}
+                        activeColumns={
+                          tableRef.current
+                            ?.getAllColumns()
+                            .filter((col: any) => col.id !== "select") // Exclude select column from management
+                            .map((col: any) => ({
+                              id: col.id,
+                              name: col.columnDef.header?.toString() || col.id,
+                              shown: col.getIsVisible(),
+                            })) || []
+                        }
+                        setActiveColumns={(columns) => {
+                          const table = tableRef.current;
+                          if (!table) return;
+
+                          // Update all column visibility states at once
+                          const visibilityState: Record<string, boolean> = {};
+                          columns.forEach((col) => {
+                            if (col.id !== "select") {
+                              // Don't modify select column visibility
+                              visibilityState[col.id] = col.shown;
+                            }
+                          });
+                          table.setColumnVisibility(visibilityState);
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Manage columns</TooltipContent>
+                  </Tooltip>
+                </div>
+              }
+              rightActions={
+                <div className="flex items-center gap-2">
                   {/* Add to dataset button - only shows when items are selected */}
                   {selectedIds.length > 0 && (
                     <Button
@@ -817,40 +854,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                       Add to Dataset
                     </Button>
                   )}
-                </div>
-              }
-              rightActions={
-                <div className="flex items-center gap-2">
-                  {/* View Columns button */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <ViewColumns
-                          columns={tableRef.current?.getAllColumns() || []}
-                          activeColumns={
-                            tableRef.current
-                              ?.getAllColumns()
-                              .map((col: any) => ({
-                                id: col.id,
-                                name: col.id,
-                                shown: col.getIsVisible(),
-                              })) || []
-                          }
-                          setActiveColumns={(columns) => {
-                            columns.forEach((col) => {
-                              const tableCol = tableRef.current?.getColumn(
-                                col.id
-                              );
-                              if (tableCol) {
-                                tableCol.toggleVisibility(col.shown);
-                              }
-                            });
-                          }}
-                        />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>Manage columns</TooltipContent>
-                  </Tooltip>
 
                   {/* Export button */}
                   <Tooltip>

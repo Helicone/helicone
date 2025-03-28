@@ -1,8 +1,4 @@
-import { Menu, Transition } from "@headlessui/react";
-import {
-  AdjustmentsHorizontalIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -10,8 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Menu, Transition } from "@headlessui/react";
 import { Column } from "@tanstack/react-table";
-import { Fragment, useState } from "react";
+import { Columns, Info } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
 import ColumnOptions from "./ColumnOptions";
@@ -20,7 +18,6 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
-import { Button } from "@/components/ui/button";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
@@ -30,7 +27,27 @@ interface ViewColumnsProps<T> {
 }
 
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
-  const { columns, activeColumns, setActiveColumns, isDatasetsPage } = props;
+  const {
+    columns,
+    activeColumns: initialActiveColumns,
+    setActiveColumns,
+    isDatasetsPage,
+  } = props;
+
+  // Add internal state to track active columns
+  const [localActiveColumns, setLocalActiveColumns] =
+    useState<DragColumnItem[]>(initialActiveColumns);
+
+  // Sync internal state with props
+  useEffect(() => {
+    setLocalActiveColumns(initialActiveColumns);
+  }, [initialActiveColumns]);
+
+  // Update both local and parent state
+  const handleActiveColumnsChange = (newColumns: DragColumnItem[]) => {
+    setLocalActiveColumns(newColumns);
+    setActiveColumns(newColumns);
+  };
 
   const categories = columns.reduce(
     (acc, column) => {
@@ -56,7 +73,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
           className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
           size="xs"
         >
-          <AdjustmentsHorizontalIcon className="h-4 w-4" />
+          <Columns className="h-4 w-4" />
         </Menu.Button>
       </div>
       <Transition
@@ -68,7 +85,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="border border-slate-300 dark:border-slate-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
+        <Menu.Items className="border border-slate-300 dark:border-slate-700 absolute z-20 left-1/2 -translate-x-1/2 mt-2 w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
           <Row className="h-full">
             <Col className="relative flex-1 h-full p-4">
               <div className="flex flex-row items-center justify-start space-x-2 mb-4">
@@ -78,7 +95,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <InformationCircleIcon className="h-5 w-5 text-muted-foreground" />
+                      <Info className="h-5 w-5 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>The ordering only affects your Requests table</p>
@@ -94,7 +111,10 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               </i>
 
               <div className="overflow-y-auto h-[calc(100%-6rem)]">
-                <DragList items={activeColumns} setItems={setActiveColumns} />
+                <DragList
+                  items={localActiveColumns}
+                  setItems={handleActiveColumnsChange}
+                />
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-black to-transparent pointer-events-none"></div>
             </Col>
@@ -109,8 +129,8 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
                   columns={columns}
-                  activeColumns={activeColumns}
-                  setActiveColumns={setActiveColumns}
+                  activeColumns={localActiveColumns}
+                  setActiveColumns={handleActiveColumnsChange}
                 />
               </div>
               <div className="border-t border-border p-4">
@@ -119,7 +139,9 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      setActiveColumns(columnDefsToDragColumnItems(columns))
+                      handleActiveColumnsChange(
+                        columnDefsToDragColumnItems(columns)
+                      )
                     }
                     className="text-xs"
                   >
@@ -130,8 +152,11 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setActiveColumns(
-                          activeColumns.map((c) => ({ ...c, shown: false }))
+                        handleActiveColumnsChange(
+                          localActiveColumns.map((c) => ({
+                            ...c,
+                            shown: false,
+                          }))
                         )
                       }
                       className="text-xs"
@@ -142,8 +167,8 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setActiveColumns(
-                          activeColumns.map((c) => ({ ...c, shown: true }))
+                        handleActiveColumnsChange(
+                          localActiveColumns.map((c) => ({ ...c, shown: true }))
                         )
                       }
                       className="text-xs"
