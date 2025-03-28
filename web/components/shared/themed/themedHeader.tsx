@@ -30,7 +30,7 @@ import ThemedModal from "./themedModal";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import ThemedTimeFilter from "./themedTimeFilter";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-
+import FilterASTButton from "@/filterAST/FilterASTButton";
 export interface Column {
   key: keyof UserMetric;
   label: string;
@@ -113,10 +113,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     savedFilters,
   } = props;
 
-  const [showAdvancedFilters, setShowAdvancedFilters] = useLocalStorage(
-    "showFilters",
-    false
-  );
   const [exportFiltered, setExportFiltered] = useState(false);
 
   return (
@@ -143,42 +139,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
           {(advancedFilter || editColumns || csvExport) && (
             <div className="flex flex-wrap space-x-2 items-center">
-              {advancedFilter && (
-                <>
-                  {advancedFilter && (
-                    <Button
-                      onClick={() =>
-                        setShowAdvancedFilters(!showAdvancedFilters)
-                      }
-                      variant="ghostLinear"
-                      className="gap-2"
-                      size="sm_sleek"
-                    >
-                      <FunnelIcon className="h-[13px] w-[13px] text-slate-500" />
-                      <span className="hidden sm:inline text-slate-700 dark:text-slate-300 font-normal text-[13px]">
-                        {showAdvancedFilters ? "Hide" : ""} Filters
-                      </span>
-                    </Button>
-                  )}
-                  {savedFilters && (
-                    <>
-                      <div className="mx-auto flex text-sm">
-                        <FiltersButton
-                          filters={savedFilters.filters}
-                          currentFilter={savedFilters.currentFilter}
-                          onFilterChange={savedFilters.onFilterChange}
-                          onDeleteCallback={() => {
-                            if (savedFilters.onSaveFilterCallback) {
-                              savedFilters.onSaveFilterCallback();
-                            }
-                          }}
-                          layoutPage={savedFilters.layoutPage}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
+              {advancedFilter && <FilterASTButton />}
               {editColumns && (
                 <ThemedMultiSelect
                   columns={editColumns.columns.map((col) => ({
@@ -236,19 +197,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             </div>
           )}
         </div>
-        {advancedFilter && (
-          <div>
-            {advancedFilter.filterMap && (
-              <>
-                {showAdvancedFilters && (
-                  <>
-                    <FilterASTEditor />
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
       </div>
       {csvExport && (
         <ThemedModal

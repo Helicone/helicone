@@ -12,7 +12,13 @@ import { Small } from "@/components/ui/typography";
 import { Info, Link, Loader2, Plus, PlusCircle, Share2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { AndExpression, OrExpression, FilterExpression } from "./filterAst";
+import {
+  AndExpression,
+  OrExpression,
+  FilterExpression,
+  DEFAULT_FILTER_EXPRESSION,
+  DEFAULT_FILTER_GROUP_EXPRESSION,
+} from "./filterAst";
 
 // Import components
 import FilterGroupNode from "./components/FilterGroupNode";
@@ -68,16 +74,8 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
     }
   };
 
-  if (crud.isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin h-4 w-4" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-3 w-full bg-white dark:bg-slate-950 rounded-md p-3">
+    <div className="space-y-3 w-full bg-background rounded-md py-4 px-6">
       {filterStore.filter && (
         <div className="flex items-center justify-between border-b pb-2">
           <div className="flex flex-col items-center gap-1.5">
@@ -167,15 +165,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               showSavedFilters={showSavedFilters}
               toggleSavedFilters={toggleSavedFilters}
             />
-
-            <Button
-              variant="glass"
-              size="xs"
-              onClick={() => helpers.newEmptyFilter()}
-            >
-              <Plus size={12} />
-              <span className="text-[10px] font-normal">New Filter</span>
-            </Button>
           </div>
         </div>
       )}
@@ -188,26 +177,18 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             isRoot={true}
           />
         ) : (
-          <div className="text-center py-6 rounded-md flex flex-col items-center gap-2">
-            <Small className="text-muted-foreground text-[10px] font-normal">
-              No filters applied
-            </Small>
-            <div className="flex items-center gap-2">
-              <SavedFiltersDropdown
-                showSavedFilters={showSavedFilters}
-                toggleSavedFilters={toggleSavedFilters}
-              />
-              <Button
-                onClick={() => {
-                  helpers.newEmptyFilter();
-                }}
-                variant="default"
-                size="xs"
-              >
-                <PlusCircle size={12} className="mr-1" />
-                <span className="text-[10px] font-normal">New Filter</span>
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                filterStore.setFilter(DEFAULT_FILTER_GROUP_EXPRESSION);
+              }}
+            >
+              <Plus size={16} />
+              <span>Add Condition Group</span>
+            </Button>
+            <SavedFiltersDropdown />
           </div>
         )}
       </div>

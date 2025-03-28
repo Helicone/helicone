@@ -673,3 +673,7 @@ export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
   "eq",
   "200"
 );
+
+export const DEFAULT_FILTER_GROUP_EXPRESSION = FilterAST.and(
+  FilterAST.condition("status", "eq", "200")
+);

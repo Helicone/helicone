@@ -76,21 +76,6 @@ export const useContextHelpers = ({
     return result;
   };
 
-  const newEmptyFilter = async () => {
-    const result = await filterCrud.createFilter.mutateAsync({
-      name: "Untitled Filter",
-      filter: {
-        type: "and",
-        expressions: [DEFAULT_FILTER_EXPRESSION],
-      },
-    });
-
-    if (result?.data?.id) {
-      loadFilterById(result.data.id);
-    }
-
-    return result;
-  };
   /**
    * Delete a saved filter by ID
    */
@@ -155,7 +140,7 @@ export const useContextHelpers = ({
   return {
     loadFilterById,
     saveFilter,
-    newEmptyFilter,
+
     deleteFilter,
     updateFilterById,
     getShareableUrl,

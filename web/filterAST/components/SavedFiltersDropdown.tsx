@@ -9,18 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Small } from "@/components/ui/typography";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { BookmarkIcon, Check, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
-interface SavedFiltersDropdownProps {
-  showSavedFilters: boolean;
-  toggleSavedFilters: () => void;
-}
+interface SavedFiltersDropdownProps {}
 
-export const SavedFiltersDropdown: React.FC<SavedFiltersDropdownProps> = ({
-  showSavedFilters,
-  toggleSavedFilters,
-}) => {
+export const SavedFiltersDropdown: React.FC<
+  SavedFiltersDropdownProps
+> = ({}) => {
   const [open, setOpen] = useState(false);
   const { crud, helpers, store } = useFilterAST();
 
@@ -37,17 +33,18 @@ export const SavedFiltersDropdown: React.FC<SavedFiltersDropdownProps> = ({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="glass" size="xs" className="flex items-center gap-1">
-          <BookmarkIcon size={12} className="" />
-          <span className="text-[10px] font-normal">Saved</span>
+        <Button
+          variant="glass"
+          size="sm"
+          className="flex items-center gap-2 text-xs"
+        >
+          <span>Saved Filters</span>
           {crud.savedFilters.length > 0 && (
-            <Badge
-              variant="secondary"
-              className="ml-1 px-1 py-0 h-3.5 text-[10px] font-normal"
-            >
+            <Badge variant="helicone" className="border-none">
               {crud.savedFilters.length}
             </Badge>
           )}
+          <ChevronDown size={12} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
