@@ -702,7 +702,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                         <Popover.Button
                           as={Button}
                           variant="outline"
-                          asPill
                           size="sm"
                           className="gap-2"
                           onClick={() => {
@@ -723,7 +722,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                           </span>
                         </Popover.Button>
 
-                        <Popover.Panel className="min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg absolute z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border">
+                        <Popover.Panel
+                          static={isFiltersPinned}
+                          className="absolute top-full left-0 min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border"
+                        >
                           <div
                             className="w-full"
                             ref={popoverContentRef}
@@ -765,6 +767,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                       </>
                     )}
                   </Popover>
+
                   <ThemedTimeFilter
                     currentTimeFilter={getTimeRange()}
                     timeFilterOptions={[]}
