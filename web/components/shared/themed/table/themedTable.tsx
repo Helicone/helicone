@@ -41,6 +41,7 @@ interface ThemedTableProps<T extends { id?: string }> {
   defaultColumns: ColumnDef<T>[];
   skeletonLoading: boolean;
   dataLoading: boolean;
+  tableRef?: React.MutableRefObject<any>;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRowTree;
@@ -127,6 +128,7 @@ export default function ThemedTable<T extends { id?: string }>(
     isDatasetsPage,
     search,
     rowLink,
+    tableRef,
   } = props;
 
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
@@ -143,6 +145,10 @@ export default function ThemedTable<T extends { id?: string }>(
       columnOrder: activeColumns.map((column) => column.id),
     },
   });
+
+  if (tableRef) {
+    tableRef.current = table;
+  }
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();

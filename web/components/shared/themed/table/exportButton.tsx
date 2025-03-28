@@ -1,10 +1,3 @@
-import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import Papa from "papaparse";
-import { useState } from "react";
-import { clsx } from "../../clsx";
-import useNotification from "../../notification/useNotification";
-import ThemedModal from "../themedModal";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,6 +12,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import Papa from "papaparse";
+import { useState } from "react";
+import { LuDownload } from "react-icons/lu";
+import { clsx } from "../../clsx";
+import useNotification from "../../notification/useNotification";
+import ThemedModal from "../themedModal";
 
 interface ExportButtonProps<T> {
   rows: T[];
@@ -88,16 +89,8 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            onClick={() => setOpen(true)}
-            className={clsx(
-              "flex items-center gap-2 text-slate-700 dark:text-slate-400",
-              className
-            )}
-            size="xs"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4" />
+          <Button variant="ghost" onClick={() => setOpen(true)} size="xs">
+            <LuDownload className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Export data</TooltipContent>

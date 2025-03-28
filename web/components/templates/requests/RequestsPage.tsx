@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
 import FiltersButton from "@/components/shared/themed/table/filtersButton";
 import { AdvancedFilters } from "@/components/shared/themed/themedAdvancedFilters";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
@@ -10,6 +11,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
@@ -20,10 +26,9 @@ import {
 } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { Popover } from "@headlessui/react";
-import { PinIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuPlus } from "react-icons/lu";
+import { LuPin, LuPlus } from "react-icons/lu";
 import { PiFunnelBold } from "react-icons/pi";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
@@ -49,6 +54,7 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
+import ExportButton from "../../shared/themed/table/exportButton";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -106,6 +112,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const initialLoadRef = useRef(true);
   const drawerRef = useRef<any>(null);
   const popoverContentRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<any>(null);
 
   /* -------------------------------------------------------------------------- */
   /*                                   STATES                                   */
@@ -713,7 +720,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                           }}
                         >
                           <PiFunnelBold className="h-4 w-4" />
-                          <span className="hidden sm:inline font-normal text-[13px]">
+                          <span className="hidden sm:inline font-normal text-xs">
                             {isFiltersPinned
                               ? showFilters
                                 ? "Hide Filters"
@@ -756,9 +763,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                                 className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
                               >
                                 {isFiltersPinned ? (
-                                  <PinIcon className="h-5 w-5 text-primary" />
+                                  <LuPin className="h-4 w-4 text-primary" />
                                 ) : (
-                                  <PinIcon className="h-5 w-5 text-muted-foreground" />
+                                  <LuPin className="h-4 w-4 text-muted-foreground" />
                                 )}
                               </Button>
                             </div>
@@ -795,16 +802,75 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                       layoutPage={"requests"}
                     />
                   )}
+
+                  {/* Add to dataset button - only shows when items are selected */}
+                  {selectedIds.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex flex-row gap-2 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 text-xs"
+                      onClick={() => {
+                        setModalOpen(true);
+                      }}
+                    >
+                      <LuPlus className="h-4 w-4" />
+                      Add to Dataset
+                    </Button>
+                  )}
                 </div>
               }
               rightActions={
-                <LivePill
-                  isLive={isLive}
-                  setIsLive={setIsLive}
-                  isDataLoading={isDataLoading}
-                  isRefetching={isRefetching}
-                  refetch={refetch}
-                />
+                <div className="flex items-center gap-2">
+                  {/* View Columns button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <ViewColumns
+                          columns={tableRef.current?.getAllColumns() || []}
+                          activeColumns={
+                            tableRef.current
+                              ?.getAllColumns()
+                              .map((col: any) => ({
+                                id: col.id,
+                                name: col.id,
+                                shown: col.getIsVisible(),
+                              })) || []
+                          }
+                          setActiveColumns={(columns) => {
+                            columns.forEach((col) => {
+                              const tableCol = tableRef.current?.getColumn(
+                                col.id
+                              );
+                              if (tableCol) {
+                                tableCol.toggleVisibility(col.shown);
+                              }
+                            });
+                          }}
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>Manage columns</TooltipContent>
+                  </Tooltip>
+
+                  {/* Export button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <ExportButton rows={requests} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>Export data</TooltipContent>
+                  </Tooltip>
+
+                  {/* Live pill */}
+                  <LivePill
+                    isLive={isLive}
+                    setIsLive={setIsLive}
+                    isDataLoading={isDataLoading}
+                    isRefetching={isRefetching}
+                    refetch={refetch}
+                  />
+                </div>
               }
             />
           )}
@@ -815,6 +881,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           ) : (
             <ThemedTable
               id="requests-table"
+              tableRef={tableRef}
               highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
@@ -881,25 +948,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
-              selectedRows={
-                selectedIds.length > 0
-                  ? {
-                      showSelectedCount: true,
-                      children: (
-                        <GenericButton
-                          onClick={() => {
-                            setModalOpen(true);
-                          }}
-                          icon={
-                            <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                          }
-                          text="Add to dataset"
-                          className="h-8 py-0"
-                        />
-                      ),
-                    }
-                  : undefined
-              }
             >
               {_selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
