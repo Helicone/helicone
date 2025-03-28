@@ -373,15 +373,10 @@ const useOrgsContextManager = () => {
 
   useEffect(() => {
     if (user) {
-      posthog.identify(
-        user.id,
-        {
-          name: user.user_metadata?.name,
-        },
-        {
-          email: user.email,
-        }
-      );
+      posthog.identify(user.id, {
+        name: user.user_metadata?.name,
+        email: user.email,
+      });
     }
 
     if (org) {
