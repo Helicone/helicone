@@ -50,8 +50,8 @@ const NavItem: React.FC<NavItemProps> = ({
                 variant: "ghost",
                 size: "icon",
               }),
-              "h-9 w-9 hover:bg-white dark:hover:bg-black",
-              link.current && "shadow-sm bg-white dark:bg-black"
+              "h-9 w-9",
+              link.current && "bg-accent hover:bg-accent"
             )}
           >
             {link.icon && (
@@ -79,7 +79,7 @@ const NavItem: React.FC<NavItemProps> = ({
   }
 
   return (
-    <div>
+    <div className={cn(isSubItem)}>
       <Link
         href={hasSubItems ? "#" : link.href}
         onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
@@ -88,28 +88,27 @@ const NavItem: React.FC<NavItemProps> = ({
             ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
             : cn(
                 buttonVariants({
-                  variant: link.current ? "outline" : "none",
+                  variant: link.current ? "secondary" : "ghost",
                   size: "xs",
                 }),
                 deep && deep > 1 ? "h-6" : "h-8",
-                "justify-start w-full font-normal text-slate-500 hover:bg-white dark:hover:bg-black",
-                link.current &&
-                  "text-slate-800 dark:text-slate-200 shadow-sm bg-white dark:bg-black"
-              )
+                "justify-start w-full font-normal",
+                "text-sm  text-[12px] text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200"
+              ),
+          ""
         )}
       >
-        <div className="flex flex-row items-center justify-between w-full">
-          <div className="flex flex-row items-center">
-            {link.icon && (
-              <link.icon
-                className={cn(
-                  "mr-2 h-3.5 w-3.5 text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200"
-                )}
-              />
-            )}
-            {link.name}
-          </div>
+        <div className="flex items-center">
+          {link.icon && (
+            <link.icon
+              className={cn(
+                "mr-2 h-3.5 w-3.5 text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200"
+              )}
+            />
+          )}
+          {link.name}
           {link.isNew && (
             <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
               New
