@@ -1,27 +1,16 @@
 // src/users/usersController.ts
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
   FilterLeafSubset,
   filterListToTree,
-  FilterNode,
 } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { Result } from "../../lib/shared/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
-import { KVCache } from "../../lib/cache/kvCache";
+import { clickhousePriceCalc } from "../../packages/cost";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface UserQueryParams {
   userIds?: string[];
