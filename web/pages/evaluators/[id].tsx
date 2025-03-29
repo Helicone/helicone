@@ -17,9 +17,6 @@ import { Plus, Settings, Play } from "lucide-react";
 
 import EvaluatorForm from "@/components/templates/evals/EvaluatorForm";
 
-// Type for scoring types
-type ScoringType = "boolean" | "choice" | "range";
-
 // Type for choice score item
 type ChoiceScore = {
   score: number;
