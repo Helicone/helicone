@@ -16,10 +16,21 @@ import {
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
-import { RequestFilterNode } from "./requestController";
 import { KVCache } from "../../lib/cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { result } from "lodash";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+
+export type SessionFilterBranch = {
+  left: SessionFilterNode;
+  operator: "or" | "and";
+  right: SessionFilterNode;
+};
+
+export type SessionFilterNode =
+  | FilterLeafSubset<"request_response_rmt" | "sessions_request_response_rmt">
+  | SessionFilterBranch
+  | "all";
 
 export interface SessionQueryParams {
   search: string;
@@ -29,7 +40,7 @@ export interface SessionQueryParams {
   };
   nameEquals?: string;
   timezoneDifference: number;
-  filter: RequestFilterNode;
+  filter: SessionFilterNode;
 }
 
 export interface SessionNameQueryParams {

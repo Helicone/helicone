@@ -1,21 +1,19 @@
 import {
-  SessionNameQueryParams,
-  SessionQueryParams,
-} from "../controllers/public/sessionController";
-import {
   UserMetricsQueryParams,
   UserMetricsResult,
 } from "../controllers/public/userController";
+import { KVCache } from "../lib/cache/kvCache";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams } from "../lib/db/supabase";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
+import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
+import { FilterNode } from "../lib/shared/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
 } from "../lib/shared/filters/filters";
-import { err, ok, Result, resultMap } from "../lib/shared/result";
+import { ok, Result, resultMap } from "../lib/shared/result";
+import { SortDirection } from "../lib/shared/sorts/requests/sorts";
 import { clickhousePriceCalc } from "../packages/cost";
-import { isValidTimeZoneDifference } from "../utils/helpers";
+import { cacheResultCustom } from "../utils/cacheResult";
 import { BaseManager } from "./BaseManager";
 import {
   getHistogramRowOnKeys,
@@ -23,6 +21,72 @@ import {
 } from "./helpers/percentileDistributions";
 
 export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";
+
+const isValidSortDirection = (sort: SortDirection) => {
+  return sort === "asc" || sort === "desc";
+};
+
+function assertValidSortDirection(direction: SortDirection) {
+  if (!isValidSortDirection(direction)) {
+    throw new Error(`Invalid sort direction: ${direction}`);
+  }
+}
+const kv = new KVCache(60); // 1 minute
+export interface UserMetric {
+  id?: string;
+  user_id: string;
+  active_for: number;
+  first_active: string;
+  last_active: string;
+  total_requests: number;
+  average_requests_per_day_active: number;
+  average_tokens_per_request: number;
+  cost: number;
+  rate_limited_count: number;
+}
+
+export type SortLeafUsers = {
+  [K in keyof UserMetric]?: SortDirection;
+};
+
+const sortMappings: { [K in keyof UserMetric]: string } = {
+  user_id: "request.user_id",
+  active_for: "active_for",
+  last_active: "last_active",
+  total_requests: "total_requests",
+  average_requests_per_day_active: "average_requests_per_day_active",
+  average_tokens_per_request: "average_tokens_per_request",
+  first_active: "first_active",
+  cost: "cost",
+  rate_limited_count: "rate_limited_count",
+};
+
+export function buildUserSort(
+  sort: SortLeafUsers,
+  argsAcc: any[] = []
+): {
+  orderByString: string;
+  argsAcc: any[];
+} {
+  const sortKeys = Object.keys(sort);
+  if (sortKeys.length === 0) {
+    argsAcc = argsAcc.concat([sortMappings.last_active]);
+    return {
+      orderByString: `{val_${argsAcc.length - 1}: String} DESC`,
+      argsAcc,
+    };
+  } else {
+    const sortKey = sortKeys[0];
+    const sortDirection = sort[sortKey as keyof UserMetric];
+    assertValidSortDirection(sortDirection!);
+    const sortColumn = sortMappings[sortKey as keyof UserMetric];
+    argsAcc = argsAcc.concat([sortColumn]);
+    return {
+      orderByString: `{val_${argsAcc.length - 1}: Identifier} ${sortDirection}`,
+      argsAcc,
+    };
+  }
+}
 
 export class UserManager extends BaseManager {
   async getUserMetricsOverview(
@@ -72,19 +136,23 @@ export class UserManager extends BaseManager {
 
   async getUserMetrics(
     queryParams: UserMetricsQueryParams
-  ): Promise<Result<UserMetricsResult[], string>> {
+  ): Promise<Result<{ users: UserMetricsResult[]; count: number }, string>> {
     const {
       filter,
       offset,
       limit,
       timeZoneDifferenceMinutes = 0,
       timeFilter,
+      sort = {
+        last_active: "desc",
+      },
     } = queryParams;
     const { organizationId } = this.authParams;
+    const { argsAcc, orderByString } = buildUserSort(sort);
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
-      argsAcc: [],
+      argsAcc: argsAcc,
       filter: {
         left: timeFilter
           ? {
@@ -116,36 +184,61 @@ export class UserManager extends BaseManager {
       argsAcc: builtFilter.argsAcc,
     });
 
+    const baseQuery = `
+    SELECT
+      r.user_id as user_id,
+      r.user_id as id,
+      count(DISTINCT date_trunc('day', r.request_created_at)) as active_for,
+      toDateTime(min(r.request_created_at) ${
+        timeZoneDifferenceMinutes > 0
+          ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
+          : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
+      }) as first_active,
+      toDateTime(max(r.request_created_at) ${
+        timeZoneDifferenceMinutes > 0
+          ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
+          : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
+      }) as last_active,
+      count(r.request_id)::Int32 as total_requests,
+      count(r.request_id) / count(DISTINCT date_trunc('day', r.request_created_at)) as average_requests_per_day_active,
+      (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
+      sum(r.completion_tokens) as total_completion_tokens,
+      sum(r.prompt_tokens) as total_prompt_token,
+      (${clickhousePriceCalc("r")}) as cost,
+      sum(CASE WHEN r.properties['Helicone-Rate-Limit-Status'] = 'rate_limited' THEN 1 ELSE 0 END) as rate_limited_count
+    from request_response_rmt r
+    WHERE (${builtFilter.filter})
+    GROUP BY r.user_id WITH TOTALS
+    HAVING (${havingFilter.filter})
+      `;
+
     const query = `
-  SELECT
-    request_response_rmt.user_id as user_id,
-    count(DISTINCT date_trunc('day', request_response_rmt.request_created_at)) as active_for,
-    toDateTime(min(request_response_rmt.request_created_at) ${
-      timeZoneDifferenceMinutes > 0
-        ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
-        : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
-    }) as first_active,
-    toDateTime(max(request_response_rmt.request_created_at) ${
-      timeZoneDifferenceMinutes > 0
-        ? `- INTERVAL '${Math.abs(timeZoneDifferenceMinutes)} minute'`
-        : `+ INTERVAL '${timeZoneDifferenceMinutes} minute'`
-    }) as last_active,
-    count(request_response_rmt.request_id)::Int32 as total_requests,
-    count(request_response_rmt.request_id) / count(DISTINCT date_trunc('day', request_response_rmt.request_created_at)) as average_requests_per_day_active,
-    (sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens)) / count(request_response_rmt.request_id) as average_tokens_per_request,
-    sum(request_response_rmt.completion_tokens) as total_completion_tokens,
-    sum(request_response_rmt.prompt_tokens) as total_prompt_tokens,
-    (${clickhousePriceCalc("request_response_rmt")}) as cost
-  from request_response_rmt
-  WHERE (${builtFilter.filter})
-  GROUP BY request_response_rmt.user_id
-  HAVING (${havingFilter.filter})
-  ORDER BY last_active
-  LIMIT ${limit}
-  OFFSET ${offset}
+    ${baseQuery}
+    ORDER BY ${orderByString}
+    LIMIT ${limit}
+    OFFSET ${offset}
+        `;
+
+    const countQuery = `
+    SELECT
+      count(*) as count
+    FROM (
+      ${baseQuery}
+    )
     `;
 
+    const countResult = await cacheResultCustom(
+      "userMetricsCountQuery" + organizationId,
+      async () =>
+        await dbQueryClickhouse<{ count: number }>(
+          countQuery,
+          builtFilter.argsAcc
+        ),
+      kv
+    );
+
     const results = await clickhouseDb.dbQuery<{
+      id: string;
       user_id: string;
       active_for: number;
       first_active: string;
@@ -158,7 +251,7 @@ export class UserManager extends BaseManager {
       cost: number;
     }>(query, builtFilter.argsAcc);
 
-    return resultMap(results, (x) =>
+    const users = resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
         average_requests_per_day_active: +y.average_requests_per_day_active,
@@ -173,5 +266,16 @@ export class UserManager extends BaseManager {
         user_id: y.user_id,
       }))
     );
+    if (users.error) {
+      return users;
+    }
+    if (countResult.error) {
+      return countResult;
+    }
+
+    return ok({
+      users: users.data!,
+      count: countResult.data?.[0].count ?? 0,
+    });
   }
 }

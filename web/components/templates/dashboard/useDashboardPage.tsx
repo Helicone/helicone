@@ -23,7 +23,10 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
+import {
+  FilterLeaf,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
@@ -31,6 +34,8 @@ import {
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -153,9 +158,15 @@ export const useUIFilterConvert = (
     return updateModelFilter(filterMap, sortedAllModelsData);
   }, [filterMap, sortedAllModelsData, updateModelFilter]);
 
+  const filterStore = useFilterStore();
+
   return {
     properties,
-    userFilters,
+    userFilters: {
+      left: userFilters,
+      right: filterStore.filter ? toFilterNode(filterStore.filter) : "all",
+      operator: "and",
+    } as FilterNode,
     filterMap: updatedFilterMap,
     allModelsData: sortedAllModelsData,
     isModelsLoading,

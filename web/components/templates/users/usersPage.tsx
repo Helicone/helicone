@@ -1,31 +1,26 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
+import { LockIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDebounce } from "../../../services/hooks/debounce";
 import { useUsers } from "../../../services/hooks/users";
-import { userTableFilters } from "../../../services/lib/filters/frontendFilterDefs";
 import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
-import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+  SortDirection,
+  SortLeafRequest,
+} from "../../../services/lib/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
+import { UpgradeProDialog } from "../organization/plan/upgradeProDialog";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { LockIcon } from "lucide-react";
-import { UserMetric } from "@/lib/api/users/UserMetric";
-import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -84,11 +79,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
-
   const router = useRouter();
 
   const sortLeaf: SortLeafRequest =
@@ -100,56 +90,19 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           last_active: "desc",
         };
 
-  const filterNode = useMemo(() => {
-    return filterUITreeToFilterNode(
-      userTableFilters.sort((a, b) => a.label.localeCompare(b.label)),
-      debouncedAdvancedFilters
-    );
-  }, [debouncedAdvancedFilters]);
-
-  const { users, count, from, isLoading, to, refetch } = useUsers(
+  const { userMetrics } = useUsers(
     parseInt(currentPage, 10),
     parseInt(pageSize, 10),
-    sortLeaf,
-    filterNode
+    sortLeaf
   );
 
   const { hasAccess, freeLimit, upgradeMessage, canCreate } = useFeatureLimit(
     "users",
-    users.length
+    userMetrics.data?.data?.data?.count ?? 0
   );
 
-  const checkIsNotUniqueUser = useCallback(() => {
-    if (users.length === 0 || users.length > 1) {
-      return false;
-    }
-    if (users.length === 1) {
-      // check the user id and see if it is an empty string
-      const user = users[0];
-      return user.user_id === "";
-    }
-  }, [users]);
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree) => {
-      setAdvancedFilters(filters);
-    },
-    []
-  );
   const [activeTab, setActiveTab] = useQueryParam("tab", "all");
-
-  const advancedFiltersProp = useMemo(
-    () => ({
-      filterMap: userTableFilters,
-      setAdvancedFilters: onSetAdvancedFiltersHandler,
-      filters: advancedFilters,
-      searchPropertyFilters: async () => ({
-        data: null,
-        error: "Not implemented",
-      }),
-    }),
-    [advancedFilters, onSetAdvancedFiltersHandler]
-  );
+  const filter = useFilterAST();
 
   const columns = useMemo(() => {
     if (hasAccess) {
@@ -162,9 +115,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           ...column,
           cell: (info: any) => {
             const user = info.row.original;
-            const userIndex = users.findIndex(
-              (u) => u.user_id === user.user_id
-            );
+            const userIndex =
+              userMetrics.data?.data?.data?.users?.findIndex(
+                (u) => u.user_id === user.user_id
+              ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
             return (
@@ -187,9 +141,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           ...column,
           cell: (info: any) => {
             const user = info.row.original;
-            const userIndex = users.findIndex(
-              (u) => u.user_id === user.user_id
-            );
+            const userIndex =
+              userMetrics.data?.data?.data?.users?.findIndex(
+                (u) => u.user_id === user.user_id
+              ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
             if (isPremium) {
@@ -209,7 +164,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       }
       return column;
     });
-  }, [hasAccess, freeLimit, users]);
+  }, [hasAccess, freeLimit, userMetrics]);
 
   const handleRowSelect = (row: UserMetric) => {
     // Fast exit if user has full access - direct navigation
@@ -218,7 +173,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       return;
     }
 
-    const userIndex = users.findIndex((u) => u.user_id === row.user_id);
+    const userIndex =
+      userMetrics.data?.data?.data?.users?.findIndex(
+        (u) => u.user_id === row.user_id
+      ) ?? 0;
     const isPremiumUser = userIndex >= freeLimit;
 
     if (isPremiumUser) {
@@ -229,11 +187,18 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     router.push(`/users/${encodeURIComponent(row.user_id)}`);
   };
 
-  if (isLoading) {
-    return <LoadingAnimation title="Loading Users" />;
-  }
+  const hasNoUsers = useMemo(() => {
+    return (
+      userMetrics.data?.data?.data?.users?.length === 0 ||
+      (userMetrics.data?.data?.data?.users?.length === 1 &&
+        userMetrics.data?.data?.data?.users?.[0]?.user_id === "")
+    );
+  }, [userMetrics]);
 
-  if (users.length === 0) {
+  if (
+    userMetrics.data?.data?.data?.users?.length === 0 &&
+    !filter.store.filter
+  ) {
     return (
       <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
         <div className="flex flex-1 h-full">
@@ -266,7 +231,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             {!canCreate && (
               <FreeTierLimitBanner
                 feature="users"
-                itemCount={users.length}
+                itemCount={userMetrics.data?.data?.data?.count ?? 0}
                 freeLimit={freeLimit}
                 className="w-full"
               />
@@ -274,21 +239,21 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
 
             <ThemedTable
               id="user-table"
-              defaultData={users}
+              defaultData={userMetrics.data?.data?.data?.users ?? []}
               defaultColumns={columns}
-              skeletonLoading={isLoading}
+              skeletonLoading={userMetrics.isLoading}
               dataLoading={false}
               sortable={{
                 sortKey: sortKey,
                 sortDirection: sortDirection as SortDirection,
                 isCustomProperty: false,
               }}
-              advancedFilters={advancedFiltersProp}
-              exportData={users}
+              exportData={userMetrics.data?.data?.data?.users ?? []}
               onRowSelect={handleRowSelect}
+              showFilters
             />
 
-            {!isLoading && checkIsNotUniqueUser() && (
+            {!userMetrics.isLoading && hasNoUsers && (
               <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
                 <div className="flex flex-col w-2/5">
                   <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
@@ -314,8 +279,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             <TableFooter
               currentPage={parseInt(currentPage, 10)}
               pageSize={parseInt(pageSize, 10)}
-              isCountLoading={isLoading}
-              count={count || 0}
+              isCountLoading={userMetrics.isLoading}
+              count={userMetrics.data?.data?.data?.count ?? 0}
               onPageChange={(newPage) => {
                 setCurrentPage(newPage.toString());
               }}
@@ -328,7 +293,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           </div>
         </TabsContent>
         <TabsContent value="active">
-          <UserMetrics filterNode={filterNode} />
+          <UserMetrics />
         </TabsContent>
       </Tabs>
 

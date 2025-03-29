@@ -6,18 +6,13 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useAutoSaveFilter } from "../hooks/useAutoSaveFilter";
-import { useFilterActions } from "../hooks/useFilterActions";
-import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
-import { useFilterNavigation } from "../hooks/useFilterNavigation";
+import { useFilterCrud } from "../hooks/useFilterCrud";
 import { FilterState, useFilterStore } from "../store/filterStore";
 import { useContextHelpers } from "./useContextHelpers";
 
 // Define the shape of our context
 interface FilterContextType {
   store: FilterState;
-  actions: ReturnType<typeof useFilterActions>;
-  navigation: ReturnType<typeof useFilterNavigation>;
   crud: ReturnType<typeof useFilterCrud>;
   helpers: ReturnType<typeof useContextHelpers>;
 }
@@ -42,51 +37,28 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
   const filterStore = useFilterStore();
   const searchParams = useSearchParams();
 
-  const filterActions = useFilterActions();
-  const filterNavigation = useFilterNavigation();
   const filterCrud = useFilterCrud();
   const helpers = useContextHelpers({
     filterStore,
     filterCrud,
   });
-  // Use the auto-save hook
-  useAutoSaveFilter({
-    activeFilterId: filterStore.activeFilterId,
-    hasUnsavedChanges: filterStore.hasUnsavedChanges,
-    filter: filterStore.filter,
-    savedFilters: filterCrud.savedFilters,
-    updateFilter: async (filter) => {
-      await filterCrud.updateFilter.mutateAsync(filter);
-      filterStore.setHasUnsavedChanges(false);
-    },
-    autoSaveDelay: 1000,
-  });
+
   // Initial URL hook
   useEffect(() => {
-    if (filterStore.initialFilterId && !filterStore.activeFilterId) {
-      const filterToLoad = filterCrud.savedFilters.find(
-        (filter: StoreFilterType) => filter.id === filterStore.initialFilterId
-      );
-
-      if (filterToLoad) {
-        helpers.loadFilterById(filterStore.initialFilterId);
-      }
+    const newInitialFilterId =
+      searchParams?.get("filter_id") ?? filterStore.activeFilterId;
+    if (!filterStore.alreadyLoadedOnce && newInitialFilterId) {
+      helpers.loadFilterById(newInitialFilterId);
     }
-    const newInitialFilterId = searchParams?.get("filter_id");
-    if (newInitialFilterId) {
-      filterStore.setInitialFilterId(newInitialFilterId);
-    }
-  }, [searchParams, filterStore, filterCrud]);
+  }, [searchParams, filterStore, filterCrud, helpers]);
 
   const value = useMemo(
     () => ({
       store: filterStore,
-      actions: filterActions,
-      navigation: filterNavigation,
       crud: filterCrud,
       helpers,
     }),
-    [filterStore, filterActions, filterNavigation, filterCrud, helpers]
+    [filterStore, filterCrud, helpers]
   );
 
   return (

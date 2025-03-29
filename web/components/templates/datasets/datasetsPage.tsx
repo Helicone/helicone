@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
-import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +8,7 @@ import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { useState } from "react";
 import { UpgradeProDialog } from "../../templates/organization/plan/upgradeProDialog";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 
 interface DatasetsPageProps {
   currentPage: number;

@@ -1,50 +1,24 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
-import {
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
-import { useMemo, useState } from "react";
+import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useState } from "react";
+import { UserMetric } from "../../../lib/api/users/UserMetric";
+import { Result } from "../../../lib/result";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {
   ColumnType,
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
-import { clsx } from "../clsx";
-import ThemedTimeFilter from "./themedTimeFilter";
-import { AdvancedFilters } from "./themedAdvancedFilters";
-import ThemedModal from "./themedModal";
-import Link from "next/link";
-import { Result } from "../../../lib/result";
-import { ThemedMultiSelect } from "./themedMultiSelect";
-import { TimeFilter } from "@/types/timeFilter";
-import FiltersButton from "./table/filtersButton";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import { Button } from "@/components/ui/button";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import { UserMetric } from "../../../lib/api/users/UserMetric";
-import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
-
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import FilterASTButton from "@/filterAST/FilterASTButton";
+import { clsx } from "../clsx";
+import ThemedModal from "./themedModal";
+import { ThemedMultiSelect } from "./themedMultiSelect";
+import ThemedTimeFilter from "./themedTimeFilter";
 export interface Column {
   key: keyof UserMetric;
   label: string;
@@ -55,7 +29,7 @@ export interface Column {
   columnOrigin?: "property" | "value" | "feedback";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
-  toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
+  toSortLeaf?: (direction: SortDirection) => any;
   format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 
@@ -127,11 +101,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
     savedFilters,
   } = props;
 
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [exportFiltered, setExportFiltered] = useState(false);
-  const advencedFiltersLength = useMemo(() => {
-    return advancedFilter?.filters ? countFilters(advancedFilter.filters) : 0;
-  }, [advancedFilter?.filters]);
 
   return (
     <>
@@ -157,42 +127,7 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
           </div>
           {(advancedFilter || editColumns || csvExport) && (
             <div className="flex flex-wrap space-x-2 items-center">
-              {advancedFilter && (
-                <>
-                  {advancedFilter && (
-                    <Button
-                      onClick={() =>
-                        setShowAdvancedFilters(!showAdvancedFilters)
-                      }
-                      variant="ghostLinear"
-                      className="gap-2"
-                      size="sm_sleek"
-                    >
-                      <FunnelIcon className="h-[13px] w-[13px] text-slate-500" />
-                      <span className="hidden sm:inline text-slate-700 dark:text-slate-300 font-normal text-[13px]">
-                        {showAdvancedFilters ? "Hide" : ""} Filters
-                      </span>
-                    </Button>
-                  )}
-                  {savedFilters && (
-                    <>
-                      <div className="mx-auto flex text-sm">
-                        <FiltersButton
-                          filters={savedFilters.filters}
-                          currentFilter={savedFilters.currentFilter}
-                          onFilterChange={savedFilters.onFilterChange}
-                          onDeleteCallback={() => {
-                            if (savedFilters.onSaveFilterCallback) {
-                              savedFilters.onSaveFilterCallback();
-                            }
-                          }}
-                          layoutPage={savedFilters.layoutPage}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
+              {advancedFilter && <FilterASTButton />}
               {editColumns && (
                 <ThemedMultiSelect
                   columns={editColumns.columns.map((col) => ({
@@ -250,25 +185,6 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
             </div>
           )}
         </div>
-        {advancedFilter && (
-          <div>
-            {advancedFilter.filterMap && (
-              <>
-                {showAdvancedFilters && (
-                  <AdvancedFilters
-                    filterMap={advancedFilter.filterMap}
-                    filters={advancedFilter.filters}
-                    setAdvancedFilters={advancedFilter.onAdvancedFilter}
-                    searchPropertyFilters={advancedFilter.searchPropertyFilters}
-                    onSaveFilterCallback={savedFilters?.onSaveFilterCallback}
-                    savedFilters={savedFilters?.filters}
-                    layoutPage={savedFilters?.layoutPage ?? "dashboard"}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        )}
       </div>
       {csvExport && (
         <ThemedModal
