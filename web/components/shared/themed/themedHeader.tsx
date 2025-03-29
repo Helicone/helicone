@@ -1,13 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { FilterASTEditor } from "@/filterAST/FilterASTEditor";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
-import {
-  ArrowDownTrayIcon,
-  ArrowPathIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
@@ -19,18 +13,12 @@ import {
   SingleFilterDef,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
-import {
-  SortDirection,
-  SortLeafRequest,
-} from "../../../services/lib/sorts/requests/sorts";
-import { SortLeafUsers } from "../../../services/lib/sorts/users/sorts";
+import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
+import FilterASTButton from "@/filterAST/FilterASTButton";
 import { clsx } from "../clsx";
-import FiltersButton from "./table/filtersButton";
 import ThemedModal from "./themedModal";
 import { ThemedMultiSelect } from "./themedMultiSelect";
 import ThemedTimeFilter from "./themedTimeFilter";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import FilterASTButton from "@/filterAST/FilterASTButton";
 export interface Column {
   key: keyof UserMetric;
   label: string;
@@ -41,7 +29,7 @@ export interface Column {
   columnOrigin?: "property" | "value" | "feedback";
   minWidth?: number;
   align?: "center" | "inherit" | "left" | "right" | "justify";
-  toSortLeaf?: (direction: SortDirection) => SortLeafRequest | SortLeafUsers;
+  toSortLeaf?: (direction: SortDirection) => any;
   format?: (value: any, mode: "Condensed" | "Expanded") => string;
 }
 
