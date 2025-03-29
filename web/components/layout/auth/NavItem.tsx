@@ -43,24 +43,12 @@ const NavItem: React.FC<NavItemProps> = ({
   // Get the filter_id from the current URL query parameters
   const { filter_id } = router.query;
 
-  // Function to append filter_id to href if it exists
-  const getHrefWithFilter = (baseHref: string) => {
-    if (filter_id) {
-      // Check if the URL already has query parameters
-      const hasQueryParams = baseHref.includes("?");
-      return `${baseHref}${hasQueryParams ? "&" : "?"}filter_id=${filter_id}`;
-    }
-    return baseHref;
-  };
-
   if (isCollapsed) {
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Link
-            href={getHrefWithFilter(
-              hasSubItems ? link.subItems![0].href : link.href
-            )}
+            href={hasSubItems ? link.subItems![0].href : link.href}
             className={cn(
               buttonVariants({
                 variant: "ghost",
@@ -97,7 +85,7 @@ const NavItem: React.FC<NavItemProps> = ({
   return (
     <div className={cn(isSubItem)}>
       <Link
-        href={hasSubItems ? "#" : getHrefWithFilter(link.href)}
+        href={hasSubItems ? "#" : link.href}
         onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
         className={cn(
           hasSubItems
