@@ -5,11 +5,12 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useSessionNames } from "../../../services/hooks/sessions";
-import { SortDirection } from "../../../services/lib/sorts/users/sorts";
+
 import { Col } from "../../layout/common/col";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
+import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 
 type TSessions = {
   created_at: string;
