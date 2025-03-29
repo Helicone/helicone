@@ -45,7 +45,8 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
 
   // Initial URL hook
   useEffect(() => {
-    const newInitialFilterId = searchParams?.get("filter_id");
+    const newInitialFilterId =
+      searchParams?.get("filter_id") ?? filterStore.activeFilterId;
     if (!filterStore.alreadyLoadedOnce && newInitialFilterId) {
       helpers.loadFilterById(newInitialFilterId);
     }

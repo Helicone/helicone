@@ -317,8 +317,13 @@ const havingKeyMappings: KeyMappings = {
   }),
   sessions_request_response_rmt:
     easyKeyMappings<"sessions_request_response_rmt">({
-      total_cost: "total_cost",
-      total_tokens: "total_tokens",
+      session_total_cost: "total_cost",
+      session_completion_tokens: "completion_tokens",
+      session_prompt_tokens: "prompt_tokens",
+      session_total_requests: "total_requests",
+      session_created_at: "created_at",
+      session_latest_request_created_at: "latest_request_created_at",
+      session_total_tokens: "total_tokens",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,

@@ -1877,11 +1877,26 @@
 			},
 			"Partial_SessionsRequestResponseRMTToOperators_": {
 				"properties": {
-					"total_cost": {
+					"session_total_cost": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"total_tokens": {
+					"session_total_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"session_prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"session_completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"session_total_requests": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"session_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"session_latest_request_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
 					}
 				},
 				"type": "object",
@@ -4722,6 +4737,60 @@
 					}
 				]
 			},
+			"Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
+					"sessions_request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_"
+			},
+			"SessionFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/SessionFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"SessionFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/SessionFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/SessionFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
 			"SessionQueryParams": {
 				"properties": {
 					"search": {
@@ -4752,7 +4821,7 @@
 						"format": "double"
 					},
 					"filter": {
-						"$ref": "#/components/schemas/RequestFilterNode"
+						"$ref": "#/components/schemas/SessionFilterNode"
 					}
 				},
 				"required": [

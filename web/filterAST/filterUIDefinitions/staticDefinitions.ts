@@ -2,7 +2,7 @@ import { FilterUIDefinition } from "./types";
 
 export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {
-    id: "user_id",
+    id: "user_user_id",
     label: "User ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
@@ -10,7 +10,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "active_for",
+    id: "user_active_for",
     label: "Active For (days)",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -18,7 +18,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "first_active",
+    id: "user_first_active",
     label: "First Active",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -26,7 +26,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "last_active",
+    id: "user_last_active",
     label: "Last Active",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -34,7 +34,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "total_requests",
+    id: "user_total_requests",
     label: "Total Requests",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -42,7 +42,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "average_requests_per_day_active",
+    id: "user_average_requests_per_day_active",
     label: "Avg Requests per Day",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -50,7 +50,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "average_tokens_per_request",
+    id: "user_average_tokens_per_request",
     label: "Avg Tokens per Request",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -58,7 +58,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "total_completion_tokens",
+    id: "user_total_completion_tokens",
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -66,7 +66,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "total_prompt_token",
+    id: "user_total_prompt_token",
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -74,7 +74,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "cost",
+    id: "user_total_cost",
     label: "Total Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -85,7 +85,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
 
 export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {
-    id: "session_id",
+    id: "session_session_id",
     label: "Session ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
@@ -93,7 +93,23 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "sessions",
   },
   {
-    id: "total_tokens",
+    id: "session_session_created_at",
+    label: "Created At",
+    type: "datetime",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "session_session_latest_request_created_at",
+    label: "Latest Request Created At",
+    type: "datetime",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "session_total_tokens",
     label: "Total Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -101,7 +117,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "sessions",
   },
   {
-    id: "total_requests",
+    id: "session_total_requests",
     label: "Total Requests",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -109,14 +125,14 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "sessions",
   },
   {
-    id: "total_completion_tokens",
+    id: "session_total_completion_tokens",
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "sessions_request_response_rmt",
   },
   {
-    id: "total_prompt_token",
+    id: "session_total_prompt_token",
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -124,8 +140,8 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "sessions",
   },
   {
-    id: "cost",
-    label: "Total Cost",
+    id: "session_total_cost",
+    label: "Total Session Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "sessions_request_response_rmt",

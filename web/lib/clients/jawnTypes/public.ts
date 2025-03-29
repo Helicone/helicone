@@ -1037,8 +1037,13 @@ export interface components {
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
-      total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
@@ -1733,6 +1738,19 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+    };
+    "FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_"];
+    SessionFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["SessionFilterBranch"] | "all";
+    SessionFilterBranch: {
+      right: components["schemas"]["SessionFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["SessionFilterNode"];
+    };
     SessionQueryParams: {
       search: string;
       timeFilter: {
@@ -1744,7 +1762,7 @@ Json: JsonObject;
       nameEquals?: string;
       /** Format: double */
       timezoneDifference: number;
-      filter: components["schemas"]["RequestFilterNode"];
+      filter: components["schemas"]["SessionFilterNode"];
     };
     SessionNameResult: {
       name: string;
