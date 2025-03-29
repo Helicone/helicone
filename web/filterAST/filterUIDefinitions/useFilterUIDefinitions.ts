@@ -108,13 +108,15 @@ export const useFilterUIDefinitions = () => {
       id: "model",
       label: "Model",
       type: "searchable",
-      operators: ["eq", "neq", "like", "ilike", "contains", "in"],
+      operators: ["contains", "eq", "neq", "like", "ilike", "in"],
 
       onSearch: async (searchTerm) => {
         return Promise.resolve(
           models.data?.data
-            ?.filter((m) =>
-              m.model.toLowerCase().includes(searchTerm.toLowerCase())
+            ?.filter(
+              (m) =>
+                m.model.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                m.model !== ""
             )
             .map((m) => ({
               label: m.model,

@@ -3,7 +3,7 @@ import { ConditionExpression, FilterOperator } from "../filterAst";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2, Loader2 } from "lucide-react";
 import SearchableSelect, {
   SearchableSelectOption,
 } from "./ui/SearchableSelect";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 import clsx from "clsx";
+import { Small } from "@/components/ui/typography";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -295,7 +296,16 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       return [];
     }
   };
-
+  if (isLoading) {
+    return (
+      <div className="p-2 border border-border bg-accent rounded-md flex items-center gap-2">
+        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+        <Small className="text-muted-foreground">
+          Loading filter options...
+        </Small>
+      </div>
+    );
+  }
   if (!filterDef) {
     return (
       <div className="p-2 border border-amber-300 bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">

@@ -40,7 +40,10 @@ export const SavedFiltersDropdown: React.FC<
         >
           <span>Saved Filters</span>
           {crud.savedFilters.length > 0 && (
-            <Badge variant="helicone" className="border-none">
+            <Badge
+              variant="helicone"
+              className="border-none bg-slate-200 dark:bg-slate-800"
+            >
               {crud.savedFilters.length}
             </Badge>
           )}

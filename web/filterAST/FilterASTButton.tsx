@@ -45,11 +45,13 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
                 {store.activeFilterName}
               </Badge>
             )}
-            {store.getFilterNodeCount() > 0 && (
-              <Badge variant="default" className="text-xs">
-                {store.getFilterNodeCount()}
-              </Badge>
-            )}
+            {!isOpen &&
+              !store.activeFilterId &&
+              store.getFilterNodeCount() > 0 && (
+                <Badge variant="default" className="text-xs">
+                  {store.getFilterNodeCount()}
+                </Badge>
+              )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto min-w-[800px] max-w-[90vw] p-0">

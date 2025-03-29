@@ -1,6 +1,11 @@
 import { create } from "zustand";
-import { FilterExpression, AndExpression, OrExpression } from "../filterAst";
 import { persist } from "zustand/middleware";
+import {
+  AndExpression,
+  EMPTY_FILTER_GROUP_EXPRESSION,
+  FilterExpression,
+  OrExpression,
+} from "../filterAst";
 
 export interface FilterState {
   // The active filter expression
@@ -65,7 +70,7 @@ const _getFilterNodeCount = (filter: FilterExpression): number => {
 export const useFilterStore = create<FilterState>()(
   persist(
     (set, get) => ({
-      filter: null,
+      filter: EMPTY_FILTER_GROUP_EXPRESSION,
       activeFilterId: null,
       initialFilterId: null,
       hasUnsavedChanges: false,
@@ -218,7 +223,7 @@ export const useFilterStore = create<FilterState>()(
         // If removing the root, clear the filter
         if (path.length === 0) {
           set({
-            filter: null,
+            filter: EMPTY_FILTER_GROUP_EXPRESSION,
             hasUnsavedChanges: get().activeFilterId !== null,
           });
           return;
@@ -271,7 +276,7 @@ export const useFilterStore = create<FilterState>()(
         set({
           activeFilterId: null,
           hasUnsavedChanges: false,
-          filter: null,
+          filter: EMPTY_FILTER_GROUP_EXPRESSION,
           activeFilterName: "Untitled Filter",
         });
       },

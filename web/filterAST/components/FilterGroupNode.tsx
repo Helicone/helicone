@@ -10,6 +10,8 @@ import {
 } from "../filterAst";
 import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
+import { Row } from "@/components/layout/common/row";
+import SaveFilterButton from "./SaveFilterButton";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
@@ -151,16 +153,22 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
             </Button>
           </div>
         )}
+
         {isRoot && (
-          <Button
-            variant="glass"
-            size="xs"
-            className="flex items-center gap-1 w-fit"
-            onClick={() => handleAddGroup()}
-          >
-            <Plus size={12} />
-            <span className="text-[10px] font-normal">Add Condition Group</span>
-          </Button>
+          <Row className="justify-between w-full">
+            <Button
+              variant="glass"
+              size="xs"
+              className="flex items-center gap-1 w-fit"
+              onClick={() => handleAddGroup()}
+            >
+              <Plus size={12} />
+              <span className="text-[10px] font-normal">
+                Add Condition Group
+              </span>
+            </Button>
+            <SaveFilterButton />
+          </Row>
         )}
       </div>
     </div>
