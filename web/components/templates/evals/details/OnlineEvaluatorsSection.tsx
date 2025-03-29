@@ -1,4 +1,3 @@
-import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -9,14 +8,13 @@ import {
   TagIcon,
   PencilIcon,
 } from "lucide-react";
-import { H4, P, Small, Muted } from "@/components/ui/typography";
+import { H4, P } from "@/components/ui/typography";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,

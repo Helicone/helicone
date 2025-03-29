@@ -7,7 +7,6 @@ import {
   EvaluatorForm,
   EvaluatorFormValues,
 } from "@/components/templates/evals/EvaluatorForm";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { useLLMEvaluatorSubmit } from "@/components/templates/evals/hooks/useEvaluatorSubmit";
 
 const CreateEvaluator = () => {

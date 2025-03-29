@@ -11,9 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { H2, P } from "@/components/ui/typography";
+import { H2 } from "@/components/ui/typography";
 import Link from "next/link";
-import { LineChart, Pencil, Play, Trash2 } from "lucide-react";
+import { LineChart, Pencil, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";

@@ -2,59 +2,18 @@ import { ReactElement, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import AuthHeader from "@/components/shared/authHeader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useEvaluators } from "@/components/templates/evals/EvaluatorHook";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { P, H3 } from "@/components/ui/typography";
+import { H3 } from "@/components/ui/typography";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useLLMEvaluatorSubmit } from "@/components/templates/evals/hooks/useEvaluatorSubmit";
 import { useEvaluatorDetails } from "@/components/templates/evals/details/hooks";
 import { OnlineEvaluatorsSection } from "@/components/templates/evals/details/OnlineEvaluatorsSection";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  OpenAIFunctionToFunctionParams,
-  generateOpenAITemplate,
-  openAITemplateToOpenAIFunctionParams,
-  OpenAIFunctionParams,
-} from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
-import {
-  Pencil,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Minus,
-  Activity,
-  Settings,
-} from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+import { openAITemplateToOpenAIFunctionParams } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
+import { Plus, Settings } from "lucide-react";
+
 import EvaluatorForm from "@/components/templates/evals/EvaluatorForm";
 
 // Type for scoring types

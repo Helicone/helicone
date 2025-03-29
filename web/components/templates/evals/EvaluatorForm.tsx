@@ -1,10 +1,10 @@
-import { ReactElement, useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { P, H3 } from "@/components/ui/typography";
+import { P } from "@/components/ui/typography";
 import { ChevronDown, ChevronUp, Plus, Minus } from "lucide-react";
 import {
   Select,
@@ -14,11 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import {
   generateOpenAITemplate,
   OpenAIFunctionParams,
@@ -263,8 +259,9 @@ export const EvaluatorForm = ({
               <TabsContent value="choice" className="pt-4">
                 <div className="space-y-4">
                   <P className="text-muted-foreground">
-                    Categorical scoring returns values like "good", "bad",
-                    "excellent". Best for qualitative assessments.
+                    Categorical scoring returns values like &ldquo;good&rdquo;,
+                    &ldquo;bad&rdquo;, &ldquo;excellent&rdquo;. Best for
+                    qualitative assessments.
                   </P>
                   <div className="p-4 border rounded-md bg-muted/10">
                     <div className="flex justify-between items-center mb-3">
