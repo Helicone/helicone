@@ -1,71 +1,30 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Link, Plus, Share2 } from "lucide-react";
-import React, { useState } from "react";
-import { toast } from "sonner";
+import { Link, Plus } from "lucide-react";
+import React from "react";
+import FilterGroupNode from "./components/FilterGroupNode";
+import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
+
+import { useFilterAST } from "./context/filterContext";
 import {
   AndExpression,
   DEFAULT_FILTER_GROUP_EXPRESSION,
-  FilterExpression,
   OrExpression,
 } from "./filterAst";
+import { usePathname } from "next/navigation";
+import useNotification from "@/components/shared/notification/useNotification";
 
-// Import components
-import ClearFilterDropdown from "./components/ClearFilterDropdown";
-import FilterGroupNode from "./components/FilterGroupNode";
-import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
-import SaveFilterDialog from "./components/SaveFilterDialog";
+interface FilterASTEditorProps {}
 
-// Import hooks
-import { useFilterAST } from "./context/filterContext";
-
-interface FilterASTEditorProps {
-  onFilterChange?: (filter: FilterExpression) => void;
-}
-
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
-  onFilterChange,
-}) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
   const {
     crud,
     store: filterStore,
-    actions: {
-      saveDialogOpen,
-      setSaveDialogOpen,
-      hasActiveFilters,
-      updateFilterName,
-    },
+
     helpers,
   } = useFilterAST();
-
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-
-  // Call the onFilterChange callback whenever the filter changes
-  React.useEffect(() => {
-    if (onFilterChange && filterStore.filter) {
-      onFilterChange(filterStore.filter);
-    }
-  }, [filterStore.filter, onFilterChange]);
-
-  // Handler for copying the shareable URL
-  const handleCopyShareableUrl = () => {
-    const url = helpers.getShareableUrl();
-    if (url) {
-      navigator.clipboard.writeText(url);
-      toast.success("URL copied", {
-        description: "Shareable filter URL has been copied to clipboard.",
-      });
-      setIsShareDialogOpen(false);
-    }
-  };
+  const pathname = usePathname();
+  const notification = useNotification();
 
   return (
     <div className="space-y-3 w-full bg-background rounded-md py-4 px-6">
@@ -77,18 +36,27 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                 <Input
                   value={filterStore.activeFilterName}
                   onChange={(e) => {
-                    updateFilterName(e.target.value);
+                    filterStore.setActiveFilterName(e.target.value);
                   }}
                   className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0 bg-transparent"
                   placeholder="Untitled Filter"
                 />
-                {(crud.isRefetching || crud.isSaving) && (
+                {crud.isRefetching || crud.isSaving ? (
                   <div className="flex items-center text-muted-foreground bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded-md text-xs border border-slate-200 dark:border-slate-800">
                     Saving...
                   </div>
-                )}
-                {filterStore.hasUnsavedChanges &&
-                !(crud.isRefetching || crud.isSaving) ? (
+                ) : !filterStore.activeFilterId ? (
+                  <Button
+                    variant="outline"
+                    size="sm_sleek"
+                    onClick={() => {
+                      helpers.saveFilter();
+                    }}
+                    className="text-[10px] font-normal"
+                  >
+                    Save New
+                  </Button>
+                ) : filterStore.hasUnsavedChanges ? (
                   <Button
                     variant="outline"
                     size="sm_sleek"
@@ -106,7 +74,20 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                     Save
                   </Button>
                 ) : (
-                  <Button variant="ghost" size="square_icon">
+                  <Button
+                    variant="ghost"
+                    size="square_icon"
+                    onClick={() => {
+                      const url = helpers.getShareableUrl();
+                      if (url) {
+                        navigator.clipboard.writeText(url);
+                        notification.setNotification(
+                          "Filter URL copied to clipboard",
+                          "success"
+                        );
+                      }
+                    }}
+                  >
                     <Link size={12} />
                   </Button>
                 )}
@@ -147,12 +128,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
           </div>
         )}
       </div>
-
-      {/* Save filter dialog */}
-      <SaveFilterDialog
-        open={saveDialogOpen}
-        onOpenChange={setSaveDialogOpen}
-      />
     </div>
   );
 };

@@ -235,6 +235,15 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   // Handle removing the condition
   const handleRemove = () => {
+    const parentPath = filterStore.getParentPath(path);
+    const parentExpression = filterStore.getFilterExpression(parentPath);
+
+    if (parentExpression?.type == "and" || parentExpression?.type == "or") {
+      if (parentExpression.expressions.length === 1) {
+        return filterStore.removeFilterExpression(parentPath);
+      }
+    }
+
     filterStore.removeFilterExpression(path);
   };
 

@@ -3,6 +3,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { DEFAULT_FILTER_EXPRESSION, FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
+import useNotification from "@/components/shared/notification/useNotification";
 
 /**
  * Hook to manage saved filters for a specific page type
@@ -18,6 +19,8 @@ export const useContextHelpers = ({
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const notification = useNotification();
+
   const loadFilterById = useCallback(
     async (filterId: string) => {
       const filterToLoad = await filterCrud.getFilterById(filterId);
@@ -46,31 +49,27 @@ export const useContextHelpers = ({
     router.push(`${pathname}?${params.toString()}`);
   }, [filterStore, pathname, searchParams, router]);
 
-  const saveFilter = async (
-    name: string = "Untitled Filter",
-    filter: FilterExpression
-  ) => {
-    // If we have an active filter ID, update it instead of creating a new one
-    if (filterStore.activeFilterId) {
-      return filterCrud.updateFilter.mutateAsync({
-        id: filterStore.activeFilterId,
-        filter,
-        name,
-      });
+  const saveFilter = async () => {
+    if (!filterStore.filter) {
+      notification.setNotification("No filter to save", "error");
+      return;
     }
 
     const newFilter: StoreFilterType = {
-      name,
-      filter: filter,
+      name: filterStore.activeFilterName ?? "Untitled Filter",
+      filter: filterStore.filter,
       createdAt: new Date().toISOString(),
     };
 
-    // Create new filter
     const result = await filterCrud.createFilter.mutateAsync(newFilter);
 
     // Update the active filter ID and URL
     if (result?.data?.id) {
       filterStore.setActiveFilterId(result.data.id);
+      const params = new URLSearchParams(searchParams?.toString());
+      params.set("filter_id", result.data.id);
+
+      router.push(`${pathname}?${params.toString()}`);
     }
 
     return result;
@@ -140,7 +139,6 @@ export const useContextHelpers = ({
   return {
     loadFilterById,
     saveFilter,
-
     deleteFilter,
     updateFilterById,
     getShareableUrl,

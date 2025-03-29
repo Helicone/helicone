@@ -6,18 +6,13 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useAutoSaveFilter } from "../hooks/useAutoSaveFilter";
-import { useFilterActions } from "../hooks/useFilterActions";
-import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
-import { useFilterNavigation } from "../hooks/useFilterNavigation";
+import { useFilterCrud } from "../hooks/useFilterCrud";
 import { FilterState, useFilterStore } from "../store/filterStore";
 import { useContextHelpers } from "./useContextHelpers";
 
 // Define the shape of our context
 interface FilterContextType {
   store: FilterState;
-  actions: ReturnType<typeof useFilterActions>;
-  navigation: ReturnType<typeof useFilterNavigation>;
   crud: ReturnType<typeof useFilterCrud>;
   helpers: ReturnType<typeof useContextHelpers>;
 }
@@ -42,8 +37,6 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
   const filterStore = useFilterStore();
   const searchParams = useSearchParams();
 
-  const filterActions = useFilterActions();
-  const filterNavigation = useFilterNavigation();
   const filterCrud = useFilterCrud();
   const helpers = useContextHelpers({
     filterStore,
@@ -56,17 +49,15 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
     if (!filterStore.alreadyLoadedOnce && newInitialFilterId) {
       helpers.loadFilterById(newInitialFilterId);
     }
-  }, [searchParams, filterStore, filterCrud]);
+  }, [searchParams, filterStore, filterCrud, helpers]);
 
   const value = useMemo(
     () => ({
       store: filterStore,
-      actions: filterActions,
-      navigation: filterNavigation,
       crud: filterCrud,
       helpers,
     }),
-    [filterStore, filterActions, filterNavigation, filterCrud, helpers]
+    [filterStore, filterCrud, helpers]
   );
 
   return (

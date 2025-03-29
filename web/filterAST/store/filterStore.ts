@@ -37,6 +37,9 @@ export interface FilterState {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   clearActiveFilter: () => void;
   setActiveFilterName: (name: string | null) => void;
+  getParentPath: (path: number[]) => number[];
+  getFilterExpression: (path: number[]) => FilterExpression | null;
+  getFilterNodeCount: () => number;
   loadFilterContents: ({
     filter,
     filterId,
@@ -47,6 +50,16 @@ export interface FilterState {
     filterName: string;
   }) => void;
 }
+
+const _getFilterNodeCount = (filter: FilterExpression): number => {
+  if (filter.type === "and" || filter.type === "or") {
+    return filter.expressions.reduce((acc, expression) => {
+      return acc + _getFilterNodeCount(expression);
+    }, 0);
+  }
+
+  return 1;
+};
 
 export const useFilterStore = create<FilterState>()((set, get) => ({
   filter: null,
@@ -87,6 +100,29 @@ export const useFilterStore = create<FilterState>()((set, get) => ({
       filter,
       hasUnsavedChanges: get().activeFilterId !== null,
     });
+  },
+
+  getParentPath: (path: number[]) => {
+    return path.slice(0, -1);
+  },
+
+  getFilterExpression: (path: number[]) => {
+    const { filter } = get();
+    if (!filter) return null;
+
+    let current = filter;
+    for (let i = 0; i < path.length; i++) {
+      if (current.type !== "and" && current.type !== "or") break;
+      current = current.expressions[path[i]] as AndExpression | OrExpression;
+    }
+
+    return current;
+  },
+
+  getFilterNodeCount: () => {
+    const { filter } = get();
+    if (!filter) return 0;
+    return _getFilterNodeCount(filter);
   },
 
   updateFilterExpression: (path, expression) => {
