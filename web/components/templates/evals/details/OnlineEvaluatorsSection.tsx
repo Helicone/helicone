@@ -64,7 +64,8 @@ export const OnlineEvaluatorsSection = ({
   onOpenChange,
 }: OnlineEvaluatorsSectionProps) => {
   const emptyState = onlineEvaluators.length === 0;
-  const [showCreateForm, setShowCreateForm] = useState(emptyState);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingEvaluator, setEditingEvaluator] = useState<string | null>(null);
   const [localEvaluators, setLocalEvaluators] = useState<
     typeof onlineEvaluators
