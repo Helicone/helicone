@@ -330,44 +330,40 @@ export default function EvaluatorsList() {
                       <TableCell className="text-right py-3 px-4">
                         <div className="flex justify-end gap-1.5">
                           <Button
-                            variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
-                            asChild
-                          >
-                            <Link
-                              href={`/evaluators/${evaluator.id}`}
-                              title="Edit"
-                            >
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Link>
-                          </Button>
-                          <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
-                            asChild
-                          >
-                            <Link
-                              href={`/evaluators/test/${evaluator.id}`}
-                              title="Test"
-                            >
-                              <Play className="h-4 w-4" />
-                              <span className="sr-only">Test</span>
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
                             onClick={() =>
-                              handleDelete(evaluator.id, evaluator.name)
+                              router.push(`/evaluators/${evaluator.id}`)
                             }
-                            title="Delete"
                           >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
+                            <Pencil
+                              size={15}
+                              className="text-muted-foreground"
+                            />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={async () => {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this evaluator?"
+                                )
+                              ) {
+                                try {
+                                  await deleteEvaluator(evaluator.id);
+                                  notification.success(
+                                    "Evaluator deleted successfully"
+                                  );
+                                } catch (e) {
+                                  notification.error(
+                                    "Failed to delete evaluator"
+                                  );
+                                }
+                              }
+                            }}
+                          >
+                            <Trash2 size={15} className="text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
