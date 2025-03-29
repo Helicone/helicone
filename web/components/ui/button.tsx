@@ -9,18 +9,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90",
-        outline:
-          "border border-[hsl(var(--border))] bg-[hsl(var(--background))] hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive:
-          "bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))] hover:bg-[hsl(var(--destructive))]/90",
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-[hsl(var(--secondary))]/80",
-        ghost:
-          "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
         ghostLinear:
           "hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))]",
-        link: "text-[hsl(var(--primary))] underline-offset-4 hover:underline",
         action:
           "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 border border-[hsl(var(--border))] interactive",
         glass:
@@ -28,9 +27,9 @@ const buttonVariants = cva(
       },
       size: {
         xs: "h-8 px-3 text-xs",
-        sm: "h-9 rounded-lg px-3 text-sm",
-        default: "px-4 py-2 h-10 text-sm",
-        lg: "h-11 rounded-md px-8 text-base",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs font-normal",
+        lg: "h-10 rounded-md px-8",
         icon: "h-10 w-10",
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-sm",

@@ -118,6 +118,12 @@ type UserMetricsToOperators = {
   user_id: SingleKey<TextOperators>;
   last_active: SingleKey<TimestampOperators>;
   total_requests: SingleKey<NumberOperators>;
+  active_for: SingleKey<NumberOperators>;
+  average_requests_per_day_active: SingleKey<NumberOperators>;
+  average_tokens_per_request: SingleKey<NumberOperators>;
+  total_completion_tokens: SingleKey<NumberOperators>;
+  total_prompt_tokens: SingleKey<NumberOperators>;
+  cost: SingleKey<NumberOperators>;
 };
 
 export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;

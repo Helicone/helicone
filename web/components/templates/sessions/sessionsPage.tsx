@@ -1,25 +1,19 @@
 import AuthHeader from "@/components/shared/authHeader";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
-import { SESSIONS_TABLE_FILTERS } from "@/services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-} from "@/services/lib/filters/uiFilterRowTree";
+import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
-import { SortDirection } from "../../../services/lib/sorts/users/sorts";
 import { Row } from "../../layout/common/row";
 import SessionNameSelection from "./nameSelection";
 import SessionDetails from "./sessionDetails";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -73,27 +67,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     undefined
   );
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-  const debouncedAdvancedFilters = useDebounce(advancedFilters, 500); // 0.5 seconds
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree) => {
-      setAdvancedFilters(filters);
-    },
-    []
-  );
-
-  const { sessions, isLoading, hasSessions } = useSessions(
+  const { sessions, isLoading, hasSessions } = useSessions({
     timeFilter,
-    debouncedSessionIdSearch ?? "",
-    filterUITreeToFilterNode(
-      SESSIONS_TABLE_FILTERS,
-      debouncedAdvancedFilters
-    ) as any,
-    selectedName
-  );
+    sessionIdSearch: debouncedSessionIdSearch ?? "",
+    selectedName,
+  });
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -200,8 +178,6 @@ const SessionsPage = (props: SessionsPageProps) => {
                 timeFilter={timeFilter}
                 setTimeFilter={setTimeFilter}
                 setInterval={() => {}}
-                advancedFilters={advancedFilters}
-                onSetAdvancedFiltersHandler={onSetAdvancedFiltersHandler}
               />
             </Row>
           </>

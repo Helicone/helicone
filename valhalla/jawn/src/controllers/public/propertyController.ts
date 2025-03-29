@@ -92,6 +92,7 @@ export class PropertyController extends Controller {
     WHERE (
       ${builtFilter.filter} AND key = {val_0: String}
     )
+    LIMIT 25
   `;
 
     const res = await dbQueryClickhouse<{ property: string }>(

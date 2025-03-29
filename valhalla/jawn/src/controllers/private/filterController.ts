@@ -43,7 +43,6 @@ export class FilterController extends Controller {
       organization_layout
       WHERE organization_id = $1
       AND type = 'filter_ast'
-      AND filters->>'name' != 'Untitled Filter'
       ORDER BY created_at DESC
       `,
       [request.authParams.organizationId]
