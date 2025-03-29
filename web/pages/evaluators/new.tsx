@@ -14,8 +14,18 @@ const CreateEvaluator = () => {
   const notification = useNotification();
 
   // Use the existing hook for creating evaluators that's already used elsewhere
-  const createEvaluator = useLLMEvaluatorSubmit(() => {
-    router.push("/evaluators");
+  const createEvaluator = useLLMEvaluatorSubmit((result) => {
+    const evaluatorId = result?.data?.data?.id;
+
+    if (evaluatorId) {
+      router.push(`/evaluators/${evaluatorId}`);
+    } else {
+      router.push("/evaluators");
+      notification.setNotification(
+        "Evaluator created successfully, but couldn't navigate to edit page. Check console for details.",
+        "info"
+      );
+    }
   });
 
   // Default values for the form
