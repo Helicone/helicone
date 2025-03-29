@@ -13,10 +13,8 @@ import {
   Tags,
 } from "tsoa";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { supabaseServer } from "../../lib/db/supabase";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { Setting, SettingName } from "../../utils/settings";
 
@@ -24,15 +22,18 @@ export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
   }
-  const { data, error } = await supabaseServer.client
-    .from("admins")
-    .select("*");
 
-  if (error) {
-    throw new Error(error.message);
+  // Replace Supabase call with dbExecute
+  const result = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [userId]
+  );
+
+  if (result.error) {
+    throw new Error(result.error);
   }
 
-  const hasAdmin = data?.map((admin) => admin.user_id).includes(userId);
+  const hasAdmin = result.data?.map((admin) => admin.user_id).includes(userId);
 
   if (!hasAdmin) {
     throw new Error("Unauthorized");
@@ -43,179 +44,6 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
-  @Get("governance-orgs/keys")
-  public async getGovernanceOrgKeys(
-    @Request() request: JawnAuthenticatedRequest
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    return await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys")
-      .single();
-  }
-
-  @Post("/governance-orgs/keys")
-  public async createGovernanceOrgKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body()
-    body: {
-      name: string;
-      value: string;
-    }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    let keys: { name: string; value: string }[] = [];
-    const keysData = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys");
-
-    if (keysData.error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    if (keysData.data?.[0]) {
-      keys = (keysData.data[0].settings as any).keys.filter(
-        (key: { name: string }) => key.name !== body.name
-      );
-    }
-
-    keys.push({
-      name: body.name,
-      value: body.value,
-    });
-
-    let seen = new Set();
-    keys = keys.filter((key) => {
-      if (seen.has(key.name)) {
-        return false;
-      }
-      seen.add(key.name);
-      return true;
-    });
-
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .update({
-        settings: {
-          keys,
-        },
-      })
-      .eq("name", "governance_keys");
-
-    if (error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    return data;
-  }
-
-  @Delete("/governance-orgs/keys")
-  public async deleteGovernanceOrgKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { name: string }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const keysData = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys");
-
-    if (keysData.error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    const keys = keysData.data?.[0];
-
-    const newKeys = (keys?.settings as any).keys.filter(
-      (key: { name: string }) => key.name !== body.name
-    );
-
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .upsert({
-        name: "governance_keys",
-        settings: {
-          keys: newKeys,
-        },
-      });
-
-    if (error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    return data;
-  }
-
-  @Post("/governance-orgs/{orgId}")
-  public async governanceOrgs(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() orgId: string,
-    @Body()
-    body: {
-      limitUSD: number | null;
-      days: number | null;
-    }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const org = await supabaseServer.client
-      .from("organization")
-      .update({
-        governance_settings: {
-          limitUSD: body.limitUSD,
-          days: body.days,
-        },
-      })
-      .eq("id", orgId);
-
-    if (org.error) {
-      this.setStatus(404);
-      throw new Error("Organization not found");
-    }
-
-    return org.data;
-  }
-
-  @Delete("/governance-orgs/{orgId}")
-  public async deleteGovernanceOrg(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() orgId: string
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const org = await supabaseServer.client
-      .from("organization")
-      .update({
-        governance_settings: null,
-      })
-      .eq("id", orgId);
-
-    if (org.error) {
-      this.setStatus(404);
-      throw new Error("Organization not found");
-    }
-
-    return org.data;
-  }
-
-  @Get("/governance-orgs")
-  @Tags("Governance Orgs")
-  @Security("api_key")
-  public async getGovernanceOrgs(@Request() request: JawnAuthenticatedRequest) {
-    await authCheckThrow(request.authParams.userId);
-
-    return await getGovernanceOrgs();
-  }
-
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
@@ -678,9 +506,20 @@ export class AdminController extends Controller {
       user_id: string | null;
     }[]
   > {
-    const { data, error } = await supabaseServer.client
-      .from("admins")
-      .select("*");
+    await authCheckThrow(request.authParams.userId);
+
+    const { data } = await dbExecute<{
+      user_email: string | null;
+      id: number;
+      created_at: string;
+      user_id: string | null;
+    }>(
+      `
+      SELECT user_email, id, created_ai, user_id FROM
+      admins
+      `,
+      []
+    );
 
     return data ?? [];
   }
@@ -890,15 +729,19 @@ export class AdminController extends Controller {
   ): Promise<Setting> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", name);
+    const { data, error } = await dbExecute<{
+      settings: Setting;
+    }>(
+      `
+      SELECT settings FROM helicone_settings WHERE name = $1
+      `,
+      [name]
+    );
 
-    if (error || data.length === 0) {
-      throw new Error(error?.message ?? "No settings found");
+    if (error || !data) {
+      throw new Error(error ?? "No settings found");
     }
-    const settings = data[0].settings;
+    const settings = data?.[0]?.settings;
 
     return JSON.parse(JSON.stringify(settings)) as Setting;
   }
@@ -943,31 +786,29 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data: currentSettings } = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", body.name);
+    const { data: currentSettings } = await dbExecute<{
+      settings: Setting;
+    }>(
+      `
+      SELECT settings FROM helicone_settings WHERE name = $1
+      `,
+      [body.name]
+    );
 
-    if (currentSettings!.length === 0) {
-      const { error } = await supabaseServer.client
-        .from("helicone_settings")
-        .insert({
-          name: body.name,
-          settings: JSON.parse(JSON.stringify(body.settings)),
-        });
-      if (error) {
-        throw new Error(error.message);
-      }
+    if (!currentSettings) {
+      await dbExecute(
+        `
+        INSERT INTO helicone_settings (name, settings) VALUES ($1, $2)
+        `,
+        [body.name, JSON.parse(JSON.stringify(body.settings))]
+      );
     } else {
-      const { error } = await supabaseServer.client
-        .from("helicone_settings")
-        .update({
-          settings: JSON.parse(JSON.stringify(body.settings)),
-        })
-        .eq("name", body.name);
-      if (error) {
-        throw new Error(error.message);
-      }
+      await dbExecute(
+        `
+        UPDATE helicone_settings SET settings = $1 WHERE name = $2
+        `,
+        [JSON.parse(JSON.stringify(body.settings)), body.name]
+      );
     }
 
     return;
@@ -988,10 +829,15 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .ilike("name", `%${body.orgName}%`);
+    const { data } = await dbExecute<{
+      name: string;
+      id: string;
+    }>(
+      `
+      SELECT name, id FROM organization WHERE name ILIKE $1
+      `,
+      [body.orgName]
+    );
     return {
       orgs:
         data?.map((org) => ({
@@ -1128,21 +974,16 @@ export class AdminController extends Controller {
     await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
 
-    const { data, error } = await supabaseServer.client
-      .from("organization_member")
-      .insert(
-        adminIds.map((adminId) => ({
-          organization: orgId,
-          member: adminId,
-          org_role: "admin",
-        }))
-      );
+    const { error } = await dbExecute(
+      `
+      INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)
+      `,
+      [orgId, adminIds, "admin"]
+    );
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error);
     }
-
-    return;
   }
 
   @Post("/alert_banners")
@@ -1156,16 +997,15 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("alert_banners")
-      .insert({
-        title: body.title,
-        message: body.message,
-        active: false,
-      });
+    const { error } = await dbExecute(
+      `
+      INSERT INTO alert_banners (title, message, active) VALUES ($1, $2, $3)
+      `,
+      [body.title, body.message, false]
+    );
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error);
     }
   }
 
@@ -1180,10 +1020,16 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("alert_banners")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } = await dbExecute<{
+      title: string;
+      message: string;
+      active: boolean;
+    }>(
+      `
+      SELECT * FROM alert_banners ORDER BY created_at DESC
+      `,
+      []
+    );
 
     if (body.active) {
       const activeBanner = data?.find((banner) => banner.active);
@@ -1194,16 +1040,15 @@ export class AdminController extends Controller {
       }
     }
 
-    const { data: updateData, error: updateError } = await supabaseServer.client
-      .from("alert_banners")
-      .update({
-        active: body.active,
-        updated_at: new Date().toISOString(),
-      })
-      .match({ id: body.id });
+    const { error } = await dbExecute(
+      `
+      UPDATE alert_banners SET active = $1, updated_at = $2 WHERE id = $3
+      `,
+      [body.active, new Date().toISOString(), body.id]
+    );
 
-    if (updateError) {
-      throw new Error(updateError.message);
+    if (error) {
+      throw new Error(error);
     }
   }
 
