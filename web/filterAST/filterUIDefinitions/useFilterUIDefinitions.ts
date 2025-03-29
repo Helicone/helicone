@@ -10,6 +10,21 @@ import {
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useRouter } from "next/router";
+
+const KNOWN_HELICONE_PROPERTIES = {
+  "helicone-session-id": {
+    label: "Session ID",
+    subType: "sessions",
+  },
+  "helicone-session-name": {
+    label: "Session Name",
+    subType: "sessions",
+  },
+  "helicone-session-path": {
+    label: "Session Path",
+    subType: "sessions",
+  },
+} as const;
 /**
  * Hook to fetch and combine static and dynamic filter UI definitions
  *
@@ -63,9 +78,14 @@ export const useFilterUIDefinitions = () => {
     const dynamicDefinitions: FilterUIDefinition[] =
       properties.data?.data?.map((property) => ({
         id: property.property,
-        label: property.property,
+        label:
+          property.property.toLowerCase() in KNOWN_HELICONE_PROPERTIES
+            ? KNOWN_HELICONE_PROPERTIES[
+                property.property.toLowerCase() as keyof typeof KNOWN_HELICONE_PROPERTIES
+              ].label
+            : property.property,
         type: "searchable",
-        operators: ["eq", "neq", "like", "ilike", "contains", "in"],
+        operators: ["contains", "eq", "neq", "like", "ilike", "in"],
         onSearch: (searchTerm) => {
           return searchProperties
             .mutateAsync({
@@ -122,6 +142,18 @@ export const useFilterUIDefinitions = () => {
     }
     if (router.pathname.startsWith("/sessions")) {
       definitions.push(...STATIC_SESSIONS_VIEW_DEFINITIONS);
+
+      for (const def of definitions) {
+        if (
+          def.subType === "property" &&
+          def.id.toLowerCase() in KNOWN_HELICONE_PROPERTIES
+        ) {
+          def.subType =
+            KNOWN_HELICONE_PROPERTIES[
+              def.id.toLowerCase() as keyof typeof KNOWN_HELICONE_PROPERTIES
+            ].subType;
+        }
+      }
     }
 
     return definitions;

@@ -198,6 +198,8 @@ interface RequestResponseRMTToOperators {
 }
 
 interface SessionsRequestResponseRMTToOperators {
+  session_session_id: SingleKey<TextOperators>;
+  session_session_name: SingleKey<TextOperators>;
   session_total_cost: SingleKey<NumberOperators>;
   session_total_tokens: SingleKey<NumberOperators>;
   session_prompt_tokens: SingleKey<NumberOperators>;

@@ -16,6 +16,7 @@ interface FilterASTButtonProps {}
 export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Wait for hydration to complete
   useEffect(() => {
@@ -34,12 +35,12 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
 
   return (
     <Row>
-      <Popover>
+      <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             <Filter className="h-4 w-4" />
             Filter
-            {store.activeFilterId && (
+            {!isOpen && store.activeFilterId && (
               <Badge variant="outline" className="text-xs">
                 {store.activeFilterName}
               </Badge>

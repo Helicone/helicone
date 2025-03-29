@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, Plus } from "lucide-react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import FilterGroupNode from "./components/FilterGroupNode";
 import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 
@@ -25,6 +25,30 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
   } = useFilterAST();
   const pathname = usePathname();
   const notification = useNotification();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Effect to resize input based on content
+  useEffect(() => {
+    if (inputRef.current && filterStore.activeFilterName !== null) {
+      // Create a hidden span to measure text width
+      const span = document.createElement("span");
+      span.style.visibility = "hidden";
+      span.style.position = "absolute";
+      span.style.whiteSpace = "pre";
+      span.style.fontSize = "14px"; // Match the input font size
+      span.style.fontFamily = window.getComputedStyle(
+        inputRef.current
+      ).fontFamily;
+      span.textContent = filterStore.activeFilterName || "Untitled Filter";
+
+      document.body.appendChild(span);
+      const width = span.getBoundingClientRect().width;
+      document.body.removeChild(span);
+
+      // Add some padding and set the width
+      inputRef.current.style.width = `${Math.max(width + 20, 80)}px`;
+    }
+  }, [filterStore.activeFilterName]);
 
   return (
     <div className="space-y-3 w-full bg-background rounded-md py-4 px-6">
@@ -34,11 +58,12 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
             {filterStore.activeFilterName !== null && (
               <div className="flex items-center gap-1">
                 <Input
+                  ref={inputRef}
                   value={filterStore.activeFilterName}
                   onChange={(e) => {
                     filterStore.setActiveFilterName(e.target.value);
                   }}
-                  className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0 bg-transparent"
+                  className="text-sm font-medium border-none p-0 h-auto min-h-[24px] w-fit focus-visible:ring-0 bg-transparent"
                   placeholder="Untitled Filter"
                 />
                 {crud.isRefetching || crud.isSaving ? (

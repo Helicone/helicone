@@ -1037,6 +1037,8 @@ export interface components {
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
+      session_session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_session_name?: components["schemas"]["Partial_TextOperators_"];
       session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
       session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];

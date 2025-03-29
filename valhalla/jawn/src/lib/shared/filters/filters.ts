@@ -324,6 +324,8 @@ const havingKeyMappings: KeyMappings = {
       session_created_at: "created_at",
       session_latest_request_created_at: "latest_request_created_at",
       session_total_tokens: "total_tokens",
+      session_session_id: "properties['Helicone-Session-Id']",
+      session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,
