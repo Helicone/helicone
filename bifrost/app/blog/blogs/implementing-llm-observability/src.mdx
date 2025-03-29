@@ -96,6 +96,8 @@ const response = await openai.chat.completions.create({
   headers: {
     "Helicone-User-Id": userId,
     "Helicone-Session-Id": sessionId
+    "Helicone-Session-Path": "/abstract",
+    "Helicone-Session-Name": "Course Plan",
   }
 });
 ```
