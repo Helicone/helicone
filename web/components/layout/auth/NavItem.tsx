@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+
 interface NavigationItem {
   name: string;
   href: string;
@@ -38,10 +38,6 @@ const NavItem: React.FC<NavItemProps> = ({
   onClick,
 }) => {
   const hasSubItems = link.subItems && link.subItems.length > 0;
-  const router = useRouter();
-
-  // Get the filter_id from the current URL query parameters
-  const { filter_id } = router.query;
 
   if (isCollapsed) {
     return (
