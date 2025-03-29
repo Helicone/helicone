@@ -1,153 +1,84 @@
+import { Row } from "@/components/layout/common/row";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { H4, P } from "@/components/ui/typography";
-import {
-  Filter as FilterIcon,
-  PlusCircle,
-  Save,
-  X,
-  BookOpen,
-  Loader2,
-} from "lucide-react";
-import React, { useState } from "react";
-import { AndExpression, FilterExpression } from "./filterAst";
-
-// Import components
+import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
+import React from "react";
 import FilterGroupNode from "./components/FilterGroupNode";
-import SaveFilterDialog from "./components/SaveFilterDialog";
-import SavedFiltersList from "./components/SavedFiltersList";
-
-// Import hooks
+import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 import { useFilterAST } from "./context/filterContext";
+import {
+  AndExpression,
+  DEFAULT_FILTER_GROUP_EXPRESSION,
+  OrExpression,
+} from "./filterAst";
 
-// Define a default filter structure
-const DEFAULT_FILTER: AndExpression = {
-  type: "and",
-  expressions: [
-    {
-      type: "condition",
-      field: { column: "status" },
-      operator: "eq",
-      value: "",
-    },
-  ],
-};
+interface FilterASTEditorProps {}
 
-interface FilterASTEditorProps {
-  onFilterChange?: (filter: FilterExpression) => void;
-}
-
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
-  onFilterChange,
-}) => {
-  const {
-    crud,
-    store: filterStore,
-    actions: {
-      saveDialogOpen,
-      setSaveDialogOpen,
-      hasActiveFilters,
-      clearFilter,
-    },
-    helpers,
-  } = useFilterAST();
-  const [showSavedFilters, setShowSavedFilters] = useState(false);
-
-  // Call the onFilterChange callback whenever the filter changes
-  React.useEffect(() => {
-    if (onFilterChange && filterStore.filter) {
-      onFilterChange(filterStore.filter);
-    }
-  }, [filterStore.filter, onFilterChange]);
-
-  // Toggle saved filters visibility
-  const toggleSavedFilters = () => {
-    setShowSavedFilters(!showSavedFilters);
-  };
-
-  if (crud.isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="animate-spin" />
-      </div>
-    );
-  }
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
+  const { store: filterStore, helpers } = useFilterAST();
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Header with actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FilterIcon size={20} />
-          <H4>Filters</H4>
-          {hasActiveFilters() && (
-            <Badge variant="outline" className="ml-2">
-              Active
-            </Badge>
+    <div className="space-y-3 w-full bg-background rounded-md py-4 px-6">
+      <div className="flex items-center justify-between ">
+        <div className="flex flex-col items-center gap-1.5">
+          {filterStore.activeFilterName !== null && (
+            <div className="flex items-center gap-1 group border-b border-dotted border-transparent hover:border-gray-300 dark:hover:border-slate-600">
+              <Input
+                value={filterStore.activeFilterName}
+                onChange={(e) => {
+                  filterStore.setActiveFilterName(e.target.value);
+                }}
+                disabled={filterStore.filter === null}
+                className="text-sm font-medium border-none p-0 h-auto min-h-[24px] w-fit focus-visible:ring-0 bg-transparent"
+                placeholder="Untitled Filter"
+              />
+            </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={toggleSavedFilters}>
-            <BookOpen size={16} className="mr-1" />
-            {showSavedFilters ? "Hide Saved" : "Saved Filters"}
-            {!showSavedFilters && crud.savedFilters.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
-                {crud.savedFilters.length}
+
+        <div className="flex items-center gap-1.5">
+          <Row className="gap-1 items-center">
+            {filterStore.getFilterNodeCount() > 0 && (
+              <Badge
+                variant="default"
+                className="text-xs text-center hover:bg-primary hover:text-primary-foreground"
+              >
+                {filterStore.getFilterNodeCount()}
               </Badge>
             )}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSaveDialogOpen(true)}
-            disabled={!hasActiveFilters()}
-          >
-            <Save size={16} className="mr-1" />
-            Save Filter
-          </Button>
-          <Button variant="outline" size="sm" onClick={clearFilter}>
-            <X size={16} className="mr-1" />
-            Clear
-          </Button>
+            {filterStore.filter !== null && (
+              <Button variant="ghost" size="xs" onClick={helpers.clearFilter}>
+                Clear
+              </Button>
+            )}
+          </Row>
+          <SavedFiltersDropdown />
         </div>
       </div>
 
-      {/* Main filter content */}
-      <div className="space-y-4">
-        {filterStore.filter &&
-        (filterStore.filter.type === "and" ||
-          filterStore.filter.type === "or") ? (
-          <FilterGroupNode group={filterStore.filter} path={[]} isRoot={true} />
+      <div className="space-y-2">
+        {filterStore.filter ? (
+          <FilterGroupNode
+            group={filterStore.filter as AndExpression | OrExpression}
+            path={[]}
+            isRoot={true}
+          />
         ) : (
-          <div className="text-center py-8">
-            <P className="text-muted-foreground">No filters applied</P>
-            <Button
-              onClick={() => {
-                helpers.newEmptyFilter();
-              }}
-              className="mt-2"
-              variant="default"
-            >
-              <PlusCircle size={16} className="mr-1" />
-              New Filter
-            </Button>
-          </div>
-        )}
-
-        {/* Display saved filters */}
-        {showSavedFilters && (
-          <div className="mt-4 border rounded-md p-4 bg-card">
-            <H4 className="mb-2">Saved Filters</H4>
-            <SavedFiltersList onClose={() => setShowSavedFilters(false)} />
-          </div>
+          <Button
+            variant="glass"
+            size="xs"
+            className="flex items-center gap-1 w-fit"
+            onClick={() => {
+              filterStore.setFilter(DEFAULT_FILTER_GROUP_EXPRESSION);
+              filterStore.setActiveFilterName("Untitled Filter");
+            }}
+          >
+            <Plus size={12} />
+            <span className="text-[10px] font-normal">Add Condition Group</span>
+          </Button>
         )}
       </div>
-
-      {/* Save filter dialog */}
-      <SaveFilterDialog
-        open={saveDialogOpen}
-        onOpenChange={setSaveDialogOpen}
-      />
     </div>
   );
 };

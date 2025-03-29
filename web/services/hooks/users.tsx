@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { UserMetric } from "../../lib/api/users/UserMetric";
 import { Result } from "../../lib/result";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+import { getTimeMap } from "../../lib/timeCalculations/constants";
 import { filterListToTree } from "../lib/filters/filterListToTree";
-import { SortLeafUsers } from "../lib/sorts/users/sorts";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
 } from "../lib/filters/frontendFilterDefs";
-import { getTimeMap } from "../../lib/timeCalculations/constants";
+import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { FilterExpression } from "@/filterAST/filterAst";
+import { toFilterNode } from "@/filterAST/toFilterNode";
+import { UserMetric } from "@/lib/api/users/UserMetric";
 
 const useUserId = (userId: string) => {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -41,7 +45,7 @@ const useUserId = (userId: string) => {
           },
           body: JSON.stringify({
             filter: {
-              users_view: {
+              user_metrics: {
                 user_id: {
                   equals: userId,
                 },
@@ -140,88 +144,53 @@ const useUserId = (userId: string) => {
 const useUsers = (
   currentPage: number,
   currentPageSize: number,
-  sortLeaf: SortLeafUsers,
-  advancedFilter?: FilterNode,
-  timeFilter?: FilterNode
+  sortLeaf: any
 ) => {
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const org = useOrg();
+
+  const filter = useFilterAST();
+
+  const userMetrics = useQuery({
     queryKey: [
       "users",
       currentPage,
       currentPageSize,
-      advancedFilter,
       sortLeaf,
-      timeFilter,
+      org?.currentOrg?.id,
+      filter.store.filter,
     ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
       const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3] as FilterNode | undefined;
-      const sortLeaf = query.queryKey[4];
-      const timeFilter = query.queryKey[5] as FilterNode | undefined;
+      const sortLeaf = query.queryKey[3];
+      const orgId = query.queryKey[4] as string;
+      const filter = query.queryKey[5] as FilterExpression | null;
 
-      let filter = advancedFilter ?? timeFilter;
-      if (timeFilter && advancedFilter) {
-        filter = {
-          left: advancedFilter,
-          operator: "and",
-          right: timeFilter,
-        };
+      const jawn = getJawnClient(orgId);
+
+      const filterNode = filter ? toFilterNode(filter) : "all";
+
+      const result = await jawn.POST("/v1/user/metrics/query", {
+        body: {
+          filter: filterNode as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf,
+          timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
+        },
+      });
+      if (result.error || result.data.error) {
+        throw new Error(result.error || result.data.error || "Unknown error");
       }
-      const [response, count] = await Promise.all([
-        fetch("/api/request_users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: filter,
-            offset: (currentPage - 1) * currentPageSize,
-            limit: currentPageSize,
-            sort: sortLeaf,
-            timeZoneDifference: new Date().getTimezoneOffset(),
-          }),
-        }).then((res) => res.json() as Promise<Result<UserMetric[], string>>),
-        fetch("/api/request_users/count", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: advancedFilter,
-          }),
-        }).then((res) => res.json() as Promise<Result<number, string>>),
-      ]);
-
-      return {
-        response,
-        count,
-      };
+      return result;
     },
+    retry: 2,
     refetchOnWindowFocus: false,
   });
 
-  const { response, count } = data || {
-    response: undefined,
-    count: undefined,
-    dailyActiveUsers: undefined,
-  };
-
-  const users = response?.data || [];
-  const from = (currentPage - 1) * currentPageSize;
-  const to = currentPage * currentPageSize;
-  const error = response?.error;
-
   return {
-    users,
-    count: count?.data ?? 0,
-    from,
-    to,
-    error,
-    isLoading,
-    refetch,
-    isRefetching,
+    userMetrics,
   };
 };
 
-export { useUsers, useUserId };
+export { useUserId, useUsers };

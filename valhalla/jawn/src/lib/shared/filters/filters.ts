@@ -295,16 +295,14 @@ const whereKeyMappings: KeyMappings = {
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "request_response_rmt.last_active",
-    total_requests: "request_response_rmt.total_requests",
-    active_for: "request_response_rmt.active_for",
-    average_requests_per_day_active:
-      "request_response_rmt.average_requests_per_day_active",
-    average_tokens_per_request:
-      "request_response_rmt.average_tokens_per_request",
-    total_completion_tokens: "request_response_rmt.total_completion_tokens",
-    total_prompt_tokens: "request_response_rmt.total_prompt_tokens",
-    cost: "request_response_rmt.cost",
+    last_active: "last_active",
+    total_requests: "total_requests",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -319,8 +317,15 @@ const havingKeyMappings: KeyMappings = {
   }),
   sessions_request_response_rmt:
     easyKeyMappings<"sessions_request_response_rmt">({
-      total_cost: "total_cost",
-      total_tokens: "total_tokens",
+      session_total_cost: "total_cost",
+      session_completion_tokens: "completion_tokens",
+      session_prompt_tokens: "prompt_tokens",
+      session_total_requests: "total_requests",
+      session_created_at: "created_at",
+      session_latest_request_created_at: "latest_request_created_at",
+      session_total_tokens: "total_tokens",
+      session_session_id: "properties['Helicone-Session-Id']",
+      session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
   request_response_search: NOT_IMPLEMENTED,

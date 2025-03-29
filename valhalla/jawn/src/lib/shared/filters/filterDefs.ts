@@ -198,8 +198,15 @@ interface RequestResponseRMTToOperators {
 }
 
 interface SessionsRequestResponseRMTToOperators {
-  total_cost: SingleKey<NumberOperators>;
-  total_tokens: SingleKey<NumberOperators>;
+  session_session_id: SingleKey<TextOperators>;
+  session_session_name: SingleKey<TextOperators>;
+  session_total_cost: SingleKey<NumberOperators>;
+  session_total_tokens: SingleKey<NumberOperators>;
+  session_prompt_tokens: SingleKey<NumberOperators>;
+  session_completion_tokens: SingleKey<NumberOperators>;
+  session_total_requests: SingleKey<NumberOperators>;
+  session_created_at: SingleKey<TimestampOperatorsTyped>;
+  session_latest_request_created_at: SingleKey<TimestampOperatorsTyped>;
 }
 
 export type FilterLeafRequestResponseLog =

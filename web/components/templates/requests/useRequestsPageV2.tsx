@@ -15,6 +15,8 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -25,6 +27,7 @@ const useRequestsPageV2 = (
   isCached: boolean,
   isLive: boolean
 ) => {
+  const filterStore = useFilterAST();
   const [timeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("all"),
     end: new Date(),
@@ -72,7 +75,13 @@ const useRequestsPageV2 = (
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
   const filter: FilterNode = {
-    left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
+    left: {
+      right: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
+      left: filterStore.store.filter
+        ? toFilterNode(filterStore.store.filter)
+        : "all",
+      operator: "and",
+    },
     right: advancedFilter,
     operator: "and",
   };
