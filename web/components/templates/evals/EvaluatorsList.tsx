@@ -344,24 +344,9 @@ export default function EvaluatorsList() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={async () => {
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this evaluator?"
-                                )
-                              ) {
-                                try {
-                                  await deleteEvaluator(evaluator.id);
-                                  notification.success(
-                                    "Evaluator deleted successfully"
-                                  );
-                                } catch (e) {
-                                  notification.error(
-                                    "Failed to delete evaluator"
-                                  );
-                                }
-                              }
-                            }}
+                            onClick={() =>
+                              handleDelete(evaluator.id, evaluator.name)
+                            }
                           >
                             <Trash2 size={15} className="text-destructive" />
                           </Button>
