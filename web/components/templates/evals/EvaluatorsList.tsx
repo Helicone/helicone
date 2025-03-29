@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { H2 } from "@/components/ui/typography";
 import Link from "next/link";
-import { LineChart, Pencil, Trash2 } from "lucide-react";
+import { LineChart, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
@@ -245,7 +245,8 @@ export default function EvaluatorsList() {
                   return (
                     <TableRow
                       key={evaluator.id}
-                      className="hover:bg-muted/10 transition-colors border-b border-border/40 dark:border-slate-800/40 last:border-0"
+                      className="hover:bg-muted/25 transition-colors border-b border-border/40 dark:border-slate-800/40 last:border-0 cursor-pointer"
+                      onClick={() => router.push(`/evaluators/${evaluator.id}`)}
                     >
                       <TableCell className="font-medium py-3 px-4">
                         {evaluator.name}
@@ -328,25 +329,14 @@ export default function EvaluatorsList() {
                           : "N/A"}
                       </TableCell>
                       <TableCell className="text-right py-3 px-4">
-                        <div className="flex justify-end gap-1.5">
+                        <div className="flex justify-end">
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() =>
-                              router.push(`/evaluators/${evaluator.id}`)
-                            }
-                          >
-                            <Pencil
-                              size={15}
-                              className="text-muted-foreground"
-                            />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() =>
-                              handleDelete(evaluator.id, evaluator.name)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click
+                              handleDelete(evaluator.id, evaluator.name);
+                            }}
                           >
                             <Trash2 size={15} className="text-destructive" />
                           </Button>
