@@ -3,7 +3,7 @@ import { ConditionExpression, FilterOperator } from "../filterAst";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import SearchableSelect, {
   SearchableSelectOption,
 } from "./ui/SearchableSelect";
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
+import clsx from "clsx";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -150,31 +151,18 @@ const NumberInput: React.FC<{
           className={`w-full h-7 text-[10px] ${className}`}
         />
         {selectOptions.length > 0 && (
-          <div
-            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
+          <ChevronDown
+            className={clsx(
+              "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer transition-transform",
+              open && "rotate-180"
+            )}
+            size={10}
             onClick={toggleDropdown}
-          >
-            <svg
-              width="10"
-              height="6"
-              viewBox="0 0 10 6"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className={`transition-transform ${open ? "rotate-180" : ""}`}
-            >
-              <path
-                d="M1 1L5 5L9 1"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+          />
         )}
       </div>
       {open && selectOptions.length > 0 && (
-        <div className="absolute w-full top-8 left-0 z-10 bg-white dark:bg-slate-950 border border-border rounded-md shadow-md max-h-[200px] overflow-y-auto">
+        <div className="absolute w-full top-8 left-0 z-10 bg-white dark:bg-slate-950 border border-border shadow-md max-h-[200px] overflow-y-auto">
           {selectOptions.map((option) => (
             <div
               key={option.value}
@@ -196,13 +184,15 @@ const NumberInput: React.FC<{
 interface FilterConditionNodeProps {
   condition: ConditionExpression;
   path: number[];
-  isOnlyCondition?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   condition,
   path,
-  isOnlyCondition = false,
+  isFirst = false,
+  isLast = false,
 }) => {
   const filterStore = useFilterStore();
   const { filterDefinitions: filterDefs, isLoading } = useFilterUIDefinitions();
@@ -299,7 +289,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
 
   if (!filterDef) {
     return (
-      <div className="p-2 border border-amber-300 rounded-md bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">
+      <div className="p-2 border border-amber-300 bg-amber-50 dark:bg-amber-950 dark:border-amber-800 flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
             Invalid field: &quot;{condition.field.column || "empty"}&quot;
@@ -308,16 +298,15 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
             Please select a valid field or remove
           </span>
         </div>
-        {!isOnlyCondition && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRemove}
-            className="h-6 w-6 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
-          >
-            <Trash2 size={12} />
-          </Button>
-        )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleRemove}
+          className="border h-6 w-6 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+        >
+          <Trash2 size={12} />
+        </Button>
       </div>
     );
   }
@@ -344,7 +333,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           onValueChange={(val) => handleValueChange(val)}
           suggestions={valueOptions as { label: string; value: number }[]}
           disabled={!condition.field.column || !condition.operator}
-          className="w-full"
+          className="w-full border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
         />
       );
     }
@@ -359,7 +348,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           placeholder="Type to search..."
           emptyMessage="No results found"
           disabled={!condition.field.column || !condition.operator}
-          className="w-full h-7"
+          className="w-full h-7 border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
         />
       );
     }
@@ -375,7 +364,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
           searchPlaceholder="Search value..."
           emptyMessage="No value found."
           disabled={!condition.field.column || !condition.operator}
-          className="w-full h-7 text-[10px]"
+          className="w-full h-7 text-[10px] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
         />
       );
     }
@@ -387,13 +376,19 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         onChange={(e) => handleValueChange(e.target.value)}
         disabled={!condition.field.column || !condition.operator}
         placeholder="Enter value"
-        className="w-full h-7 text-[10px]"
+        className="w-full h-7 text-[10px] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
       />
     );
   };
 
   return (
-    <div className="flex flex-row items-center gap-1.5 rounded-md bg-white dark:bg-slate-950">
+    <div
+      className={clsx(
+        "flex flex-row items-center border bg-slate-100 dark:bg-slate-950",
+        isFirst && "rounded-t-md",
+        isLast && "rounded-b-md"
+      )}
+    >
       <SearchableSelect
         options={fieldOptions}
         value={condition.field.column}
@@ -402,25 +397,27 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         searchPlaceholder="Search field..."
         emptyMessage="No field found."
         width="200px"
-        className="flex-shrink-0 h-7 text-[10px]"
+        className={clsx(
+          "flex-shrink-0 h-7 text-[10px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent rounded-none"
+        )}
       />
       <Select
         value={condition.operator}
         onValueChange={handleOperatorChange}
         disabled={!condition.field.column}
       >
-        <SelectTrigger className="w-[40px] h-7 px-1 flex-shrink-0 text-center text-[10px] font-normal">
+        <SelectTrigger className="w-[40px] h-7 px-1 flex-shrink-0 text-center text-[10px] font-normal border-none focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none bg-transparent rounded-l-none">
           <SelectValue placeholder="Op">
             {condition.operator &&
               FILTER_OPERATOR_LABELS[condition.operator as FilterOperator]}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="focus-visible:ring-0 focus-visible:ring-offset-0">
           {operatorOptions.map((op) => (
             <SelectItem
               key={op.value}
               value={op.value}
-              className="text-[10px] font-normal"
+              className="text-[10px] font-normal focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               {op.label}
             </SelectItem>
@@ -428,16 +425,15 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         </SelectContent>
       </Select>
       <div className="flex-grow">{renderValueInput()}</div>
-      {!isOnlyCondition && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleRemove}
-          className="flex-shrink-0 h-6 w-6"
-        >
-          <Trash2 size={12} className="text-muted-foreground" />
-        </Button>
-      )}
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleRemove}
+        className="flex-shrink-0 h-6  border-none px-1"
+      >
+        <Trash2 size={12} className="" />
+      </Button>
     </div>
   );
 };

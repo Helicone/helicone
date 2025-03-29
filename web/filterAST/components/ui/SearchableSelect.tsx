@@ -92,7 +92,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
           disabled={disabled}
         >
           {getCurrentLabel()}
-          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={`w-[${width}] p-0`}>

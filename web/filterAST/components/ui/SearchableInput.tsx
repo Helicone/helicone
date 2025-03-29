@@ -136,7 +136,7 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
           className="w-[--radix-popover-trigger-width] p-0"
           align="start"
         >
-          <Command className="rounded-md border border-border">
+          <Command className="border border-border">
             <CommandList className="max-h-[200px] overflow-auto">
               <CommandEmpty className="text-xs py-2">
                 {emptyMessage}

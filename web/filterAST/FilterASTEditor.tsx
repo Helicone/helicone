@@ -8,23 +8,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Small } from "@/components/ui/typography";
-import { Info, Link, Loader2, Plus, PlusCircle, Share2 } from "lucide-react";
+import { Link, Plus, Share2 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   AndExpression,
-  OrExpression,
-  FilterExpression,
-  DEFAULT_FILTER_EXPRESSION,
   DEFAULT_FILTER_GROUP_EXPRESSION,
+  FilterExpression,
+  OrExpression,
 } from "./filterAst";
 
 // Import components
-import FilterGroupNode from "./components/FilterGroupNode";
-import SaveFilterDialog from "./components/SaveFilterDialog";
 import ClearFilterDropdown from "./components/ClearFilterDropdown";
+import FilterGroupNode from "./components/FilterGroupNode";
 import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
+import SaveFilterDialog from "./components/SaveFilterDialog";
 
 // Import hooks
 import { useFilterAST } from "./context/filterContext";
@@ -47,7 +45,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
     },
     helpers,
   } = useFilterAST();
-  const [showSavedFilters, setShowSavedFilters] = useState(false);
+
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   // Call the onFilterChange callback whenever the filter changes
@@ -56,11 +54,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
       onFilterChange(filterStore.filter);
     }
   }, [filterStore.filter, onFilterChange]);
-
-  // Toggle saved filters visibility
-  const toggleSavedFilters = () => {
-    setShowSavedFilters(!showSavedFilters);
-  };
 
   // Handler for copying the shareable URL
   const handleCopyShareableUrl = () => {
@@ -77,7 +70,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
   return (
     <div className="space-y-3 w-full bg-background rounded-md py-4 px-6">
       {filterStore.filter && (
-        <div className="flex items-center justify-between border-b pb-2">
+        <div className="flex items-center justify-between ">
           <div className="flex flex-col items-center gap-1.5">
             {filterStore.activeFilterName !== null && (
               <div className="flex items-center gap-1">
@@ -86,7 +79,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                   onChange={(e) => {
                     updateFilterName(e.target.value);
                   }}
-                  className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0"
+                  className="text-sm font-medium border-none p-0 h-auto min-h-[24px] min-w-[120px] w-full focus-visible:ring-0 bg-transparent"
                   placeholder="Untitled Filter"
                 />
                 {(crud.isRefetching || crud.isSaving) && (
@@ -95,76 +88,37 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
                   </div>
                 )}
                 {filterStore.hasUnsavedChanges &&
-                  !(crud.isRefetching || crud.isSaving) && (
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      onClick={() => {
-                        if (filterStore.activeFilterId) {
-                          helpers.updateFilterById(filterStore.activeFilterId, {
-                            filter: filterStore.filter,
-                            name:
-                              filterStore.activeFilterName || "Untitled Filter",
-                          });
-                        }
-                      }}
-                      className="text-[10px] font-normal"
-                    >
-                      Save
-                    </Button>
-                  )}
+                !(crud.isRefetching || crud.isSaving) ? (
+                  <Button
+                    variant="outline"
+                    size="sm_sleek"
+                    onClick={() => {
+                      if (filterStore.activeFilterId) {
+                        helpers.updateFilterById(filterStore.activeFilterId, {
+                          filter: filterStore.filter,
+                          name:
+                            filterStore.activeFilterName || "Untitled Filter",
+                        });
+                      }
+                    }}
+                    className="text-[10px] font-normal"
+                  >
+                    Save
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="square_icon">
+                    <Link size={12} />
+                  </Button>
+                )}
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Dialog
-              open={isShareDialogOpen}
-              onOpenChange={setIsShareDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button
-                  variant="glass"
-                  size="xs"
-                  disabled={!filterStore.activeFilterId}
-                >
-                  <Share2 size={12} />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Share Filter</DialogTitle>
-                  <DialogDescription>
-                    Copy the URL below to share this filter with others.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={helpers.getShareableUrl() || ""}
-                    readOnly
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyShareableUrl}
-                  >
-                    <Link size={14} className="mr-1" />
-                    Copy
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            <ClearFilterDropdown
-              onConfirm={helpers.clearFilter}
-              hasActiveFilters={hasActiveFilters()}
-            />
-
-            <SavedFiltersDropdown
-              showSavedFilters={showSavedFilters}
-              toggleSavedFilters={toggleSavedFilters}
-            />
+            <Button variant="ghost" size="xs" onClick={helpers.clearFilter}>
+              Clear
+            </Button>
+            <SavedFiltersDropdown />
           </div>
         </div>
       )}
@@ -183,6 +137,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
               className="gap-2"
               onClick={() => {
                 filterStore.setFilter(DEFAULT_FILTER_GROUP_EXPRESSION);
+                filterStore.setActiveFilterName("Untitled Filter");
               }}
             >
               <Plus size={16} />

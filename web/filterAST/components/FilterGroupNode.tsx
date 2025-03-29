@@ -1,17 +1,15 @@
-import React from "react";
-import { AndExpression, OrExpression } from "../filterAst";
-import { useFilterStore } from "../store/filterStore";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Small } from "@/components/ui/typography";
-import { Plus, PlusCircle, Trash2 } from "lucide-react";
+import { Small, XSmall } from "@/components/ui/typography";
+import { ChevronsUpDown, Plus } from "lucide-react";
+import React, { useMemo } from "react";
+import {
+  AndExpression,
+  DEFAULT_FILTER_GROUP_EXPRESSION,
+  FilterAST,
+  OrExpression,
+} from "../filterAst";
+import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
-import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
@@ -26,7 +24,6 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   isRoot = false,
 }) => {
   const filterStore = useFilterStore();
-  const { filterDefinitions } = useFilterUIDefinitions();
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
@@ -41,33 +38,21 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
     });
   };
 
-  // Handle adding a nested group to this group
-  const handleAddGroup = (groupType: "and" | "or") => {
-    // Use status as the default field (common and useful default)
-    const defaultField = "status";
-    const defaultFieldDef = filterDefinitions.find(
-      (def) => def.id === defaultField
+  const hasGroupAlready = useMemo(() => {
+    return group.expressions.find(
+      (expr) => expr.type === "and" || expr.type === "or"
     );
-
-    // If status field is found, use its first operator, otherwise fallback to eq
-    const defaultOperator = defaultFieldDef?.operators[0] || "eq";
-
-    // Create a new group with a default condition already included
-    filterStore.addFilterExpression(path, {
-      type: groupType,
-      expressions: [
-        {
-          type: "condition",
-          field: {
-            column: defaultField,
-            subtype: defaultFieldDef?.subType,
-            table: "request_response_rmt",
-          },
-          operator: defaultOperator,
-          value: "",
-        },
-      ],
-    });
+  }, [group]);
+  // Handle adding a nested group to this group
+  const handleAddGroup = () => {
+    if (hasGroupAlready) {
+      group.expressions.push(DEFAULT_FILTER_GROUP_EXPRESSION);
+      filterStore.setFilter(group);
+    } else {
+      filterStore.setFilter(
+        FilterAST.and(group, DEFAULT_FILTER_GROUP_EXPRESSION)
+      );
+    }
   };
 
   // Handle toggling the operator of this group (AND/OR)
@@ -87,111 +72,96 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
     }
   };
 
-  // Handle removing this group
-  const handleRemove = () => {
-    filterStore.removeFilterExpression(path);
-  };
-
   return (
     <div
-      className={` rounded-md bg-white dark:bg-slate-950${
-        isRoot
-          ? "bg-transparent"
-          : " p-2  border border-slate-200 dark:border-slate-800 "
-      }`}
+      className={` rounded-md bg-transparent ${isRoot ? "" : " p-4 border "}`}
     >
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-1.5">
+          <XSmall className="font-normal">Match</XSmall>
+
           <Button
-            variant="ghost"
-            size="xs"
-            asPill
+            size="sm_sleek"
             onClick={handleToggleGroupOperator}
-            className={`min-w-[40px] px-2 py-0 h-5 text-[10px] flex items-center ${
-              group.type === "and"
-                ? "bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 dark:bg-sky-900 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-800"
-                : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700"
-            }`}
+            variant={"secondary"}
+            className="gap-1 border px-3"
           >
-            {group.type === "and" ? "AND" : "OR"}
+            <XSmall className="font-normal">
+              {group.type === "and" ? "All" : "Any"}
+            </XSmall>
+            <ChevronsUpDown className="opacity-50" size={12} />
           </Button>
-          <div className="text-[10px] bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-full px-2 h-5 flex items-center">
-            {group.expressions.length}{" "}
-            {group.expressions.length === 1 ? "condition" : "conditions"}
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          {path.length === 0 ? (
-            <Button
-              variant="secondary"
-              size="xs"
-              className="flex items-center gap-1"
-              onClick={() => handleAddGroup("and")}
-            >
-              <PlusCircle size={12} />
-              <span className="text-[10px] font-normal">Add Filter Group</span>
-            </Button>
-          ) : undefined}
-          {!isRoot && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleRemove}
-              className="h-6 w-6"
-            >
-              <Trash2 size={12} className="text-muted-foreground" />
-            </Button>
-          )}
+          <XSmall className="font-normal">
+            {isRoot ? "groups" : "conditions in this group"}
+          </XSmall>
         </div>
       </div>
 
-      <div className={`space-y-1.5 ${isRoot ? "" : "pl-3"}`}>
-        {group.expressions.length === 0 ? (
-          <Small className="text-muted-foreground py-1.5 block">
-            No conditions. Click &quot;Add&quot; to create one.
-          </Small>
-        ) : (
-          group.expressions.map((expr, index) => {
-            const newPath = [...path, index];
-            if (expr.type === "and" || expr.type === "or") {
-              return (
-                <div key={`group-${index}`} className="mt-1.5">
-                  <FilterGroupNode
-                    group={expr as AndExpression | OrExpression}
-                    path={newPath}
-                  />
-                </div>
-              );
-            } else if (expr.type === "condition") {
-              // Check if this is the only condition in the group
-              const isOnlyCondition = group.expressions.length === 1;
+      <div className={`flex flex-col gap-2 ${isRoot ? "" : ""}`}>
+        <div className="flex flex-col gap-0">
+          {group.expressions.length === 0 ? (
+            <Small className="text-muted-foreground py-1.5 block">
+              No conditions. Click &quot;Add&quot; to create one.
+            </Small>
+          ) : (
+            group.expressions.map((expr, index) => {
+              const newPath = [...path, index];
+              if (expr.type === "and" || expr.type === "or") {
+                const isLast = index === group.expressions.length - 1;
+                return (
+                  <div key={`group-${index}`} className="mt-1.5">
+                    <FilterGroupNode
+                      group={expr as AndExpression | OrExpression}
+                      path={newPath}
+                    />
+                    {!isLast && (
+                      <XSmall className="font-normal text-slate-400">
+                        {group.type === "and" ? "And" : "Or"}
+                      </XSmall>
+                    )}
+                  </div>
+                );
+              } else if (expr.type === "condition") {
+                return (
+                  <div key={`condition-${index}`}>
+                    <FilterConditionNode
+                      condition={expr}
+                      path={newPath}
+                      isFirst={index === 0}
+                      isLast={index === group.expressions.length - 1}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })
+          )}
+        </div>
 
-              return (
-                <div key={`condition-${index}`}>
-                  <FilterConditionNode
-                    condition={expr}
-                    path={newPath}
-                    isOnlyCondition={isOnlyCondition}
-                  />
-                </div>
-              );
-            }
-            return null;
-          })
+        {(!isRoot || !hasGroupAlready) && (
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              onClick={handleAddCondition}
+              size="sm_sleek"
+              className="flex gap-1 px-0"
+            >
+              <Plus size={10} />
+              <span className="text-[10px] font-normal">Add Condition</span>
+            </Button>
+          </div>
         )}
-
-        {/* Quick add button - show at all levels */}
-        <div className="flex justify-start mt-1">
+        {isRoot && (
           <Button
             variant="glass"
-            onClick={handleAddCondition}
-            size="sm_sleek"
-            className="flex items-center gap-1"
+            size="xs"
+            className="flex items-center gap-1 w-fit"
+            onClick={() => handleAddGroup()}
           >
-            <Plus size={10} />
-            <span className="text-[10px] font-normal">Add Condition</span>
+            <Plus size={12} />
+            <span className="text-[10px] font-normal">Add Condition Group</span>
           </Button>
-        </div>
+        )}
       </div>
     </div>
   );
