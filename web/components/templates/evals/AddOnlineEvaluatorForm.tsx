@@ -11,7 +11,7 @@ import { X } from "lucide-react";
 import { Plus } from "lucide-react";
 import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "@/services/lib/filters/frontendFilterDefs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CommandGroup,
   CommandEmpty,
@@ -33,6 +33,7 @@ const AddOnlineEvaluatorForm = ({
   onSubmit,
   isLoading,
   close,
+  initialValues,
 }: {
   onSubmit: (data: {
     config: {
@@ -42,12 +43,26 @@ const AddOnlineEvaluatorForm = ({
   }) => void;
   isLoading: boolean;
   close: () => void;
+  initialValues?: {
+    sampleRate: number;
+    propertyFilters: { key: string; value: string }[];
+  };
 }) => {
-  const [sampleRate, setSampleRate] = useState(100);
+  const [sampleRate, setSampleRate] = useState(
+    initialValues?.sampleRate || 100
+  );
   const [propertyFilters, setPropertyFilters] = useState<
     { key: string; value: string }[]
-  >([]);
+  >(initialValues?.propertyFilters || []);
   const properties = useGetPropertiesV2(getPropertyFiltersV2);
+
+  // Initialize form with initialValues if provided
+  useEffect(() => {
+    if (initialValues) {
+      setSampleRate(initialValues.sampleRate);
+      setPropertyFilters(initialValues.propertyFilters);
+    }
+  }, [initialValues]);
 
   const addPropertyFilter = () => {
     setPropertyFilters([...propertyFilters, { key: "", value: "" }]);
@@ -200,7 +215,7 @@ const AddOnlineEvaluatorForm = ({
           onClick={() => onSubmit({ config: { sampleRate, propertyFilters } })}
           disabled={isLoading}
         >
-          Add Webhook
+          {initialValues ? "Update" : "Add Evaluator"}
         </Button>
       </DialogFooter>
     </>
