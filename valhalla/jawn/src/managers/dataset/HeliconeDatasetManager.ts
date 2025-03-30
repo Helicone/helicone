@@ -198,7 +198,7 @@ export class HeliconeDatasetManager extends BaseManager {
     try {
       // Build the VALUES part of the query dynamically
       const values = addRequests
-        .map((_, index) => `($1, $${index + 2}, $3)`)
+        .map((_, index) => `($1, $${index + 2}, $${addRequests.length + 2})`)
         .join(",");
 
       // Prepare parameters array with organization_id, request IDs, and dataset_id
