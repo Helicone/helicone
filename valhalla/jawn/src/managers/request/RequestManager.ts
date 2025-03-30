@@ -1,8 +1,9 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { KVCache } from "../../lib/cache/kvCache";
+import { AuthParams } from "../../lib/db/supabase";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../lib/shared/result";
@@ -16,13 +17,11 @@ import {
   getRequestsClickhouse,
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { costOfPrompt } from "../../packages/cost";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
-import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../../lib/cache/kvCache";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;

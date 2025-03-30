@@ -3,9 +3,9 @@ import { PromiseGenericResult, Result, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { formatTimeString } from "../stores/request/VersionedRequestStore";
-import { supabaseServer } from "../db/supabase";
 import { KVCache } from "../cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";
+import { dbExecute } from "../shared/db/dbExecute";
 
 const kvCache = new KVCache(60 * 1000); // 5 minute
 const SEGMENT_PROVIDER_NAME = "HELICONE_SEGMENT_KEY";
@@ -13,34 +13,54 @@ const SEGMENT_PROVIDER_NAME = "HELICONE_SEGMENT_KEY";
 async function getSegmentConfig(
   organizationId: string
 ): Promise<Result<{ writeKey: string } | null, string>> {
-  const { data, error } = await supabaseServer.client
-    .from("integrations")
-    .select("*")
-    .eq("integration_name", "segment")
-    .eq("organization_id", organizationId)
-    .eq("active", true);
+  try {
+    // Get active segment integration
+    const integrationResult = await dbExecute<{
+      id: string;
+      integration_name: string;
+    }>(
+      `SELECT id, integration_name
+       FROM integrations
+       WHERE integration_name = $1
+       AND organization_id = $2
+       AND active = true
+       LIMIT 1`,
+      ["segment", organizationId]
+    );
 
-  const config = data?.[0];
+    if (
+      integrationResult.error ||
+      !integrationResult.data ||
+      integrationResult.data.length === 0
+    ) {
+      return err("No active segment integration found");
+    }
 
-  if (!config) {
-    return err("No active segment integration found");
+    // Get the decrypted provider key
+    const writeKeyResult = await dbExecute<{ decrypted_provider_key: string }>(
+      `SELECT decrypted_provider_key
+       FROM decrypted_provider_keys
+       WHERE provider_name = $1
+       AND org_id = $2
+       LIMIT 1`,
+      [SEGMENT_PROVIDER_NAME, organizationId]
+    );
+
+    if (
+      writeKeyResult.error ||
+      !writeKeyResult.data ||
+      writeKeyResult.data.length === 0
+    ) {
+      console.error("Error fetching segment write key:", writeKeyResult.error);
+      return err("Failed to fetch segment write key");
+    }
+
+    const writeKey = writeKeyResult.data[0].decrypted_provider_key;
+    return ok({ writeKey });
+  } catch (error) {
+    console.error("Error getting segment config:", error);
+    return err(String(error));
   }
-
-  const { data: writeKeyData, error: writeKeyError } =
-    await supabaseServer.client
-      .from("decrypted_provider_keys")
-      .select("*")
-      .eq("provider_name", SEGMENT_PROVIDER_NAME)
-      .eq("org_id", organizationId);
-
-  if (writeKeyError) {
-    console.error(writeKeyError);
-    return err(writeKeyError.message);
-  }
-
-  const writeKey = writeKeyData?.[0]?.decrypted_provider_key!;
-
-  return ok({ writeKey });
 }
 
 async function sendSegmentEvent(segmentEvent: SegmentEvent) {

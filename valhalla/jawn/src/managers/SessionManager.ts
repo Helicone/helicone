@@ -3,7 +3,8 @@ import {
   SessionQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams, supabaseServer } from "../lib/db/supabase";
+import { AuthParams } from "../lib/db/supabase";
+import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { err, ok, Result, resultMap } from "../lib/shared/result";
@@ -316,32 +317,35 @@ export class SessionManager {
     sessionId: string,
     rating: boolean
   ): Promise<Result<null, string>> {
-    const { data, error } = await supabaseServer.client
-      .from("request")
-      .select("id")
-      .eq("properties->Helicone-Session-Id", `"${sessionId}"`)
-      .eq("helicone_org_id", this.authParams.organizationId)
-      .order("created_at", { ascending: true })
-      .limit(1);
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM request
+         WHERE properties->>'Helicone-Session-Id' = $1
+         AND helicone_org_id = $2
+         ORDER BY created_at ASC
+         LIMIT 1`,
+        [sessionId, this.authParams.organizationId]
+      );
 
-    if (error) {
-      return err(error.message);
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "No request found");
+      }
+
+      const requestManager = new RequestManager(this.authParams);
+      const res = await requestManager.addPropertyToRequest(
+        result.data[0].id,
+        "Helicone-Session-Feedback",
+        rating ? "1" : "0"
+      );
+
+      if (res.error) {
+        return err(res.error);
+      }
+      return ok(null);
+    } catch (error) {
+      console.error("Error updating session feedback:", error);
+      return err(String(error));
     }
-
-    if (!data || data.length === 0) {
-      return err("No request found");
-    }
-
-    const requestManager = new RequestManager(this.authParams);
-    const res = await requestManager.addPropertyToRequest(
-      data[0].id,
-      "Helicone-Session-Feedback",
-      rating ? "1" : "0"
-    );
-
-    if (res.error) {
-      return err(res.error);
-    }
-    return ok(null);
   }
 }

@@ -1,12 +1,11 @@
-import { BaseManager } from "../BaseManager";
-import { Result, err, ok } from "../../lib/shared/result";
-import { supabaseServer } from "../../lib/db/supabase";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { hashAuth } from "../../utils/hash";
 import generateApiKey from "generate-api-key";
 import { uuid } from "uuidv4";
-import { AuthParams } from "../../lib/db/supabase";
 import { Database } from "../../lib/db/database.types";
+import { AuthParams } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { Result, err, ok } from "../../lib/shared/result";
+import { hashAuth } from "../../utils/hash";
+import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
 
 type HashedPasswordRow = {
@@ -25,21 +24,23 @@ export class KeyManager extends BaseManager {
     Result<Database["public"]["Tables"]["helicone_api_keys"]["Row"][], string>
   > {
     try {
-      const queryBuilder = supabaseServer.client
-        .from("helicone_api_keys")
-        .select("*")
-        .eq("soft_delete", false)
-        .neq("api_key_name", "auto-generated-experiment-key")
-        .eq("temp_key", false)
-        .eq("organization_id", this.authParams.organizationId);
+      const result = await dbExecute<
+        Database["public"]["Tables"]["helicone_api_keys"]["Row"]
+      >(
+        `SELECT *
+         FROM helicone_api_keys
+         WHERE soft_delete = false
+         AND api_key_name != 'auto-generated-experiment-key'
+         AND temp_key = false
+         AND organization_id = $1`,
+        [this.authParams.organizationId]
+      );
 
-      const res = await queryBuilder;
-
-      if (res.error) {
-        return err(res.error.message);
+      if (result.error) {
+        return err(result.error);
       }
 
-      return ok(res.data);
+      return ok(result.data || []);
     } catch (error) {
       return err(`Failed to get API keys: ${error}`);
     }
@@ -53,19 +54,19 @@ export class KeyManager extends BaseManager {
     updateData: { api_key_name: string }
   ): Promise<Result<null, string>> {
     try {
-      const { data, error } = await supabaseServer.client
-        .from("helicone_api_keys")
-        .update({
-          api_key_name: updateData.api_key_name,
-        })
-        .eq("id", apiKeyId)
-        .eq("organization_id", this.authParams.organizationId);
+      const result = await dbExecute(
+        `UPDATE helicone_api_keys
+         SET api_key_name = $1
+         WHERE id = $2
+         AND organization_id = $3`,
+        [updateData.api_key_name, apiKeyId, this.authParams.organizationId]
+      );
 
-      if (error) {
-        return err(error.message);
+      if (result.error) {
+        return err(result.error);
       }
 
-      return ok(data);
+      return ok(null);
     } catch (error) {
       return err(`Failed to update API key: ${error}`);
     }
@@ -76,19 +77,19 @@ export class KeyManager extends BaseManager {
    */
   async deleteAPIKey(apiKeyId: number): Promise<Result<any, string>> {
     try {
-      const { data, error } = await supabaseServer.client
-        .from("helicone_api_keys")
-        .update({
-          soft_delete: true,
-        })
-        .eq("id", apiKeyId)
-        .eq("organization_id", this.authParams.organizationId);
+      const result = await dbExecute(
+        `UPDATE helicone_api_keys
+         SET soft_delete = true
+         WHERE id = $1
+         AND organization_id = $2`,
+        [apiKeyId, this.authParams.organizationId]
+      );
 
-      if (error) {
-        return err(error.message);
+      if (result.error) {
+        return err(result.error);
       }
 
-      return ok(data);
+      return ok(null);
     } catch (error) {
       return err(`Failed to delete API key: ${error}`);
     }
@@ -99,17 +100,18 @@ export class KeyManager extends BaseManager {
    */
   async deleteProviderKey(providerKeyId: string): Promise<Result<any, string>> {
     try {
-      const { data, error } = await supabaseServer.client
-        .from("provider_keys")
-        .delete()
-        .eq("id", providerKeyId)
-        .eq("org_id", this.authParams.organizationId);
+      const result = await dbExecute(
+        `DELETE FROM provider_keys
+         WHERE id = $1
+         AND org_id = $2`,
+        [providerKeyId, this.authParams.organizationId]
+      );
 
-      if (error) {
-        return err(error.message);
+      if (result.error) {
+        return err(result.error);
       }
 
-      return ok(data);
+      return ok(null);
     } catch (error) {
       return err(`Failed to delete provider key: ${error}`);
     }
@@ -129,35 +131,40 @@ export class KeyManager extends BaseManager {
         dashes: true,
       }).toString()}`.toLowerCase();
 
-      const organization = await supabaseServer.client
-        .from("organization")
-        .select("*")
-        .eq("id", this.authParams.organizationId)
-        .single();
+      // Get organization information
+      const orgResult = await dbExecute<{ owner: string }>(
+        `SELECT owner
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [this.authParams.organizationId]
+      );
 
-      if (organization.error || !organization.data) {
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
         return err("Organization not found");
       }
 
-      const res = await supabaseServer.client
-        .from("helicone_api_keys")
-        .insert({
-          api_key_hash: await hashAuth(apiKey),
-          user_id: organization.data.owner,
-          api_key_name: keyName,
-          organization_id: this.authParams.organizationId,
-          key_permissions: keyPermissions,
-          temp_key: false,
-        })
-        .select("*")
-        .single();
+      const hashedKey = await hashAuth(apiKey);
+      const result = await dbExecute<{ id: number }>(
+        `INSERT INTO helicone_api_keys (api_key_hash, user_id, api_key_name, organization_id, key_permissions, temp_key)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [
+          hashedKey,
+          orgResult.data[0].owner,
+          keyName,
+          this.authParams.organizationId,
+          keyPermissions,
+          false,
+        ]
+      );
 
-      if (res.error || !res.data?.id) {
+      if (result.error || !result.data || result.data.length === 0) {
         return err("Failed to create API key");
       }
 
       return ok({
-        id: String(res.data.id), // Convert id to string to match expected return type
+        id: String(result.data[0].id),
         apiKey: apiKey,
       });
     } catch (error) {
@@ -170,20 +177,20 @@ export class KeyManager extends BaseManager {
    */
   async getProviderKeys(): Promise<Result<any[], string>> {
     try {
-      const queryBuilder = supabaseServer.client
-        .from("provider_keys")
-        .select("*")
-        .eq("org_id", this.authParams.organizationId)
-        .eq("soft_delete", false)
-        .order("created_at", { ascending: false });
+      const result = await dbExecute(
+        `SELECT *
+         FROM provider_keys
+         WHERE org_id = $1
+         AND soft_delete = false
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
 
-      const { data, error } = await queryBuilder;
-
-      if (error) {
-        return err(`Failed to get provider keys: ${error.message}`);
+      if (result.error) {
+        return err(`Failed to get provider keys: ${result.error}`);
       }
 
-      return ok(data || []);
+      return ok(result.data || []);
     } catch (error) {
       return err(`Failed to get provider keys: ${error}`);
     }
@@ -199,62 +206,56 @@ export class KeyManager extends BaseManager {
     config: Record<string, string>;
   }): Promise<Result<{ id: string }, string>> {
     try {
-      const { providerName, providerKey, providerKeyName } = data;
-      // Always use "default" as the key name
+      const { providerName, providerKey, providerKeyName, config } = data;
 
       // Check if a key already exists for this provider
-      const existingKeys = await supabaseServer.client
-        .from("provider_keys")
-        .select("id")
-        .eq("org_id", this.authParams.organizationId)
-        .eq("provider_name", providerName)
-        .eq("soft_delete", false);
+      const existingKeysResult = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM provider_keys
+         WHERE org_id = $1
+         AND provider_name = $2
+         AND soft_delete = false`,
+        [this.authParams.organizationId, providerName]
+      );
 
       // If a key exists, soft delete it first
-      if (existingKeys.data && existingKeys.data.length > 0) {
-        const existingKeyId = existingKeys.data[0].id;
-        const { error: deleteError } = await supabaseServer.client
-          .from("provider_keys")
-          .update({ soft_delete: true })
-          .eq("id", existingKeyId);
+      if (existingKeysResult.data && existingKeysResult.data.length > 0) {
+        const existingKeyId = existingKeysResult.data[0].id;
+        const deleteResult = await dbExecute(
+          `UPDATE provider_keys
+           SET soft_delete = true
+           WHERE id = $1`,
+          [existingKeyId]
+        );
 
-        if (deleteError) {
-          return err(`Failed to replace existing key: ${deleteError.message}`);
+        if (deleteResult.error) {
+          return err(`Failed to replace existing key: ${deleteResult.error}`);
         }
       }
 
       // Insert the new key
-      const insertData = {
-        provider_name: providerName,
-        provider_key_name: providerKeyName,
-        provider_key: providerKey,
-        org_id: this.authParams.organizationId,
-        soft_delete: false,
-        config: data.config,
-      };
+      const result = await dbExecute<{ id: string }>(
+        `INSERT INTO provider_keys (provider_name, provider_key_name, provider_key, org_id, soft_delete, config)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [
+          providerName,
+          providerKeyName,
+          providerKey,
+          this.authParams.organizationId,
+          false,
+          config,
+        ]
+      );
 
-      const res = await supabaseServer.client
-        .from("provider_keys")
-        .insert(insertData)
-        .select("id")
-        .single();
-
-      if (res.error || !res.data?.id) {
-        console.log(
-          `Failed to create provider key: ${
-            res.error?.message
-          }, ${JSON.stringify(insertData)}`
-        );
-        return err(
-          `Failed to create provider key: ${
-            res.error?.message
-          }, ${JSON.stringify(insertData)}`
-        );
+      if (result.error || !result.data || result.data.length === 0) {
+        console.log(`Failed to create provider key: ${result.error}`);
+        return err(`Failed to create provider key: ${result.error}`);
       }
 
-      return ok({ id: res.data.id });
+      return ok({ id: result.data[0].id });
     } catch (error) {
-      return err(`Failed to create provider key2: ${error}`);
+      return err(`Failed to create provider key: ${error}`);
     }
   }
 
@@ -275,23 +276,43 @@ export class KeyManager extends BaseManager {
         return err(hasAccess.error);
       }
 
-      // Update the key
-      const result = await supabaseServer.client
-        .from("provider_keys")
-        .update({
-          provider_key: providerKey,
-          config: config,
-        })
-        .eq("id", providerKeyId)
-        .eq("org_id", this.authParams.organizationId)
-        .select("id")
-        .single();
+      // Build update query dynamically based on provided params
+      const updateParts = [];
+      const values = [];
+      let paramIndex = 1;
 
-      if (result.error) {
-        return err(`Failed to update provider key: ${result.error.message}`);
+      if (providerKey !== undefined) {
+        updateParts.push(`provider_key = $${paramIndex++}`);
+        values.push(providerKey);
       }
 
-      return ok({ id: result.data.id });
+      if (config !== undefined) {
+        updateParts.push(`config = $${paramIndex++}`);
+        values.push(config);
+      }
+
+      if (updateParts.length === 0) {
+        return err("No fields to update");
+      }
+
+      // Add the WHERE conditions
+      values.push(providerKeyId, this.authParams.organizationId);
+
+      // Update the key
+      const result = await dbExecute<{ id: string }>(
+        `UPDATE provider_keys
+         SET ${updateParts.join(", ")}
+         WHERE id = $${paramIndex++}
+         AND org_id = $${paramIndex}
+         RETURNING id`,
+        values
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(`Failed to update provider key: ${result.error}`);
+      }
+
+      return ok({ id: result.data[0].id });
     } catch (error) {
       return err(`Failed to update provider key: ${error}`);
     }
@@ -310,26 +331,33 @@ export class KeyManager extends BaseManager {
     }
 
     try {
-      const key = await supabaseServer.client
-        .from("decrypted_provider_keys")
-        .select(
-          "id, org_id, decrypted_provider_key, provider_key_name, provider_name"
-        )
-        .eq("id", providerKeyId)
-        .eq("org_id", this.authParams.organizationId)
-        .eq("soft_delete", false)
-        .single();
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        provider_key_name: string;
+        provider_name: string;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+         FROM decrypted_provider_keys
+         WHERE id = $1
+         AND org_id = $2
+         AND soft_delete = false
+         LIMIT 1`,
+        [providerKeyId, this.authParams.organizationId]
+      );
 
-      if (key.error !== null || key.data === null) {
-        return err(key.error?.message || "Provider key not found");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Provider key not found");
       }
 
+      const key = result.data[0];
       const providerKey: DecryptedProviderKey = {
-        id: key.data.id,
-        org_id: key.data.org_id,
-        provider_key: key.data.decrypted_provider_key,
-        provider_name: key.data.provider_name,
-        provider_key_name: key.data.provider_key_name,
+        id: key.id,
+        org_id: key.org_id,
+        provider_key: key.decrypted_provider_key,
+        provider_name: key.provider_name,
+        provider_key_name: key.provider_key_name,
       };
 
       return ok(providerKey);
@@ -341,18 +369,24 @@ export class KeyManager extends BaseManager {
   private async hasAccessToProviderKey(
     providerKeyId: string
   ): Promise<Result<boolean, string>> {
-    const providerKeyResult = await supabaseServer.client
-      .from("provider_keys")
-      .select("*")
-      .eq("id", providerKeyId)
-      .eq("org_id", this.authParams.organizationId)
-      .single();
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM provider_keys
+         WHERE id = $1
+         AND org_id = $2
+         LIMIT 1`,
+        [providerKeyId, this.authParams.organizationId]
+      );
 
-    if (providerKeyResult.error || !providerKeyResult.data) {
-      return err(providerKeyResult.error?.message || "Provider key not found");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Provider key not found or no access");
+      }
+
+      return ok(true);
+    } catch (error) {
+      return err(`Error checking access to provider key: ${error}`);
     }
-
-    return ok(true);
   }
 
   /**
@@ -409,28 +443,34 @@ export class KeyManager extends BaseManager {
       // Fix the insert call by ensuring provider_key_id is a non-null string
       const providerKeyIdSafe = providerKey.id || "";
 
-      const newProxyMapping = await supabaseServer.client
-        .from("helicone_proxy_keys")
-        .insert({
-          org_id: this.authParams.organizationId,
-          helicone_proxy_key_name: proxyKeyName,
-          helicone_proxy_key: hashedResult.data[0].hashed_password,
-          provider_key_id: providerKeyIdSafe,
-          experiment_use: experimentUse,
-          id: proxyKeyId,
-        })
-        .select("*")
-        .single();
+      const result = await dbExecute<{ id: string }>(
+        `INSERT INTO helicone_proxy_keys (
+          org_id, 
+          helicone_proxy_key_name, 
+          helicone_proxy_key, 
+          provider_key_id, 
+          experiment_use, 
+          id
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id`,
+        [
+          this.authParams.organizationId,
+          proxyKeyName,
+          hashedResult.data[0].hashed_password,
+          providerKeyIdSafe,
+          experimentUse,
+          proxyKeyId,
+        ]
+      );
 
-      if (newProxyMapping.error || !newProxyMapping.data) {
-        return err(
-          `Failed to create proxy key mapping: ${newProxyMapping.error?.message}`
-        );
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(`Failed to create proxy key mapping: ${result.error}`);
       }
 
       return ok({
         proxyKey,
-        proxyKeyId: newProxyMapping.data.id,
+        proxyKeyId: result.data[0].id,
       });
     } catch (error) {
       return err(`Failed to create proxy key: ${error}`);
@@ -451,35 +491,47 @@ export class KeyManager extends BaseManager {
         dashes: true,
       }).toString()}`.toLowerCase();
 
-      const organization = await supabaseServer.client
-        .from("organization")
-        .select("*")
-        .eq("id", this.authParams.organizationId)
-        .single();
+      // Get organization information
+      const orgResult = await dbExecute<{ owner: string }>(
+        `SELECT owner
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [this.authParams.organizationId]
+      );
 
-      if (organization.error || !organization.data) {
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
         return err("Organization not found");
       }
 
-      const res = await supabaseServer.client
-        .from("helicone_api_keys")
-        .insert({
-          api_key_hash: await hashAuth(apiKey),
-          user_id: organization.data.owner,
-          api_key_name: keyName,
-          organization_id: this.authParams.organizationId,
-          key_permissions: keyPermissions,
-          temp_key: true,
-        })
-        .select("*")
-        .single();
+      const hashedKey = await hashAuth(apiKey);
+      const result = await dbExecute<{ id: number }>(
+        `INSERT INTO helicone_api_keys (
+          api_key_hash, 
+          user_id, 
+          api_key_name, 
+          organization_id, 
+          key_permissions, 
+          temp_key
+        )
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id`,
+        [
+          hashedKey,
+          orgResult.data[0].owner,
+          keyName,
+          this.authParams.organizationId,
+          keyPermissions,
+          true,
+        ]
+      );
 
-      if (res.error || !res.data?.id) {
+      if (result.error || !result.data || result.data.length === 0) {
         return err("Failed to create temporary API key");
       }
 
       return ok({
-        id: String(res.data.id),
+        id: String(result.data[0].id),
         apiKey: apiKey,
       });
     } catch (error) {

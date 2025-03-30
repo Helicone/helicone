@@ -1,10 +1,8 @@
-import { supabaseServer } from "../../db/supabase";
 import {
   AllOperators,
   AnyOperator,
   FilterBranch,
   FilterLeaf,
-  filterListToTree,
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
@@ -539,29 +537,6 @@ export function buildFilterPostgres(
     ...args,
     argPlaceHolder: (index, parameter) => `$${index + 1}`,
   });
-}
-
-async function getUserIdHashes(user_id: string): Promise<string[]> {
-  const { data: user_api_keys, error } = await supabaseServer.client
-    .from("user_api_keys")
-    .select("api_key_hash")
-    .eq("user_id", user_id);
-  if (error) {
-    throw error;
-  }
-  if (!user_api_keys || user_api_keys.length === 0) {
-    throw new Error("No API keys found for user");
-  }
-  return user_api_keys.map((x) => x.api_key_hash);
-}
-
-async function buildUserIdHashesFilter(
-  user_id: string,
-  hashToFilter: (hash: string) => FilterLeaf
-) {
-  const userIdHashes = await getUserIdHashes(user_id);
-  const filters: FilterLeaf[] = userIdHashes.map(hashToFilter);
-  return filterListToTree(filters, "or");
 }
 
 export interface BuildFilterArgs {
