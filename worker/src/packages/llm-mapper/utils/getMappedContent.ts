@@ -21,6 +21,8 @@ import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 
+const MAX_PREVIEW_LENGTH = 1_000;
+
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
   "anthropic-chat": mapAnthropicRequest,
@@ -234,8 +236,12 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request?.slice(0, 30),
-      response: mappedContent.preview.response?.slice(0, 30),
+      request: mappedContent.preview.request
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
+      response: mappedContent.preview.response
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
       fullRequestText: (preview?: boolean) => {

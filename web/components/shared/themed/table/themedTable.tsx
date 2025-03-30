@@ -305,7 +305,7 @@ export default function ThemedTable<T extends { id?: string }>(
         className="flex-grow overflow-hidden"
       >
         <ResizablePanel defaultSize={100} className="flex-grow">
-          <div className="h-full overflow-auto bg-white dark:bg-slate-800">
+          <div className="h-full overflow-auto ">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
