@@ -372,7 +372,7 @@ export class OrganizationController extends Controller {
 
     const org = await organizationManager.getOrg();
     if (org.error || !org.data) {
-      return err(org.error?.message ?? "Error getting organization");
+      return err(org.error ?? "Error getting organization");
     }
 
     if (
