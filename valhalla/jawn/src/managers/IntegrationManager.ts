@@ -1,4 +1,4 @@
-import { AuthParams } from "../lib/db/supabase";
+import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { ok, err, Result } from "../lib/shared/result";
 import { BaseManager } from "./BaseManager";

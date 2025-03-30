@@ -1,7 +1,7 @@
 import generateApiKey from "generate-api-key";
 import { uuid } from "uuidv4";
 import { Database } from "../../lib/db/database.types";
-import { AuthParams } from "../../lib/db/supabase";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, ok } from "../../lib/shared/result";
 import { hashAuth } from "../../utils/hash";

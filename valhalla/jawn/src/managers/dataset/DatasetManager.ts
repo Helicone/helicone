@@ -12,7 +12,7 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { AuthParams } from "../../lib/db/supabase";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { Result, err, ok } from "../../lib/shared/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";

@@ -1,5 +1,5 @@
 import { Database } from "../../lib/db/database.types";
-import { AuthParams } from "../../lib/db/supabase";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { Result } from "../../lib/shared/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";

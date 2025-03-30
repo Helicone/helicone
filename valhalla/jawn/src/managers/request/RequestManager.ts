@@ -1,7 +1,6 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
 import { KVCache } from "../../lib/cache/kvCache";
-import { AuthParams } from "../../lib/db/supabase";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
@@ -22,6 +21,7 @@ import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;

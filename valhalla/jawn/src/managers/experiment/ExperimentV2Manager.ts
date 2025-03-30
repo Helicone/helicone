@@ -6,8 +6,8 @@ import {
   ExtendedExperimentData,
 } from "../../controllers/public/experimentV2Controller";
 import { PromptVersionResult } from "../../controllers/public/promptController";
-import { AuthParams } from "../../lib/db/supabase";
 import { run } from "../../lib/experiment/run";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../lib/shared/result";
 import { ExperimentStore } from "../../lib/stores/experimentStore";

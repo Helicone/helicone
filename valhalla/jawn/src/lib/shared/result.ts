@@ -1,5 +1,3 @@
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
-
 export interface ResultError<K> {
   data: null;
   error: K;
@@ -34,9 +32,10 @@ export async function unwrapAsync<T, K>(
 ): Promise<T> {
   return unwrap(await result);
 }
-export function mapPostgrestErr<T>(
-  result: PostgrestSingleResponse<T>
-): Result<T, string> {
+export function mapPostgrestErr<T>(result: {
+  data: T;
+  error: { message: string };
+}): Result<T, string> {
   if (result.error === null) {
     return { data: result.data, error: null };
   }

@@ -1,6 +1,6 @@
 import { EvalQueryParams } from "../../controllers/public/evalController";
 import { KVCache } from "../../lib/cache/kvCache";
-import { AuthParams } from "../../lib/db/supabase";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";

@@ -1,13 +1,13 @@
-import { err, ok, Result } from "../../lib/shared/result";
-import { AuthParams } from "../../lib/db/supabase";
-import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
+import * as Sentry from "@sentry/node";
+import { validate as uuidValidate } from "uuid";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
-import * as Sentry from "@sentry/node";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
+import { err, ok, Result } from "../../lib/shared/result";
+import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
 import { BaseManager } from "../BaseManager";
-import { validate as uuidValidate } from "uuid";
 
 type Scores = Record<string, number | boolean | undefined>;
 
@@ -67,11 +67,7 @@ export class ScoreManager extends BaseManager {
     evaluatorId?: string
   ): Promise<Result<null, string>> {
     const mappedScores = mapScores(scores);
-    await this.scoreStore.putScoresIntoSupabase(
-      requestId,
-      mappedScores,
-      evaluatorId
-    );
+    await this.scoreStore.putScoresIntoDB(requestId, mappedScores, evaluatorId);
     const res = await this.addBatchScores(
       [
         {

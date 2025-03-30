@@ -1,5 +1,3 @@
-import { PostgrestBuilder } from "@supabase/postgrest-js";
-
 export const FREQUENT_PRECENT_LOGGING = 0.01;
 
 interface WithTimingParams {
@@ -18,25 +16,6 @@ export class DBQueryTimer {
 
   constructor(dataDogConfig: DataDogConfig) {
     this.dataDogConfig = dataDogConfig;
-  }
-
-  async withTiming<T>(
-    promise: PostgrestBuilder<T>,
-    { queryName, percentLogging = 1 }: WithTimingParams
-  ) {
-    const timestamp = Math.floor(new Date().getTime() / 1000);
-    const start = performance.now();
-    const result = await promise;
-    const end = performance.now();
-
-    const randomNumber = Math.random();
-
-    // Log based on the percentage
-    if (this.dataDogConfig.enabled && randomNumber < percentLogging) {
-      this.logDistributionMetric(timestamp, end - start, queryName).then();
-    }
-
-    return result;
   }
 
   async logDistributionMetric(
