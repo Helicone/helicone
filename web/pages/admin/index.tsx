@@ -26,8 +26,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user },
   } = options;
 
-  // const { data } = await jawn.GET("/v1/admin/admins/query");
-
   const { data, error } = await getSupabaseServer().from("admins").select("*");
 
   const admins = data?.map((admin) => admin.user_id || "") || [];
