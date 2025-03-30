@@ -1542,7 +1542,7 @@ Json: JsonObject;
       heliconeMeta: components["schemas"]["HeliconeMeta"];
       authorization: string;
     };
-    ResultSuccess_unknown_: {
+    ResultSuccess_any_: {
       data: unknown;
       /** @enum {number|null} */
       error: null;
@@ -1552,59 +1552,11 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
-      /** Format: double */
-      status: number;
-      statusText: string;
+    ResultSuccess_unknown_: {
+      data: unknown;
       /** @enum {number|null} */
       error: null;
-      data: {
-        organization: string;
-        org_role: string;
-        member: string;
-        governance_limits: components["schemas"]["Json"];
-        created_at: string;
-      };
-      /** Format: double */
-      count: number | null;
     };
-    /**
-     * @description Error format
-     *
-     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
-     */
-    PostgrestError: {
-      name: string;
-      message: string;
-      stack?: string;
-      details: string;
-      hint: string;
-      code: string;
-    };
-    PostgrestResponseFailure: {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      error: components["schemas"]["PostgrestError"];
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      count: null;
-    };
-    "PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": components["schemas"]["PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"] | components["schemas"]["PostgrestResponseFailure"];
-    "PostgrestResponseSuccess__governance_settings-Json__": {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      /** @enum {number|null} */
-      error: null;
-      data: {
-        governance_settings: components["schemas"]["Json"];
-      };
-      /** Format: double */
-      count: number | null;
-    };
-    "PostgrestSingleResponse__governance_settings-Json__": components["schemas"]["PostgrestResponseSuccess__governance_settings-Json__"] | components["schemas"]["PostgrestResponseFailure"];
     /** @enum {string} */
     KeyPermissions: "w" | "rw";
     GenerateHashQueryParams: {
@@ -3874,7 +3826,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3899,7 +3851,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3909,7 +3861,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3919,7 +3871,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__governance_settings-Json__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };

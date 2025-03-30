@@ -37,13 +37,6 @@ class TempHeliconeAPIKey implements BaseTempKey {
       })
       .eq("temp_key", true)
       .lt("created_at", new Date(Date.now() - CACHE_TTL).toISOString());
-
-    return await supabaseServer.client
-      .from("helicone_api_keys")
-      .delete({
-        count: "exact",
-      })
-      .eq("id", this.heliconeApiKeyId);
   }
 
   async with<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {

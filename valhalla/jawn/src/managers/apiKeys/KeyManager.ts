@@ -49,7 +49,7 @@ export class KeyManager extends BaseManager {
    * Update an API key's name
    */
   async updateAPIKey(
-    apiKeyId: string,
+    apiKeyId: number,
     updateData: { api_key_name: string }
   ): Promise<Result<null, string>> {
     try {
@@ -74,7 +74,7 @@ export class KeyManager extends BaseManager {
   /**
    * Soft delete an API key
    */
-  async deleteAPIKey(apiKeyId: string): Promise<Result<any, string>> {
+  async deleteAPIKey(apiKeyId: number): Promise<Result<any, string>> {
     try {
       const { data, error } = await supabaseServer.client
         .from("helicone_api_keys")

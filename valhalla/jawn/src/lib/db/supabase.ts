@@ -148,7 +148,7 @@ export class SupabaseConnector {
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single();
     if (storedProxyKey.error || !storedProxyKey.data) {
       return err("Proxy key not found in storedProxyKey");

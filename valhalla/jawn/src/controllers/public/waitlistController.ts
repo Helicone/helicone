@@ -1,7 +1,7 @@
 import { Controller, Request, Route, Post, Tags, Security, Body } from "tsoa";
 import express from "express";
-import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok } from "../../lib/shared/result";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 @Route("v1/public/waitlist")
 @Tags("Waitlist")
@@ -17,16 +17,15 @@ export class WaitlistController extends Controller {
     }
 
     try {
-      const { data, error } = await supabaseServer.client
-        .from("experiments_waitlist")
-        .insert({
-          email: reqBody.email,
-        });
+      const { error } = await dbExecute(
+        `INSERT INTO experiments_waitlist (email) VALUES ($1)`,
+        [reqBody.email]
+      );
 
       if (error) {
-        console.error(`Error adding to waitlist: ${error.message}`);
+        console.error(`Error adding to waitlist: ${error}`);
         this.setStatus(500);
-        return err(error.message);
+        return err(error);
       }
 
       this.setStatus(200);

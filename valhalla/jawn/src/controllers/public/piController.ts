@@ -11,11 +11,10 @@ import {
 import { Result, err, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
-import { supabaseServer } from "../../lib/db/supabase";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhousePriceCalc } from "../../packages/cost";
 import {
   DataOverTimeRequest,
@@ -38,21 +37,24 @@ export class PiController extends Controller {
 
     // 10% chance of deleting all sessions older than 1 hour
     if (Math.random() < 0.1) {
-      await supabaseServer.client
-        .from("pi_session")
-        .delete()
-        .lt("created_at", one_hour_ago);
+      await dbExecute(
+        `DELETE FROM pi_session 
+         WHERE created_at < $1`,
+        [one_hour_ago]
+      );
     }
 
-    const result = await supabaseServer.client.from("pi_session").insert({
-      session_id: body.sessionUUID,
-      organization_id: request.authParams.organizationId,
-    });
+    const { error } = await dbExecute(
+      `INSERT INTO pi_session 
+       (session_id, organization_id) 
+       VALUES ($1, $2)`,
+      [body.sessionUUID, request.authParams.organizationId]
+    );
 
-    if (result.error) {
+    if (error) {
       this.setStatus(500);
-      console.error(result.error);
-      return err(result.error?.message || "Failed to fetch evals");
+      console.error(error);
+      return err(error || "Failed to add session");
     } else {
       this.setStatus(200);
       return ok("success");
@@ -63,18 +65,21 @@ export class PiController extends Controller {
   public async getOrgName(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
-    const result = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("id", request.authParams.organizationId);
+    const result = await dbExecute<{
+      name: string;
+    }>(
+      `SELECT name FROM organization
+       WHERE id = $1`,
+      [request.authParams.organizationId]
+    );
 
-    if (result.error) {
+    if (result.error || !result.data || result.data.length === 0) {
       this.setStatus(500);
       console.error(result.error);
-      return err(result.error?.message || "Failed to fetch evals");
+      return err(result.error || "Failed to fetch organization");
     }
 
-    return ok(result.data?.[0]?.name || "Unknown");
+    return ok(result.data[0]?.name || "Unknown");
   }
 
   @Post("/total-costs")
