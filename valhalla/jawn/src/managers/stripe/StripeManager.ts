@@ -51,13 +51,9 @@ const getProProductPrices = async (): Promise<
           // Populate with default prices
           dbExecute(
             `INSERT INTO helicone_settings (name, settings)
-             VALUES ($1, $2)`,
-            [`price:${productId}`, defaultPriceId]
-          ).catch((err) =>
-            console.error(
-              `Error inserting default price for ${productId}:`,
-              err
-            )
+             VALUES ($1, $2)
+             ON CONFLICT (name) DO UPDATE SET settings = $2`,
+            [`price:${productId}`, JSON.stringify(defaultPriceId)]
           );
         }
         return { [productId]: defaultPriceId };

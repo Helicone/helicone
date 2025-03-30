@@ -166,7 +166,6 @@ export async function getRequestsClickhouseNoSort(
   offset: number,
   limit: number
 ): Promise<Result<HeliconeRequest[], string>> {
-  console.log("getRequestsClickhouseNoSort");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
