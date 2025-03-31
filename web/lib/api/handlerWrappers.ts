@@ -9,7 +9,7 @@ import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;

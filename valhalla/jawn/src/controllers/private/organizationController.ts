@@ -11,7 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import {
   NewOrganizationParams,
   OnboardingStatus,

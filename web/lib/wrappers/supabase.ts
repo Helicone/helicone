@@ -3,7 +3,7 @@ import {
   User,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import {
   GetServerSidePropsContext,
   NextApiRequest,

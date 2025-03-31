@@ -1,5 +1,10 @@
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, PromiseGenericResult, Result } from "../shared/result";
+import {
+  err,
+  ok,
+  PromiseGenericResult,
+  Result,
+} from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export type EvaluatorConfig = {

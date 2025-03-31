@@ -1,7 +1,7 @@
-import { Role } from "../../../models/models";
-import { KeyPermissions } from "../../../models/models";
-import { HeliconeAuth } from "../../requestWrapper";
-import { PromiseGenericResult } from "../result";
+import { HeliconeAuth } from "../types";
+import { PromiseGenericResult, Result } from "../../result";
+export type Role = "admin" | "owner" | "member" | undefined;
+export type KeyPermissions = "w" | "rw" | undefined;
 
 export interface AuthParams {
   organizationId: string;
@@ -44,4 +44,10 @@ export interface HeliconeAuthClient {
   getUserByEmail: (email: string) => HeliconeUserResult;
 
   getUserById: (userId: string) => HeliconeUserResult;
+
+  updateUser: ({
+    password,
+  }: {
+    password: string;
+  }) => Promise<Result<void, string>>;
 }

@@ -3,19 +3,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
 import OrgMembersPage from "../members/orgMembersPage";
 import { Separator } from "@/components/ui/separator";
-
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
-
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
@@ -23,7 +21,7 @@ interface OrgSettingsPageProps {
 
 const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const { org, variant = "organization" } = props;
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [, setOpenDemo] = useLocalStorage("openDemo", false);
   const [, setRemovedDemo] = useLocalStorage("removedDemo", false);

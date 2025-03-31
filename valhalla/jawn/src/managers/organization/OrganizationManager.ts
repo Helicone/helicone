@@ -1,9 +1,9 @@
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { Database } from "../../lib/db/database.types";
-import { getHeliconeAuthClient } from "../../lib/shared/auth/AuthClientFactory";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
 

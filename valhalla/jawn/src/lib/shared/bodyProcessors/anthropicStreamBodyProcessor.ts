@@ -1,7 +1,7 @@
 import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
-import { PromiseGenericResult, ok } from "../result";
+import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 import { NON_DATA_LINES } from "./openAIStreamProcessor";
@@ -55,8 +55,10 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
                 processedBody?.usage?.input_tokens +
                 processedBody?.usage?.output_tokens,
               promptTokens: processedBody?.usage?.input_tokens,
-              promptCacheWriteTokens: processedBody?.usage?.cache_creation_input_tokens,
-              promptCacheReadTokens: processedBody?.usage?.cache_read_input_tokens,
+              promptCacheWriteTokens:
+                processedBody?.usage?.cache_creation_input_tokens,
+              promptCacheReadTokens:
+                processedBody?.usage?.cache_read_input_tokens,
               completionTokens: processedBody?.usage?.output_tokens,
               heliconeCalculated: true,
             },

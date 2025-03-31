@@ -14,7 +14,7 @@ import {
   Tags,
 } from "tsoa";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";

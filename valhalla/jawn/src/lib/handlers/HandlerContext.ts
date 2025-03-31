@@ -1,7 +1,8 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { HeliconeRequest, Provider } from "../../packages/llm-mapper/types";
 import { SetOnce } from "../../utils/setOnce";
-import { AuthParams, OrgParams } from "../shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;

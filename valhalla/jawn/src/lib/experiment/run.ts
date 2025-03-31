@@ -1,5 +1,5 @@
 import { uuid } from "uuidv4";
-import { Result, err, ok } from "../shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";

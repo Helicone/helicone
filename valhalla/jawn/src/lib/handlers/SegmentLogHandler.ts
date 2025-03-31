@@ -1,5 +1,10 @@
 import * as Sentry from "@sentry/node";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import {
+  PromiseGenericResult,
+  Result,
+  err,
+  ok,
+} from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { formatTimeString } from "../stores/request/VersionedRequestStore";

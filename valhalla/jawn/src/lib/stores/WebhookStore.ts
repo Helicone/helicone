@@ -1,6 +1,6 @@
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 export class WebhookStore {
   constructor() {}

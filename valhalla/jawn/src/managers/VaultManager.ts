@@ -1,5 +1,5 @@
 import { dbExecute } from "../lib/shared/db/dbExecute";
-import { Result } from "../lib/shared/result";
+import { Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 
 const KEYS_WHERE_ONLY_ONE_PER_ORG = ["OPEN_PIPE"];

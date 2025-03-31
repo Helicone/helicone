@@ -1,17 +1,12 @@
-import { User } from "@supabase/auth-helpers-nextjs";
+import AdminPage from "@/components/templates/admin/adminPage";
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import { ReactElement } from "react";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminPage from "../../components/templates/admin/adminPage";
-import { getSupabaseServer } from "../../lib/supabaseServer";
+import { withAuthSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminProps {
-  user: User;
-}
+interface AdminProps {}
 
 const Admin = (props: AdminProps) => {
-  const { user } = props;
-
   return <AdminPage />;
 };
 
@@ -26,7 +21,10 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user },
   } = options;
 
-  const { data, error } = await getSupabaseServer().from("admins").select("*");
+  const { data, error } = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [user?.id]
+  );
 
   const admins = data?.map((admin) => admin.user_id || "") || [];
 

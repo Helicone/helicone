@@ -1,5 +1,4 @@
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useNotification from "../components/shared/notification/useNotification";
@@ -11,11 +10,12 @@ import { GetServerSidePropsContext } from "next";
 import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+
 const SignUp = () => {
-  const supabase = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-  const user = useUser();
   const router = useRouter();
   const { demo = "false" } = router.query;
 
@@ -26,7 +26,7 @@ const SignUp = () => {
     }
   }, [router.query]);
 
-  if (user && user.email !== DEMO_EMAIL) {
+  if (heliconeAuthClient.user && heliconeAuthClient.user.email !== DEMO_EMAIL) {
     router.push(`/welcome`);
   }
 
@@ -47,7 +47,7 @@ const SignUp = () => {
             email: email,
           });
 
-          const { data, error } = await supabase.auth.signUp({
+          const { data, error } = await heliconeAuthClient.signUp({
             email: email,
             password: password,
             options: {
@@ -61,7 +61,6 @@ const SignUp = () => {
               "error"
             );
             console.error(error);
-            console.error(error.message);
             return;
           }
 
@@ -71,7 +70,7 @@ const SignUp = () => {
           posthog.capture("user_signed_up", {
             method: "google",
           });
-          const { error } = await supabase.auth.signInWithOAuth({
+          const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "google",
             options: {
               redirectTo: `${origin}/onboarding`,
@@ -90,7 +89,7 @@ const SignUp = () => {
           posthog.capture("user_signed_up", {
             method: "github",
           });
-          const { error } = await supabase.auth.signInWithOAuth({
+          const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "github",
             options: {
               redirectTo: `${origin}/onboarding`,

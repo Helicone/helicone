@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 import Parser from "rss-parser";
-import { Database } from "@/supabase/database.types";
+import { Database } from "@/db/database.types";
 
 const useAlertBanners = () => {
   const supabaseClient = useSupabaseClient<Database>();

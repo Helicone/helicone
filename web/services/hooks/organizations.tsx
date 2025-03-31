@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { useCallback, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
@@ -268,7 +268,6 @@ const setOrgCookie = (orgId: string) => {
 const useOrgsContextManager = () => {
   const user = useUser();
   const { data: orgs, refetch } = useGetOrgs();
-  const jawn = getJawnClient();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);

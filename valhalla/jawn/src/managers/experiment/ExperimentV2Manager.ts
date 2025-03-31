@@ -7,9 +7,9 @@ import {
 } from "../../controllers/public/experimentV2Controller";
 import { PromptVersionResult } from "../../controllers/public/promptController";
 import { run } from "../../lib/experiment/run";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { ExperimentStore } from "../../lib/stores/experimentStore";
 import { BaseManager } from "../BaseManager";
 import { InputsManager } from "../inputs/InputsManager";

@@ -1,10 +1,8 @@
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
-import { Database } from "../../../supabase/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface SuggestionModalProps {
   open: boolean;
@@ -13,17 +11,18 @@ interface SuggestionModalProps {
 
 const SuggestionModal = (props: SuggestionModalProps) => {
   const { open, setOpen } = props;
-  const user = useUser();
+
   const org = useOrg();
   const [metricTitle, setMetricTitle] = useState("");
   const [metricType, setMetricType] = useState("");
   const [email, setEmail] = useState("");
   const [useCase, setUseCase] = useState("");
   const [whatElse, setWhatElse] = useState("");
-  const client = useSupabaseClient<Database>();
+  const heliconeAuthClient = useHeliconeAuthClient();
   useEffect(() => {
-    setEmail(user?.email ?? "");
-  }, [user?.email]);
+    setEmail(heliconeAuthClient?.user?.email ?? "");
+  }, [heliconeAuthClient?.user?.email]);
+
   const { setNotification } = useNotification();
   return (
     <ThemedModal open={open} setOpen={setOpen}>
@@ -81,7 +80,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
                 name="email"
                 type="email"
                 autoComplete="email"
-                defaultValue={user?.email}
+                defaultValue={heliconeAuthClient?.user?.email}
                 required
                 className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 text-sm lg:text-md lg:leading-6"
               />
@@ -128,7 +127,7 @@ const SuggestionModal = (props: SuggestionModalProps) => {
           <div className="border-t border-gray-300 flex items-center justify-end pt-4">
             <button
               onClick={() => {
-                client
+                heliconeAuthClient
                   .from("user_feedback")
                   .insert({
                     feedback: `

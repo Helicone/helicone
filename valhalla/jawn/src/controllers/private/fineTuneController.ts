@@ -16,7 +16,7 @@ import { getRequests } from "../../lib/stores/request/request";
 import { FineTuningManager } from "../../managers/FineTuningManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 
 // src/users/usersController.ts
 import { hasAccessToFineTune } from "./datasetController";

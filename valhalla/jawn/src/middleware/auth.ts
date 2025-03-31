@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { authCheckThrow } from "../controllers/private/adminController";
 import { newPostHogClient } from "../lib/clients/postHogClient";
 import { RequestWrapper } from "../lib/requestWrapper";
-import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
-import { getHeliconeAuthClient } from "../lib/shared/auth/AuthClientFactory";
+import { AuthParams } from "../packages/common/auth/types";
+import { getHeliconeAuthClient } from "../packages/common/auth/AuthClientFactory";
 
 export const logInPostHog = (
   reqParams: {
@@ -107,3 +107,7 @@ export const authMiddleware = async (
     res.status(400).send("Invalid token.");
   }
 };
+export interface HeliconeUser {
+  email: string;
+  id: string;
+}
