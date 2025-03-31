@@ -3,6 +3,7 @@ import { Database } from "../../../supabase/database.types";
 import { clickhousePriceCalc } from "../../packages/cost";
 import { Result, err, ok } from "../util/results";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
+import { safePut } from "../safePut";
 
 // uses Dat trunc
 export async function checkLimitsSingle(
@@ -130,6 +131,11 @@ export async function checkLimits(
     }
   });
 
-  await env.CACHE_KV.put(cacheKey, result.toString(), { expirationTtl: 60 });
+  await safePut({
+    key: env.CACHE_KV,
+    keyName: cacheKey,
+    value: result.toString(),
+    options: { expirationTtl: 60 },
+  });
   return result;
 }

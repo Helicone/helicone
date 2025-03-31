@@ -1,0 +1,4 @@
+{
+  "title": "New HeliconeLogBuilder for Improved Stream Handling",
+  "description": "Introducing the HeliconeLogBuilder class that simplifies streaming LLM responses with better error handling, simpler stream management, and improved async support."
+}

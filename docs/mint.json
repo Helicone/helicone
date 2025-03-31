@@ -212,7 +212,7 @@
     {
       "group": "Other Integrations",
       "pages": [
-        "getting-started/integration-method/posthog",
+        "other-integrations/langgraph",
         "other-integrations/ragas",
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
@@ -227,7 +227,8 @@
           ]
         },
         "other-integrations/firecrawl",
-        "other-integrations/bubble"
+        "other-integrations/bubble",
+        "getting-started/integration-method/posthog"
       ]
     },
     {
@@ -245,8 +246,8 @@
           "group": "Prompts",
           "pages": [
             "features/prompts/editor",
-            "features/prompts/import",
-            "features/prompts/generate"
+            "features/prompts/generate",
+            "features/prompts/import"
           ]
         },
         "features/experiments",
@@ -288,6 +289,7 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/prompt-thinking-models",
             "guides/cookbooks/fine-tune",
             "guides/cookbooks/openai-structured-outputs",
             "guides/cookbooks/experiments",

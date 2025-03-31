@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "helicone_helpers"
-version = "1.0.2"
+version = "1.0.3"
 description = "A Python wrapper for some of Helicone's common functionalities"
 license = "Apache-2.0"
 authors = ["Helicone, Inc. <help@helicone.ai>"]

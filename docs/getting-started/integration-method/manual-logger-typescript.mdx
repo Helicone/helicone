@@ -163,10 +163,7 @@ const { question } = await request.json();
     const together = new Together();
     const helicone = new HeliconeManualLogger({
       apiKey: process.env.HELICONE_API_KEY!,
-      loggingEndpoint: "https://api.worker.helicone.ai/oai/v1/log",
-      headers: {
-        "Helicone-Property-appname": "TogetherChat",
-      },
+
     });
 
     const nonStreamingBody = {
@@ -235,6 +232,32 @@ headers?: Record<string, string>;
 loggingEndpoint?: string; // defaults to https://api.hconeai.com/custom/v1/log
 };
 ```
+
+### HeliconeLogBuilder
+
+```typescript
+class HeliconeLogBuilder {
+  constructor(
+    logger: HeliconeManualLogger,
+    request: HeliconeLogRequest,
+    additionalHeaders?: Record<string, string>
+  );
+
+  setError(error: any): void;
+  toReadableStream<T>(stream: Stream<T>): ReadableStream;
+  setResponse(body: string): void;
+  sendLog(): Promise<void>;
+}
+```
+
+The `HeliconeLogBuilder` provides a simplified way to handle streaming LLM responses with better error handling and async support. It's created using the `logBuilder` method of `HeliconeManualLogger`.
+
+#### Methods
+
+- `setError(error: any)`: Sets an error that occurred during the request
+- `toReadableStream<T>(stream: Stream<T>)`: Collects streaming responses and converts them to a readable stream while capturing the response for logging
+- `setResponse(body: string)`: Sets the response body for non-streaming responses
+- `sendLog()`: Sends the log to Helicone
 
 ### logRequest
 
@@ -415,6 +438,49 @@ const response = await llmProvider.createCompletion(requestBody);
 await helicone.logSingleRequest(requestBody, JSON.stringify(response), {
   "Helicone-User-Id": userId,
 });
+```
+
+### logBuilder
+
+The recommended method for handling streaming responses with better error handling and simplified workflow.
+
+```typescript
+logBuilder(
+  request: HeliconeLogRequest,
+  additionalHeaders?: Record<string, string>
+): HeliconeLogBuilder
+```
+
+**Parameters:**
+
+- `request`: The request object to log
+- `additionalHeaders`: Optional additional headers to include with the log request
+
+**Example:**
+
+```typescript
+// Create a log builder
+const heliconeLogBuilder = helicone.logBuilder(requestBody, {
+  "Helicone-User-Id": userId,
+});
+
+try {
+  // Make the LLM API call
+  const response = await llmProvider.createChatCompletion({
+    stream: true,
+    ...requestBody,
+  });
+
+  // Convert the API response to a readable stream and return it
+  return new Response(heliconeLogBuilder.toReadableStream(response));
+} catch (error) {
+  // Record any errors that occur
+  heliconeLogBuilder.setError(error);
+  throw error;
+} finally {
+  // Send the log (can be used with Vercel's "after" function)
+  await heliconeLogBuilder.sendLog();
+}
 ```
 
 ## Streaming Examples

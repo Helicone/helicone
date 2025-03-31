@@ -29,7 +29,6 @@ const getRequestText = (requestBody: any): string => {
     const lastMessage = messages.at(-1);
     if (!lastMessage) return "";
 
-    // Handle function calls in request messages
     if (lastMessage.function_call || lastMessage.tool_calls) {
       return formatStreamingToolCalls(
         lastMessage.tool_calls || [lastMessage.function_call]
@@ -131,75 +130,110 @@ export const getResponseText = (
   }
 };
 
-export const getRequestMessages = (request: any): Message[] => {
-  return (
-    request.messages?.map((msg: any) => {
-      // Handle function calls first
-      if (msg.function_call || msg.tool_calls) {
-        const toolCallMsg = handleToolCalls(msg);
+const processFunctionCall = (msg: any): Message => {
+  const toolCallMsg = handleToolCalls(msg);
+  return {
+    ...toolCallMsg,
+    content: toolCallMsg.content || "",
+    _type: "functionCall",
+  };
+};
+
+const processToolResponse = (msg: any): Message => {
+  const toolResponseMsg = handleToolResponse(msg);
+  return {
+    ...toolResponseMsg,
+    content: toolResponseMsg.content || "",
+    _type: "function",
+    name: msg.name,
+    tool_calls: [
+      {
+        name: msg.name,
+        arguments: {
+          query_result: msg.content,
+        },
+      },
+    ],
+  };
+};
+
+const processArrayContent = (msg: any): Message => {
+  // Process each item in the array uniformly
+  return {
+    contentArray: msg.content.map((item: any) => {
+      if (item.type === "text") {
         return {
-          ...toolCallMsg,
-          content: toolCallMsg.content || "",
-          _type: "functionCall",
+          content: item.text || "",
+          role: msg.role || "user",
+          _type: "message",
         };
-      }
-
-      // Handle tool responses
-      if (msg.role === "tool" || msg.role === "function") {
-        const toolResponseMsg = handleToolResponse(msg);
+      } else if (item.type === "image_url") {
         return {
-          ...toolResponseMsg,
-          content: toolResponseMsg.content || "",
-          _type: "function",
-          name: msg.name,
-          tool_calls: [
-            {
-              name: msg.name,
-              arguments: {
-                query_result: msg.content,
-              },
-            },
-          ],
-        };
-      }
-
-      // Handle array content (e.g. text + image)
-      if (Array.isArray(msg.content)) {
-        const textContent = msg.content.find(
-          (item: any) => item.type === "text"
-        );
-        const imageContent = msg.content.find(
-          (item: any) => item.type === "image_url"
-        );
-
-        if (textContent && imageContent) {
-          return {
-            role: msg.role,
-            _type: "image",
-            content: textContent.text || "",
-            image_url: imageContent.image_url.url,
-          };
-        }
-      }
-
-      // Handle single image content
-      if (msg.content?.type === "image_url") {
-        return {
-          role: msg.role,
+          role: msg.role || "user",
           _type: "image",
-          content: msg.content.text || "",
-          image_url: msg.content.image_url.url,
+          content: "",
+          image_url: item.image_url.url,
         };
       }
-
-      // Handle regular messages
       return {
-        content: getFormattedMessageContent(msg.content) || "",
+        content: JSON.stringify(item),
         role: msg.role || "user",
-        _type: getContentType(msg as any),
+        _type: "message",
       };
-    }) ?? []
-  );
+    }),
+    _type: "contentArray",
+    role: msg.role,
+  };
+};
+
+const processSingleImage = (msg: any): Message => {
+  if (typeof msg.content.image_url === "string") {
+    return {
+      role: msg.role,
+      _type: "image",
+      content: msg.content.text || "",
+      image_url: msg.content.image_url,
+    };
+  }
+
+  return {
+    role: msg.role,
+    _type: "image",
+    content: msg.content.text || "",
+    image_url: msg.content.image_url.url,
+  };
+};
+
+const processTextMessage = (msg: any): Message => {
+  return {
+    content: getFormattedMessageContent(msg.content) || "",
+    role: msg.role || "user",
+    _type: getContentType(msg as any),
+  };
+};
+
+const openAIMessageToHeliconeMessage = (msg: any): Message => {
+  if (msg.function_call || msg.tool_calls) {
+    return processFunctionCall(msg);
+  }
+
+  if (msg.role === "tool" || msg.role === "function") {
+    return processToolResponse(msg);
+  }
+
+  if (Array.isArray(msg.content)) {
+    return processArrayContent(msg);
+  }
+
+  if (msg.content?.type === "image_url") {
+    return processSingleImage(msg);
+  }
+
+  return processTextMessage(msg);
+};
+
+export const getRequestMessages = (request: any): Message[] => {
+  return request.messages?.map(openAIMessageToHeliconeMessage) ?? [];
 };
 
 const getLLMSchemaResponse = (response: any) => {
@@ -220,40 +254,7 @@ const getLLMSchemaResponse = (response: any) => {
         const message = choice?.message;
         if (!message) return null;
 
-        // Handle function calls
-        if (message.function_call || message.tool_calls) {
-          const toolCallMsg = handleToolCalls(message);
-          return {
-            ...toolCallMsg,
-            content: toolCallMsg.content || "",
-            _type: "functionCall",
-          };
-        }
-
-        // Handle function/tool responses
-        if (message.role === "function" || message.role === "tool") {
-          return {
-            content: getFormattedMessageContent(message.content) || "",
-            role: message.role,
-            _type: "function",
-            name: message.name,
-            tool_calls: [
-              {
-                name: message.name,
-                arguments: {
-                  query_result: message.content,
-                },
-              },
-            ],
-          };
-        }
-
-        // Handle regular messages
-        return {
-          content: getFormattedMessageContent(message.content) || "",
-          role: message.role ?? "",
-          _type: getContentType(message),
-        };
+        return openAIMessageToHeliconeMessage(message);
       })
       .filter(Boolean),
     model: response?.model,

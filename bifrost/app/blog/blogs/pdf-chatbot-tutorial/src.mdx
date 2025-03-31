@@ -1,5 +1,10 @@
+Ever tried having a meaningful conversation with a 100-page technical document? Between dense specifications, scattered references, and complex terminology, extracting specific information from PDFs remains a persistent challenge. 
+
+This post walks through how to build a RAG chatbot that can actually understand and discuss PDF documents, using **Retrieval Augmented Generation (RAG)**, LLMs, and vector search. 
+
 ![PDF Chatbot Cover](/static/blog/pdf-chatbot-tutorial/pdf-chatbot-cover.webp)
-Ever tried having a meaningful conversation with a 100-page technical document? Between dense specifications, scattered references, and complex terminology, extracting specific information from PDFs remains a persistent challenge. This post walks through how to build a RAG chatbot that can actually understand and discuss PDF documents, using **Retrieval Augmented Generation (RAG)**, LLMs, and vector search. We'll explore how to create an intelligent PDF to AI chatbot and use **<span style={{color: '#0ea5e9'}}>Helicone</span>** to gain visibility into our system's performance.
+
+We'll explore how to create an intelligent PDF to AI chatbot and use <a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone</a> to gain visibility into our system's performance.
 
 ## The Problem: PDFs Are Hard to Query
 
@@ -28,7 +33,7 @@ I'll walk you through each component, showing you how they fit together to creat
 
 ### 1. PDF Text Extraction
 
-First, we need to extract the raw text content from our PDF documents using the [`pdf-parse`](https://www.npmjs.com/package/pdf-parse) library:
+First, we need to extract the raw text content from our PDF documents using the <a href="https://www.npmjs.com/package/pdf-parse" target="_blank" rel="noopener">pdf-parse</a> library:
 
 ```typescript
 // Function to extract text from PDF
@@ -93,7 +98,7 @@ An embedding is nothing but a text converted into a vector of numbers.
 
 ### 4. Vector Storage
 
-These embeddings need to be stored so that we can retrieve them later. Vector data, as a type of spatial data, requires special handling because it represents information as points in multi-dimensional space where similar concepts cluster together. In this tutorial, we will be using [FAISS (Facebook AI Similarity Search)](https://github.com/facebookresearch/faiss) for storing our vector data structures since it's lightweight and optimized for efficient similarity search. You can also explore other vector databases like [Chroma](https://docs.trychroma.com/getting-started), [Pinecone](https://www.pinecone.io/docs/getting-started/), etc.
+These embeddings need to be stored so that we can retrieve them later. Vector data, as a type of spatial data, requires special handling because it represents information as points in multi-dimensional space where similar concepts cluster together. In this tutorial, we will be using <a href="https://github.com/facebookresearch/faiss" target="_blank" rel="noopener">FAISS (Facebook AI Similarity Search)</a> for storing our vector data structures since it's lightweight and optimized for efficient similarity search. You can also explore other vector databases like <a href="https://docs.trychroma.com/getting-started" target="_blank" rel="noopener">Chroma</a>, <a href="https://www.pinecone.io/docs/getting-started/" target="_blank" rel="noopener">Pinecone</a>, etc.
 
 **Note**: Understanding semantic search vs vector search is key here - while semantic search relies on keywords and language patterns, vector search uses mathematical representations for more precise similarity matching.
 
@@ -238,11 +243,11 @@ And there you have it! 🎊 You've built a fully functional RAG chatbot. Now let
 
 While building our RAG system, we quickly discovered that blind spots in LLM request monitoring could lead to performance issues and unexpected behaviors. Questions like "How to improve our prompt?", "Which queries are taking the longest?", and "Is my vector database returning the best results?" became critical to answer.
 
-This is where **<span style={{color: '#0ea5e9'}}>Helicone</span>** comes in, providing observability for our rag chatbot. Let's look at how we integrated it...
+This is where **Helicone** comes in, providing observability for our rag chatbot. Let's look at how we integrated it...
 
 ### Logging Requests
 
-Throughout the code, Helicone's `HeliconeManualLogger` is used to log specific operations, such as embedding generation and FAISS searches. See the [official documentation](https://docs.helicone.ai/integrations/vectordb/javascript) for more details.
+Throughout the code, Helicone's `HeliconeManualLogger` is used to log specific operations, such as embedding generation and FAISS searches. See the <a href="https://docs.helicone.ai/integrations/vectordb/javascript" target="_blank" rel="noopener">official documentation</a> for more details.
 
 ```typescript
 const heliconeLogger = new HeliconeManualLogger({
@@ -440,13 +445,17 @@ main().catch(console.error);
 
 **Explanation**: The `main` function ensures a seamless flow from PDF processing to user interaction, with Helicone monitoring each critical step.
 
-All of these requests are logged to **<span style={{color: '#0ea5e9'}}>Helicone</span>** and leverage [session tracking](https://docs.helicone.ai/features/sessions). This groups related multi-step requests into a single session, allowing you to view the complete request/response chain in Helicone.
+All of these requests are logged to **Helicone** and leverage <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">session tracking</a>. This groups related multi-step requests into a single session, allowing you to view the complete request/response chain in Helicone.
 
 **Example**:
 ![Helicone Session](/static/blog/pdf-chatbot-tutorial/helicone-session-ui.webp)
 
 ## Conclusion
 
-Remember that needle-in-a-haystack problem we started with? By combining RAG architecture with powerful monitoring tools like Helicone, we've built a solution that makes conversing with PDFs feel natural and efficient. The system doesn't just search for keywords, it understands context, maintains conversation flow, and learns from each interaction. Whether you're dealing with technical documentation, research papers, or legal documents, this architecture provides a foundation for building intelligent document interactions that feel less like searching through haystacks and more like having a knowledgeable assistant at your fingertips.
+Remember that needle-in-a-haystack problem we started with? By combining RAG architecture with powerful monitoring tools like Helicone, we've built a solution that makes conversing with PDFs feel natural and efficient. 
+
+The system doesn't just search for keywords, it understands context, maintains conversation flow, and learns from each interaction. 
+
+Whether you're dealing with technical documentation, research papers, or legal documents, this architecture provides a foundation for building intelligent document interactions that feel less like searching through haystacks and more like having a knowledgeable assistant at your fingertips.
 
 <Questions />

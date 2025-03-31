@@ -7,31 +7,16 @@ import { CreatePanel } from "./panels/CreatePanel";
 import { EditPanel } from "./panels/EditPanel";
 import { MainPanel } from "./panels/mainPanel";
 import { TestPanel } from "./panels/TestPanel";
-import EvalsPreview from "../featurePreview/evalsPreview";
-import { useHasAccess } from "@/hooks/useHasAccess";
-import AuthHeader from "@/components/shared/authHeader";
 import React from "react";
 import { useEvalPanelStore } from "./store/evalPanelStore";
 import { useOrg } from "@/components/layout/org/organizationContext";
 
 const EvalsPage = () => {
-  const hasAccess = useHasAccess("evals");
   const org = useOrg();
   const { panels } = useEvalPanelStore();
 
   if (!org?.currentOrg?.tier) {
     return null;
-  }
-
-  if (!hasAccess) {
-    return (
-      <>
-        <AuthHeader title={null} />
-        <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-          <EvalsPreview />
-        </div>
-      </>
-    );
   }
 
   return (

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { Headers, Response } from "node-fetch";
 import { SocketMessage } from "../../types/realtime";
+import { safeJSONStringify } from "../../utils/sanitize";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { DBLoggable } from "./DBLoggable";
 
@@ -28,23 +29,32 @@ export async function handleSocketSession(
   const clientMessages = messages.filter((msg) => msg.from === "client");
   const targetMessages = messages.filter((msg) => msg.from === "target");
 
-  const startingSession = targetMessages[0]?.content?.session;
+  let requestBody;
+  const startingSession = targetMessages.find((msg) => msg.content?.session)
+    ?.content?.session;
+  if (startingSession) {
+    requestBody = {
+      model: startingSession.model,
+      temperature: startingSession.temperature,
+      modalities: startingSession.modalities,
+      instructions: startingSession.instructions,
+      voice: startingSession.voice,
+      turn_detection: startingSession.turn_detection,
+      input_audio_format: startingSession.input_audio_format,
+      output_audio_format: startingSession.output_audio_format,
+      tool_choice: startingSession.tool_choice,
+      max_response_output_tokens: startingSession.max_response_output_tokens,
+      tools: startingSession.tools,
 
-  const requestBody = {
-    model: startingSession.model,
-    temperature: startingSession.temperature,
-    modalities: startingSession.modalities,
-    instructions: startingSession.instructions,
-    voice: startingSession.voice,
-    turn_detection: startingSession.turn_detection,
-    input_audio_format: startingSession.input_audio_format,
-    output_audio_format: startingSession.output_audio_format,
-    tool_choice: startingSession.tool_choice,
-    max_response_output_tokens: startingSession.max_response_output_tokens,
-    tools: startingSession.tools,
+      messages: clientMessages,
+    };
+  } else {
+    requestBody = {
+      error: "No Realtime Starting Session Found.",
 
-    messages: clientMessages,
-  };
+      messages: clientMessages,
+    };
+  }
 
   const responseBody = {
     id: startingSession.id,
@@ -75,12 +85,12 @@ export async function handleSocketSession(
         country_code: null,
         experimentColumnId: null,
         experimentRowIndex: null,
-        bodyText: JSON.stringify(requestBody),
+        bodyText: safeJSONStringify(requestBody),
       },
       response: {
         responseId,
         getResponseBody: async () => ({
-          body: JSON.stringify(responseBody),
+          body: safeJSONStringify(responseBody),
           endTime,
         }),
         status: async () => 200,

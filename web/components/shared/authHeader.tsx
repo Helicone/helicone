@@ -37,7 +37,7 @@ const AuthHeader = (props: AuthHeaderProps) => {
       <div className="flex flex-col items-start space-y-2">
         {breadcrumb ? (
           <Link
-            className="flex w-fit items-center text-slate-500 space-x-2 hover:text-slate-700 dark:text-slate-400"
+            className="flex w-fit items-center text-slate-500 space-x-2 dark:text-slate-400"
             href={breadcrumb.href}
           >
             <ChevronLeftIcon className="h-4 w-4 inline" />
@@ -45,7 +45,7 @@ const AuthHeader = (props: AuthHeaderProps) => {
           </Link>
         ) : (
           <div className="flex items-center space-x-4 ">
-            <h1 className="flex w-fit items-center text-gray-500 space-x-2 hover:text-slate-700 font-bold dark:text-slate-300">
+            <h1 className="flex w-fit items-center text-gray-500 space-x-2 font-bold dark:text-slate-300">
               {title}
             </h1>
             {headerActions}

@@ -90,6 +90,7 @@ export const useGetRequestsWithBodies = (
 ) => {
   const org = useOrg();
 
+  // Main query to fetch requests with signed URLs
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "requestsData",
@@ -126,58 +127,87 @@ export const useGetRequestsWithBodies = (
     keepPreviousData: true,
   });
 
-  const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
+  const requestsWithSignedUrls = data?.data ?? [];
 
+  // Fetch request bodies for each request with a signed URL
   const urlQueries = useQueries({
     queries: requestsWithSignedUrls.map((request) => ({
-      queryKey: ["request-content", request.signed_body_url],
+      queryKey: [
+        "request-content",
+        request.request_id,
+        request.signed_body_url,
+      ],
       queryFn: async () => {
+        // Check cache first
         if (requestBodyCache.has(request.request_id)) {
-          return requestBodyCache.get(request.request_id);
+          return {
+            request,
+            bodyContent: requestBodyCache.get(request.request_id),
+          };
         }
-        if (!request.signed_body_url) return null;
-        const contentResponse = await fetch(request.signed_body_url);
-        if (contentResponse.ok) {
-          const text = await contentResponse.text();
-          let content = JSON.parse(text);
-          if (request.asset_urls) {
-            content = placeAssetIdValues(request.asset_urls, content);
+
+        if (!request.signed_body_url) return { request, bodyContent: null };
+
+        try {
+          const contentResponse = await fetch(request.signed_body_url);
+          if (contentResponse.ok) {
+            const text = await contentResponse.text();
+            let content = JSON.parse(text);
+
+            if (request.asset_urls) {
+              content = placeAssetIdValues(request.asset_urls, content);
+            }
+
+            // Update cache
+            requestBodyCache.set(request.request_id, content);
+            if (requestBodyCache.size > 1000) {
+              requestBodyCache.clear();
+            }
+
+            return { request, bodyContent: content };
           }
-          requestBodyCache.set(request.request_id, content);
-          if (requestBodyCache.size > 1000) {
-            requestBodyCache.clear();
-          }
-          return content;
+        } catch (error) {
+          console.error("Error fetching request body:", error);
         }
-        return null;
+
+        return { request, bodyContent: null };
       },
       keepPreviousData: true,
       enabled: !!request.signed_body_url,
+      staleTime: isLive ? 2000 : 0,
     })),
   });
 
-  const requests = useMemo(() => {
-    return requestsWithSignedUrls.map((request, index) => {
-      const content = urlQueries[index].data;
-      if (!content) return request;
+  // Process the requests with their bodies
+  const processedRequests = useMemo(() => {
+    const results: HeliconeRequest[] = [];
 
-      let updatedRequest = {
-        ...request,
-        request_body: content.request,
-        response_body: content.response,
-      };
+    for (const query of urlQueries) {
+      if (query.data) {
+        const { request, bodyContent } = query.data;
 
-      return updatedRequest;
-    });
-  }, [requestsWithSignedUrls, urlQueries]);
+        if (bodyContent) {
+          results.push({
+            ...request,
+            request_body: bodyContent.request,
+            response_body: bodyContent.response,
+          });
+        } else {
+          results.push(request);
+        }
+      }
+    }
+
+    return results;
+  }, [urlQueries]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
   return {
-    isLoading: isLoading,
+    isLoading,
     refetch,
     isRefetching: isRefetching || isUrlsFetching,
-    requests: requests,
+    requests: processedRequests,
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: requestsWithSignedUrls.length,
   };
@@ -226,7 +256,6 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
-      // cache the count for 5 minutes
       cacheTime: 5 * 60 * 1000,
     }),
   };

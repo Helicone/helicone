@@ -167,7 +167,6 @@ export class ExperimentV2Controller extends Controller {
       inputRecord = await supabaseServer.client
         .from("prompt_input_record")
         .insert({
-          experiment_id: experiment.data.experimentId,
           inputs: {},
           prompt_version: promptVersionResult.data!,
           auto_prompt_inputs: [],

@@ -28,7 +28,7 @@ Unlike traditional chatbots, which follow explicit instructions or rules, AI age
 
 ### Use of RAG to Improve Functionality
 
-Retrieval-Augmented Generation (RAG) is an advanced method that allows the agent to **<span style={{color: '#0ea5e9'}}>incorporate information from external knowledge bases</span>** (e.g., databases, documents, articles) into the response.
+Retrieval-Augmented Generation (RAG) is an advanced method that allows the agent to **incorporate information from external knowledge bases** (e.g., databases, documents, articles) into the response.
 
 RAG significantly improved the response outcome as the agent now have access to the most recent data based on keywords, semantic similarity, or other advanced search techniques, and used it to generate more accurate, personalized, and context-specific responses.
 
@@ -59,7 +59,7 @@ Typically, AI agents consists of four core components:
 
 **⚠️ Their decision making process is complicated.**
 
-AI agent's adaptive behavior makes their decision paths **<span style={{color: '#0ea5e9'}}>non-deterministic</span>** and harder to trace. This is because agents base their decisions on **<span style={{color: '#0ea5e9'}}>many inputs</span>** from **<span style={{color: '#0ea5e9'}}>diverse data sources</span>** (i.e. user interactions, environmental data, and internal states), and they learn through patterns and correlations identified in the data.
+AI agent's adaptive behavior makes their decision paths **non-deterministic** and harder to trace. This is because agents base their decisions on **many inputs** from **diverse data sources** (i.e. user interactions, environmental data, and internal states), and they learn through patterns and correlations identified in the data.
 
 **⚠️ No visibility into their internal states.**
 
@@ -67,7 +67,7 @@ AI agents function as "black boxes” and understanding how they transform input
 
 **⚠️ Context builds up over time, so do errors.**
 
-Agents can often make multiple dependent vector database calls within a single session, adding some complexity in tracing the data flow. They can also operate over a longer sessions, where **<span style={{color: '#0ea5e9'}}>an early error can have cascading effects</span>**, so it's difficult to identify their original source without proper session tracking.
+Agents can often make multiple dependent vector database calls within a single session, adding some complexity in tracing the data flow. They can also operate over a longer sessions, where **an early error can have cascading effects**, so it's difficult to identify their original source without proper session tracking.
 
 ## Scenario 1: Debugging errors in a travel chatbot
 
@@ -77,7 +77,7 @@ A travel chatbot assists users in booking flights, hotels and rent cars. There a
 
 ### Issue
 
-While building this chatbot, we noticed that the LLM occasionally provided incorrect parameters to the flight search API, leading to **<span style={{color: '#0ea5e9'}}>incorrect bookings</span>**.
+While building this chatbot, we noticed that the LLM occasionally provided incorrect parameters to the flight search API, leading to **incorrect bookings**.
 
 ### How to debug using Helicone's Sessions
 
@@ -114,7 +114,7 @@ A health and fitness chatbot that takes the user's goal to create a personalized
 
 ### Issue
 
-Users report that the chatbot is generating **<span style={{color: '#0ea5e9'}}>inconsistent dietary recommendations</span>** when prompted a few times.
+Users report that the chatbot is generating **inconsistent dietary recommendations** when prompted a few times.
 
 In this example, the user who previously selected a high-protein diet for muscle gain might later receive a low-calorie meal plan designed for weight loss.
 

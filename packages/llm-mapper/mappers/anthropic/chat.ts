@@ -23,6 +23,14 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
       return responseBody?.error?.message || "";
     }
 
+    // Handle AWS Bedrock Anthropic format
+    if (responseBody?.output?.message?.content) {
+      const content = responseBody.output.message.content;
+      if (Array.isArray(content) && content[0]?.text) {
+        return content[0].text || "";
+      }
+    }
+
     // Handle new format
     if (responseBody?.content && Array.isArray(responseBody.content)) {
       const textContent = responseBody.content.find(

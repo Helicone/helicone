@@ -1,5 +1,4 @@
 import { Row } from "@/components/layout/common";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -103,7 +102,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       requests.requests.requests.length === 0
     ) {
       return {
-        isRealtime: null,
+        isRealtime: false,
         effectiveRequests: [],
         originalRequest: null,
       };
@@ -128,18 +127,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       originalRequest,
     };
   }, [requests.requests.requests, requests.requests.isLoading]);
-
-  // Only show loading when initially loading, not when refetching with existing data
-  if (
-    (requests.requests.isLoading && !requests.requests.isRefetching) ||
-    realtimeData.isRealtime === null
-  ) {
-    return (
-      <div className="h-screen w-full flex justify-center items-center">
-        <LoadingAnimation />
-      </div>
-    );
-  }
 
   return (
     <Col className="h-screen">

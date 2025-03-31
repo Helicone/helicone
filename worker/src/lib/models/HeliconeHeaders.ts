@@ -260,6 +260,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     const requestId = this.getValidUUID(
       this.headers.get("Helicone-Request-Id")
     );
+
     return {
       heliconeAuth: this.headers.get("helicone-auth") ?? null,
       heliconeAuthV2: this.getHeliconeAuthV2(),
