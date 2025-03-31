@@ -1,5 +1,5 @@
 import { MapperBuilder } from "@/llm-mapper/path-mapper/builder";
-import { LlmSchema, Response } from "@/llm-mapper/types";
+import { LlmSchema, Response, Message } from "@/llm-mapper/types";
 
 const typeMap: Record<string, Response["_type"]> = {
   input_text: "text",
@@ -316,4 +316,63 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   )
   .map("frequency_penalty", "frequency_penalty")
   .map("presence_penalty", "presence_penalty")
-  .map("seed", "seed");
+  .map("seed", "seed")
+  .build();
+
+/**
+ * Convert response to internal Message format
+ */
+const convertResponse = (responseBody: any): Response[] => {
+  if (!responseBody || !responseBody.choices) return [];
+
+  const responses: Response[] = [];
+
+  for (const choice of responseBody.choices) {
+    if (choice.message) {
+      responses.push({
+        _type: "text",
+        role: choice.response.role || "assistant",
+        text: choice.response.text || "",
+        type: choice.response.type,
+        id: `resp-res-${choice.index || 0}`,
+      });
+    }
+  }
+
+  return responses;
+};
+
+export const mapOpenAIRequestV2 = ({
+  request,
+  response,
+  model,
+}: {
+  request: OpenAIResponseRequest;
+  response: any;
+  statusCode?: number; // Not currently used
+  model: string;
+}): LlmSchema => {
+  // Map the request using our path mapper
+  const mappedRequest = openaiResponseMapper.toInternal({
+    ...request,
+    model: model || request.model,
+  });
+
+  // Create the LlmSchema structure
+  const schema: LlmSchema = {
+    request: mappedRequest,
+    response: null,
+  };
+
+  // Add response data if available
+  if (response) {
+    const responses = convertResponse(response);
+
+    schema.response = {
+      responses: responses,
+      model: model || response.model,
+    };
+  }
+
+  return schema;
+};
