@@ -121,6 +121,13 @@ export class HeliconeLogBuilder {
     });
   }
 
+  public addAdditionalHeaders(headers: Record<string, string>): void {
+    this.additionalHeaders = {
+      ...this.additionalHeaders,
+      ...headers,
+    };
+  }
+
   /**
    * Attaches a stream to the log builder, this will consume the stream and log it on sendLog
    * @param stream - The stream to attach
