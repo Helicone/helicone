@@ -1,5 +1,5 @@
 import { MapperBuilder } from "@/llm-mapper/path-mapper/builder";
-import { LlmSchema, Response, Message } from "@/llm-mapper/types";
+import { LlmSchema, Response, Message, LLMPreview } from "@/llm-mapper/types";
 
 const typeMap: Record<string, Response["_type"]> = {
   input_text: "text",
@@ -322,36 +322,35 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
 /**
  * Convert response to internal Message format
  */
-const convertResponse = (responseBody: any): Response[] => {
+const convertResponse = (responseBody: any): Message[] => {
   if (!responseBody || !responseBody.choices) return [];
 
-  const responses: Response[] = [];
+  const messages: Message[] = [];
 
   for (const choice of responseBody.choices) {
     if (choice.message) {
-      responses.push({
-        _type: "text",
-        role: choice.response.role || "assistant",
-        text: choice.response.text || "",
-        type: choice.response.type,
-        id: `resp-res-${choice.index || 0}`,
+      messages.push({
+        _type: "message",
+        role: choice.message.role || "assistant",
+        content: choice.message.content || "",
+        id: `resp-msg-${choice.index || 0}`,
       });
     }
   }
 
-  return responses;
+  return messages;
 };
 
-export const mapOpenAIRequestV2 = ({
+export const mapOpenAIResponse = ({
   request,
   response,
   model,
 }: {
   request: OpenAIResponseRequest;
   response: any;
-  statusCode?: number; // Not currently used
+  statusCode?: number;
   model: string;
-}): LlmSchema => {
+}): { schema: LlmSchema; preview: LLMPreview } => {
   // Map the request using our path mapper
   const mappedRequest = openaiResponseMapper.toInternal({
     ...request,
@@ -366,13 +365,21 @@ export const mapOpenAIRequestV2 = ({
 
   // Add response data if available
   if (response) {
-    const responses = convertResponse(response);
-
+    const messages = convertResponse(response);
     schema.response = {
-      responses: responses,
+      messages,
       model: model || response.model,
     };
   }
 
-  return schema;
+  return {
+    schema,
+    preview: {
+      concatenatedMessages: schema.response?.messages || [],
+      request: JSON.stringify(request),
+      response: JSON.stringify(response),
+      fullRequestText: () => JSON.stringify(request),
+      fullResponseText: () => JSON.stringify(response),
+    },
+  };
 };

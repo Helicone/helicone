@@ -2,6 +2,7 @@ import { ProviderName } from "../cost/providers/mappings";
 
 export type MapperType =
   | "openai-chat"
+  | "openai-response"
   | "anthropic-chat"
   | "gemini-chat"
   | "black-forest-labs-image"
