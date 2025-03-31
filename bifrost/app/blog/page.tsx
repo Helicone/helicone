@@ -346,11 +346,6 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "llm-api-providers",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "rag-chunking-strategies",
     },
   },
