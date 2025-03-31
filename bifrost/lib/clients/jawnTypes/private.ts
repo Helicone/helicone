@@ -795,6 +795,29 @@ Json: JsonObject;
       size?: string;
       quality?: string;
     };
+    Response: {
+      contentArray?: components["schemas"]["Response"][];
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** Format: double */
+      idx?: number;
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      text?: string;
+      /** @enum {string} */
+      type: "input_image" | "input_text" | "input_file";
+      name?: string;
+      /** @enum {string} */
+      role: "user" | "assistant" | "system" | "developer";
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
+    };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
         /** @enum {string} */
@@ -826,6 +849,7 @@ Json: JsonObject;
         heliconeMessage: unknown;
       };
       model?: string | null;
+      responses?: components["schemas"]["Response"][] | null;
       messages?: components["schemas"]["Message"][] | null;
     };
     LlmSchema: {

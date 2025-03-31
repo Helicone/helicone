@@ -31,6 +31,7 @@ export const RenderMappedRequest = (
   props: RenderMappedRequestProps & { mapperContent: MappedLLMRequest }
 ) => {
   const { mapperContent } = props;
+  console.log(mapperContent);
 
   if ([0, null].includes(mapperContent?.heliconeMetadata?.status?.code)) {
     return <p>Pending...</p>;
@@ -55,7 +56,8 @@ export const RenderMappedRequest = (
     }
   } else if (
     mapperContent._type === "openai-instruct" ||
-    mapperContent._type === "openai-embedding"
+    mapperContent._type === "openai-embedding" ||
+    mapperContent._type === "openai-response"
   ) {
     if (
       mapperContent.heliconeMetadata.status.code >= 200 &&

@@ -20,11 +20,13 @@ import { mapTool } from "../mappers/tool";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapOpenAIResponse } from "../mappers/openai/responses";
 
 const MAX_PREVIEW_LENGTH = 1_000;
 
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
+  "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,
   "black-forest-labs-image": mapBlackForestLabsImage,
@@ -281,7 +283,6 @@ export const getMappedContent = ({
 export const heliconeRequestToMappedContent = (
   heliconeRequest: HeliconeRequest
 ): MappedLLMRequest => {
-  // TODO add a mapper type to change for the new mapper
   const mapperType = getMapperTypeFromHeliconeRequest(
     heliconeRequest,
     heliconeRequest.model
