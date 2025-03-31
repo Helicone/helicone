@@ -62,6 +62,7 @@ export const RenderMappedRequest = (
       mapperContent.heliconeMetadata.status.code < 300
     ) {
       return <Completion mappedRequest={mapperContent} />;
+      // Maybe render it kind of like a completetion? 
     } else {
       return <ErrorMessage mapperContent={mapperContent} />;
     }

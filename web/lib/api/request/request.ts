@@ -18,12 +18,12 @@ const MAX_TOTAL_BODY_SIZE = 3 * 1024 * 1024;
 export interface HeliconeRequest {
   response_id: string | null;
   response_created_at: string | null;
-  response_body?: any;
+  response_body?: any; // main key
   response_status: number;
   response_model: string | null;
   request_id: string;
   request_created_at: string;
-  request_body: any;
+  request_body: any; // these are the main keys
   request_path: string;
   request_user_id: string | null;
   request_properties: Record<string, string> | null;

@@ -34,6 +34,7 @@ export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-embedding": mapOpenAIEmbedding,
   "openai-instruct": mapOpenAIInstructRequest,
   "openai-realtime": mapRealtimeRequest,
+  // TODO: Add new mapper 
   "vector-db": mapVectorDB,
   tool: mapTool,
   unknown: mapOpenAIRequest,
@@ -281,6 +282,7 @@ export const getMappedContent = ({
 export const heliconeRequestToMappedContent = (
   heliconeRequest: HeliconeRequest
 ): MappedLLMRequest => {
+  // TODO add a mapper type to change for the new mapper
   const mapperType = getMapperTypeFromHeliconeRequest(
     heliconeRequest,
     heliconeRequest.model
