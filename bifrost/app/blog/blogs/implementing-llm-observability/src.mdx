@@ -94,10 +94,10 @@ const response = await openai.chat.completions.create({
   model: "gpt-4",
   messages: chatHistory,
   headers: {
-    "Helicone-User-Id": userId,
-    "Helicone-Session-Id": sessionId
-    "Helicone-Session-Path": "/abstract",
-    "Helicone-Session-Name": "Course Plan",
+    "Helicone-User-Id": userId, // Track user by ID
+    "Helicone-Session-Id": sessionId, // Track session by ID
+    "Helicone-Session-Path": "/abstract", // Defines parent-child hierarchy
+    "Helicone-Session-Name": "Course Plan", 
   }
 });
 ```
