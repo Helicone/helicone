@@ -55,9 +55,7 @@ export default async function Home() {
           <Hero />
 
           {/* Wrap sections below the fold in Suspense */}
-          <Suspense fallback={<LoadingSection height="h-[30rem]" />}>
-            <Prototype />
-          </Suspense>
+          <Prototype />
           <Suspense fallback={<LoadingSection height="h-24" />}>
             <Companies />
           </Suspense>
