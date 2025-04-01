@@ -2,12 +2,13 @@ import React from "react";
 
 import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
-import { PromptMessage } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, PromptMessage } from "@/packages/llm-mapper/types";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageRendererProps {
   messages: PromptMessage[];
   showAllMessages: boolean;
+  mappedRequest: MappedLLMRequest;
   expandedChildren: Record<string, boolean>;
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
@@ -27,6 +28,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
   selectedProperties,
   isHeliconeTemplate,
   autoInputs,
+  mappedRequest,
   setShowAllMessages,
   mode,
 }) => {
@@ -55,6 +57,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
         isHeliconeTemplate={isHeliconeTemplate}
         autoInputs={autoInputs}
         mode={mode}
+        mappedRequest={mappedRequest}
       />
     );
   }

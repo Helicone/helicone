@@ -1,8 +1,8 @@
 import { MapperBuilder } from "../../path-mapper/builder";
 import { LlmSchema, Message, Response, LLMPreview } from "../../types";
 
-const typeMap: Record<string, Response["_type"]> = {
-  input_text: "text",
+const typeMap: Record<string, Message["_type"]> = {
+  input_text: "message",
   input_image: "image",
   input_file: "file",
 };
@@ -79,16 +79,16 @@ interface OpenAIResponseRequest {
 
 const convertRequestInputToMessages = (
   input: OpenAIResponseRequest["input"]
-): Response[] => {
+): Message[] => {
   if (!input) return [];
 
   if (typeof input === "string") {
     return [
       {
-        _type: "text",
+        _type: "message",
         role: "user",
         type: "input_text",
-        text: input,
+        content: input,
         id: "req-msg-0",
       },
     ];
@@ -98,7 +98,7 @@ const convertRequestInputToMessages = (
     .map((msg, msgIdx) => {
       if (typeof msg.content === "string") {
         return {
-          _type: "text",
+          _type: "message",
           role: msg.role,
           type: "input_text",
           text: msg.content,
@@ -106,15 +106,15 @@ const convertRequestInputToMessages = (
         };
       } else if (Array.isArray(msg.content)) {
         const contentArray = msg.content.map((content, contentIdx) => {
-          const baseResponse: Response = {
-            _type: typeMap[content.type] || "text",
+          const baseResponse: Message = {
+            _type: typeMap[content.type] || "message",
             role: msg.role,
             type: content.type,
             id: `req-msg-${msgIdx}-${contentIdx}`,
           };
 
           if (content.type === "input_text" && content.text) {
-            baseResponse.text = content.text;
+            baseResponse.content = content.text;
           } else if (content.type === "input_image") {
             baseResponse.detail = content.detail;
             baseResponse.image_url = content.image_url;
@@ -137,37 +137,39 @@ const convertRequestInputToMessages = (
 
       return null;
     })
-    .filter(Boolean) as Response[];
+    .filter(Boolean) as Message[];
 };
 
 const toExternalRequest = (
-  responses: Response[]
+  responses: Message[]
 ): OpenAIResponseRequest["input"] => {
   if (!responses) return [];
-  return responses.map(({ role, _type, text, contentArray }) => {
+  return responses.map(({ role, _type, content, contentArray }) => {
+    const validRole =
+      (role as "user" | "assistant" | "system" | "developer") || "user";
     if (_type === "contentArray" && contentArray) {
       const textContent = contentArray.filter(
-        (c): c is Response & { _type: "text" } => c._type === "text"
+        (c): c is Message & { _type: "message" } => c._type === "message"
       );
       const imageContent = contentArray.filter(
-        (c): c is Response & { _type: "image" } => c._type === "image"
+        (c): c is Message & { _type: "image" } => c._type === "image"
       );
       const fileContent = contentArray.filter(
-        (c): c is Response & { _type: "file" } => c._type === "file"
+        (c): c is Message & { _type: "file" } => c._type === "file"
       );
 
       if (textContent.length > 0) {
         return {
-          role,
+          role: validRole,
           content: textContent.map((c) => ({
             type: "input_text",
-            text: c.text ?? "",
+            text: c.content ?? "",
           })),
         };
       }
       if (imageContent.length > 0) {
         return {
-          role,
+          role: validRole,
           content: imageContent.map((c) => ({
             type: "input_image",
             detail: (c.detail ?? "auto") as "high" | "low" | "auto",
@@ -178,23 +180,23 @@ const toExternalRequest = (
       }
       if (fileContent.length > 0) {
         return {
-          role,
+          role: validRole,
           content: fileContent.map((c) => ({
             type: "input_file",
-            file_data: c.file_data,
+            file_data: c.content,
             file_id: c.file_id,
             filename: c.filename,
           })),
         };
       }
       return {
-        role,
+        role: validRole,
         content: "",
       };
     }
     return {
-      role,
-      content: text || "",
+      role: validRole,
+      content: content || "",
     };
   });
 };
@@ -300,6 +302,7 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
     convertRequestInputToMessages,
     toExternalRequest
   )
+  .map("instructions", "instructions")
   .map("temperature", "temperature")
   .map("top_p", "top_p")
   .map("n", "n")
@@ -375,7 +378,9 @@ export const mapOpenAIResponse = ({
   return {
     schema,
     preview: {
-      concatenatedMessages: schema.response?.messages || [],
+      concatenatedMessages: (schema.request.messages ?? []).concat(
+        schema.response?.messages || []
+      ),
       request: JSON.stringify(request),
       response: JSON.stringify(response),
       fullRequestText: () => JSON.stringify(request),

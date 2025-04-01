@@ -1534,6 +1534,26 @@
 						"type": "number",
 						"format": "double"
 					},
+					"detail": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					},
+					"file_id": {
+						"type": "string"
+					},
+					"file_data": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"input_image",
+							"input_text",
+							"input_file"
+						]
+					},
 					"audio_data": {
 						"type": "string"
 					},
@@ -1558,8 +1578,24 @@
 					"name": {
 						"type": "string"
 					},
-					"role": {
+					"instruction": {
 						"type": "string"
+					},
+					"role": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"enum": [
+									"user",
+									"assistant",
+									"system",
+									"developer"
+								]
+							}
+						]
 					},
 					"id": {
 						"type": "string"
@@ -1570,6 +1606,7 @@
 							"functionCall",
 							"function",
 							"image",
+							"file",
 							"message",
 							"autoInput",
 							"contentArray",
@@ -1689,6 +1726,10 @@
 						"nullable": true
 					},
 					"prompt": {
+						"type": "string",
+						"nullable": true
+					},
+					"instructions": {
 						"type": "string",
 						"nullable": true
 					},
@@ -2020,6 +2061,10 @@
 						"type": "object"
 					},
 					"model": {
+						"type": "string",
+						"nullable": true
+					},
+					"instructions": {
 						"type": "string",
 						"nullable": true
 					},

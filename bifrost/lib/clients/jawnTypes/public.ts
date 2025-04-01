@@ -819,6 +819,12 @@ export interface components {
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** @enum {string} */
+      type?: "input_image" | "input_text" | "input_file";
       audio_data?: string;
       image_url?: string;
       timestamp?: string;
@@ -826,10 +832,11 @@ export interface components {
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       name?: string;
-      role?: string;
+      instruction?: string;
+      role?: string | ("user" | "assistant" | "system" | "developer");
       id?: string;
       /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
+      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;
@@ -862,6 +869,7 @@ export interface components {
       model?: string;
       messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
+      instructions?: string | null;
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
@@ -951,6 +959,7 @@ export interface components {
         heliconeMessage: unknown;
       };
       model?: string | null;
+      instructions?: string | null;
       responses?: components["schemas"]["Response"][] | null;
       messages?: components["schemas"]["Message"][] | null;
     };

@@ -1,10 +1,11 @@
 import React from "react";
-import { PromptMessage } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, PromptMessage } from "@/packages/llm-mapper/types";
 import { SingleChat } from "./single/singleChat";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageGroupProps {
   messages: PromptMessage[];
+  mappedRequest: MappedLLMRequest;
   expandedChildren: { [key: string]: boolean };
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>
@@ -23,6 +24,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
   isHeliconeTemplate,
   autoInputs,
   mode,
+  mappedRequest,
 }) => {
   return (
     <>
@@ -33,6 +35,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({
           <SingleChat
             key={index}
             message={message}
+            mappedRequest={mappedRequest}
             index={index}
             isLast={index === messages.length - 1}
             expandedProps={{
