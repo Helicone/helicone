@@ -343,7 +343,6 @@ export type TablesAndViews = {
   experiment: FilterLeafExperiment;
   experiment_hypothesis_run: ExperimentHypothesisRunScoreValue;
   score_value: FilterLeafScoreValue;
-  request_response_search: FilterLeafRequestResponseSearch;
 
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;

@@ -241,22 +241,6 @@ const whereKeyMappings: KeyMappings = {
       scores_column: "request_response_rmt.scores",
     })(filter, placeValueSafely);
   },
-  request_response_search: (filter, placeValueSafely) => {
-    const keys = Object.keys(filter);
-    if (keys.length !== 1) {
-      throw new Error("Invalid filter, only one key is allowed");
-    }
-    const key = keys[0];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter[key as keyof typeof filter]!
-    );
-
-    return {
-      column: `request_response_search.${key}`,
-      operator: "vector-contains",
-      value: placeValueSafely(value),
-    };
-  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -328,7 +312,7 @@ const havingKeyMappings: KeyMappings = {
       session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
-  request_response_search: NOT_IMPLEMENTED,
+
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
