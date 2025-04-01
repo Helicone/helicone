@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRightIcon, SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -17,12 +18,30 @@ import {
 import { getPopularModels, createComparisonPath } from "@/lib/models/registry";
 
 export default function ComparisonContent() {
-  const [firstModel, setFirstModel] = useState("");
-  const [secondModel, setSecondModel] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Get models from our registry adapter instead of hardcoding them
+  // Get models from our registry adapter for initialization
   const popularModels = getPopularModels();
+
+  // Find the Claude model ID by looking for "claude" in the name
+  const claudeModelId =
+    popularModels.find(
+      (m) =>
+        m.name.toLowerCase().includes("claude") &&
+        m.name.toLowerCase().includes("sonnet")
+    )?.id || "";
+
+  // Find the GPT-4o model ID to ensure it exists
+  const gpt4oModelId =
+    popularModels.find(
+      (m) =>
+        m.name.toLowerCase().includes("gpt-4o") ||
+        m.name.toLowerCase().includes("gpt4o")
+    )?.id || "";
+
+  // Pre-select models if they exist in the registry
+  const [firstModel, setFirstModel] = useState(gpt4oModelId);
+  const [secondModel, setSecondModel] = useState(claudeModelId);
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   const filteredModels = popularModels.filter(
     (model) =>
@@ -33,28 +52,37 @@ export default function ComparisonContent() {
   const isCompareDisabled =
     !firstModel || !secondModel || firstModel === secondModel;
 
+  // Handle navigation when both models are selected
+  useEffect(() => {
+    // Disabled automatic navigation since we now have the button
+    // This useEffect can be used for other initialization if needed
+  }, [firstModel, secondModel, router]);
+
+  // Handle second model selection (also used for card clicks)
+  const handleSecondModelSelect = (modelId: string) => {
+    if (modelId === firstModel) return; // Prevent selecting the same model
+    setSecondModel(modelId);
+  };
+
+  // Handle model card clicks with the same logic
+  const handleModelCardClick = (modelId: string) => {
+    if (!firstModel) {
+      setFirstModel(modelId);
+    } else if (firstModel !== modelId) {
+      // If first model is set and this is a different model, set as second and navigate
+      handleSecondModelSelect(modelId);
+    } else if (firstModel === modelId) {
+      setFirstModel("");
+    } else if (secondModel === modelId) {
+      setSecondModel("");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white px-4 py-12 flex flex-col items-center">
-      {/* Header badges - match Hero.tsx style */}
-      <div className="flex flex-wrap gap-x-12 gap-y-4 items-center mb-8">
-        <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
-          <p>Backed by</p>
-          <img
-            src="/static/home/yc-logo.webp"
-            alt="Y Combinator"
-            className="w-24 h-auto"
-          />
-        </div>
-        <img
-          src="/static/home/productoftheday.webp"
-          alt="Product of the Day"
-          className="w-32 h-auto"
-        />
-      </div>
-
       {/* Main heading - match Hero.tsx style */}
-      <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-5xl font-semibold mb-4">
+      <div className="text-center max-w-3xl mx-auto pt-24">
+        <h1 className="text-4xl font-semibold mb-4">
           LLM Leaderboard <span className="text-brand">2025</span>
         </h1>
 
@@ -63,158 +91,131 @@ export default function ComparisonContent() {
           thousands of applications.
         </p>
 
-        <Link href="#comparison">
-          <button className="bg-brand py-3 px-6 text-base font-normal flex gap-3 rounded-lg text-white self-start items-center mx-auto">
-            Start comparing models
-            <ArrowRightIcon size={16} strokeWidth={2.33} />
+        {/* Simple model selector right here */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 max-w-2xl mx-auto">
+          <div className="w-full sm:w-[44%]">
+            <Select value={firstModel} onValueChange={setFirstModel}>
+              <SelectTrigger className="w-full h-10 text-sm">
+                <SelectValue placeholder="Select first model" />
+              </SelectTrigger>
+              <SelectContent>
+                {popularModels.map((model) => (
+                  <SelectItem
+                    key={model.id}
+                    value={model.id}
+                    disabled={model.id === secondModel}
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={model.logo}
+                        alt={`${model.provider} logo`}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                      <span>{model.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex-shrink-0 text-md px-2 font-bold">VS</div>
+
+          <div className="w-full sm:w-[44%]">
+            <Select value={secondModel} onValueChange={handleSecondModelSelect}>
+              <SelectTrigger className="w-full h-10 text-sm">
+                <SelectValue placeholder="Select second model" />
+              </SelectTrigger>
+              <SelectContent>
+                {popularModels.map((model) => (
+                  <SelectItem
+                    key={model.id}
+                    value={model.id}
+                    disabled={model.id === firstModel}
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={model.logo}
+                        alt={`${model.provider} logo`}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                      <span>{model.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Compare button */}
+        <Link
+          href={
+            !isCompareDisabled
+              ? createComparisonPath(firstModel, secondModel)
+              : "#"
+          }
+          className="inline-block mb-6"
+        >
+          <button
+            disabled={isCompareDisabled}
+            className={`bg-brand py-2 px-6 text-base font-medium flex gap-2 rounded-lg text-white items-center ${
+              isCompareDisabled ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            Compare Models <ArrowRightIcon size={16} strokeWidth={2.33} />
           </button>
         </Link>
       </div>
 
-      {/* Model selector card */}
+      {/* Full model selector card */}
       <div id="comparison" className="max-w-4xl mx-auto mt-12">
         <Card className="p-6 md:p-8 border border-gray-200 rounded-lg">
-          <h2 className="text-xl font-semibold mb-6">
-            Select models to compare
-          </h2>
+          <h2 className="text-xl font-semibold mb-6">Browse all models</h2>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                First Model
-              </label>
-              <Select value={firstModel} onValueChange={setFirstModel}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {popularModels.map((model) => (
-                    <SelectItem
-                      key={model.id}
-                      value={model.id}
-                      disabled={model.id === secondModel}
-                    >
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={model.logo}
-                          alt={`${model.provider} logo`}
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
-                        <span>{model.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Second Model
-              </label>
-              <Select value={secondModel} onValueChange={setSecondModel}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {popularModels.map((model) => (
-                    <SelectItem
-                      key={model.id}
-                      value={model.id}
-                      disabled={model.id === firstModel}
-                    >
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={model.logo}
-                          alt={`${model.provider} logo`}
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
-                        <span>{model.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="flex items-center justify-between mb-4">
+            <div className="relative">
+              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="text"
+                placeholder="Search models..."
+                className="pl-8 w-[200px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <Link
-              href={
-                !isCompareDisabled
-                  ? createComparisonPath(firstModel, secondModel)
-                  : "#"
-              }
-              passHref
-            >
-              <button
-                disabled={isCompareDisabled}
-                className={`bg-brand py-2 px-6 text-base font-normal flex gap-2 rounded-lg text-white items-center ${
-                  isCompareDisabled ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {filteredModels.map((model) => (
+              <div
+                key={model.id}
+                className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleModelCardClick(model.id)}
               >
-                Compare Models{" "}
-                <ArrowRightIcon className="h-4 w-4" strokeWidth={2.33} />
-              </button>
-            </Link>
-          </div>
-
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">Or browse all models</h3>
-              <div className="relative">
-                <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  type="text"
-                  placeholder="Search models..."
-                  className="pl-8 w-[200px]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {filteredModels.map((model) => (
                 <div
-                  key={model.id}
-                  className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => {
-                    if (!firstModel) {
-                      setFirstModel(model.id);
-                    } else if (!secondModel && firstModel !== model.id) {
-                      setSecondModel(model.id);
-                    } else if (firstModel === model.id) {
-                      setFirstModel("");
-                    } else if (secondModel === model.id) {
-                      setSecondModel("");
-                    }
-                  }}
+                  className={`flex items-center gap-2 ${
+                    firstModel === model.id || secondModel === model.id
+                      ? "text-brand font-medium"
+                      : ""
+                  }`}
                 >
-                  <div
-                    className={`flex items-center gap-2 ${
-                      firstModel === model.id || secondModel === model.id
-                        ? "text-brand font-medium"
-                        : ""
-                    }`}
-                  >
-                    <img
-                      src={model.logo}
-                      alt={`${model.provider} logo`}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="text-sm font-medium truncate">
-                        {model.name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {model.provider}
-                      </div>
+                  <img
+                    src={model.logo}
+                    alt={`${model.provider} logo`}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div>
+                    <div className="text-sm font-medium truncate">
+                      {model.name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {model.provider}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
