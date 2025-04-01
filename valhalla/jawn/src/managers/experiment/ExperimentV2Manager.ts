@@ -737,14 +737,14 @@ export class ExperimentV2Manager extends BaseManager {
 
     try {
       // Create placeholders for the IN clause
-      const placeholders = inputRecordIds.map((_, i) => `$${i + 3}`).join(", ");
+      const placeholders = inputRecordIds.map((_, i) => `$${i + 1}`).join(", ");
 
       const result = await dbExecute(
         `UPDATE prompt_input_record
          SET experiment_id = null
          WHERE id IN (${placeholders})
-         AND experiment_id = $1`,
-        [experimentId, ...inputRecordIds]
+         AND experiment_id = $${inputRecordIds.length + 1}`,
+        [...inputRecordIds, experimentId]
       );
 
       if (result.error) {
