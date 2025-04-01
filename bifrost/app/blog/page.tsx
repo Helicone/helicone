@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Helicone Blog | AI Development Insights & Best Practices",
@@ -55,15 +56,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-          name: author,
-          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-        }))
+            name: author,
+            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+          }))
         : [
-          {
-            name: metadata.author || "",
-            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-          },
-        ],
+            {
+              name: metadata.author || "",
+              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+            },
+          ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -98,10 +99,16 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       </div>
 
       <div className="w-full h-fit flex flex-col space-y-2 text-left px-1 md:px-0">
-        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">{blog.description}</p>
+        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">
+          {blog.description}
+        </p>
         <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -129,6 +136,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           priority={true}
+          loading="eager"
           style={{ objectFit: "cover" }}
           className="rounded-lg transform group-hover:scale-105 transition-transform duration-300"
         />
@@ -140,11 +148,17 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
           </span>
         </div>
 
-        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">{blog.description}</p>
+        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">
+          {blog.description}
+        </p>
 
         <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -188,10 +202,10 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-    dynmaicEntry: {
-      folderName: string;
+      dynmaicEntry: {
+        folderName: string;
+      };
     };
-  };
 
 const blogContent: BlogStructure[] = [
   {
@@ -859,20 +873,37 @@ const blogContent: BlogStructure[] = [
 
 const Blog = async () => {
   return (
-    <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
-      <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-          {blogContent.map((blog, i) => {
-            if (i === 0) {
-              return (
-                <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full" key={i}>
-                  <FeaturedBlogPost blog={blog} />
-                </div>
-              );
-            } else {
-              return <RegularBlogPost blog={blog} key={i} />;
+    <div className="w-full bg-white min-h-screen">
+      <div className="container mx-auto flex flex-col items-center justify-start py-6 lg:py-12 px-4 md:px-6">
+        <div className="w-full h-full flex flex-col gap-4 md:gap-8 max-w-5xl">
+          <div className="flex flex-col w-full space-y-2">
+            <h1 className="text-3xl lg:text-4xl font-bold">Helicone Blog</h1>
+            <p className="text-slate-500">
+              The latest AI news, industry trends, and developer insights from
+              Helicone
+            </p>
+          </div>
+
+          <Suspense
+            fallback={
+              <div className="w-full h-72 bg-slate-100 animate-pulse rounded-xl"></div>
             }
-          })}
+          >
+            <FeaturedBlogPost blog={blogContent[0]} />
+          </Suspense>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {blogContent.slice(1).map((blog, i) => (
+              <Suspense
+                key={i}
+                fallback={
+                  <div className="w-full h-64 bg-slate-100 animate-pulse rounded-xl"></div>
+                }
+              >
+                <RegularBlogPost blog={blog} />
+              </Suspense>
+            ))}
+          </div>
         </div>
       </div>
     </div>
