@@ -46,17 +46,21 @@ const Prototype = () => {
                 alt={openedPage}
                 width={1000}
                 height={500}
+                quality={100}
                 className="w-full h-full object-contain"
+                priority
               />
             </div>
           </div>
           <div className="block lg:hidden">
             <Image
-              src="/static/home/dashboard_with_sidebar.webp"
+              src="/static/home/mobile/dashboard_with_sidebar.webp"
               alt="dashboard"
-              width={600}
-              height={300}
+              width={1200}
+              height={600}
+              quality={90}
               className="w-full h-full object-contain"
+              priority
             />
           </div>
         </div>

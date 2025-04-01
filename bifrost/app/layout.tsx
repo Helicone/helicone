@@ -61,6 +61,21 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.google-analytics.com" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.helicone.ai" />
+
+        <link
+          rel="preload"
+          href="/static/home/mobile/dashboard_with_sidebar.webp"
+          as="image"
+          type="image/webp"
+          media="(max-width: 1024px)"
+        />
+        <link
+          rel="preload"
+          href="/static/home/dashboard.webp"
+          as="image"
+          type="image/webp"
+          media="(min-width: 1025px)"
+        />
       </Head>
       <PHProvider>
         <body>
