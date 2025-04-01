@@ -2,20 +2,11 @@ import { useHasAccess } from "@/hooks/useHasAccess";
 import { FREE_TIER_CONFIG, LimitConfig } from "@/lib/freeTierLimits";
 import { FeatureId, SubfeatureId } from "@/lib/features";
 
-// Define base interface for all limit results
 export interface BaseLimitResult {
-  // Whether the user has access to this feature (via paid plan)
   hasAccess: boolean;
-  // How many more items the user can create
   remainingItems: number;
-
-  // Message to show when prompting for upgrade
   upgradeMessage: string;
-
-  // The maximum number of items allowed on the free tier
   freeLimit: number;
-
-  // Whether the user can create more items
   canCreate: boolean;
 }
 
@@ -37,7 +28,6 @@ export function useFeatureLimit(
   const hasAccess = useHasAccess(feature);
   let config: LimitConfig | null = null;
 
-  // Determine if we're checking a feature or subfeature
   if (subfeature) {
     config =
       FREE_TIER_CONFIG.features[feature]?.subfeatures?.[subfeature] ?? null;
@@ -45,7 +35,6 @@ export function useFeatureLimit(
     config = FREE_TIER_CONFIG.features[feature]?.main ?? null;
   }
 
-  // If no config exists, allow unlimited
   if (!config) {
     const baseResult = {
       hasAccess,
@@ -55,7 +44,6 @@ export function useFeatureLimit(
       canCreate: true,
     };
 
-    // Return appropriate type based on if subfeature was provided
     if (subfeature) {
       return {
         ...baseResult,

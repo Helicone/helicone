@@ -39,24 +39,20 @@ export function humanReadableNumber(num: number): string {
 }
 
 export function formatLatency(ms: number): string {
-  if (ms === 0) return "N/A";
+  if (ms === undefined || ms === null) return "-";
 
-  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
-  const hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-  const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+  // Round to 1 decimal place for precision
+  ms = Math.round(ms * 10) / 10;
 
-  if (days > 0) {
-    return `${days}d ${hours}h`;
-  } else if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${((ms % (60 * 1000)) / 1000).toFixed(0)}s`;
-  } else if (ms >= 1000) {
-    return `${(ms / 1000).toFixed(2)}s`;
-  } else if (ms < 1) {
-    return `${(ms * 1000).toFixed(2)}μs`;
+  if (ms < 1) {
+    // For very small values, show microseconds
+    return `${(ms * 1000).toFixed(0)}μs`;
+  } else if (ms < 1000) {
+    // For milliseconds
+    return `${ms.toFixed(1)}ms`;
   } else {
-    return `${ms.toFixed(2)}ms`;
+    // For seconds
+    return `${(ms / 1000).toFixed(2)}s`;
   }
 }
 
