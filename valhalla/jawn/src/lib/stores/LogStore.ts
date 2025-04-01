@@ -18,7 +18,6 @@ const requestColumns = new pgp.helpers.ColumnSet(
   [
     "id",
     "auth_hash",
-    "body",
     "path",
     "provider",
     "created_at",
@@ -48,7 +47,6 @@ const onConflictRequest =
 const responseColumns = new pgp.helpers.ColumnSet(
   [
     "id",
-    "body",
     "request",
     "created_at",
     { name: "helicone_org_id", def: null },
