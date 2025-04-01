@@ -1,5 +1,3 @@
-"use client";
-
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { ChevronRightIcon } from "lucide-react";

@@ -1,22 +1,30 @@
-import Banner from "@/components/home/Banner";
-import BigDashboard from "@/components/home/BigDashboard";
-import Companies from "@/components/home/Companies";
-import CTA from "@/components/home/CTA";
-import Evaluate from "@/components/home/Evaluate";
-import Experiment from "@/components/home/Experiment";
-import FAQ from "@/components/home/FAQ";
 import Hero from "@/components/home/Hero";
-import LLMLifecycle from "@/components/home/LLMLifecycle";
-import Log from "@/components/home/Log";
-import OpenSource from "@/components/home/OpenSource";
-import Production from "@/components/home/Production";
-import Prototype from "@/components/home/Prototype";
-import Quote from "@/components/home/Quote";
-import Quote2 from "@/components/home/Quote2";
-import Quote3 from "@/components/home/Quote3";
-import Stats from "@/components/home/Stats";
 import { Layout } from "@/app/components/Layout";
 import Integrations from "@/components/templates/landing/integrations";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
+const Companies = dynamic(() => import("@/components/home/Companies"));
+const CTA = dynamic(() => import("@/components/home/CTA"));
+const Evaluate = dynamic(() => import("@/components/home/Evaluate"));
+const Experiment = dynamic(() => import("@/components/home/Experiment"));
+const FAQ = dynamic(() => import("@/components/home/FAQ"));
+const LLMLifecycle = dynamic(() => import("@/components/home/LLMLifecycle"));
+const Log = dynamic(() => import("@/components/home/Log"));
+const OpenSource = dynamic(() => import("@/components/home/OpenSource"));
+const Production = dynamic(() => import("@/components/home/Production"));
+const Prototype = dynamic(() => import("@/components/home/Prototype"));
+const Quote = dynamic(() => import("@/components/home/Quote"));
+const Quote2 = dynamic(() => import("@/components/home/Quote2"));
+const Quote3 = dynamic(() => import("@/components/home/Quote3"));
+const Stats = dynamic(() => import("@/components/home/Stats"));
+
+const LoadingSection = ({ height = "h-96" }: { height?: string }) => (
+  <div
+    className={`w-full bg-gray-100 animate-pulse rounded-lg ${height}`}
+  ></div>
+);
 
 export default async function Home() {
   const response = await fetch(
@@ -26,6 +34,7 @@ export default async function Home() {
       headers: {
         "Content-Type": "application/json",
       },
+      next: { revalidate: 3600 },
     }
   );
   // console.log(await response.text());
@@ -44,22 +53,56 @@ export default async function Home() {
         <div className="max-w-8xl mx-auto">
           {/* <Banner /> */}
           <Hero />
-          <Prototype />
-          <Companies />
-          <Quote />
-          <Integrations />
-          <Quote2 />
-          <LLMLifecycle />
-          <Log />
-          <Evaluate />
-          <Experiment />
-          <Production />
-          <BigDashboard />
-          <Stats totalValuesData={totalValuesData} />
-          <OpenSource />
-          <FAQ />
-          <Quote3 />
-          <CTA />
+
+          {/* Wrap sections below the fold in Suspense */}
+          <Suspense fallback={<LoadingSection height="h-[30rem]" />}>
+            <Prototype />
+          </Suspense>
+          <Suspense fallback={<LoadingSection height="h-24" />}>
+            <Companies />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Quote />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Integrations />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Quote2 />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <LLMLifecycle />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Log />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Evaluate />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Experiment />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Production />
+          </Suspense>
+          <Suspense fallback={<LoadingSection height="h-[40rem]" />}>
+            <BigDashboard />
+          </Suspense>
+          <Suspense fallback={<LoadingSection height="h-48" />}>
+            <Stats totalValuesData={totalValuesData} />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <OpenSource />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <FAQ />
+          </Suspense>
+          <Suspense fallback={<LoadingSection />}>
+            <Quote3 />
+          </Suspense>
+          <Suspense fallback={<LoadingSection height="h-64" />}>
+            <CTA />
+          </Suspense>
         </div>
       </main>
     </Layout>
