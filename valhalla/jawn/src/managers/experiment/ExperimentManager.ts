@@ -1,12 +1,9 @@
 // src/users/usersService.ts
-import {
-  ExperimentRun,
-  NewExperimentParams,
-} from "../../controllers/public/experimentController";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/shared/result";
+import { NewExperimentParams } from "../../controllers/public/experimentController";
+import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { BaseManager } from "../BaseManager";
+import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { Result, err, ok } from "../../lib/shared/result";
 import {
   Experiment,
   ExperimentDatasetRow,
@@ -16,10 +13,8 @@ import {
   IncludeExperimentKeys,
   Score,
 } from "../../lib/stores/experimentStore";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { runOriginalExperiment } from "../../lib/experiment/run";
+import { BaseManager } from "../BaseManager";
 import { PromptManager } from "../prompt/PromptManager";
-import { Database } from "../../lib/db/database.types";
 
 export interface CreateExperimentTableParams {
   datasetId: string;
@@ -39,13 +34,21 @@ export class ExperimentManager extends BaseManager {
   }
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
-    const experiment = await supabaseServer.client
-      .from("experiment_v2")
-      .select("*")
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
-    return !!experiment.data;
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM experiment_v2
+         WHERE id = $1
+         AND organization = $2
+         LIMIT 1`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      return !!(result.data && result.data.length > 0);
+    } catch (error) {
+      console.error("Error checking experiment access:", error);
+      return false;
+    }
   }
 
   async getExperimentById(
@@ -78,88 +81,104 @@ export class ExperimentManager extends BaseManager {
     providerKeyId: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
   }): Promise<Result<{ hypothesisId: string }, string>> {
-    const hasAccess = await supabaseServer.client
-      .from("experiment_v2")
-      .select("id", { count: "exact" })
-      .eq("id", params.experimentId)
-      .eq("organization", this.authParams.organizationId);
+    try {
+      // Check if user has access to the experiment
+      const hasAccess = await dbExecute<{ count: number }>(
+        `SELECT COUNT(*) as count
+         FROM experiment_v2
+         WHERE id = $1
+         AND organization = $2`,
+        [params.experimentId, this.authParams.organizationId]
+      );
 
-    if (hasAccess.count === 0) {
-      return err("Experiment not found");
+      if (hasAccess.error || !hasAccess.data || hasAccess.data[0].count === 0) {
+        return err("Experiment not found");
+      }
+
+      const result = await dbExecute<{ id: string }>(
+        `
+        INSERT INTO experiment_v2_hypothesis (
+          prompt_version,
+          model,
+          status,
+          experiment_v2,
+          provider_key
+        )
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id
+        `,
+        [
+          params.promptVersion,
+          params.model,
+          params.status,
+          params.experimentId,
+          params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
+        ]
+      );
+
+      if (result.error || !result.data) {
+        return err(result.error);
+      }
+
+      return ok({ hypothesisId: result.data[0].id });
+    } catch (error) {
+      console.error("Error creating experiment hypothesis:", error);
+      return err(String(error));
     }
-
-    const result = await dbExecute<{ id: string }>(
-      `
-      INSERT INTO experiment_v2_hypothesis (
-        prompt_version,
-        model,
-        status,
-        experiment_v2,
-        provider_key
-      )
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id
-      `,
-      [
-        params.promptVersion,
-        params.model,
-        params.status,
-        params.experimentId,
-        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
-      ]
-    );
-
-    if (result.error || !result.data) {
-      return err(result.error);
-    }
-
-    return ok({ hypothesisId: result.data[0].id });
   }
 
   async addNewExperiment(
     params: NewExperimentParams
   ): Promise<Result<{ experimentId: string }, string>> {
-    // TODO ensure that params.sourcePromptVersion matches the provided dataset for now...
+    try {
+      // Create the experiment
+      const experiment = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_v2 (dataset, organization, meta)
+         VALUES ($1, $2, $3)
+         RETURNING id`,
+        [params.datasetId, this.authParams.organizationId, params.meta || null]
+      );
 
-    const experiment = await supabaseServer.client
-      .from("experiment_v2")
-      .insert({
-        dataset: params.datasetId,
-        organization: this.authParams.organizationId,
-        meta: params.meta,
-      })
-      .select("*")
-      .single();
+      if (
+        experiment.error ||
+        !experiment.data ||
+        experiment.data.length === 0
+      ) {
+        return err("Failed to create experiment: " + experiment.error);
+      }
 
-    if (!experiment.data?.id) {
-      return err("Failed to create experiment " + experiment.error?.message);
+      const experimentId = experiment.data[0].id;
+
+      // Create the hypothesis
+      const result = await dbExecute(
+        `
+        INSERT INTO experiment_v2_hypothesis (
+          prompt_version,
+          model,
+          status,
+          experiment_v2,
+          provider_key
+        )
+        VALUES ($1, $2, $3, $4, $5)
+        `,
+        [
+          params.promptVersion,
+          params.model,
+          "PENDING",
+          experimentId,
+          params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
+        ]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok({ experimentId });
+    } catch (error) {
+      console.error("Error adding new experiment:", error);
+      return err(String(error));
     }
-
-    const result = await dbExecute(
-      `
-      INSERT INTO experiment_v2_hypothesis (
-        prompt_version,
-        model,
-        status,
-        experiment_v2,
-        provider_key
-      )
-      VALUES ($1, $2, $3, $4, $5)
-      `,
-      [
-        params.promptVersion,
-        params.model,
-        "PENDING",
-        experiment.data.id,
-        params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
-      ]
-    );
-
-    if (result.error) {
-      return err(result.error);
-    }
-
-    return ok({ experimentId: experiment.data.id });
   }
 
   async createNewExperimentTable(

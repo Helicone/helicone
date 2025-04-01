@@ -34,7 +34,7 @@ export class ScoreStore extends BaseStore {
     super(organizationId);
   }
 
-  public async putScoresIntoSupabase(
+  public async putScoresIntoDB(
     requestId: string,
     scores: Score[],
     evaluatorId?: string

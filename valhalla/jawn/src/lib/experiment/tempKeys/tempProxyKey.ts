@@ -1,11 +1,7 @@
-import generateApiKey from "generate-api-key";
-import { supabaseServer } from "../../db/supabase";
-import { Result, err, ok } from "../../shared/result";
-import { uuid } from "uuidv4";
-import { dbExecute } from "../../shared/db/dbExecute";
-import { hashAuth } from "../../../utils/hash";
-import { BaseTempKey } from "./baseTempKey";
 import { KeyManager } from "../../../managers/apiKeys/KeyManager";
+import { dbExecute } from "../../shared/db/dbExecute";
+import { Result, err, ok } from "../../shared/result";
+import { BaseTempKey } from "./baseTempKey";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -68,14 +64,18 @@ class TempProxyKey implements BaseTempKey {
       return;
     }
 
-    // Direct database access for cleanup
-    return await supabaseServer.client
-      .from("helicone_proxy_keys")
-      .delete({
-        count: "exact",
-      })
-      .eq("id", this.proxyKeyId)
-      .eq("experiment_use", true);
+    try {
+      // Direct database access for cleanup
+      return await dbExecute(
+        `DELETE FROM helicone_proxy_keys
+         WHERE id = $1
+         AND experiment_use = true`,
+        [this.proxyKeyId]
+      );
+    } catch (error) {
+      console.error("Error cleaning up proxy key:", error);
+      return { error: String(error) };
+    }
   }
 
   async with<T>(callback: (proxyKey: string) => Promise<T>): Promise<T> {
@@ -102,20 +102,26 @@ export async function generateProxyKey(
 ): Promise<Result<TempProxyKey, string>> {
   // Get provider key details to determine organization ID if not provided
   if (!organizationId) {
-    // We can't use KeyManager.getDecryptedProviderKeyById because it's private
-    // Use direct database query instead
-    const key = await supabaseServer.client
-      .from("decrypted_provider_keys")
-      .select("org_id")
-      .eq("id", providerKeyId)
-      .eq("soft_delete", false)
-      .single();
+    try {
+      // Use direct database query to get organization ID
+      const keyResult = await dbExecute<{ org_id: string }>(
+        `SELECT org_id
+         FROM decrypted_provider_keys
+         WHERE id = $1 
+         AND soft_delete = false
+         LIMIT 1`,
+        [providerKeyId]
+      );
 
-    if (key.error || !key.data?.org_id) {
-      return err("Provider key not found or missing organization ID");
+      if (keyResult.error || !keyResult.data || keyResult.data.length === 0) {
+        return err("Provider key not found or missing organization ID");
+      }
+
+      organizationId = keyResult.data[0].org_id;
+    } catch (error) {
+      console.error("Error getting provider key details:", error);
+      return err(String(error));
     }
-
-    organizationId = key.data.org_id;
   }
 
   // Create the proxy key using the updated createProxyKey function

@@ -1,9 +1,8 @@
 import type { Log, KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
-import { AuthParams } from "../lib/db/supabase";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { randomUUID } from "crypto";
-
+import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
 export class TraceManager {
   private s3Client: S3Client;
   constructor() {

@@ -4370,7 +4370,7 @@
 				],
 				"type": "object"
 			},
-			"ResultSuccess_unknown_": {
+			"ResultSuccess_any_": {
 				"properties": {
 					"data": {},
 					"error": {
@@ -4406,196 +4406,23 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+			"ResultSuccess_unknown_": {
 				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"statusText": {
-						"type": "string"
-					},
+					"data": {},
 					"error": {
 						"type": "number",
 						"enum": [
 							null
 						],
 						"nullable": true
-					},
-					"data": {
-						"properties": {
-							"organization": {
-								"type": "string"
-							},
-							"org_role": {
-								"type": "string"
-							},
-							"member": {
-								"type": "string"
-							},
-							"governance_limits": {
-								"$ref": "#/components/schemas/Json"
-							},
-							"created_at": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"organization",
-							"org_role",
-							"member",
-							"governance_limits",
-							"created_at"
-						],
-						"type": "object"
-					},
-					"count": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
 					}
 				},
 				"required": [
-					"status",
-					"statusText",
-					"error",
 					"data",
-					"count"
+					"error"
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"PostgrestError": {
-				"description": "Error format\n\n{@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}",
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"message": {
-						"type": "string"
-					},
-					"stack": {
-						"type": "string"
-					},
-					"details": {
-						"type": "string"
-					},
-					"hint": {
-						"type": "string"
-					},
-					"code": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"name",
-					"message",
-					"details",
-					"hint",
-					"code"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PostgrestResponseFailure": {
-				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"statusText": {
-						"type": "string"
-					},
-					"error": {
-						"$ref": "#/components/schemas/PostgrestError"
-					},
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"count": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"status",
-					"statusText",
-					"error",
-					"data",
-					"count"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
-					},
-					{
-						"$ref": "#/components/schemas/PostgrestResponseFailure"
-					}
-				]
-			},
-			"PostgrestResponseSuccess__governance_settings-Json__": {
-				"properties": {
-					"status": {
-						"type": "number",
-						"format": "double"
-					},
-					"statusText": {
-						"type": "string"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"data": {
-						"properties": {
-							"governance_settings": {
-								"$ref": "#/components/schemas/Json"
-							}
-						},
-						"required": [
-							"governance_settings"
-						],
-						"type": "object"
-					},
-					"count": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					}
-				},
-				"required": [
-					"status",
-					"statusText",
-					"error",
-					"data",
-					"count"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"PostgrestSingleResponse__governance_settings-Json__": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/PostgrestResponseSuccess__governance_settings-Json__"
-					},
-					{
-						"$ref": "#/components/schemas/PostgrestResponseFailure"
-					}
-				]
 			},
 			"KeyPermissions": {
 				"type": "string",
@@ -10309,7 +10136,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+											"$ref": "#/components/schemas/ResultSuccess_any_"
 										},
 										{
 											"$ref": "#/components/schemas/ResultError_unknown_"
@@ -10371,7 +10198,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										}
+									]
 								}
 							}
 						}
@@ -10406,7 +10240,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										}
+									]
 								}
 							}
 						}
@@ -10432,7 +10273,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PostgrestSingleResponse__governance_settings-Json__"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										}
+									]
 								}
 							}
 						}

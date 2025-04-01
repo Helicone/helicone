@@ -1,4 +1,5 @@
-import { AuthParams, supabaseServer } from "../lib/db/supabase";
+import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
+import { dbExecute } from "../lib/shared/db/dbExecute";
 import { ok, err, Result } from "../lib/shared/result";
 import { BaseManager } from "./BaseManager";
 import {
@@ -16,52 +17,99 @@ export class IntegrationManager extends BaseManager {
   public async createIntegration(
     params: IntegrationCreateParams
   ): Promise<Result<{ id: string }, string>> {
-    const { data, error } = await supabaseServer.client
-      .from("integrations")
-      .insert({
-        organization_id: this.authParams.organizationId,
-        integration_name: params.integration_name,
-        settings: params.settings,
-        active: params.active ?? false,
-      })
-      .select("id")
-      .single();
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `INSERT INTO integrations (organization_id, integration_name, settings, active)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          this.authParams.organizationId,
+          params.integration_name,
+          params.settings,
+          params.active ?? false,
+        ]
+      );
 
-    if (error) {
-      return err(error.message);
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Failed to create integration");
+      }
+
+      return ok({ id: result.data[0].id });
+    } catch (error) {
+      console.error("Error creating integration:", error);
+      return err(String(error));
     }
-
-    return ok({ id: data.id });
   }
 
   public async getIntegrations(): Promise<Result<Array<Integration>, string>> {
-    const { data, error } = await supabaseServer.client
-      .from("integrations")
-      .select("id, integration_name, active, settings")
-      .eq("organization_id", this.authParams.organizationId);
+    try {
+      const result = await dbExecute<Integration>(
+        `SELECT id, integration_name, active, settings
+         FROM integrations
+         WHERE organization_id = $1`,
+        [this.authParams.organizationId]
+      );
 
-    if (error) {
-      return err(error.message);
+      if (result.error) {
+        return err(result.error ?? "Failed to get integrations");
+      }
+
+      return ok(result.data ?? []);
+    } catch (error) {
+      console.error("Error getting integrations:", error);
+      return err(String(error));
     }
-
-    return ok(data as Integration[]);
   }
 
   public async updateIntegration(
     integrationId: string,
     params: IntegrationUpdateParams
   ): Promise<Result<null, string>> {
-    const { error } = await supabaseServer.client
-      .from("integrations")
-      .update(params)
-      .eq("id", integrationId)
-      .eq("organization_id", this.authParams.organizationId);
+    try {
+      // Build the SET part of the query dynamically based on provided params
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
 
-    if (error) {
-      return err(error.message);
+      if (params.integration_name !== undefined) {
+        updates.push(`integration_name = $${paramIndex++}`);
+        values.push(params.integration_name);
+      }
+
+      if (params.settings !== undefined) {
+        updates.push(`settings = $${paramIndex++}`);
+        values.push(params.settings);
+      }
+
+      if (params.active !== undefined) {
+        updates.push(`active = $${paramIndex++}`);
+        values.push(params.active);
+      }
+
+      if (updates.length === 0) {
+        return ok(null); // Nothing to update
+      }
+
+      // Add the WHERE condition parameters
+      values.push(integrationId, this.authParams.organizationId);
+
+      const result = await dbExecute(
+        `UPDATE integrations
+         SET ${updates.join(", ")}
+         WHERE id = $${paramIndex++}
+         AND organization_id = $${paramIndex}`,
+        values
+      );
+
+      if (result.error) {
+        return err(result.error ?? "Failed to update integration");
+      }
+
+      return ok(null);
+    } catch (error) {
+      console.error("Error updating integration:", error);
+      return err(String(error));
     }
-
-    return ok(null);
   }
 
   public async getIntegration(integrationId: string): Promise<
@@ -75,25 +123,30 @@ export class IntegrationManager extends BaseManager {
       string
     >
   > {
-    const { data, error } = await supabaseServer.client
-      .from("integrations")
-      .select("id, integration_name, settings, active")
-      .eq("id", integrationId)
-      .eq("organization_id", this.authParams.organizationId)
-      .single();
-
-    if (error) {
-      return err(error.message);
-    }
-
-    return ok(
-      data as {
+    try {
+      const result = await dbExecute<{
         id: string;
         integration_name: string;
         settings: Record<string, any>;
         active: boolean;
+      }>(
+        `SELECT id, integration_name, settings, active
+         FROM integrations
+         WHERE id = $1
+         AND organization_id = $2
+         LIMIT 1`,
+        [integrationId, this.authParams.organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Integration not found");
       }
-    );
+
+      return ok(result.data[0]);
+    } catch (error) {
+      console.error("Error getting integration:", error);
+      return err(String(error));
+    }
   }
 
   public async getIntegrationByType(integrationType: string): Promise<
@@ -107,48 +160,58 @@ export class IntegrationManager extends BaseManager {
       string
     >
   > {
-    const { data, error } = await supabaseServer.client
-      .from("integrations")
-      .select("id, integration_name, settings, active")
-      .eq("organization_id", this.authParams.organizationId)
-      .eq("integration_name", integrationType)
-      .single();
-
-    if (error) {
-      return err(error.message);
-    }
-
-    return ok(
-      data satisfies {
+    try {
+      const result = await dbExecute<{
         id: string;
         integration_name: string;
         settings: Json;
         active: boolean;
+      }>(
+        `SELECT id, integration_name, settings, active
+         FROM integrations
+         WHERE organization_id = $1
+         AND integration_name = $2
+         LIMIT 1`,
+        [this.authParams.organizationId, integrationType]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Integration not found");
       }
-    );
+
+      return ok(result.data[0]);
+    } catch (error) {
+      console.error("Error getting integration by type:", error);
+      return err(String(error));
+    }
   }
 
   public async getSlackChannels(): Promise<
     Result<Array<{ id: string; name: string }>, string>
   > {
-    const { data, error } = await supabaseServer.client
-      .from("integrations")
-      .select("id, integration_name, settings, active")
-      .eq("integration_name", "slack")
-      .eq("organization_id", this.authParams.organizationId);
-
-    if (error) {
-      return err(error.message);
-    }
-
-    if (!data || data.length === 0) {
-      return err("No data found");
-    }
-
-    const slackSettings = data[0].settings as Record<string, any>;
-    let channels: Array<{ id: string; name: string }> = [];
-    let nextCursor: string | null = null;
     try {
+      const result = await dbExecute<{
+        id: string;
+        integration_name: string;
+        settings: Record<string, any>;
+        active: boolean;
+      }>(
+        `SELECT id, integration_name, settings, active
+         FROM integrations
+         WHERE integration_name = 'slack'
+         AND organization_id = $1
+         LIMIT 1`,
+        [this.authParams.organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("No Slack integration found");
+      }
+
+      const slackSettings = result.data[0].settings as Record<string, any>;
+      let channels: Array<{ id: string; name: string }> = [];
+      let nextCursor: string | null = null;
+
       const response = await fetch(
         "https://slack.com/api/conversations.list?limit=1000&types=public_channel,private_channel&exclude_archived=true",
         {

@@ -1,7 +1,6 @@
 import { Body, Controller, Post, Request, Route, Tags } from "tsoa";
 import { Result, err, ok } from "../../lib/shared/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { supabaseServer } from "../../lib/db/supabase";
 import { getHeliconeSetting } from "../../lib/stores/settintgsStore";
 import api from "gpt-tokenizer";
 

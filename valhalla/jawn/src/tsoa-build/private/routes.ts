@@ -1394,7 +1394,7 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"log":{"ref":"Log","required":true},"heliconeMeta":{"ref":"HeliconeMeta","required":true},"authorization":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_unknown_": {
+    "ResultSuccess_any_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"any","required":true},
@@ -1412,63 +1412,13 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+    "ResultSuccess_unknown_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
+            "data": {"dataType":"any","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"organization":{"dataType":"string","required":true},"org_role":{"dataType":"string","required":true},"member":{"dataType":"string","required":true},"governance_limits":{"ref":"Json","required":true},"created_at":{"dataType":"string","required":true}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestError": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string","required":true},
-            "message": {"dataType":"string","required":true},
-            "stack": {"dataType":"string"},
-            "details": {"dataType":"string","required":true},
-            "hint": {"dataType":"string","required":true},
-            "code": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseFailure": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"ref":"PostgrestError","required":true},
-            "data": {"dataType":"enum","enums":[null],"required":true},
-            "count": {"dataType":"enum","enums":[null],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__governance_settings-Json__": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"governance_settings":{"ref":"Json","required":true}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__governance_settings-Json__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__governance_settings-Json__"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "KeyPermissions": {
