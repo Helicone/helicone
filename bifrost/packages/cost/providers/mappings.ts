@@ -6,7 +6,6 @@ import { costs as azureCosts } from "./azure";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
-import { costs as googleCosts } from "./google";
 import { costs as groqCosts } from "./groq";
 import { costs as mistralCosts } from "./mistral";
 import { costs as nebiusCosts } from "./nebius";
@@ -23,6 +22,7 @@ import {
   costs as togetherAICompletionLlamaCosts,
 } from "./togetherai/completion";
 import { costs as xCosts } from "./x";
+import { googleProvider } from "./google";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -188,7 +188,8 @@ export const providers: {
   {
     pattern: googleapis,
     provider: "GOOGLE",
-    costs: googleCosts,
+    costs: googleProvider.costs,
+    modelDetails: googleProvider.modelDetails,
   },
   {
     pattern: openRouter,
