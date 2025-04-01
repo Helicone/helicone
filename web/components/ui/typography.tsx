@@ -14,8 +14,12 @@ export const typography = {
   // Body text
   p: "font-sans text-base leading-7 font-normal text-[hsl(var(--foreground))]",
   lead: "font-sans text-xl leading-7 font-normal text-[hsl(var(--muted-foreground))]",
-  large: "font-sans text-lg leading-7 font-light text-[hsl(var(--foreground))]",
-  small: "font-sans text-sm leading-4 font-light text-[hsl(var(--foreground))]",
+  large:
+    "font-sans text-lg leading-7 font-normal text-[hsl(var(--foreground))]",
+  small:
+    "font-sans text-sm leading-4 font-normal text-[hsl(var(--foreground))]",
+  xsmall:
+    "font-sans text-xs leading-4 font-normal text-[hsl(var(--foreground))]",
   muted: "font-sans text-sm font-normal text-[hsl(var(--muted-foreground))]",
   xsmall:
     "font-sans text-xs leading-4 font-light text-[hsl(var(--foreground))]",
