@@ -12,7 +12,6 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { supabaseServer } from "../../lib/db/supabase";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import { Result, err, ok } from "../../lib/shared/result";
 import {
@@ -31,6 +30,7 @@ import {
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export type ExperimentFilterBranch = {
   left: ExperimentFilterNode;
@@ -72,37 +72,43 @@ export class ExperimentController extends Controller {
       string
     >
   > {
-    const result = await supabaseServer.client
-      .from("experiment_v2")
-      .insert({
-        dataset: requestBody.datasetId,
-        organization: request.authParams.organizationId,
-        meta: requestBody.metadata,
-      })
-      .select("*")
-      .single();
+    const result = await dbExecute<{
+      id: string;
+    }>(
+      `INSERT INTO experiment_v2 
+       (dataset, organization, meta) 
+       VALUES ($1, $2, $3) 
+       RETURNING id`,
+      [
+        requestBody.datasetId,
+        request.authParams.organizationId,
+        requestBody.metadata,
+      ]
+    );
 
-    // const result = await promptManager.getPrompts(requestBody);
-    if (result.error || !result.data) {
+    if (result.error || !result.data || result.data.length === 0) {
       this.setStatus(500);
       console.error(result.error);
-      return err(result.error.message);
+      return err(result.error ?? "Failed to create experiment");
     } else {
-      await supabaseServer.client.from("experiment_table").insert({
-        experiment_id: result.data.id,
-        name: "Experiment Table",
-        organization_id: request.authParams.organizationId,
-        metadata: {
-          datasetId: requestBody.datasetId,
-        },
+      const experimentId = result.data[0].id;
+
+      await dbExecute(
+        `INSERT INTO experiment_table 
+         (experiment_id, name, organization_id, metadata) 
+         VALUES ($1, $2, $3, $4)`,
+        [
+          experimentId,
+          "Experiment Table",
+          request.authParams.organizationId,
+          { datasetId: requestBody.datasetId },
+        ]
+      );
+
+      this.setStatus(200);
+      return ok({
+        experimentId: experimentId,
       });
-      this.setStatus(200); // set return status 201
-      return {
-        data: {
-          experimentId: result.data.id,
-        },
-        error: null,
-      };
     }
   }
 
@@ -598,13 +604,19 @@ export class ExperimentController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const result = await supabaseServer.client
-      .from("experiment_v2")
-      .update({ meta: requestBody.meta })
-      .eq("id", requestBody.experimentId)
-      .eq("organization", request.authParams.organizationId);
+    const result = await dbExecute(
+      `UPDATE experiment_v2 
+       SET meta = $1 
+       WHERE id = $2 AND organization = $3 
+       RETURNING id`,
+      [
+        requestBody.meta,
+        requestBody.experimentId,
+        request.authParams.organizationId,
+      ]
+    );
 
-    if (result.error || !result.data) {
+    if (result.error || !result.data || result.data.length === 0) {
       this.setStatus(500);
       console.error(result.error);
       return err(result.error);

@@ -1,6 +1,6 @@
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../cache/kvCache";
-import { supabaseServer } from "../db/supabase";
+import { dbExecute } from "../shared/db/dbExecute";
 import { ok, Result } from "../shared/result";
 import { err } from "../shared/result";
 
@@ -12,15 +12,24 @@ export async function getHeliconeSetting(
   return await cacheResultCustom(
     "getHeliconeSetting" + settingName,
     async () => {
-      const result = await supabaseServer.client
-        .from("helicone_settings")
-        .select("*")
-        .eq("name", settingName)
-        .single();
-      if (result.error) {
-        return err(result.error.message);
+      try {
+        const result = await dbExecute<{ settings: any }>(
+          `SELECT settings
+           FROM helicone_settings
+           WHERE name = $1
+           LIMIT 1`,
+          [settingName]
+        );
+
+        if (result.error || !result.data || result.data.length === 0) {
+          return err(result.error ?? "Setting not found");
+        }
+
+        return ok(result.data[0]?.settings?.toString() ?? "");
+      } catch (error) {
+        console.error("Error fetching Helicone setting:", error);
+        return err(String(error));
       }
-      return ok(result.data?.settings?.toString() ?? "");
     },
     kvCache
   );

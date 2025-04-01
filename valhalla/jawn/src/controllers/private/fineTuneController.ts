@@ -12,10 +12,11 @@ import {
   Tags,
 } from "tsoa";
 import { postHogClient } from "../../lib/clients/postHogClient";
-import { supabaseServer } from "../../lib/routers/withAuth";
 import { getRequests } from "../../lib/stores/request/request";
 import { FineTuningManager } from "../../managers/FineTuningManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { Result, err, ok } from "../../lib/shared/result";
 
 // src/users/usersController.ts
 import { hasAccessToFineTune } from "./datasetController";
@@ -66,19 +67,30 @@ export class FineTuneMainController extends Controller {
         error: "No requests found",
       };
     }
-    const { data: key, error: keyError } = await supabaseServer.client
-      .from("decrypted_provider_keys")
-      .select("decrypted_provider_key")
-      .eq("id", providerKeyId)
-      .eq("org_id", request.authParams.organizationId)
-      .single();
-    if (keyError || !key || !key.decrypted_provider_key) {
+
+    const keyResult = await dbExecute<{
+      decrypted_provider_key: string;
+    }>(
+      `SELECT decrypted_provider_key FROM decrypted_provider_keys 
+       WHERE id = $1 AND org_id = $2`,
+      [providerKeyId, request.authParams.organizationId]
+    );
+
+    if (
+      keyResult.error ||
+      !keyResult.data ||
+      keyResult.data.length === 0 ||
+      !keyResult.data[0].decrypted_provider_key
+    ) {
       this.setStatus(500);
       return {
         error: "No Provider Key found",
       };
     }
-    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+
+    const fineTuningManager = new FineTuningManager(
+      keyResult.data[0].decrypted_provider_key
+    );
     try {
       const fineTuneJob = await fineTuningManager.createFineTuneJob(
         metrics.data,
@@ -104,36 +116,48 @@ export class FineTuneMainController extends Controller {
           org_id: request.authParams.organizationId,
         },
       });
-      const dataset = await supabaseServer.client
-        .from("finetune_dataset")
-        .insert({
-          name: `Automated Dataset for ${fineTuneJob.data.id}`,
-          filters: JSON.stringify([]),
-          organization_id: request.authParams.organizationId,
-        })
-        .select("*")
-        .single();
-      if (dataset.error || !dataset.data) {
+
+      const datasetResult = await dbExecute<{ id: string }>(
+        `INSERT INTO finetune_dataset
+         (name, filters, organization_id)
+         VALUES ($1, $2, $3)
+         RETURNING id`,
+        [
+          `Automated Dataset for ${fineTuneJob.data.id}`,
+          JSON.stringify([]),
+          request.authParams.organizationId,
+        ]
+      );
+
+      if (
+        datasetResult.error ||
+        !datasetResult.data ||
+        datasetResult.data.length === 0
+      ) {
         this.setStatus(500);
         return {
-          error: dataset.error.message,
+          error: datasetResult.error || "Failed to create dataset",
         };
       }
-      const fineTunedJobId = await supabaseServer.client
-        .from("finetune_job")
-        .insert({
-          dataset_id: dataset.data.id,
-          finetune_job_id: fineTuneJob.data.id,
-          provider_key_id: providerKeyId,
-          status: "created",
-          organization_id: request.authParams.organizationId,
-        })
-        .select("*")
-        .single();
+
+      const fineTuneJobResult = await dbExecute<{ id: string }>(
+        `INSERT INTO finetune_job
+         (dataset_id, finetune_job_id, provider_key_id, status, organization_id)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id`,
+        [
+          datasetResult.data[0].id,
+          fineTuneJob.data.id,
+          providerKeyId,
+          "created",
+          request.authParams.organizationId,
+        ]
+      );
+
       return {
         success: true,
         data: {
-          fineTuneJob: fineTunedJobId.data?.id ?? "",
+          fineTuneJob: fineTuneJobResult.data?.[0]?.id ?? "",
           url: url,
         },
       };
@@ -168,41 +192,65 @@ export class FineTuneMainController extends Controller {
         events: any;
       }
   > {
-    const { data: fineTuneJob, error: fineTuneJobError } =
-      await supabaseServer.client
-        .from("finetune_job")
-        .select("*")
-        .eq("id", jobId ?? "")
-        .eq("organization_id", request.authParams.organizationId)
-        .single();
-    if (!fineTuneJob || fineTuneJobError) {
+    const fineTuneJobResult = await dbExecute<{
+      id: string;
+      provider_key_id: string;
+      finetune_job_id: string;
+    }>(
+      `SELECT id, provider_key_id, finetune_job_id
+       FROM finetune_job
+       WHERE id = $1 AND organization_id = $2`,
+      [jobId ?? "", request.authParams.organizationId]
+    );
+
+    if (
+      fineTuneJobResult.error ||
+      !fineTuneJobResult.data ||
+      fineTuneJobResult.data.length === 0
+    ) {
       this.setStatus(404);
       return {
         error: "No fine tune job found",
       };
     }
-    const { data: key, error: keyError } = await supabaseServer.client
-      .from("decrypted_provider_keys")
-      .select("decrypted_provider_key")
-      .eq("id", fineTuneJob.provider_key_id)
-      .eq("org_id", request.authParams.organizationId)
-      .single();
-    if (keyError || !key || !key.decrypted_provider_key) {
+
+    const fineTuneJob = fineTuneJobResult.data[0];
+
+    const keyResult = await dbExecute<{
+      decrypted_provider_key: string;
+    }>(
+      `SELECT decrypted_provider_key
+       FROM decrypted_provider_keys
+       WHERE id = $1 AND org_id = $2`,
+      [fineTuneJob.provider_key_id, request.authParams.organizationId]
+    );
+
+    if (
+      keyResult.error ||
+      !keyResult.data ||
+      keyResult.data.length === 0 ||
+      !keyResult.data[0].decrypted_provider_key
+    ) {
       this.setStatus(404);
       return {
         error: "No key found",
       };
     }
-    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+
+    const fineTuningManager = new FineTuningManager(
+      keyResult.data[0].decrypted_provider_key
+    );
     const fineTuneJobData = await fineTuningManager.getFineTuneJob(
       fineTuneJob.finetune_job_id
     );
+
     if (fineTuneJobData.error || !fineTuneJobData.data) {
       this.setStatus(500);
       return {
         error: "Failed to get fine tune job",
       };
     }
+
     this.setStatus(200);
     return fineTuneJobData.data;
   }
