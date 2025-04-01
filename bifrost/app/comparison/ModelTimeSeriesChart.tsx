@@ -2,7 +2,8 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { ChartTooltip } from "@/components/ui/chart";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { formatLatency, formatPercentage } from "../utils/formattingUtils";
-import { MetricType } from "./MetricComparisonCard";
+
+export type MetricType = "latency" | "ttft" | "errorRate" | "successRate";
 
 interface ModelTimeSeriesChartProps {
   models: components["schemas"]["Model"][];
