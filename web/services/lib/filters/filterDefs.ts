@@ -229,14 +229,6 @@ type PropertyWithResponseV1ToOperators = {
 export type FilterLeafPropertyWithResponseV1 =
   SingleKey<PropertyWithResponseV1ToOperators>;
 
-type RequestResponseSearchToOperators = {
-  request_body_vector: SingleKey<VectorOperators>;
-  response_body_vector: SingleKey<VectorOperators>;
-};
-
-export type FilterLeafRequestResponseSearch =
-  SingleKey<RequestResponseSearchToOperators>;
-
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -292,7 +284,6 @@ export type TablesAndViews = {
   request: FilterLeafRequest;
   feedback: FilterLeafFeedback;
   properties_table: FilterLeafPropertiesTable;
-  request_response_search: FilterLeafRequestResponseSearch;
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseVersioned;
