@@ -46,7 +46,6 @@ export type RequestFilterNode =
       | "response"
       | "properties"
       | "values"
-      | "request_response_search"
       | "cache_hits"
       | "request_response_rmt"
       | "sessions_request_response_rmt"
