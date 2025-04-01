@@ -1,5 +1,6 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const Quote3 = () => {
   return (
@@ -14,15 +15,19 @@ const Quote3 = () => {
             I pretty much use it for all my AI apps now.
           </h2>
           <div className="flex items-end gap-6">
-            <img
+            <Image
               src="/static/home/hassan.webp"
               alt="Hassan El Mghari"
+              width={48}
+              height={48}
               className="w-12 h-12"
             />
             <div className="flex flex-col gap-2">
-              <img
+              <Image
                 src="/static/togetherai.webp"
-                alt="qawolf"
+                alt="Together AI"
+                width={112}
+                height={28}
                 className="w-28 pb-2"
               />
               <h4 className="text-[17px] sm:text-xl font-medium whitespace-nowrap">
