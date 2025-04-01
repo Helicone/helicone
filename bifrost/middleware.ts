@@ -167,7 +167,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(jpg|jpeg|gif|png|svg|webp)).*)",
     "/career",
     "/developer",
     "/features/customer-portal",
