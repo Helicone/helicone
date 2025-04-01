@@ -79,9 +79,18 @@ export default function ComparisonContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-12 flex flex-col items-center">
+    <div className="min-h-screen bg-white px-4 py-4 flex flex-col items-center">
+      {/* LLM Leaderboard Image */}
+      <div className="container mx-auto max-w-4xl pb-2 text-center">
+        <img
+          src="/static/llmleaderboard.webp"
+          alt="LLM Leaderboard"
+          className="mx-auto max-w-[150px] h-auto"
+        />
+      </div>
+
       {/* Main heading - match Hero.tsx style */}
-      <div className="text-center max-w-3xl mx-auto pt-24">
+      <div className="text-center max-w-3xl mx-auto">
         <h1 className="text-4xl font-semibold mb-4">
           LLM Leaderboard <span className="text-brand">2025</span>
         </h1>
@@ -159,7 +168,7 @@ export default function ComparisonContent() {
         >
           <button
             disabled={isCompareDisabled}
-            className={`bg-brand py-2 px-6 text-base font-medium flex gap-2 rounded-lg text-white items-center ${
+            className={`bg-brand py-2 px-6 text-sm font-medium flex gap-2 rounded-md items-center text-white ${
               isCompareDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
