@@ -75,6 +75,12 @@ const nextConfig = {
       },
     ];
   },
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+    modern: true,
+    modernBrowsers: true,
+  },
 };
 
 const withMDX = createMDX({
