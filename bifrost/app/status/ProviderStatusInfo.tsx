@@ -44,6 +44,7 @@ export function ProviderStatusInfo({
   timeFrame,
   onTimeFrameChange,
 }: ProviderStatusInfoProps) {
+  // If provider is null, return nothing - loading state will be handled by parent
   if (!provider) return null;
 
   const formatTimestamp = (timestamp: string) => {
@@ -95,6 +96,25 @@ export function ProviderStatusInfo({
     return null;
   };
 
+  // Ensure we have metrics and timeSeriesData before proceeding
+  if (
+    !provider.metrics ||
+    !provider.metrics.timeSeriesData ||
+    provider.metrics.timeSeriesData.length === 0
+  ) {
+    return (
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="text-center p-8">
+          <h2 className="text-xl font-semibold mb-2">No data available</h2>
+          <p className="text-gray-500">
+            Unable to retrieve metrics for{" "}
+            {formatProviderName(provider.providerName)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = provider.metrics.timeSeriesData.map((data) => ({
     timestamp: data.timestamp,
     originalTimestamp: data.timestamp,
@@ -103,8 +123,11 @@ export function ProviderStatusInfo({
     latency: data.averageLatency,
   }));
 
-  const maxErrorCount = Math.max(...chartData.map((data) => data.errorCount));
-  const maxLatency = Math.max(...chartData.map((data) => data.latency));
+  const maxErrorCount = Math.max(
+    ...chartData.map((data) => data.errorCount || 0),
+    1
+  );
+  const maxLatency = Math.max(...chartData.map((data) => data.latency || 0), 1);
 
   const getXAxisInterval = (chartType: "error" | "latency") => {
     const dataLength = chartData.length;
