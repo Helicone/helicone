@@ -22,8 +22,8 @@ import Image from "next/image";
 
 const IMG_PATH = {
   dashboard: "/static/home/dashboard.webp",
-  requests: "/static/home/requests.png",
-  sessions: "/static/home/sessions.png",
+  requests: "/static/home/requests.webp",
+  sessions: "/static/home/sessions.webp",
 };
 
 const Prototype = () => {
