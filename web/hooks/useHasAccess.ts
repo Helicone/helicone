@@ -11,12 +11,10 @@ export const useHasAccess = (feature: FeatureId) => {
       addons?: { [key in (typeof ADDON_FEATURES)[number]]?: boolean };
     };
 
-    // Handle non-free features first
     if (NON_FREE_FEATURES.includes(feature as any)) {
       return tier !== "free";
     }
 
-    // Handle legacy tiers and team bundle
     if (
       tier === "growth" ||
       tier === "enterprise" ||
