@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button, buttonVariants } from "../ui/button";
+import Image from "next/image";
 
 const IMG_PATH = {
-  dashboard: "/static/home/dashboard.png",
+  dashboard: "/static/home/dashboard.webp",
   requests: "/static/home/requests.png",
   sessions: "/static/home/sessions.png",
 };
@@ -40,17 +41,21 @@ const Prototype = () => {
               setOpenedPage={setOpenedPage}
             />
             <div className="col-span-5">
-              <img
+              <Image
                 src={IMG_PATH[openedPage]}
                 alt={openedPage}
+                width={1000}
+                height={500}
                 className="w-full h-full object-contain"
               />
             </div>
           </div>
           <div className="block lg:hidden">
-            <img
-              src="/static/home/dashboard_with_sidebar.png"
+            <Image
+              src="/static/home/dashboard_with_sidebar.webp"
               alt="dashboard"
+              width={600}
+              height={300}
               className="w-full h-full object-contain"
             />
           </div>

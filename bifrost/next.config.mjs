@@ -35,11 +35,23 @@ const nextConfig = {
     ];
   },
   images: {
-    domains: [
-      "api.producthunt.com",
-      "dailybaileyai.com",
-      "i0.wp.com",
-      "www.sequoiacap.com",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.producthunt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dailybaileyai.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i0.wp.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.sequoiacap.com",
+      },
     ],
   },
   async headers() {

@@ -5,7 +5,6 @@ import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
 import ContributorsImg from "@/public/static/home/community.webp";
 import DeployImg from "@/public/static/deploy-cube.png";
-import CostCalculatorImg from "@/public/static/home/cost-calculator.svg";
 import Link from "next/link";
 
 const CostCalculatorSvg = () => (

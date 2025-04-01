@@ -47,27 +47,20 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <Head>
-        <Head>
-          <link rel="shortcut icon" href="/favicon.ico" />
-          <link rel="icon" href="/static/logo.png" />
-          <link rel="icon" href="/favicon-16x16.png" sizes="16x16" />
-          <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
-          <link
-            rel="apple-touch-icon"
-            href="/apple-touch-icon.png"
-            sizes="180x180"
-          />
-
-          {/* Preconnect to critical third-party domains - per Lighthouse report */}
-          <link rel="preconnect" href="https://www.google-analytics.com" />
-          <link rel="preconnect" href="https://www.googletagmanager.com" />
-        </Head>
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" href="/static/logo.png" />
+        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" />
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
         <link
-          rel="icon"
-          href="/favicon.ico"
-          type="image/x-icon"
-          sizes="16x16"
+          rel="apple-touch-icon"
+          href="/apple-touch-icon.png"
+          sizes="180x180"
         />
+
+        {/* Preconnect to critical third-party domains - per Lighthouse report */}
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.helicone.ai" />
       </Head>
       <PHProvider>
         <body>
@@ -85,15 +78,15 @@ export default async function RootLayout({
               __html: `!function(){var reb2b=window.reb2b=window.reb2b||[];if(reb2b.invoked)return;reb2b.invoked=true;reb2b.methods=["identify","collect"];reb2b.factory=function(method){return function(){var args=Array.prototype.slice.call(arguments);args.unshift(method);reb2b.push(args);return reb2b;}};for(var i=0;i<reb2b.methods.length;i++){var key=reb2b.methods[i];reb2b[key]=reb2b.factory(key);}reb2b.load=function(key){var script=document.createElement("script");script.type="text/javascript";script.async=true;script.src="https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"+key+"/LNKLDHM4VMOJ.js.gz";var first=document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script,first);};reb2b.SNIPPET_VERSION="1.0.1";reb2b.load("LNKLDHM4VMOJ");}();`,
             }}
           />
-          {/* Google Analytics - already using proper strategy */}
+          {/* Google Analytics - updated to lazyOnload strategy */}
           <Script
             id="google-analytics"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             src="https://www.googletagmanager.com/gtag/js?id=G-WGDEGPP49F"
           />
           <Script
             id="google-analytics-config"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
               window.dataLayer = window.dataLayer || [];
