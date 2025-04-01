@@ -6,7 +6,7 @@ import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
+import { processStream } from "@/lib/api/llm/process-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
 import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
 import { $assistant, $system, $user } from "@/utils/generate";
@@ -100,7 +100,8 @@ export default function PromptBox({
     generatedText: string;
     start: number;
     end: number;
-    isPending: boolean;
+    isLoading: boolean;
+    abortController?: AbortController;
   } | null>(null);
   const preRef = useRef<HTMLPreElement>(null);
 
@@ -189,20 +190,22 @@ export default function PromptBox({
               $assistant(prompt.prefill),
             ],
             temperature: 0.7,
+            signal: controller.signal,
           },
           { headers: { "x-cancel": "0" } }
         );
 
-        let accumulatedText = "";
-        await readStream(
+        await processStream(
           stream,
-          (chunk: string) => {
-            accumulatedText += chunk;
-            // console.log("Received suggestion:", accumulatedText);
-            dispatch({
-              type: "SET_SUGGESTION",
-              payload: cleanSuggestionIfNeeded(value, accumulatedText),
-            });
+          {
+            initialState: { content: "", reasoning: "", calls: "" },
+            onUpdate: (result) => {
+              // console.log("Received suggestion:", result.content);
+              dispatch({
+                type: "SET_SUGGESTION",
+                payload: cleanSuggestionIfNeeded(value, result.content),
+              });
+            },
           },
           controller.signal
         );
@@ -217,6 +220,9 @@ export default function PromptBox({
           console.error("Error fetching suggestion:", error);
         }
         dispatch({ type: "STOP_STREAMING" });
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+        }
       }
     };
     fetchAndHandleStream();
@@ -499,6 +505,12 @@ export default function PromptBox({
   const handleGeneratedEdit = async (instruction: string) => {
     if (!selection) return;
 
+    // Abort previous edit if any
+    if (pendingEdit?.abortController) {
+      pendingEdit.abortController.abort();
+    }
+    const controller = new AbortController(); // Create new controller
+
     const prompt = performEditPrompt(
       instruction,
       selection.text,
@@ -507,13 +519,13 @@ export default function PromptBox({
     );
 
     try {
-      let generatedText = "";
       setPendingEdit({
         originalText: selection.text,
         generatedText: "",
         start: selection.selectionStart,
         end: selection.selectionEnd,
-        isPending: true,
+        isLoading: true,
+        abortController: controller, // Store controller
       });
 
       const stream = await generateStream(
@@ -527,21 +539,37 @@ export default function PromptBox({
           ],
           temperature: 1,
           stop: ["</edited_target>"],
+          signal: controller.signal, // Pass signal to generateStream
         },
         { headers: { "x-cancel": "0" } }
       );
 
-      await readStream(stream, (chunk: string) => {
-        generatedText += chunk;
-        setPendingEdit((prev) =>
-          prev ? { ...prev, generatedText: generatedText.trim() } : null
-        );
-      });
+      // Use processStream for the edit generation
+      await processStream(
+        stream,
+        {
+          initialState: { content: "", reasoning: "", calls: "" }, // Initial state
+          onUpdate: (result) => {
+            setPendingEdit((prev) =>
+              prev ? { ...prev, generatedText: result.content.trim() } : null
+            );
+          },
+        },
+        controller.signal // Pass signal to processStream
+      );
     } catch (error) {
-      console.error("Error generating edit:", error);
-      setPendingEdit(null);
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("Error generating edit:", error);
+        setPendingEdit(null); // Clear pending edit on non-abort error
+      }
+      // If it was an abort error, pendingEdit might have already been cleared by handleDenyEdit
     } finally {
-      setPendingEdit((prev) => (prev ? { ...prev, isPending: false } : null));
+      // Only set isLoading to false if the controller matches the current pending edit
+      setPendingEdit((prev) =>
+        prev && prev.abortController === controller
+          ? { ...prev, isLoading: false }
+          : prev
+      );
     }
   };
   const handleAcceptEdit = () => {
@@ -568,8 +596,12 @@ export default function PromptBox({
     setPendingEdit(null);
   };
   const handleDenyEdit = () => {
-    setPendingEdit(null);
-    // TODO: Also cancel the generation if ongoing
+    setPendingEdit((prev) => {
+      if (prev?.abortController) {
+        prev.abortController.abort(); // Abort the stream on deny
+      }
+      return null; // Clear pending edit state
+    });
   };
 
   // TOOLBAR: TOOLS
