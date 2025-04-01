@@ -1,0 +1,17 @@
+[package]
+name = "openai-types"
+version = "0.1.0"
+authors = ["OpenAPI Generator team and contributors"]
+description = "The OpenAI REST API. Please see https://platform.openai.com/docs/api-reference for more details."
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true, features = ["base64", "std", "macros"] }
+serde_json = { workspace = true }
+serde_repr = { workspace = true }
+url = { workspace = true }
+reqwest = { workspace = true, features = ["json", "multipart"] }
+thiserror = { workspace = true }
+derive_builder = { workspace = true }
+futures = { workspace = true }

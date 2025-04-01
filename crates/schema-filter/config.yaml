@@ -1,0 +1,8 @@
+providers:
+  openai:
+    - method: post
+      url: /chat/completions
+    - method: post
+      url: /completions
+    - method: post
+      url: /responses

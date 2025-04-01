@@ -1,0 +1,43 @@
+[package]
+name = "llm-proxy"
+version = "0.1.0"
+edition = "2024"
+authors = [ "Thomas Harmon <thomas.alan.harmon@gmail.com>" ]
+
+[package.metadata.release]
+release = false
+
+# https://github.com/rustwasm/wasm-pack/issues/1247
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[lib]
+#crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+openai-types = { workspace = true }
+anthropic-types = { workspace = true }
+
+worker = { workspace = true, features=['http'] }
+worker-macros = { workspace = true, features=['http'] }
+console_error_panic_hook = { version = "0.1.1" }
+http = { workspace = true }
+
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+thiserror = { workspace = true }
+bytes = { workspace = true, features = ['serde'] }
+derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
+indexmap = { workspace = true, features = ['serde'] }
+isocountry = { workspace = true }
+hyper = { workspace = true }
+url = { workspace = true, features = ['serde'] }
+serde = { workspace = true, features = ['derive', 'rc'] }
+serde_with = { workspace = true }
+tower = { workspace = true, features = ['full']}
+http-body-util = { workspace = true }
+rust_decimal = { workspace = true }
+pin-project-lite = "0.2.16"
+futures = { workspace = true }
+tower-http = { workspace = true }

@@ -1,0 +1,20 @@
+[package]
+name = "worker-test"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+llm-proxy = { workspace = true }
+tokio = { workspace = true }
+openai-types = { workspace = true }
+anthropic-types = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+thiserror = { workspace = true }
+http = { workspace = true }
+worker = { workspace = true, features=['http'] }
+futures = { workspace = true }
+http-body-util = { workspace = true }
+bytes = { workspace = true, features = ['serde'] }
