@@ -6,10 +6,7 @@ import {
   Twitter,
   ChevronUp,
   ChevronDown,
-  X,
-  Plus,
   XCircle,
-  ChevronRight,
 } from "lucide-react";
 import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
 import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
@@ -20,19 +17,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
 import { ModelCostCardSkeleton } from "@/components/skeletons/ModelCostCardSkeleton";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { ProviderWithModels } from "./utils";
 
-type ModelPriceCalculatorProps = {
-  model?: string;
-  provider?: string;
-};
-
-type CostData = {
+// Define and export the CostData type
+export type CostData = {
   provider: string;
   model: string;
   inputCostPer1k: number;
@@ -40,6 +32,16 @@ type CostData = {
   inputCost: number;
   outputCost: number;
   totalCost: number;
+};
+
+// Update props to accept initial data AND filter data from server
+type ModelPriceCalculatorProps = {
+  model?: string;
+  provider?: string;
+  initialCostData: CostData[];
+  defaultInputTokens: number;
+  defaultOutputTokens: number;
+  providerWithModels: ProviderWithModels[]; // Add the new prop type
 };
 
 const FilterSection = ({
@@ -52,7 +54,7 @@ const FilterSection = ({
   onRemoveModel,
   onClearAll,
 }: {
-  providers: { provider: string; models: string[] }[];
+  providers: ProviderWithModels[]; // Use the imported type
   selectedProviders: string[];
   selectedModels: string[];
   onAddProvider: (provider: string) => void;
@@ -155,10 +157,19 @@ const FilterSection = ({
 export default function ModelPriceCalculator({
   model,
   provider,
+  initialCostData, // Receive initial data
+  defaultInputTokens,
+  defaultOutputTokens,
+  providerWithModels, // Receive filter data
 }: ModelPriceCalculatorProps) {
-  const [inputTokens, setInputTokens] = useState<string>("100");
-  const [outputTokens, setOutputTokens] = useState<string>("100");
-  const [costData, setCostData] = useState<CostData[]>([]);
+  // Initialize state with props from the server
+  const [inputTokens, setInputTokens] = useState<string>(
+    String(defaultInputTokens || "100")
+  );
+  const [outputTokens, setOutputTokens] = useState<string>(
+    String(defaultOutputTokens || "100")
+  );
+  const [costData, setCostData] = useState<CostData[]>(initialCostData || []);
   const [selectedModelData, setSelectedModelData] = useState<CostData | null>(
     null
   );
@@ -172,8 +183,10 @@ export default function ModelPriceCalculator({
   // Update these state declarations
   const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  // Add loading state
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Start loading as false if initial data is provided
+  const [isLoading, setIsLoading] = useState<boolean>(
+    !initialCostData || initialCostData.length === 0
+  );
 
   function formatCost(cost: number): string {
     if (cost === 0) return "0";
@@ -183,21 +196,26 @@ export default function ModelPriceCalculator({
     return cost.toFixed(7).replace(/\.?0+$/, "");
   }
 
+  // Effect to recalculate costs when USER changes token inputs
   useEffect(() => {
-    const calculateCosts = () => {
-      setIsLoading(true); // Set loading state to true when calculation starts
-
+    const calculateCostsForUpdate = () => {
+      setIsLoading(true);
       const updatedCostData: CostData[] = [];
       const inputTokensNum = parseInt(inputTokens) || 0;
       const outputTokensNum = parseInt(outputTokens) || 0;
 
-      providers.forEach((prov) => {
-        prov.costs?.forEach((modelCost) => {
+      // Re-fetch providers data *within the effect* only when needed for calculation
+      // This assumes `providers` mapping is relatively static and doesn't need constant updates
+      // Alternatively, if costOf/costOfPrompt don't need the full providers map, adjust imports
+      const currentProviders =
+        require("../../packages/cost/providers/mappings").providers;
+
+      currentProviders.forEach((prov: any) => {
+        prov.costs?.forEach((modelCost: any) => {
           const costDetails = costOf({
             model: modelCost.model.value,
             provider: prov.provider,
           });
-
           const totalCost = costOfPrompt({
             model: modelCost.model.value,
             provider: prov.provider,
@@ -210,7 +228,6 @@ export default function ModelPriceCalculator({
           if (costDetails) {
             const inputCostPer1k = costDetails.prompt_token * 1000;
             const outputCostPer1k = costDetails.completion_token * 1000;
-
             const inputCost = (inputTokensNum / 1000) * inputCostPer1k;
             const outputCost = (outputTokensNum / 1000) * outputCostPer1k;
 
@@ -224,20 +241,24 @@ export default function ModelPriceCalculator({
               totalCost: totalCost || 0,
             });
           } else {
+            // Client-side warning
             console.warn(
-              `Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`
+              `[Client Cost Calc] Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`
             );
           }
         });
       });
 
       setCostData(updatedCostData);
-      setIsLoading(false); // Set loading state to false when data is ready
+      setIsLoading(false);
     };
 
-    calculateCosts();
+    if (!isNaN(parseInt(inputTokens)) && !isNaN(parseInt(outputTokens))) {
+      calculateCostsForUpdate();
+    }
   }, [inputTokens, outputTokens]);
 
+  // Effect to find selected model based on URL (remains the same)
   useEffect(() => {
     const urlParts = pathname.split("/");
     const urlProvider = urlParts[urlParts.indexOf("provider") + 1];
@@ -247,14 +268,14 @@ export default function ModelPriceCalculator({
       const decodedModel = decodeURIComponent(urlModel);
       const decodedProvider = decodeURIComponent(urlProvider);
 
-      // First try to find exact match
+      // Use the current costData state (which might be initial or updated)
       let selectedModel = costData.find(
         (data) =>
           data.model.toLowerCase() === decodedModel.toLowerCase() &&
           data.provider.toLowerCase() === decodedProvider.toLowerCase()
       );
 
-      // If not found, check if it's a parent model
+      // Fallback logic remains the same...
       if (!selectedModel) {
         const providerData = providers.find(
           (p) => p.provider.toLowerCase() === decodedProvider.toLowerCase()
@@ -267,7 +288,6 @@ export default function ModelPriceCalculator({
               details.searchTerms[0].toLowerCase() ===
               decodedModel.toLowerCase()
             ) {
-              // Use the first matching model's costs
               const firstMatchModel = details.matches[0];
               selectedModel = costData.find(
                 (data) =>
@@ -309,11 +329,6 @@ export default function ModelPriceCalculator({
 
     return filteredData;
   }, [costData, selectedProviders, selectedModels, sortConfig]);
-
-  // Update these memoized values
-  const uniqueProviders = useMemo(() => {
-    return Array.from(new Set(costData.map((data) => data.provider))).sort();
-  }, [costData]);
 
   const handleAddProvider = (provider: string) => {
     setSelectedProviders((prev) => [...prev, provider]);
@@ -384,15 +399,6 @@ Optimize your AI API costs:`;
       <ChevronDown className="inline-block ml-1 w-4 h-4 text-slate-600" />
     );
   };
-
-  const providerWithModels = useMemo(() => {
-    return uniqueProviders.map((provider) => ({
-      provider,
-      models: costData
-        .filter((data) => data.provider === provider)
-        .map((data) => data.model),
-    }));
-  }, [uniqueProviders, costData]);
 
   const handleClearAll = () => {
     setSelectedProviders([]);
