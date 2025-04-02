@@ -10,7 +10,7 @@ import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { Database } from "../../db/database.types";
-
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
   res: NextApiResponse<RetVal>;
@@ -91,6 +91,9 @@ export function withAuth<T>(
       req,
       res,
     });
+
+    const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+
     const { data, error } = await supabaseClient.getUserAndOrg();
     if (error !== null || !data.orgId || !data.userId) {
       res.status(401).json({

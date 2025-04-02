@@ -326,6 +326,9 @@ export interface paths {
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
   };
+  "/v1/alert-banner": {
+    get: operations["GetAlertBanners"];
+  };
   "/v1/admin/feature-flags": {
     post: operations["UpdateFeatureFlags"];
     delete: operations["DeleteFeatureFlag"];
@@ -2146,6 +2149,20 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
+    "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          title: string;
+          message: string;
+          /** Format: double */
+          id: number;
+          created_at: string;
+          active: boolean;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -4100,6 +4117,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetAlertBanners: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_"];
         };
       };
     };

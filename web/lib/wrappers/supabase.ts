@@ -17,14 +17,11 @@ export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
   | GetServerSidePropsContext;
 
-interface SupabaseServerWrapperOptions {
-  supabaseUrl?: string;
-}
 export class SupabaseServerWrapper<T> {
   client: SupabaseClient<Database>;
   ctx: SSRContext<T>;
-  constructor(ctx: SSRContext<T>, options?: SupabaseServerWrapperOptions) {
-    const supabaseUrl = options?.supabaseUrl ?? serverSupabaseUrl ?? "";
+  constructor(ctx: SSRContext<T>) {
+    const supabaseUrl = serverSupabaseUrl ?? "";
     this.ctx = ctx;
     this.client = createServerSupabaseClient<Database>(ctx, {
       supabaseUrl,

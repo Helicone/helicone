@@ -44,10 +44,4 @@ export interface HeliconeAuthClient {
   getUserByEmail: (email: string) => HeliconeUserResult;
 
   getUserById: (userId: string) => HeliconeUserResult;
-
-  updateUser: ({
-    password,
-  }: {
-    password: string;
-  }) => Promise<Result<void, string>>;
 }

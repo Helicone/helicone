@@ -2,6 +2,5 @@ import { SupabaseAuthWrapper } from "../../toImplement/server/SupabaseAuthWrappe
 import { HeliconeAuthClient } from "./HeliconeAuthClient";
 
 export function getHeliconeAuthClient(): HeliconeAuthClient {
-  const authClient = new SupabaseAuthWrapper();
-  return authClient;
+  return new SupabaseAuthWrapper();
 }

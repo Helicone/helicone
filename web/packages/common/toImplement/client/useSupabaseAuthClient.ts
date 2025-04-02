@@ -7,9 +7,10 @@ import {
 import { useMemo } from "react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeUser } from "../../auth/types";
+import posthog from "posthog-js";
 import { err, ok, Result } from "../../result";
 
-class SupabaseAuthClient implements HeliconeAuthClient {
+export class SupabaseAuthClient implements HeliconeAuthClient {
   supabaseClient: SupabaseClient<Database>;
   user?: HeliconeUser;
   constructor(supabaseClient?: SupabaseClient<Database>, user?: HeliconeUser) {
@@ -21,6 +22,10 @@ class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
+    await this.supabaseClient.auth.signOut({ scope: "global" });
+    await this.supabaseClient.auth.signOut({ scope: "others" });
+    await this.supabaseClient.auth.signOut({ scope: "local" });
+    posthog.reset();
     await this.supabaseClient.auth.signOut();
   }
 
@@ -71,7 +76,9 @@ class SupabaseAuthClient implements HeliconeAuthClient {
     options?: { emailRedirectTo?: string };
   }): Promise<Result<void, string>> {
     const { data: user, error: authError } =
-      await this.supabaseClient.auth.resetPasswordForEmail(email, options);
+      await this.supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: options?.emailRedirectTo,
+      });
     if (authError) {
       return err(authError.message);
     }

@@ -1,15 +1,13 @@
-import { NextPageWithLayout } from "../_app";
-import AuthLayout from "../../components/layout/auth/authLayout";
 import { ReactElement } from "react";
+import AuthLayout from "../../components/layout/auth/authLayout";
+import { useOrg } from "../../components/layout/org/organizationContext";
 import DeveloperPage from "../../components/templates/developer/developerPage";
 import WebhooksPage from "../../components/templates/webhooks/webhooksPage";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useFeatureFlags } from "../../services/hooks/featureFlags";
-import { useOrg } from "../../components/layout/org/organizationContext";
+import { NextPageWithLayout } from "../_app";
 import { ContactUsSection } from "../developer/index";
 
 const DeveloperWebhooks: NextPageWithLayout = () => {
-  const user = useUser();
   const orgContext = useOrg();
   const { hasFlag } = useFeatureFlags(
     "webhook_beta",
@@ -18,11 +16,7 @@ const DeveloperWebhooks: NextPageWithLayout = () => {
 
   return (
     <DeveloperPage title="Developer Webhooks">
-      {hasFlag ? (
-        <WebhooksPage user={user!} />
-      ) : (
-        <ContactUsSection feature="webhook" />
-      )}
+      {hasFlag ? <WebhooksPage /> : <ContactUsSection feature="webhook" />}
     </DeveloperPage>
   );
 };
