@@ -35,15 +35,8 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
             alt={alt || ""}
             width={800}
             height={450}
-            className="w-full rounded-md"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
             priority={isHeroImage}
-            // Use loading="lazy" for non-hero images
             loading={isHeroImage ? undefined : "lazy"}
-            style={{
-              maxWidth: "100%",
-              height: "auto",
-            }}
           />
         );
       }
