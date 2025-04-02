@@ -1,6 +1,6 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Evaluator } from "./types";
 
@@ -11,19 +11,13 @@ export function useEvaluatorDetails(
   const org = useOrg();
   const { setNotification } = useNotification();
 
-  const experiments = useQuery({
-    queryKey: ["experiments", evaluator.id],
-    queryFn: () => {
-      const jawn = getJawnClient(org?.currentOrg?.id!);
-      return jawn.GET("/v1/evaluator/{evaluatorId}/experiments", {
-        params: {
-          path: {
-            evaluatorId: evaluator.id,
-          },
-        },
-      });
-    },
-  });
+  const experiments = $JAWN_API.useQuery(
+    "get",
+    "/v1/evaluator/{evaluatorId}/experiments",
+    {
+      params: { path: { evaluatorId: evaluator.id } },
+    }
+  );
 
   const onlineEvaluators = useQuery({
     queryKey: ["onlineEvaluators", evaluator.id],
