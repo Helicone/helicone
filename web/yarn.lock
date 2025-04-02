@@ -8473,6 +8473,18 @@ openapi-fetch@^0.9.3:
   dependencies:
     openapi-typescript-helpers "^0.0.8"
 
+openapi-react-query@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/openapi-react-query/-/openapi-react-query-0.3.1.tgz#d284f8d7e4bbc26f825c5837d74528dad930dd67"
+  integrity sha512-1R3NunDpf6koap0pF4AiUO5Asw4o3GmKrer6r8+2kvfLTxgHNm9vm7F0grZUcKG1tfc9qKrGa5NSvoMqa79DMg==
+  dependencies:
+    openapi-typescript-helpers "^0.0.15"
+
+openapi-typescript-helpers@^0.0.15:
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/openapi-typescript-helpers/-/openapi-typescript-helpers-0.0.15.tgz#96ffa762a5e01ef66a661b163d5f1109ed1967ed"
+  integrity sha512-opyTPaunsklCBpTK8JGef6mfPhLSnyy5a0IN9vKtx3+4aExf+KxEqYwIy3hqkedXIB97u357uLMJsOnm3GVjsw==
+
 openapi-typescript-helpers@^0.0.8:
   version "0.0.8"
   resolved "https://registry.npmjs.org/openapi-typescript-helpers/-/openapi-typescript-helpers-0.0.8.tgz"
