@@ -5,8 +5,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getJawnClient } from "@/lib/clients/jawn";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   PiCaretDownBold,
   PiDownloadBold,
@@ -20,11 +21,6 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
-import {
-  convertPcm16ToWav,
-  isWavFormatted,
-  playWithWebAudio,
-} from "../../../../../utils/audio";
 import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
 
 type MessageType =
@@ -498,47 +494,94 @@ interface AudioPlayerProps {
   isUserMessage?: boolean; // Whether this is a user message (for styling)
   audioFormat?: string; // Format hint from the API (pcm16)
 }
+
+type ConversionStatus = "idle" | "loading" | "success" | "error";
+
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
   audioData,
   isUserMessage = false,
 }) => {
+  const jawn = getJawnClient();
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  // New state for conversion status and error message
+  const [conversionStatus, setConversionStatus] =
+    useState<ConversionStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [convertedWavData, setConvertedWavData] = useState<string | null>(null);
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const progressRef = React.useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (!audioData) {
+      setConversionStatus("idle"); // Reset if audioData is gone
+      return;
+    }
+
+    let isCancelled = false; // Flag to prevent state updates on unmounted component
+
+    const convertAudio = async () => {
+      setConversionStatus("loading");
+      setErrorMessage(null);
+      setConvertedWavData(null); // Clear previous data
+
+      try {
+        const response = await jawn.POST("/v1/audio/convert-to-wav", {
+          body: { audioData },
+        });
+
+        if (isCancelled) return; // Don't update if component unmounted
+
+        if (response.data?.error || !response.data?.data) {
+          throw new Error(
+            response.data?.error || "Conversion failed: No data returned"
+          );
+        }
+        setConvertedWavData(response.data.data);
+        setConversionStatus("success");
+      } catch (err: any) {
+        if (isCancelled) return; // Don't update if component unmounted
+        console.error("Error converting audio:", err);
+        setErrorMessage(`Conversion failed: ${err.message}`);
+        setConversionStatus("error");
+      }
+      // No finally block needed as status covers loading state
+    };
+
+    convertAudio();
+
+    // Cleanup function to prevent state updates on unmount
+    return () => {
+      isCancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioData]); // Only run when audioData changes
+
   const handlePlayPause = () => {
+    // Should only be callable when status is 'success' due to disabled state
+    if (conversionStatus !== "success" || !convertedWavData) return;
+
     if (isPlaying) {
-      // If already playing, just stop
       if (audioRef.current) {
         audioRef.current.pause();
+        // isPlaying state updated by onPause handler
       }
-      setIsPlaying(false);
     } else {
-      // Try standard HTML Audio element first
       if (audioRef.current) {
-        setError(null);
-        audioRef.current.play().catch(() => {
-          console.error("Standard audio playback failed, trying Web Audio API");
-          // If standard playback fails, try Web Audio API
-          playWithWebAudio(
-            audioData,
-            () => setIsPlaying(true),
-            () => setIsPlaying(false),
-            (errorMsg) => setError(errorMsg)
-          );
+        // Reset error specific to playback attempt
+        setErrorMessage(null);
+        audioRef.current.play().catch((err) => {
+          console.error("Standard audio playback failed:", err);
+          const playErrorMsg = `Playback error: ${
+            err.message || "Unknown error"
+          }`;
+          setErrorMessage(playErrorMsg);
+          setConversionStatus("error"); // Set status to error to show the message
+          setIsPlaying(false); // Ensure playing state is false on error
+          // Note: Web Audio API fallback removed for simplicity, can be added back if needed
         });
-        setIsPlaying(true);
-      } else {
-        // Fallback to Web Audio API if audio element not available
-        playWithWebAudio(
-          audioData,
-          () => setIsPlaying(true),
-          () => setIsPlaying(false),
-          (errorMsg) => setError(errorMsg)
-        );
+        // isPlaying state updated by onPlay handler
       }
     }
   };
@@ -556,6 +599,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only allow seeking if playback is possible
+    if (conversionStatus !== "success" || !audioRef.current) return;
     if (progressRef.current && audioRef.current) {
       const rect = progressRef.current.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
@@ -573,36 +618,23 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   // Create audio source from base64 data
   const audioSrc = React.useMemo(() => {
-    if (!audioData) return "";
+    if (conversionStatus !== "success" || !convertedWavData) return "";
 
     try {
-      // First check if data is already in WAV format
-      if (isWavFormatted(audioData)) {
-        return `data:audio/wav;base64,${audioData}`;
-      }
-
-      // Otherwise convert PCM16 to WAV
-      // OpenAI Realtime API uses 24kHz for both user and assistant audio
-      const sampleRate = 24000;
-      const wavData = convertPcm16ToWav(audioData, sampleRate);
-      return `data:audio/wav;base64,${wavData}`;
+      // Data from backend is already WAV
+      return `data:audio/wav;base64,${convertedWavData}`;
     } catch (e) {
-      console.error("Error creating audio source:", e);
-
-      // Fallback: try to use the original data directly
-      try {
-        return `data:audio/wav;base64,${audioData}`;
-      } catch (fallbackError) {
-        console.error("Fallback audio source also failed:", fallbackError);
-        setError("Audio format error");
-        return "";
-      }
+      console.error("Error creating audio source from converted data:", e);
+      // Error should be handled during conversion or playback attempt
+      return "";
     }
-  }, [audioData]);
+  }, [conversionStatus, convertedWavData]);
 
   // Handle download
   const handleDownload = () => {
-    if (!audioData) return;
+    // Only allow download if conversion was successful
+    if (conversionStatus !== "success" || !convertedWavData || !audioSrc)
+      return;
 
     const link = document.createElement("a");
     link.href = audioSrc;
@@ -629,36 +661,46 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     ? "bg-white"
     : "bg-blue-500 dark:bg-blue-400";
 
-  // Handle errors
-  const handleError = () => {
-    const errorMessage = audioRef.current?.error
-      ? `Error code: ${audioRef.current.error.code}, message: ${audioRef.current.error.message}`
+  // Handle <audio> element errors
+  const handleAudioElementError = () => {
+    const err = audioRef.current?.error;
+    const errorMsg = err
+      ? `Audio Error ${err.code}: ${err.message}`
       : "Error loading audio";
 
-    console.error("Audio element error:", errorMessage);
-    setError(errorMessage);
+    console.error("Audio element error:", errorMsg);
+    setErrorMessage(errorMsg);
+    setConversionStatus("error");
     setIsPlaying(false);
+  };
+
+  const canPlay = conversionStatus === "success";
+  const commonDisabledProps = {
+    disabled: !canPlay,
+    className: `flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors ${
+      !canPlay ? "opacity-50 cursor-not-allowed" : ""
+    }`,
   };
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Error Message */}
-      {error && (
+      {/* Status Messages */}
+      {conversionStatus === "loading" && (
+        <div className="text-xs text-slate-300 mb-1">Converting audio...</div>
+      )}
+      {conversionStatus === "error" && errorMessage && (
         <div className="text-xs text-red-500 dark:text-red-400 mb-1">
-          {error}
+          {errorMessage}
         </div>
       )}
 
-      {/* Audio Player */}
-      <div className="flex flex-row items-center justify-center gap-3">
+      {/* Audio Player - Render controls only on success, but keep layout consistent */}
+      <div className="flex flex-row items-center justify-center gap-3 h-8">
         {/* Play/Pause Button */}
         <button
           onClick={handlePlayPause}
-          className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors ${
-            error ? "opacity-50 cursor-not-allowed" : ""
-          }`}
           aria-label={isPlaying ? "Pause" : "Play"}
-          disabled={!!error}
+          {...commonDisabledProps}
         >
           {isPlaying ? (
             <PiPauseBold className="w-4 h-4" />
@@ -670,51 +712,55 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         {/* Progress Bar */}
         <div
           ref={progressRef}
-          className={`w-24 h-2 rounded-full cursor-pointer ${progressBgClass} ${
-            error ? "opacity-50" : ""
+          className={`w-24 h-2 rounded-full ${progressBgClass} ${
+            !canPlay ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
-          onClick={!error ? handleProgressClick : undefined}
+          onClick={handleProgressClick} // Disabled internally by status check
         >
           <div
             className={`h-full rounded-full ${progressFillClass}`}
-            style={{ width: `${(currentTime / duration) * 100}%` }}
+            style={{
+              width: `${canPlay ? (currentTime / duration) * 100 : 0}%`,
+            }}
           />
         </div>
 
         {/* Time */}
         <div className="flex flex-row gap-1 text-xs text-slate-300">
           <span className="font-mono w-10 text-start">
-            {formatTime(currentTime)}
+            {canPlay ? formatTime(currentTime) : "00:00"}
           </span>
           <span className="text-xs text-slate-300">/</span>
           <span className="font-mono w-10 text-end">
-            {duration ? formatTime(duration) : "--:--"}
+            {canPlay && duration ? formatTime(duration) : "--:--"}
           </span>
         </div>
 
         {/* Download Button */}
         <button
           onClick={handleDownload}
-          className={`flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors`}
           aria-label="Download audio"
           title="Download audio"
+          {...commonDisabledProps}
         >
           <PiDownloadBold className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Audio Element */}
-      <audio
-        ref={audioRef}
-        src={audioSrc}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-        onPause={() => setIsPlaying(false)}
-        onPlay={() => setIsPlaying(true)}
-        onError={handleError}
-        className="hidden" // Hide the default audio controls
-      />
+      {/* Audio Element - Rendered only when data is ready */}
+      {canPlay && audioSrc && (
+        <audio
+          ref={audioRef}
+          src={audioSrc}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={() => setIsPlaying(false)}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+          onError={handleAudioElementError}
+          className="hidden" // Hide the default audio controls
+        />
+      )}
     </div>
   );
 };

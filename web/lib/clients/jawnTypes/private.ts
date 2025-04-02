@@ -373,6 +373,9 @@ export interface paths {
   "/v1/admin/top-orgs-over-time": {
     post: operations["GetTopOrgsOverTime"];
   };
+  "/v1/audio/convert-to-wav": {
+    post: operations["ConvertToWav"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -2224,6 +2227,13 @@ Json: JsonObject;
      * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
+    ConvertToWavResponse: {
+      data: string | null;
+      error: string | null;
+    };
+    ConvertToWavRequestBody: {
+      audioData: string;
+    };
   };
   responses: {
   };
@@ -4581,6 +4591,21 @@ export interface operations {
                 organization_id: string;
               }[];
           };
+        };
+      };
+    };
+  };
+  ConvertToWav: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConvertToWavRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConvertToWavResponse"];
         };
       };
     };
