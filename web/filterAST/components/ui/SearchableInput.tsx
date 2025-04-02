@@ -120,16 +120,14 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
               onChange={handleInputChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              onFocus={() =>
-                inputValue && onSearch(inputValue).then(setOptions)
-              }
+              onFocus={() => onSearch(inputValue).then(setOptions)}
               placeholder={placeholder}
               disabled={disabled}
-              className={cn("w-full", className)}
+              className={cn("w-full text-xs h-8 px-2", className)}
             />
             {loading && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
               </div>
             )}
           </div>
@@ -138,20 +136,22 @@ export const SearchableInput: React.FC<SearchableInputProps> = ({
           className="w-[--radix-popover-trigger-width] p-0"
           align="start"
         >
-          <Command>
-            <CommandList>
-              <CommandEmpty>{emptyMessage}</CommandEmpty>
+          <Command className="border border-border">
+            <CommandList className="max-h-[200px] overflow-auto">
+              <CommandEmpty className="text-xs py-2">
+                {emptyMessage}
+              </CommandEmpty>
               <CommandGroup>
                 {options.map((option) => (
                   <CommandItem
                     key={option.value}
                     value={option.value}
                     onSelect={handleSelect}
-                    className="flex items-center"
+                    className="flex items-center text-xs py-1.5"
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 h-3 w-3",
                         value === option.value ? "opacity-100" : "opacity-0"
                       )}
                     />

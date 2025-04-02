@@ -183,30 +183,35 @@ export const EvaluatorForm = ({
       onSubmit={handleSubmit}
       className="max-w-4xl mx-auto space-y-6"
     >
-      {/* Basic Info card */}
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">
-            Evaluator Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-1">
-                Name
-              </label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter evaluator name"
-                className="max-w-md"
-              />
+      {/* Basic Info card - only shown when creating */}
+      {isCreating && (
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">
+              Evaluator Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Name
+                </label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter evaluator name"
+                  className="max-w-md"
+                />
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Prompt card */}
       <Card className="shadow-sm">

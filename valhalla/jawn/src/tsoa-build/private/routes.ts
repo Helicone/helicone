@@ -787,7 +787,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_SessionsRequestResponseRMTToOperators_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"total_cost":{"ref":"Partial_NumberOperators_"},"total_tokens":{"ref":"Partial_NumberOperators_"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"session_session_id":{"ref":"Partial_TextOperators_"},"session_session_name":{"ref":"Partial_TextOperators_"},"session_total_cost":{"ref":"Partial_NumberOperators_"},"session_total_tokens":{"ref":"Partial_NumberOperators_"},"session_prompt_tokens":{"ref":"Partial_NumberOperators_"},"session_completion_tokens":{"ref":"Partial_NumberOperators_"},"session_total_requests":{"ref":"Partial_NumberOperators_"},"session_created_at":{"ref":"Partial_TimestampOperatorsTyped_"},"session_latest_request_created_at":{"ref":"Partial_TimestampOperatorsTyped_"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
@@ -1394,7 +1394,7 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"log":{"ref":"Log","required":true},"heliconeMeta":{"ref":"HeliconeMeta","required":true},"authorization":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_unknown_": {
+    "ResultSuccess_any_": {
         "dataType": "refObject",
         "properties": {
             "data": {"dataType":"any","required":true},
@@ -1412,63 +1412,13 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
+    "ResultSuccess_unknown_": {
         "dataType": "refObject",
         "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
+            "data": {"dataType":"any","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"organization":{"dataType":"string","required":true},"org_role":{"dataType":"string","required":true},"member":{"dataType":"string","required":true},"governance_limits":{"ref":"Json","required":true},"created_at":{"dataType":"string","required":true}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestError": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string","required":true},
-            "message": {"dataType":"string","required":true},
-            "stack": {"dataType":"string"},
-            "details": {"dataType":"string","required":true},
-            "hint": {"dataType":"string","required":true},
-            "code": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseFailure": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"ref":"PostgrestError","required":true},
-            "data": {"dataType":"enum","enums":[null],"required":true},
-            "count": {"dataType":"enum","enums":[null],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__governance_settings-Json__": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"governance_settings":{"ref":"Json","required":true}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__governance_settings-Json__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__governance_settings-Json__"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "KeyPermissions": {
@@ -1929,40 +1879,6 @@ const models: TsoaRoute.Models = {
             "minimum_request_count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"undefined"}],"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"settings":{"ref":"Json","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true},"created_at":{"dataType":"string","required":true}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
-        "dataType": "refObject",
-        "properties": {
-            "status": {"dataType":"double","required":true},
-            "statusText": {"dataType":"string","required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-            "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"tier":{"dataType":"string","required":true},"subscription_status":{"dataType":"string","required":true},"stripe_subscription_item_id":{"dataType":"string","required":true},"stripe_subscription_id":{"dataType":"string","required":true},"stripe_metadata":{"ref":"Json","required":true},"stripe_customer_id":{"dataType":"string","required":true},"soft_delete":{"dataType":"boolean","required":true},"size":{"dataType":"string","required":true},"reseller_id":{"dataType":"string","required":true},"request_limit":{"dataType":"double","required":true},"referral":{"dataType":"string","required":true},"percent_to_log":{"dataType":"double","required":true},"owner":{"dataType":"string","required":true},"organization_type":{"dataType":"string","required":true},"org_provider_key":{"dataType":"string","required":true},"onboarding_status":{"ref":"Json","required":true},"name":{"dataType":"string","required":true},"logo_path":{"dataType":"string","required":true},"limits":{"ref":"Json","required":true},"is_personal":{"dataType":"boolean","required":true},"is_main_org":{"dataType":"boolean","required":true},"id":{"dataType":"string","required":true},"icon":{"dataType":"string","required":true},"has_onboarded":{"dataType":"boolean","required":true},"governance_settings":{"ref":"Json","required":true},"domain":{"dataType":"string","required":true},"created_at":{"dataType":"string","required":true},"color":{"dataType":"string","required":true}}},"required":true},
-            "count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"},{"ref":"PostgrestResponseFailure"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
@@ -5666,197 +5582,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteAlert',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/v1/admin/governance-orgs/keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getGovernanceOrgKeys)),
-
-            async function AdminController_getGovernanceOrgKeys(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'getGovernanceOrgKeys',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/admin/governance-orgs/keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.createGovernanceOrgKey)),
-
-            async function AdminController_createGovernanceOrgKey(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"value":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'createGovernanceOrgKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.delete('/v1/admin/governance-orgs/keys',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.deleteGovernanceOrgKey)),
-
-            async function AdminController_deleteGovernanceOrgKey(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'deleteGovernanceOrgKey',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/v1/admin/governance-orgs/:orgId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.governanceOrgs)),
-
-            async function AdminController_governanceOrgs(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"days":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"limitUSD":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true}}},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'governanceOrgs',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.delete('/v1/admin/governance-orgs/:orgId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.deleteGovernanceOrg)),
-
-            async function AdminController_deleteGovernanceOrg(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                    orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'deleteGovernanceOrg',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/v1/admin/governance-orgs',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getGovernanceOrgs)),
-
-            async function AdminController_getGovernanceOrgs(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'getGovernanceOrgs',
                 controller,
                 response,
                 next,

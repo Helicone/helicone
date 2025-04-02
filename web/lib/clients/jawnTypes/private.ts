@@ -326,18 +326,6 @@ export interface paths {
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
   };
-  "/v1/admin/governance-orgs/keys": {
-    get: operations["GetGovernanceOrgKeys"];
-    post: operations["CreateGovernanceOrgKey"];
-    delete: operations["DeleteGovernanceOrgKey"];
-  };
-  "/v1/admin/governance-orgs/{orgId}": {
-    post: operations["GovernanceOrgs"];
-    delete: operations["DeleteGovernanceOrg"];
-  };
-  "/v1/admin/governance-orgs": {
-    get: operations["GetGovernanceOrgs"];
-  };
   "/v1/admin/feature-flags": {
     post: operations["UpdateFeatureFlags"];
     delete: operations["DeleteFeatureFlag"];
@@ -1027,8 +1015,15 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
-      total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_session_name?: components["schemas"]["Partial_TextOperators_"];
+      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
@@ -1547,7 +1542,7 @@ Json: JsonObject;
       heliconeMeta: components["schemas"]["HeliconeMeta"];
       authorization: string;
     };
-    ResultSuccess_unknown_: {
+    ResultSuccess_any_: {
       data: unknown;
       /** @enum {number|null} */
       error: null;
@@ -1557,59 +1552,11 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": {
-      /** Format: double */
-      status: number;
-      statusText: string;
+    ResultSuccess_unknown_: {
+      data: unknown;
       /** @enum {number|null} */
       error: null;
-      data: {
-        organization: string;
-        org_role: string;
-        member: string;
-        governance_limits: components["schemas"]["Json"];
-        created_at: string;
-      };
-      /** Format: double */
-      count: number | null;
     };
-    /**
-     * @description Error format
-     *
-     * {@link https://postgrest.org/en/stable/api.html?highlight=options#errors-and-http-status-codes}
-     */
-    PostgrestError: {
-      name: string;
-      message: string;
-      stack?: string;
-      details: string;
-      hint: string;
-      code: string;
-    };
-    PostgrestResponseFailure: {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      error: components["schemas"]["PostgrestError"];
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      count: null;
-    };
-    "PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__": components["schemas"]["PostgrestResponseSuccess__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"] | components["schemas"]["PostgrestResponseFailure"];
-    "PostgrestResponseSuccess__governance_settings-Json__": {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      /** @enum {number|null} */
-      error: null;
-      data: {
-        governance_settings: components["schemas"]["Json"];
-      };
-      /** Format: double */
-      count: number | null;
-    };
-    "PostgrestSingleResponse__governance_settings-Json__": components["schemas"]["PostgrestResponseSuccess__governance_settings-Json__"] | components["schemas"]["PostgrestResponseFailure"];
     /** @enum {string} */
     KeyPermissions: "w" | "rw";
     GenerateHashQueryParams: {
@@ -2199,64 +2146,6 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
-    "PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__": {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      /** @enum {number|null} */
-      error: null;
-      data: {
-        settings: components["schemas"]["Json"];
-        name: string;
-        id: string;
-        created_at: string;
-      };
-      /** Format: double */
-      count: number | null;
-    };
-    "PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__": components["schemas"]["PostgrestResponseSuccess__created_at-string--id-string--name-string--settings-Json__"] | components["schemas"]["PostgrestResponseFailure"];
-    "PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
-      /** Format: double */
-      status: number;
-      statusText: string;
-      /** @enum {number|null} */
-      error: null;
-      data: {
-          tier: string;
-          subscription_status: string;
-          stripe_subscription_item_id: string;
-          stripe_subscription_id: string;
-          stripe_metadata: components["schemas"]["Json"];
-          stripe_customer_id: string;
-          soft_delete: boolean;
-          size: string;
-          reseller_id: string;
-          /** Format: double */
-          request_limit: number;
-          referral: string;
-          /** Format: double */
-          percent_to_log: number;
-          owner: string;
-          organization_type: string;
-          org_provider_key: string;
-          onboarding_status: components["schemas"]["Json"];
-          name: string;
-          logo_path: string;
-          limits: components["schemas"]["Json"];
-          is_personal: boolean;
-          is_main_org: boolean;
-          id: string;
-          icon: string;
-          has_onboarded: boolean;
-          governance_settings: components["schemas"]["Json"];
-          domain: string;
-          created_at: string;
-          color: string;
-        }[];
-      /** Format: double */
-      count: number | null;
-    };
-    "PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": components["schemas"]["PostgrestResponseSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["PostgrestResponseFailure"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -3937,7 +3826,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3962,7 +3851,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3972,7 +3861,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--governance_limits-Json--member-string--org_role-string--organization-string__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -3982,7 +3871,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__governance_settings-Json__"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -4211,101 +4100,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetGovernanceOrgKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__created_at-string--id-string--name-string--settings-Json__"];
-        };
-      };
-    };
-  };
-  CreateGovernanceOrgKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          value: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  DeleteGovernanceOrgKey: {
-    requestBody: {
-      content: {
-        "application/json": {
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  GovernanceOrgs: {
-    parameters: {
-      path: {
-        orgId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          days: number | null;
-          /** Format: double */
-          limitUSD: number | null;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  DeleteGovernanceOrg: {
-    parameters: {
-      path: {
-        orgId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  GetGovernanceOrgs: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["PostgrestSingleResponse__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"];
         };
       };
     };

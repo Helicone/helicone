@@ -2191,7 +2191,6 @@ export type Database = {
       request: {
         Row: {
           auth_hash: string
-          body: Json
           country_code: string | null
           created_at: string
           formatted_prompt_id: string | null
@@ -2215,7 +2214,6 @@ export type Database = {
         }
         Insert: {
           auth_hash: string
-          body: Json
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
@@ -2239,7 +2237,6 @@ export type Database = {
         }
         Update: {
           auth_hash?: string
-          body?: Json
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
@@ -2332,51 +2329,8 @@ export type Database = {
           },
         ]
       }
-      request_response_search: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          request_body_vector: unknown | null
-          request_id: string
-          response_body_vector: unknown | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organization_id: string
-          request_body_vector?: unknown | null
-          request_id: string
-          response_body_vector?: unknown | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          request_body_vector?: unknown | null
-          request_id?: string
-          response_body_vector?: unknown | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "request_response_search_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_response_search_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       response: {
         Row: {
-          body: Json
           completion_tokens: number | null
           created_at: string
           delay_ms: number | null
@@ -2392,7 +2346,6 @@ export type Database = {
           time_to_first_token: number | null
         }
         Insert: {
-          body: Json
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
@@ -2408,7 +2361,6 @@ export type Database = {
           time_to_first_token?: number | null
         }
         Update: {
-          body?: Json
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null

@@ -10,12 +10,12 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { supabaseServer } from "../../lib/routers/withAuth";
+import { postHogClient } from "../../lib/clients/postHogClient";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { getRequests } from "../../lib/stores/request/request";
 import { FineTuningManager } from "../../managers/FineTuningManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { postHogClient } from "../../lib/clients/postHogClient";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
@@ -23,25 +23,29 @@ export interface GenerateHashQueryParams {
   keyName: string;
 }
 
-export async function hasAccessToFineTune(orgId: string) {
-  const { data: org, error: orgError } = await supabaseServer.client
-    .from("organization")
-    .select("*")
-    .eq("id", orgId)
-    .single();
-  if (orgError) {
+export async function hasAccessToFineTune(orgId: string): Promise<boolean> {
+  const orgResult = await dbExecute<{ id: string; tier: string }>(
+    `SELECT id, tier FROM organization WHERE id = $1`,
+    [orgId]
+  );
+
+  if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
     return false;
   }
+
+  const org = orgResult.data[0];
 
   if (!org.tier) {
     return false;
   }
+
   if (org.tier === "free") {
-    const jobCountQuery = await supabaseServer.client
-      .from("finetune_job")
-      .select("*", { count: "exact" })
-      .eq("organization_id", orgId);
-    const jobsCount = jobCountQuery.count ?? 1;
+    const jobCountResult = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) as count FROM finetune_job WHERE organization_id = $1`,
+      [orgId]
+    );
+
+    const jobsCount = jobCountResult.data?.[0]?.count ?? 1;
     if (jobsCount >= 1) {
       return false;
     } else {
@@ -66,6 +70,7 @@ export type FineTuneResult =
 export interface FineTuneBodyParams {
   providerKeyId: string;
 }
+
 @Route("v1/dataset")
 @Tags("Dataset")
 @Security("api_key")
@@ -86,19 +91,25 @@ export class DatasetController extends Controller {
     }
 
     const { providerKeyId } = body;
-    const { data: dataset, error: datasetError } = await supabaseServer.client
-      .from("finetune_dataset")
-      .select("*")
-      .eq("id", datasetId)
-      .single();
+    const datasetResult = await dbExecute<{
+      id: string;
+      filter_node: string;
+    }>(`SELECT id, filter_node FROM finetune_dataset WHERE id = $1`, [
+      datasetId,
+    ]);
 
-    if (datasetError || !dataset) {
+    if (
+      datasetResult.error ||
+      !datasetResult.data ||
+      datasetResult.data.length === 0
+    ) {
       this.setStatus(404);
       return {
         error: "No dataset found",
       };
     }
 
+    const dataset = datasetResult.data[0];
     let filterNode: FilterNode;
 
     try {
@@ -125,21 +136,29 @@ export class DatasetController extends Controller {
       };
     }
 
-    const { data: key, error: keyError } = await supabaseServer.client
-      .from("decrypted_provider_keys")
-      .select("decrypted_provider_key")
-      .eq("id", providerKeyId)
-      .eq("org_id", request.authParams.organizationId)
-      .single();
+    const keyResult = await dbExecute<{
+      decrypted_provider_key: string;
+    }>(
+      `SELECT decrypted_provider_key FROM decrypted_provider_keys 
+       WHERE id = $1 AND org_id = $2`,
+      [providerKeyId, request.authParams.organizationId]
+    );
 
-    if (keyError || !key || !key.decrypted_provider_key) {
+    if (
+      keyResult.error ||
+      !keyResult.data ||
+      keyResult.data.length === 0 ||
+      !keyResult.data[0].decrypted_provider_key
+    ) {
       this.setStatus(404);
       return {
-        error: "No Provider  key found",
+        error: "No Provider key found",
       };
     }
 
-    const fineTuningManager = new FineTuningManager(key.decrypted_provider_key);
+    const fineTuningManager = new FineTuningManager(
+      keyResult.data[0].decrypted_provider_key
+    );
     try {
       const fineTuneJob = await fineTuningManager.createFineTuneJob(
         metrics.data,
@@ -169,22 +188,23 @@ export class DatasetController extends Controller {
         },
       });
 
-      const fineTunedJobId = await supabaseServer.client
-        .from("finetune_job")
-        .insert({
-          dataset_id: dataset.id,
-          finetune_job_id: fineTuneJob.data.id,
-          provider_key_id: providerKeyId,
-          status: "created",
-          organization_id: request.authParams.organizationId,
-        })
-        .select("*")
-        .single();
+      const insertResult = await dbExecute<{ id: string }>(
+        `INSERT INTO finetune_job 
+         (dataset_id, finetune_job_id, provider_key_id, status, organization_id) 
+         VALUES ($1, $2, $3, 'created', $4) 
+         RETURNING id`,
+        [
+          dataset.id,
+          fineTuneJob.data.id,
+          providerKeyId,
+          request.authParams.organizationId,
+        ]
+      );
 
       return {
         success: true,
         data: {
-          fineTuneJob: fineTunedJobId.data?.id ?? "",
+          fineTuneJob: insertResult.data?.[0]?.id ?? "",
           url: url,
         },
       };

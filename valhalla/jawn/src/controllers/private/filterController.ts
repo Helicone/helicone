@@ -11,9 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
-
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 
@@ -32,7 +30,7 @@ export class FilterController extends Controller {
   public async getFilters(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<StoreFilterType[], string>> {
-    const { data, error: deleteError } = await dbExecute<{
+    const { data, error } = await dbExecute<{
       id: string;
       name: string;
       filter: string;
@@ -43,15 +41,14 @@ export class FilterController extends Controller {
       organization_layout
       WHERE organization_id = $1
       AND type = 'filter_ast'
-      AND filters->>'name' != 'Untitled Filter'
       ORDER BY created_at DESC
       `,
       [request.authParams.organizationId]
     );
 
-    if (deleteError) {
+    if (error) {
       this.setStatus(500);
-      return err(`Failed to delete filter: ${deleteError}`);
+      return err(`Failed to get filters: ${error}`);
     }
 
     return ok(
@@ -69,15 +66,20 @@ export class FilterController extends Controller {
     @Path() id: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<StoreFilterType, string>> {
-    const { data, error: deleteError } = await supabaseServer.client
-      .from("organization_layout")
-      .select("*")
-      .eq("id", id)
-      .eq("organization_id", request.authParams.organizationId);
+    const { data, error } = await dbExecute<{
+      filters: any;
+    }>(
+      `
+      SELECT filters FROM organization_layout
+      WHERE id = $1
+      AND organization_id = $2
+      `,
+      [id, request.authParams.organizationId]
+    );
 
-    if (deleteError) {
+    if (error || !data || data.length === 0) {
       this.setStatus(500);
-      return err(`Failed to get filter: ${deleteError.message}`);
+      return err(`Failed to get filter: ${error}`);
     }
 
     return ok(data[0].filters as StoreFilterType);
@@ -89,23 +91,23 @@ export class FilterController extends Controller {
     requestBody: StoreFilterType,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ id: string }, string>> {
-    const { error: createError, data } = await supabaseServer.client
-      .from("organization_layout")
-      .insert({
-        organization_id: request.authParams.organizationId,
-        filters: requestBody,
-        type: "filter_ast",
-      })
-      .select("id")
-      .single();
+    const { data, error } = await dbExecute<{ id: string }>(
+      `
+      INSERT INTO organization_layout
+      (organization_id, filters, type)
+      VALUES ($1, $2, 'filter_ast')
+      RETURNING id
+      `,
+      [request.authParams.organizationId, requestBody]
+    );
 
-    if (createError) {
+    if (error || !data || data.length === 0) {
       this.setStatus(500);
-      return err(`Failed to create filter: ${createError.message}`);
+      return err(`Failed to create filter: ${error}`);
     }
 
     this.setStatus(201);
-    return ok({ id: data.id });
+    return ok({ id: data[0].id });
   }
 
   @Delete("/{id}")
@@ -113,15 +115,18 @@ export class FilterController extends Controller {
     @Path() id: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const { error: deleteError } = await supabaseServer.client
-      .from("organization_layout")
-      .delete()
-      .eq("id", id)
-      .eq("organization_id", request.authParams.organizationId);
+    const { error } = await dbExecute(
+      `
+      DELETE FROM organization_layout
+      WHERE id = $1
+      AND organization_id = $2
+      `,
+      [id, request.authParams.organizationId]
+    );
 
-    if (deleteError) {
+    if (error) {
       this.setStatus(500);
-      return err(`Failed to delete filter: ${deleteError.message}`);
+      return err(`Failed to delete filter: ${error}`);
     }
 
     this.setStatus(200);
@@ -137,17 +142,19 @@ export class FilterController extends Controller {
     @Path() id: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const { error: updateError } = await supabaseServer.client
-      .from("organization_layout")
-      .update({
-        filters: requestBody.filters,
-      })
-      .eq("id", id)
-      .eq("organization_id", request.authParams.organizationId);
+    const { error } = await dbExecute(
+      `
+      UPDATE organization_layout
+      SET filters = $1
+      WHERE id = $2
+      AND organization_id = $3
+      `,
+      [requestBody.filters, id, request.authParams.organizationId]
+    );
 
-    if (updateError) {
+    if (error) {
       this.setStatus(500);
-      return err(`Failed to update filter: ${updateError.message}`);
+      return err(`Failed to update filter: ${error}`);
     }
 
     this.setStatus(200);

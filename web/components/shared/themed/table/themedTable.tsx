@@ -113,6 +113,7 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     placeholder: string;
   };
   rowLink?: (row: T) => string;
+  showFilters?: boolean;
 }
 
 export default function ThemedTable<T extends { id?: string }>(
@@ -148,6 +149,7 @@ export default function ThemedTable<T extends { id?: string }>(
     rightPanel,
     search,
     rowLink,
+    showFilters,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -265,6 +267,7 @@ export default function ThemedTable<T extends { id?: string }>(
                   }
                 : undefined
             }
+            showFilters={showFilters}
             savedFilters={savedFilters}
             activeColumns={activeColumns}
             setActiveColumns={setActiveColumns}
@@ -302,7 +305,7 @@ export default function ThemedTable<T extends { id?: string }>(
         className="flex-grow overflow-hidden"
       >
         <ResizablePanel defaultSize={100} className="flex-grow">
-          <div className="h-full overflow-auto bg-white dark:bg-slate-800">
+          <div className="h-full overflow-auto ">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (

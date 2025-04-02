@@ -1,5 +1,6 @@
-// import { FilterNode } from "@/services/lib/filters/filterDefs";
+import { UserMetric } from "@/lib/api/users/UserMetric";
 
+export type FilterSubType = "property" | "score" | "sessions" | "user";
 /**
  * Represents a record/row from the request_response_rmt table
  * Contains all the fields that can be filtered on
@@ -30,6 +31,19 @@ interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+}
+
+export interface Views {
+  user_metrics: UserMetric;
+  session_metrics: {
+    total_cost: number;
+    total_tokens: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_requests: number;
+    created_at: string;
+    latest_request_created_at: string;
+  };
 }
 
 /**
@@ -98,13 +112,25 @@ interface AllExpression extends BaseExpression {
  * Type for the field specification in a condition
  * Describes what field is being filtered and how
  */
-interface FieldSpec {
-  table?: string;
-  column: string;
-  subtype?: "property" | "score";
+interface BaseFieldSpec {
+  subtype?: FilterSubType;
   valueMode?: "value" | "key";
   key?: string;
 }
+
+type FieldSpec =
+  | (BaseFieldSpec & {
+      table: "request_response_rmt";
+      column: keyof RequestResponseRMT;
+    })
+  | (BaseFieldSpec & {
+      table: "user_metrics";
+      column: keyof Views["user_metrics"];
+    })
+  | (BaseFieldSpec & {
+      table: "sessions_request_response_rmt";
+      column: keyof Views["session_metrics"];
+    });
 
 /**
  * Single condition expression that compares a field against a value
@@ -167,7 +193,7 @@ function condition(
     type: "condition",
     field: {
       table: "request_response_rmt",
-      column,
+      column: column as keyof RequestResponseRMT,
     },
     operator,
     value,
@@ -642,3 +668,15 @@ export type {
   AndExpression,
   OrExpression,
 };
+
+export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
+  "status",
+  "eq",
+  "200"
+);
+
+export const DEFAULT_FILTER_GROUP_EXPRESSION = FilterAST.and(
+  FilterAST.condition("status", "eq", "200")
+);
+
+export const EMPTY_FILTER_GROUP_EXPRESSION = null;

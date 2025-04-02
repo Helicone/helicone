@@ -1,5 +1,6 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const Quote = () => {
   return (
@@ -14,15 +15,19 @@ const Quote = () => {
             </span>
           </h2>
           <div className="flex items-end gap-6">
-            <img
+            <Image
               src="/static/home/nishantshukla.webp"
               alt="nishant shukla"
+              width={48}
+              height={48}
               className="w-12 h-12"
             />
             <div className="flex flex-col gap-2">
-              <img
+              <Image
                 src="/static/qawolf.webp"
                 alt="qawolf"
+                width={128}
+                height={32}
                 className="w-32 pb-2"
               />
               <h4 className="text-[17px] sm:text-xl font-medium whitespace-nowrap">

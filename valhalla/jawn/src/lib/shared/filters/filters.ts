@@ -1,10 +1,8 @@
-import { supabaseServer } from "../../db/supabase";
 import {
   AllOperators,
   AnyOperator,
   FilterBranch,
   FilterLeaf,
-  filterListToTree,
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
@@ -241,22 +239,6 @@ const whereKeyMappings: KeyMappings = {
       scores_column: "request_response_rmt.scores",
     })(filter, placeValueSafely);
   },
-  request_response_search: (filter, placeValueSafely) => {
-    const keys = Object.keys(filter);
-    if (keys.length !== 1) {
-      throw new Error("Invalid filter, only one key is allowed");
-    }
-    const key = keys[0];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter[key as keyof typeof filter]!
-    );
-
-    return {
-      column: `request_response_search.${key}`,
-      operator: "vector-contains",
-      value: placeValueSafely(value),
-    };
-  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -295,16 +277,14 @@ const whereKeyMappings: KeyMappings = {
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "request_response_rmt.last_active",
-    total_requests: "request_response_rmt.total_requests",
-    active_for: "request_response_rmt.active_for",
-    average_requests_per_day_active:
-      "request_response_rmt.average_requests_per_day_active",
-    average_tokens_per_request:
-      "request_response_rmt.average_tokens_per_request",
-    total_completion_tokens: "request_response_rmt.total_completion_tokens",
-    total_prompt_tokens: "request_response_rmt.total_prompt_tokens",
-    cost: "request_response_rmt.cost",
+    last_active: "last_active",
+    total_requests: "total_requests",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -319,11 +299,18 @@ const havingKeyMappings: KeyMappings = {
   }),
   sessions_request_response_rmt:
     easyKeyMappings<"sessions_request_response_rmt">({
-      total_cost: "total_cost",
-      total_tokens: "total_tokens",
+      session_total_cost: "total_cost",
+      session_completion_tokens: "completion_tokens",
+      session_prompt_tokens: "prompt_tokens",
+      session_total_requests: "total_requests",
+      session_created_at: "created_at",
+      session_latest_request_created_at: "latest_request_created_at",
+      session_total_tokens: "total_tokens",
+      session_session_id: "properties['Helicone-Session-Id']",
+      session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
-  request_response_search: NOT_IMPLEMENTED,
+
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
@@ -534,29 +521,6 @@ export function buildFilterPostgres(
     ...args,
     argPlaceHolder: (index, parameter) => `$${index + 1}`,
   });
-}
-
-async function getUserIdHashes(user_id: string): Promise<string[]> {
-  const { data: user_api_keys, error } = await supabaseServer.client
-    .from("user_api_keys")
-    .select("api_key_hash")
-    .eq("user_id", user_id);
-  if (error) {
-    throw error;
-  }
-  if (!user_api_keys || user_api_keys.length === 0) {
-    throw new Error("No API keys found for user");
-  }
-  return user_api_keys.map((x) => x.api_key_hash);
-}
-
-async function buildUserIdHashesFilter(
-  user_id: string,
-  hashToFilter: (hash: string) => FilterLeaf
-) {
-  const userIdHashes = await getUserIdHashes(user_id);
-  const filters: FilterLeaf[] = userIdHashes.map(hashToFilter);
-  return filterListToTree(filters, "or");
 }
 
 export interface BuildFilterArgs {

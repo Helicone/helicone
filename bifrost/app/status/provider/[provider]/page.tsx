@@ -1,6 +1,6 @@
 import { ProviderStatusPage } from "@/app/status/ProviderStatusPage";
 import { Suspense } from "react";
-import { components } from "@/lib/clients/jawnTypes/public";
+import { ProviderStatusInfoSkeleton } from "@/app/status/SkeletonLoaders";
 
 const PROVIDERS = [
   "OPENAI",
@@ -14,7 +14,6 @@ const PROVIDERS = [
   "DEEPINFRA",
   "QSTASH",
   "PERPLEXITY",
-  "HYPERBOLIC",
 ] as const;
 
 const displayToBackendName: Record<string, string> = {
@@ -36,7 +35,13 @@ export default async function Home({
 
   return (
     <div className="container mx-auto py-8">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+            Loading...
+          </div>
+        }
+      >
         <ProviderStatusPage provider={backendProvider} />
       </Suspense>
     </div>

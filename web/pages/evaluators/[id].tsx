@@ -10,14 +10,12 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { useLLMEvaluatorSubmit } from "@/components/templates/evals/hooks/useEvaluatorSubmit";
 import { useEvaluatorDetails } from "@/components/templates/evals/details/hooks";
 import { OnlineEvaluatorsSection } from "@/components/templates/evals/details/OnlineEvaluatorsSection";
+import { TestDrawer } from "@/components/templates/evals/details/TestDrawer";
 
 import { openAITemplateToOpenAIFunctionParams } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Play } from "lucide-react";
 
 import EvaluatorForm from "@/components/templates/evals/EvaluatorForm";
-
-// Type for scoring types
-type ScoringType = "boolean" | "choice" | "range";
 
 // Type for choice score item
 type ChoiceScore = {
@@ -77,6 +75,9 @@ const EvaluatorDetail = () => {
 
   // State for managing modal visibility - explicitly set to false to prevent auto-opening
   const [showEvaluatorsModal, setShowEvaluatorsModal] = useState(false);
+
+  // State for test drawer
+  const [showTestDrawer, setShowTestDrawer] = useState(false);
 
   // Only update evaluator counts, don't trigger modal visibility
   useEffect(() => {
@@ -351,17 +352,14 @@ const EvaluatorDetail = () => {
             <div className="flex items-center gap-2">
               <H3>{name || "Unnamed Evaluator"}</H3>
             </div>
-            {hasOnlineEvaluators ? (
-              <OnlineIndicator />
-            ) : (
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-2"
                 onClick={() => {
                   if (currentEvaluator) {
-                    // For empty state, open the modal and the create form directly
-                    setShowEvaluatorsModal(true);
+                    setShowTestDrawer(true);
                   } else {
                     notification.setNotification(
                       "Please save the evaluator first",
@@ -370,10 +368,34 @@ const EvaluatorDetail = () => {
                   }
                 }}
               >
-                <Plus size={14} />
-                <span>Add Online Evaluator</span>
+                <Play size={14} />
+                <span>Test Evaluator</span>
               </Button>
-            )}
+
+              {hasOnlineEvaluators ? (
+                <OnlineIndicator />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    if (currentEvaluator) {
+                      // For empty state, open the modal and the create form directly
+                      setShowEvaluatorsModal(true);
+                    } else {
+                      notification.setNotification(
+                        "Please save the evaluator first",
+                        "info"
+                      );
+                    }
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>Add Online Evaluator</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -402,6 +424,15 @@ const EvaluatorDetail = () => {
             onOpenChange={setShowEvaluatorsModal}
           />
         )}
+
+      {/* Render the Test Drawer */}
+      {currentEvaluator && (
+        <TestDrawer
+          evaluatorId={currentEvaluator.id}
+          isOpen={showTestDrawer}
+          onClose={() => setShowTestDrawer(false)}
+        />
+      )}
     </div>
   );
 };

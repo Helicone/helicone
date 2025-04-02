@@ -48,7 +48,7 @@ export class HeliconeLogBuilder {
     this.logger = logger;
     this.request = request;
     this.additionalHeaders = additionalHeaders;
-    this.startTime = Date.now();
+    this.startTime = performance.now();
   }
 
   /**
@@ -57,7 +57,7 @@ export class HeliconeLogBuilder {
    */
   public setError(error: any): void {
     this.error = error;
-    this.endTime = Date.now();
+    this.endTime = performance.now();
     this.status = 500;
   }
 
@@ -75,8 +75,6 @@ export class HeliconeLogBuilder {
     const self = stream;
     let iter: AsyncIterator<any>;
     const encoder = new TextEncoder();
-    let firstChunkTimeUnix: number | null = null;
-
     // Store the reference to this for use in the ReadableStream
     const builder = this;
     this.streamState.isPolling = true;
@@ -89,14 +87,13 @@ export class HeliconeLogBuilder {
         try {
           const { value, done } = await iter.next();
           if (done) {
-            builder.endTime = Date.now();
+            builder.endTime = performance.now();
             builder.streamState.isPolling = false;
             return ctrl.close();
           }
 
-          if (!firstChunkTimeUnix) {
-            firstChunkTimeUnix = Date.now();
-            builder.timeToFirstToken = firstChunkTimeUnix - builder.startTime;
+          if (!builder.timeToFirstToken) {
+            builder.timeToFirstToken = performance.now() - builder.startTime;
           }
 
           const json = JSON.stringify(value) + "\n";
@@ -106,7 +103,7 @@ export class HeliconeLogBuilder {
           ctrl.enqueue(bytes);
         } catch (err) {
           builder.error = err;
-          builder.endTime = Date.now();
+          builder.endTime = performance.now();
           builder.status = 500;
           builder.streamState.isPolling = false;
           ctrl.error(err);
@@ -114,11 +111,18 @@ export class HeliconeLogBuilder {
       },
       async cancel() {
         builder.wasCancelled = true;
-        builder.endTime = Date.now();
+        builder.endTime = performance.now();
         builder.streamState.isPolling = false;
         await iter.return?.();
       },
     });
+  }
+
+  public addAdditionalHeaders(headers: Record<string, string>): void {
+    this.additionalHeaders = {
+      ...this.additionalHeaders,
+      ...headers,
+    };
   }
 
   /**
@@ -138,15 +142,15 @@ export class HeliconeLogBuilder {
    */
   public setResponse(body: string): void {
     this.responseBody = body;
-    this.endTime = Date.now();
+    this.endTime = performance.now();
   }
 
   private async waitForStreamToFinish(): Promise<void> {
     const maxWaitTime = 10_000; // 10 seconds
 
-    const startTime = Date.now();
+    const startTime = performance.now();
     while (this.streamState.isPolling) {
-      if (Date.now() - startTime > maxWaitTime) {
+      if (performance.now() - startTime > maxWaitTime) {
         throw new Error("Stream took too long to finish");
       }
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -171,7 +175,7 @@ export class HeliconeLogBuilder {
     }
     await this.waitForStreamToFinish();
     if (this.endTime === 0) {
-      this.endTime = Date.now();
+      this.endTime = performance.now();
     }
 
     try {
@@ -194,11 +198,20 @@ export class HeliconeLogBuilder {
           response;
       }
 
+      // Convert high-resolution time to Unix timestamps for the API
+      const startTimeUnix =
+        Date.now() - Math.round(performance.now() - this.startTime);
+      const endTimeUnix =
+        Date.now() - Math.round(performance.now() - this.endTime);
+      const timeToFirstTokenMs = this.timeToFirstToken
+        ? Math.round(this.timeToFirstToken)
+        : undefined;
+
       await this.logger.sendLog(this.request, response, {
-        startTime: this.startTime,
-        endTime: this.endTime,
+        startTime: startTimeUnix,
+        endTime: endTimeUnix,
         additionalHeaders: this.additionalHeaders,
-        timeToFirstToken: this.timeToFirstToken,
+        timeToFirstToken: timeToFirstTokenMs,
         status: this.status,
       });
     } catch (error) {

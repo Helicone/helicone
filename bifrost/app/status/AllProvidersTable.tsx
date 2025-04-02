@@ -69,13 +69,17 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
         </TableHeader>
         <TableBody>
           {providers.map((providerInfo) => {
+            if (!providerInfo || !providerInfo.metrics) return null;
+
             const providerName = formatProviderName(providerInfo.providerName);
             const {
-              errorRate24h,
-              errorRateChange,
-              recentErrorCount,
-              recentRequestCount,
-            } = providerInfo.metrics;
+              errorRate24h = 0,
+              errorRateChange = 0,
+              recentErrorCount = 0,
+              recentRequestCount = 0,
+              averageLatencyPerToken = 0,
+              latencyPerTokenChange = 0,
+            } = providerInfo.metrics || {};
 
             const recentErrorRate =
               recentRequestCount > 0
@@ -87,7 +91,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
 
             return (
               <TableRow
-                key={providerName}
+                key={providerName || `provider-${Math.random()}`}
                 className="bg-white hover:bg-gray-50/50 transition-colors"
               >
                 <TableCell className="p-0 font-medium">
@@ -123,10 +127,8 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                     )}`}
                     className="block w-full h-full px-6 py-2"
                   >
-                    {providerInfo.metrics.averageLatencyPerToken.toFixed(0)}ms
-                    <TrendIndicator
-                      change={providerInfo.metrics.latencyPerTokenChange}
-                    />
+                    {averageLatencyPerToken.toFixed(0)}ms
+                    <TrendIndicator change={latencyPerTokenChange} />
                   </Link>
                 </TableCell>
                 <TableCell className="p-0">

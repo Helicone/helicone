@@ -105,7 +105,21 @@ type RealtimeMessage = {
     }[];
   };
   // With type "session.created", "session.update", "session.updated"
-  session?: {};
+  session?: {
+    input_audio_format?: string; // "pcm16", "g711_ulaw", or "g711_alaw"
+    input_audio_noise_reduction?: object | null; // Configuration for input audio noise reduction
+    input_audio_transcription?: object | null; // Configuration for input audio transcription
+    instructions?: string; // Default system instructions
+    max_response_output_tokens?: number | "inf"; // Max output tokens, integer between 1-4096 or "inf"
+    modalities?: string[]; // Set of modalities the model can respond with, e.g. ["text"] to disable audio
+    model?: string; // The Realtime model used for this session
+    output_audio_format?: string; // "pcm16", "g711_ulaw", or "g711_alaw"
+    temperature?: number; // Sampling temperature, limited to [0.6, 1.2]
+    tool_choice?: string; // "auto", "none", "required", or specify a function
+    tools?: any[]; // Tools (functions) available to the model
+    turn_detection?: object | null; // Configuration for turn detection
+    voice?: string; // Voice model uses to respond (alloy, ash, ballad, coral, etc.)
+  };
   // With type "conversation.item.create"
   item?: {
     type: string; // "function_call_output" or "message"

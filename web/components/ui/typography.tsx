@@ -17,7 +17,8 @@ export const typography = {
   large: "font-sans text-lg leading-7 font-light text-[hsl(var(--foreground))]",
   small: "font-sans text-sm leading-4 font-light text-[hsl(var(--foreground))]",
   muted: "font-sans text-sm font-normal text-[hsl(var(--muted-foreground))]",
-
+  xsmall:
+    "font-sans text-xs leading-4 font-light text-[hsl(var(--foreground))]",
   // Special elements
   blockquote:
     "font-sans text-base leading-6 font-normal mt-6 border-l-2 border-[hsl(var(--border))] pl-6 italic text-[hsl(var(--muted-foreground))]",
@@ -76,6 +77,10 @@ export function Large({ className, ...props }: TypographyProps) {
 
 export function Small({ className, ...props }: TypographyProps) {
   return <small className={cn(typography.small, className)} {...props} />;
+}
+
+export function XSmall({ className, ...props }: TypographyProps) {
+  return <small className={cn(typography.xsmall, className)} {...props} />;
 }
 
 export function Muted({ className, ...props }: TypographyProps) {

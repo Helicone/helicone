@@ -4,8 +4,8 @@ import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
 import { KafkaProducer } from "../clients/KafkaProducer";
-import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
+import { getHeliconeAuthClient } from "../shared/auth/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
 import { S3Manager } from "./S3Manager";
 import { handleSocketSession } from "./WebSocketProxyRequestHandler";
@@ -117,6 +117,7 @@ export function webSocketProxyForwarder(
             /*                            Handle Closing Event                            */
             /* -------------------------------------------------------------------------- */
           } else if (messageType === "close") {
+            const authClient = getHeliconeAuthClient();
             try {
               // 1. Handle the socket session with socket messages
               const { loggable } = await handleSocketSession(
@@ -134,7 +135,7 @@ export function webSocketProxyForwarder(
 
               // 3. Get the auth params
               const { data: authParams, error: authParamsError } =
-                await supabaseServer.authenticate(auth);
+                await authClient.authenticate(auth);
 
               if (authParamsError || !authParams) {
                 console.error("Error getting auth params", authParamsError);
@@ -143,7 +144,7 @@ export function webSocketProxyForwarder(
 
               // 4. Get the org params
               const { data: orgParams, error: orgParamsError } =
-                await supabaseServer.getOrganization(authParams);
+                await authClient.getOrganization(authParams);
 
               if (orgParamsError || !orgParams) {
                 console.error("Error getting organization", orgParamsError);
