@@ -12,26 +12,30 @@ type allPaths = publicPaths & privatePaths;
 export function getJawnClient(orgId?: string | "none") {
   return createFetchClient<allPaths>({
     baseUrl: env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"),
-    fetch: (request) => {
-      orgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
+    fetch: (request: Request) => {
+      // Read cookies on each request to get latest values
+      const currentOrgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
       const jwtToken = getHeliconeCookie().data?.jwtToken;
-      const headers =
-        orgId !== "none"
-          ? {
-              "helicone-authorization": JSON.stringify({
-                _type: "jwt",
-                token: jwtToken,
-                orgId: orgId,
-              }),
-            }
-          : {};
 
-      return fetch(request, {
-        headers: {
-          ...headers,
-          ...request.headers,
-        },
+      // Get existing headers
+      const existingHeaders = Object.fromEntries(request.headers.entries());
+
+      // Add auth header if an org is selected
+      const headers = { ...existingHeaders };
+      if (currentOrgId !== "none") {
+        headers["helicone-authorization"] = JSON.stringify({
+          _type: "jwt",
+          token: jwtToken,
+          orgId: currentOrgId,
+        });
+      }
+
+      // Clone the request to modify it
+      const newRequest = new Request(request, {
+        headers,
       });
+
+      return fetch(newRequest);
     },
   });
 }
