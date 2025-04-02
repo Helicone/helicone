@@ -16,6 +16,7 @@ const TIERS = [
   "enterprise",
   "demo",
   "team-20250130",
+  "free",
 ];
 
 export class LLMAsAJudge {
