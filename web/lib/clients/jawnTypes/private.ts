@@ -392,6 +392,9 @@ export interface paths {
      */
     get: operations["GetSubscriptionData"];
   };
+  "/v1/audio/convert-to-wav": {
+    post: operations["ConvertToWav"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -13996,6 +13999,13 @@ Json: JsonObject;
     "Record_string.stripe.Stripe.Discount_": {
       [key: string]: components["schemas"]["stripe.Stripe.Discount"];
     };
+    ConvertToWavResponse: {
+      data: string | null;
+      error: string | null;
+    };
+    ConvertToWavRequestBody: {
+      audioData: string;
+    };
   };
   responses: {
   };
@@ -16440,6 +16450,21 @@ export interface operations {
             invoices: components["schemas"]["stripe.Stripe.Invoice"][];
             subscriptions: components["schemas"]["stripe.Stripe.Subscription"][];
           };
+        };
+      };
+    };
+  };
+  ConvertToWav: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConvertToWavRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConvertToWavResponse"];
         };
       };
     };
