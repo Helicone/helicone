@@ -17,7 +17,7 @@ interface AssistantProps {
 
 export const Assistant = ({
   mappedRequest,
-  className = "bg-slate-50",
+  className = "bg-slate-50 dark:bg-slate-950",
 }: AssistantProps) => {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
@@ -36,7 +36,7 @@ export const Assistant = ({
   };
 
   const content = (
-    <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
+    <div className="w-full border border-border divide-y divide-border h-full">
       <ChatTopBar {...chatTopBarProps} />
       <AssistantContent mode={mode} mappedRequest={mappedRequest} />
     </div>
@@ -46,14 +46,14 @@ export const Assistant = ({
     <>
       <div
         className={clsx(
-          "w-full flex flex-col text-left space-y-2 text-sm dark:bg-black",
+          "w-full flex flex-col text-left space-y-2 text-sm bg-white dark:bg-black",
           className
         )}
       >
         {content}
       </div>
       <ThemedModal open={open} setOpen={setOpen}>
-        <div className="w-[80vw] rounded-md divide-y divide-gray-300 dark:divide-gray-700 h-full">
+        <div className="w-[80vw] rounded-md divide-y divide-border h-full">
           <ChatTopBar {...chatTopBarProps} isModal={true} />
           <AssistantContent mode={mode} mappedRequest={mappedRequest} />
         </div>
