@@ -1,8 +1,8 @@
 {
-  "title": "How to Track and Optimize Your LLM API Costs by 90%",
-  "title1": "How to Track and Optimize Your LLM API Costs by 90%",
-  "title2": "How to Track and Optimize Your LLM API Costs by 90%",
-  "description": "Building AI apps doesn't have to break the bank. We have 5 proven techniques to help you improve your LLM spending without sacrificing performance. We also suggest a list of tools to help you monitor your LLM API costs across OpenAI, Anthropic, and other providers.",
+  "title": "How to Monitor Your LLM API Costs and Cut Spending by 90%",
+  "title1": "How to Monitor Your LLM API Costs and Cut Spending by 90%",
+  "title2": "How to Monitor Your LLM API Costs and Cut Spending by 90%",
+  "description": "Stop watching your OpenAI and Anthropic bills skyrocket. Learn how to optimize prompt engineering, implement strategic caching, use task-specific models, leverage RAG, and monitor costs effectively",
   "images": "/static/blog/monitor-and-optimize-llm-costs/slash-cover.webp",
   "time": "6 minute read",
   "author": "Lina Lam",
