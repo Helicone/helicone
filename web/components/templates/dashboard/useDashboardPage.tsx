@@ -87,7 +87,9 @@ export const useUIFilterConvert = (
 
   const filterMap = useMemo(() => {
     return (DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-      properties.propertyFilters
+      Array.isArray(properties.propertyFilters)
+        ? properties.propertyFilters
+        : []
     );
   }, [properties.propertyFilters]);
 
@@ -397,8 +399,8 @@ export const useDashboardPage = ({
       Object.values(metrics).forEach((x) => x.refetch());
     },
     remove: () => {
-      Object.values(overTimeData).forEach((x) => x.remove());
-      Object.values(metrics).forEach((x) => x.remove());
+      Object.values(overTimeData).forEach((x) => x.refetch && x.refetch());
+      Object.values(metrics).forEach((x) => x.refetch && x.refetch());
     },
     models: ok(topModels),
     isModelsLoading,
