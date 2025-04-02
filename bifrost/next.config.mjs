@@ -32,6 +32,11 @@ const nextConfig = {
         destination: "https://us.helicone.ai/roadmap",
         permanent: true,
       },
+      {
+        source: "/blog/slash-llm-cost",
+        destination: "/blog/monitor-and-optimize-llm-costs",
+        permanent: true,
+      },
     ];
   },
   images: {

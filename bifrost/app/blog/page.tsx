@@ -456,7 +456,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "slash-llm-cost",
+      folderName: "monitor-and-optimize-llm-costs",
     },
   },
   {
