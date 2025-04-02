@@ -1,14 +1,16 @@
-Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable **open-source frameworks** in the AI agent landscape are **CrewAI** and **AutoGen**. 
+Selecting the right framework to power your agents is crucial for efficiency and scalability. Two notable open-source frameworks are **CrewAI** and **AutoGen**. 
 
-CrewAI offers collaborative and team-oriented workflows, while AutoGen offers finely tuned control for more intricate, iterative problem-solving.
+CrewAI offers collaborative and team-oriented workflows, while AutoGen offers finely tuned control for more intricate, iterative problem-solving. Both are part of the growing ecosystem of <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> that are transforming how developers build AI applications.
 
 ![CrewAI vs. AutoGen for building AI Agents](/static/blog/crewai-vs-autogen.webp)
 
-Both platforms are powerful and cater to different aspects of AI application development. Depending on your project’s specific needs, you might find one edges out the other. 
+Both platforms are powerful and cater to different aspects of AI application development. Depending on your project's specific needs, you might find one edges out the other.
 
 We will cover the key differences, example implementations, and share our recommendations for developers starting out in agent-building.
 
-## Key Differences: CrewAI vs AutoGen at a Glance
+## Table of Contents
+
+## How are CrewAI and AutoGen different?
 
 | Feature             | CrewAI                                                                                 | AutoGen                                                                                    |
 | ------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
@@ -22,7 +24,10 @@ We will cover the key differences, example implementations, and share our recomm
 | Use Case Fit        | Ideal for known, structured processes that need regular execution.                     | Better for complex, one-time tasks that require dynamic problem-solving.                   |
 | Verbosity           | More structured logging with better terminal output to understand process flow.        | More raw output that may require additional interpretation.                                 |
 
-## Table of Contents
+### Other comparisons you might like:
+
+- <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">Deep Dive: CrewAI vs. Dify AI</a>
+- <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank" rel="noopener">Deep Dive: LlamaIndex vs. LangChain</a>
 
 ## What is CrewAI?
 
@@ -75,10 +80,10 @@ crew = Crew(
 
 _Note: Always check CrewAI's official <a href="https://docs.crewai.com/concepts/agents" target="_blank" rel="noopener">documentation</a> for the most up-to-date information and best practices._
 
-### Use Cases of CrewAI
+### Best Use Cases for CrewAI
 
-- Better for prototyping and quickly testing complex agent interactions.
-- Better for automating regular workflows with a defined structure.
+- Prototyping and quickly testing complex agent interactions.
+- Automating regular workflows with a defined structure.
 
 #### Example 1: Multi-stage data processing
 
@@ -102,11 +107,9 @@ support_crew = Crew(agents=[first_line, specialist, escalation])
 result = support_crew.kickoff()
 ```
 
-_You might find these helpful: <a href="https://pypi.org/project/crewai/" target="_blank" rel="noopener">Python Package</a>_
+_You might find <a href="https://pypi.org/project/crewai/" target="_blank" rel="noopener">this Python package docs</a> helpful for getting started with CrewAI._
 
----
-
-## What is AutoGen AI?
+## What is AutoGen?
 
 `free` `open-source`
 
@@ -146,10 +149,10 @@ joe = ConversableAgent(
 
 _Note: Always check <a href="https://microsoft.github.io/autogen/0.2/docs/tutorial/introduction/#agents" target="_blank" rel="noopener">AutoGen's official documentation</a> for the most up-to-date information and best practices._
 
-### Use Cases of AutoGen
+### Best Use Cases for AutoGen
 
-- Preferred for tasks requiring precise control over information processing and API access.
-- Better for one-time, complex problem-solving where the solution approach is unclear.
+- Tasks requiring precise control over information processing and API access.
+- One-time, complex problem-solving where the solution approach is unclear.
 
 #### Example 1: Single agent performing data retrieval
 
@@ -169,31 +172,31 @@ user_proxy.initiate_chat(data_retriever) # start the conversation
 user_proxy.initiate_chat(data_analyst)
 ```
 
----
+## CrewAI and AutoGen, which framework is better for beginners?
 
-## Which framework is better for beginners, CrewAI or AutoGen?
-
-For beginners, **CrewAI is generally considered the more accessible** and easier-to-use framework compared to AutoGen. Here’s why:
+For beginners, **CrewAI is generally considered the more accessible** and easier-to-use framework compared to AutoGen. Here's why:
 
 1. Faster setup process and more straightforward to get started with
 2. Documentation contains examples, which is particularly beneficial for beginners
 3. Higher level of abstraction, helps beginners quickly prototype and explore multi-agent interactions without delving too deeply into complex setups
 
-## Microsoft AutoGen vs CrewAI: Experienced Developer Opinions
+When working with either framework, you might want to consider using Helicone's <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> feature to track and visualize your agent workflows, making debugging and optimization much easier.
+
+## What do Experienced Developers Think?
 
 Many developers find that the choice between AutoGen or CrewAI depends on the specific project requirements:
 
 - Some prefer **AutoGen** for its ability to run multiple models concurrently and handle more complex code execution.
-- Others appreciate **CrewAI**'s integration with LangChain and its broader ecosystem support, making it more accessible.
+- Others appreciate **CrewAI**'s integration with <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank" rel="noopener">LangChain</a> and its broader ecosystem support, making it more accessible.
 - A common recommendation is to choose between **CrewAI or AutoGen** based on your problem-solving approach: **CrewAI** if you know how to solve a problem and want to automate the process, and **AutoGen** if you want the agent to come up with a solution for you.
 
 ## CrewAI vs AutoGen: Real-world Reviews
 
-Autogen and CrewAI are frequently compared in developer communities. 
+AutoGen and CrewAI are frequently compared in developer communities. 
 
 One user explains the distinction perfectly:
 
-> TL;Dr: Use CrewAi if you know how to solve a problem and want to automate the process. Use Autogen if you don't know how to solve a problem and want a set of experts to come up with a solution for you.
+> TL;DR: Use CrewAI if you know how to solve a problem and want to automate the process. Use AutoGen if you don't know how to solve a problem and want a set of experts to come up with a solution for you.
 
 This suggests that while CrewAI excels at structured, repeatable processes, AutoGen shines in dynamic problem-solving scenarios.
 
@@ -215,20 +218,32 @@ Many production environments leverage aspects of both frameworks depending on th
 | ⬥ Seamless integration with LangChain ecosystem | ⬥ Better performance with concurrent operations in production environments |
 | ⬥ Rapid prototyping of agent interactions with minimal setup | ⬥ Advanced capabilities for autonomous coding tasks and technical workflows |
 
+<CallToAction 
+title="Debug your LLM workflows 10x Faster with Helicone 💡" 
+description="Helicone's Sessions feature allows you to trace and visualize your agentic workflows, making debugging and optimization much faster."
+primaryButtonText="Get Started for Free"
+primaryButtonLink="https://helicone.ai/signup"
+secondaryButtonText="Read our Docs"
+secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
+
 ## Bottom Line
 
 Your choice between CrewAI and AutoGen ultimately depends on your specific use case, technical requirements, and development approach.
 
 CrewAI excels when you have **clearly defined workflows** that need consistent execution and prefer a more accessible entry point. Meanwhile, AutoGen shines when tackling **complex, open-ended problems** where the solution path itself needs to be discovered through agent collaboration.
 
-It's also worth noting that there are many other awesome and rapidly evolving <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> out there for you to try. 
+No matter which framework you choose, consider using Helicone's <a href="https://docs.helicone.ai/features/advanced-usage/evaluation/overview" target="_blank" rel="noopener">evaluation tools</a> to monitor and evaluate your agents' performance in real-world scenarios.
 
-So, we encourage you to explore multiple options (even beyond CrewAI and AutoGen) to find the best fit for your use case, and stay updated with the latest advancements in the field.
+It's also worth noting that there are many other awesome and rapidly evolving <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">AI agent frameworks</a> out there for you to try. 
 
-### Other Comparisons?
+So, we encourage you to explore multiple options (even beyond CrewAI and AutoGen) to find the best fit for your use case!
 
-- <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">Deep Dive: CrewAI vs. Dify AI</a>
-- <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" target="_blank" rel="noopener">Deep Dive: LlamaIndex vs. LangChain</a>
+### Related Readings
+
+- <a href="https://docs.helicone.ai/getting-started/integration-method/crewai" target="_blank" rel="noopener">Monitor your CrewAI agents with Helicone</a> 
+- <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions: Track Your AI Agent Workflows</a>
+- <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" target="_blank" rel="noopener">Comparing CrewAI vs. Dify AI, A No-Code Alternative</a>
 - <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">7 Awesome Open-Source AI Agent Builders</a>
 
 <FAQ items={[
