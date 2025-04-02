@@ -415,6 +415,7 @@ Optimize your AI API costs:`;
           height={92}
           quality={100}
           className="mx-auto mb-4 h-auto w-auto max-w-[100px]"
+          priority
         />
         <h1 className="text-4xl font-semibold text-slate-700 mb-2">
           {provider && model ? (
