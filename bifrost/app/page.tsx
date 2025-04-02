@@ -3,6 +3,7 @@ import { Layout } from "@/app/components/Layout";
 import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
 
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
@@ -51,56 +52,53 @@ export default async function Home() {
     <Layout>
       <main className="bg-white text-landing-description">
         <div className="max-w-8xl mx-auto">
-          {/* <Banner /> */}
           <Hero />
-
-          {/* Wrap sections below the fold in Suspense */}
           <Prototype />
-          <Suspense fallback={<LoadingSection height="h-24" />}>
+          <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
             <Companies />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Integrations />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote2 />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <LLMLifecycle />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Log />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Evaluate />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Experiment />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Production />
-          </Suspense>
-          <Suspense fallback={<LoadingSection height="h-[40rem]" />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection height="h-[40rem]" />}>
             <BigDashboard />
-          </Suspense>
-          <Suspense fallback={<LoadingSection height="h-48" />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection height="h-48" />}>
             <Stats totalValuesData={totalValuesData} />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <OpenSource />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <FAQ />
-          </Suspense>
-          <Suspense fallback={<LoadingSection />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote3 />
-          </Suspense>
-          <Suspense fallback={<LoadingSection height="h-64" />}>
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection height="h-64" />}>
             <CTA />
-          </Suspense>
+          </LazyLoadComponent>
         </div>
       </main>
     </Layout>
