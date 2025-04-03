@@ -5,7 +5,7 @@ import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageGroupProps {
   messages: PromptMessage[];
-  mappedRequest: MappedLLMRequest;
+  mappedRequest?: MappedLLMRequest;
   expandedChildren: { [key: string]: boolean };
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<{ [key: string]: boolean }>

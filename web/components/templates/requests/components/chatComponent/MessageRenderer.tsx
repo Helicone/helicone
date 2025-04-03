@@ -8,7 +8,7 @@ import { PROMPT_MODES } from "./chatTopBar";
 interface MessageRendererProps {
   messages: PromptMessage[];
   showAllMessages: boolean;
-  mappedRequest: MappedLLMRequest;
+  mappedRequest?: MappedLLMRequest;
   expandedChildren: Record<string, boolean>;
   setExpandedChildren: React.Dispatch<
     React.SetStateAction<Record<string, boolean>>
