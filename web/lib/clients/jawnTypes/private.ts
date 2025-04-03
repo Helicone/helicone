@@ -720,6 +720,12 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** @enum {string} */
+      type?: "input_image" | "input_text" | "input_file";
       audio_data?: string;
       image_url?: string;
       timestamp?: string;
@@ -727,10 +733,11 @@ Json: JsonObject;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       name?: string;
-      role?: string;
+      instruction?: string;
+      role?: string | ("user" | "assistant" | "system" | "developer");
       id?: string;
       /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
+      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;
@@ -763,6 +770,7 @@ Json: JsonObject;
       model?: string;
       messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
+      instructions?: string | null;
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
@@ -798,6 +806,29 @@ Json: JsonObject;
       size?: string;
       quality?: string;
     };
+    Response: {
+      contentArray?: components["schemas"]["Response"][];
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** Format: double */
+      idx?: number;
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      text?: string;
+      /** @enum {string} */
+      type: "input_image" | "input_text" | "input_file";
+      name?: string;
+      /** @enum {string} */
+      role: "user" | "assistant" | "system" | "developer";
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
+    };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
         /** @enum {string} */
@@ -829,6 +860,8 @@ Json: JsonObject;
         heliconeMessage: unknown;
       };
       model?: string | null;
+      instructions?: string | null;
+      responses?: components["schemas"]["Response"][] | null;
       messages?: components["schemas"]["Message"][] | null;
     };
     LlmSchema: {
