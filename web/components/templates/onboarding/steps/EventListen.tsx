@@ -1,17 +1,21 @@
-import { Result } from "@/lib/result";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import * as Listening from "../../../../public/lottie/Listening.json";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
-import { ArrowUpRightIcon, MessageCircleQuestionIcon } from "lucide-react";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useState } from "react";
+import { DialogFooter } from "@/components/ui/dialog";
+import { useRouter } from "next/router";
+import { MessageCircleQuestionIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useQuery } from "@tanstack/react-query";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+
+// Import JSON files directly
+import * as Listening from "../../../../public/lottie/Listening.json";
+import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
+
+// Dynamic import of Lottie
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
 
 const EventListen = ({
@@ -22,11 +26,11 @@ const EventListen = ({
   close: () => void;
 }) => {
   const [loading, setLoading] = useState(false);
-  const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
-    ["hasOnboarded"],
-    async () => {
-      const response = await fetch("/api/user/checkOnboarded", {
-        method: "POST",
+  const { data } = useQuery({
+    queryKey: ["event-listen"],
+    queryFn: async () => {
+      const response = await fetch("/api/request/onboard-check", {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -40,12 +44,10 @@ const EventListen = ({
 
       return jsonData;
     },
-    {
-      refetchOnWindowFocus: false,
-      refetchInterval: 3000,
-      enabled: true,
-    }
-  );
+    refetchOnWindowFocus: false,
+    refetchInterval: 3000,
+    enabled: true,
+  });
 
   const jawn = useJawnClient();
 

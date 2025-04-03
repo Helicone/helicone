@@ -14,18 +14,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import clsx from "clsx";
 import PromptPlayground from "../../../id/promptPlayground";
-import {
-  useExperimentRequestData,
-  useExperimentTable,
-} from "../hooks/useExperimentTable";
+import { useExperimentTable } from "../hooks/useExperimentTable";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
-import { TriangleAlertIcon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export type HypothesisCellRef = {
   runHypothesis: () => Promise<void>;
@@ -53,9 +44,45 @@ export const HypothesisCellRenderer = forwardRef<
     const [content, setContent] = useState<string | null>(null);
     const [playgroundPrompt, setPlaygroundPrompt] = useState<any>(null);
 
-    const { requestsData, isRequestsLoading } = useExperimentRequestData(
-      hypothesisRequestId ?? ""
-    );
+    const {
+      data: requestsData,
+      isLoading: isRequestsLoading,
+      isError: isRequestsError,
+    } = useQuery({
+      queryKey: ["hypothesisRequest", hypothesisRequestId, promptVersionId],
+      queryFn: async () => {
+        if (!hypothesisRequestId) return null;
+
+        const res = await jawnClient.GET("/v1/request/{requestId}", {
+          params: {
+            path: {
+              requestId: hypothesisRequestId,
+            },
+          },
+        });
+
+        const parentPromptVersion = await jawnClient.GET(
+          "/v1/prompt/version/{promptVersionId}",
+          {
+            params: {
+              path: {
+                promptVersionId:
+                  (res.data?.data as any)?.parent_prompt_version ?? "",
+              },
+            },
+          }
+        );
+
+        return {
+          ...(res.data?.data as any),
+          parent_prompt_version: parentPromptVersion?.data?.data,
+        };
+      },
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
     const jawnClient = useJawnClient();
 
     useEffect(() => {
@@ -64,46 +91,6 @@ export const HypothesisCellRenderer = forwardRef<
 
     const { runHypothesis, wrapText, selectedScoreKey } =
       useExperimentTable(experimentTableId);
-
-    const { data: promptTemplate } = useQuery(
-      ["promptTemplate", promptVersionId],
-      async () => {
-        if (!promptVersionId) return null;
-
-        const res = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: promptVersionId,
-              },
-            },
-          }
-        );
-
-        const parentPromptVersion = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: res.data?.data?.parent_prompt_version ?? "",
-              },
-            },
-          }
-        );
-
-        return {
-          ...res.data?.data,
-          parent_prompt_version: parentPromptVersion?.data?.data,
-        };
-      },
-      {
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-      }
-    );
 
     const queryClient = useQueryClient();
 
@@ -153,31 +140,31 @@ export const HypothesisCellRenderer = forwardRef<
 
     useEffect(() => {
       if (
-        requestsData?.responseBody?.response?.choices?.[0]?.message?.content
+        requestsData?.response_body?.response?.choices?.[0]?.message?.content
       ) {
         setContent(
-          requestsData.responseBody.response.choices[0].message.content
+          requestsData.response_body.response.choices[0].message.content
         );
         setRunning(false);
       } else if (
         // if the initial model is claude
-        requestsData?.responseBody?.response?.content &&
-        requestsData?.responseBody?.response?.content?.length > 0
+        requestsData?.response_body?.response?.content &&
+        requestsData?.response_body?.response?.content?.length > 0
       ) {
-        setContent(requestsData.responseBody.response.content[0].text);
+        setContent(requestsData.response_body.response.content[0].text);
         setRunning(false);
       }
     }, [
-      requestsData?.responseBody?.response?.choices,
-      requestsData?.responseBody?.response?.content,
+      requestsData?.response_body?.response?.choices,
+      requestsData?.response_body?.response?.content,
     ]);
 
     useEffect(() => {
-      if (content || (promptTemplate?.helicone_template as any)?.messages) {
+      if (content || (requestsData?.parent_prompt_version as any)?.messages) {
         setPlaygroundPrompt({
           model: initialModel,
           messages: [
-            ...((promptTemplate?.helicone_template as any)?.messages ?? []),
+            ...((requestsData?.parent_prompt_version as any)?.messages ?? []),
             content
               ? {
                   role: "assistant",
@@ -187,7 +174,7 @@ export const HypothesisCellRenderer = forwardRef<
           ],
         });
       }
-    }, [content, promptTemplate?.helicone_template, initialModel]);
+    }, [content, requestsData?.parent_prompt_version, initialModel]);
 
     const handleRunHypothesis = async (e?: React.MouseEvent) => {
       e?.stopPropagation();
@@ -281,22 +268,12 @@ export const HypothesisCellRenderer = forwardRef<
                 </div>
               </div>
               <div className="absolute bottom-2 right-2 text-xs text-slate-500 z-[20]">
-                {new Date(promptTemplate?.updated_at ?? "").getTime() >
-                  new Date(
-                    requestsData?.request_created_at ?? ""
-                  ).getTime() && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <TriangleAlertIcon className="w-4 h-4 text-yellow-500" />
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="left"
-                      className="text-[11px] py-px px-1 border-0 text-yellow-500 dark:text-yellow-500 shadow-none rounded-none bg-yellow-50 dark:bg-yellow-950"
-                    >
-                      Prompt has changed since this cell was last run
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                {new Date(requestsData?.created_at ?? "").getTime() >
+                new Date(requestsData?.request_created_at ?? "").getTime()
+                  ? new Date(requestsData?.created_at ?? "").toLocaleString()
+                  : new Date(
+                      requestsData?.request_created_at ?? ""
+                    ).toLocaleString()}
               </div>
             </div>
           </PopoverTrigger>

@@ -45,9 +45,9 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
     data: inputRecordsData,
     isLoading,
     isError,
-  } = useQuery(
-    ["inputRecords", promptVersionId],
-    async () => {
+  } = useQuery({
+    queryKey: ["inputRecords", promptVersionId],
+    queryFn: async () => {
       const res = await jawn.POST(
         "/v1/prompt/version/{promptVersionId}/inputs/query",
         {
@@ -63,10 +63,8 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
       );
       return res.data?.data ?? [];
     },
-    {
-      enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
-    }
-  );
+    enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
+  });
 
   // Process input records
   const inputRecords = useMemo(() => {

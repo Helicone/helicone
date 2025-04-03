@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 const Lottie = dynamic(() => import("react-lottie"), { ssr: false });
-import { Result } from "../../../../lib/result";
 import * as Listening from "../../../../public/lottie/Listening.json";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import * as PartyParrot from "../../../../public/lottie/PartyParrot.json";
@@ -25,35 +24,22 @@ const EventListen = (props: EventListenProps) => {
     nextStep();
   };
 
-  const { data, isSuccess } = useQuery<Result<boolean, string>, Error>(
-    ["hasOnboarded"],
-    async () => {
-      const response = await fetch("/api/user/checkOnboarded", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const jsonData = await response.json();
-
-      if (!response.ok) {
-        return null;
-      }
-
+  const { data: message } = useQuery({
+    queryKey: ["exampleRequest"],
+    queryFn: async () => {
+      const result = await fetch("/api/onboarding/exampleRequest");
+      const jsonData = await result.json();
       return jsonData;
     },
-    {
-      refetchOnWindowFocus: false,
-      refetchInterval: 3000,
-      enabled: true,
-    }
-  );
+    refetchOnWindowFocus: false,
+    refetchInterval: 3000,
+    enabled: true,
+  });
 
   return (
     <div id="content" className="w-full flex flex-col ">
       <div className="flex flex-col p-4 h-full">
-        {data && data.data ? (
+        {message && message.data ? (
           <>
             <LoadingAnimation animation={PartyParrot} height={75} width={75} />
             <p className="text-lg md:text-xl font-semibold text-center mt-4">
@@ -170,11 +156,11 @@ const EventListen = (props: EventListenProps) => {
         <Button
           size={"sm"}
           onClick={() => {
-            if (data && data.data) {
+            if (message && message.data) {
               nextStepHandler();
             }
           }}
-          disabled={!isSuccess}
+          disabled={!message}
         >
           Next
         </Button>
