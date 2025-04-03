@@ -10,6 +10,8 @@ import { IHeliconeHeaders } from "./HeliconeHeaders";
 import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
+import { MAPPERS } from "../../packages/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "../../packages/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 
@@ -77,16 +79,45 @@ export class HeliconeProxyRequestMapper {
 
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
-      const { templateWithInputs } = parseJSXObject(
-        JSON.parse(await this.request.getRawText())
-      );
+      try {
+        const rawJson = JSON.parse(await this.request.getRawText());
 
-      // Use promptInputs from requestWrapper instead when provided
-      if (this.request.promptSettings.promptInputs) {
-        templateWithInputs.inputs = this.request.promptSettings.promptInputs;
+        // Get the mapper type based on the request
+        const mapperType = getMapperType({
+          model: rawJson.model,
+          provider: this.provider,
+          path: this.request.url.pathname,
+        });
+
+        // Map the request using the appropriate mapper
+        const mapper = MAPPERS[mapperType];
+        if (!mapper) {
+          console.error(`No mapper found for type ${mapperType}`);
+          return null;
+        }
+
+        const mappedResult = mapper({
+          request: rawJson,
+          response: { choices: [] },
+          statusCode: 200,
+          model: rawJson.model,
+        });
+
+        // Parse JSX object from the mapped request schema
+        const { templateWithInputs } = parseJSXObject(
+          mappedResult.schema.request
+        );
+
+        // Use promptInputs from requestWrapper instead when provided
+        if (this.request.promptSettings.promptInputs) {
+          templateWithInputs.inputs = this.request.promptSettings.promptInputs;
+        }
+
+        return templateWithInputs;
+      } catch (error) {
+        console.error("Error in getHeliconeTemplate:", error);
+        return null;
       }
-
-      return templateWithInputs;
     }
     return null;
   }
