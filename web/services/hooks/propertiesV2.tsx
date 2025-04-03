@@ -68,8 +68,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
       );
     },
     enabled:
-      debouncedPropertySearch.property !== "" && !propertiesQuery.isLoading,
-    keepPreviousData: true,
+      debouncedPropertySearch.property !== "" && !propertiesQuery.isPending,
   });
 
   const propertyFilters = useMemo(() => {
@@ -86,7 +85,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
 
   return {
     properties: allProperties,
-    isLoading: propertiesQuery.isLoading,
+    isLoading: propertiesQuery.isPending,
     error: propertiesQuery.error,
     propertyFilters,
     searchPropertyFilters,

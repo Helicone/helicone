@@ -33,7 +33,7 @@ const useAlertBanners = () => {
 };
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
-  const { mutate: createBanner, isLoading: isCreatingBanner } = useMutation({
+  const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({
     mutationKey: ["create-alert-banner"],
     mutationFn: async (req: { title: string; message: string }) => {
       const jawnClient = getJawnClient();
@@ -55,7 +55,7 @@ const useCreateAlertBanner = (onSuccess?: () => void) => {
 };
 
 const useUpdateAlertBanner = (onSuccess?: () => void) => {
-  const { mutate: updateBanner, isLoading: isUpdatingBanner } = useMutation({
+  const { mutate: updateBanner, isPending: isUpdatingBanner } = useMutation({
     mutationKey: ["update-alert-banner"],
     mutationFn: async (req: { id: number; active: boolean }) => {
       const jawnClient = getJawnClient();
@@ -80,7 +80,7 @@ const useUpdateAlertBanner = (onSuccess?: () => void) => {
 };
 
 const useUpdateSetting = (onSuccess?: () => void) => {
-  const { mutate: updateSetting, isLoading: isUpdatingSetting } = useMutation({
+  const { mutate: updateSetting, isPending: isUpdatingSetting } = useMutation({
     mutationKey: ["update-settings"],
     mutationFn: async (req: {
       name: components["schemas"]["SettingName"];

@@ -99,7 +99,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const jawn = useJawnClient();
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-    propertyFilters
+    Array.isArray(propertyFilters) ? propertyFilters : []
   );
 
   function encodeFilter(filter: UIFilterRow): string {

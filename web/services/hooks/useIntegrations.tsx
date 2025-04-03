@@ -33,7 +33,7 @@ export function useIntegration(integrationName: IntegrationNames) {
     },
   });
 
-  const { mutate: updateIntegration, isLoading: isUpdatingIntegration } =
+  const { mutate: updateIntegration, isPending: isUpdatingIntegration } =
     useMutation({
       mutationFn: async (params: {
         autoDatasetSync: boolean;

@@ -37,6 +37,6 @@ export function useUpgradePlan() {
 
   return {
     handleUpgradeTeam,
-    isLoading: upgradeToTeamBundle.isLoading,
+    isLoading: upgradeToTeamBundle.isPending,
   };
 }

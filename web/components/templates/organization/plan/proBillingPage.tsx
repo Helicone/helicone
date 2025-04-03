@@ -342,9 +342,9 @@ export const ProPlanCard = () => {
                     console.error("Failed to reactivate subscription");
                   }
                 }}
-                disabled={reactivateSubscription.isLoading}
+                disabled={reactivateSubscription.isPending}
               >
-                {reactivateSubscription.isLoading
+                {reactivateSubscription.isPending
                   ? "Reactivating..."
                   : "Reactivate Subscription"}
               </Button>
@@ -362,9 +362,9 @@ export const ProPlanCard = () => {
                     );
                   }
                 }}
-                disabled={manageSubscriptionPaymentLink.isLoading}
+                disabled={manageSubscriptionPaymentLink.isPending}
               >
-                {manageSubscriptionPaymentLink.isLoading
+                {manageSubscriptionPaymentLink.isPending
                   ? "Loading..."
                   : "Manage Subscription"}
               </Button>

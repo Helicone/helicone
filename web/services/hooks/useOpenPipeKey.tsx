@@ -8,7 +8,7 @@ export function useOpenPipeKey() {
   const jawnClient = useJawnClient();
   const { setNotification } = useNotification();
 
-  const { data: existingKey, isLoading: isLoadingVault } = useQuery({
+  const { data: existingKey, isPending: isLoadingVault } = useQuery({
     queryKey: ["openPipeKey"],
     queryFn: async () => {
       const response = await jawnClient.GET("/v1/vault/keys");
@@ -19,7 +19,7 @@ export function useOpenPipeKey() {
     },
   });
 
-  const { mutate: saveKey, isLoading: isSavingKey } = useMutation({
+  const { mutate: saveKey, isPending: isSavingKey } = useMutation({
     mutationFn: async (newKey: string) => {
       if (existingKey?.id) {
         return jawnClient.PATCH(`/v1/vault/update/{id}`, {

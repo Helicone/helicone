@@ -9,20 +9,24 @@ const usePortalPage = () => {
 
   const { data, isLoading, refetch } = useQuery<
     Database["public"]["Tables"]["organization"]["Row"][]
-  >(["orgs", org?.currentOrg?.id], async (query) => {
-    const orgId = query.queryKey[1];
+  >({
+    queryKey: ["orgs", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const orgId = query.queryKey[1];
 
-    const { data, error } = await supabase
-      .from("organization")
-      .select("*")
-      .eq("soft_delete", false)
-      .eq("reseller_id", orgId);
+      const { data, error } = await supabase
+        .from("organization")
+        .select("*")
+        .eq("soft_delete", false)
+        .eq("reseller_id", orgId);
 
-    if (error) {
-      return [];
-    }
+      if (error) {
+        return [];
+      }
 
-    return data as Database["public"]["Tables"]["organization"]["Row"][];
+      return data as Database["public"]["Tables"]["organization"]["Row"][];
+    },
+    initialData: [],
   });
 
   return { data, isLoading, refetch };
