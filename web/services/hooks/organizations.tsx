@@ -165,7 +165,7 @@ const useGetOrg = (orgId: string) => {
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isPending, refetch } = useQuery({
     queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
       if (!user?.id) {
@@ -182,7 +182,7 @@ const useGetOrgs = () => {
       return data;
     },
     refetchOnWindowFocus: false,
-    refetchInterval: (data) => (data?.length === 0 ? 1_000 : false), // Refetch every 1 seconds if no orgs
+    refetchInterval: 10_000, // Refetch every 10 seconds
     refetchIntervalInBackground: true,
   });
 
@@ -196,7 +196,7 @@ const useGetOrgs = () => {
 
   return {
     data,
-    isLoading,
+    isPending,
     refetch,
   };
 };

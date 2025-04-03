@@ -1,8 +1,9 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ScoresGraph from "./ScoresGraph";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { PromptVersion } from "./PromptVersion";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const ScoresGraphContainer = ({
   experimentId,
@@ -13,6 +14,8 @@ const ScoresGraphContainer = ({
 }) => {
   const { fetchExperimentHypothesisScores } = useExperimentScores(experimentId);
   const queryClient = useQueryClient();
+  const org = useOrg();
+
   const {
     data: scores,
     isLoading,
@@ -20,17 +23,18 @@ const ScoresGraphContainer = ({
   } = useQuery({
     queryKey: ["experimentScores", experimentId],
     queryFn: async () => {
-      const scoresData: Record<string, Record<string, any>> = {};
+      const scoresData: Record<string, any> = {};
 
-      // Add signal handling to prevent query cancellation
+      // Query for scores for each prompt version
       const results = await Promise.all(
-        promptVersions.map(async (promptVersion) => {
-          if (promptVersion.id) {
+        promptVersions.map(async (pv) => {
+          if (pv.id) {
             return {
-              id: promptVersion.id,
-              data: await fetchExperimentHypothesisScores(promptVersion.id),
+              id: pv.id,
+              data: await fetchExperimentHypothesisScores(pv.id),
             };
           }
+          return null;
         })
       );
 
@@ -46,15 +50,19 @@ const ScoresGraphContainer = ({
     // Add these options to prevent cancellation
     staleTime: 0,
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      Object.entries(data).forEach(([promptVersionId, score]) => {
+  });
+
+  // Handle the data setting when scores change
+  useEffect(() => {
+    if (scores) {
+      Object.entries(scores).forEach(([promptVersionId, score]) => {
         queryClient.setQueryData(
           ["experimentScores", experimentId, promptVersionId],
           score ?? ""
         );
       });
-    },
-  });
+    }
+  }, [scores, experimentId, queryClient]);
 
   useEffect(() => {
     refetch();

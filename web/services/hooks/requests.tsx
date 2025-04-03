@@ -124,7 +124,6 @@ export const useGetRequestsWithBodies = (
     },
     refetchOnWindowFocus: false,
     refetchInterval: isLive ? 1_000 : false,
-    keepPreviousData: true,
   });
 
   const requestsWithSignedUrls = data?.data ?? [];
@@ -172,7 +171,6 @@ export const useGetRequestsWithBodies = (
 
         return { request, bodyContent: null };
       },
-      keepPreviousData: true,
       enabled: !!request.signed_body_url,
       staleTime: isLive ? 2000 : 0,
     })),
@@ -256,7 +254,7 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
-      cacheTime: 5 * 60 * 1000,
+      gcTime: 5 * 60 * 1000,
     }),
   };
 };

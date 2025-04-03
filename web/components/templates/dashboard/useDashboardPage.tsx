@@ -8,6 +8,8 @@ import {
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { useCallback, useMemo } from "react";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
@@ -34,8 +36,6 @@ import {
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
-import { useFilterStore } from "@/filterAST/store/filterStore";
-import { toFilterNode } from "@/filterAST/toFilterNode";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -87,7 +87,9 @@ export const useUIFilterConvert = (
 
   const filterMap = useMemo(() => {
     return (DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-      properties.propertyFilters
+      Array.isArray(properties.propertyFilters)
+        ? properties.propertyFilters
+        : []
     );
   }, [properties.propertyFilters]);
 
@@ -395,10 +397,6 @@ export const useDashboardPage = ({
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());
-    },
-    remove: () => {
-      Object.values(overTimeData).forEach((x) => x.remove());
-      Object.values(metrics).forEach((x) => x.remove());
     },
     models: ok(topModels),
     isModelsLoading,

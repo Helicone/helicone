@@ -394,7 +394,7 @@ export const UpgradeProDialog = ({
               }
             }
           }}
-          disabled={upgradeToPro.isLoading || upgradeToTeamBundle.isLoading}
+          disabled={upgradeToPro.isPending || upgradeToTeamBundle.isPending}
         >
           Start 7-day free trial
         </Button>
