@@ -3,11 +3,55 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { OTELTrace, TraceManager } from "../../managers/traceManager";
 import * as protobuf from "protobufjs";
 import path from "path";
+import { CustomTraceManager } from "../../managers/customTraceManager";
 
 @Route("v1/trace")
 @Tags("Trace")
 @Security("api_key")
 export class TraceController extends Controller {
+  @Post("custom/v1/log")
+  public async logCustomTraceLegacy(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() traceBody: any
+  ) {
+    await this.processCustomTrace(request, traceBody);
+  }
+
+  @Post("custom/log")
+  public async logCustomTrace(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() traceBody: any
+  ) {
+    await this.processCustomTrace(request, traceBody);
+  }
+
+  private async processCustomTrace(
+    request: JawnAuthenticatedRequest,
+    traceBody: any
+  ) {
+    console.log("Received traces.");
+    const traceManager = new CustomTraceManager();
+
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(request.headers)) {
+      if (typeof value === "string") {
+        headers.set(key, value);
+      }
+    }
+    try {
+      await traceManager.consumeLog(
+        traceBody,
+        headers,
+        request.header("authorization") ?? "",
+        request.authParams
+      );
+      this.setStatus(200);
+    } catch (error: any) {
+      console.error(`Error processing custom trace: ${error.message}`);
+      this.setStatus(500);
+    }
+  }
+
   @Post("log")
   public async logTrace(
     @Request() request: JawnAuthenticatedRequest,

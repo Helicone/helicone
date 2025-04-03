@@ -214,6 +214,12 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
+  "/v1/trace/custom/v1/log": {
+    post: operations["LogCustomTraceLegacy"];
+  };
+  "/v1/trace/custom/log": {
+    post: operations["LogCustomTrace"];
+  };
   "/v1/trace/log": {
     post: operations["LogTrace"];
   };
@@ -1022,11 +1028,6 @@ export interface components {
       response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_RequestResponseSearchToOperators_: {
-      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
       session_session_id?: components["schemas"]["Partial_TextOperators_"];
       session_session_name?: components["schemas"]["Partial_TextOperators_"];
@@ -1048,12 +1049,11 @@ export interface components {
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       properties?: {
@@ -1063,8 +1063,8 @@ export interface components {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -3908,6 +3908,32 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
         };
+      };
+    };
+  };
+  LogCustomTraceLegacy: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogCustomTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };
