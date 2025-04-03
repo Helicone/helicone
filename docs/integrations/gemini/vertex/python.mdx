@@ -62,3 +62,195 @@ iconType: "solid"
     ```
   </Step>
 </Steps>
+
+# Manual Logging with Log Builder
+
+For more control over logging, especially with asynchronous and streaming responses, you can use the Helicone Manual Logger:
+
+<Steps>
+  <Step title="Install additional required packages">
+    ```bash
+    pip install python-dotenv helicone
+    ```
+  </Step>
+  <Step title="Create a log builder example">
+    This example demonstrates using the Helicone log builder with both async and streaming responses:
+
+    ```python
+    import os
+    import asyncio
+    from dotenv import load_dotenv
+    import vertexai
+    from vertexai.generative_models import GenerativeModel
+    from helicone_helpers import HeliconeManualLogger
+    import warnings
+    import sys
+
+    # Load environment variables
+    load_dotenv()
+
+    HELICONE_API_KEY = os.getenv("HELICONE_API_KEY")
+    PROJECT_ID = os.getenv("PROJECT_ID")
+    LOCATION = os.getenv("LOCATION")
+
+    helicone_logger = HeliconeManualLogger(api_key=HELICONE_API_KEY)
+
+    async def generate_content_async(model, prompt="Tell me a joke"):
+        generate_kwargs = {
+            "contents": [prompt],
+        }
+
+        log_builder = helicone_logger.new_builder(
+            request=generate_kwargs
+        )
+        log_builder.add_model("gemini-1.5-pro")
+        try:
+            response = await model.generate_content_async(**generate_kwargs)
+            log_builder.add_response(response.to_dict())
+            print(f"Response: {response.text}")
+            return response.text
+        except Exception as e:
+            print(f"Error: {e}")
+            return str(e)
+        finally:
+            await log_builder.send_log()
+
+    async def generate_content_streaming(model: GenerativeModel, prompt="Tell me a joke"):
+        generate_kwargs = {
+            "contents": [prompt],
+            "stream": True,
+        }
+
+        log_builder = helicone_logger.new_builder(
+            request=generate_kwargs
+        )
+        log_builder.add_model("gemini-1.5-pro")
+        try:
+            responses = await model.generate_content_async(**generate_kwargs)
+
+            full_response = []
+            print("Streaming response:")
+            async for response in responses:
+                log_builder.add_chunk(response.to_dict())
+                chunk = response.text
+                print(chunk, end="", flush=True)
+                full_response.append(chunk)
+            print("\n")
+            return "".join(full_response)
+        except Exception as e:
+            print(f"Error in streaming: {e}")
+            return str(e)
+        finally:
+            await log_builder.send_log()
+
+    async def main():
+        print("Vertex AI Gemini with Helicone Example")
+
+        vertexai.init(
+            project=PROJECT_ID,
+            location=LOCATION,
+        )
+
+        model = GenerativeModel(
+            "gemini-1.5-pro",
+            generation_config={"response_mime_type": "application/json"}
+        )
+
+        print("\n=== Regular Async Response ===")
+        await generate_content_async(model, "Tell me a joke about programming")
+
+        print("\n=== Streaming Response ===")
+        await generate_content_streaming(model, "Tell me a short 2 sentence story about a programmer")
+
+    if __name__ == "__main__":
+        if not sys.warnoptions:
+            warnings.filterwarnings("ignore", category=ResourceWarning)
+
+        asyncio.run(main())
+
+        sys.exit(0)
+    ```
+
+  </Step>
+  <Step title="Create the HeliconeManualLogger helper">
+    Create a file named `helicone_helpers.py` with the following content:
+
+    ```python
+    import json
+    import os
+    import aiohttp
+    import requests
+
+    class HeliconeManualLogger:
+        def __init__(self, api_key=None):
+            self.api_key = api_key or os.environ.get("HELICONE_API_KEY")
+            if not self.api_key:
+                raise ValueError("Helicone API key is required")
+
+            self.base_url = "https://api.helicone.ai/v1/log"
+
+        def new_builder(self, request):
+            return LogBuilder(self.api_key, request)
+
+    class LogBuilder:
+        def __init__(self, api_key, request):
+            self.api_key = api_key
+            self.request = request
+            self.model = None
+            self.response = None
+            self.chunks = []
+
+        def add_model(self, model):
+            self.model = model
+            return self
+
+        def add_response(self, response):
+            self.response = response
+            return self
+
+        def add_chunk(self, chunk):
+            self.chunks.append(chunk)
+            return self
+
+        async def send_log(self):
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            }
+
+            payload = {
+                "provider": "vertex",
+                "model": self.model,
+                "request": self.request
+            }
+
+            if self.response:
+                payload["response"] = self.response
+
+            if self.chunks:
+                payload["response_chunks"] = self.chunks
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.helicone.ai/v1/log",
+                    headers=headers,
+                    json=payload
+                ) as response:
+                    if response.status != 200:
+                        print(f"Failed to log to Helicone: {response.status}")
+                        text = await response.text()
+                        print(f"Response: {text}")
+                    return response.status == 200
+    ```
+
+  </Step>
+</Steps>
+
+The log builder approach provides several advantages:
+
+- Precise control over what gets logged
+- Support for both async and streaming responses
+- Ability to add custom properties and metadata
+- Manual control over when logs are sent
+
+This is particularly useful for complex applications where you need more control over the logging process.

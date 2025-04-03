@@ -1,4 +1,3 @@
-import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
 import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
 import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
@@ -16,6 +15,7 @@ const TIERS = [
   "enterprise",
   "demo",
   "team-20250130",
+  "free",
 ];
 
 export class LLMAsAJudge {

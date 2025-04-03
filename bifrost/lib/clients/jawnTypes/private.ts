@@ -281,7 +281,7 @@ export interface paths {
     post: operations["UpdateOnboardingStatus"];
   };
   "/v1/log/request": {
-    post: operations["GetRequests"];
+    post: operations["LogRequests"];
   };
   "/v1/gov-organization/limits/member/{memberId}": {
     get: operations["GetMemberLimits"];
@@ -325,6 +325,9 @@ export interface paths {
   };
   "/v1/alert/{alertId}": {
     delete: operations["DeleteAlert"];
+  };
+  "/v1/alert-banner": {
+    get: operations["GetAlertBanners"];
   };
   "/v1/admin/feature-flags": {
     post: operations["UpdateFeatureFlags"];
@@ -955,15 +958,6 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseSearchToOperators_: {
-      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
       /** Format: date-time */
       gte?: string;
@@ -982,6 +976,10 @@ Json: JsonObject;
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
@@ -1026,7 +1024,7 @@ Json: JsonObject;
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
@@ -1036,13 +1034,12 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -2146,6 +2143,20 @@ Json: JsonObject;
       /** Format: double */
       minimum_request_count?: number;
     };
+    "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          title: string;
+          message: string;
+          /** Format: double */
+          id: number;
+          created_at: string;
+          active: boolean;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -2833,16 +2844,31 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Log message to log */
+    /** @description Request query filters */
     requestBody: {
       content: {
-        "application/json": components["schemas"]["KafkaMessageContents"];
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
+         * }
+         */
+        "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
       };
     };
   };
@@ -3816,6 +3842,20 @@ export interface operations {
       };
     };
   };
+  LogRequests: {
+    /** @description Log message to log */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["KafkaMessageContents"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   GetMemberLimits: {
     parameters: {
       path: {
@@ -4100,6 +4140,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetAlertBanners: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_"];
         };
       };
     };

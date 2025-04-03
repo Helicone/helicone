@@ -1,11 +1,11 @@
 {
-  "title": "Comparing CrewAI vs. AutoGen for Building AI Agents",
-  "title1": "Comparing CrewAI vs. AutoGen for Building AI Agents",
-  "title2": "Comparing CrewAI vs. AutoGen for Building AI Agents",
-  "description": "CrewAI and AutoGen are two notable frameworks in the AI agent landscape. We will cover the key differences, example implementations and share our recommendations if you are starting out in agent-building.",
+  "title": "CrewAI vs. AutoGen: Which Open-Source Framework is Better for Building AI Agents?",
+  "title1": "CrewAI vs. AutoGen: Which Open-Source Framework is Better for Building AI Agents?",
+  "title2": "CrewAI vs. AutoGen: Which Open-Source Framework is Better for Building AI Agents?",
+  "description": "Want to build powerful AI agents but not sure which framework to choose? This in-depth comparison of CrewAI and AutoGen explores their strengths, limitations, and ideal use cases to help developers make the right choice for their agent-building projects.",
   "images": "/static/blog/crewai-vs-autogen.webp",
   "time": "5 minute read",
   "author": "Lina Lam",
-  "date": "November 8, 2024",
+  "date": "April 3, 2025",
   "badge": "compare"
 }

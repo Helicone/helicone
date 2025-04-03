@@ -70,6 +70,12 @@ const UserIdPage = (props: UserIdPageProps) => {
       <>
         {isLoading ? (
           <LoadingAnimation />
+        ) : !user ? (
+          <div className="grid grid-cols-10 gap-8 w-full pt-8">
+            <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
+              <p className="text-sm text-gray-500">User not found</p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-10 gap-8 w-full pt-8">
             <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
@@ -79,13 +85,13 @@ const UserIdPage = (props: UserIdPageProps) => {
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Cost</p>
                     <p className="text-sm text-gray-500">
-                      ${formatNumber(Number(user.cost || 0), 6)}
+                      ${formatNumber(Number(user?.cost ?? 0), 6)}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Requests</p>
                     <p className="text-sm text-gray-500">
-                      {user.total_requests}
+                      {user?.total_requests}
                     </p>
                   </div>
                   <div className="flex flex-col items-start space-y-1">
