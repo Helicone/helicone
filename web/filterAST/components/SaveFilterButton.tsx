@@ -5,7 +5,7 @@ import { useFilterAST } from "../context/filterContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Row } from "@/components/layout/common/row";
 
-interface SaveFilterButtonProps {}
+interface SaveFilterButtonProps { }
 
 const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
   const { crud, store: filterStore, helpers } = useFilterAST();
@@ -18,12 +18,12 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
           Saving...
         </div>
         <Button
-          variant="outline"
-          size="sm_sleek"
+          variant="glass"
+          size="sm"
           onClick={() => {
             helpers.saveFilter();
           }}
-          className="text-[10px] font-normal"
+          className="flex items-center gap-1 w-fit"
         >
           Save New
         </Button>
@@ -34,12 +34,12 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
   if (!filterStore.activeFilterId) {
     return (
       <Button
-        variant="outline"
-        size="sm_sleek"
+        variant="glass"
+        size="sm"
         onClick={() => {
           helpers.saveFilter();
         }}
-        className="text-[10px] font-normal"
+        className="flex items-center gap-1 w-fit"
       >
         Save New
       </Button>
@@ -51,7 +51,7 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
       <Row className="gap-2">
         <Button
           variant="default"
-          size="sm_sleek"
+          size="sm"
           onClick={() => {
             if (filterStore.activeFilterId) {
               helpers.updateFilterById(filterStore.activeFilterId, {
@@ -60,17 +60,17 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
               });
             }
           }}
-          className="text-[10px] font-normal"
+          className="flex items-center gap-1 w-fit"
         >
           Save
         </Button>
         <Button
-          variant="outline"
-          size="sm_sleek"
+          variant="glass"
+          size="sm"
           onClick={() => {
             helpers.saveFilter();
           }}
-          className="text-[10px] font-normal"
+          className="flex items-center gap-1 w-fit"
         >
           Save New
         </Button>
@@ -97,12 +97,12 @@ const SaveFilterButton: React.FC<SaveFilterButtonProps> = () => {
         <Link size={12} className="text-primary" />
       </Button>
       <Button
-        variant="outline"
-        size="sm_sleek"
+        variant="glass"
+        size="sm"
         onClick={() => {
           helpers.saveFilter();
         }}
-        className="text-[10px] font-normal"
+        className="flex items-center gap-1 w-fit"
       >
         Save New
       </Button>

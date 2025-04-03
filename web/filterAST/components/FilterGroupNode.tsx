@@ -88,7 +88,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
             variant={"secondary"}
             className="gap-1 border px-3"
           >
-            <XSmall className="font-normal">
+            <XSmall className="font-normal text-xs">
               {group.type === "and" ? "All" : "Any"}
             </XSmall>
             <ChevronsUpDown className="opacity-50" size={12} />
@@ -146,10 +146,10 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
               variant="ghost"
               onClick={handleAddCondition}
               size="sm_sleek"
-              className="flex gap-1 px-0"
+              className="flex gap-1 px-1.5"
             >
               <Plus size={10} />
-              <span className="text-[10px] font-normal">Add Condition</span>
+              <span className="text-[11px] font-normal">Add Condition</span>
             </Button>
           </div>
         )}
@@ -158,14 +158,14 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           <Row className="justify-between w-full">
             <Button
               variant="glass"
-              size="xs"
+              size="sm"
               className="flex items-center gap-1 w-fit"
               onClick={() => handleAddGroup()}
             >
               <Plus size={12} />
-              <span className="text-[10px] font-normal">
-                Add Condition Group
-              </span>
+              {/* <span className="text-xs font-normal"> */}
+              Add Condition Group
+              {/* </span> */}
             </Button>
             <SaveFilterButton />
           </Row>

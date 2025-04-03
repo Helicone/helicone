@@ -13,9 +13,9 @@ import {
   OrExpression,
 } from "./filterAst";
 
-interface FilterASTEditorProps {}
+interface FilterASTEditorProps { }
 
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
   const { store: filterStore, helpers } = useFilterAST();
 
   return (
@@ -39,17 +39,16 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
 
         <div className="flex items-center gap-1.5">
           <Row className="gap-1 items-center">
-            {filterStore.getFilterNodeCount() > 0 && (
-              <Badge
-                variant="default"
-                className="text-xs text-center hover:bg-primary hover:text-primary-foreground"
-              >
-                {filterStore.getFilterNodeCount()}
-              </Badge>
-            )}
             {filterStore.filter !== null && (
               <Button variant="ghost" size="xs" onClick={helpers.clearFilter}>
-                Clear
+                Clear {filterStore.getFilterNodeCount() > 0 && (
+                  <Badge
+                    variant="default"
+                    className="ml-2 text-xs text-center hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {filterStore.getFilterNodeCount()}
+                  </Badge>
+                )}
               </Button>
             )}
           </Row>
@@ -67,7 +66,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
         ) : (
           <Button
             variant="glass"
-            size="xs"
+            size="sm"
             className="flex items-center gap-1 w-fit"
             onClick={() => {
               filterStore.setFilter(DEFAULT_FILTER_GROUP_EXPRESSION);
@@ -75,7 +74,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
             }}
           >
             <Plus size={12} />
-            <span className="text-[10px] font-normal">Add Condition Group</span>
+            Add Condition Group
           </Button>
         )}
       </div>
