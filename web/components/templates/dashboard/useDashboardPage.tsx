@@ -387,8 +387,6 @@ export const useDashboardPage = ({
     Object.values(metrics).some(isLoading) ||
     isPropertiesLoading;
 
-  const queryClient = useQueryClient();
-
   return {
     filterMap,
     metrics,

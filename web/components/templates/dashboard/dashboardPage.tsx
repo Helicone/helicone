@@ -222,7 +222,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     overTimeData: realOverTimeData,
     isAnyLoading,
     refetch,
-
     models: realModels,
     isModelsLoading,
   } = useDashboardPage({
