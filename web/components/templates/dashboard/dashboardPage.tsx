@@ -222,7 +222,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     overTimeData: realOverTimeData,
     isAnyLoading,
     refetch,
-    remove,
+
     models: realModels,
     isModelsLoading,
   } = useDashboardPage({
@@ -497,7 +497,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             headerActions={
               <button
                 onClick={() => {
-                  remove();
                   refetch();
                 }}
                 className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"

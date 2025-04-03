@@ -1,4 +1,4 @@
-import { UseQueryResult } from "@tanstack/react-query";
+import { useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result, ok, resultMap } from "../../../lib/result";
 import {
@@ -387,6 +387,8 @@ export const useDashboardPage = ({
     Object.values(metrics).some(isLoading) ||
     isPropertiesLoading;
 
+  const queryClient = useQueryClient();
+
   return {
     filterMap,
     metrics,
@@ -397,10 +399,6 @@ export const useDashboardPage = ({
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());
-    },
-    remove: () => {
-      Object.values(overTimeData).forEach((x) => x.refetch && x.refetch());
-      Object.values(metrics).forEach((x) => x.refetch && x.refetch());
     },
     models: ok(topModels),
     isModelsLoading,

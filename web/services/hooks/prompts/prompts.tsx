@@ -2,7 +2,7 @@ import { LLMRequestBody } from "@/packages/llm-mapper/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import useNotification from "../../../components/shared/notification/useNotification";
-import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
+import { getJawnClient } from "../../../lib/clients/jawn";
 import { Result, resultMap } from "../../../lib/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
@@ -13,7 +13,7 @@ import {
 export const usePromptVersions = (promptId: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -47,7 +47,7 @@ export const usePromptVersions = (promptId: string) => {
     : undefined;
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompts: sortedVersions,
@@ -57,14 +57,14 @@ export const usePromptVersions = (promptId: string) => {
 export const usePrompts = (promptId?: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
 
-      let filterNode: JawnFilterNode = "all";
+      let filterNode: any = "all";
 
       if (promptId) {
         filterNode = {
@@ -86,7 +86,7 @@ export const usePrompts = (promptId?: string) => {
   });
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompts: data?.data?.data,
@@ -96,7 +96,7 @@ export const usePrompts = (promptId?: string) => {
 export const usePrompt = (id: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompt", org?.currentOrg?.id, id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -123,7 +123,7 @@ export const usePrompt = (id: string) => {
   });
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompt: data?.data?.data,
@@ -221,7 +221,7 @@ export const useCreatePrompt = () => {
       request: Partial<LLMRequestBody>,
       metadata?: Record<string, any>
     ) => mutation.mutateAsync({ prompt: request, metadata }),
-    isCreating: mutation.isLoading,
+    isCreating: mutation.isPending,
     error: mutation.error,
   };
 };
