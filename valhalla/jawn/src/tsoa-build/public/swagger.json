@@ -995,6 +995,299 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"EvaluatorResult": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"organization_id": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"code_template": {},
+					"last_mile_config": {}
+				},
+				"required": [
+					"id",
+					"created_at",
+					"scoring_type",
+					"llm_template",
+					"organization_id",
+					"updated_at",
+					"name",
+					"code_template",
+					"last_mile_config"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorResult_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorResult"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorResult.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateEvaluatorParams": {
+				"properties": {
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"name": {
+						"type": "string"
+					},
+					"code_template": {},
+					"last_mile_config": {}
+				},
+				"required": [
+					"scoring_type",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorResult-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/EvaluatorResult"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorResult-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpdateEvaluatorParams": {
+				"properties": {
+					"scoring_type": {
+						"type": "string"
+					},
+					"llm_template": {},
+					"code_template": {},
+					"name": {
+						"type": "string"
+					},
+					"last_mile_config": {}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EvaluatorExperiment": {
+				"properties": {
+					"experiment_name": {
+						"type": "string"
+					},
+					"experiment_created_at": {
+						"type": "string"
+					},
+					"experiment_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"experiment_name",
+					"experiment_created_at",
+					"experiment_id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_EvaluatorExperiment-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/EvaluatorExperiment"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorExperiment-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorExperiment-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"OnlineEvaluatorByEvaluatorId": {
+				"properties": {
+					"config": {},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"config",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OnlineEvaluatorByEvaluatorId"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OnlineEvaluatorByEvaluatorId-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateOnlineEvaluatorParams": {
+				"properties": {
+					"config": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"config"
+				],
+				"type": "object"
+			},
+			"ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"statusCode": {
+								"type": "number",
+								"format": "double"
+							},
+							"traces": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"output": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"traces",
+							"output"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__output-string--traces-string-Array--statusCode_63_-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Record_string.string_": {
 				"properties": {},
 				"additionalProperties": {
@@ -1002,6 +1295,403 @@
 				},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
+			},
+			"TestInput": {
+				"properties": {
+					"promptTemplate": {
+						"type": "string"
+					},
+					"inputs": {
+						"properties": {
+							"autoInputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							},
+							"inputs": {
+								"$ref": "#/components/schemas/Record_string.string_"
+							}
+						},
+						"required": [
+							"inputs"
+						],
+						"type": "object"
+					},
+					"outputBody": {
+						"type": "string"
+					},
+					"inputBody": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"inputs",
+					"outputBody",
+					"inputBody"
+				],
+				"type": "object"
+			},
+			"EvaluatorScore": {
+				"properties": {
+					"score": {
+						"anyOf": [
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					}
+				},
+				"required": [
+					"score"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_EvaluatorScore_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorScore"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorScore.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorScore_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"EvaluatorScoreResult": {
+				"$ref": "#/components/schemas/Result_EvaluatorScore.string_"
+			},
+			"EvaluatorConfig": {
+				"properties": {
+					"evaluator_code_template": {
+						"type": "string"
+					},
+					"evaluator_llm_template": {
+						"type": "string"
+					},
+					"evaluator_scoring_type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"evaluator_scoring_type"
+				],
+				"type": "object"
+			},
+			"ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"ground_truth": {
+								"type": "string"
+							},
+							"output": {
+								"type": "string"
+							},
+							"input": {
+								"type": "string"
+							},
+							"score": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"output",
+							"input",
+							"score"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"DataEntry": {
+				"anyOf": [
+					{
+						"properties": {
+							"_type": {
+								"type": "string",
+								"enum": [
+									"system-prompt"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"inputKey": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"prompt-input"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"inputKey",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"input-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"content": {
+								"type": "string",
+								"enum": [
+									"jsonify",
+									"message"
+								]
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"output-body"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"content",
+							"_type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"BaseLastMileConfigForm": {
+				"properties": {
+					"output": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"input": {
+						"$ref": "#/components/schemas/DataEntry"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"output",
+					"input",
+					"name"
+				],
+				"type": "object"
+			},
+			"LastMileConfigForm": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/BaseLastMileConfigForm"
+					},
+					{
+						"anyOf": [
+							{
+								"properties": {
+									"_type": {
+										"type": "string",
+										"enum": [
+											"relevance",
+											"context_relevance"
+										]
+									}
+								},
+								"required": [
+									"_type"
+								],
+								"type": "object"
+							},
+							{
+								"properties": {
+									"groundTruth": {
+										"$ref": "#/components/schemas/DataEntry"
+									},
+									"_type": {
+										"type": "string",
+										"enum": [
+											"faithfulness"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"groundTruth",
+									"_type"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
+			},
+			"EvaluatorStats": {
+				"properties": {
+					"averageScore": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalUses": {
+						"type": "number",
+						"format": "double"
+					},
+					"recentTrend": {
+						"type": "string",
+						"enum": [
+							"up",
+							"down",
+							"stable"
+						]
+					},
+					"scoreDistribution": {
+						"items": {
+							"properties": {
+								"count": {
+									"type": "number",
+									"format": "double"
+								},
+								"range": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"count",
+								"range"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"timeSeriesData": {
+						"items": {
+							"properties": {
+								"value": {
+									"type": "number",
+									"format": "double"
+								},
+								"date": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"value",
+								"date"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"averageScore",
+					"totalUses",
+					"recentTrend",
+					"scoreDistribution",
+					"timeSeriesData"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_EvaluatorStats_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/EvaluatorStats"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_EvaluatorStats.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_EvaluatorStats_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"ProviderName": {
 				"type": "string",
@@ -3030,696 +3720,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PromptVersionResultFilled_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"EvaluatorResult": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"created_at": {
-						"type": "string"
-					},
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"organization_id": {
-						"type": "string"
-					},
-					"updated_at": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"code_template": {},
-					"last_mile_config": {}
-				},
-				"required": [
-					"id",
-					"created_at",
-					"scoring_type",
-					"llm_template",
-					"organization_id",
-					"updated_at",
-					"name",
-					"code_template",
-					"last_mile_config"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_EvaluatorResult_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/EvaluatorResult"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorResult.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"CreateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"name": {
-						"type": "string"
-					},
-					"code_template": {},
-					"last_mile_config": {}
-				},
-				"required": [
-					"scoring_type",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_EvaluatorResult-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/EvaluatorResult"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorResult-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorResult-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"UpdateEvaluatorParams": {
-				"properties": {
-					"scoring_type": {
-						"type": "string"
-					},
-					"llm_template": {},
-					"code_template": {},
-					"name": {
-						"type": "string"
-					},
-					"last_mile_config": {}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"EvaluatorExperiment": {
-				"properties": {
-					"experiment_name": {
-						"type": "string"
-					},
-					"experiment_created_at": {
-						"type": "string"
-					},
-					"experiment_id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"experiment_name",
-					"experiment_created_at",
-					"experiment_id"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_EvaluatorExperiment-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/EvaluatorExperiment"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorExperiment-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorExperiment-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"OnlineEvaluatorByEvaluatorId": {
-				"properties": {
-					"config": {},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"config",
-					"id"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/OnlineEvaluatorByEvaluatorId"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_OnlineEvaluatorByEvaluatorId-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_OnlineEvaluatorByEvaluatorId-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"CreateOnlineEvaluatorParams": {
-				"properties": {
-					"config": {
-						"$ref": "#/components/schemas/Record_string.any_"
-					}
-				},
-				"required": [
-					"config"
-				],
-				"type": "object"
-			},
-			"ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"statusCode": {
-								"type": "number",
-								"format": "double"
-							},
-							"traces": {
-								"items": {
-									"type": "string"
-								},
-								"type": "array"
-							},
-							"output": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"traces",
-							"output"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__output-string--traces-string-Array--statusCode_63_-number_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__output-string--traces-string-Array--statusCode_63_-number__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"TestInput": {
-				"properties": {
-					"promptTemplate": {
-						"type": "string"
-					},
-					"inputs": {
-						"properties": {
-							"autoInputs": {
-								"$ref": "#/components/schemas/Record_string.string_"
-							},
-							"inputs": {
-								"$ref": "#/components/schemas/Record_string.string_"
-							}
-						},
-						"required": [
-							"inputs"
-						],
-						"type": "object"
-					},
-					"outputBody": {
-						"type": "string"
-					},
-					"inputBody": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"inputs",
-					"outputBody",
-					"inputBody"
-				],
-				"type": "object"
-			},
-			"EvaluatorScore": {
-				"properties": {
-					"score": {
-						"anyOf": [
-							{
-								"type": "number",
-								"format": "double"
-							},
-							{
-								"type": "boolean"
-							}
-						]
-					}
-				},
-				"required": [
-					"score"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_EvaluatorScore_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/EvaluatorScore"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorScore.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorScore_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"EvaluatorScoreResult": {
-				"$ref": "#/components/schemas/Result_EvaluatorScore.string_"
-			},
-			"EvaluatorConfig": {
-				"properties": {
-					"evaluator_code_template": {
-						"type": "string"
-					},
-					"evaluator_llm_template": {
-						"type": "string"
-					},
-					"evaluator_scoring_type": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"evaluator_scoring_type"
-				],
-				"type": "object"
-			},
-			"ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"ground_truth": {
-								"type": "string"
-							},
-							"output": {
-								"type": "string"
-							},
-							"input": {
-								"type": "string"
-							},
-							"score": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"output",
-							"input",
-							"score"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__score-number--input-string--output-string--ground_truth_63_-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__score-number--input-string--output-string--ground_truth_63_-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"DataEntry": {
-				"anyOf": [
-					{
-						"properties": {
-							"_type": {
-								"type": "string",
-								"enum": [
-									"system-prompt"
-								],
-								"nullable": false
-							}
-						},
-						"required": [
-							"_type"
-						],
-						"type": "object"
-					},
-					{
-						"properties": {
-							"inputKey": {
-								"type": "string"
-							},
-							"_type": {
-								"type": "string",
-								"enum": [
-									"prompt-input"
-								],
-								"nullable": false
-							}
-						},
-						"required": [
-							"inputKey",
-							"_type"
-						],
-						"type": "object"
-					},
-					{
-						"properties": {
-							"content": {
-								"type": "string",
-								"enum": [
-									"jsonify",
-									"message"
-								]
-							},
-							"_type": {
-								"type": "string",
-								"enum": [
-									"input-body"
-								],
-								"nullable": false
-							}
-						},
-						"required": [
-							"content",
-							"_type"
-						],
-						"type": "object"
-					},
-					{
-						"properties": {
-							"content": {
-								"type": "string",
-								"enum": [
-									"jsonify",
-									"message"
-								]
-							},
-							"_type": {
-								"type": "string",
-								"enum": [
-									"output-body"
-								],
-								"nullable": false
-							}
-						},
-						"required": [
-							"content",
-							"_type"
-						],
-						"type": "object"
-					}
-				]
-			},
-			"BaseLastMileConfigForm": {
-				"properties": {
-					"output": {
-						"$ref": "#/components/schemas/DataEntry"
-					},
-					"input": {
-						"$ref": "#/components/schemas/DataEntry"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"output",
-					"input",
-					"name"
-				],
-				"type": "object"
-			},
-			"LastMileConfigForm": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/BaseLastMileConfigForm"
-					},
-					{
-						"anyOf": [
-							{
-								"properties": {
-									"_type": {
-										"type": "string",
-										"enum": [
-											"relevance",
-											"context_relevance"
-										]
-									}
-								},
-								"required": [
-									"_type"
-								],
-								"type": "object"
-							},
-							{
-								"properties": {
-									"groundTruth": {
-										"$ref": "#/components/schemas/DataEntry"
-									},
-									"_type": {
-										"type": "string",
-										"enum": [
-											"faithfulness"
-										],
-										"nullable": false
-									}
-								},
-								"required": [
-									"groundTruth",
-									"_type"
-								],
-								"type": "object"
-							}
-						]
-					}
-				]
-			},
-			"EvaluatorStats": {
-				"properties": {
-					"averageScore": {
-						"type": "number",
-						"format": "double"
-					},
-					"totalUses": {
-						"type": "number",
-						"format": "double"
-					},
-					"recentTrend": {
-						"type": "string",
-						"enum": [
-							"up",
-							"down",
-							"stable"
-						]
-					},
-					"scoreDistribution": {
-						"items": {
-							"properties": {
-								"count": {
-									"type": "number",
-									"format": "double"
-								},
-								"range": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"count",
-								"range"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"timeSeriesData": {
-						"items": {
-							"properties": {
-								"value": {
-									"type": "number",
-									"format": "double"
-								},
-								"date": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"value",
-								"date"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"averageScore",
-					"totalUses",
-					"recentTrend",
-					"scoreDistribution",
-					"timeSeriesData"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_EvaluatorStats_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/EvaluatorStats"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_EvaluatorStats.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_EvaluatorStats_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -8754,6 +8754,529 @@
 				}
 			}
 		},
+		"/v1/evaluator": {
+			"post": {
+				"operationId": "CreateEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateEvaluatorParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}": {
+			"get": {
+				"operationId": "GetEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateEvaluatorParams"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/evaluator/query": {
+			"post": {
+				"operationId": "QueryEvaluators",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/experiments": {
+			"get": {
+				"operationId": "GetExperimentsForEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorExperiment-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/onlineEvaluators": {
+			"get": {
+				"operationId": "GetOnlineEvaluators",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OnlineEvaluatorByEvaluatorId-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateOnlineEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOnlineEvaluatorParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
+			"delete": {
+				"operationId": "DeleteOnlineEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "onlineEvaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/evaluator/python/test": {
+			"post": {
+				"operationId": "TestPythonEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__output-string--traces-string-Array--statusCode_63_-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"code": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"testInput",
+									"code"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/llm/test": {
+			"post": {
+				"operationId": "TestLLMEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/EvaluatorScoreResult"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"evaluatorName": {
+										"type": "string"
+									},
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"evaluatorConfig": {
+										"$ref": "#/components/schemas/EvaluatorConfig"
+									}
+								},
+								"required": [
+									"evaluatorName",
+									"testInput",
+									"evaluatorConfig"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/lastmile/test": {
+			"post": {
+				"operationId": "TestLastMileEvaluator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__score-number--input-string--output-string--ground_truth_63_-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"testInput": {
+										"$ref": "#/components/schemas/TestInput"
+									},
+									"config": {
+										"$ref": "#/components/schemas/LastMileConfigForm"
+									}
+								},
+								"required": [
+									"testInput",
+									"config"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/evaluator/{evaluatorId}/stats": {
+			"get": {
+				"operationId": "GetEvaluatorStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_EvaluatorStats.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Evaluator"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/request/query": {
 			"post": {
 				"operationId": "GetRequests",
@@ -9910,529 +10433,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/evaluator": {
-			"post": {
-				"operationId": "CreateEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateEvaluatorParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}": {
-			"get": {
-				"operationId": "GetEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"put": {
-				"operationId": "UpdateEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpdateEvaluatorParams"
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"operationId": "DeleteEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/evaluator/query": {
-			"post": {
-				"operationId": "QueryEvaluators",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorResult-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}/experiments": {
-			"get": {
-				"operationId": "GetExperimentsForEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorExperiment-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/evaluator/{evaluatorId}/onlineEvaluators": {
-			"get": {
-				"operationId": "GetOnlineEvaluators",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_OnlineEvaluatorByEvaluatorId-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			},
-			"post": {
-				"operationId": "CreateOnlineEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/CreateOnlineEvaluatorParams"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}": {
-			"delete": {
-				"operationId": "DeleteOnlineEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "onlineEvaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/evaluator/python/test": {
-			"post": {
-				"operationId": "TestPythonEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__output-string--traces-string-Array--statusCode_63_-number_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"testInput": {
-										"$ref": "#/components/schemas/TestInput"
-									},
-									"code": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"testInput",
-									"code"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/llm/test": {
-			"post": {
-				"operationId": "TestLLMEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/EvaluatorScoreResult"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"evaluatorName": {
-										"type": "string"
-									},
-									"testInput": {
-										"$ref": "#/components/schemas/TestInput"
-									},
-									"evaluatorConfig": {
-										"$ref": "#/components/schemas/EvaluatorConfig"
-									}
-								},
-								"required": [
-									"evaluatorName",
-									"testInput",
-									"evaluatorConfig"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/lastmile/test": {
-			"post": {
-				"operationId": "TestLastMileEvaluator",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__score-number--input-string--output-string--ground_truth_63_-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"testInput": {
-										"$ref": "#/components/schemas/TestInput"
-									},
-									"config": {
-										"$ref": "#/components/schemas/LastMileConfigForm"
-									}
-								},
-								"required": [
-									"testInput",
-									"config"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/evaluator/{evaluatorId}/stats": {
-			"get": {
-				"operationId": "GetEvaluatorStats",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_EvaluatorStats.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Evaluator"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "evaluatorId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
 			}
 		},
 		"/v2/experiment/create/empty": {
