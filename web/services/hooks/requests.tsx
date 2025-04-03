@@ -172,13 +172,26 @@ export const useGetRequestsWithBodies = (
     },
   });
 
+  const mergedRequests = useMemo(() => {
+    const rawRequests = requestQuery.data?.data ?? [];
+    return rawRequests.map((rawRequest) => {
+      const requestWithBody = requests?.find(
+        (request) => request.request_id === rawRequest.request_id
+      );
+      if (requestWithBody) {
+        return requestWithBody;
+      }
+      return rawRequest;
+    });
+  }, [requestQuery, requests]);
+
   return {
     isLoading: requestQuery.isLoading || bodiesLoading,
     refetch: requestQuery.refetch,
     isRefetching: requestQuery.isRefetching,
-    requests,
-    completedQueries: requests?.length ?? 0,
-    totalQueries: requests?.length ?? 0,
+    requests: mergedRequests,
+    completedQueries: mergedRequests?.length ?? 0,
+    totalQueries: mergedRequests?.length ?? 0,
   };
 };
 
