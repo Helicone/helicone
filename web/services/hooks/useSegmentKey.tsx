@@ -10,7 +10,7 @@ export function useSegmentKey() {
   const jawnClient = useJawnClient();
   const { setNotification } = useNotification();
 
-  const { data: existingKey, isLoading: isLoadingVault } = useQuery({
+  const { data: existingKey, isPending: isLoadingVault } = useQuery({
     queryKey: ["segmentKey"],
     queryFn: async () => {
       const response = await jawnClient.GET("/v1/vault/keys");
@@ -21,7 +21,7 @@ export function useSegmentKey() {
     },
   });
 
-  const { mutate: saveKey, isLoading: isSavingKey } = useMutation({
+  const { mutate: saveKey, isPending: isSavingKey } = useMutation({
     mutationFn: async (newKey: string) => {
       if (existingKey?.id) {
         return jawnClient.PATCH(`/v1/vault/update/{id}`, {

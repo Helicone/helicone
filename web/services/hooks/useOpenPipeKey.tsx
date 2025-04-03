@@ -8,7 +8,7 @@ export function useOpenPipeKey() {
   const jawnClient = useJawnClient();
   const { setNotification } = useNotification();
 
-  const { data: existingKey, isLoading: isLoadingVault } = useQuery({
+  const { data: existingKey, isPending: isLoadingVault } = useQuery({
     queryKey: ["openPipeKey"],
     queryFn: async () => {
       const response = await jawnClient.GET("/v1/vault/keys");

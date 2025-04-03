@@ -54,7 +54,10 @@ const AddMemberModal = (props: AddMemberModalProps) => {
       }
     );
     if (addMemberError) {
-      setNotification("Error adding member", "error");
+      setNotification(
+        "Error adding member - only admins or owners can add members",
+        "error"
+      );
       console.error(addMemberError);
     } else {
       setNotification("Member added successfully", "success");
