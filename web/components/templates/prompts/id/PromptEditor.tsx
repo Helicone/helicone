@@ -1319,7 +1319,7 @@ export default function PromptEditor({
             <Button
               variant="outline"
               size="sm"
-              disabled={newFromPromptVersion.isLoading}
+              disabled={newFromPromptVersion.isPending}
               onClick={async () => {
                 const result = await newFromPromptVersion.mutateAsync({
                   name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
