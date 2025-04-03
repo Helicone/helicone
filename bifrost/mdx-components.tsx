@@ -23,6 +23,18 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </ResponsiveTable>
     ),
     img: ({ src, alt, ...props }: any) => {
+      // Handle img.shields.io badges
+      if (typeof src === "string" && src.includes("img.shields.io")) {
+        return (
+          <img
+            src={src}
+            alt={alt || ""}
+            style={{ maxWidth: "100px", height: "auto" }}
+            {...props}
+          />
+        );
+      }
+
       // Only use Next/Image for valid string sources
       if (typeof src === "string") {
         // Check if this is the first image in the post (likely the hero)
