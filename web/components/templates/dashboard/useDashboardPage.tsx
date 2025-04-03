@@ -1,4 +1,4 @@
-import { useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 import { Result, ok, resultMap } from "../../../lib/result";
 import {
@@ -8,6 +8,8 @@ import {
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { useCallback, useMemo } from "react";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
@@ -34,8 +36,6 @@ import {
   textWithSuggestions,
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
-import { useFilterStore } from "@/filterAST/store/filterStore";
-import { toFilterNode } from "@/filterAST/toFilterNode";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
