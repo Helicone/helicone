@@ -1774,6 +1774,26 @@
 						"type": "number",
 						"format": "double"
 					},
+					"detail": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					},
+					"file_id": {
+						"type": "string"
+					},
+					"file_data": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"input_image",
+							"input_text",
+							"input_file"
+						]
+					},
 					"audio_data": {
 						"type": "string"
 					},
@@ -1798,8 +1818,24 @@
 					"name": {
 						"type": "string"
 					},
-					"role": {
+					"instruction": {
 						"type": "string"
+					},
+					"role": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "string",
+								"enum": [
+									"user",
+									"assistant",
+									"system",
+									"developer"
+								]
+							}
+						]
 					},
 					"id": {
 						"type": "string"
@@ -1810,6 +1846,7 @@
 							"functionCall",
 							"function",
 							"image",
+							"file",
 							"message",
 							"autoInput",
 							"contentArray",
@@ -1929,6 +1966,10 @@
 						"nullable": true
 					},
 					"prompt": {
+						"type": "string",
+						"nullable": true
+					},
+					"instructions": {
 						"type": "string",
 						"nullable": true
 					},
@@ -2066,6 +2107,93 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Response": {
+				"properties": {
+					"contentArray": {
+						"items": {
+							"$ref": "#/components/schemas/Response"
+						},
+						"type": "array"
+					},
+					"detail": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					},
+					"file_id": {
+						"type": "string"
+					},
+					"file_data": {
+						"type": "string"
+					},
+					"idx": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio_data": {
+						"type": "string"
+					},
+					"image_url": {
+						"type": "string"
+					},
+					"timestamp": {
+						"type": "string"
+					},
+					"tool_call_id": {
+						"type": "string"
+					},
+					"tool_calls": {
+						"items": {
+							"$ref": "#/components/schemas/FunctionCall"
+						},
+						"type": "array"
+					},
+					"text": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"input_image",
+							"input_text",
+							"input_file"
+						]
+					},
+					"name": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"user",
+							"assistant",
+							"system",
+							"developer"
+						]
+					},
+					"id": {
+						"type": "string"
+					},
+					"_type": {
+						"type": "string",
+						"enum": [
+							"functionCall",
+							"function",
+							"image",
+							"text",
+							"file",
+							"contentArray"
+						]
+					}
+				},
+				"required": [
+					"type",
+					"role",
+					"_type"
+				],
+				"type": "object"
+			},
 			"LLMResponseBody": {
 				"properties": {
 					"vectorDBDetailsResponse": {
@@ -2174,6 +2302,17 @@
 					},
 					"model": {
 						"type": "string",
+						"nullable": true
+					},
+					"instructions": {
+						"type": "string",
+						"nullable": true
+					},
+					"responses": {
+						"items": {
+							"$ref": "#/components/schemas/Response"
+						},
+						"type": "array",
 						"nullable": true
 					},
 					"messages": {
