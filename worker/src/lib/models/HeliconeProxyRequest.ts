@@ -103,16 +103,21 @@ export class HeliconeProxyRequestMapper {
           model: rawJson.model,
         });
 
-        // Parse JSX object from the mapped request schema
-        const { templateWithInputs } = parseJSXObject(
-          mappedResult.schema.request
+        // parseJSX only on the messages to avoid tools from being touched
+        const parsedJSXMessages = parseJSXObject(
+          JSON.parse(JSON.stringify(mappedResult.schema.request.messages))
         );
 
-        // Use promptInputs from requestWrapper instead when provided
-        if (this.request.promptSettings.promptInputs) {
-          templateWithInputs.inputs = this.request.promptSettings.promptInputs;
-        }
-
+        const templateWithInputs = {
+          inputs:
+            this.request.promptSettings.promptInputs ??
+            parsedJSXMessages.templateWithInputs.inputs,
+          autoInputs: parsedJSXMessages.templateWithInputs.autoInputs,
+          template: {
+            ...mappedResult.schema.request,
+            messages: parsedJSXMessages.templateWithInputs.template,
+          },
+        };
         return templateWithInputs;
       } catch (error) {
         console.error("Error in getHeliconeTemplate:", error);
