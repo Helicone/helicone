@@ -2,37 +2,6 @@ import { LlmSchema, Message } from "../../types";
 import { isJSON } from "../../utils/contentHelpers";
 import { MapperFn } from "../types";
 
-export const mapRealtimeRequest: MapperFn<any, any> = ({
-  request,
-  response,
-  statusCode = 200,
-  model,
-}) => {
-  const requestMessages = mapRealtimeMessages(request?.messages || []);
-  const responseMessages = mapRealtimeMessages(response?.messages || []);
-  const allMessages = [...requestMessages, ...responseMessages];
-
-  const llmSchema: LlmSchema = {
-    request: {
-      model: model || request?.model || "gpt-4o-realtime",
-      messages: requestMessages,
-      stream: true,
-    },
-    response: {
-      messages: responseMessages,
-    },
-  };
-
-  return {
-    schema: llmSchema,
-    preview: {
-      request: requestMessages[0]?.content || "",
-      response: responseMessages[0]?.content || "",
-      concatenatedMessages: allMessages,
-    },
-  };
-};
-
 interface SocketMessage {
   type: string; // "message" or "error"
   from: "client" | "target"; // Origin of the message
@@ -47,7 +16,7 @@ type RealtimeMessage = {
     | "input_audio_buffer.clear"
     | "conversation.item.create"
     | "conversation.item.truncate"
-    | "conversation.item.delete"
+    | "conversation.item.delete" // USE: Find and delete the item with this id, maybe still show deleted items as super truncated messages?
     | "response.create"
     | "response.cancel"
     // target
@@ -141,6 +110,37 @@ type RealtimeMessage = {
   audio?: string; // Base64 encoded audio data (single chunk or combined chunks)
   // With type "response.audio.delta"
   delta?: string; // "Base64 encoded audio"
+};
+
+export const mapRealtimeRequest: MapperFn<any, any> = ({
+  request,
+  response,
+  statusCode = 200,
+  model,
+}) => {
+  const requestMessages = mapRealtimeMessages(request?.messages || []);
+  const responseMessages = mapRealtimeMessages(response?.messages || []);
+  const allMessages = [...requestMessages, ...responseMessages];
+
+  const llmSchema: LlmSchema = {
+    request: {
+      model: model || request?.model || "gpt-4o-realtime",
+      messages: requestMessages,
+      stream: true,
+    },
+    response: {
+      messages: responseMessages,
+    },
+  };
+
+  return {
+    schema: llmSchema,
+    preview: {
+      request: requestMessages[0]?.content || "",
+      response: responseMessages[0]?.content || "",
+      concatenatedMessages: allMessages,
+    },
+  };
 };
 
 // Helper function to group audio buffer append messages
@@ -381,6 +381,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     })
     .filter((msg) => msg !== null)
     .sort(
+      // Sort by timestamp
       (a, b) =>
         new Date(a?.timestamp || 0).getTime() -
         new Date(b?.timestamp || 0).getTime()
