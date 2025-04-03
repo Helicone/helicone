@@ -1,6 +1,6 @@
-import { KafkaProducer } from "../clients/KafkaProducer";
-import { AuthParams, OrgParams, supabaseServer } from "../db/supabase";
 import { HeliconeAuth } from "../requestWrapper";
+import { getHeliconeAuthClient } from "../shared/auth/AuthClientFactory";
+import { AuthParams, OrgParams } from "../shared/auth/HeliconeAuthClient";
 import { PromiseGenericResult, err, ok } from "../shared/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
@@ -48,7 +48,8 @@ export class AuthenticationHandler extends AbstractLogHandler {
       };
     }
 
-    const authResult = await supabaseServer.authenticate(heliconeAuth);
+    const authClient = getHeliconeAuthClient();
+    const authResult = await authClient.authenticate(heliconeAuth);
     if (authResult.error || !authResult.data?.organizationId) {
       return err(
         `Authentication failed: ${
@@ -63,7 +64,8 @@ export class AuthenticationHandler extends AbstractLogHandler {
   private async getOrganization(
     authParams: AuthParams
   ): PromiseGenericResult<OrgParams> {
-    const orgResult = await supabaseServer.getOrganization(authParams);
+    const authClient = getHeliconeAuthClient();
+    const orgResult = await authClient.getOrganization(authParams);
     if (orgResult.error || !orgResult.data) {
       return err(`Organization not found: ${orgResult.error}`);
     }

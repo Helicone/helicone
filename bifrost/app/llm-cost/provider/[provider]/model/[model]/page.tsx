@@ -1,7 +1,18 @@
-import { providers } from "@/packages/cost/providers/mappings";
-import ModelPriceCalculator from "../../../../ModelPriceCalculator";
+import ModelPriceCalculator, {
+  CostData,
+} from "../../../../ModelPriceCalculator";
+import {
+  getInitialCostData,
+  getProviderWithModelsData,
+  DEFAULT_INPUT_TOKENS,
+  DEFAULT_OUTPUT_TOKENS,
+  ProviderWithModels,
+} from "../../../../utils";
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { providers } from "@/../packages/cost/providers/mappings";
 
-export default async function Home({
+export default async function ModelCostPage({
   params,
 }: {
   params: {
@@ -9,21 +20,47 @@ export default async function Home({
     provider: string;
   };
 }) {
-  const { model: model, provider: provider } = params;
+  const { provider, model } = params;
   const decodedModel = decodeURIComponent(model || "");
   const decodedProvider = decodeURIComponent(provider || "");
+
+  const initialCostData = getInitialCostData();
+  const providerWithModels = getProviderWithModelsData(initialCostData);
+
+  const modelExists = initialCostData.some(
+    (d: CostData) =>
+      d.provider.toLowerCase() === decodedProvider.toLowerCase() &&
+      d.model.toLowerCase() === decodedModel.toLowerCase()
+  );
+
+  if (!modelExists) {
+    const providerExists = providerWithModels.some(
+      (p: ProviderWithModels) =>
+        p.provider.toLowerCase() === decodedProvider.toLowerCase()
+    );
+    if (!providerExists) {
+      notFound();
+    }
+  }
 
   return (
     <>
       <div className="container mx-auto py-8">
-        <ModelPriceCalculator model={decodedModel} provider={decodedProvider} />
+        <ModelPriceCalculator
+          model={decodedModel}
+          provider={decodedProvider}
+          initialCostData={initialCostData}
+          defaultInputTokens={DEFAULT_INPUT_TOKENS}
+          defaultOutputTokens={DEFAULT_OUTPUT_TOKENS}
+          providerWithModels={providerWithModels}
+        />
       </div>
     </>
   );
 }
 
 export async function generateStaticParams() {
-  const paths = [];
+  const paths: { provider: string; model: string }[] = [];
 
   for (const provider of providers) {
     for (const cost of provider.costs || []) {

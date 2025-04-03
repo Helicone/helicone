@@ -263,8 +263,8 @@ export const OnlineEvaluatorsSection = ({
                                     handleEditSubmit(item.id, data);
                                   }}
                                   isLoading={
-                                    createOnlineEvaluator.isLoading ||
-                                    deleteOnlineEvaluator.isLoading
+                                    createOnlineEvaluator.isPending ||
+                                    deleteOnlineEvaluator.isPending
                                   }
                                   initialValues={{
                                     sampleRate,
@@ -346,7 +346,7 @@ export const OnlineEvaluatorsSection = ({
           </DialogHeader>
           <AddOnlineEvaluatorForm
             onSubmit={handleCreate}
-            isLoading={createOnlineEvaluator.isLoading}
+            isLoading={createOnlineEvaluator.isPending}
             close={() => setShowCreateForm(false)}
           />
         </DialogContent>

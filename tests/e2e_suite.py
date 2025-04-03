@@ -332,6 +332,61 @@ class TestHeliconeIntegrations:
         )
         assert message.content[0].text is not None
 
+    def test_anthropic_tool_streaming(self):
+        """Test Anthropic with tools and streaming"""
+        all_content = ""
+        tool_use_detected = False
+
+        with anthropic_client.messages.stream(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            tools=[
+                {
+                    "name": "get_weather",
+                    "description": "Get the current weather in a given location",
+                    "input_schema": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city and state, e.g. San Francisco, CA",
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": ["celsius", "fahrenheit"],
+                                "description": "The unit of temperature, either 'celsius' or 'fahrenheit'",
+                            },
+                        },
+                        "required": ["location"],
+                    },
+                }
+            ],
+            messages=[
+                {"role": "user", "content": "What's the weather like in San Francisco?"}
+            ],
+            extra_headers={
+                "Helicone-Property-Test": "Tool Streaming",
+            },
+        ) as stream:
+            # Process text stream
+            for text in stream.text_stream:
+                all_content += text
+                print(text, end="", flush=True)
+
+            # Get the final message with full structure
+            final_message = stream.get_final_message()
+
+            # Check if any tool use blocks exist in the final message
+            for block in final_message.content:
+                if hasattr(block, "type") and block.type == "tool_use":
+                    tool_use_detected = True
+                    break
+
+            # Verify that a tool call was made
+            assert tool_use_detected, "No tool use blocks were found in the response"
+            # Verify we got some content
+            assert len(all_content) > 0, "No text content was received"
+
     def test_anthropic_cache(self):
         """Test Anthropic's cache functionality with system prompts"""
         message = anthropic_client.messages.create(

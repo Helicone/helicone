@@ -1,6 +1,5 @@
-import { AlertResponse, AlertRequest } from "../../managers/alert/AlertManager";
+import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
 import { Database } from "../db/database.types";
-import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../shared/result";
 import { BaseStore } from "./baseStore";
@@ -13,28 +12,43 @@ export class AlertStore extends BaseStore {
   private oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
 
   public async getAlerts(): Promise<Result<AlertResponse, string>> {
-    const { data: alert, error: alertError } = await supabaseServer.client
-      .from("alert")
-      .select("*")
-      .eq("org_id", this.organizationId)
-      .not("soft_delete", "eq", true);
+    try {
+      const alertResult = await dbExecute<
+        Database["public"]["Tables"]["alert"]["Row"]
+      >(
+        `SELECT *
+         FROM alert
+         WHERE org_id = $1
+         AND (soft_delete IS NULL OR soft_delete = false)`,
+        [this.organizationId]
+      );
 
-    const { data: alertHistory, error: alertHistoryError } =
-      await supabaseServer.client
-        .from("alert_history")
-        .select("*")
-        .eq("org_id", this.organizationId)
-        .not("soft_delete", "eq", true);
+      const alertHistoryResult = await dbExecute<
+        Database["public"]["Tables"]["alert_history"]["Row"]
+      >(
+        `SELECT *
+         FROM alert_history
+         WHERE org_id = $1
+         AND (soft_delete IS NULL OR soft_delete = false)`,
+        [this.organizationId]
+      );
 
-    if (alertError || !alert) {
-      return err(alertError?.message || "");
+      if (alertResult.error) {
+        return err(alertResult.error ?? "Failed to fetch alerts");
+      }
+
+      if (alertHistoryResult.error) {
+        return err(alertHistoryResult.error ?? "Failed to fetch alert history");
+      }
+
+      return ok({
+        alerts: alertResult.data ?? [],
+        history: alertHistoryResult.data ?? [],
+      });
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      return err(String(error));
     }
-
-    if (alertHistoryError || !alertHistory) {
-      return err(alertHistoryError?.message || "");
-    }
-
-    return ok({ alerts: alert, history: alertHistory });
   }
 
   public async createAlert(
@@ -76,15 +90,24 @@ export class AlertStore extends BaseStore {
   }
 
   public async deleteAlert(alertId: string): Promise<Result<null, string>> {
-    const deleteResult = await supabaseServer.client
-      .from("alert")
-      .update({ soft_delete: true })
-      .eq("id", alertId)
-      .eq("org_id", this.organizationId);
-    if (deleteResult.error) {
-      return err(`Error deleting alert: ${deleteResult.error}`);
+    try {
+      const result = await dbExecute(
+        `UPDATE alert
+         SET soft_delete = true
+         WHERE id = $1
+         AND org_id = $2`,
+        [alertId, this.organizationId]
+      );
+
+      if (result.error) {
+        return err(`Error deleting alert: ${result.error}`);
+      }
+
+      return ok(null);
+    } catch (error) {
+      console.error("Error deleting alert:", error);
+      return err(String(error));
     }
-    return ok(null);
   }
 
   validateAlertCreate(alert: AlertRequest): Result<null, string> {

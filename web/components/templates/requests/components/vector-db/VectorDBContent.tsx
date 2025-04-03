@@ -253,7 +253,6 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
           )}
         </div>
       </div>
-
       {/* Vector Section */}
       {requestDetails?.vector && (
         <div className="w-full flex flex-col text-left">
@@ -280,7 +279,6 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
           </div>
         </div>
       )}
-
       {/* Response Section */}
       {(responseDetails?.status ||
         responseDetails?.message ||
@@ -326,7 +324,6 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
           </div>
         </div>
       )}
-
       {/* Additional Metadata Section */}
       {responseDetails?.metadata &&
         Object.keys(responseDetails.metadata).length > 0 && (
@@ -360,7 +357,6 @@ export const VectorDBContent: React.FC<VectorDBContentProps> = ({
             </div>
           </div>
         )}
-
       {/* Display vector search results if available */}
       {matches && matches.length > 0 && (
         <div className="w-full flex flex-col text-left">

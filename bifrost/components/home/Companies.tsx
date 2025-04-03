@@ -12,12 +12,12 @@ const Companies = () => {
             [
               ["/static/togetherai.webp", "togetherai", 169, 53],
               ["/static/qawolf.webp", "qawolf", 157, 53],
+              ["/static/home/clay.webp", "clay", 150, 53],
+              ["/static/home/axiom.webp", "axiom", 132, 53],
+              ["/static/home/duolingo2.png", "duolingo", 240, 53],
               ["/static/sunrun.webp", "sunrun", 132, 53],
               ["/static/filevine.webp", "filevine", 130, 53],
-              ["/static/slate.webp", "slate", 92, 53],
-              ["/static/mintlify.svg", "mintlify", 150, 53],
-              ["/static/upenn.webp", "upenn", 132, 53],
-              ["/static/swiss.webp", "swiss red cross", 240, 53],
+              ["/static/home/hear.webp", "hear.com", 92, 53],
             ] as const
           ).map((src, index) => (
             <li className="flex items-center justify-center p-2" key={index}>

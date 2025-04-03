@@ -13,7 +13,6 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
@@ -58,17 +57,23 @@ export class PromptManager extends BaseManager {
   private async getPromptVersionFromRequest(
     requestId: string
   ): Promise<Result<string, string>> {
-    const res = await supabaseServer.client
-      .from("prompt_input_record")
-      .select("*")
-      .eq("source_request", requestId)
-      .single();
+    try {
+      const result = await dbExecute<{ prompt_version: string }>(
+        `SELECT prompt_version
+         FROM prompt_input_record
+         WHERE source_request = $1
+         LIMIT 1`,
+        [requestId]
+      );
 
-    if (res.error || !res.data) {
-      return err("Failed to get prompt version from request");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Failed to get prompt version from request");
+      }
+
+      return ok(result.data[0].prompt_version);
+    } catch (error) {
+      return err(`Error retrieving prompt version: ${error}`);
     }
-
-    return ok(res.data.prompt_version);
   }
   async createNewPromptVersion(
     parentPromptVersionId: string,
@@ -222,29 +227,34 @@ export class PromptManager extends BaseManager {
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
       ).map((match) => match[1]);
 
-      const existingExperimentInputKeys = await supabaseServer.client
-        .from("experiment_v3")
-        .select("input_keys")
-        .eq("id", params.experimentId)
-        .single();
+      // Get existing input keys for experiment
+      const existingKeysResult = await dbExecute<{ input_keys: string[] }>(
+        `SELECT input_keys
+         FROM experiment_v3
+         WHERE id = $1
+         LIMIT 1`,
+        [params.experimentId]
+      );
 
+      const existingInputKeys = existingKeysResult.data?.[0]?.input_keys ?? [];
+
+      // Update experiment input keys
       const res = await Promise.all([
-        supabaseServer.client
-          .from("experiment_v3")
-          .update({
-            input_keys: [
-              ...new Set([
-                ...(existingExperimentInputKeys.data?.input_keys ?? []),
-                ...newPromptVersionInputKeys,
-              ]),
-            ],
-          })
-          .eq("organization", this.authParams.organizationId)
-          .eq("id", params.experimentId),
+        dbExecute(
+          `UPDATE experiment_v3
+           SET input_keys = $1
+           WHERE organization = $2
+           AND id = $3`,
+          [
+            [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
+            this.authParams.organizationId,
+            params.experimentId,
+          ]
+        ),
         dbExecute(
           `INSERT INTO prompt_input_keys (key, prompt_version)
-       SELECT unnest($1::text[]), $2
-       ON CONFLICT (key, prompt_version) DO NOTHING`,
+           SELECT unnest($1::text[]), $2
+           ON CONFLICT (key, prompt_version) DO NOTHING`,
           [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
         ),
       ]);

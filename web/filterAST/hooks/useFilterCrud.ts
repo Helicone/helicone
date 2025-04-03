@@ -161,7 +161,7 @@ export const useFilterCrud = () => {
     deleteFilter,
     getFilterById,
     getShareableUrl,
-    isSaving: createFilter.isLoading || updateFilter.isLoading,
-    isDeleting: deleteFilter.isLoading,
+    isSaving: createFilter.isPending || updateFilter.isPending,
+    isDeleting: deleteFilter.isPending,
   };
 };

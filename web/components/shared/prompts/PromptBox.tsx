@@ -100,7 +100,7 @@ export default function PromptBox({
     generatedText: string;
     start: number;
     end: number;
-    isLoading: boolean;
+    isPending: boolean;
   } | null>(null);
   const preRef = useRef<HTMLPreElement>(null);
 
@@ -513,7 +513,7 @@ export default function PromptBox({
         generatedText: "",
         start: selection.selectionStart,
         end: selection.selectionEnd,
-        isLoading: true,
+        isPending: true,
       });
 
       const stream = await generateStream(
@@ -541,7 +541,7 @@ export default function PromptBox({
       console.error("Error generating edit:", error);
       setPendingEdit(null);
     } finally {
-      setPendingEdit((prev) => (prev ? { ...prev, isLoading: false } : null));
+      setPendingEdit((prev) => (prev ? { ...prev, isPending: false } : null));
     }
   };
   const handleAcceptEdit = () => {

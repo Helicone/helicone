@@ -23,7 +23,6 @@ export const authCheckThrow = async (userId: string | undefined) => {
     throw new Error("Unauthorized");
   }
 
-  // Replace Supabase call with dbExecute
   const result = await dbExecute<{ user_id: string }>(
     "SELECT user_id FROM admins WHERE user_id = $1",
     [userId]

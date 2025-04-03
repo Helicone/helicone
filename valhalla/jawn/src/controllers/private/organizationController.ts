@@ -11,7 +11,6 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { supabaseServer } from "../../lib/db/supabase";
 import { err, ok, Result } from "../../lib/shared/result";
 import {
   NewOrganizationParams,
@@ -25,6 +24,7 @@ import {
 } from "../../managers/organization/OrganizationManager";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -38,17 +38,19 @@ export class OrganizationController extends Controller {
       return err("User not found");
     }
 
-    const result = await supabaseServer.client.auth.admin.updateUserById(
-      request.authParams.userId,
-      {
-        user_metadata: {
-          accepted_terms_date: new Date().toISOString(),
-        },
-      }
+    const result = await dbExecute(
+      `UPDATE auth.users
+       SET raw_user_meta_data = jsonb_set(
+         COALESCE(raw_user_meta_data, '{}'::jsonb),
+         '{accepted_terms_date}',
+         $1::jsonb
+       )
+       WHERE id = $2`,
+      [JSON.stringify(new Date().toISOString()), request.authParams.userId]
     );
 
     if (result.error) {
-      return err(result.error.message);
+      return err(result.error);
     }
 
     return ok(null);
@@ -100,12 +102,16 @@ export class OrganizationController extends Controller {
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    await supabaseServer.client
-      .from("organization")
-      .update({
-        has_onboarded: true,
-      })
-      .eq("id", request.authParams.organizationId);
+    const { error } = await dbExecute(
+      `UPDATE organization
+       SET has_onboarded = true
+       WHERE id = $1`,
+      [request.authParams.organizationId]
+    );
+
+    if (error) {
+      return err(error);
+    }
 
     return ok(null);
   }
@@ -136,7 +142,7 @@ export class OrganizationController extends Controller {
     );
 
     if (isExistingMember) {
-      return ok(null); // Silently succeed if member already exists
+      return ok(null);
     }
 
     if (org.data.tier === "enterprise" || "team-20250130") {
@@ -366,7 +372,7 @@ export class OrganizationController extends Controller {
 
     const org = await organizationManager.getOrg();
     if (org.error || !org.data) {
-      return err(org.error?.message ?? "Error getting organization");
+      return err(org.error ?? "Error getting organization");
     }
 
     if (

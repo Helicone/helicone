@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { ProviderStatusPage } from "./ProviderStatusPage";
 import { Suspense } from "react";
+import { ProvidersTableSkeleton } from "./SkeletonLoaders";
 
 export const metadata: Metadata = {
   title:
@@ -32,7 +33,13 @@ export const metadata: Metadata = {
 export default function PriceCalcPage() {
   return (
     <div className="container mx-auto py-8">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+            Loading...
+          </div>
+        }
+      >
         <ProviderStatusPage provider="all" />
       </Suspense>
     </div>

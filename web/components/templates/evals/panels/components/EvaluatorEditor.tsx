@@ -2,11 +2,11 @@ import React from "react";
 import LLMAsJudgeEvaluatorDetails from "../../details/LLMAsJudgeEvaluatorDetails";
 import PythonEvaluatorDetails from "../../details/PythonEvaluatorDetails";
 import LastMileEvaluatorDetails from "../../details/LastMileEvaluatorDetails";
-import { UseMutationResult } from "@tanstack/react-query";
+import { useEvaluators } from "../../EvaluatorHook";
 
 interface EvaluatorEditorProps {
   evaluator: any; // Replace with proper type
-  deleteEvaluator: UseMutationResult<any, unknown, string, unknown>;
+  deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"];
 }
 
 export const EvaluatorEditor: React.FC<EvaluatorEditorProps> = ({

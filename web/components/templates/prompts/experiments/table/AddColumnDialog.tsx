@@ -29,9 +29,9 @@ const AddColumnDialog = ({
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
 
-  const { data: promptVersionTemplateData } = useQuery(
-    ["promptVersionTemplate", selectedForkFromPromptVersionId],
-    async () => {
+  const { data: promptVersionTemplateData } = useQuery({
+    queryKey: ["promptVersionTemplate", selectedForkFromPromptVersionId],
+    queryFn: async () => {
       if (!selectedForkFromPromptVersionId || !orgId) {
         return null;
       }
@@ -46,10 +46,8 @@ const AddColumnDialog = ({
 
       return res.data?.data;
     },
-    {
-      enabled: !!selectedForkFromPromptVersionId && !!orgId,
-    }
-  );
+    enabled: !!selectedForkFromPromptVersionId && !!orgId,
+  });
 
   const [basePrompt, setBasePrompt] = useState<string | PromptObject | null>(
     promptVersionTemplateData?.helicone_template ?? ""

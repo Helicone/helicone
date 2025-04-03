@@ -4,7 +4,7 @@ import { PromptSettings } from "../requestWrapper/requestWrapper";
 import { err, ok } from "../shared/result";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
 import { KafkaProducer } from "../clients/KafkaProducer";
-import { AuthParams, OrgParams } from "../db/supabase";
+import { AuthParams, OrgParams } from "../shared/auth/HeliconeAuthClient";
 import { S3Manager } from "./S3Manager";
 import { KafkaMessageContents } from "../handlers/HandlerContext";
 import { Headers } from "node-fetch";

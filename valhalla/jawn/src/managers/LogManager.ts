@@ -1,28 +1,27 @@
-import { RateLimitStore } from "../lib/stores/RateLimitStore";
-import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
+import * as Sentry from "@sentry/node";
+import { dataDogClient } from "../lib/clients/DataDogClient";
+import { KAFKA_ENABLED, KafkaProducer } from "../lib/clients/KafkaProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
-import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
-import { LoggingHandler } from "../lib/handlers/LoggingHandler";
-import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import {
   HandlerContext,
   KafkaMessageContents,
 } from "../lib/handlers/HandlerContext";
-import { LogStore } from "../lib/stores/LogStore";
-import { PromptHandler } from "../lib/handlers/PromptHandler";
-import { PostHogHandler } from "../lib/handlers/PostHogHandler";
-import { S3Client } from "../lib/shared/db/s3Client";
-import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
-import * as Sentry from "@sentry/node";
-import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
-import { KAFKA_ENABLED, KafkaProducer } from "../lib/clients/KafkaProducer";
-import { WebhookHandler } from "../lib/handlers/WebhookHandler";
-import { WebhookStore } from "../lib/stores/WebhookStore";
-import { supabaseServer } from "../lib/db/supabase";
-import { dataDogClient } from "../lib/clients/DataDogClient";
+import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
-import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 import { OnlineEvalHandler } from "../lib/handlers/OnlineEvalHandler";
+import { PostHogHandler } from "../lib/handlers/PostHogHandler";
+import { PromptHandler } from "../lib/handlers/PromptHandler";
+import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
+import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
+import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
+import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
+import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
+import { WebhookHandler } from "../lib/handlers/WebhookHandler";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { LogStore } from "../lib/stores/LogStore";
+import { RateLimitStore } from "../lib/stores/RateLimitStore";
+import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
+import { WebhookStore } from "../lib/stores/WebhookStore";
 
 export class LogManager {
   public async processLogEntry(
@@ -69,9 +68,7 @@ export class LogManager {
     const posthogHandler = new PostHogHandler();
     const lytixHandler = new LytixHandler();
 
-    const webhookHandler = new WebhookHandler(
-      new WebhookStore(supabaseServer.client)
-    );
+    const webhookHandler = new WebhookHandler(new WebhookStore());
     const segmentHandler = new SegmentLogHandler();
 
     authHandler
