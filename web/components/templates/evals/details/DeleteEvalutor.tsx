@@ -55,8 +55,9 @@ export const DeleteEvaluator = ({
                 placeholder={evaluator.name}
               />
               <i>
-                This will remove the evaluator from all experiments. Your scores
-                will still be saved, but you will not be able to use this
+                This will remove the evaluator from all{" "}
+                {experiments.data?.data?.data?.length ?? 0} experiments. Your
+                scores will still be saved, but you will not be able to use this
                 evaluator in new experiments.
               </i>
             </AlertDialogDescription>

@@ -19,7 +19,7 @@ export function useOpenPipeKey() {
     },
   });
 
-  const { mutate: saveKey, isLoading: isSavingKey } = useMutation({
+  const { mutate: saveKey, isPending: isSavingKey } = useMutation({
     mutationFn: async (newKey: string) => {
       if (existingKey?.id) {
         return jawnClient.PATCH(`/v1/vault/update/{id}`, {
