@@ -6,7 +6,6 @@ import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { processStream } from "@/lib/api/llm/process-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
 import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
 import { $assistant, $system, $user } from "@/utils/generate";
@@ -19,6 +18,7 @@ import {
 
 import Toolbar from "@/components/shared/prompts/Toolbar";
 import LoadingDots from "@/components/shared/universal/LoadingDots";
+import { processStream } from "@/lib/api/llm/process-stream";
 import { MdKeyboardTab } from "react-icons/md";
 import { PiChatDotsBold } from "react-icons/pi";
 
@@ -62,7 +62,6 @@ interface PromptBoxProps {
   variables?: StateInputs[];
   disabled?: boolean;
 }
-
 export default function PromptBox({
   value,
   onChange,
@@ -100,7 +99,7 @@ export default function PromptBox({
     generatedText: string;
     start: number;
     end: number;
-    isLoading: boolean;
+    isPending: boolean;
     abortController?: AbortController;
   } | null>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -524,8 +523,8 @@ export default function PromptBox({
         generatedText: "",
         start: selection.selectionStart,
         end: selection.selectionEnd,
-        isLoading: true,
-        abortController: controller, // Store controller
+        isPending: true,
+        abortController: controller,
       });
 
       const stream = await generateStream(
@@ -564,12 +563,7 @@ export default function PromptBox({
       }
       // If it was an abort error, pendingEdit might have already been cleared by handleDenyEdit
     } finally {
-      // Only set isLoading to false if the controller matches the current pending edit
-      setPendingEdit((prev) =>
-        prev && prev.abortController === controller
-          ? { ...prev, isLoading: false }
-          : prev
-      );
+      setPendingEdit((prev) => (prev ? { ...prev, isPending: false } : null));
     }
   };
   const handleAcceptEdit = () => {
