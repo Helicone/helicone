@@ -11,7 +11,9 @@ import { PiPlusBold, PiToolboxBold, PiTrashBold } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
 import UniversalPopup from "../universal/Popup";
 import { ParameterLabel } from "./ParametersPanel";
-import ToolEditor from "./ToolEditor";
+// import ToolEditor from "./ToolEditor";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { toSnakeCase } from "@/utils/strings";
 
 interface ToolPanelProps {
   tools: Tool[];
@@ -20,6 +22,9 @@ interface ToolPanelProps {
 
 export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [toolJson, setToolJson] = useState(
+    '{\n  "name": "",\n  "description": "",\n  "parameters": {\n    "type": "object",\n    "properties": {},\n    "required": []\n  }\n}'
+  );
 
   const getParameters = (tool: Tool): string[] => {
     if (tool.parameters?.properties) {
@@ -28,15 +33,30 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
     return [];
   };
 
-  const handleAddTool = (tool: Tool) => {
-    onToolsChange([...tools, tool]);
-    setIsPopupOpen(false);
+  const handleAddTool = () => {
+    try {
+      const tool: Tool = JSON.parse(toolJson);
+      tool.name = toSnakeCase(tool.name); // Ensure name is in snake_case
+      onToolsChange([...tools, tool]);
+      setIsPopupOpen(false);
+    } catch (e) {
+      console.error("Invalid tool JSON:", e);
+    }
   };
 
   const handleDeleteTool = (index: number) => {
     const newTools = [...tools];
     newTools.splice(index, 1);
     onToolsChange(newTools);
+  };
+
+  const isValidJson = (jsonString: string) => {
+    try {
+      JSON.parse(jsonString);
+      return true;
+    } catch (e) {
+      return false;
+    }
   };
 
   return (
@@ -114,10 +134,31 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
         onClose={() => setIsPopupOpen(false)}
         width="max-w-5xl w-full"
       >
-        <ToolEditor
-          onSave={handleAddTool}
-          onCancel={() => setIsPopupOpen(false)}
-        />
+        <div className="flex flex-col gap-6 p-4">
+          <div className="h-[500px]">
+            <MarkdownEditor
+              text={toolJson}
+              setText={setToolJson}
+              language="json"
+              className="h-full bg-white rounded-lg"
+            />
+          </div>
+          <div className="flex flex-row justify-end items-center gap-2">
+            {!isValidJson(toolJson) && (
+              <p className="text-red-500 text-sm">Invalid JSON</p>
+            )}
+            <Button variant="outline" onClick={() => setIsPopupOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="action"
+              onClick={handleAddTool}
+              disabled={!isValidJson(toolJson)}
+            >
+              Save Tool
+            </Button>
+          </div>
+        </div>
       </UniversalPopup>
     </div>
   );
