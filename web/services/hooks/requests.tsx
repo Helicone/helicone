@@ -2,7 +2,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
-import { getJawnClient } from "../../lib/clients/jawn";
+import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "../../lib/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
@@ -88,126 +88,97 @@ export const useGetRequestsWithBodies = (
   isLive: boolean = false,
   isCached: boolean = false
 ) => {
-  const org = useOrg();
-
-  // Main query to fetch requests with signed URLs
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "requestsData",
-      currentPage,
-      currentPageSize,
-      advancedFilter,
-      sortLeaf,
-      isCached,
-      org?.currentOrg?.id,
-    ],
-    queryFn: async (query) => {
-      const currentPage = query.queryKey[1] as number;
-      const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3];
-      const sortLeaf = query.queryKey[4];
-      const isCached = query.queryKey[5];
-      const orgId = query.queryKey[6] as string;
-      const jawn = getJawnClient(orgId);
-
-      const response = await jawn.POST("/v1/request/query-clickhouse", {
-        body: {
-          filter: advancedFilter as any,
-          offset: (currentPage - 1) * currentPageSize,
-          limit: currentPageSize,
-          sort: sortLeaf as any,
-          isCached: isCached as any,
-        },
-      });
-
-      return response.data as Result<HeliconeRequest[], string>;
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: isLive ? 1_000 : false,
-  });
-
-  const requestsWithSignedUrls = data?.data ?? [];
-
-  // Fetch request bodies for each request with a signed URL
-  const urlQueries = useQueries({
-    queries: requestsWithSignedUrls.map((request) => ({
-      queryKey: [
-        "request-content",
-        request.request_id,
-        request.signed_body_url,
-      ],
-      queryFn: async () => {
-        // Check cache first
-        if (requestBodyCache.has(request.request_id)) {
-          return {
-            request,
-            bodyContent: requestBodyCache.get(request.request_id),
-          };
-        }
-
-        if (!request.signed_body_url) return { request, bodyContent: null };
-
-        try {
-          const contentResponse = await fetch(request.signed_body_url);
-          if (contentResponse.ok) {
-            const text = await contentResponse.text();
-            let content = JSON.parse(text);
-
-            if (request.asset_urls) {
-              content = placeAssetIdValues(request.asset_urls, content);
-            }
-
-            // Update cache
-            requestBodyCache.set(request.request_id, content);
-            if (requestBodyCache.size > 1000) {
-              requestBodyCache.clear();
-            }
-
-            return { request, bodyContent: content };
-          }
-        } catch (error) {
-          console.error("Error fetching request body:", error);
-        }
-
-        return { request, bodyContent: null };
+  // First query to fetch the initial request data
+  const requestQuery = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/query-clickhouse",
+    {
+      body: {
+        filter: advancedFilter as any,
+        offset: (currentPage - 1) * currentPageSize,
+        limit: currentPageSize,
+        sort: sortLeaf as any,
+        isCached: isCached as any,
       },
-      enabled: !!request.signed_body_url,
-      staleTime: isLive ? 2000 : 0,
-    })),
-  });
-
-  // Process the requests with their bodies
-  const processedRequests = useMemo(() => {
-    const results: HeliconeRequest[] = [];
-
-    for (const query of urlQueries) {
-      if (query.data) {
-        const { request, bodyContent } = query.data;
-
-        if (bodyContent) {
-          results.push({
-            ...request,
-            request_body: bodyContent.request,
-            response_body: bodyContent.response,
-          });
-        } else {
-          results.push(request);
-        }
-      }
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 1_000 : false,
+      keepPreviousData: true,
     }
+  );
 
-    return results;
-  }, [urlQueries]);
+  // Second query to fetch and process request bodies
+  const { data: requests, isLoading: bodiesLoading } = useQuery<
+    HeliconeRequest[]
+  >({
+    queryKey: ["requestsWithSignedUrls", requestQuery.data?.data],
+    placeholderData: (prev) => prev,
+    enabled: !!requestQuery.data?.data?.length,
+    queryFn: async () => {
+      try {
+        return await Promise.all(
+          requestQuery.data?.data?.map(async (request) => {
+            // Return from cache if available
+            if (requestBodyCache.has(request.request_id)) {
+              const bodyContent = requestBodyCache.get(request.request_id);
+              return {
+                ...request,
+                request_body: bodyContent?.request,
+                response_body: bodyContent?.response,
+              };
+            }
 
-  const isUrlsFetching = urlQueries.some((query) => query.isFetching);
+            // Skip if no signed URL is available
+            if (!request.signed_body_url) return request;
+
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (!contentResponse.ok) {
+                console.error(
+                  `Error fetching request body: ${contentResponse.status}`
+                );
+                return request;
+              }
+
+              const text = await contentResponse.text();
+              let content = JSON.parse(text);
+
+              if (request.asset_urls) {
+                content = placeAssetIdValues(request.asset_urls, content);
+              }
+
+              // Update cache with size limit protection
+              requestBodyCache.set(request.request_id, content);
+              if (requestBodyCache.size > 10_000) {
+                requestBodyCache.clear();
+              }
+
+              return {
+                ...request,
+                request_body: content.request,
+                response_body: content.response,
+              };
+            } catch (error) {
+              console.error("Error processing request body:", error);
+              return request;
+            }
+          }) ?? []
+        );
+      } catch (error) {
+        console.error("Error processing requests with bodies:", error);
+        return [];
+      }
+    },
+  });
 
   return {
-    isLoading,
-    refetch,
-    isRefetching: isRefetching || isUrlsFetching,
-    requests: processedRequests,
-    completedQueries: urlQueries.filter((query) => query.isSuccess).length,
-    totalQueries: requestsWithSignedUrls.length,
+    isLoading: requestQuery.isLoading || bodiesLoading,
+    refetch: requestQuery.refetch,
+    isRefetching: requestQuery.isRefetching,
+    requests,
+    completedQueries: requests?.length ?? 0,
+    totalQueries: requests?.length ?? 0,
   };
 };
 
