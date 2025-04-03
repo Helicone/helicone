@@ -49,6 +49,11 @@ const navigation = [
     href: "/admin/top-orgs",
     icon: ChartBarIcon,
   },
+  {
+    name: "Projections",
+    href: "/admin/projections",
+    icon: ChartBarIcon,
+  },
 ];
 
 export default function AdminLayout(props: { children: React.ReactNode }) {

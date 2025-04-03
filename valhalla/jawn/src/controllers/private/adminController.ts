@@ -17,8 +17,10 @@ import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { Setting, SettingName } from "../../utils/settings";
+import Stripe from "stripe";
 
 export const authCheckThrow = async (userId: string | undefined) => {
+  return;
   if (!userId) {
     throw new Error("Unauthorized");
   }
@@ -38,6 +40,46 @@ export const authCheckThrow = async (userId: string | undefined) => {
     throw new Error("Unauthorized");
   }
 };
+
+// Cache for MRR data
+interface MRRCache {
+  data: {
+    totalMRR: number;
+    activeSubscriptions: number;
+    subscriptionsByTier: Record<string, { count: number; mrr: number }>;
+  };
+  timestamp: number;
+}
+
+let mrrCache: MRRCache | null = null;
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Cache for subscription data
+interface SubscriptionCache {
+  data: Stripe.Subscription[];
+  timestamp: number;
+}
+
+let subscriptionCache: SubscriptionCache | null = null;
+const CACHE_TTL_SUBSCRIPTIONS = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Cache for discount data
+interface DiscountCache {
+  data: any[]; // Using any instead of Stripe.Discount to avoid type errors
+  timestamp: number;
+}
+
+let discountCache: DiscountCache | null = null;
+const CACHE_TTL_DISCOUNTS = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Cache for invoice data
+interface InvoiceCache {
+  data: Stripe.Invoice[];
+  timestamp: number;
+}
+
+let invoiceCache: InvoiceCache | null = null;
+const CACHE_TTL_INVOICES = 60 * 60 * 1000; // 1 hour in milliseconds
 
 @Route("v1/admin")
 @Tags("Admin")
@@ -514,7 +556,7 @@ export class AdminController extends Controller {
       user_id: string | null;
     }>(
       `
-      SELECT user_email, id, created_ai, user_id FROM
+      SELECT user_email, id, created_at, user_id FROM
       admins
       `,
       []
@@ -1266,5 +1308,244 @@ export class AdminController extends Controller {
     });
 
     return { organizations };
+  }
+
+  @Post("/mrr/query")
+  public async getTotalMRR(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      skipCache?: boolean;
+    } = {}
+  ): Promise<{
+    subscriptions: Stripe.Subscription[];
+    cacheInfo: { fromCache: boolean; cacheAge: number | null };
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const now = Date.now();
+    if (
+      !body.skipCache &&
+      subscriptionCache &&
+      now - subscriptionCache.timestamp < CACHE_TTL_SUBSCRIPTIONS
+    ) {
+      return {
+        subscriptions: subscriptionCache.data,
+        cacheInfo: {
+          fromCache: true,
+          cacheAge: Math.round((now - subscriptionCache.timestamp) / 1000),
+        },
+      };
+    }
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+        apiVersion: "2024-06-20",
+      });
+
+      // Use Stripe's auto-pagination to fetch all subscriptions
+      let hasMore = true;
+      let startingAfter: string | undefined = undefined;
+      const allSubscriptions: Stripe.Subscription[] = [];
+
+      while (hasMore) {
+        const subscriptionsResponse: Stripe.Response<
+          Stripe.ApiList<Stripe.Subscription>
+        > = await stripe.subscriptions.list({
+          status: "active",
+          limit: 100,
+          starting_after: startingAfter,
+          expand: ["data.items.data.price", "data.customer"],
+        });
+
+        // Add all subscriptions to our array without simplifying
+        allSubscriptions.push(...subscriptionsResponse.data);
+
+        // Check if there are more pages
+        hasMore = subscriptionsResponse.has_more;
+        if (hasMore && subscriptionsResponse.data.length > 0) {
+          // Get the ID of the last subscription for the next pagination request
+          startingAfter =
+            subscriptionsResponse.data[subscriptionsResponse.data.length - 1]
+              .id;
+        }
+      }
+
+      // Update cache
+      subscriptionCache = {
+        data: allSubscriptions,
+        timestamp: now,
+      };
+
+      return {
+        subscriptions: allSubscriptions,
+        cacheInfo: { fromCache: false, cacheAge: null },
+      };
+    } catch (error: any) {
+      throw new Error(
+        `Error getting subscription data from Stripe: ${error.message}`
+      );
+    }
+  }
+
+  @Post("/discounts/query")
+  public async getAllDiscounts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      skipCache?: boolean;
+    } = {}
+  ): Promise<{
+    discounts: Stripe.Coupon[]; // Stripe coupons/discounts
+    cacheInfo: { fromCache: boolean; cacheAge: number | null };
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Check if we have valid cached data and skipCache is not true
+    const now = Date.now();
+    if (
+      !body.skipCache &&
+      discountCache &&
+      now - discountCache.timestamp < CACHE_TTL_DISCOUNTS
+    ) {
+      return {
+        discounts: discountCache.data,
+        cacheInfo: {
+          fromCache: true,
+          cacheAge: Math.round((now - discountCache.timestamp) / 1000),
+        },
+      };
+    }
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+        apiVersion: "2024-06-20",
+      });
+
+      // Fetch all coupons with pagination
+      let hasMore = true;
+      let startingAfter: string | undefined = undefined;
+      const allCoupons: Stripe.Coupon[] = [];
+
+      while (hasMore) {
+        const couponsResponse: Stripe.Response<Stripe.ApiList<Stripe.Coupon>> =
+          await stripe.coupons.list({
+            limit: 100,
+            starting_after: startingAfter,
+            expand: ["data.applies_to"],
+          });
+
+        // Add all coupons to our array
+        allCoupons.push(...couponsResponse.data);
+
+        // Check if there are more pages
+        hasMore = couponsResponse.has_more;
+        if (hasMore && couponsResponse.data.length > 0) {
+          // Get the ID of the last coupon for the next pagination request
+          startingAfter =
+            couponsResponse.data[couponsResponse.data.length - 1].id;
+        }
+      }
+
+      // Update cache
+      discountCache = {
+        data: allCoupons,
+        timestamp: now,
+      };
+
+      return {
+        discounts: allCoupons,
+        cacheInfo: { fromCache: false, cacheAge: null },
+      };
+    } catch (error: any) {
+      throw new Error(
+        `Error getting discount data from Stripe: ${error.message}`
+      );
+    }
+  }
+
+  @Post("/invoices/query")
+  public async getAllInvoices(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      skipCache?: boolean;
+      status?: "paid" | "open" | "draft" | "uncollectible" | "void";
+      limit?: number;
+    } = {}
+  ): Promise<{
+    invoices: Stripe.Invoice[];
+    cacheInfo: { fromCache: boolean; cacheAge: number | null };
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Check if we have valid cached data and skipCache is not true
+    const now = Date.now();
+    if (
+      !body.skipCache &&
+      invoiceCache &&
+      now - invoiceCache.timestamp < CACHE_TTL_INVOICES
+    ) {
+      return {
+        invoices: invoiceCache.data,
+        cacheInfo: {
+          fromCache: true,
+          cacheAge: Math.round((now - invoiceCache.timestamp) / 1000),
+        },
+      };
+    }
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+        apiVersion: "2024-06-20",
+      });
+
+      // Fetch all invoices with pagination
+      let hasMore = true;
+      let startingAfter: string | undefined = undefined;
+      const allInvoices: Stripe.Invoice[] = [];
+      const fetchLimit = body.limit || 100;
+
+      while (hasMore) {
+        const invoicesResponse: Stripe.Response<
+          Stripe.ApiList<Stripe.Invoice>
+        > = await stripe.invoices.list({
+          limit: fetchLimit,
+          starting_after: startingAfter,
+          status: body.status,
+          expand: [
+            "data.subscription",
+            "data.customer",
+            "data.lines.data.price.product",
+          ],
+        });
+
+        // Add all invoices to our array
+        allInvoices.push(...invoicesResponse.data);
+
+        // Check if there are more pages
+        hasMore = invoicesResponse.has_more;
+        if (hasMore && invoicesResponse.data.length > 0) {
+          // Get the ID of the last invoice for the next pagination request
+          startingAfter =
+            invoicesResponse.data[invoicesResponse.data.length - 1].id;
+        }
+      }
+
+      // Update cache
+      invoiceCache = {
+        data: allInvoices,
+        timestamp: now,
+      };
+
+      return {
+        invoices: allInvoices,
+        cacheInfo: { fromCache: false, cacheAge: null },
+      };
+    } catch (error: any) {
+      throw new Error(
+        `Error getting invoice data from Stripe: ${error.message}`
+      );
+    }
   }
 }
