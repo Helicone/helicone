@@ -7,7 +7,7 @@ import { MessageHeader } from "./MessageHeader";
 
 interface SingleChatProps {
   message: Message;
-  mappedRequest: MappedLLMRequest;
+  mappedRequest?: MappedLLMRequest;
   index: number;
   isLast: boolean;
   expandedProps: {
@@ -49,7 +49,7 @@ export const SingleChat: React.FC<SingleChatProps> = ({
 
   return (
     <>
-      {mappedRequest.raw.request.instructions && (
+      {mappedRequest?.raw.request.instructions && (
         <div className="p-4 mt-2 text-left bg-gray-100 dark:bg-gray-800 rounded-md shadow">
           <h4 className="font-semibold text-gray-900 dark:text-gray-200">
             Instructions
