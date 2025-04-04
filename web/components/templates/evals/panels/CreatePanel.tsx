@@ -246,15 +246,15 @@ export const CreatePanel = () => {
             onClick={handleCreate}
             disabled={
               isSubmitting ||
-              llmSubmit.isLoading ||
-              pythonSubmit.isLoading ||
-              lastMileSubmit.isLoading
+              llmSubmit.isPending ||
+              pythonSubmit.isPending ||
+              lastMileSubmit.isPending
             }
           >
             {isSubmitting ||
-            llmSubmit.isLoading ||
-            pythonSubmit.isLoading ||
-            lastMileSubmit.isLoading ? (
+            llmSubmit.isPending ||
+            pythonSubmit.isPending ||
+            lastMileSubmit.isPending ? (
               <span className="flex items-center gap-2">
                 <svg
                   className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"

@@ -72,9 +72,6 @@ export default function BillingPage() {
     enabled: !!createdOrgId,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    onError: (error) => {
-      console.error("Subscription query error:", error);
-    },
   });
 
   useEffect(() => {

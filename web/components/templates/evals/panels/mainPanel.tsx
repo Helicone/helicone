@@ -159,7 +159,6 @@ export const MainPanel = () => {
           </FreeTierLimitWrapper>,
         ]}
       />
-
       {!canCreateEvaluator && (
         <FreeTierLimitBanner
           feature="evals"
@@ -167,7 +166,6 @@ export const MainPanel = () => {
           freeLimit={MAX_EVALUATORS}
         />
       )}
-
       {evaluators.isLoading ? (
         // Loading state
         <div className="flex flex-col w-full gap-6 p-6">

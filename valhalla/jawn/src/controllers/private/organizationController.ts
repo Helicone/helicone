@@ -142,7 +142,7 @@ export class OrganizationController extends Controller {
     );
 
     if (isExistingMember) {
-      return ok(null); // Silently succeed if member already exists
+      return ok(null);
     }
 
     if (org.data.tier === "enterprise" || "team-20250130") {

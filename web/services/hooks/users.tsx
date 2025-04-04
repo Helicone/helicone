@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-
-import { Result } from "../../lib/result";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { FilterExpression } from "@/filterAST/filterAst";
+import { toFilterNode } from "@/filterAST/toFilterNode";
+import { getJawnClient } from "@/lib/clients/jawn";
 import { getTimeMap } from "../../lib/timeCalculations/constants";
 import { filterListToTree } from "../lib/filters/filterListToTree";
 import {
@@ -9,14 +12,9 @@ import {
 } from "../lib/filters/frontendFilterDefs";
 import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
 
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { useFilterAST } from "@/filterAST/context/filterContext";
-import { FilterExpression } from "@/filterAST/filterAst";
-import { toFilterNode } from "@/filterAST/toFilterNode";
-import { UserMetric } from "@/lib/api/users/UserMetric";
-
 const useUserId = (userId: string) => {
+  const org = useOrg();
+  const jawn = getJawnClient(org?.currentOrg?.id!);
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["users", userId],
     queryFn: async (query) => {
@@ -37,15 +35,12 @@ const useUserId = (userId: string) => {
         start: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
         end: new Date(),
       };
+
       const [response, requestOverTime, costOverTime] = await Promise.all([
-        fetch("/api/request_users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        jawn.POST("/v1/user/metrics/query", {
+          body: {
             filter: {
-              user_metrics: {
+              request_response_rmt: {
                 user_id: {
                   equals: userId,
                 },
@@ -56,9 +51,9 @@ const useUserId = (userId: string) => {
             sort: {
               last_active: "desc",
             },
-            timeZoneDifference: new Date().getTimezoneOffset(),
-          }),
-        }).then((res) => res.json() as Promise<Result<UserMetric[], string>>),
+            timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
+          },
+        }),
         fetch("/api/metrics/requestOverTime", {
           method: "POST",
           headers: {
@@ -131,7 +126,7 @@ const useUserId = (userId: string) => {
     costOverTime: undefined,
   };
 
-  const users = response?.data || [];
+  const users = response?.data?.data?.users || [];
 
   return {
     user: users[0],

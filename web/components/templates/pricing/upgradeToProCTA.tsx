@@ -113,9 +113,9 @@ export const UpgradeToProCTA = ({
           }
         }}
         className="w-full mt-4"
-        disabled={upgradeToPro.isLoading}
+        disabled={upgradeToPro.isPending}
       >
-        {upgradeToPro.isLoading
+        {upgradeToPro.isPending
           ? "Loading..."
           : isPro
           ? "Upgrade"

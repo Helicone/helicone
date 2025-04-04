@@ -65,9 +65,9 @@ export const HypothesisCellRenderer = forwardRef<
     const { runHypothesis, wrapText, selectedScoreKey } =
       useExperimentTable(experimentTableId);
 
-    const { data: promptTemplate } = useQuery(
-      ["promptTemplate", promptVersionId],
-      async () => {
+    const { data: promptTemplate } = useQuery({
+      queryKey: ["promptTemplate", promptVersionId],
+      queryFn: async () => {
         if (!promptVersionId) return null;
 
         const res = await jawnClient.GET(
@@ -97,13 +97,11 @@ export const HypothesisCellRenderer = forwardRef<
           parent_prompt_version: parentPromptVersion?.data?.data,
         };
       },
-      {
-        staleTime: Infinity,
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-      }
-    );
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    });
 
     const queryClient = useQueryClient();
 
