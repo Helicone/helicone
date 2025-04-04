@@ -1,5 +1,5 @@
 import { HeliconeAuth } from "../../packages/common/auth/types";
-import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { AuthParams } from "../../packages/common/auth/types";
 import { OrgParams } from "../../packages/common/auth/types";
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";

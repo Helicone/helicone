@@ -4,7 +4,7 @@ import {
   HeliconeAuth,
   HeliconeUserResult,
   OrgResult,
-} from "./types";
+} from "../types";
 
 export interface HeliconeAuthClient {
   authenticate: (auth: HeliconeAuth) => AuthResult;

@@ -14,7 +14,7 @@ import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 import { Database } from "../../lib/db/database.types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { AuthParams } from "../../packages/common/auth/types";
 const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)

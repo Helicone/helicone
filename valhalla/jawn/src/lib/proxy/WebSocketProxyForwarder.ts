@@ -5,7 +5,7 @@ import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
 import { KafkaProducer } from "../clients/KafkaProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
-import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
 import { S3Manager } from "./S3Manager";
 import { handleSocketSession } from "./WebSocketProxyRequestHandler";
