@@ -56,7 +56,9 @@ export function costOfPrompt({
   promptTokens,
   promptCacheWriteTokens,
   promptCacheReadTokens,
+  promptAudioTokens,
   completionTokens,
+  completionAudioTokens,
   images = 1,
   perCall = 1,
 }: {
@@ -65,7 +67,9 @@ export function costOfPrompt({
   promptTokens: number;
   promptCacheWriteTokens: number;
   promptCacheReadTokens: number;
+  promptAudioTokens: number;
   completionTokens: number;
+  completionAudioTokens: number;
   images?: number;
   perCall?: number;
 }) {
@@ -93,8 +97,22 @@ export function costOfPrompt({
     totalCost += promptCacheReadTokens * cost.prompt_token;
   }
 
+  // Add cost for prompt audio tokens if applicable
+  if (cost.prompt_audio_token && promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_audio_token;
+  } else if (promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_token;
+  }
+
   // Add cost for completion tokens
   totalCost += completionTokens * cost.completion_token;
+
+  // Add cost for completion audio tokens if applicable
+  if (cost.completion_audio_token && completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_audio_token;
+  } else if (completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_token;
+  }
 
   // Add cost for images and per-call fees
   const imageCost = images * (cost.per_image ?? 0);

@@ -120,6 +120,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.usage.cost = usage.cost;
       context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
       context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
+      context.usage.promptAudioTokens = usage.promptAudioTokens;
+      context.usage.completionAudioTokens = usage.completionAudioTokens;
 
       return await super.handle(context);
     } catch (error: any) {
