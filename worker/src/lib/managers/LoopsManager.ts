@@ -372,6 +372,10 @@ export async function updateLoopUsers(env: Env) {
     }`
   );
 
+  // Create separate arrays for regular events and group identifies
+  const groupIdentifyEvents: any[] = [];
+
+  // Users with onboarding status changed should trigger org onboarding events
   for (const user of loopsUpdates) {
     if (user.id && user.onboardingStatusChanged && user.hasOnboarded) {
       console.log(
@@ -387,6 +391,24 @@ export async function updateLoopUsers(env: Env) {
         console.log(
           `LoopsManager: Found organization ${userOrg.id} for user ${user.id}`
         );
+
+        // 1. Create group identify payload
+        groupIdentifyEvents.push({
+          api_key: env.POSTHOG_API_KEY,
+          event: "$groupidentify",
+          distinct_id: user.id,
+          properties: {
+            $group_type: "organization",
+            $group_key: userOrg.id,
+            $group_set: {
+              name: user.email.split("@")[0], // Use email username as fallback org name
+              has_onboarded: true,
+              onboarded_at: new Date().toISOString(),
+            },
+          },
+        });
+
+        // 2. Create the actual onboarding event
         posthogEvents.push({
           event: "organization_onboarded",
           distinct_id: user.id,
@@ -394,13 +416,14 @@ export async function updateLoopUsers(env: Env) {
             email: user.email,
             name: `${user.firstName} ${user.lastName}`.trim(),
             timestamp: new Date().toISOString(),
-          },
-          groups: {
-            organization: userOrg.id, // Use the organization ID from the found org
+            $groups: {
+              organization: userOrg.id,
+            },
           },
         });
+
         console.log(
-          `PostHog: Added organization onboarding event for org ${userOrg.id}`
+          `PostHog: Prepared organization onboarding event for org ${userOrg.id}`
         );
       } else {
         console.log(
@@ -481,45 +504,54 @@ export async function updateLoopUsers(env: Env) {
     }
   }
 
-  // Send all PostHog events at once
+  // First send all group identify events
+  if (groupIdentifyEvents.length > 0) {
+    console.log(
+      `PostHog: Sending ${groupIdentifyEvents.length} group identify events`
+    );
+
+    for (const event of groupIdentifyEvents) {
+      try {
+        const response = await fetch(POSTHOG_EVENT_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(event),
+        });
+
+        console.log(`PostHog: Group identify response: ${response.status}`);
+      } catch (error) {
+        console.error(`Error sending group identify to PostHog:`, error);
+      }
+    }
+  }
+
+  // Then send all regular events
   if (posthogEvents.length > 0) {
-    console.log(
-      `⭐ LOOPSMANAGER: Debug - Sending ${posthogEvents.length} events to PostHog`
-    );
-    console.log(
-      `⭐ LOOPSMANAGER: Debug - First event: ${JSON.stringify(
-        posthogEvents[0]
-      )}`
-    );
-    await sendPosthogEvents(posthogEvents, env.POSTHOG_API_KEY);
-    console.log(`⭐ LOOPSMANAGER: Debug - Finished sending events to PostHog`);
+    console.log(`PostHog: Sending ${posthogEvents.length} events`);
+
+    for (const event of posthogEvents) {
+      try {
+        const posthogPayload = {
+          api_key: env.POSTHOG_API_KEY,
+          event: event.event,
+          distinct_id: event.distinct_id,
+          properties: event.properties,
+        };
+
+        const response = await fetch(POSTHOG_EVENT_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(posthogPayload),
+        });
+
+        console.log(
+          `PostHog: Event response for ${event.event}: ${response.status}`
+        );
+      } catch (error) {
+        console.error(`Error sending event to PostHog:`, error);
+      }
+    }
   } else {
-    console.log(`⭐ LOOPSMANAGER: Debug - No PostHog events to send`);
-
-    // Debug why no events were created
-    console.log(
-      `⭐ LOOPSMANAGER: Debug - loopsUpdates: ${loopsUpdates.length}`
-    );
-    if (loopsUpdates.length > 0) {
-      console.log(
-        `⭐ LOOPSMANAGER: Debug - First user: ${JSON.stringify({
-          id: loopsUpdates[0].id,
-          email: loopsUpdates[0].email,
-          onboardingStatusChanged: loopsUpdates[0].onboardingStatusChanged,
-          hasOnboarded: loopsUpdates[0].hasOnboarded,
-        })}`
-      );
-    }
-
-    // Check onboarded orgs and user ID matching
-    if (onboardedOrgs && onboardedOrgs.length > 0 && loopsUpdates.length > 0) {
-      const userIds = loopsUpdates.map((u) => u.id).filter(Boolean);
-      const matchingOrgs = onboardedOrgs.filter((org) =>
-        userIds.includes(org.owner)
-      );
-      console.log(
-        `⭐ LOOPSMANAGER: Debug - Users with matching orgs: ${matchingOrgs.length}`
-      );
-    }
+    console.log(`PostHog: No events to send`);
   }
 }
