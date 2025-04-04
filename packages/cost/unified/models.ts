@@ -13,6 +13,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        stop: [],
+      },
       providers: [
         {
           provider: "OPENAI",
@@ -32,6 +35,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        stop: [],
       },
       providers: [
         {
@@ -53,6 +59,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        stop: [],
+      },
       providers: [
         {
           provider: "OPENROUTER",
@@ -64,6 +73,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        stop: [],
       },
       providers: [
         {
@@ -87,6 +99,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         reasoning_effort: "medium",
+        stop: [],
       },
       providers: [
         {
@@ -110,6 +123,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         reasoning_effort: "medium",
+        stop: [],
       },
       providers: [
         {
@@ -135,6 +149,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         max_tokens: 8192,
+        stop: [],
       },
       providers: [
         {
@@ -158,6 +173,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         max_tokens: 8192,
+        stop: [],
       },
       providers: [
         {
@@ -181,6 +197,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         max_tokens: 8192,
+        stop: [],
       },
       providers: [
         {
@@ -204,6 +221,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         max_tokens: 4096,
+        stop: [],
       },
       providers: [
         {
@@ -391,6 +409,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        stop: [],
+      },
       providers: [
         {
           provider: "DEEPSEEK",
@@ -406,6 +427,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        stop: [],
       },
       providers: [
         {
