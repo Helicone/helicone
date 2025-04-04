@@ -2,7 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
 
 async function handler({

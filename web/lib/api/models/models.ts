@@ -4,7 +4,7 @@ import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
+import { Result } from "../../../packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface ModelMetric {

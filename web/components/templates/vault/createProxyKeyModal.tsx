@@ -5,7 +5,7 @@ import {
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
 import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { clsx } from "../../shared/clsx";
 import {
   ArrowPathIcon,
@@ -13,7 +13,7 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useOrg } from "../../layout/org/organizationContext";
 

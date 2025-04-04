@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 
 const useFeatureFlags = (featureFlag: string, orgId: string) => {
   const supabaseClient = useSupabaseClient<Database>();

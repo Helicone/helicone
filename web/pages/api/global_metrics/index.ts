@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 
 export default async function handler(
   req: NextApiRequest,

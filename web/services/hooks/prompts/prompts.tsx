@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import useNotification from "../../../components/shared/notification/useNotification";
 import { getJawnClient } from "../../../lib/clients/jawn";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   BackendMetricsCall,

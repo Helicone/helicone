@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "./constants";
-import { Result, err } from "./result";
+import { Result, err } from "../packages/common/result";
 
 export function getHeliconeCookie(): Result<
   {
