@@ -1,7 +1,7 @@
 import { supabaseServer } from "../../db/supabase";
-import { HeliconeAuth } from "../../requestWrapper";
+import { HeliconeAuth, JwtAuth } from "../../../packages/common/auth/types";
 import { dbExecute } from "../db/dbExecute";
-import { err, ok, Result } from "../result";
+import { err, ok, Result } from "../../../packages/common/result";
 import {
   AuthParams,
   HeliconeAuthClient,
@@ -11,6 +11,22 @@ import {
 
 export class SupabaseAuthWrapper implements HeliconeAuthClient {
   constructor() {}
+
+  async getUser(auth: JwtAuth): HeliconeUserResult {
+    const { data, error } = await supabaseServer.client.auth.getUser(
+      auth.token
+    );
+    if (error) {
+      return err(error.message);
+    }
+    if (!data.user.email) {
+      return err("User not found");
+    }
+    return ok({
+      email: data.user.email,
+      id: data.user.id,
+    });
+  }
 
   async getUserById(userId: string): HeliconeUserResult {
     const user = await supabaseServer.client.auth.admin.getUserById(userId);

@@ -1,7 +1,6 @@
-import { Role } from "../../../models/models";
-import { KeyPermissions } from "../../../models/models";
-import { HeliconeAuth } from "../../requestWrapper";
-import { PromiseGenericResult } from "../result";
+import { HeliconeAuth, Role } from "../../../packages/common/auth/types";
+import { KeyPermissions } from "../../../packages/common/auth/types";
+import { PromiseGenericResult } from "../../../packages/common/result";
 
 export interface AuthParams {
   organizationId: string;

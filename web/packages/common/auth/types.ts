@@ -39,6 +39,10 @@ export type OrgResult = PromiseGenericResult<OrgParams>;
 export interface HeliconeUser {
   email: string;
   id: string;
+  user_metadata?: {
+    name?: string;
+    avatar_url?: string;
+  };
 }
 
 export type HeliconeUserResult = PromiseGenericResult<HeliconeUser>;

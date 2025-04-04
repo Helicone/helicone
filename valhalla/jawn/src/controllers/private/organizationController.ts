@@ -26,11 +26,67 @@ import { StripeManager } from "../../managers/stripe/StripeManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Database } from "../../lib/db/database.types";
-
+import { RequestWrapper } from "../../lib/requestWrapper";
+import { Request as ExpressRequest } from "express";
+import { getHeliconeAuthClient } from "../../lib/shared/auth/AuthClientFactory";
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
+  @Get("/")
+  public async getOrganizations(
+    @Request() req: ExpressRequest
+  ): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"][], string>
+  > {
+    const request = new RequestWrapper(req);
+
+    const authHeader = request.authHeader();
+    if (authHeader.error) {
+      return err(authHeader.error);
+    }
+    if (!authHeader.data) {
+      return err("User not found");
+    }
+
+    if (authHeader.data._type !== "jwt") {
+      return err("Invalid auth header");
+    }
+
+    const authParams = await getHeliconeAuthClient().getUser(authHeader.data);
+    if (authParams.error || !authParams.data) {
+      return err(authParams.error ?? "User not found");
+    }
+
+    return await dbExecute<Database["public"]["Tables"]["organization"]["Row"]>(
+      `SELECT organization.* FROM organization 
+      left join organization_member on organization.id = organization_member.organization
+      WHERE soft_delete = false
+      and (organization_member.member = $1 or organization.owner = $1)
+      `,
+      [authParams.data.id]
+    );
+  }
+
+  @Get("/{organizationId}")
+  public async getOrganization(
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const result = await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"]
+    >(
+      `SELECT organization.* FROM organization 
+      left join organization_member on organization.id = organization_member.organization
+      WHERE soft_delete = false
+      and (organization_member.member = $1 or organization.owner = $1)
+      and organization.id = $2`,
+      [request.authParams.userId, organizationId]
+    );
+
+    return ok(result);
+  }
+
   @Get("/reseller/{resellerId}")
   public async getReseller(
     @Path() resellerId: string,

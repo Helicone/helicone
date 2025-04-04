@@ -55,6 +55,10 @@ export const authMiddleware = async (
     next();
     return;
   }
+  if (req.path === "/v1/organization") {
+    next();
+    return;
+  }
 
   try {
     const request = new RequestWrapper(req);

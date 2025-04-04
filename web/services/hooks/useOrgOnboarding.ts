@@ -1,9 +1,9 @@
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useEffect } from "react";
 
 export type OnboardingStep =
   | "ORGANIZATION"
@@ -107,7 +107,6 @@ const defaultOnboardingState: OnboardingState = {
 
 export const useOrgOnboarding = (orgId: string) => {
   const queryClient = useQueryClient();
-  const supabase = useSupabaseClient();
   const jawn = useJawnClient();
 
   const draftStore = useDraftOnboardingStore(orgId);
@@ -122,27 +121,27 @@ export const useOrgOnboarding = (orgId: string) => {
     clearDraft,
   } = draftStore();
 
-  const { data: onboardingState, isLoading } = useQuery({
-    queryKey: ["org", orgId, "onboarding"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("organization")
-        .select("name, onboarding_status")
-        .eq("id", orgId)
-        .single();
-
-      if (error) throw error;
-
-      const baseState =
-        (data?.onboarding_status as OnboardingState) ?? defaultOnboardingState;
-
-      return {
-        ...baseState,
-        name: data?.name ?? "",
-      };
+  const { data: onboardingState, isLoading } = $JAWN_API.useQuery(
+    "get",
+    "/v1/organization/{organizationId}",
+    {
+      params: { path: { organizationId: orgId } },
     },
-    enabled: !!orgId,
-  });
+    {
+      enabled: !!orgId,
+      select: (data) => {
+        const organization = data?.data?.data?.[0];
+        if (!organization) {
+          return null;
+        }
+        const baseState =
+          (organization?.onboarding_status as unknown as OnboardingState) ??
+          defaultOnboardingState;
+
+        return { ...baseState, name: data?.data?.data?.[0]?.name ?? "" };
+      },
+    }
+  );
 
   useEffect(() => {
     if (
@@ -193,7 +192,7 @@ export const useOrgOnboarding = (orgId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["org", orgId, "onboarding"]
+        queryKey: ["org", orgId, "onboarding"],
       });
     },
   });
@@ -201,10 +200,10 @@ export const useOrgOnboarding = (orgId: string) => {
   const updateCurrentStep = async (step: OnboardingState["currentStep"]) => {
     await saveOnboardingChangesAsync({ currentStep: step });
     await queryClient.invalidateQueries({
-      queryKey: ["org", orgId, "onboarding"]
+      queryKey: ["org", orgId, "onboarding"],
     });
     await queryClient.refetchQueries({
-      queryKey: ["org", orgId, "onboarding"]
+      queryKey: ["org", orgId, "onboarding"],
     });
   };
 
@@ -212,10 +211,10 @@ export const useOrgOnboarding = (orgId: string) => {
     await saveOnboardingChangesAsync({ hasOnboarded: true });
     clearDraft();
     await queryClient.invalidateQueries({
-      queryKey: ["org", orgId, "onboarding"]
+      queryKey: ["org", orgId, "onboarding"],
     });
     await queryClient.refetchQueries({
-      queryKey: ["org", orgId, "onboarding"]
+      queryKey: ["org", orgId, "onboarding"],
     });
   };
 

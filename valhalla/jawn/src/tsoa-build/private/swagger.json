@@ -3847,6 +3847,181 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"tier": {
+									"type": "string",
+									"nullable": true
+								},
+								"subscription_status": {
+									"type": "string",
+									"nullable": true
+								},
+								"stripe_subscription_item_id": {
+									"type": "string",
+									"nullable": true
+								},
+								"stripe_subscription_id": {
+									"type": "string",
+									"nullable": true
+								},
+								"stripe_metadata": {
+									"$ref": "#/components/schemas/Json"
+								},
+								"stripe_customer_id": {
+									"type": "string",
+									"nullable": true
+								},
+								"soft_delete": {
+									"type": "boolean"
+								},
+								"size": {
+									"type": "string",
+									"nullable": true
+								},
+								"reseller_id": {
+									"type": "string",
+									"nullable": true
+								},
+								"request_limit": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"referral": {
+									"type": "string",
+									"nullable": true
+								},
+								"percent_to_log": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"owner": {
+									"type": "string"
+								},
+								"organization_type": {
+									"type": "string"
+								},
+								"org_provider_key": {
+									"type": "string",
+									"nullable": true
+								},
+								"onboarding_status": {
+									"$ref": "#/components/schemas/Json"
+								},
+								"name": {
+									"type": "string"
+								},
+								"logo_path": {
+									"type": "string",
+									"nullable": true
+								},
+								"limits": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
+								"is_personal": {
+									"type": "boolean"
+								},
+								"is_main_org": {
+									"type": "boolean"
+								},
+								"id": {
+									"type": "string"
+								},
+								"icon": {
+									"type": "string"
+								},
+								"has_onboarded": {
+									"type": "boolean"
+								},
+								"governance_settings": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
+								"domain": {
+									"type": "string",
+									"nullable": true
+								},
+								"created_at": {
+									"type": "string",
+									"nullable": true
+								},
+								"color": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"tier",
+								"subscription_status",
+								"stripe_subscription_item_id",
+								"stripe_subscription_id",
+								"stripe_metadata",
+								"stripe_customer_id",
+								"soft_delete",
+								"size",
+								"reseller_id",
+								"request_limit",
+								"referral",
+								"percent_to_log",
+								"owner",
+								"organization_type",
+								"org_provider_key",
+								"onboarding_status",
+								"name",
+								"logo_path",
+								"limits",
+								"is_personal",
+								"is_main_org",
+								"id",
+								"icon",
+								"has_onboarded",
+								"governance_settings",
+								"domain",
+								"created_at",
+								"color"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
@@ -9817,6 +9992,67 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/organization": {
+			"get": {
+				"operationId": "GetOrganizations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/organization/{organizationId}": {
+			"get": {
+				"operationId": "GetOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/organization/reseller/{resellerId}": {

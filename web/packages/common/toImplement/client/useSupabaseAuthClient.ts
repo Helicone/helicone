@@ -37,6 +37,7 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     return ok({
       id: user.data.user.id,
       email: user.data.user.email ?? "",
+      user_metadata: user.data.user.user_metadata,
     });
   }
 
@@ -65,6 +66,7 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     return ok({
       id: user.user?.id ?? "",
       email: user.user?.email ?? "",
+      user_metadata: user.user?.user_metadata,
     });
   }
 
@@ -103,6 +105,7 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     return ok({
       id: user.user?.id ?? "",
       email: user.user?.email ?? "",
+      user_metadata: user.user?.user_metadata,
     });
   }
 

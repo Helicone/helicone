@@ -1,5 +1,4 @@
 import { PromiseGenericResult } from "../result";
-import { KeyPermissions, Role } from "./types";
 
 export type JwtAuth = {
   _type: "jwt";

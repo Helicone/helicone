@@ -1,5 +1,5 @@
+import { PromiseGenericResult } from "../../result";
 import { HeliconeAuth } from "../types";
-import { PromiseGenericResult, Result } from "../../result";
 export type Role = "admin" | "owner" | "member" | undefined;
 export type KeyPermissions = "w" | "rw" | undefined;
 
