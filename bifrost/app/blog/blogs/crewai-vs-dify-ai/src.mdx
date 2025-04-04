@@ -1,6 +1,6 @@
 Choosing the proper framework to build your AI agent is essential for your team's productivity and app scalability. 
 
-As more and more frameworks emerge in a competitive market, developers and non-technical users alike are looking for <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">the best AI agent framework</a>.
+As more and more frameworks emerge in a competitive market, developers and non-technical users alike are looking for <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">the best AI agent framework</a> to get started. 
 
 ![CrewAI vs. Dify AI for building AI Agents](/static/blog/crewai-vs-dify-ai/cover.webp)
 
@@ -8,7 +8,7 @@ In this blog, we will explore the key differences between **CrewAI** and **Dify*
 
 ## Table of Contents
 
-## Quick Comparison: CrewAI vs Dify
+## CrewAI vs Dify: Quick Compare
 
 | **Criteria**            | **CrewAI** | **Dify.AI** |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -26,7 +26,7 @@ In this blog, we will explore the key differences between **CrewAI** and **Dify*
 ## What is CrewAI?
 
 CrewAI is a multi-agent automation tool for building AI agentic workflows. CrewAI's
-comprehensive tools **simplify building, managing, and deploying AI agents**.
+comprehensive tools **simplify the building, management, and deployment of AI agents**.
 
 These agents are typically powered by large language models (LLMs) and can be
 integrated with external tools to improve functionality.
@@ -44,7 +44,7 @@ integrated with external tools to improve functionality.
 
 ### Limitations
 
-- Less robust at handling complex code execution compared to alternatives like <a href="https://www.helicone.ai/blog/crewai-vs-autogen" target="_blank" rel="noopener">AutoGen</a>
+- Less robust at handling complex code execution compared to alternatives like <a href="https://www.helicone.ai/blog/crewai-vs-autogen" target="_blank" rel="noopener">AutoGen</a> from Microsoft
 - Less suited for tasks that require heavy computation or are highly specialized
 - Less flexibility than other developer-centric platforms
 
@@ -55,7 +55,7 @@ integrated with external tools to improve functionality.
 
 _For up-to-date pricing information, we recommend checking <a href="https://www.crewai.com/" target="_blank" rel="noopener">CrewAI's official website</a>._
 
-### How to Build an AI Agent in CrewAI
+## How to Build an AI Agent in CrewAI
 
 **CrewAI** offers a structured approach to building AI agents. 
 
@@ -129,7 +129,7 @@ _For the most complete and up-to-date instructions, always refer to <a href="htt
 
 ## What is Dify?
 
-**Dify** is a no-code platform that allows cross-functional teams to build AI agents rapidly and collaboratively. It supports **LLM-based workflows** and can integrate **Backend-as-a-Service (BaaS)** APIs and tools.
+<a href="https://dify.ai/" target="_blank" rel="noopener nofollow">Dify</a> is a no-code platform that allows cross-functional teams to build AI agents rapidly and collaboratively. It supports **LLM-based workflows** and can integrate **Backend-as-a-Service (BaaS)** APIs and tools.
 
 ![Dify AI - No-code AI Agent Builder](/static/blog/crewai-vs-dify-ai/dify-ai.webp)
 
@@ -154,7 +154,7 @@ _For the most complete and up-to-date instructions, always refer to <a href="htt
 
 _For up-to-date pricing information, we recommend checking <a href="https://dify.ai/pricing" target="_blank" rel="noopener">Dify's official website</a>._
 
-### How to Build a Dify Agent
+## How to Build a Dify Agent
 
 **Dify.AI** offers two primary methods for creating agents: using pre-built templates or building your own from scratch. 
 
@@ -218,31 +218,28 @@ _For the most up-to-date instructions, please check <a href="https://docs.dify.a
 
 ---
 
-## How to Monitor Your CrewAI or Dify AI Agent Application
+## How to Monitor Your CrewAI or Dify Agents
 
-As you build increasingly complex systems, monitoring and analytics become critical. 
+As you build increasingly complex systems such as agents or complex LLM workflows, monitoring and tracing become critical. 
 
-**Helicone** provides real-time insights and performance monitoring for both CrewAI and Dify projects. Integrating Helicone is simple:
+Tools like <a href="https://docs.helicone.ai/features/sessions" target="_blank" 
+rel="noopener">Helicone's Sessions</a> provide real-time traces and model performance monitoring for both CrewAI and Dify projects. Here's what Sessions look like - companies use Sessions frequently to narrow down errors in a complex LLM workflow, and identify performance improvements. 
 
 ![Helicone AI - Trace your agentic workflow with ease](/static/blog/crewai-vs-dify-ai/helicone-sessions.webp)
 
-### Step 1: Create a Helicone account
+Integrating Helicone is simple:
 
-- <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">
-    Get started for free
-  </a>
-- With a free plan, you will be able to log 10,000 requests per month and access basic monitoring and analytics features.
-- With a <a href="https://www.helicone.ai/pricing" target="_blank" rel="noopener">Pro</a> plan, you will have access to advanced features like <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a>, where you can visualize multi-step LLM interactions and pinpoint root cause of errors easily.
+### Step 1: Create a <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">Helicone account</a>
 
-### Step 2: Generate an API Key
+Getting started is free. You get 10,000 logs/month and access to enterprise-grade features for comprehensive monitoring. 
+
+### Step 2: Generate an API key
 
 Generate a Helicone API Key in `Settings`, under `API Keys`.
 
-### Step 3: Configure Your Framework
+### Step 3: Configure your framework
 
-#### For **CrewAI** Users:
-
-Set `OPENAI_BASE_URL` as an environment variable:
+**For CrewAI users,** set `OPENAI_BASE_URL` as an environment variable:
 
 ```python
 import os
@@ -252,46 +249,40 @@ os.environ["OPENAI_API_BASE"] = f"https://oai.helicone.ai/{HELICONE_API_KEY}/v1"
 
 _For detailed documentation, please visit <a href="https://docs.helicone.ai/integrations/openai/crewai#crew-ai-integration" target="_blank" rel="noopener">CrewAI Integration</a>._
 
-#### For **Dify.AI** Users:
-
-Choose whichever provider you are using that is supported by Helicone. Here is an example using OpenAI:
+**For Dify.AI users**, choose whichever provider you are using that is supported by Helicone. Here is an example using OpenAI:
 
 ![Dify AI - Configure API Base](/static/blog/crewai-vs-dify-ai/dify-ai-api.webp)
 
 _For detailed documentation, please visit <a href="https://docs.helicone.ai/other-integrations/dify#dify" target="_blank" rel="noopener">Dify Integration</a>._
 
-### Step 4: Monitor Your Agent Performance
+### Step 4: Monitor the performance
 
 ![Helicone AI - The Best LLM Agent Monitoring Platform](/static/blog/crewai-vs-dify-ai/dashboard.webp)
 
-Once integrated, Helicone provides powerful monitoring capabilities for both your **CrewAI** workflows and **Dify** applications:
-
+Once integrated, Helicone provides powerful monitoring capabilities for both your CrewAI workflows and Dify applications, where you can: 
 - Track token usage and costs across agents
 - Monitor latency and performance metrics
 - View detailed conversation logs
 - Trace multi-agent interactions using Sessions
-- Identify and troubleshoot bottlenecks
 - Analyze prompt effectiveness and model responses
 
 <CallToAction
-  title="Ready to monitor your AI agent?"
-  description="Join companies like QA Wolf who trust Helicone to track, debug, and optimize their agentic workflows."
-  primaryButtonText="Get started today"
+  title="Debug Your AI Agents 10x Faster ⚡️"
+  description="Join companies like QA Wolf who rely on Helicone's purpose-built observability to ship more reliable AI agents. Trace complex agent workflows and identify bottlenecks in your AI application. "
+  primaryButtonText="Start Monitoring Today"
   primaryButtonLink="https://helicone.ai"
-  secondaryButtonText="Contact us"
-  secondaryButtonLink="https://www.helicone.ai/contact"
+  secondaryButtonText="See Sessions Docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
 />
 
 ## Bottom Line
 
-Both **CrewAI** and **Dify.AI** offer distinct strengths that cater to different needs and technical goals:
+When choosing between **Dify vs CrewAI**, think about your team's technical capabilities, project complexity, and deployment requirements. In summary: 
 
 - **CrewAI** excels for developers building complex, role-based agent systems who need deep customization and don't mind writing code.
 - **Dify.AI** shines for teams seeking rapid development through a no-code interface, particularly those with mixed technical expertise.
 
-When choosing between **Dify vs CrewAI**, consider your team's technical capabilities, project complexity, and deployment requirements. 
-
-Finally, we encourage you to explore <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">other AI agents</a> such as AutoGen and LangChain—who knows, you might find them a better fit for your use case! 
+We encourage you to explore <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noopener">other AI agent building platforms</a> such as AutoGen and LangChain—who knows, you might find them a better fit for your use case! 
 
 ### Other useful comparisons:
 
