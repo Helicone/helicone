@@ -25,11 +25,27 @@ import {
 import { StripeManager } from "../../managers/stripe/StripeManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { Database } from "../../lib/db/database.types";
 
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
+  @Get("/reseller/{resellerId}")
+  public async getReseller(
+    @Path() resellerId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const result = await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"]
+    >(
+      `SELECT * FROM organization WHERE reseller_id = $1 and soft_delete = false`,
+      [resellerId]
+    );
+
+    return ok(result);
+  }
+
   @Post("/user/accept_terms")
   public async acceptTerms(
     @Request() request: JawnAuthenticatedRequest
