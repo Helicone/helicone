@@ -685,22 +685,9 @@ const blogContent: BlogStructure[] = [
     time: "4 minute read",
   },
   {
-    title:
-      "A LangSmith Alternative that Takes LLM Observability to the Next Level",
-    description:
-      "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
-    badgeText: "Compare",
-    date: "Apr 18, 2024",
-    href: "/blog/langsmith",
-    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "langsmith-vs-helicone",
+    },
   },
   {
     title:
