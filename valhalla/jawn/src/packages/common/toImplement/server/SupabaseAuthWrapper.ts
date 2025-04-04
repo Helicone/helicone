@@ -1,11 +1,11 @@
-import { supabaseServer } from "../../../lib/db/supabase";
-import { HeliconeAuth } from "../auth/types";
-import { dbExecute } from "../../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../result";
-import { HeliconeAuthClient } from "../auth/server/HeliconeAuthClient";
-import { AuthParams } from "../auth/types";
-import { OrgParams } from "../auth/types";
-import { HeliconeUserResult } from "../auth/types";
+import { supabaseServer } from "../../../../lib/db/supabase";
+import { HeliconeAuth } from "../../auth/types";
+import { dbExecute } from "../../../../lib/shared/db/dbExecute";
+import { err, ok, Result } from "../../result";
+import { HeliconeAuthClient } from "../../auth/server/HeliconeAuthClient";
+import { AuthParams } from "../../auth/types";
+import { OrgParams } from "../../auth/types";
+import { HeliconeUserResult } from "../../auth/types";
 
 export class SupabaseAuthWrapper implements HeliconeAuthClient {
   constructor() {}
