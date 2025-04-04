@@ -1,5 +1,5 @@
 import { createClient, ClickHouseClient } from "@clickhouse/client";
-import { Result } from "../shared/result";
+import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;

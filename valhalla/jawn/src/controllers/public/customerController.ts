@@ -13,7 +13,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { clickhousePriceCalc } from "../../packages/cost";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 
 export interface CustomerUsage {
   id: string;

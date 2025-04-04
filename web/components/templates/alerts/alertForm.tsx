@@ -1,6 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
 import {
   useGetOrgMembers,
   useGetOrgSlackChannels,
@@ -21,7 +20,7 @@ import {
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./constant";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
@@ -74,7 +73,6 @@ const AlertForm = (props: AlertFormProps) => {
   );
 
   const orgContext = useOrg();
-  const user = useUser();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
     orgContext?.currentOrg?.id || ""

@@ -1,10 +1,10 @@
 import { EvalQueryParams } from "../../controllers/public/evalController";
 import { KVCache } from "../../lib/cache/kvCache";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { getXOverTime } from "../helpers/getXOverTime";

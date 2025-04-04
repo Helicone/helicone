@@ -3,7 +3,7 @@ import {
   getModelFromResponse,
 } from "../../../utils/modelMapper";
 import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
-import { PromiseGenericResult, ok } from "../result";
+import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class AnthropicBodyProcessor implements IBodyProcessor {
@@ -30,8 +30,10 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
               parsedResponseBody?.usage?.input_tokens +
               parsedResponseBody?.usage?.output_tokens,
             promptTokens: parsedResponseBody?.usage?.input_tokens,
-            promptCacheWriteTokens: parsedResponseBody?.usage?.cache_creation_input_tokens,
-            promptCacheReadTokens: parsedResponseBody?.usage?.cache_read_input_tokens,
+            promptCacheWriteTokens:
+              parsedResponseBody?.usage?.cache_creation_input_tokens,
+            promptCacheReadTokens:
+              parsedResponseBody?.usage?.cache_read_input_tokens,
             completionTokens: parsedResponseBody?.usage?.output_tokens,
             heliconeCalculated: true,
           },

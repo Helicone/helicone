@@ -13,7 +13,7 @@ import {
   Tags,
 } from "tsoa";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 import {
   Experiment,
   ExperimentTable,

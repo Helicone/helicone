@@ -19,10 +19,11 @@ import RequestsPageV2 from "../requests/requestsPageV2";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
+
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -33,7 +34,7 @@ const RateLimitPage = (props: {}) => {
   const { properties, isLoading: propertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
   const org = useOrg();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const {
     unauthorized,
     currentTier,

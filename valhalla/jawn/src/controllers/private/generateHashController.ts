@@ -2,7 +2,7 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { hashAuth } from "../../utils/hash";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { KeyPermissions } from "../../models/models";
+import { KeyPermissions } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface GenerateHashQueryParams {

@@ -10,7 +10,7 @@ import {
   PromiseGenericResult,
   err,
   ok,
-} from "../../shared/result";
+} from "../../../packages/common/result";
 import { Topics } from "../KafkaProducer";
 import { generateKafkaAdmin, generateKafkaConsumer } from "./client";
 import {

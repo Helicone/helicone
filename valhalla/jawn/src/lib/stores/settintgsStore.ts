@@ -1,8 +1,8 @@
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../cache/kvCache";
 import { dbExecute } from "../shared/db/dbExecute";
-import { ok, Result } from "../shared/result";
-import { err } from "../shared/result";
+import { ok, Result } from "../../packages/common/result";
+import { err } from "../../packages/common/result";
 
 const kvCache = new KVCache(60 * 1000); // 5 minutes
 

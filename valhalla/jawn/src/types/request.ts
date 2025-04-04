@@ -1,5 +1,5 @@
 import express from "express";
-import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../packages/common/auth/types";
 
 export type JawnAuthenticatedRequest = express.Request & {
   authParams: AuthParams;

@@ -1,5 +1,5 @@
 import { KVCache } from "../lib/cache/kvCache";
-import { Result } from "../lib/shared/result";
+import { Result } from "../packages/common/result";
 import { stringToNumberHash } from "../utils/helpers";
 
 const kvCache = new KVCache(24 * 60 * 60 * 1000); // 24 hours

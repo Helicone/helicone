@@ -1,6 +1,6 @@
 import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, resultMap, ok, Result } from "../shared/result";
+import { err, resultMap, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export type Score = {

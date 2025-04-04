@@ -1,9 +1,9 @@
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../lib/result";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
 
 async function handler({
   req,
@@ -18,23 +18,22 @@ async function handler({
     referralCode: string;
   };
 
-  const { data: user, error: userError } = await getSupabaseServer()
-    .from("user_settings")
-    .select("*")
-    .eq("referral_code", referralCode)
-    .single();
+  const { data: user, error: userError } = await dbExecute<{ user: string }>(
+    "SELECT user FROM user_settings WHERE referral_code = $1",
+    [referralCode]
+  );
 
-  if (userError || !user?.user) {
+  if (userError || !user?.[0]?.user) {
     res.status(500).json({ error: "Failed to retrieve user", data: null });
     return;
   }
 
-  const { error } = await getSupabaseServer().from("referrals").insert({
-    referred_user_id: userData?.userId,
-    referrer_user_id: user?.user,
-  });
+  const { error: updateError } = await dbExecute(
+    "INSERT INTO referrals (referred_user_id, referrer_user_id) VALUES ($1, $2)",
+    [userData?.userId, user?.[0]?.user]
+  );
 
-  if (error) {
+  if (updateError) {
     res.status(500).json({ error: "Failed to create referral", data: null });
     return;
   }

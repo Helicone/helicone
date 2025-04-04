@@ -1,29 +1,14 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "../../lib/clients/jawn";
-import { components } from "../../lib/clients/jawnTypes/private";
 import Parser from "rss-parser";
-import { Database } from "@/supabase/database.types";
+import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
+import { components } from "../../lib/clients/jawnTypes/private";
 
 const useAlertBanners = () => {
-  const supabaseClient = useSupabaseClient<Database>();
   const {
     data: alertBanners,
     isLoading: isAlertBannersLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["alert-banners"],
-    queryFn: async () => {
-      const { data, error } = await supabaseClient
-        .from("alert_banners")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      return { data, error };
-    },
-    refetchOnWindowFocus: false,
-    staleTime: 60000,
-  });
+  } = $JAWN_API.useQuery("get", "/v1/alert-banner", {});
 
   return {
     alertBanners,
@@ -33,21 +18,10 @@ const useAlertBanners = () => {
 };
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
-  const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({
-    mutationKey: ["create-alert-banner"],
-    mutationFn: async (req: { title: string; message: string }) => {
-      const jawnClient = getJawnClient();
-      const { data, error } = await jawnClient.POST("/v1/admin/alert_banners", {
-        body: req,
-      });
-
-      if (!error) {
-        onSuccess && onSuccess();
-      }
-
-      return { data, error };
-    },
-  });
+  const { mutate: createBanner, isPending: isCreatingBanner } =
+    $JAWN_API.useMutation("post", "/v1/admin/alert_banners", {
+      onSuccess,
+    });
   return {
     createBanner,
     isCreatingBanner,
@@ -181,9 +155,9 @@ const useChangelog = () => {
 
 export {
   useAlertBanners,
+  useChangelog,
   useCreateAlertBanner,
   useGetSetting,
   useUpdateAlertBanner,
   useUpdateSetting,
-  useChangelog,
 };

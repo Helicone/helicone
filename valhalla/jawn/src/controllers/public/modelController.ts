@@ -1,6 +1,6 @@
 import { Controller, Get, Request, Route, Security, Tags } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";

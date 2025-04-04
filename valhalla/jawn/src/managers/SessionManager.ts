@@ -3,11 +3,11 @@ import {
   SessionQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../packages/common/auth/types";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
-import { err, ok, Result, resultMap } from "../lib/shared/result";
+import { err, ok, Result, resultMap } from "../packages/common/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {

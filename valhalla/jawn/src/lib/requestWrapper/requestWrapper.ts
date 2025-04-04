@@ -6,7 +6,13 @@
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
 import { supabaseServer } from "../db/supabase";
-import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
+import {
+  Result,
+  err,
+  map,
+  mapPostgrestErr,
+  ok,
+} from "../../packages/common/result";
 
 import { Request } from "express";
 import { usageLimitManager } from "../../managers/UsageLimitManager";

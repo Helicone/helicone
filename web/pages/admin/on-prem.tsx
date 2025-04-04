@@ -1,17 +1,12 @@
-import { User } from "@supabase/auth-helpers-nextjs";
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import { AdminOnPremPage } from "../../components/templates/admin/onPrem/adminOnPrem";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
-import { getSupabaseServer } from "../../lib/supabaseServer";
 
-interface AdminProps {
-  user: User;
-}
+import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { AdminOnPremPage } from "@/components/templates/admin/onPrem/adminOnPrem";
+interface AdminProps {}
 
 const Admin = (props: AdminProps) => {
-  const { user } = props;
-
   return <AdminOnPremPage />;
 };
 
@@ -26,9 +21,10 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     userData: { user },
   } = options;
 
-  // const { data } = await jawn.GET("/v1/admin/admins/query");
-
-  const { data, error } = await getSupabaseServer().from("admins").select("*");
+  const { data, error } = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [user?.id]
+  );
 
   const admins = data?.map((admin) => admin.user_id || "") || [];
 

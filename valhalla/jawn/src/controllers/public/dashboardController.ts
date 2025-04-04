@@ -9,7 +9,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../packages/common/result";
 import {
   DataOverTimeRequest,
   getXOverTime,

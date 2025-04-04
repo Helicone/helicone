@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import Stripe from "stripe";
 import { DEMO_EMAIL } from "../../../lib/constants";
-import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import { getStripeCustomer } from "../../../utils/stripeHelpers";
 import { stripeServer } from "../../../utils/stripeServer";
 
@@ -28,8 +27,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const supabase = new SupabaseServerWrapper({ req, res }).getClient();
-  const email = (await supabase.auth.getUser())?.data.user?.email;
+  const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+  const email = client.user?.email;
 
   const discountCode = req.query.discountCode as string;
 

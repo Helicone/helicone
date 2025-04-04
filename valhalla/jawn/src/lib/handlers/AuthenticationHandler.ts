@@ -1,7 +1,8 @@
-import { HeliconeAuth } from "../requestWrapper";
-import { getHeliconeAuthClient } from "../shared/auth/AuthClientFactory";
-import { AuthParams, OrgParams } from "../shared/auth/HeliconeAuthClient";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { HeliconeAuth } from "../../packages/common/auth/types";
+import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { AuthParams } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

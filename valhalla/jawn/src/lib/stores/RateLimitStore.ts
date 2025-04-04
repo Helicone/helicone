@@ -1,5 +1,5 @@
 import { ClickhouseDB, clickhouseDb } from "../db/ClickhouseWrapper";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 export class RateLimitStore {
   public async batchInsertRateLimits(

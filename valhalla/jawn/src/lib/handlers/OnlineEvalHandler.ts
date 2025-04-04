@@ -5,7 +5,7 @@ import {
 } from "../../managers/evaluator/EvaluatorManager";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../cache/kvCache";
-import { err, PromiseGenericResult } from "../shared/result";
+import { err, PromiseGenericResult } from "../../packages/common/result";
 import { OnlineEvalStore } from "../stores/OnlineEvalStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, toHeliconeRequest } from "./HandlerContext";

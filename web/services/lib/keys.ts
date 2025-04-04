@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { Result } from "../../lib/result";
 
 export type DecryptedProviderKey = {

@@ -2,7 +2,7 @@ import pgPromise from "pg-promise";
 import { Database } from "../db/database.types";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { mapScores } from "../../managers/score/ScoreManager";

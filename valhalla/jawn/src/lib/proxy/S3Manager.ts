@@ -1,5 +1,5 @@
 import { S3Client } from "../shared/db/s3Client";
-import { Result } from "../shared/result";
+import { Result } from "../../packages/common/result";
 
 export class S3Manager {
   constructor(private s3Client: S3Client) {}

@@ -5,7 +5,7 @@ import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequestAsset,
@@ -21,7 +21,7 @@ import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;

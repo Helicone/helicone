@@ -7,9 +7,9 @@ import {
 } from "../../controllers/public/experimentV2Controller";
 import { PromptVersionResult } from "../../controllers/public/promptController";
 import { run } from "../../lib/experiment/run";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { ExperimentStore } from "../../lib/stores/experimentStore";
 import { BaseManager } from "../BaseManager";
 import { InputsManager } from "../inputs/InputsManager";
@@ -737,14 +737,14 @@ export class ExperimentV2Manager extends BaseManager {
 
     try {
       // Create placeholders for the IN clause
-      const placeholders = inputRecordIds.map((_, i) => `$${i + 1}`).join(", ");
+      const placeholders = inputRecordIds.map((_, i) => `$${i + 3}`).join(", ");
 
       const result = await dbExecute(
         `UPDATE prompt_input_record
          SET experiment_id = null
          WHERE id IN (${placeholders})
-         AND experiment_id = $${inputRecordIds.length + 1}`,
-        [...inputRecordIds, experimentId]
+         AND experiment_id = $1`,
+        [experimentId, ...inputRecordIds]
       );
 
       if (result.error) {

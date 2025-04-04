@@ -1,7 +1,7 @@
 import { calculateModel } from "../../../utils/modelMapper";
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
-import { PromiseGenericResult, ok } from "../result";
+import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 

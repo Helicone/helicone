@@ -1,5 +1,5 @@
 import { dataDogClient } from "../clients/DataDogClient";
-import { PromiseGenericResult, ok } from "../shared/result";
+import { PromiseGenericResult, ok } from "../../packages/common/result";
 import { HandlerContext } from "./HandlerContext";
 
 interface LogHandler {

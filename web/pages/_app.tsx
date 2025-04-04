@@ -23,6 +23,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
+import JawnClientProvider from "@/components/shared/JawnClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 

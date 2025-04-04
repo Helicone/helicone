@@ -13,7 +13,7 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { useFeatureFlags } from "../../../services/hooks/featureFlags";
 import { useOrg } from "../../layout/org/organizationContext";
 

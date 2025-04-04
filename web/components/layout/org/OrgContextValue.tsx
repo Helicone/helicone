@@ -1,4 +1,4 @@
-import { Database } from "@/supabase/database.types";
+import { Database } from "@/db/database.types";
 
 export interface OrgContextValue {
   currentOrg?: Database["public"]["Tables"]["organization"]["Row"];

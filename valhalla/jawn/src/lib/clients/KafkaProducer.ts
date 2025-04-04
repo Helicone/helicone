@@ -3,7 +3,7 @@ import {
   HeliconeScoresMessage,
   KafkaMessageContents,
 } from "../handlers/HandlerContext";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { LogManager } from "../../managers/LogManager";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");

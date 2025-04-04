@@ -1,9 +1,9 @@
 // src/users/usersService.ts
 import { NewExperimentParams } from "../../controllers/public/experimentController";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 import {
   Experiment,
   ExperimentDatasetRow,

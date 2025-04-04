@@ -4,7 +4,7 @@ import {
   PostHogEvent,
   PosthogUserClient,
 } from "../clients/PosthogUserClient";
-import { PromiseGenericResult, ok } from "../shared/result";
+import { PromiseGenericResult, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import crypto from "crypto";

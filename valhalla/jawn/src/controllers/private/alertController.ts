@@ -16,7 +16,7 @@ import {
   AlertRequest,
   AlertResponse,
 } from "../../managers/alert/AlertManager";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../packages/common/result";
 
 @Route("v1/alert")
 @Tags("Alert")

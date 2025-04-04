@@ -1,4 +1,4 @@
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { gzip } from "zlib";
 import { promisify } from "util";
 

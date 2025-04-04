@@ -1,12 +1,13 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
 import { useState } from "react";
 import ThemedModal from "../components/shared/themed/themedModal";
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 const Reset = () => {
-  const supabase = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
+
   const { setNotification } = useNotification();
   const [open, setOpen] = useState(false);
 
@@ -14,8 +15,11 @@ const Reset = () => {
     <>
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
-          const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/reset-password`,
+          const { error } = await heliconeAuthClient.resetPassword({
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/reset-password`,
+            },
           });
 
           if (error) {

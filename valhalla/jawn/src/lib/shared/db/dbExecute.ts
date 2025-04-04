@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import { Result } from "../result";
+import { Result } from "../../../packages/common/result";
 import { clickhouseDb } from "../../db/ClickhouseWrapper";
 import { HELICONE_DB } from "./pgpClient";
 

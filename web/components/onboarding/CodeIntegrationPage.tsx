@@ -6,7 +6,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Alert } from "@/components/ui/alert";
@@ -31,6 +30,7 @@ import { Result } from "@/lib/result";
 import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { H1, Small, Muted } from "@/components/ui/typography";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -70,7 +70,7 @@ export function CodeIntegrationPage({
   defaultProvider = "openai",
   defaultLanguage = "typescript",
 }: CodeIntegrationPageProps) {
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const org = useOrg();
   const router = useRouter();

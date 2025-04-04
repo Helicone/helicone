@@ -1,5 +1,3 @@
-import { SupabaseClient, User } from "@supabase/supabase-js";
-
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { Result } from "../../result";
 import {
@@ -9,11 +7,6 @@ import {
 import { dbExecute } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
-
-export interface AuthClient {
-  client: SupabaseClient;
-  user: User;
-}
 
 export interface ModelUsageOverTime {
   created_at_trunc: Date;

@@ -15,7 +15,7 @@ import {
   formatISO,
   isAfter,
 } from "date-fns";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import useNotification from "../../../shared/notification/useNotification";
 import { useState } from "react";
 import { useGetRequestCountClickhouse } from "../../../../services/hooks/requests";

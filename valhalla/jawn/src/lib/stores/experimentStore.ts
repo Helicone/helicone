@@ -3,7 +3,13 @@ import { costOfPrompt } from "../../packages/cost";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
-import { err, ok, promiseResultMap, Result, resultMap } from "../shared/result";
+import {
+  err,
+  ok,
+  promiseResultMap,
+  Result,
+  resultMap,
+} from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 import { RequestResponseBodyStore } from "./request/RequestResponseBodyStore";
 

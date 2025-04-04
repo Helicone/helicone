@@ -7,7 +7,7 @@ import {
   filterListToTree,
 } from "../../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../packages/common/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
 import { clickhousePriceCalc } from "../../packages/cost";
 import { JawnAuthenticatedRequest } from "../../types/request";

@@ -1,18 +1,11 @@
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import { withAuthSSR } from "@/lib/api/handlerWrappers";
-import { getSupabaseServer } from "@/lib/supabaseServer";
-import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export default function SlackRedirect({
-  user,
-  error,
-}: {
-  user: User;
-  error?: string;
-}) {
+export default function SlackRedirect({ error }: { error?: string }) {
   return (
     <div>
       {error ? <div>{error}</div> : <div>Slack Redirect</div>}
@@ -42,10 +35,13 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const { data, error } = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("id", state);
+  const { data, error } = await dbExecute<{ id: string }>(
+    `
+    SELECT id FROM organization
+    WHERE id = $1
+    `,
+    [state]
+  );
 
   if (error) {
     return {
@@ -56,7 +52,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const organization = data[0];
+  const organization = data?.[0];
 
   if (!organization) {
     return {
@@ -112,23 +108,27 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     };
   }
 
-  const { data: slackData, error: slackError } = await getSupabaseServer()
-    .from("integrations")
-    .insert({
-      integration_name: "slack",
-      organization_id: organization.id,
-      settings: {
+  const { data: slackData, error: slackError } = await dbExecute<{
+    id: string;
+  }>(
+    `
+    INSERT INTO integrations (integration_name, organization_id, settings)
+    VALUES ($1, $2, $3)
+    RETURNING *
+    `,
+    [
+      "slack",
+      organization.id,
+      {
         team_id: responseData.team.id,
         access_token: responseData.access_token,
       },
-    })
-    .select("*")
-    .single();
+    ]
+  );
 
   if (slackError) {
     return {
       props: {
-        user: options.userData.user,
         error: slackError,
       },
     };

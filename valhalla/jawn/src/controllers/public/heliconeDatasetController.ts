@@ -9,7 +9,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 import {
   FilterLeafSubset,
   FilterNode,

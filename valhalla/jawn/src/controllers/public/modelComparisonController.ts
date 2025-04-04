@@ -9,7 +9,7 @@ import {
   Post,
   Body,
 } from "tsoa";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
 import { KVCache } from "../../lib/cache/kvCache";

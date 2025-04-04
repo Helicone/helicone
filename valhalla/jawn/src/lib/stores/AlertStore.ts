@@ -1,7 +1,8 @@
 import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
+import { err, ok, Result } from "../../packages/common/result";
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, Result } from "../shared/result";
+
 import { BaseStore } from "./baseStore";
 
 export class AlertStore extends BaseStore {

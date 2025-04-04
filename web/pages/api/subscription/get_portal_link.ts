@@ -1,11 +1,9 @@
 import { Result } from "../../../lib/result";
-
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { getStripeCustomer } from "../../../utils/stripeHelpers";
 import { stripeServer } from "../../../utils/stripeServer";
 
@@ -46,16 +44,25 @@ async function handler(option: HandlerWrapperOptions<Result<string, string>>) {
     return;
   }
 
-  const { data, error } = await getSupabaseServer()
-    .from("organization")
-    .select("stripe_customer_id, subscription_status")
-    .eq("id", orgId)
-    .single();
+  // Define type for organization data
+  type OrgData = {
+    stripe_customer_id: string | null;
+    subscription_status: string | null;
+  };
 
-  if (error !== null) {
-    res.status(500).json({ error: error.message, data: null });
+  const { data: orgDataArr, error: dbError } = await dbExecute<OrgData>(
+    `SELECT stripe_customer_id, subscription_status FROM organization WHERE id = $1 LIMIT 1`,
+    [orgId]
+  );
+
+  if (dbError || !orgDataArr || orgDataArr.length === 0) {
+    res
+      .status(500)
+      .json({ error: dbError || "Organization not found", data: null });
     return;
   }
+
+  const data = orgDataArr[0];
 
   let customer_id = data.stripe_customer_id;
 

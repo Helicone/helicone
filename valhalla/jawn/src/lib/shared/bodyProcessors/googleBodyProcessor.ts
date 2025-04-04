@@ -1,4 +1,4 @@
-import { PromiseGenericResult, ok } from "../result";
+import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GoogleBodyProcessor implements IBodyProcessor {

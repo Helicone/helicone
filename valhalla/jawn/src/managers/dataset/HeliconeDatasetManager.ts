@@ -1,8 +1,13 @@
 import { Json } from "../../lib/db/database.types";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
+import {
+  Result,
+  err,
+  ok,
+  promiseResultMap,
+} from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 
 export interface MutateParams {

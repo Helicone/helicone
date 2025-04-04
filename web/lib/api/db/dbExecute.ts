@@ -107,3 +107,43 @@ export async function dbExecute<T>(
     return { data: null, error: JSON.stringify(err) };
   }
 }
+
+/**
+ * Builds a dynamic UPDATE query that only includes fields with defined values
+ * @param options - Object containing query building options
+ * @param options.from - The name of the table to update
+ * @param options.set - Object containing fields to update with their values
+ * @param options.where - Object containing field name and value for the WHERE clause
+ * @returns An object with the SQL query string and parameters array
+ */
+export function buildDynamicUpdateQuery(options: {
+  from: string;
+  set: Record<string, any>;
+  where: {
+    field: string;
+    equals: any;
+  };
+}): { query: string; params: any[] } {
+  const { from, set, where } = options;
+  const queryParts: string[] = [];
+  const params: any[] = [];
+  let paramCounter = 1;
+
+  // Add only defined fields to the query
+  for (const [key, value] of Object.entries(set)) {
+    if (value !== undefined) {
+      queryParts.push(`${key} = $${paramCounter++}`);
+      params.push(value);
+    }
+  }
+
+  // Add the WHERE clause parameter
+  params.push(where.equals);
+
+  // Build the final query
+  const query = `UPDATE ${from} SET ${queryParts.join(", ")} WHERE ${
+    where.field
+  } = $${paramCounter}`;
+
+  return { query, params };
+}

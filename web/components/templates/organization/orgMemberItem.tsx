@@ -1,9 +1,7 @@
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { AcademicCapIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-
 import { Button } from "@/components/ui/button";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
@@ -11,6 +9,7 @@ import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import ThemedModal from "../../shared/themed/themedModal";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface OrgMemberItemProps {
   index: number;
@@ -33,7 +32,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
 
   const [openDelete, setOpenDelete] = useState(false);
 
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const router = useRouter();
 

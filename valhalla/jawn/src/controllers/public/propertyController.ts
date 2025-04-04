@@ -15,7 +15,7 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { clickhousePriceCalc } from "../../packages/cost";
-import { resultMap } from "../../lib/shared/result";
+import { resultMap } from "../../packages/common/result";
 
 export interface Property {
   property: string;

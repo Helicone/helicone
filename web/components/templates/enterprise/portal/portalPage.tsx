@@ -21,7 +21,6 @@ import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 
-import ExportCustomerButton from "./exportCustomerButton";
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
 import CreateOrgForm from "../../organization/createOrgForm";
 
@@ -73,7 +72,6 @@ const PortalPage = (props: PortalPageProps) => {
                   />
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
-                  <ExportCustomerButton searchQuery={currentSearch} />
                   <button
                     onClick={() => {
                       setAddCustomerModalOpen(true);

@@ -3,9 +3,9 @@ import { validate as uuidValidate } from "uuid";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
 import { KafkaProducer } from "../../lib/clients/KafkaProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../../packages/common/auth/types";
 import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { Score, ScoreStore } from "../../lib/stores/ScoreStore";
 import { BaseManager } from "../BaseManager";
 

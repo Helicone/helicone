@@ -6,7 +6,7 @@ import { ChatHistory } from "./ChatHistory";
 import Typewriter from "./typewriter";
 import { useState, useEffect, useRef } from "react";
 import { hpf } from "@helicone/prompts";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 export const ChatWindow = ({
   chatHistory,
@@ -28,7 +28,7 @@ export const ChatWindow = ({
 
   const [sendingMessage, setSendingMessage] = useState(false);
   const [message, setMessage] = useState("");
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 

@@ -5,7 +5,7 @@ import { Provider } from "../../packages/llm-mapper/types";
 
 import { parseJSXObject } from "@helicone/prompts";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
-import { Result, ok } from "../shared/result";
+import { Result, ok } from "../../packages/common/result";
 import { buildTargetUrl } from "./ProviderClient";
 import { RateLimitOptionsBuilder } from "./RateLimitOptions";
 import { RateLimitOptions } from "./RateLimiter";

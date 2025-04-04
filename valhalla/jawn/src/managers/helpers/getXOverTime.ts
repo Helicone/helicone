@@ -1,11 +1,11 @@
-import { resultMap } from "../../lib/shared/result";
+import { resultMap } from "../../packages/common/result";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,
 } from "../../lib/shared/filters/filters";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../packages/common/result";
 import {
   isValidTimeFilter,
   isValidTimeIncrement,

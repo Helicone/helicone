@@ -25,10 +25,9 @@ import { IslandContainer } from "@/components/ui/islandContainer";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import UnauthorizedView from "../requests/UnauthorizedView";
-import { useUser } from "@supabase/auth-helpers-react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { useOrg } from "@/components/layout/org/organizationContext";
-
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 interface CachePageProps {
   currentPage: number;
   pageSize: number;
@@ -86,13 +85,13 @@ const CachePage = (props: CachePageProps) => {
   }>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
-  const user = useUser();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const org = useOrg();
   const {
     unauthorized,
     currentTier,
     isLoading: isLoadingUnauthorized,
-  } = useGetUnauthorized(user?.id || "");
+  } = useGetUnauthorized(heliconeAuthClient?.user?.id || "");
 
   const hasCache = useMemo(() => {
     const cacheHits = chMetrics.totalCacheHits.data?.data;
