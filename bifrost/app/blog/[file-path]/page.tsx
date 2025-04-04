@@ -13,6 +13,8 @@ import "highlight.js/styles/atom-one-dark.css";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronRight, ChevronLeft } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
+import { cache } from "react";
+import Image from "next/image";
 
 // Define headshots mapping
 const HEADSHOTS = {
@@ -23,6 +25,40 @@ const HEADSHOTS = {
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
   "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
+};
+
+const getSerializedMdx = cache(async (filePath: string) => {
+  const source = await fs.readFile(filePath, "utf8");
+  return serialize(source, {
+    mdxOptions: {
+      remarkPlugins: [
+        remarkGfm,
+        [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
+      ],
+      rehypePlugins: [rehypeSlug, rehypeHighlight],
+    },
+  });
+});
+
+const getCachedMetadata = cache(async (filePath: string) => {
+  return getMetadata(filePath);
+});
+
+// Preload headshot images
+const preloadHeadshots = () => {
+  return (
+    <>
+      {Object.entries(HEADSHOTS).map(([name, src]) => (
+        <link
+          key={name}
+          rel="preload"
+          as="image"
+          href={src}
+          type="image/webp"
+        />
+      ))}
+    </>
+  );
 };
 
 export default async function Home({
@@ -41,22 +77,8 @@ export default async function Home({
     "src.mdx"
   );
 
-  const source = await fs.readFile(changelogFolder, "utf8");
-
-  const mdxSource = await serialize(source, {
-    mdxOptions: {
-      remarkPlugins: [
-        remarkGfm,
-        [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
-      ],
-      rehypePlugins: [
-        rehypeSlug,
-        rehypeHighlight,
-      ],
-    },
-  });
-
-  const metadata = await getMetadata(params["file-path"]);
+  const mdxSource = await getSerializedMdx(changelogFolder);
+  const metadata = await getCachedMetadata(params["file-path"]);
 
   if (!metadata) {
     notFound();
@@ -64,6 +86,8 @@ export default async function Home({
 
   return (
     <div className="w-full bg-white h-full antialiased relative">
+      {preloadHeadshots()}
+
       <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-8">
         <div className="hidden md:flex w-56 h-full flex-col space-y-6 md:sticky top-16 md:top-32">
           <Link
@@ -74,16 +98,18 @@ export default async function Home({
             <span className="text-sm font-medium">Back</span>
           </Link>
 
-          {/* Author information - simplified */}
+          {/* Author information - optimized */}
           <div className="p-2">
             {metadata.authors && metadata.authors.length > 0 ? (
               <div className="space-y-4">
                 {metadata.authors.map((author, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <img
+                    <Image
                       src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
                       alt={`${author}'s headshot`}
-                      className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                      width={36}
+                      height={36}
+                      className="rounded-full object-cover border border-slate-200"
                     />
                     <div>
                       <div className="text-slate-700 text-sm font-medium">
@@ -95,10 +121,12 @@ export default async function Home({
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <img
+                <Image
                   src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
                   alt={`${metadata.author}'s headshot`}
-                  className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover border border-slate-200"
                 />
                 <div>
                   <div className="text-slate-700 text-sm font-medium">
@@ -164,7 +192,7 @@ export default async function Home({
             </div>
           </div>
 
-          {/* Mobile view for author info */}
+          {/* Mobile view for author info - optimized */}
           <div className="flex md:hidden items-center gap-2 -mt-8 -mb-6">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
@@ -172,10 +200,12 @@ export default async function Home({
                   <>
                     {metadata.authors.map((author, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <img
+                        <Image
                           src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
                           alt={`${author}'s headshot`}
-                          className="w-8 h-8 rounded-full"
+                          width={32}
+                          height={32}
+                          className="rounded-full"
                         />
                         <span className="text-slate-500 text-sm font-medium">
                           {author}
@@ -189,10 +219,12 @@ export default async function Home({
                   </>
                 ) : (
                   <>
-                    <img
+                    <Image
                       src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
                       alt={`${metadata.author}'s headshot`}
-                      className="w-8 h-8 rounded-full"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
                     />
                     <span className="text-slate-600 text-sm font-medium">
                       {metadata.author}

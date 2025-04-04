@@ -15,11 +15,20 @@ export interface BlogStructureMetaData {
   badge?: string;
 }
 
+// Simple in-memory cache for metadata
+const metadataCache: Record<string, BlogStructureMetaData> = {};
+
 export async function getMetadata(
   filePath: string,
   blogFolder: string = "blog",
   blogSubFolder: string = "blogs"
 ): Promise<BlogStructureMetaData | null> {
+  // Check cache first
+  const cacheKey = `${blogFolder}/${blogSubFolder}/${filePath}`;
+  if (metadataCache[cacheKey]) {
+    return metadataCache[cacheKey];
+  }
+
   const basePath = path.join(
     process.cwd(),
     "app",
@@ -40,8 +49,10 @@ export async function getMetadata(
     }
 
     const jsonContent = await fs.readFile(jsonPath, "utf8");
-
     const hMetadata = JSON.parse(jsonContent) as BlogStructureMetaData;
+
+    // Cache the result
+    metadataCache[cacheKey] = hMetadata;
 
     return hMetadata;
   } catch (error) {
