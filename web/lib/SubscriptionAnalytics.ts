@@ -64,6 +64,33 @@ export type TimeSeriesResult = {
 };
 
 /**
+ * Export type definition
+ */
+export type SubscriptionAnalyticsResult = {
+  id: string;
+  currentMRR: number;
+  discountedMRR: number;
+  lifetimeValue: number;
+  items: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    mrr: number;
+  }>;
+};
+
+export type MRRDataPoint = {
+  actual: number;
+  projected: number;
+};
+
+export type MRRChartData = {
+  [month: string]: {
+    [productId: string]: MRRDataPoint;
+  };
+};
+
+/**
  * Analytics engine for subscription data
  */
 export class SubscriptionAnalytics {
@@ -115,17 +142,9 @@ export class SubscriptionAnalytics {
   /**
    * Get subscription-specific analytics
    */
-  getSubscriptionAnalytics(subscriptionId: string): {
-    currentMRR: number;
-    lifetimeValue: number;
-    startDate: Date;
-    items: Array<{
-      id: string;
-      productId: string;
-      productName: string;
-      mrr: number;
-    }>;
-  } {
+  getSubscriptionAnalytics(
+    subscriptionId: string
+  ): SubscriptionAnalyticsResult {
     if (this.subscriptionAnalyticsCache.has(subscriptionId)) {
       return this.subscriptionAnalyticsCache.get(subscriptionId);
     }
@@ -135,15 +154,17 @@ export class SubscriptionAnalytics {
     );
     if (!subscription) {
       return {
+        id: subscriptionId,
         currentMRR: 0,
+        discountedMRR: 0,
         lifetimeValue: 0,
-        startDate: new Date(),
         items: [],
       };
     }
 
+    const discount = this.discounts[subscriptionId];
     const currentMRR = calculateMRR(subscription);
-    const startDate = new Date(subscription.created * 1000);
+    const discountedMRR = calculateMRR(subscription, discount);
 
     // Calculate lifetime value from invoices
     const subscriptionInvoices =
@@ -164,9 +185,10 @@ export class SubscriptionAnalytics {
     });
 
     const result = {
+      id: subscriptionId,
       currentMRR,
+      discountedMRR,
       lifetimeValue,
-      startDate,
       items,
     };
 
@@ -182,11 +204,18 @@ export class SubscriptionAnalytics {
       return this.invoicesCache.get(subscriptionId)!;
     }
 
-    const filteredInvoices = this.invoices.filter(
-      (invoice) =>
-        typeof invoice.subscription === "string" &&
-        invoice.subscription === subscriptionId
-    );
+    const filteredInvoices = this.invoices.filter((invoice) => {
+      // Handle both string subscription ID and object reference
+      if (typeof invoice.subscription === "string") {
+        return invoice.subscription === subscriptionId;
+      } else if (
+        invoice.subscription &&
+        typeof invoice.subscription === "object"
+      ) {
+        return invoice.subscription.id === subscriptionId;
+      }
+      return false;
+    });
 
     // Sort invoices by date (newest first)
     const sortedInvoices = filteredInvoices.sort(
@@ -218,5 +247,116 @@ export class SubscriptionAnalytics {
     this.aggregateCache.clear();
     this.subscriptionAnalyticsCache.clear();
     this.invoicesCache.clear();
+  }
+
+  getMRRChartData(options?: {
+    months?: number;
+    productIds?: string[];
+  }): MRRChartData {
+    const months = options?.months || 6;
+    const result: MRRChartData = {};
+
+    const today = new Date();
+    const currentMonth = formatDateByInterval(today, "month");
+    const currentMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    for (let i = 0; i < months; i++) {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() - i);
+      const monthKey = formatDateByInterval(date, "month");
+      result[monthKey] = {};
+    }
+
+    this.invoices.forEach((invoice) => {
+      if (invoice.status !== "paid") return;
+
+      const invoiceDate = new Date(invoice.created * 1000);
+      const monthKey = formatDateByInterval(invoiceDate, "month");
+
+      if (!result[monthKey]) return;
+
+      invoice.lines.data.forEach((line) => {
+        if (!line.price?.product) return;
+
+        const productId =
+          typeof line.price.product === "string"
+            ? line.price.product
+            : line.price.product.id;
+
+        if (options?.productIds && !options.productIds.includes(productId))
+          return;
+
+        if (!result[monthKey][productId]) {
+          result[monthKey][productId] = { actual: 0, projected: 0 };
+        }
+
+        // Convert to monthly equivalent
+        let monthlyAmount = line.amount;
+        if (line.period && line.period.start && line.period.end) {
+          const periodDuration = line.period.end - line.period.start;
+          const monthInSeconds = 30 * 24 * 60 * 60;
+          monthlyAmount = (line.amount / periodDuration) * monthInSeconds;
+        }
+
+        result[monthKey][productId].actual += monthlyAmount;
+      });
+    });
+
+    this.subscriptions.forEach((subscription) => {
+      if (
+        subscription.status !== "active" &&
+        subscription.status !== "trialing"
+      )
+        return;
+
+      const alreadyInvoiced = this.invoices.some(
+        (invoice) =>
+          (typeof invoice.subscription === "string"
+            ? invoice.subscription === subscription.id
+            : invoice.subscription?.id === subscription.id) &&
+          new Date(invoice.created * 1000) >= currentMonthStart
+      );
+
+      if (alreadyInvoiced) return;
+
+      const discount = this.discounts[subscription.id];
+
+      subscription.items.data.forEach((item) => {
+        const productId = getProductIdFromItem(item);
+
+        if (options?.productIds && !options.productIds.includes(productId))
+          return;
+
+        if (!result[currentMonth][productId]) {
+          result[currentMonth][productId] = { actual: 0, projected: 0 };
+        }
+
+        // Calculate MRR for this item and apply proportional discount
+        let mrr = calculateItemMRR(item);
+        const subTotalMRR = calculateMRR(subscription);
+
+        if (discount && subTotalMRR > 0) {
+          // Calculate this item's percentage of the total MRR
+          const itemProportion = mrr / subTotalMRR;
+
+          // Apply the same proportion of the discount
+          if (discount.coupon.percent_off) {
+            mrr = mrr * (1 - discount.coupon.percent_off / 100);
+          } else if (discount.coupon.amount_off) {
+            // Distribute the fixed discount proportionally
+            const itemDiscount = itemProportion * discount.coupon.amount_off;
+            mrr = Math.max(0, mrr - itemDiscount);
+          }
+        }
+
+        result[currentMonth][productId].projected += mrr;
+      });
+    });
+
+    return result;
   }
 }

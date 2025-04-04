@@ -31,10 +31,12 @@ export const authCheckThrow = async (userId: string | undefined) => {
   );
 
   if (result.error) {
-    throw new Error(result.error);
+    throw new Error(result.error || "Error checking authorization");
   }
 
-  const hasAdmin = result.data?.map((admin) => admin.user_id).includes(userId);
+  const hasAdmin = result.data
+    ?.map((admin) => admin.user_id)
+    .includes(userId as string);
 
   if (!hasAdmin) {
     throw new Error("Unauthorized");
@@ -1309,3 +1311,421 @@ export class AdminController extends Controller {
 
     return { organizations };
   }
+
+  /**
+   * Get all subscription data, invoices, and discounts for the admin projections page
+   * Uses caching to minimize API calls to Stripe
+   */
+  @Get("/subscription-data")
+  public async getSubscriptionData(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    subscriptions: Stripe.Subscription[];
+    invoices: Stripe.Invoice[];
+    discounts: Record<string, Stripe.Discount>;
+  }> {
+    console.time("getSubscriptionData");
+    console.log("[AdminController] Starting getSubscriptionData");
+    await authCheckThrow(request.authParams.userId);
+
+    const now = Date.now();
+    let shouldFetchSubscriptions = true;
+    let shouldFetchInvoices = true;
+    let shouldFetchDiscounts = true;
+
+    // Check if we have cached data that's still fresh
+    if (
+      subscriptionCache &&
+      now - subscriptionCache.timestamp < CACHE_TTL_SUBSCRIPTIONS
+    ) {
+      shouldFetchSubscriptions = false;
+      console.log("[AdminController] Using cached subscriptions");
+    }
+
+    if (invoiceCache && now - invoiceCache.timestamp < CACHE_TTL_INVOICES) {
+      shouldFetchInvoices = false;
+      console.log("[AdminController] Using cached invoices");
+    }
+
+    if (discountCache && now - discountCache.timestamp < CACHE_TTL_DISCOUNTS) {
+      shouldFetchDiscounts = false;
+      console.log("[AdminController] Using cached discounts");
+    }
+
+    // Initialize Stripe
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+      apiVersion: "2024-06-20",
+    });
+
+    // Simplified pagination function that handles one "page" at a time
+    async function fetchPage<T>(
+      fetchFunction: (params: any) => Promise<Stripe.ApiList<T>>,
+      params: any = {}
+    ): Promise<{
+      items: T[];
+      hasMore: boolean;
+      lastId?: string;
+    }> {
+      try {
+        const result = await fetchFunction(params);
+        const lastItem =
+          result.data.length > 0
+            ? (result.data[result.data.length - 1] as any)
+            : null;
+
+        return {
+          items: result.data,
+          hasMore: result.has_more,
+          lastId: lastItem?.id,
+        };
+      } catch (error) {
+        console.error(`[AdminController] Error fetching page:`, error);
+        throw error;
+      }
+    }
+
+    // Calculate date 6 months ago for invoice filtering
+    const sixMonthsAgo = Math.floor(now / 1000) - 60 * 60 * 24 * 180;
+    console.log(
+      `[AdminController] Filtering invoices created after ${new Date(
+        sixMonthsAgo * 1000
+      ).toISOString()}`
+    );
+
+    // Fetch all subscriptions
+    const fetchAllSubscriptions = async (): Promise<Stripe.Subscription[]> => {
+      if (!shouldFetchSubscriptions) {
+        return subscriptionCache?.data || [];
+      }
+
+      console.time("fetchSubscriptions");
+      console.log("[AdminController] Fetching all subscriptions");
+
+      const allSubscriptions: Stripe.Subscription[] = [];
+      let hasMore = true;
+      let lastId: string | undefined;
+      let pageCount = 0;
+
+      const pageSize = 100;
+
+      while (hasMore) {
+        pageCount++;
+        const startTime = Date.now();
+
+        const {
+          items,
+          hasMore: moreAvailable,
+          lastId: newLastId,
+        } = await fetchPage(
+          (params) =>
+            stripe.subscriptions.list({
+              ...params,
+              status: "all",
+              expand: ["data.customer"],
+              limit: pageSize,
+            }),
+          lastId ? { starting_after: lastId } : {}
+        );
+
+        allSubscriptions.push(...items);
+        hasMore = moreAvailable;
+        lastId = newLastId;
+
+        const duration = Date.now() - startTime;
+        console.log(
+          `[AdminController] Fetched ${items.length} subscriptions (page ${pageCount}, ${duration}ms, total: ${allSubscriptions.length})`
+        );
+      }
+
+      console.timeEnd("fetchSubscriptions");
+      console.log(
+        `[AdminController] Completed fetching all subscriptions. Total: ${allSubscriptions.length}`
+      );
+
+      return allSubscriptions;
+    };
+
+    // Split invoice fetching into multiple parallel requests (by created date ranges)
+    const fetchAllInvoices = async (): Promise<Stripe.Invoice[]> => {
+      if (!shouldFetchInvoices) {
+        return invoiceCache?.data || [];
+      }
+
+      console.time("fetchInvoices");
+      console.log(
+        "[AdminController] Fetching invoices in parallel using time-based queuing"
+      );
+
+      // Start from when Stripe account was created (or a reasonable earliest date)
+      // For this example, we'll go back 3 years max, but you can adjust as needed
+      const now = Math.floor(Date.now() / 1000);
+      const threeYearsAgo = now - 3 * 365 * 24 * 60 * 60; // 3 years in seconds
+      const dayInSeconds = 24 * 60 * 60; // 1 day in seconds
+
+      // Create daily chunks for maximum parallelism
+      const dateChunks = [];
+      // Calculate how many days to cover (3 years = ~1095 days)
+      const daysToFetch = Math.ceil((now - threeYearsAgo) / dayInSeconds);
+
+      // We can go for more days now with our optimized approach
+      const maxInitialChunks = 365; // Get up to a year of history initially
+      const chunksToBuild = Math.min(daysToFetch, maxInitialChunks);
+
+      for (let i = 0; i < chunksToBuild; i++) {
+        const chunkEnd = i === 0 ? now : now - i * dayInSeconds;
+        const chunkStart = now - (i + 1) * dayInSeconds;
+
+        dateChunks.push({
+          start: chunkStart,
+          end: chunkEnd,
+          label: `day-${i + 1}`,
+        });
+      }
+
+      console.log(
+        `[AdminController] Split invoice fetching into ${dateChunks.length} date chunks (daily)`
+      );
+
+      // Add retry capability for rate limit errors
+      async function fetchWithRetry<T>(
+        fn: () => Promise<T>,
+        retries = 3
+      ): Promise<T> {
+        try {
+          return await fn();
+        } catch (error: any) {
+          if (error.statusCode === 429 && retries > 0) {
+            console.log(
+              `[AdminController] Rate limited, retrying after 2000ms (${retries} retries left)`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return fetchWithRetry(fn, retries - 1);
+          }
+          throw error;
+        }
+      }
+
+      // Time-based request queuing
+      const REQUESTS_PER_SECOND = 50; // 10 requests per second (well under the 100/s limit)
+      const allInvoices: Stripe.Invoice[] = [];
+      const results: Promise<Stripe.Invoice[]>[] = [];
+
+      // Process chunks using time-based batching
+      for (let i = 0; i < dateChunks.length; i += REQUESTS_PER_SECOND) {
+        const startTime = Date.now();
+        const batchChunks = dateChunks.slice(i, i + REQUESTS_PER_SECOND);
+
+        console.log(
+          `[AdminController] Queuing batch ${
+            Math.floor(i / REQUESTS_PER_SECOND) + 1
+          } of ${Math.ceil(dateChunks.length / REQUESTS_PER_SECOND)} (${
+            batchChunks.length
+          } chunks)`
+        );
+
+        // Queue up requests without waiting for responses
+        const batchPromises = batchChunks.map((chunk) => {
+          // Wrap in an async function that we'll execute immediately
+          const promise = fetchWithRetry(() => fetchChunk(chunk))
+            .then((invoices) => {
+              console.log(
+                `[AdminController] Completed chunk ${chunk.label}, got ${invoices.length} invoices`
+              );
+              return invoices;
+            })
+            .catch((error) => {
+              console.error(
+                `[AdminController] Error processing chunk ${chunk.label}:`,
+                error
+              );
+              return [] as Stripe.Invoice[]; // Return empty array on error
+            });
+
+          results.push(promise);
+          return promise;
+        });
+
+        // Wait 1 second before sending the next batch regardless of responses
+        const elapsed = Date.now() - startTime;
+        const waitTime = Math.max(0, 1000 - elapsed);
+
+        // Only wait if we have more chunks to process
+        if (i + REQUESTS_PER_SECOND < dateChunks.length) {
+          console.log(
+            `[AdminController] Waiting ${waitTime}ms before next batch`
+          );
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+        }
+      }
+
+      // Wait for all results to finish
+      console.log(
+        `[AdminController] All requests queued, waiting for ${results.length} responses...`
+      );
+      const allResults = await Promise.all(results);
+
+      // Combine all results
+      for (const invoiceBatch of allResults) {
+        allInvoices.push(...invoiceBatch);
+      }
+
+      console.timeEnd("fetchInvoices");
+      console.log(
+        `[AdminController] Completed fetching all invoices. Total: ${allInvoices.length}`
+      );
+
+      return allInvoices;
+
+      // Fetch invoices for a specific date chunk
+      async function fetchChunk(chunk: {
+        start: number;
+        end: number;
+        label: string;
+      }): Promise<Stripe.Invoice[]> {
+        console.log(
+          `[AdminController] Starting to fetch invoices for ${
+            chunk.label
+          } (${new Date(chunk.start * 1000).toLocaleDateString()} to ${new Date(
+            chunk.end * 1000
+          ).toLocaleDateString()})`
+        );
+
+        const chunkInvoices: Stripe.Invoice[] = [];
+        let hasMore = true;
+        let lastId: string | undefined;
+        let pageCount = 0;
+
+        const pageSize = 100;
+
+        while (hasMore) {
+          pageCount++;
+
+          try {
+            const {
+              items,
+              hasMore: moreAvailable,
+              lastId: newLastId,
+            } = await fetchPage(
+              (params) =>
+                stripe.invoices.list({
+                  ...params,
+                  created: {
+                    gte: chunk.start,
+                    lt: chunk.end,
+                  },
+                  expand: ["data.subscription"],
+                  limit: pageSize,
+                }),
+              lastId ? { starting_after: lastId } : {}
+            );
+
+            chunkInvoices.push(...items);
+            hasMore = moreAvailable;
+            lastId = newLastId;
+
+            console.log(
+              `[AdminController] Fetched ${items.length} invoices for ${chunk.label} (page ${pageCount}, total: ${chunkInvoices.length})`
+            );
+          } catch (error) {
+            console.error(
+              `[AdminController] Error fetching page ${pageCount} for ${chunk.label}:`,
+              error
+            );
+            hasMore = false; // Stop on error
+          }
+        }
+
+        return chunkInvoices;
+      }
+    };
+
+    // Fetch subscriptions and invoices in parallel
+    const [subscriptions, invoices] = await Promise.all([
+      fetchAllSubscriptions(),
+      fetchAllInvoices(),
+    ]);
+
+    console.log(
+      `[AdminController] Data fetch complete. Processing discounts...`
+    );
+    console.time("processDiscounts");
+
+    // Process discounts from subscriptions
+    const discounts: Record<string, Stripe.Discount> = {};
+
+    if (shouldFetchSubscriptions || shouldFetchDiscounts) {
+      // Find subscriptions with discounts
+      const subsWithDiscounts = subscriptions.filter(
+        (sub) => sub.discount !== null
+      );
+
+      console.log(
+        `[AdminController] Found ${subsWithDiscounts.length} subscriptions with discounts`
+      );
+
+      // Map each subscription discount to the subscription ID
+      subsWithDiscounts.forEach((sub) => {
+        if (sub.discount) {
+          discounts[sub.id] = sub.discount;
+        }
+      });
+    }
+
+    console.timeEnd("processDiscounts");
+
+    // Update caches
+    if (shouldFetchSubscriptions) {
+      console.log(
+        `[AdminController] Cached ${subscriptions.length} subscriptions from Stripe`
+      );
+      subscriptionCache = {
+        data: subscriptions,
+        timestamp: now,
+      };
+    }
+
+    if (shouldFetchInvoices) {
+      console.log(
+        `[AdminController] Cached ${invoices.length} invoices from Stripe`
+      );
+      invoiceCache = {
+        data: invoices,
+        timestamp: now,
+      };
+    }
+
+    if (shouldFetchSubscriptions || shouldFetchDiscounts) {
+      console.log(
+        `[AdminController] Cached ${
+          Object.keys(discounts).length
+        } discounts from Stripe`
+      );
+      discountCache = {
+        data: Object.values(discounts),
+        timestamp: now,
+      };
+    }
+
+    const discountsMap = discountCache
+      ? discountCache.data.reduce(
+          (acc: Record<string, Stripe.Discount>, discount: any) => {
+            if (discount.subscription) {
+              acc[discount.subscription] = discount;
+            }
+            return acc;
+          },
+          {}
+        )
+      : {};
+
+    console.timeEnd("getSubscriptionData");
+    console.log(`[AdminController] Finished getSubscriptionData`);
+
+    // Return the data
+    return {
+      subscriptions,
+      invoices,
+      discounts: discountsMap,
+    };
+  }
+}
