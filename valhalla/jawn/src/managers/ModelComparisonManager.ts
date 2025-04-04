@@ -3,8 +3,8 @@ import {
   ModelsToCompare,
 } from "../controllers/public/modelComparisonController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { err, ok } from "../lib/shared/result";
-import { Result } from "../lib/shared/result";
+import { err, ok } from "../packages/common/result";
+import { Result } from "../packages/common/result";
 import { providers } from "../packages/cost/providers/mappings";
 
 // Query Result Types

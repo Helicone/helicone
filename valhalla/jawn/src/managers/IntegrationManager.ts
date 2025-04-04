@@ -1,6 +1,6 @@
-import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
+import { AuthParams } from "../packages/common/auth/types";
 import { dbExecute } from "../lib/shared/db/dbExecute";
-import { ok, err, Result } from "../lib/shared/result";
+import { ok, err, Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import {
   Integration,

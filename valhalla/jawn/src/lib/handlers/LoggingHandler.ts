@@ -2,7 +2,12 @@ import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
-import { err, ok, PromiseGenericResult, Result } from "../shared/result";
+import {
+  err,
+  ok,
+  PromiseGenericResult,
+  Result,
+} from "../../packages/common/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";

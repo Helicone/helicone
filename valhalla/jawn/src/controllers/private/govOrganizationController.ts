@@ -10,7 +10,7 @@ import {
   Tags,
 } from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/gov-organization")

@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

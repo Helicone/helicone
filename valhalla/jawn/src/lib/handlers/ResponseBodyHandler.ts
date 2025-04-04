@@ -17,7 +17,12 @@ import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProc
 import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import {
+  PromiseGenericResult,
+  Result,
+  err,
+  ok,
+} from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

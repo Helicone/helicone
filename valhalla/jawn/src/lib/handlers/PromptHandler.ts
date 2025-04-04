@@ -1,5 +1,5 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { PromiseGenericResult } from "../shared/result";
+import { PromiseGenericResult } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { sanitizeObject } from "../../utils/sanitize";

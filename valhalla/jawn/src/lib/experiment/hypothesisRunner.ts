@@ -1,5 +1,5 @@
 import { dbExecute } from "../shared/db/dbExecute";
-import { Result, err, ok } from "../shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 
 interface RunnerProps {
   url: URL;
