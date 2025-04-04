@@ -1,4 +1,8 @@
-import { HeliconeAuth, Role } from "../../../packages/common/auth/types";
+import {
+  HeliconeAuth,
+  JwtAuth,
+  Role,
+} from "../../../packages/common/auth/types";
 import { KeyPermissions } from "../../../packages/common/auth/types";
 import { PromiseGenericResult } from "../../../packages/common/result";
 
@@ -39,6 +43,8 @@ export interface HeliconeAuthClient {
     password?: string;
     otp?: boolean;
   }) => HeliconeUserResult;
+
+  getUser(auth: JwtAuth): HeliconeUserResult;
 
   getUserByEmail: (email: string) => HeliconeUserResult;
 
