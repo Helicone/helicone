@@ -21,8 +21,7 @@ export const typography = {
   xsmall:
     "font-sans text-xs leading-4 font-normal text-[hsl(var(--foreground))]",
   muted: "font-sans text-sm font-normal text-[hsl(var(--muted-foreground))]",
-  xsmall:
-    "font-sans text-xs leading-4 font-light text-[hsl(var(--foreground))]",
+
   // Special elements
   blockquote:
     "font-sans text-base leading-6 font-normal mt-6 border-l-2 border-[hsl(var(--border))] pl-6 italic text-[hsl(var(--muted-foreground))]",
