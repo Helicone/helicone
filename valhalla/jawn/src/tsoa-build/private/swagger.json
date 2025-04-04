@@ -1524,6 +1524,9 @@
 			},
 			"Message": {
 				"properties": {
+					"deleted": {
+						"type": "boolean"
+					},
 					"contentArray": {
 						"items": {
 							"$ref": "#/components/schemas/Message"
@@ -2205,6 +2208,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"prompt_audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"completion_audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_id": {
 						"type": "string",
 						"nullable": true
@@ -2303,6 +2316,8 @@
 					"prompt_cache_write_tokens",
 					"prompt_cache_read_tokens",
 					"completion_tokens",
+					"prompt_audio_tokens",
+					"completion_audio_tokens",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
