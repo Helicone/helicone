@@ -37,9 +37,9 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
     data: datasetsData,
     isLoading,
     isError,
-  } = useQuery(
-    ["datasets", promptVersionId],
-    async () => {
+  } = useQuery({
+    queryKey: ["datasets", promptVersionId],
+    queryFn: async () => {
       const res = await jawn.POST("/v1/helicone-dataset/query", {
         body: {
           datasetIds: [],
@@ -47,10 +47,8 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
       });
       return res.data?.data ?? [];
     },
-    {
-      enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
-    }
-  );
+    enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
+  });
 
   // Process input records
   const datasets = useMemo(() => {

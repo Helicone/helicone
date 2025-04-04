@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { DollarSign } from "lucide-react";
 
 interface CostComparisonCardProps {
   models: Array<{
@@ -13,64 +14,82 @@ interface CostComparisonCardProps {
 export default function CostComparisonCard({
   models,
 }: CostComparisonCardProps) {
+  if (!models || models.length < 2) return null;
+
+  // Calculate which model is cheaper overall
+  const model0TotalCost =
+    models[0].costs.prompt_token + models[0].costs.completion_token;
+  const model1TotalCost =
+    models[1].costs.prompt_token + models[1].costs.completion_token;
+  const cheaper = model0TotalCost < model1TotalCost ? 0 : 1;
+
+  // Format dollar amounts with appropriate precision
+  const formatCost = (cost: number) => {
+    const costPerMillion = cost * 1000000;
+
+    if (costPerMillion >= 100) {
+      return `$${costPerMillion.toFixed(0)}`;
+    } else if (costPerMillion >= 10) {
+      return `$${costPerMillion.toFixed(1)}`;
+    } else {
+      return `$${costPerMillion.toFixed(2)}`;
+    }
+  };
+
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">Cost Per Million Tokens</h3>
-            <p className="text-sm text-gray-500">USD per 1M tokens</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
+      <CardContent className="p-5">
+        <h3 className="text-lg font-semibold mb-4 flex items-center">
+          <DollarSign className="w-5 h-5 mr-2 text-sky-500" />
+          Cost Per Million Tokens
+        </h3>
+
+        <div className="grid grid-cols-1 gap-4">
           {models.map((model, index) => {
-            const isWinner =
-              model.costs.prompt_token < models[1 - index].costs.prompt_token;
+            const isWinner = index === cheaper;
+            const totalCost =
+              model.costs.prompt_token + model.costs.completion_token;
+
             return (
               <div
                 key={model.model}
-                className="space-y-2 md:space-y-4 p-4 rounded-lg"
+                className={`p-4 rounded-lg border ${
+                  isWinner ? "border-sky-200 bg-sky-50" : ""
+                }`}
               >
-                <div
-                  className={`flex items-center gap-2 p-2 rounded-lg ${
-                    isWinner
-                      ? "bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-red-500/10"
-                      : ""
-                  }`}
-                >
+                <div className="flex items-center gap-2 mb-3">
                   <div
-                    className={`w-3 h-3 rounded-sm ${
+                    className={`w-3 h-3 rounded-full ${
                       index === 0 ? "bg-red-500" : "bg-blue-500"
                     }`}
                   />
-                  <div
-                    className={`text-sm font-medium ${
-                      isWinner ? "font-bold text-gray-900" : "text-gray-500"
-                    }`}
-                  >
+                  <div className="text-base font-medium">
                     {model.model}
                     {isWinner && (
-                      <span className="text-xs font-semibold text-purple-500 ml-1">
-                        WINNER
+                      <span className="ml-2 text-xs font-medium text-sky-600">
+                        cheaper
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 md:gap-4">
-                  <div className="p-3 md:p-4 border rounded-lg">
-                    <div className="text-xs md:text-sm text-gray-500">
-                      Input
-                    </div>
-                    <div className="text-lg md:text-xl font-bold">
-                      ${(model.costs.prompt_token * 1000000).toFixed(2)}
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Input</div>
+                    <div className="text-lg font-bold">
+                      {formatCost(model.costs.prompt_token)}
                     </div>
                   </div>
-                  <div className="p-3 md:p-4 border rounded-lg">
-                    <div className="text-xs md:text-sm text-gray-500">
-                      Output
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Output</div>
+                    <div className="text-lg font-bold">
+                      {formatCost(model.costs.completion_token)}
                     </div>
-                    <div className="text-lg md:text-xl font-bold">
-                      ${(model.costs.completion_token * 1000000).toFixed(2)}
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Total</div>
+                    <div className="text-lg font-bold">
+                      {formatCost(totalCost)}
                     </div>
                   </div>
                 </div>

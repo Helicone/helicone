@@ -196,7 +196,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                   includeData: data.includeData,
                 });
               }}
-              isLoading={createWebhook.isLoading}
+              isLoading={createWebhook.isPending}
               error={webhookError}
               onCancel={() => setAddWebhookOpen(false)}
             />
@@ -289,7 +289,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                     includeData: data.includeData,
                   });
                 }}
-                isLoading={createWebhook.isLoading}
+                isLoading={createWebhook.isPending}
                 error={webhookError}
                 onCancel={() => setAddWebhookOpen(false)}
               />

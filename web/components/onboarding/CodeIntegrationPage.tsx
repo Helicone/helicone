@@ -86,9 +86,9 @@ export function CodeIntegrationPage({
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Add the event listening query
-  const { data: hasEvent } = useQuery<Result<boolean, string>, Error>(
-    ["hasOnboarded"],
-    async () => {
+  const { data: hasEvent } = useQuery<Result<boolean, string>, Error>({
+    queryKey: ["hasOnboarded"],
+    queryFn: async () => {
       const response = await fetch("/api/user/checkOnboarded", {
         method: "POST",
         headers: {
@@ -102,12 +102,10 @@ export function CodeIntegrationPage({
       }
       return jsonData;
     },
-    {
-      refetchOnWindowFocus: false,
-      refetchInterval: 3000,
-      enabled: true,
-    }
-  );
+    refetchOnWindowFocus: false,
+    refetchInterval: 3000,
+    enabled: true,
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

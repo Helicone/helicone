@@ -63,7 +63,7 @@ export function TestDrawer({ evaluatorId, isOpen, onClose }: TestDrawerProps) {
     },
     enabled: isOpen && testMode === "requestId" && !requestId,
     staleTime: Infinity, // Don't refetch automatically
-    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Load request data when ID changes

@@ -9,6 +9,32 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 const nextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   transpilePackages: ["next-mdx-remote"],
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.shields.io",
+      },
+      {
+        protocol: "https",
+        hostname: "api.producthunt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dailybaileyai.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i0.wp.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.sequoiacap.com",
+      },
+    ],
+  },
   async redirects() {
     return [
       {
@@ -34,14 +60,6 @@ const nextConfig = {
       },
     ];
   },
-  images: {
-    domains: [
-      "api.producthunt.com",
-      "dailybaileyai.com",
-      "i0.wp.com",
-      "www.sequoiacap.com",
-    ],
-  },
   async headers() {
     return [
       {
@@ -62,6 +80,12 @@ const nextConfig = {
         ],
       },
     ];
+  },
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+    modern: true,
+    modernBrowsers: true,
   },
 };
 

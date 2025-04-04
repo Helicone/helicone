@@ -886,9 +886,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           </div>
         )}
       </div>
-
       <RequestsEmptyState isVisible={shouldShowMockData} />
-
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
           request_ids={selectedIds}
@@ -897,7 +895,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           }}
         />
       </ThemedModal>
-
       <OnboardingFloatingPrompt
         open={showOnboardingPopUp}
         setOpen={setShowOnboardingPopUp}

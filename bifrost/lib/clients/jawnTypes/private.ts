@@ -281,7 +281,7 @@ export interface paths {
     post: operations["UpdateOnboardingStatus"];
   };
   "/v1/log/request": {
-    post: operations["GetRequests"];
+    post: operations["LogRequests"];
   };
   "/v1/gov-organization/limits/member/{memberId}": {
     get: operations["GetMemberLimits"];
@@ -720,6 +720,12 @@ Json: JsonObject;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** @enum {string} */
+      type?: "input_image" | "input_text" | "input_file";
       audio_data?: string;
       image_url?: string;
       timestamp?: string;
@@ -727,10 +733,11 @@ Json: JsonObject;
       tool_calls?: components["schemas"]["FunctionCall"][];
       content?: string;
       name?: string;
-      role?: string;
+      instruction?: string;
+      role?: string | ("user" | "assistant" | "system" | "developer");
       id?: string;
       /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "message" | "autoInput" | "contentArray" | "audio";
+      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
     };
     Tool: {
       name: string;
@@ -763,6 +770,7 @@ Json: JsonObject;
       model?: string;
       messages?: components["schemas"]["Message"][] | null;
       prompt?: string | null;
+      instructions?: string | null;
       /** Format: double */
       max_tokens?: number | null;
       /** Format: double */
@@ -798,6 +806,29 @@ Json: JsonObject;
       size?: string;
       quality?: string;
     };
+    Response: {
+      contentArray?: components["schemas"]["Response"][];
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** Format: double */
+      idx?: number;
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      text?: string;
+      /** @enum {string} */
+      type: "input_image" | "input_text" | "input_file";
+      name?: string;
+      /** @enum {string} */
+      role: "user" | "assistant" | "system" | "developer";
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
+    };
     LLMResponseBody: {
       vectorDBDetailsResponse?: {
         /** @enum {string} */
@@ -829,6 +860,8 @@ Json: JsonObject;
         heliconeMessage: unknown;
       };
       model?: string | null;
+      instructions?: string | null;
+      responses?: components["schemas"]["Response"][] | null;
       messages?: components["schemas"]["Message"][] | null;
     };
     LlmSchema: {
@@ -958,15 +991,6 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseSearchToOperators_: {
-      request_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-      response_body_vector?: components["schemas"]["Partial_VectorOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
       /** Format: date-time */
       gte?: string;
@@ -985,6 +1009,10 @@ Json: JsonObject;
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
@@ -1029,7 +1057,7 @@ Json: JsonObject;
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
@@ -1039,13 +1067,12 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      request_response_search?: components["schemas"]["Partial_RequestResponseSearchToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_search-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -2850,16 +2877,31 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Log message to log */
+    /** @description Request query filters */
     requestBody: {
       content: {
-        "application/json": components["schemas"]["KafkaMessageContents"];
+        /**
+         * @example {
+         *   "filter": "all",
+         *   "isCached": false,
+         *   "limit": 10,
+         *   "offset": 0,
+         *   "sort": {
+         *     "created_at": "desc"
+         *   },
+         *   "isScored": false,
+         *   "isPartOfExperiment": false
+         * }
+         */
+        "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
       };
     };
   };
@@ -3830,6 +3872,20 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
         };
+      };
+    };
+  };
+  LogRequests: {
+    /** @description Log message to log */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["KafkaMessageContents"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
       };
     };
   };

@@ -192,21 +192,31 @@ export const useOrgOnboarding = (orgId: string) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["org", orgId, "onboarding"]);
+      queryClient.invalidateQueries({
+        queryKey: ["org", orgId, "onboarding"]
+      });
     },
   });
 
   const updateCurrentStep = async (step: OnboardingState["currentStep"]) => {
     await saveOnboardingChangesAsync({ currentStep: step });
-    await queryClient.invalidateQueries(["org", orgId, "onboarding"]);
-    await queryClient.refetchQueries(["org", orgId, "onboarding"]);
+    await queryClient.invalidateQueries({
+      queryKey: ["org", orgId, "onboarding"]
+    });
+    await queryClient.refetchQueries({
+      queryKey: ["org", orgId, "onboarding"]
+    });
   };
 
   const completeOnboarding = async () => {
     await saveOnboardingChangesAsync({ hasOnboarded: true });
     clearDraft();
-    await queryClient.invalidateQueries(["org", orgId, "onboarding"]);
-    await queryClient.refetchQueries(["org", orgId, "onboarding"]);
+    await queryClient.invalidateQueries({
+      queryKey: ["org", orgId, "onboarding"]
+    });
+    await queryClient.refetchQueries({
+      queryKey: ["org", orgId, "onboarding"]
+    });
   };
 
   return {

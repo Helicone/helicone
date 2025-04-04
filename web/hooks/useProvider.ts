@@ -183,7 +183,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     existingKey,
     addProviderKey,
     updateProviderKey,
-    isSavingKey: updateProviderKey.isLoading || addProviderKey.isLoading,
+    isSavingKey: updateProviderKey.isPending || addProviderKey.isPending,
     isSavedKey: updateProviderKey.isSuccess || addProviderKey.isSuccess,
     viewDecryptedProviderKey,
   };

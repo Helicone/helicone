@@ -12,15 +12,11 @@ export function useEvaluatorDetails(
   const { setNotification } = useNotification();
 
   const experiments = useQuery({
-    queryKey: ["experiments", evaluator.id],
-    queryFn: () => {
+    queryKey: ["evaluatorExperiments", evaluator.id],
+    queryFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id!);
       return jawn.GET("/v1/evaluator/{evaluatorId}/experiments", {
-        params: {
-          path: {
-            evaluatorId: evaluator.id,
-          },
-        },
+        params: { path: { evaluatorId: evaluator.id } },
       });
     },
   });
