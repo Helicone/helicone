@@ -16,24 +16,24 @@ type RealtimeMessage = {
     | "input_audio_buffer.clear"
     | "conversation.item.create"
     | "conversation.item.truncate"
-    | "conversation.item.delete" // USE: Find and delete the item with this id, maybe still show deleted items as super truncated messages?
-    | "response.create"
+    | "conversation.item.delete"
+    | "response.create" // SHOW: Count as user message (text)
     | "response.cancel"
     // target
     | "error"
     | "session.created"
     | "session.updated"
     | "conversation.created"
-    | "conversation.item.created"
+    | "conversation.item.created" // SHOW: Count as user or assistant message (audio or text)
     | "conversation.item.input_audio_transcription.failed"
     | "conversation.item.input_audio_transcription.completed" // SHOW: Count as user message (audio)
     | "conversation.item.truncated"
-    | "conversation.item.deleted"
+    | "conversation.item.deleted" // USE: Find and delete the item with this id, maybe still show deleted items as super truncated messages?
     | "input_audio_buffer.committed"
     | "input_audio_buffer.cleared"
     | "input_audio_buffer.speech_started"
     | "input_audio_buffer.speech_stopped"
-    | "response.created" // SHOW: Count as user message (text)
+    | "response.created"
     | "response.done" // SHOW: Count as assistant message (audio or text depending on response.output.content type "text" or "audio")
     | "response.output_item.added"
     | "response.output_item.done"
@@ -91,6 +91,7 @@ type RealtimeMessage = {
   };
   // With type "conversation.item.create"
   item?: {
+    id?: string; // ex: "msg_001"
     type: string; // "function_call_output" or "message"
     // For "function_call" and "function_call_output":
     name?: string; //  ex: "get_weather" (only for "function_call")
@@ -104,6 +105,9 @@ type RealtimeMessage = {
       transcript?: string; // For "input_audio" type: Transcribed text
     }[];
   };
+  // With type "conversation.item.delete"
+  event_id?: string; // ex: "event_901"
+  item_id?: string; // ex: "msg_003"
   // With type "conversation.item.input_audio_transcription.completed"
   transcript?: string; // ex: "Hello, how are you?"
   // With type "input_audio_buffer.append" or "input_audio_buffer.combined"
@@ -231,6 +235,17 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   // Group audio buffer messages before processing
   const groupedMessages = groupAudioBufferMessages(messages);
 
+  // Track deleted item IDs
+  const deletedItemIds = new Set<string>();
+  groupedMessages.forEach((msg) => {
+    if (
+      msg.content.type === "conversation.item.delete" &&
+      msg.content.item_id
+    ) {
+      deletedItemIds.add(msg.content.item_id);
+    }
+  });
+
   return groupedMessages
     .map((msg: SocketMessage) => {
       // Only process specific message types that we want to show
@@ -329,6 +344,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 },
               ],
               timestamp: msg.timestamp,
+              id: item.id,
+              // Check if this function call output has been deleted
+              deleted: item.id ? deletedItemIds.has(item.id) : false,
             };
           }
 
@@ -345,6 +363,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               content: item.content[0].transcript || "",
               audio_data: item.content[0].audio || null,
               timestamp: msg.timestamp,
+              id: item.id,
+              // Check if this audio item has been deleted
+              deleted: item.id ? deletedItemIds.has(item.id) : false,
             };
           }
 
@@ -360,6 +381,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "message",
               content: item.content[0].text || "",
               timestamp: msg.timestamp,
+              id: item.id,
+              // Check if this text item has been deleted
+              deleted: item.id ? deletedItemIds.has(item.id) : false,
             };
           }
           return null;
@@ -374,6 +398,10 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 timestamp: msg.timestamp,
               }
             : null;
+
+        case "conversation.item.delete":
+          // We don't create a message for delete events, we just track them
+          return null;
 
         default:
           return null;
