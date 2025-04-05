@@ -6,7 +6,7 @@ import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";

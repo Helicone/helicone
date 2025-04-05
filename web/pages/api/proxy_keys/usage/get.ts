@@ -3,7 +3,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../packages/common/result";
 import { clickhousePriceCalc } from "../../../../packages/cost";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";

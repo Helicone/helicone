@@ -11,7 +11,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, ok, Result, resultMap } from "../../lib/shared/result";
+import { err, ok, Result, resultMap } from "../../packages/common/result";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";

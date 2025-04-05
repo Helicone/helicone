@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Result } from "../../lib/result";
+import { Result } from "../../packages/common/result";
 
 const useGetUnauthorized = (userId: string) => {
   function getBeginningOfMonth() {

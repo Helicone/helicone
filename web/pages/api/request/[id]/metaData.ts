@@ -4,7 +4,7 @@ import {
   RequestMetaData,
   getRequestMetaData,
 } from "../../../../lib/api/request/metadata";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../packages/common/result";
 import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 
 export default async function handler(

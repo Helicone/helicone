@@ -4,12 +4,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { HeliconeProxyKeys } from "../../../services/lib/keys";
 import crypto from "crypto";
 import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 
 type HashedPasswordRow = {
   hashed_password: string;

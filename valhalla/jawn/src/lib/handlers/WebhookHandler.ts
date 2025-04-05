@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { sendToWebhook, WebhookPayload } from "../clients/webhookSender";
-import { err, ok, PromiseGenericResult } from "../shared/result";
+import { err, ok, PromiseGenericResult } from "../../packages/common/result";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";

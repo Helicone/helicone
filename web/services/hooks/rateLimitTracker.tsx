@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 
 export interface RateLimitPageData {

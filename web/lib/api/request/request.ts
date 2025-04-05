@@ -9,7 +9,7 @@ import {
   SortLeafRequest,
   buildRequestSort,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Result, resultMap } from "../../result";
+import { Result, resultMap } from "../../../packages/common/result";
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 
 export type Provider = ProviderName | "CUSTOM";

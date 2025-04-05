@@ -1,4 +1,4 @@
-import { Result, err } from "../shared/result";
+import { Result, err } from "../../packages/common/result";
 import { RateLimitOptions } from "./RateLimiter";
 
 export class RateLimitOptionsBuilder {

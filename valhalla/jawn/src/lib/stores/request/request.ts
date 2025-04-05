@@ -9,7 +9,7 @@ import {
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../shared/result";
+import { Result, resultMap, ok, err } from "../../../packages/common/result";
 import {
   dbExecute,
   dbQueryClickhouse,

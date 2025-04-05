@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 import { dbExecute } from "../../lib/shared/db/dbExecute";

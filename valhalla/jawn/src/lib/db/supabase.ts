@@ -1,16 +1,15 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { KeyPermissions, Role } from "../../models/models";
+import { KeyPermissions } from "../../packages/common/auth/types";
+import { Role } from "../../packages/common/auth/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { hashAuth } from "../../utils/hash";
 import { KVCache } from "../cache/kvCache";
-import { HeliconeAuth } from "../requestWrapper";
-import {
-  AuthParams,
-  AuthResult,
-  OrgParams,
-  OrgResult,
-} from "../shared/auth/HeliconeAuthClient";
-import { err, ok } from "../shared/result";
+import { HeliconeAuth } from "../../packages/common/auth/types";
+import { AuthParams } from "../../packages/common/auth/types";
+import { AuthResult } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
+import { OrgResult } from "../../packages/common/auth/types";
+import { err, ok } from "../../packages/common/result";
 import { Database } from "./database.types";
 
 const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");

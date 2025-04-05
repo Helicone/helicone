@@ -7,7 +7,7 @@ import {
   buildFilterWithAuthClickHouseRateLimits,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../result";
+import { Result, resultMap } from "../../../packages/common/result";
 import {
   isValidTimeFilter,
   isValidTimeIncrement,

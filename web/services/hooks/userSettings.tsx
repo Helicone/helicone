@@ -1,6 +1,6 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 
 const useUserSettings = (userId: string) => {
   const client = useSupabaseClient();

@@ -1,4 +1,4 @@
-import { Result } from "../shared/result";
+import { Result } from "../../packages/common/result";
 import { DBLoggable, dbLoggableRequestFromProxyRequest } from "./DBLoggable";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
 import {

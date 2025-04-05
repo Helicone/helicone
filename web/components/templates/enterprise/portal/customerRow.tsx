@@ -14,7 +14,7 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { DeleteOrgModal } from "../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "./editCustomerOrgModal";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,

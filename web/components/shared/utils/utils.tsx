@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import posthog from "posthog-js";
 
 const monthNames = [

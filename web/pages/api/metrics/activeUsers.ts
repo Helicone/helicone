@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getActiveUsers } from "../../../lib/api/metrics/activeUsers";
-import { Result, resultsAll } from "../../../lib/result";
+import { Result, resultsAll } from "../../../packages/common/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const { req, res, userData } = options;

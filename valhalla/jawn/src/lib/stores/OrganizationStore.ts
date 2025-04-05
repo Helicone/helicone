@@ -11,7 +11,7 @@ import { BaseTempKey } from "../experiment/tempKeys/baseTempKey";
 import { generateTempHeliconeAPIKey } from "../experiment/tempKeys/tempAPIKey";
 import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, Result } from "../shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export class OrganizationStore extends BaseStore {

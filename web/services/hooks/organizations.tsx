@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { useCallback, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";

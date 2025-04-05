@@ -14,7 +14,7 @@ import {
 } from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
-import { Result, resultMap } from "../../lib/shared/result";
+import { Result, resultMap } from "../../packages/common/result";
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { JawnAuthenticatedRequest } from "../../types/request";
