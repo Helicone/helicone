@@ -1,16 +1,17 @@
 In December 2024, OpenAI announced o3 and o3-mini, with o3 set to launch in early 2025. However, plans have changed.
 
-OpenAI CEO Sam Altman <a href="https://x.com/sama/status/1908167621624856998" target="_blank" rel="noopener">announced</a> on April 4, 2025 that the company will release both o3 and a newly announced **o4-mini** in "a couple of weeks," while delaying GPT-5 until "a few months" later. 
+On April 4, 2025, OpenAI CEO Sam Altman <a href="https://x.com/sama/status/1908167621624856998" target="_blank" rel="noopener">announced</a> that the company will **release both o3 and a new model o4-mini in "a couple of weeks,"** while delaying GPT-5 until "a few months" later. 
 
-Originally, o3's reasoning capabilities were expected to be integrated into GPT-5, but OpenAI has pivoted to releasing both models separately.
 
 ![OpenAI o3 released](/static/blog/openai-o3/o3-cover.webp)
 
-The delay in GPT-5 is reportedly to make it "much better than originally thought" while addressing integration challenges.
+Originally, o3's reasoning capabilities were expected to be integrated into GPT-5, but OpenAI has pivoted to releasing both models separately. The delay in GPT-5 is reportedly to make it "much better than originally thought" while addressing integration challenges.
 
 Building on the foundation of OpenAI's o1 models, the o3 family introduces several notable improvements in performance, deeper reasoning capabilities, and better test results. 
 
 Let's dive into how o3 compares to top models in the market!
+
+## Table of Contents
 
 ## TL;DR
 
@@ -29,7 +30,7 @@ This allows the model to pause and reflect on its own internal thought processes
 
 While the o1 models were good at understanding and generating text, the o3 models take it a step further by thinking through problems and planning their responses ahead of time. This "private chain-of-thought" technique is a core feature that sets o3 apart.
 
-### Simulated Reasoning gaining popularity
+### Simulated Reasoning is gaining popularity
 
 OpenAI's o3 and o3-mini models both use simulated reasoning (SR), which is gaining traction lately, with Google launching its own <a href="https://www.helicone.ai/blog/google-gemini-2-0-flash-thinking" target="_blank" rel="noopener">Gemini 2.0 Flash Thinking</a> and DeepSeek launching their own models based on this approach.
 
@@ -57,7 +58,7 @@ o3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek's R1.
 | DeepSeek R1 | $0.55                       | $0.14                     | $2.19               |
 | o1-mini     | $3.00                       | $1.50                     | $12.00              |
 
-## o3 vs o1 benchmarks
+## o3 vs o1 Benchmarks
 
 ### Reasoning Ability
 
@@ -77,7 +78,7 @@ OpenAI reports that o3 also achieved remarkable results in subjects like mathema
 
 ![o3 math performance](/static/blog/openai-o3/math-and-science.webp)
 
-### o3 coding benchmark Results
+### o3 Coding Benchmark Results
 
 In terms of coding, is o3 better than o1? The benchmarks suggest yes. 
 
@@ -110,7 +111,7 @@ o3 scored `87.7%`, demonstrating strong reasoning skills in graduate-level biolo
 
 ### EpochAI Frontier Math Benchmark
 
-The EpochAI Frontier Math benchmark is one of the toughest challenges featuring unpublished, research-level problems that demand advanced reasoning and creativity.
+The EpochAI Frontier Math benchmark is one of the toughest challenges, featuring unpublished, research-level problems that demand advanced reasoning and creativity.
 
 These problems often take professional mathematicians hours or even days to solve. o3 solved `25.2%` of the problems, when no other model has exceeded `2%` previously on this benchmark.
 
@@ -130,7 +131,7 @@ These problems often take professional mathematicians hours or even days to solv
 
 ## Integrate OpenAI o3 with Helicone ⚡️
 
-Integrate LLM observability with a few lines of code. See [docs](https://docs.helicone.ai/integrations/openai/javascript) for details.
+Integrate LLM observability with a few lines of code. See <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">docs</a> for details.
 
 ```js
 const openai = new OpenAI({
@@ -145,13 +146,13 @@ The o3 family represents a major milestone for OpenAI towards models that can re
 
 With the upcoming separate releases of o3 and o4-mini—rather than an integrated release as originally planned—OpenAI is signaling that it might have quite a lot to offer in both o3 and the much-awaited GPT-5.
 
-We, for one, are quite excited to see what's in stock!
+We, for one, are quite excited to see what's in store!
 
 ### Other models you might be interested in:
 
-- [Everything you need to know about OpenAI's o1 and ChatGPT Pro](https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro)
-- [Meta's Llama 3.3 — Benchmarks, features & comparison with GPT-4 or Claude-Sonnet-3.5](https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct)
-- [GPT-5: release date, features & what to expect](https://www.helicone.ai/blog/openai-gpt-5)
+- <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1 and ChatGPT Pro: Everything You Need to Know</a>
+- <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3 Benchmarks & How it Compares to GPT-4 or Claude-Sonnet-3.5</a>
+- <a href="https://www.helicone.ai/blog/openai-gpt-5" target="_blank" rel="noopener">GPT-5: Release Date, Features & What to Expect</a>
 
 <FAQ items={[
   {
