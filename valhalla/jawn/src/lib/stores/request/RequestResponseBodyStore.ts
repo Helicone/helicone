@@ -1,5 +1,5 @@
 import { S3Client } from "../../shared/db/s3Client";
-import { Result, err, ok } from "../../shared/result";
+import { Result, err, ok } from "../../../packages/common/result";
 
 export class RequestResponseBodyStore {
   private s3Client: S3Client;

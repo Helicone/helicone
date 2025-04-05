@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 
 async function handler({
   req,

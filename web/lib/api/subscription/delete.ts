@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { Result } from "../../result";
+import { Result } from "../../../packages/common/result";
 import { getStripeCustomerFromNext } from "../../../utils/stripeHelpers";
 import { stripeServer } from "../../../utils/stripeServer";
 

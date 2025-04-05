@@ -14,7 +14,7 @@ import { Button } from "../../../../ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { DialogHeader } from "@/components/ui/dialog";
 import ThemedModal from "../../../../shared/themed/themedModal";
-import { Result } from "../../../../../lib/result";
+import { Result } from "../../../../../packages/common/result";
 import {
   ArrowPathIcon,
   InformationCircleIcon,

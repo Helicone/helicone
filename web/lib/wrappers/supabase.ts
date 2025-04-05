@@ -3,7 +3,7 @@ import {
   User,
   createServerSupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import {
   GetServerSidePropsContext,
   NextApiRequest,
@@ -11,7 +11,7 @@ import {
 } from "next";
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result, ok } from "../result";
+import { Result, ok } from "../../packages/common/result";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }

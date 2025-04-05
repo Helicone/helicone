@@ -1,4 +1,4 @@
-import { Result, ok } from "../lib/shared/result";
+import { Result, ok } from "../packages/common/result";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { TimeFrame } from "../controllers/public/providerStatusController";
 

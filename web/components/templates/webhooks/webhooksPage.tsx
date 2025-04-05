@@ -7,7 +7,7 @@ import {
 import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { getUSDateFromString } from "../../shared/utils/utils";

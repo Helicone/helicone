@@ -10,7 +10,7 @@ import {
   err,
   ok,
   resultMap,
-} from "../../shared/result";
+} from "../../../packages/common/result";
 
 export function formatTimeString(timeString: string): string {
   return new Date(timeString).toISOString().replace("Z", "");

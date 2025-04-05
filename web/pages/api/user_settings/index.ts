@@ -1,11 +1,11 @@
 import { User } from "@supabase/auth-helpers-nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 
 import { getSubscriptions } from "../../../lib/api/subscription/get";
 import { getSupabaseServer } from "../../../lib/supabaseServer";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 // import { Tier } from "../../../components/templates/usage/usagePage";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 // import { REQUEST_LIMITS } from "../../../lib/constants";

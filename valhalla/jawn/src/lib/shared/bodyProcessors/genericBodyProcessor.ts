@@ -1,5 +1,5 @@
 import { Usage } from "../../handlers/HandlerContext";
-import { PromiseGenericResult, ok } from "../result";
+import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GenericBodyProcessor implements IBodyProcessor {
@@ -35,8 +35,10 @@ export class GenericBodyProcessor implements IBodyProcessor {
       };
       return {
         promptTokens: nonUsageResponse?.prompt_token_count ?? undefined,
-        promptCacheWriteTokens: nonUsageResponse?.prompt_cache_write_token_count ?? undefined,
-        promptCacheReadTokens: nonUsageResponse?.prompt_cache_read_token_count ?? undefined,
+        promptCacheWriteTokens:
+          nonUsageResponse?.prompt_cache_write_token_count ?? undefined,
+        promptCacheReadTokens:
+          nonUsageResponse?.prompt_cache_read_token_count ?? undefined,
         completionTokens: nonUsageResponse?.generation_token_count ?? undefined,
         totalTokens: undefined,
         heliconeCalculated: false,

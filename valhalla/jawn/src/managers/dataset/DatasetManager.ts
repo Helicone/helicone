@@ -12,12 +12,12 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { AuthParams } from "../../lib/shared/auth/HeliconeAuthClient";
-import { Result, err, ok } from "../../lib/shared/result";
+import { AuthParams } from "../../packages/common/auth/types";
+import { Result, err, ok } from "../../packages/common/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
+import { resultMap } from "../../packages/common/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { Database, Json } from "../../lib/db/database.types";
