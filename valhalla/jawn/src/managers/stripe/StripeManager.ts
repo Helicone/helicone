@@ -8,7 +8,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
 import { costOf } from "../../packages/cost";

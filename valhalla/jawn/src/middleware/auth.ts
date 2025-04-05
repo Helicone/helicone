@@ -3,7 +3,7 @@ import { authCheckThrow } from "../controllers/private/adminController";
 import { newPostHogClient } from "../lib/clients/postHogClient";
 import { RequestWrapper } from "../lib/requestWrapper";
 import { AuthParams } from "../packages/common/auth/types";
-import { getHeliconeAuthClient } from "../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../packages/common/auth/server/AuthClientFactory";
 
 export const logInPostHog = (
   reqParams: {

@@ -2,7 +2,7 @@ import { Response } from "node-fetch";
 import { Provider } from "../../packages/llm-mapper/types";
 import { KafkaProducer } from "../clients/KafkaProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
-import { getHeliconeAuthClient } from "../../packages/common/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
 import { DBLoggable } from "./DBLoggable";
 import {
