@@ -5,7 +5,7 @@ import {
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
 import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { clsx } from "../../shared/clsx";
 import {
   ArrowPathIcon,

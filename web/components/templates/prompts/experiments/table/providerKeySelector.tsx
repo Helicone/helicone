@@ -5,7 +5,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { RadioGroup } from "@headlessui/react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import {
@@ -15,7 +23,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useState } from "react";
-import { Result } from "../../../../../lib/result";
+import { Result } from "../../../../../packages/common/result";
 import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { useOrg } from "../../../../layout/org/organizationContext";
@@ -25,15 +33,6 @@ import ThemedModal from "../../../../shared/themed/themedModal";
 import { SecretInput } from "../../../../shared/themed/themedTable";
 import { Button } from "../../../../ui/button";
 import { useVaultPage } from "../../../vault/useVaultPage";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface ProviderKeySelectorProps {
   variant?: "portal" | "basic";

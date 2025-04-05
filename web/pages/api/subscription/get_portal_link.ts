@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import { Result } from "../../../lib/result";
+=======
+import { Result } from "../../../packages/common/result";
+
+>>>>>>> main
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,

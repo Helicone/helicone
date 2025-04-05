@@ -4,7 +4,7 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { Result, err, ok } from "../result";
+import { Result, err, ok } from "../../packages/common/result";
 import { SupabaseServerWrapper } from "../wrappers/supabase";
 import { User } from "@supabase/auth-helpers-nextjs";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";

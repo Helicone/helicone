@@ -23,7 +23,7 @@ import Link from "next/link";
 import { clsx } from "../../../shared/clsx";
 import UpgradeProModal from "../../../shared/upgradeProModal";
 import RenderOrgPlan from "./renderOrgPlan";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../packages/common/result";
 import { useQuery } from "@tanstack/react-query";
 
 interface OrgPlanPageProps {

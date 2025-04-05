@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
-import { Result } from "../lib/result";
+import { Result } from "../packages/common/result";
 
 const SignIn = ({
   customerPortal,

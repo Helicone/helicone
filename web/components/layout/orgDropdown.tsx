@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-
 import { LogOutIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";

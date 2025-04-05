@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
 import { Metrics } from "../../../lib/api/metrics/metrics";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   HandlerWrapperOptions,

@@ -3,7 +3,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
-import { resultMap } from "../../../../lib/result";
+import { resultMap } from "../../../../packages/common/result";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",

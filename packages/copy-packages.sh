@@ -6,7 +6,7 @@ usage() {
     echo "Copy packages to their respective destinations"
     echo ""
     echo "Options:"
-    echo "  -p, --package PACKAGE    Package to copy (cost or llm-mapper)"
+    echo "  -p, --package PACKAGE    Package to copy (cost, llm-mapper, common, common-client, or all)"
     echo "  -h, --help              Display this help message"
     exit 1
 }
@@ -61,6 +61,55 @@ copy_llm_mapper() {
     done
 }
 
+# Function to copy the common/auth/server to jawn
+copy_common() {
+    echo "Copying common/auth/server to jawn and web..."
+    
+    # Define destinations
+    destinations=(
+        "../valhalla/jawn/src/packages/common/auth/server"
+        "../web/packages/common/auth/server"
+    )
+    
+    # Remove and recreate directories
+    for dest in "${destinations[@]}"; do
+        rm -rf "$dest"
+        mkdir -p "$dest"
+    done
+    
+    # Copy files to all destinations
+    for dest in "${destinations[@]}"; do
+        cp -r common/auth/server/* "$dest"
+        echo "Copied to $dest"
+    done
+}
+
+# Function to copy the common/auth/client to web only
+copy_common_client() {
+    echo "Copying common/auth/client to web only..."
+    
+    # Define destination
+    dest="../web/packages/common/auth/client"
+    
+    # Remove and recreate directory
+    rm -rf "$dest"
+    mkdir -p "$dest"
+    
+    # Copy files to destination
+    cp -r common/auth/client/* "$dest"
+    echo "Copied to $dest"
+}
+
+# Function to copy all packages
+copy_all() {
+    echo "Copying all packages..."
+    copy_cost
+    copy_llm_mapper
+    copy_common
+    copy_common_client
+    echo "All packages copied successfully!"
+}
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -92,8 +141,17 @@ case "$PACKAGE" in
     llm-mapper)
         copy_llm_mapper
         ;;
+    common)
+        copy_common
+        ;;
+    common-client)
+        copy_common_client
+        ;;
+    all)
+        copy_all
+        ;;
     *)
-        echo "Error: Invalid package name. Must be 'cost' or 'llm-mapper'"
+        echo "Error: Invalid package name. Must be 'cost', 'llm-mapper', 'common', 'common-client', or 'all'"
         usage
         ;;
 esac 
