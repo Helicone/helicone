@@ -373,6 +373,9 @@ export interface paths {
   "/v1/admin/top-orgs-over-time": {
     post: operations["GetTopOrgsOverTime"];
   };
+  "/v1/audio/convert-to-wav": {
+    post: operations["ConvertToWav"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -717,6 +720,7 @@ Json: JsonObject;
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
@@ -903,6 +907,10 @@ Json: JsonObject;
       prompt_cache_read_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
+      /** Format: double */
+      prompt_audio_tokens: number | null;
+      /** Format: double */
+      completion_audio_tokens: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -2224,6 +2232,13 @@ Json: JsonObject;
      * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
+    ConvertToWavResponse: {
+      data: string | null;
+      error: string | null;
+    };
+    ConvertToWavRequestBody: {
+      audioData: string;
+    };
   };
   responses: {
   };
@@ -4581,6 +4596,21 @@ export interface operations {
                 organization_id: string;
               }[];
           };
+        };
+      };
+    };
+  };
+  ConvertToWav: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConvertToWavRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConvertToWavResponse"];
         };
       };
     };

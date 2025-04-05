@@ -31,7 +31,7 @@ export function costOf({
   }
 
   // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
-  // This is because we did not backfill the provider yet, and we do not plan to
+  // This is because we did not backfill the provider on supabase yet, and we do not plan to
   // This is really for legacy
   // TODO: after 07/2024 we can probably remove this
   const costs = providerCost.costs.concat(allCosts);
@@ -56,7 +56,9 @@ export function costOfPrompt({
   promptTokens,
   promptCacheWriteTokens,
   promptCacheReadTokens,
+  promptAudioTokens,
   completionTokens,
+  completionAudioTokens,
   images = 1,
   perCall = 1,
 }: {
@@ -65,7 +67,9 @@ export function costOfPrompt({
   promptTokens: number;
   promptCacheWriteTokens: number;
   promptCacheReadTokens: number;
+  promptAudioTokens: number;
   completionTokens: number;
+  completionAudioTokens: number;
   images?: number;
   perCall?: number;
 }) {
@@ -93,8 +97,22 @@ export function costOfPrompt({
     totalCost += promptCacheReadTokens * cost.prompt_token;
   }
 
+  // Add cost for prompt audio tokens if applicable
+  if (cost.prompt_audio_token && promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_audio_token;
+  } else if (promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_token;
+  }
+
   // Add cost for completion tokens
   totalCost += completionTokens * cost.completion_token;
+
+  // Add cost for completion audio tokens if applicable
+  if (cost.completion_audio_token && completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_audio_token;
+  } else if (completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_token;
+  }
 
   // Add cost for images and per-call fees
   const imageCost = images * (cost.per_image ?? 0);

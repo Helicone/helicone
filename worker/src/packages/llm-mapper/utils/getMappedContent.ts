@@ -73,6 +73,9 @@ const metaDataFromHeliconeRequest = (
       prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
       prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
 
+      prompt_audio_tokens: heliconeRequest.prompt_audio_tokens || 0,
+      completion_audio_tokens: heliconeRequest.completion_audio_tokens || 0,
+
       sum_completion_tokens: heliconeRequest.completion_tokens || 0,
 
       sum_tokens: heliconeRequest.total_tokens || 0,

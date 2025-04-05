@@ -38,6 +38,8 @@ export interface HeliconeRequest {
   prompt_cache_write_tokens: number | null;
   prompt_cache_read_tokens: number | null;
   completion_tokens: number | null;
+  completion_audio_tokens: number | null;
+  prompt_audio_tokens: number | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
