@@ -1,6 +1,4 @@
 "use client";
-
-<<<<<<< HEAD
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
@@ -17,33 +15,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-=======
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
-import { PlanType, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
-import React, { useEffect } from "react";
-import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
-import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
-import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
-import { useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
-import useNotification from "@/components/shared/notification/useNotification";
-import { H1, Muted } from "@/components/ui/typography";
->>>>>>> main
 
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
-<<<<<<< HEAD
   const { user } = useHeliconeAuthClient();
-=======
-  const user = useUser();
->>>>>>> main
   const { setNotification } = useNotification();
   const {
     onboardingState,
@@ -70,12 +46,6 @@ export default function OnboardingPage() {
     enabled: !!org?.currentOrg?.id,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-<<<<<<< HEAD
-    onError: (error) => {
-      console.error("Subscription query error:", error);
-    },
-=======
->>>>>>> main
   });
 
   const isSubscribed =
