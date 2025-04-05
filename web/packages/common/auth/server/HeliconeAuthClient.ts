@@ -18,8 +18,6 @@ export interface HeliconeAuthClient {
     password?: string;
     otp?: boolean;
   }) => HeliconeUserResult;
-
   getUserByEmail: (email: string) => HeliconeUserResult;
-
   getUserById: (userId: string) => HeliconeUserResult;
 }

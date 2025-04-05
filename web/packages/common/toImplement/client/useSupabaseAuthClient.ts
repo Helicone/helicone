@@ -1,3 +1,7 @@
+import { NextApiRequest } from "next";
+import { GetServerSidePropsContext } from "next";
+import { NextApiResponse } from "next";
+
 import { Database } from "@/db/database.types";
 import {
   SupabaseClient,
@@ -9,6 +13,19 @@ import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeUser } from "../../auth/types";
 import posthog from "posthog-js";
 import { err, ok, Result } from "../../result";
+import { SSRContext } from "../../auth/client/AuthClientFactory";
+import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
+
+export async function supabaseAuthClientFromSSRContext(
+  ctx: SSRContext<NextApiRequest, NextApiResponse, GetServerSidePropsContext>
+) {
+  const supabaseServer = new SupabaseServerWrapper(ctx);
+  const user = await supabaseServer.getClient().auth.getUser();
+  return new SupabaseAuthClient(supabaseServer.client, {
+    email: user.data.user?.email ?? "",
+    id: user.data.user?.id ?? "",
+  });
+}
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   supabaseClient: SupabaseClient<Database>;

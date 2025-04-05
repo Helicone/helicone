@@ -31,7 +31,7 @@ copy_cost() {
     
     # Copy files to all destinations
     for dest in "${destinations[@]}"; do
-        cp -r cost/* "$dest"
+        rsync -a --exclude="toImplement" cost/ "$dest"
         echo "Copied to $dest"
     done
 }
@@ -56,7 +56,7 @@ copy_llm_mapper() {
     
     # Copy files to all destinations
     for dest in "${destinations[@]}"; do
-        cp -r llm-mapper/* "$dest"
+        rsync -a --exclude="toImplement" llm-mapper/ "$dest"
         echo "Copied to $dest"
     done
 }
@@ -67,8 +67,8 @@ copy_common() {
     
     # Define destinations
     destinations=(
-        "../valhalla/jawn/src/packages/common/auth/server"
-        "../web/packages/common/auth/server"
+        "../valhalla/jawn/src/packages/common/auth"
+        "../web/packages/common/auth"
     )
     
     # Remove and recreate directories
@@ -79,25 +79,9 @@ copy_common() {
     
     # Copy files to all destinations
     for dest in "${destinations[@]}"; do
-        cp -r common/auth/server/* "$dest"
+        rsync -a --exclude="toImplement" common/auth/ "$dest"
         echo "Copied to $dest"
     done
-}
-
-# Function to copy the common/auth/client to web only
-copy_common_client() {
-    echo "Copying common/auth/client to web only..."
-    
-    # Define destination
-    dest="../web/packages/common/auth/client"
-    
-    # Remove and recreate directory
-    rm -rf "$dest"
-    mkdir -p "$dest"
-    
-    # Copy files to destination
-    cp -r common/auth/client/* "$dest"
-    echo "Copied to $dest"
 }
 
 # Function to copy all packages
@@ -106,7 +90,6 @@ copy_all() {
     copy_cost
     copy_llm_mapper
     copy_common
-    copy_common_client
     echo "All packages copied successfully!"
 }
 
@@ -143,9 +126,6 @@ case "$PACKAGE" in
         ;;
     common)
         copy_common
-        ;;
-    common-client)
-        copy_common_client
         ;;
     all)
         copy_all

@@ -15,22 +15,9 @@ export type BearerAuth = {
 };
 
 export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
-export type HeliconeUserResult = PromiseGenericResult<HeliconeUser>;
-
-export interface HeliconeUser {
-  email: string;
-  id: string;
-}
-export type OrgResult = PromiseGenericResult<OrgParams>;
-export interface OrgParams {
-  tier: string;
-  id: string;
-  percentLog: number;
-  has_onboarded: boolean;
-}
-export type AuthResult = PromiseGenericResult<AuthParams>;
-export type KeyPermissions = "w" | "rw" | undefined;
 export type Role = "admin" | "owner" | "member" | undefined;
+export type KeyPermissions = "w" | "rw" | undefined;
+
 export interface AuthParams {
   organizationId: string;
   userId?: string;
@@ -38,3 +25,24 @@ export interface AuthParams {
   keyPermissions?: KeyPermissions;
   role?: Role;
 }
+export type AuthResult = PromiseGenericResult<AuthParams>;
+
+export interface OrgParams {
+  tier: string;
+  id: string;
+  percentLog: number;
+  has_onboarded: boolean;
+}
+
+export type OrgResult = PromiseGenericResult<OrgParams>;
+
+export interface HeliconeUser {
+  email: string;
+  id: string;
+  user_metadata?: {
+    name?: string;
+    avatar_url?: string;
+  };
+}
+
+export type HeliconeUserResult = PromiseGenericResult<HeliconeUser>;
