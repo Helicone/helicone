@@ -1,3 +1,5 @@
+import { User } from "@supabase/auth-helpers-react";
+import { GetServerSidePropsContext } from "next";
 import { ReactElement, useEffect } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import RequestsPageV2 from "../components/templates/requests/requestsPageV2";
@@ -31,6 +33,7 @@ if (typeof Node === 'function' && Node.prototype) {
 `;
 
 interface RequestsV2Props {
+  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -79,3 +82,32 @@ RequestsV2.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default RequestsV2;
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const {
+    page,
+    page_size,
+    sortKey,
+    sortDirection,
+    isCustomProperty,
+    requestId,
+  } = context.query;
+
+  const currentPage = parseInt(page as string, 10) || 1;
+  const pageSize = parseInt(page_size as string, 10) || 25;
+
+  return {
+    props: {
+      currentPage,
+      pageSize,
+      sort: {
+        sortKey: sortKey ? (sortKey as string) : null,
+        sortDirection: sortDirection ? (sortDirection as SortDirection) : null,
+        isCustomProperty: isCustomProperty === "true",
+      },
+      initialRequestId: requestId ? (requestId as string) : null,
+    },
+  };
+};

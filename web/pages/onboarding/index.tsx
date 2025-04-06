@@ -34,6 +34,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     updateCurrentStep("ORGANIZATION");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const subscription = useQuery({

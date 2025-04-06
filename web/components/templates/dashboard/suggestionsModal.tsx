@@ -1,8 +1,8 @@
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useEffect, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { useEffect, useState } from "react";
-import { useOrg } from "../../layout/org/organizationContext";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface SuggestionModalProps {
   open: boolean;
@@ -11,8 +11,6 @@ interface SuggestionModalProps {
 
 const SuggestionModal = (props: SuggestionModalProps) => {
   const { open, setOpen } = props;
-
-  const org = useOrg();
   const [metricTitle, setMetricTitle] = useState("");
   const [metricType, setMetricType] = useState("");
   const [email, setEmail] = useState("");
@@ -127,18 +125,18 @@ const SuggestionModal = (props: SuggestionModalProps) => {
           <div className="border-t border-gray-300 flex items-center justify-end pt-4">
             <button
               onClick={() => {
-                heliconeAuthClient
-                  .from("user_feedback")
-                  .insert({
-                    feedback: `
+                $JAWN_API
+                  .POST("/v1/user-feedback", {
+                    body: {
+                      feedback: `
                     Metric Title: ${metricTitle}
                     Type: ${metricType}
                     Email: ${email}
                     Use Case: ${useCase}
                     What else: ${whatElse}
                   `,
-                    organization_id: org?.currentOrg?.id ?? "",
-                    tag: "dashboard_metric_suggestion",
+                      tag: "dashboard_metric_suggestion",
+                    },
                   })
                   .then((res) => {
                     if (res.error) {

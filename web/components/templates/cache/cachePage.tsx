@@ -302,8 +302,6 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
                     pageSize={pageSize}
                     sort={sort}
                     isCached={true}
-                    currentFilter={null}
-                    organizationLayout={null}
                     organizationLayoutAvailable={false}
                   />
                 )}

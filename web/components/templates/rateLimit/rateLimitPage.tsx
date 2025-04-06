@@ -194,8 +194,6 @@ const RateLimitPage = (props: {}) => {
               isCustomProperty: false,
             }}
             rateLimited={true}
-            currentFilter={null}
-            organizationLayout={null}
             organizationLayoutAvailable={false}
           />
         </div>

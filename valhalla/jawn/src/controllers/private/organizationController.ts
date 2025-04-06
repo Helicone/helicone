@@ -72,7 +72,9 @@ export class OrganizationController extends Controller {
   public async getOrganization(
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"], string>
+  > {
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"]
     >(
@@ -84,7 +86,17 @@ export class OrganizationController extends Controller {
       [request.authParams.userId, organizationId]
     );
 
-    return ok(result);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization");
+    }
+    const org = result.data?.at(0);
+    if (!org) {
+      this.setStatus(404);
+      return err("Organization not found");
+    }
+
+    return ok(org);
   }
 
   @Get("/reseller/{resellerId}")

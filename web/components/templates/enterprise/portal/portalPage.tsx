@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -7,8 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 
+import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import {
   BuildingStorefrontIcon,
   ChartPieIcon,
@@ -16,26 +17,22 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import CustomerRow from "./customerRow";
-import { ArrowRightIcon } from "@heroicons/react/20/solid";
-import { useRouter } from "next/router";
-import ThemedDrawer from "../../../shared/themed/themedDrawer";
-
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
+import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import CreateOrgForm from "../../organization/createOrgForm";
+import CustomerRow from "./customerRow";
 
 interface PortalPageProps {}
 
 const PortalPage = (props: PortalPageProps) => {
   const {} = props;
 
-  const router = useRouter();
   const [currentSearch, setCurrentSearch] = useState<string>("");
   const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
 
   const { data, isLoading, refetch } = usePortalPage();
 
-  const filteredData = data?.filter((org) => {
+  const filteredData = data?.data?.data?.filter((org) => {
     if (currentSearch === null) {
       return true;
     }
@@ -83,7 +80,7 @@ const PortalPage = (props: PortalPageProps) => {
                   </button>
                 </div>
               </div>
-              {data?.length === 0 ? (
+              {data?.data?.data?.length === 0 ? (
                 <div className="flex flex-col w-full h-96 justify-center items-center">
                   <div className="flex flex-col w-2/5">
                     <UserGroupIcon className="h-12 w-12 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />

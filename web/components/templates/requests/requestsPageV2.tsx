@@ -177,27 +177,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const encodeFilters = (filters: UIFilterRowTree): string => {
-    const encode = (node: UIFilterRowTree): any => {
-      if (isFilterRowNode(node)) {
-        return {
-          type: "node",
-          operator: node.operator,
-          rows: node.rows.map(encode),
-        };
-      } else {
-        return {
-          type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
-        };
-      }
-    };
-
-    return JSON.stringify(encode(filters));
-  };
-
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     const tableName = getTableName(isCached);
@@ -261,7 +240,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const timeRange = useMemo(getTimeRange, []);
+  const timeRange = useMemo(getTimeRange, [searchParams]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -340,6 +319,30 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequest, selectedData]);
 
+  const encodeFilters = useCallback(
+    (filters: UIFilterRowTree): string => {
+      const encode = (node: UIFilterRowTree): any => {
+        if (isFilterRowNode(node)) {
+          return {
+            type: "node",
+            operator: node.operator,
+            rows: node.rows.map(encode),
+          };
+        } else {
+          return {
+            type: "leaf",
+            filter: `${filterMap[node.filterMapIdx].label}:${
+              filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+            }:${encodeURIComponent(node.value)}`,
+          };
+        }
+      };
+
+      return JSON.stringify(encode(filters));
+    },
+    [filterMap]
+  );
+
   //convert this using useCallback
 
   // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
@@ -408,7 +411,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters]);
+  }, [filterMap, getAdvancedFilters, isDataLoading]);
 
   // TODO
   useEffect(() => {
@@ -630,15 +633,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         searchParams.set("filters", currentAdvancedFilters);
       }
     },
-    [searchParams]
+    [encodeFilters, searchParams]
   );
 
   useEffect(() => {
-    orgContext?.refetchOrgs();
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
+    } else {
+      orgContext?.refetchOrgs();
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
 
   return (
     <>

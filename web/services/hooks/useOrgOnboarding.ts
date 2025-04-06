@@ -130,7 +130,7 @@ export const useOrgOnboarding = (orgId: string) => {
     {
       enabled: !!orgId,
       select: (data) => {
-        const organization = data?.data?.data?.[0];
+        const organization = data?.data;
         if (!organization) {
           return null;
         }
@@ -138,7 +138,7 @@ export const useOrgOnboarding = (orgId: string) => {
           (organization?.onboarding_status as unknown as OnboardingState) ??
           defaultOnboardingState;
 
-        return { ...baseState, name: data?.data?.data?.[0]?.name ?? "" };
+        return { ...baseState, name: organization?.name ?? "" };
       },
     }
   );

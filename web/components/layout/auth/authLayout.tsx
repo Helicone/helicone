@@ -66,7 +66,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, orgContext?.currentOrg?.tier, router]);
+  }, [alertBanners?.data, orgContext, router]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 

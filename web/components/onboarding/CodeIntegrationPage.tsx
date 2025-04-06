@@ -142,7 +142,13 @@ export function CodeIntegrationPage({
     };
 
     generateKey();
-  }, [user, org?.currentOrg?.organization_type, apiKey, setNotification]);
+  }, [
+    user,
+    org?.currentOrg?.organization_type,
+    apiKey,
+    setNotification,
+    updateCurrentStep,
+  ]);
 
   useEffect(() => {
     const updateHighlightedCode = async () => {

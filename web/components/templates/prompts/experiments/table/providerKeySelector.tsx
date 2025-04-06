@@ -72,11 +72,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const org = useOrg();
-  const {
-    data: orgMembers,
-    isLoading: isMembersLoading,
-    refetch: refetchOrgMembers,
-  } = useGetOrgMembers(org?.currentOrg?.id || "");
+  const { data: orgMembers } = useGetOrgMembers(org?.currentOrg?.id || "");
 
   const currentUserRole = orgMembers?.find(
     (d) => d.email === heliconeAuthClient?.user?.email
@@ -90,7 +86,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
         return;
       }
     },
-    [setProviderKeyCallback, orgId, setNotification, setProviderKey]
+    [setProviderKeyCallback, setProviderKey]
   );
 
   const deleteProviderKey = async (id: string) => {

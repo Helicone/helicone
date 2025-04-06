@@ -101,7 +101,7 @@ const OrgAnalytics = () => {
   };
   const { setNotification } = useNotification();
 
-  const { mutate: addAdminToOrg, isPending: isAddingAdminToOrg } = useMutation({
+  const { mutate: addAdminToOrg } = useMutation({
     mutationKey: ["addAdminToOrg"],
     mutationFn: async ({
       orgId,

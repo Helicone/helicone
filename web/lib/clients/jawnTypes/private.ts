@@ -9,6 +9,9 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/user-feedback": {
+    post: operations["PostUserFeedback"];
+  };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
   };
@@ -1410,6 +1413,43 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
+      data: {
+        tier: string | null;
+        subscription_status: string | null;
+        stripe_subscription_item_id: string | null;
+        stripe_subscription_id: string | null;
+        stripe_metadata: components["schemas"]["Json"];
+        stripe_customer_id: string | null;
+        soft_delete: boolean;
+        size: string | null;
+        reseller_id: string | null;
+        /** Format: double */
+        request_limit: number | null;
+        referral: string | null;
+        /** Format: double */
+        percent_to_log: number | null;
+        owner: string;
+        organization_type: string;
+        org_provider_key: string | null;
+        onboarding_status: components["schemas"]["Json"];
+        name: string;
+        logo_path: string | null;
+        limits: components["schemas"]["Json"] | null;
+        is_personal: boolean;
+        is_main_org: boolean;
+        id: string;
+        icon: string;
+        has_onboarded: boolean;
+        governance_settings: components["schemas"]["Json"] | null;
+        domain: string | null;
+        created_at: string | null;
+        color: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
@@ -2331,6 +2371,30 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  PostUserFeedback: {
+    requestBody: {
+      content: {
+        "application/json": {
+          tag: string;
+          feedback: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success?: unknown;
+            error: string;
+          } | {
+            error?: unknown;
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
   CreateEvaluator: {
     requestBody: {
       content: {
@@ -3726,7 +3790,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_"];
         };
       };
     };

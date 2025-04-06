@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Database } from "../../../db/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { getUSDateFromString } from "../../shared/utils/utils";

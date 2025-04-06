@@ -36,5 +36,10 @@ export function getJawnClient(orgId?: string | "none") {
   });
 }
 
-export const $JAWN_API = createQueryClient<allPaths>(getJawnClient());
+const jawnClient = getJawnClient();
+
+export const $JAWN_API = {
+  ...jawnClient,
+  ...createQueryClient<allPaths>(jawnClient),
+};
 export type ClientType = ReturnType<typeof getJawnClient>;

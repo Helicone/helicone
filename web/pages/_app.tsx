@@ -9,7 +9,6 @@ import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
 import "../styles/globals.css";
 import "../styles/index.css";
-
 import { Analytics } from "@vercel/analytics/react";
 import { NextPage } from "next";
 import posthog from "posthog-js";
@@ -23,7 +22,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
-import JawnClientProvider from "@/components/shared/JawnClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
