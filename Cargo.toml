@@ -3,7 +3,7 @@ members = [
   "crates/anthropic-types",
   "crates/openai-types",
   "crates/schema-filter",
-  "worker",
+  "llm-proxy",
   "worker-test",
 ]
 resolver = "2"
@@ -24,7 +24,7 @@ strip = true
 [workspace.dependencies]
 openai-types = { path = "./crates/openai-types" }
 anthropic-types = { path = "./crates/anthropic-types" }
-llm-proxy = { path = "./worker" }
+llm-proxy = { path = "./llm-proxy" }
 
 anyhow = "1.0.97"
 base64 = "0.22.1"
