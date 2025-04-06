@@ -4,17 +4,15 @@ use http::Response;
 use picker::RouterPicker;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder, ServiceExt, steer::Steer};
-use worker::Result;
 
 use crate::{
-    dispatcher::{Dispatcher, ReqBody, RespBody},
-    types::config::WorkerConfig,
+    dispatcher::{Dispatcher, ReqBody, RespBody}, error::Error, types::config::WorkerConfig
 };
 
 pub async fn route(
     req: http::Request<ReqBody>,
     config: WorkerConfig,
-) -> Result<Response<RespBody>> {
+) -> Result<Response<RespBody>, Error> {
     // llm-proxy request lifecycle and flow:
     // 0. Receive request.
     // 1. Auth middleware: extract Helicone key, API provider key, perform

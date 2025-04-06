@@ -7,7 +7,7 @@ use std::{
 use bytes::Bytes;
 use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue, Request, Response};
-use http_body_util::BodyExt;
+use http_body_util::{BodyExt, Full};
 use reqwest::Client;
 use tower::{Service, util::BoxService};
 
@@ -17,8 +17,8 @@ use crate::{
     types::request::{Provider, RequestContext},
 };
 
-pub type ReqBody = worker::Body;
-pub type RespBody = worker::Body;
+pub type ReqBody = Full<Bytes>;
+pub type RespBody = Full<Bytes>;
 pub type DispatcherFuture =
     BoxFuture<'static, Result<Response<RespBody>, Error>>;
 pub type DispatcherService =
@@ -158,7 +158,8 @@ async fn convert_reqwest_to_http_response(
     for (key, value) in response.headers() {
         resp_builder = resp_builder.header(key, value);
     }
-    let body = worker::Body::from_stream(response.bytes_stream())?;
+    let body = response.bytes().await?;
+    let body = Full::new(body);
     let http_resp = resp_builder.body(body)?;
     Ok(http_resp)
 }

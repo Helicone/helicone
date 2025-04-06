@@ -1026,11 +1026,10 @@ dependencies = [
  "serde_json",
  "serde_with",
  "thiserror 2.0.12",
+ "tokio",
  "tower",
  "tower-http",
  "url",
- "worker",
- "worker-macros",
 ]
 
 [[package]]

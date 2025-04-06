@@ -17,6 +17,4 @@ pub enum Error {
     HttpError(#[from] http::Error),
     #[error("Mapper error: {0}")]
     MapperError(#[from] crate::mapper::error::MapperError),
-    #[error("Worker error: {0}")]
-    WorkerError(#[from] worker::Error),
 }
