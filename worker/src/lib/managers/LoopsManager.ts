@@ -127,49 +127,6 @@ async function getAllOnboardedOrgs(supabaseServer: SupabaseClient<Database>) {
   return orgs || [];
 }
 
-/**
- * Sends a batch of events to PostHog
- */
-async function sendPosthogEvents(events: PostHogEvent[], apiKey: string) {
-  if (events.length === 0) return;
-
-  console.log(`PostHog: Sending ${events.length} events one by one`);
-
-  for (const event of events) {
-    try {
-      // Format the event to match the PostHog API expectations
-      const posthogPayload = {
-        api_key: apiKey,
-        event: event.event,
-        distinct_id: event.distinct_id,
-        properties: {
-          ...event.properties,
-          // If the event has groups, format it correctly as $groups
-          ...(event.groups && { $groups: event.groups }),
-        },
-      };
-
-      console.log(
-        `PostHog: Sending event ${event.event} for user ${event.distinct_id}`
-      );
-      await sendPosthogEvent(posthogPayload, apiKey);
-    } catch (error) {
-      console.error(`Error sending event to PostHog:`, error);
-    }
-  }
-
-  console.log(`PostHog: Completed sending all ${events.length} events`);
-}
-
-async function sendPosthogEvent(event: PostHogEvent, apiKey: string) {
-  await fetch(POSTHOG_EVENT_API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(event),
-  });
-}
 export async function updateLoopUsers(env: Env) {
   console.log("⭐ LOOPSMANAGER: Debug - Function started");
 
