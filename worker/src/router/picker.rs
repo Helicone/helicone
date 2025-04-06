@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use http::Request;
 use tower::steer::Picker;
-use worker::console_log;
 
 use crate::{
     dispatcher::{AiProviderDispatcher, ReqBody as Body},
@@ -21,14 +20,12 @@ where
 {
     /// Chooses a service index based on the request's `RequestContext`.
     fn pick(&mut self, req: &Request<Body>, services: &[S]) -> usize {
-        println!("in router picker");
         let context = req.extensions().get::<Arc<RequestContext>>().unwrap();
         let target_provider = context.proxy_context.target_provider;
         let index = services
             .iter()
             .position(|s| s.provider() == target_provider)
             .unwrap();
-        println!("Picked service index: {}", index);
         index
     }
 }

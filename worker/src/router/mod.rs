@@ -8,12 +8,12 @@ use worker::Result;
 
 use crate::{
     dispatcher::{Dispatcher, ReqBody, RespBody},
-    types::config::Config,
+    types::config::WorkerConfig,
 };
 
 pub async fn route(
     req: http::Request<ReqBody>,
-    config: Config,
+    config: WorkerConfig,
 ) -> Result<Response<RespBody>> {
     // llm-proxy request lifecycle and flow:
     // 0. Receive request.

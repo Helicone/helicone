@@ -48,7 +48,6 @@ where
 
     fn call(&mut self, mut req: Request<Body>) -> Self::Future {
         let mut this = self.clone();
-        println!("in request_context layer");
 
         Box::pin(async move {
             let req_ctx = Arc::new(this.get_context(&req).await?);
@@ -88,7 +87,8 @@ where
             target_provider: Provider::Anthropic,
             // target_provider: Provider::OpenAI,
             original_provider: Provider::OpenAI,
-            provider_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap(),
+            provider_api_key: "test-api-key".to_string(),
+            // provider_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap(),
             // provider_api_key: std::env::var("OPENAI_API_KEY").unwrap(),
         };
         let req_ctx = RequestContext {

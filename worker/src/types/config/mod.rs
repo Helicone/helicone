@@ -10,7 +10,7 @@ pub mod router;
 pub mod template;
 
 #[derive(Debug, Default, Clone, Deserialize)]
-pub struct Config {
+pub struct WorkerConfig {
     pub dispatcher: DispatcherConfig,
 }
 

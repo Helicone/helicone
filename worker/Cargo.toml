@@ -12,8 +12,8 @@ release = false
 wasm-opt = false
 
 [lib]
-#crate-type = ["cdylib"]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+#crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 openai-types = { workspace = true }

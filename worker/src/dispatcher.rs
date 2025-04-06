@@ -6,10 +6,8 @@ use std::{
 
 use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::{
-    HeaderMap, HeaderName, HeaderValue, Request, Response, StatusCode, Version,
-};
-use http_body_util::{BodyExt, Full};
+use http::{HeaderName, HeaderValue, Request, Response};
+use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, util::BoxService};
 
@@ -19,8 +17,8 @@ use crate::{
     types::request::{Provider, RequestContext},
 };
 
-pub type ReqBody = Full<Bytes>;
-pub type RespBody = Full<Bytes>;
+pub type ReqBody = worker::Body;
+pub type RespBody = worker::Body;
 pub type DispatcherFuture =
     BoxFuture<'static, Result<Response<RespBody>, Error>>;
 pub type DispatcherService =
@@ -67,7 +65,6 @@ impl Service<Request<ReqBody>> for Dispatcher {
     }
 
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
-        println!("in dispatcher");
         let this = self.clone();
         Box::pin(async move { this.dispatch(req).await })
     }
@@ -155,22 +152,15 @@ impl Dispatcher {
 async fn convert_reqwest_to_http_response(
     response: reqwest::Response,
 ) -> Result<Response<RespBody>, Error> {
-    let status: StatusCode = response.status();
-    let version: Version = response.version();
-
-    let mut http_headers: HeaderMap = HeaderMap::new();
+    let mut resp_builder = Response::builder()
+        .status(response.status())
+        .version(response.version());
     for (key, value) in response.headers() {
-        http_headers.insert(key.clone(), value.clone());
+        resp_builder = resp_builder.header(key, value);
     }
-
-    let body_bytes: Bytes = response.bytes().await?;
-    let resp_body: RespBody = Full::new(body_bytes);
-
-    let mut http_response = Response::builder().status(status).version(version);
-    for (key, value) in http_headers.iter() {
-        http_response = http_response.header(key, value);
-    }
-    Ok(http_response.body(resp_body)?)
+    let body = worker::Body::from_stream(response.bytes_stream())?;
+    let http_resp = resp_builder.body(body)?;
+    Ok(http_resp)
 }
 
 fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
