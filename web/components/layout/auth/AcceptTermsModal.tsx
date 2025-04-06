@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { Database } from "@/supabase/database.types";
+import { Database } from "@/db/database.types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { usePathname } from "next/navigation";
 import { useOrg } from "../org/organizationContext";

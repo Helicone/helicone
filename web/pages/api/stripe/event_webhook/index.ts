@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import { getSupabaseServer } from "../../../../lib/supabaseServer";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import {
   getEvaluatorUsage,
   getExperimentUsage,

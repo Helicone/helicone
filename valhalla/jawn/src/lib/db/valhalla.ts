@@ -1,6 +1,6 @@
 import { Pool, QueryResult, PoolClient } from "pg";
 import { getEnvironment } from "../environment/get";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import {
   ValhallaFeedback,
   ValhallaRequest,
@@ -251,7 +251,7 @@ class ValhallaDB implements IValhallaDB {
       response.responseReceivedAt?.toISOString(),
       response.heliconeOrgID,
       response.promptCacheWriteTokens,
-      response.promptCacheReadTokens
+      response.promptCacheReadTokens,
     ]);
   }
 }

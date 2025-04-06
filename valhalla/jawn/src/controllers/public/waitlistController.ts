@@ -1,6 +1,6 @@
 import { Controller, Request, Route, Post, Tags, Security, Body } from "tsoa";
 import express from "express";
-import { err, ok } from "../../lib/shared/result";
+import { err, ok } from "../../packages/common/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 @Route("v1/public/waitlist")

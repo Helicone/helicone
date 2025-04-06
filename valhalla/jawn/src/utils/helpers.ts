@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import zlib from "zlib";
-import { PromiseGenericResult, err, ok } from "../lib/shared/result";
+import { PromiseGenericResult, err, ok } from "../packages/common/result";
 
 /**
  * Safely parses a JSON string and returns the parsed value or null if parsing fails

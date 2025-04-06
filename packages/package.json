@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "copy": "./copy-packages.sh -p all",
     "copy-cost": "./copy-packages.sh -p cost",
     "copy-llm-mapper": "./copy-packages.sh -p llm-mapper"
   },

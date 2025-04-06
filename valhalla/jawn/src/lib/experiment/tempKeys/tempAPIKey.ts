@@ -1,7 +1,7 @@
 import { KeyManager } from "../../../managers/apiKeys/KeyManager";
 import { cacheResultCustom } from "../../../utils/cacheResult";
 import { KVCache } from "../../cache/kvCache";
-import { Result, err, ok } from "../../shared/result";
+import { Result, err, ok } from "../../../packages/common/result";
 import { BaseTempKey } from "./baseTempKey";
 import { dbExecute } from "../../shared/db/dbExecute";
 

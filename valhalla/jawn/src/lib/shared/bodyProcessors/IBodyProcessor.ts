@@ -1,5 +1,5 @@
 import { Usage } from "../../handlers/HandlerContext";
-import { PromiseGenericResult } from "../result";
+import { PromiseGenericResult } from "../../../packages/common/result";
 
 export interface ParseInput {
   responseBody: string;

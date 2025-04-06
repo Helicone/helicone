@@ -6,7 +6,7 @@ import {
   getRateLimitOverTime,
   RateLimitOverTime,
 } from "../../../lib/api/metrics/getRateLimitOverTime";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

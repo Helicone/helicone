@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../lib/result";
+import { Result } from "../../packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";

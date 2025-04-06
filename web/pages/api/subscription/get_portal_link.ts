@@ -1,4 +1,4 @@
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {

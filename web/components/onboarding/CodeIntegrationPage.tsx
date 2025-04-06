@@ -27,7 +27,7 @@ import {
   Loader,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "@/lib/result";
+import { Result } from "@/packages/common/result";
 import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { H1, Small, Muted } from "@/components/ui/typography";

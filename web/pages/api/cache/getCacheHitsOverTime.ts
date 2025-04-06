@@ -1,6 +1,6 @@
 import { getXOverTimeCacheHits } from "../../../lib/api/metrics/getXOverTime";
 import { DataOverTimeRequest } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 
 export interface CacheHitsOverTime {
   count: number;

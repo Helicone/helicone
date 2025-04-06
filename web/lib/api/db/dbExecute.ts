@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import { Result } from "../../result";
+import { Result } from "../../../packages/common/result";
 import { createClient as clickhouseCreateClient } from "@clickhouse/client";
 import dateFormat from "dateformat";
 

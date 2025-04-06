@@ -17,7 +17,7 @@ import {
   modelNames,
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { Result, err, ok } from "../lib/shared/result";
+import { Result, err, ok } from "../packages/common/result";
 import { clickhousePriceCalc } from "../packages/cost";
 
 function andCondition(...conditions: string[]): string {
