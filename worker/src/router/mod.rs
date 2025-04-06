@@ -6,7 +6,9 @@ use reqwest::Client;
 use tower::{Service, ServiceBuilder, ServiceExt, steer::Steer};
 
 use crate::{
-    dispatcher::{Dispatcher, ReqBody, RespBody}, error::Error, types::config::WorkerConfig
+    dispatcher::{Dispatcher, ReqBody, RespBody},
+    error::Error,
+    types::config::WorkerConfig,
 };
 
 pub async fn route(

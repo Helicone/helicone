@@ -73,7 +73,7 @@ where
         let router_config =
             crate::types::config::router::test_router_config().await;
         // let target_url =
-            // url::Url::parse("https://api.openai.com/v1/chat/completions").unwrap();
+        // url::Url::parse("https://api.openai.com/v1/chat/completions").unwrap();
         let target_url =
             url::Url::parse("https://api.anthropic.com/v1/messages").unwrap();
         let helicone = crate::types::request::HeliconeContext {
@@ -87,8 +87,7 @@ where
             target_provider: Provider::Anthropic,
             // target_provider: Provider::OpenAI,
             original_provider: Provider::OpenAI,
-            provider_api_key: "test-api-key".to_string(),
-            // provider_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap(),
+            provider_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap(),
             // provider_api_key: std::env::var("OPENAI_API_KEY").unwrap(),
         };
         let req_ctx = RequestContext {

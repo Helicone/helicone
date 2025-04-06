@@ -17,7 +17,7 @@ use crate::{
     types::request::{Provider, RequestContext},
 };
 
-pub type ReqBody = Full<Bytes>;
+pub type ReqBody = hyper::body::Incoming;
 pub type RespBody = Full<Bytes>;
 pub type DispatcherFuture =
     BoxFuture<'static, Result<Response<RespBody>, Error>>;
@@ -94,6 +94,7 @@ impl Dispatcher {
             };
             r.insert(http::header::HOST, host_header);
             r.remove(http::header::AUTHORIZATION);
+            r.remove(http::header::CONTENT_LENGTH);
             r.remove(HeaderName::from_str("helicone-api-key").unwrap());
             match target_provider {
                 Provider::OpenAI => {
@@ -137,6 +138,12 @@ impl Dispatcher {
                 todo!()
             }
         };
+        tracing::info!(
+            headers = ?headers,
+            method = ?method,
+            target_url = ?target_url,
+            "sending proxied request"
+        );
         let response = self
             .client
             .request(method, target_url)
@@ -144,6 +151,7 @@ impl Dispatcher {
             .body(req_body_bytes)
             .send()
             .await?;
+        tracing::info!("received response from target provider");
 
         convert_reqwest_to_http_response(response).await
     }
@@ -171,6 +179,10 @@ fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
     .unwrap();
     let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
         TryConvert::try_convert(openai_req)?;
+    tracing::info!(
+        anthropic_req = ?anthropic_req,
+        "converted openai request to anthropic request"
+    );
     let anthropic_req_bytes = serde_json::to_vec(&anthropic_req).unwrap();
     Ok(Bytes::from(anthropic_req_bytes))
 }
