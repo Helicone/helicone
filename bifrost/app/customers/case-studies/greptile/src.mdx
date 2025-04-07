@@ -1,0 +1,58 @@
+
+
+## About Greptile
+
+Greptile is an AI-powered code search tool that helps developers find and understand code across their codebase. Unlike traditional code search tools that rely on exact text matching, Greptile uses natural language processing to understand the intent behind search queries, making it easier for developers to find relevant code examples.
+
+## The Challenge
+
+As Greptile's user base grew, the team faced several challenges:
+
+1. **Cost Management**: AI API costs were increasing rapidly with user growth
+2. **Performance Monitoring**: Difficulty tracking response times and quality across different models
+3. **User Experience**: Needed insights into how users were interacting with the tool
+4. **Optimization**: Lacked data to make informed decisions about model selection and prompt engineering
+
+## The Solution
+
+Greptile integrated Helicone into their AI pipeline to gain visibility into their LLM usage and performance. This allowed them to:
+
+- **Track costs** across different models and features
+- **Monitor performance metrics** like latency and token usage
+- **Analyze user behavior** to identify popular search patterns
+- **Optimize prompts** based on real usage data
+
+## Results
+
+After implementing Helicone, Greptile achieved significant improvements:
+
+- **35% improvement** in search result relevance
+- **28% reduction** in AI API costs
+- **40% faster** average response times
+- **Improved user satisfaction** with more relevant search results
+
+## Implementation Details
+
+Greptile uses a combination of OpenAI's GPT-4 and Anthropic's Claude models for different aspects of their code search functionality. Helicone's detailed analytics helped them identify which models performed best for different types of queries, allowing them to route requests to the most appropriate model.
+
+```typescript
+// Example of how Greptile uses Helicone with OpenAI
+import { OpenAI } from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.hconeai.com/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Property-Project": "code-search",
+  },
+});
+
+// Now all requests are logged in Helicone
+```
+
+## Conclusion
+
+With Helicone, Greptile gained the visibility and control they needed to optimize their AI-powered code search tool. The detailed analytics and monitoring capabilities allowed them to make data-driven decisions about model selection, prompt engineering, and cost management.
+
+"Helicone has been a game-changer for us," says the CTO of Greptile. "Before Helicone, we were flying blind with our AI usage. Now we have complete visibility into costs, performance, and user patterns, which has allowed us to significantly improve our product while reducing costs." 
