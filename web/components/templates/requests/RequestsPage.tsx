@@ -70,7 +70,6 @@ import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
-import icon from "react-syntax-highlighter/dist/esm/languages/prism/icon";
 
 interface RequestsPageV2Props {
   currentPage: number;
