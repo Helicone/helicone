@@ -35,10 +35,13 @@ import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthCli
 @Security("api_key")
 export class OrganizationController extends Controller {
   @Get("/")
-  public async getOrganizations(
-    @Request() req: ExpressRequest
-  ): Promise<
-    Result<Database["public"]["Tables"]["organization"]["Row"][], string>
+  public async getOrganizations(@Request() req: ExpressRequest): Promise<
+    Result<
+      (Database["public"]["Tables"]["organization"]["Row"] & {
+        role: string;
+      })[],
+      string
+    >
   > {
     const request = new RequestWrapper(req);
 
@@ -59,8 +62,12 @@ export class OrganizationController extends Controller {
       return err(authParams.error ?? "User not found");
     }
 
-    return await dbExecute<Database["public"]["Tables"]["organization"]["Row"]>(
-      `SELECT organization.* FROM organization 
+    return await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"] & {
+        role: string;
+      }
+    >(
+      `SELECT organization.*, organization_member.org_role FROM organization 
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
