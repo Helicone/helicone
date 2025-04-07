@@ -1,0 +1,57 @@
+Helicone now integrates seamlessly with LangGraph, enabling comprehensive observability for your graph-based AI agents and tools. With minimal configuration, you can get full visibility into your LangGraph workflows, from basic chains to complex multi-agent systems.
+
+![Helicone integration with LangGraph](/static/changelog/images/20250323-langgraph-integration.webp)
+
+## Why This Matters
+LangGraph has emerged as a powerful framework for building stateful, multi-agent LLM applications. Our integration gives you:
+
+- Complete visibility into every LLM call within your graph
+- Session tracking for understanding full conversation flows
+- Performance metrics to identify bottlenecks in complex agent interactions
+- Cost monitoring across your entire agent ecosystem
+
+## How It Works
+
+The integration works by configuring your LangChain models to route through Helicone's observability layer with just a few lines of code:
+
+```javascript
+// Initialize OpenAI model with Helicone integration
+const model = new ChatOpenAI({
+  modelName: "gpt-4o",
+  configuration: {
+    baseURL: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Cache-Enabled": "true", // Optional caching
+    },
+  },
+});
+```
+
+Then add custom properties to trace specific agent behaviors:
+
+```javascript
+// Add tracing info to agent invocations
+const result = await agent.invoke(
+  { messages: [new HumanMessage("what is the current weather in sf")] },
+  {
+    options: {
+      headers: {
+        "Helicone-Prompt-Id": "weather-query",
+        "Helicone-Session-Id": uuidv4(),
+        "Helicone-Session-Name": "weather-session", 
+      },
+    },
+  }
+);
+```
+
+## Supported Models
+
+The integration works with all major LLM providers supported by LangChain, including:
+
+- OpenAI
+- Anthropic
+- And more to come!
+
+For complete implementation details and working examples, check out our <a href="https://docs.helicone.ai/other-integrations/langgraph" rel="noopener" target="_blank">LangGraph integration guide</a>.
