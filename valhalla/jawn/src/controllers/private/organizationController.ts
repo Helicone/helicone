@@ -450,7 +450,8 @@ export class OrganizationController extends Controller {
     if (
       memberCount.data > 0 &&
       org.data.tier != "free" &&
-      org.data.tier != "team-20250130"
+      org.data.tier != "team-20250130" &&
+      org.data.tier != "enterprise"
     ) {
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data - 1

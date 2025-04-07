@@ -394,8 +394,7 @@ export class OrganizationStore extends BaseStore {
       const result = await dbExecute(
         `DELETE FROM organization_member
          WHERE member = $1
-         AND organization = $2
-         RETURNING id`,
+         AND organization = $2`,
         [memberId, organizationId]
       );
 
