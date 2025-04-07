@@ -186,7 +186,7 @@ export class OrganizationManager extends BaseManager {
       try {
         // We still need to use the auth API for this specific function
         const authClient = getHeliconeAuthClient();
-        const userResult = await authClient.createUser({ email });
+        const userResult = await authClient.createUser({ email, otp: true });
         if (userResult.error) {
           return err(userResult.error);
         }
