@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import {
   ChatCompletion,
