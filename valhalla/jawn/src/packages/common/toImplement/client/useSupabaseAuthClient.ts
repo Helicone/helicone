@@ -1,6 +1,6 @@
 import { SSRContext } from "../../auth/client/AuthClientFactory";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-import { HeliconeUser } from "../../auth/types";
+import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { Result } from "../../result";
 
 export async function supabaseAuthClientFromSSRContext(
@@ -15,6 +15,10 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
+    throw new Error("useSupabaseAuthClient is not implemented");
+  }
+
+  async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
     throw new Error("useSupabaseAuthClient is not implemented");
   }
 
