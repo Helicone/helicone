@@ -12,7 +12,6 @@ import { buffer } from "micro";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { hashAuth } from "../../../../lib/hashClient";
-import { dbExecute } from "@/lib/api/db/dbExecute";
 
 const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
 
