@@ -46,3 +46,34 @@ export interface HeliconeUser {
 }
 
 export type HeliconeUserResult = PromiseGenericResult<HeliconeUser>;
+
+export type HeliconeOrg = {
+  color: string;
+  created_at: string | null;
+  domain: string | null;
+  governance_settings: any | null;
+  has_onboarded: boolean;
+  icon: string;
+  id: string;
+  is_main_org: boolean;
+  is_personal: boolean;
+  limits: any | null;
+  logo_path: string | null;
+  name: string;
+  onboarding_status: any;
+  org_provider_key: string | null;
+  organization_type: string;
+  owner: string;
+  percent_to_log: number | null;
+  referral: string | null;
+  request_limit: number | null;
+  reseller_id: string | null;
+  size: string | null;
+  soft_delete: boolean;
+  stripe_customer_id: string | null;
+  stripe_metadata: any;
+  stripe_subscription_id: string | null;
+  stripe_subscription_item_id: string | null;
+  subscription_status: string | null;
+  tier: string | null;
+};

@@ -1,24 +1,78 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Database } from "@/db/database.types";
+import { dbExecute } from "@/lib/api/db/dbExecute";
+import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
+import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
 import {
   SupabaseClient,
   useSupabaseClient,
   useUser,
 } from "@supabase/auth-helpers-react";
-import { useMemo } from "react";
-import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-import { HeliconeUser } from "../../auth/types";
+import {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
 import posthog from "posthog-js";
+import { useMemo } from "react";
+import { SSRContext } from "../../auth/client/AuthClientFactory";
+import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
+import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+
+export async function supabaseAuthClientFromSSRContext(
+  ctx: SSRContext<NextApiRequest, NextApiResponse, GetServerSidePropsContext>
+) {
+  const supabaseClient = new SupabaseServerWrapper(ctx);
+  const user = await supabaseClient.getClient().auth.getUser();
+
+  return new SupabaseAuthClient(
+    supabaseClient.client,
+    {
+      email: user.data.user?.email ?? "",
+      id: user.data.user?.id ?? "",
+    },
+    ctx.req.cookies?.[ORG_ID_COOKIE_KEY]
+  );
+}
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   supabaseClient: SupabaseClient<Database>;
   user?: HeliconeUser;
-  constructor(supabaseClient?: SupabaseClient<Database>, user?: HeliconeUser) {
+  constructor(
+    supabaseClient?: SupabaseClient<Database>,
+    user?: HeliconeUser,
+    private orgId?: string
+  ) {
     if (!supabaseClient) {
       throw new Error("Supabase client not found");
     }
     this.supabaseClient = supabaseClient;
     this.user = user;
+  }
+
+  async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
+    if (!this.orgId) {
+      return err("Org not found");
+    }
+    if (!this.user?.id) {
+      return err("User not found");
+    }
+
+    const org = await dbExecute<HeliconeOrg & { role: string }>(
+      `SELECT organization.*, organization_member.role FROM organization
+      left join organization_member on organization.id = organization_member.organization
+       WHERE id = $1 and organization_member.member = $2`,
+      [this.orgId, this.user.id]
+    );
+    if (!org.data || org.data.length === 0 || org.error) {
+      return err(org.error ?? "Org not found");
+    }
+
+    return ok({
+      org: org.data[0],
+      role: org.data[0].role,
+    });
   }
 
   async signOut(): Promise<void> {
@@ -145,10 +199,15 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
 export function useSupabaseAuthClient(): HeliconeAuthClient {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
+  const org = useOrg();
   return useMemo(() => {
-    return new SupabaseAuthClient(supabaseClient, {
-      id: user?.id ?? "",
-      email: user?.email ?? "",
-    });
-  }, [supabaseClient, user]);
+    return new SupabaseAuthClient(
+      supabaseClient,
+      {
+        id: user?.id ?? "",
+        email: user?.email ?? "",
+      },
+      org?.currentOrg?.id
+    );
+  }, [supabaseClient, user, org]);
 }
