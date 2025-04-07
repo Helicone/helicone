@@ -28,7 +28,8 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Database } from "../../lib/db/database.types";
 import { RequestWrapper } from "../../lib/requestWrapper";
 import { Request as ExpressRequest } from "express";
-import { getHeliconeAuthClient } from "../../lib/shared/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
+
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
@@ -72,7 +73,9 @@ export class OrganizationController extends Controller {
   public async getOrganization(
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"], string>
+  > {
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"]
     >(
@@ -84,7 +87,17 @@ export class OrganizationController extends Controller {
       [request.authParams.userId, organizationId]
     );
 
-    return ok(result);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization");
+    }
+    const org = result.data?.at(0);
+    if (!org) {
+      this.setStatus(404);
+      return err("Organization not found");
+    }
+
+    return ok(org);
   }
 
   @Get("/reseller/{resellerId}")
