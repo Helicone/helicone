@@ -357,6 +357,7 @@ const useOrgsContextManager = () => {
         stripe_customer_id: org.stripe_customer_id || "",
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
+        has_onboarded: org.has_onboarded || false,
       });
 
       if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {
