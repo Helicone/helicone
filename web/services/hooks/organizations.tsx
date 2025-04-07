@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { useCallback, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
@@ -386,6 +386,7 @@ const useOrgsContextManager = () => {
         stripe_customer_id: org.stripe_customer_id || "",
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
+        has_onboarded: org.has_onboarded || false,
       });
 
       if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {

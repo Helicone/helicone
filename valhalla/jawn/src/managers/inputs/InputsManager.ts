@@ -3,7 +3,12 @@ import { randomUUID } from "crypto";
 import { PromptInputRecord } from "../../controllers/public/promptController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
+import {
+  Result,
+  err,
+  ok,
+  promiseResultMap,
+} from "../../packages/common/result";
 import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import { BaseManager } from "../BaseManager";
 

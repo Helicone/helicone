@@ -18,7 +18,7 @@ const AlertBanners = (props: AlertBannersProps) => {
 
   const { setNotification } = useNotification();
 
-  const { alertBanners, isAlertBannersLoading, refetch } = useAlertBanners();
+  const { data: alertBanners, refetch } = useAlertBanners();
 
   const { createBanner, isCreatingBanner } = useCreateAlertBanner(() => {
     refetch();

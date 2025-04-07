@@ -3,7 +3,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { getSupabaseServer } from "../../../../lib/supabaseServer";
-import { resultMap } from "../../../../lib/result";
+import { resultMap } from "../../../../packages/common/result";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

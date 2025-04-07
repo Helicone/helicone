@@ -98,7 +98,7 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    requests: requests.requests.map(heliconeRequestToMappedContent),
+    requests: requests.requests?.map(heliconeRequestToMappedContent) ?? [],
     count: count.data?.data,
     isDataLoading,
     isBodyLoading: requests.isLoading,

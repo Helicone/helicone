@@ -3,7 +3,7 @@ import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
 import { TimeFilter } from "../../../services/lib/filters/filterDefs";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   getTimeIntervalAgo,

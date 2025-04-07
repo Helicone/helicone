@@ -1,9 +1,4 @@
-import { Loader2, AlertCircle, Info } from "lucide-react";
-import { useState } from "react";
-import { getJawnClient } from "../../../lib/clients/jawn";
-import useNotification from "../../shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +6,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { Small, Muted } from "@/components/ui/typography";
+import { Input } from "@/components/ui/input";
+import { Muted, Small } from "@/components/ui/typography";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { getJawnClient } from "../../../lib/clients/jawn";
+import useNotification from "../../shared/notification/useNotification";
 
 interface AddMemberModalProps {
   orgId: string;

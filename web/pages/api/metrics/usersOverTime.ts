@@ -6,7 +6,7 @@ import {
   getUsersOverTime,
   UsersOverTime,
 } from "../../../lib/api/metrics/getUsersOverTime";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

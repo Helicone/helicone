@@ -10,7 +10,7 @@ import {
   Path,
   Patch,
 } from "tsoa";
-import { Result } from "../../lib/shared/result";
+import { Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   DecryptedProviderKey,

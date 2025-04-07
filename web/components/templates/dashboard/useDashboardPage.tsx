@@ -1,6 +1,6 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, ok, resultMap } from "../../../lib/result";
+import { Result, ok, resultMap } from "../../../packages/common/result";
 import {
   RequestsOverTime,
   TimeIncrement,

@@ -4,7 +4,7 @@ import {
   getPropertiesV2,
   Property,
 } from "../../../lib/api/properties/propertiesV2";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { SupabaseServerWrapper } from "../../../lib/wrappers/supabase";
 import {
   HandlerWrapperOptions,

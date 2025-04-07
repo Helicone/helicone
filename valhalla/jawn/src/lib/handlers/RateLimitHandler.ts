@@ -1,5 +1,10 @@
 import { ClickhouseDB } from "../db/ClickhouseWrapper";
-import { ok, PromiseGenericResult, err, GenericResult } from "../shared/result";
+import {
+  ok,
+  PromiseGenericResult,
+  err,
+  GenericResult,
+} from "../../packages/common/result";
 import { RateLimitStore } from "../stores/RateLimitStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";

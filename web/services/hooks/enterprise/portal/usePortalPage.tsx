@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useOrg } from "../../../../components/layout/org/organizationContext";
 

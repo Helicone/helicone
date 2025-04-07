@@ -1,5 +1,5 @@
 import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
-import { Result } from "../../result";
+import { Result } from "../../../packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface Property {

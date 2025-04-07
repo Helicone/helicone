@@ -53,6 +53,7 @@ export interface BASE_Env {
   STORAGE_URL: string;
   FALLBACK_QUEUE: Queue<unknown>;
   LOOPS_API_KEY: string;
+  POSTHOG_API_KEY: string;
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;

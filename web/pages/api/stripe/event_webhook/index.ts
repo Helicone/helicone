@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
 import { getSupabaseServer } from "../../../../lib/supabaseServer";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import {
   getEvaluatorUsage,
   getExperimentUsage,
@@ -12,6 +12,73 @@ import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 import { hashAuth } from "../../../../lib/hashClient";
 import generateApiKey from "generate-api-key";
 import { WebClient } from "@slack/web-api";
+import { dbExecute } from "@/lib/api/db/dbExecute";
+
+const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
+
+async function getUserIdFromEmail(email: string): Promise<string | null> {
+  try {
+    const query = `
+      SELECT id 
+      FROM auth.users 
+      WHERE email = $1
+      LIMIT 1
+    `;
+
+    const result = await dbExecute<{ id: string }>(query, [email]);
+
+    if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+      return result.data[0].id;
+    }
+
+    console.error(`No user found with email: ${email}`);
+    return null;
+  } catch (error) {
+    console.error(`Error getting userId from email: ${email}`, error);
+    return null;
+  }
+}
+
+async function sendPosthogEvent(
+  event: string,
+  properties: Record<string, any>,
+  userId: string,
+  orgId?: string
+) {
+  try {
+    if (!userId) {
+      console.error(
+        `Cannot send PostHog event: missing userId for event ${event}`
+      );
+      return;
+    }
+
+    const posthogPayload = {
+      api_key: process.env.NEXT_PUBLIC_POSTHOG_API_KEY,
+      event: event,
+      distinct_id: userId,
+      properties: {
+        ...properties,
+        ...(orgId ? { $groups: { organization: orgId } } : {}),
+      },
+    };
+
+    const response = await fetch(POSTHOG_EVENT_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(posthogPayload),
+    });
+
+    console.log(`PostHog: Event response for ${event}: ${response.status}`);
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      console.error(`PostHog error: ${responseText}`);
+    }
+  } catch (error) {
+    console.error(`Error sending event to PostHog:`, error);
+  }
+}
 
 const ADDON_PRICES: Record<string, keyof Addons> = {
   [process.env.PRICE_PROD_ALERTS_ID!]: "alerts",
@@ -31,7 +98,95 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
 });
 
-// Shared method to send cancellation notification to Loops
+async function sendSubscriptionEvent(
+  eventType:
+    | "subscription_created"
+    | "subscription_canceled"
+    | "subscription_deleted",
+  subscription: Stripe.Subscription,
+  additionalProperties: Record<string, any> = {}
+) {
+  try {
+    const orgId = subscription.metadata?.orgId;
+    if (!orgId) {
+      console.log(
+        `No orgId found in subscription metadata, skipping PostHog event`
+      );
+      return;
+    }
+
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer.id;
+
+    const customer = await stripe.customers.retrieve(customerId);
+
+    if (
+      !customer ||
+      customer.deleted ||
+      !("email" in customer) ||
+      !customer.email
+    ) {
+      console.log(`No valid customer email found, skipping PostHog event`);
+      return;
+    }
+
+    let orgData = undefined;
+    if (additionalProperties.includeOrgData) {
+      const { data } = await getSupabaseServer()
+        .from("organization")
+        .select("name, owner")
+        .eq("id", orgId)
+        .single();
+      orgData = data;
+      delete additionalProperties.includeOrgData;
+    }
+
+    const userId = await getUserIdFromEmail(customer.email);
+    if (!userId) {
+      console.error(
+        `Failed to get userId for email ${customer.email}, cannot send PostHog event`
+      );
+      return;
+    }
+
+    const tier = subscription.metadata?.tier || "unknown";
+    const baseProperties: Record<string, any> = {
+      subscription_id: subscription.id,
+      subscription_item_id: subscription.items?.data[0]?.id,
+      tier,
+      customer_id: customerId,
+      email: customer.email,
+      date_joined: new Date().toISOString(),
+      owner_id: orgData?.owner,
+    };
+
+    if (eventType === "subscription_canceled") {
+      baseProperties.cancel_reason = subscription.cancel_at_period_end
+        ? "end_of_period"
+        : "immediate";
+    }
+
+    // Send the event
+    await sendPosthogEvent(
+      eventType,
+      {
+        ...baseProperties,
+        ...additionalProperties,
+      },
+      userId,
+      orgId
+    );
+
+    console.log(
+      `PostHog: Sent ${eventType} event for org ${orgId} (userId: ${userId}, tier: ${tier})`
+    );
+  } catch (error) {
+    console.error(`Failed to send PostHog event for ${eventType}:`, error);
+  }
+}
+
 async function sendSubscriptionCanceledEvent(
   subscription: Stripe.Subscription
 ) {
@@ -64,17 +219,16 @@ async function sendSubscriptionCanceledEvent(
           eventName: "subscription_canceled",
         });
 
-        const loopsResponse = await fetch(
-          "https://app.loops.so/api/v1/events/send",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
-            },
-            body: requestBody,
-          }
-        );
+        await fetch("https://app.loops.so/api/v1/events/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
+          },
+          body: requestBody,
+        });
+
+        await sendSubscriptionEvent("subscription_canceled", subscription);
       } else {
         console.log(
           `No valid customer email found. Customer object:`,
@@ -104,11 +258,13 @@ const PricingVersionOld = {
       .update({
         subscription_status: "active",
         stripe_subscription_id: subscriptionId,
-        stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
+        stripe_subscription_item_id: subscriptionItemId,
         tier: "growth",
         stripe_metadata: {},
       })
       .eq("id", orgId || "");
+
+    await sendSubscriptionEvent("subscription_created", subscription);
   },
 
   async handleUpdate(event: Stripe.Event) {
@@ -554,6 +710,11 @@ const TeamVersion20250130 = {
 
     // Create Slack channel and invite team members
     await createSlackChannelAndInviteMembers(orgId, orgData?.name);
+
+    // Send PostHog event
+    await sendSubscriptionEvent("subscription_created", subscription, {
+      includeOrgData: true,
+    });
   },
 
   handleUpdate: async (event: Stripe.Event) => {
@@ -599,6 +760,12 @@ const PricingVersion20240913 = {
 
     // Invite members after org is updated
     await inviteOnboardingMembers(orgId);
+
+    // Send PostHog event
+    await sendSubscriptionEvent("subscription_created", subscription, {
+      includeOrgData: true,
+      addons: JSON.stringify(addons),
+    });
   },
 
   handleUpdate: async (event: Stripe.Event) => {

@@ -21,7 +21,7 @@ import {
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./constant";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 
