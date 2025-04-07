@@ -8,6 +8,7 @@ import {
 } from "@/components/layout/admin/mockStripeData";
 import { SubscriptionAnalytics } from "@/lib/SubscriptionAnalytics";
 import type Stripe from "stripe";
+import ProductRevenueTrendChart from "@/components/admin/ProductRevenueTrendChart";
 
 // Type for the API response
 interface SubscriptionDataResponse {
@@ -36,10 +37,13 @@ const AdminProjections = () => {
       setError(null);
 
       try {
-        const response = (await jawn.GET(
-          "/v1/admin/subscription-data",
-          {}
-        )) as unknown as SubscriptionDataResponse;
+        const response = (await jawn.GET("/v1/admin/subscription-data", {
+          params: {
+            query: {
+              forceRefresh: refreshCounter > 0, // Only force refresh if button was clicked
+            },
+          },
+        })) as unknown as SubscriptionDataResponse;
 
         if (response.error) {
           throw new Error(response.error);
@@ -119,6 +123,11 @@ const AdminProjections = () => {
           {isLoading ? "Loading..." : "Refresh Data"}
         </button>
       </div>
+
+      <ProductRevenueTrendChart
+        productId="prod_QrcNwy2KPKiZJ5"
+        analytics={analytics}
+      />
 
       <SubscriptionTable
         subscriptions={subscriptionData}

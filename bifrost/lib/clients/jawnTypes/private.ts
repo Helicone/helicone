@@ -16360,6 +16360,11 @@ export interface operations {
    * Uses caching to minimize API calls to Stripe
    */
   GetSubscriptionData: {
+    parameters: {
+      query?: {
+        forceRefresh?: boolean;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

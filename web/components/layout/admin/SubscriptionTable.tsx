@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Minus, Tag, ExternalLink, Search } from "lucide-react";
+import { Plus, Minus, ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,

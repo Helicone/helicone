@@ -17093,6 +17093,7 @@ export function RegisterRoutes(app: Router) {
             async function AdminController_getSubscriptionData(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                    forceRefresh: {"in":"query","name":"forceRefresh","dataType":"boolean"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
