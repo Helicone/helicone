@@ -29,7 +29,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   if (!code || !state) {
     return {
       props: {
-        user: options.userData.user,
         error: "Missing code or state",
       },
     };
@@ -46,7 +45,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   if (error) {
     return {
       props: {
-        user: options.userData.user,
         error: error,
       },
     };
@@ -57,7 +55,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   if (!organization) {
     return {
       props: {
-        user: options.userData.user,
         error: "Organization not found",
       },
     };
@@ -93,7 +90,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       console.error("Failed to get access token", data);
       return {
         props: {
-          user: options.userData.user,
           error: "Failed to get access token",
         },
       };
@@ -102,7 +98,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     console.error("Failed to get access token", error);
     return {
       props: {
-        user: options.userData.user,
         error: "Failed to get access token",
       },
     };

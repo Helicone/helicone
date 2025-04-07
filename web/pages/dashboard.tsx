@@ -24,8 +24,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
   return {
     props: {
       user: {
-        id: options.userData.user.id,
-        email: options.userData.user.email,
+        id: options.userData.userId,
       },
     },
   };
