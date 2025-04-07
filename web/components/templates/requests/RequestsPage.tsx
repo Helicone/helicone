@@ -2,8 +2,6 @@ import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
 import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
-import FiltersButton from "@/components/shared/themed/table/filtersButton";
-import { AdvancedFilters } from "@/components/shared/themed/themedAdvancedFilters";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import FilterASTButton from "@/filterAST/FilterASTButton";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
@@ -25,11 +24,9 @@ import {
   UIFilterRowTree,
 } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
-import { Popover } from "@headlessui/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuPin, LuPlus } from "react-icons/lu";
-import { PiFunnelBold } from "react-icons/pi";
+import { LuPlus } from "react-icons/lu";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
@@ -73,6 +70,7 @@ import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import icon from "react-syntax-highlighter/dist/esm/languages/prism/icon";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -679,205 +677,111 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (
-    <main className="h-screen w-full animate-fade-in">
-      <ResizablePanelGroup direction="horizontal">
-        {/* Header + Requests Table + Footer */}
-        <ResizablePanel className="flex flex-col">
-          {/* Requests Header */}
-          {/* Warning */}
-          {!userId && (
-            <div
-              className={
-                "flex flex-col items-center justify-center align-center text-center"
-              }
-            >
-              <StreamWarning
-                requestWithStreamUsage={requestWithoutStream !== undefined}
+    <main className="h-screen flex flex-col w-full animate-fade-in">
+      {/* Requests Header */}
+      {/* Warning */}
+      {!userId && (
+        <div
+          className={
+            "flex flex-col items-center justify-center align-center text-center"
+          }
+        >
+          <StreamWarning
+            requestWithStreamUsage={requestWithoutStream !== undefined}
+          />
+        </div>
+      )}
+      {/* Header */}
+      {!userId && (
+        <Header
+          title={isCached ? "Cached Requests" : "Requests"}
+          leftActions={
+            <div className="flex flex-row items-center gap-2">
+              {/* Time Filter */}
+              <ThemedTimeFilter
+                currentTimeFilter={getTimeRange()}
+                timeFilterOptions={[]}
+                onSelect={function (key: string, value: string): void {
+                  onTimeSelectHandler(key as TimeInterval, value);
+                }}
+                isFetching={false}
+                defaultValue={getDefaultValue()}
+                custom={true}
+              />
+
+              {/* Filter AST Button */}
+              <FilterASTButton />
+            </div>
+          }
+          rightActions={
+            <div className="flex items-center gap-2">
+              {/* Add to dataset button - only shows when items are selected */}
+              {selectedIds.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex flex-row gap-2 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 text-xs"
+                  onClick={() => {
+                    setModalOpen(true);
+                  }}
+                >
+                  <LuPlus className="h-4 w-4" />
+                  Add to Dataset
+                </Button>
+              )}
+
+              {/* Columns Configuration Button */}
+              <ViewColumns
+                columns={tableRef.current?.getAllColumns() || []}
+                activeColumns={
+                  tableRef.current
+                    ?.getAllColumns()
+                    .filter((col: any) => col.id !== "select") // Exclude select column from management
+                    .map((col: any) => ({
+                      id: col.id,
+                      name: col.columnDef.header?.toString() || col.id,
+                      shown: col.getIsVisible(),
+                    })) || []
+                }
+                setActiveColumns={(columns) => {
+                  const table = tableRef.current;
+                  if (!table) return;
+
+                  // Update all column visibility states at once
+                  const visibilityState: Record<string, boolean> = {};
+                  columns.forEach((col) => {
+                    if (col.id !== "select") {
+                      // Don't modify select column visibility
+                      visibilityState[col.id] = col.shown;
+                    }
+                  });
+                  table.setColumnVisibility(visibilityState);
+                }}
+              />
+
+              {/* Export button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ExportButton rows={requests} />
+                </TooltipTrigger>
+                <TooltipContent>Export data</TooltipContent>
+              </Tooltip>
+
+              {/* Live pill */}
+              <LivePill
+                isLive={isLive}
+                setIsLive={setIsLive}
+                isDataLoading={isDataLoading}
+                isRefetching={isRefetching}
+                refetch={refetch}
               />
             </div>
-          )}
-          {/* Header */}
-          {!userId && (
-            <Header
-              title={isCached ? "Cached Requests" : "Requests"}
-              leftActions={
-                <div className="flex flex-row items-center gap-2">
-                  <Popover className="relative flex items-center">
-                    {({ open }) => (
-                      <>
-                        {/* TODO: When there are active filters: add color to button elements + show an active (n) title */}
-                        <Popover.Button
-                          as={Button}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          onClick={() => {
-                            if (isFiltersPinned) {
-                              setShowFilters(!showFilters);
-                            } else {
-                              setShowFilters(false);
-                            }
-                          }}
-                        >
-                          <PiFunnelBold className="h-4 w-4" />
-                          <span className="hidden sm:inline font-normal text-xs">
-                            {isFiltersPinned
-                              ? showFilters
-                                ? "Hide Filters"
-                                : "Show Filters"
-                              : "Filters"}
-                          </span>
-                        </Popover.Button>
-
-                        <Popover.Panel
-                          static={isFiltersPinned}
-                          className="absolute top-full left-0 min-w-[40rem] w-[40vw] flex items-start p-0 mx-2 rounded-lg z-10 mt-2 bg-white dark:bg-slate-900 shadow-lg border border-border"
-                        >
-                          <div
-                            className="w-full"
-                            ref={popoverContentRef}
-                            onClick={handlePopoverInteraction}
-                          >
-                            <AdvancedFilters
-                              filterMap={filterMap}
-                              filters={advancedFilters}
-                              setAdvancedFilters={onSetAdvancedFiltersHandler}
-                              searchPropertyFilters={searchPropertyFilters}
-                              savedFilters={
-                                transformedFilters && orgLayout?.data?.id
-                                  ? transformedFilters
-                                  : undefined
-                              }
-                              onSaveFilterCallback={async () => {
-                                await orgLayoutRefetch();
-                              }}
-                              layoutPage={"requests"}
-                            />
-                            <div className="flex justify-end ml-4">
-                              <Button
-                                variant="ghostLinear"
-                                onClick={() => {
-                                  setIsFiltersPinned(!isFiltersPinned);
-                                  setShowFilters(!isFiltersPinned);
-                                }}
-                                className="text-gray-500 hover:text-gray-700 p-0 mt-4 mr-4 h-auto w-auto"
-                              >
-                                {isFiltersPinned ? (
-                                  <LuPin className="h-4 w-4 text-primary" />
-                                ) : (
-                                  <LuPin className="h-4 w-4 text-muted-foreground" />
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        </Popover.Panel>
-                      </>
-                    )}
-                  </Popover>
-
-                  {/* LEGACY TODO: Move inside the popover or wait for Justin's new filter component (more likely) */}
-                  {organizationLayoutAvailable && (
-                    <FiltersButton
-                      filters={
-                        transformedFilters && orgLayout?.data?.id
-                          ? transformedFilters
-                          : undefined
-                      }
-                      currentFilter={currFilter ?? undefined}
-                      onFilterChange={onLayoutFilterChange}
-                      onDeleteCallback={() => {
-                        orgLayoutRefetch();
-                      }}
-                      layoutPage={"requests"}
-                    />
-                  )}
-
-                  <ThemedTimeFilter
-                    currentTimeFilter={getTimeRange()}
-                    timeFilterOptions={[]}
-                    onSelect={function (key: string, value: string): void {
-                      onTimeSelectHandler(key as TimeInterval, value);
-                    }}
-                    isFetching={false}
-                    defaultValue={getDefaultValue()}
-                    custom={true}
-                  />
-
-                  {/* View Columns button */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <ViewColumns
-                        columns={tableRef.current?.getAllColumns() || []}
-                        activeColumns={
-                          tableRef.current
-                            ?.getAllColumns()
-                            .filter((col: any) => col.id !== "select") // Exclude select column from management
-                            .map((col: any) => ({
-                              id: col.id,
-                              name: col.columnDef.header?.toString() || col.id,
-                              shown: col.getIsVisible(),
-                            })) || []
-                        }
-                        setActiveColumns={(columns) => {
-                          const table = tableRef.current;
-                          if (!table) return;
-
-                          // Update all column visibility states at once
-                          const visibilityState: Record<string, boolean> = {};
-                          columns.forEach((col) => {
-                            if (col.id !== "select") {
-                              // Don't modify select column visibility
-                              visibilityState[col.id] = col.shown;
-                            }
-                          });
-                          table.setColumnVisibility(visibilityState);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>Manage columns</TooltipContent>
-                  </Tooltip>
-                </div>
-              }
-              rightActions={
-                <div className="flex items-center gap-2">
-                  {/* Add to dataset button - only shows when items are selected */}
-                  {selectedIds.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex flex-row gap-2 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 text-xs"
-                      onClick={() => {
-                        setModalOpen(true);
-                      }}
-                    >
-                      <LuPlus className="h-4 w-4" />
-                      Add to Dataset
-                    </Button>
-                  )}
-
-                  {/* Export button */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <ExportButton rows={requests} />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>Export data</TooltipContent>
-                  </Tooltip>
-
-                  {/* Live pill */}
-                  <LivePill
-                    isLive={isLive}
-                    setIsLive={setIsLive}
-                    isDataLoading={isDataLoading}
-                    isRefetching={isRefetching}
-                    refetch={refetch}
-                  />
-                </div>
-              }
-            />
-          )}
-
+          }
+        />
+      )}
+      <ResizablePanelGroup direction="horizontal">
+        {/* Requests Table */}
+        <ResizablePanel>
           {/* Requests Table */}
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
@@ -892,33 +796,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               skeletonLoading={isDataLoading}
               dataLoading={isBodyLoading}
               sortable={sort}
-              advancedFilters={
-                userId
-                  ? undefined
-                  : {
-                      filterMap: filterMap,
-                      filters: advancedFilters,
-                      setAdvancedFilters: onSetAdvancedFiltersHandler,
-                      searchPropertyFilters: searchPropertyFilters,
-                      show: !userId,
-                    }
-              }
-              savedFilters={
-                organizationLayoutAvailable && !userId
-                  ? {
-                      currentFilter: currFilter ?? undefined,
-                      filters:
-                        transformedFilters && orgLayout?.data?.id
-                          ? transformedFilters
-                          : undefined,
-                      onFilterChange: onLayoutFilterChange,
-                      onSaveFilterCallback: async () => {
-                        await orgLayoutRefetch();
-                      },
-                      layoutPage: "requests",
-                    }
-                  : undefined
-              }
               exportData={requests.map((request) => {
                 const flattenedRequest: any = {};
                 Object.entries(request).forEach(([key, value]) => {
@@ -977,17 +854,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               )}
             </ThemedTable>
           )}
-
-          {/* Table Footer */}
-          <TableFooter
-            currentPage={page}
-            pageSize={pageSize}
-            isCountLoading={isCountLoading}
-            count={count || 0}
-            onPageChange={(n) => handlePageChange(n)}
-            onPageSizeChange={(n) => setCurrentPageSize(n)}
-            pageSizeOptions={[25, 50, 100, 250, 500]}
-          />
         </ResizablePanel>
 
         <ResizableHandle />
@@ -1039,6 +905,17 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           />
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {/* Table Footer */}
+      <TableFooter
+        currentPage={page}
+        pageSize={pageSize}
+        isCountLoading={isCountLoading}
+        count={count || 0}
+        onPageChange={(n) => handlePageChange(n)}
+        onPageSizeChange={(n) => setCurrentPageSize(n)}
+        pageSizeOptions={[25, 50, 100, 250, 500]}
+      />
 
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>

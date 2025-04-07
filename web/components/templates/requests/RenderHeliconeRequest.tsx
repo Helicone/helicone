@@ -85,8 +85,7 @@ export function RenderMappedRequest({
       <Button
         variant={"outline"}
         size={"sm"}
-        asPill
-        className="flex felx-row gap-1 absolute top-2.5 right-4 z-20"
+        className="flex felx-row gap-1 absolute top-2 right-4 z-20"
         onClick={(e) => {
           if (isShiftPressed) {
             setIsDebugMode(!isDebugMode);

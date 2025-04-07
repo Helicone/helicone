@@ -173,7 +173,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
           return (
             <div
               key={`${idx}-${message.timestamp}`}
-              className={`flex flex-col px-4 pb-4 ${
+              className={`flex flex-col p-4 ${
                 isUser ? "items-end" : "items-start"
               } mb-4 w-full`}
             >
