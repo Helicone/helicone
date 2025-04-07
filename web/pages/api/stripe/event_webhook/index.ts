@@ -12,7 +12,6 @@ import { buffer } from "micro";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { hashAuth } from "../../../../lib/hashClient";
-
 const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
 
 async function getUserIdFromEmail(email: string): Promise<string | null> {
@@ -133,12 +132,11 @@ async function sendSubscriptionEvent(
 
     let orgData = undefined;
     if (additionalProperties.includeOrgData) {
-      const { data } = await getSupabaseServer()
-        .from("organization")
-        .select("name, owner")
-        .eq("id", orgId)
-        .single();
-      orgData = data;
+      const { data } = await dbExecute<{ name: string; owner: string }>(
+        `select name, owner from organization where id = $1`,
+        [orgId]
+      );
+      orgData = data?.[0];
       delete additionalProperties.includeOrgData;
     }
 
