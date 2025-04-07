@@ -196,6 +196,16 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "implementing-llm-observability",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "llm-observability",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "o1-pro-for-developers",
     },
   },
@@ -507,11 +517,6 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "sam-2",
-    },
-  },
-  {
-    dynmaicEntry: {
-      folderName: "llm-observability",
     },
   },
   {
