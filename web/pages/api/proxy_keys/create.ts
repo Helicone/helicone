@@ -1,15 +1,16 @@
+import crypto from "crypto";
 import generateApiKey from "generate-api-key";
+import { Database } from "../../../db/database.types";
 import { dbExecute } from "../../../lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../packages/common/result";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
-import { HeliconeProxyKeys } from "../../../services/lib/keys";
-import crypto from "crypto";
-import { getDecryptedProviderKeyById } from "../../../services/lib/keys";
-import { Database } from "../../../db/database.types";
+import { Result, resultMap } from "../../../packages/common/result";
+import {
+  getDecryptedProviderKeyById,
+  HeliconeProxyKeys,
+} from "../../../services/lib/keys";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -41,7 +42,6 @@ async function handler({
   }
 
   const { data: providerKey, error } = await getDecryptedProviderKeyById(
-    getSupabaseServer(),
     providerKeyId
   );
 
@@ -77,21 +77,23 @@ async function handler({
 
   // Constraint prevents provider key mapping twice to same helicone proxy key
   // e.g. HeliconeKey1 can't map to OpenAIKey1 and OpenAIKey2
-  const newProxyMapping = await getSupabaseServer()
-    .from("helicone_proxy_keys")
-    .insert({
-      id: proxyKeyId,
-      org_id: userData.orgId,
-      helicone_proxy_key_name: heliconeProxyKeyName,
-      helicone_proxy_key: hashedResult.data[0].hashed_password,
-      provider_key_id: providerKey.id,
-    })
-    .select("*")
-    .single();
+  const newProxyMapping = resultMap(
+    await dbExecute<Database["public"]["Tables"]["helicone_proxy_keys"]["Row"]>(
+      `INSERT INTO helicone_proxy_keys (id, org_id, helicone_proxy_key_name, helicone_proxy_key, provider_key_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [
+        proxyKeyId,
+        userData.orgId,
+        heliconeProxyKeyName,
+        hashedResult.data[0].hashed_password,
+        providerKey.id,
+      ]
+    ),
+    (data) => data?.[0]
+  );
 
   if (newProxyMapping.error !== null) {
     console.error("Failed to insert proxy key mapping", newProxyMapping.error);
-    res.status(500).json({ error: newProxyMapping.error.message, data: null });
+    res.status(500).json({ error: newProxyMapping.error, data: null });
     return;
   }
 
@@ -107,28 +109,18 @@ async function handler({
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
   if (limits.length > 0) {
-    const insertLimits = await getSupabaseServer()
-      .from("helicone_proxy_key_limits")
-      .insert(
-        limits.map((limit) => ({
-          id: crypto.randomUUID(),
-          helicone_proxy_key: proxyKeyId,
-          timewindow_seconds: limit.timewindow_seconds,
-          count: limit.count,
-          cost: limit.cost,
-          currency: limit.currency,
-        }))
+    for (const limit of limits) {
+      await dbExecute(
+        `INSERT INTO helicone_proxy_key_limits (id, helicone_proxy_key, timewindow_seconds, count, cost, currency) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          crypto.randomUUID(),
+          proxyKeyId,
+          limit.timewindow_seconds,
+          limit.count,
+          limit.cost,
+          limit.currency,
+        ]
       );
-    if (insertLimits.error) {
-      const remove = await getSupabaseServer()
-        .from("helicone_proxy_keys")
-        .delete()
-        .eq("id", proxyKeyId);
-      console.error("Failed to insert limits, removing proxy key", remove);
-
-      console.error("Failed to insert limits", insertLimits.error);
-      res.status(500).json({ error: insertLimits.error.message, data: null });
-      return;
     }
   }
 

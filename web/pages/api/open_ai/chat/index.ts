@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
+import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import OpenAI from "openai";
 import {
   ChatCompletion,
@@ -8,15 +9,21 @@ import {
 } from "openai/resources/chat";
 import { DEMO_EMAIL } from "../../../../lib/constants";
 import { Result } from "../../../../packages/common/result";
-import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
-import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<ChatCompletion, string>>
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
+  const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+  const user = await client.getUser();
+  if (!user.data || user.error !== null) {
+    res.status(401).json({ error: "Unauthorized", data: null });
+    return;
+  }
+  if (user.data.email === DEMO_EMAIL) {
+    res.status(401).json({ error: "Unauthorized", data: null });
+    return;
+  }
   let {
     messages,
     requestId,
@@ -55,26 +62,17 @@ export default async function handler(
       "OpenAI-Organization": "",
       "Helicone-Property-Tag": "experiment",
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
-      user: user.data.user?.id || "",
+      user: user.data.id || "",
       "Helicone-Property-RequestId": requestId,
     },
   });
-
-  if (!user.data || !user.data.user) {
-    res.status(401).json({ error: "Unauthorized", data: null });
-    return;
-  }
-  if (user.data.user.email === DEMO_EMAIL) {
-    res.status(401).json({ error: "Unauthorized", data: null });
-    return;
-  }
 
   try {
     const isO1orO3 = model.includes("o1") || model.includes("o3");
     const completion = await openai.chat.completions.create({
       model: model,
       messages: messages,
-      user: user.data.user.email,
+      user: user.data.email,
       temperature: isO1orO3 ? undefined : temperature,
       max_tokens: isO1orO3 ? undefined : maxTokens,
       tools: tools && tools.length > 0 ? tools : undefined,

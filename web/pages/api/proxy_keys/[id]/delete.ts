@@ -1,10 +1,10 @@
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Permission } from "../../../../services/lib/user";
 import { Result } from "../../../../packages/common/result";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
+import { Permission } from "../../../../services/lib/user";
 
 async function handler({
   req,
@@ -22,11 +22,10 @@ async function handler({
     return;
   }
 
-  const { error } = await getSupabaseServer()
-    .from("helicone_proxy_keys")
-    .update({ soft_delete: true })
-    .eq("org_id", userData.orgId)
-    .eq("id", id);
+  const { error } = await dbExecute(
+    `UPDATE helicone_proxy_keys SET soft_delete = true WHERE org_id = $1 AND id = $2`,
+    [userData.orgId, id]
+  );
 
   if (error) {
     res.status(500).json({ error: error.message, data: null });

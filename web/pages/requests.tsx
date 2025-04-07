@@ -1,4 +1,3 @@
-import { User } from "@supabase/auth-helpers-react";
 import { GetServerSidePropsContext } from "next";
 import { ReactElement, useEffect } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
@@ -33,7 +32,6 @@ if (typeof Node === 'function' && Node.prototype) {
 `;
 
 interface RequestsV2Props {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {

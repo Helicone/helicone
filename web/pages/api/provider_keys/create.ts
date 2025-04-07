@@ -1,12 +1,12 @@
+import { dbExecute } from "@/lib/api/db/dbExecute";
+import crypto from "crypto";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "../../../packages/common/result";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
-import crypto from "crypto";
 
 async function handler({
   req,
@@ -39,17 +39,15 @@ async function handler({
   }
 
   const keyId = crypto.randomUUID();
-  const { error } = await getSupabaseServer().from("provider_keys").insert({
-    id: keyId,
-    org_id: userData.orgId,
-    provider_name: providerName,
-    provider_key_name: providerKeyName,
-    provider_key: providerKey,
-  });
+
+  const { error } = await dbExecute(
+    `INSERT INTO helicone_proxy_keys (id, org_id, helicone_proxy_key_name, helicone_proxy_key, provider_key_id) VALUES ($1, $2, $3, $4, $5)`,
+    [keyId, userData.orgId, providerKeyName, providerKey, keyId]
+  );
 
   if (error) {
     console.error("Failed to insert provider key", error.message);
-    res.status(500).json({ error: error.message, data: null });
+    res.status(500).json({ error: error, data: null });
     return;
   }
 

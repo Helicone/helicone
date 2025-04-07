@@ -28,7 +28,8 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Database } from "../../lib/db/database.types";
 import { RequestWrapper } from "../../lib/requestWrapper";
 import { Request as ExpressRequest } from "express";
-import { getHeliconeAuthClient } from "../../lib/shared/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
+
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
