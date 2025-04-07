@@ -1,70 +1,14 @@
-In our <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">previous article</a>, we explored the fundamentals of LLM observability and why it's crucial for building reliable AI applications. Now, let's dive into the **practical side**-how to actually implement effective monitoring for your LLM applications.
+In our <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">previous article</a>, we explored the fundamentals of LLM observability and why it's crucial for building reliable AI applications. Now, let's dive into the **practical side**—how to actually implement effective monitoring for your LLM applications.
 
 ![Helicone: What is LLM Observability and Monitoring](/static/blog/llm-observability-cover.webp)
 
-## Best Practices for Monitoring LLM Performance
+Let's jump right in!
 
-### 1. Using Prompting Techniques to Reduce Hallucinations
+## Table Of Contents
 
-LLMs sometimes generate inaccurate outputs that sound plausible - also known as hallucination. Hallucinations can happen frequently and undermine your user's trust.
+## How to Implement LLM Observability: Step-by-Step Guide
 
-The good news is, you can mitigate this by using the right prompting technique. 
-
-**For example**:
-
-- Use <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">chain-of-thought</a> to prompt the model to adopt step-by-step reasoning.
-- Ground the model responses in trusted external knowledge **using RAG**. 
-- **Structure the output format** to limit the model's freedom to hallucinate.
-- Give **few-shot examples** for the model to follow.
-
-We wrote about other <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompting techniques</a>, too. Another useful feature in Helicone is being able to <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">experiment with your prompts</a> with production data.
-
-### 2. Preventing Prompt Injections
-
-Malicious users can manipulate their inputs to trick your model into revealing sensitive information or take risky actions. But there are ways to prevent this.
-
-**On a high-level, you can:**
-
-- Sanitize inputs by removing special characters and injection patterns.
-- Implement strict validation of user inputs.
-- Block inappropriate or malicious responses.
-- Monitor inputs using observability tools like Helicone and flag suspicious activities.
-
-We dive deeper into this topic in this blog: <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">How to prevent prompt injections</a>.
-
-### 3. Caching to Improve Performance and Latency
-
-Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
-
-In most use cases, latency has the most impact on the user experience. Helicone allows you to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">cache responses</a> on the edge, so that you can serve cached responses immediately without invoking the LLM API, reducing costs at the same time.
-
-### 4. Tracking API Usage and Costs
-
-It's important to know exactly what is drilling a hole in your operational cost. 
-
-In Helicone, you can actively track the cost incurred for every LLM interaction. We help you answer questions like: 
-
-- Which model is driving your costs? 
-- Is the premium justified? 
-- Which users are generating the highest costs? Are power users subsidizing occasional users?
-- Which features have the highest LLM spend? Is the ROI worth it?
-
-**There are ways to optimize your LLM costs**:
-
-- Monitoring LLM costs by project or user.
-- Use cheaper model for simpler tasks, and thinking models where quality is more important than latency.
-- Set rate limits for certain users or features
-- Caching common responses (see #3 above)
-
-For more effective cost optimization strategies, check out <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">this blog</a>.
-
-### 5. Iterating on the Prompt
-
-As models evolve, it's important to continuously test and audit your prompts to ensure they're performing as expected.
-
-You should <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">experiment</a> with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. You should also evaluate against key metrics that's important to your business.
-
-## Getting Started with LLM Observability
+_Implementing LLM observability with Helicone is as easy as changing just one line of code!_
 
 ### Step 1: Choose Your Integration Method
 
@@ -81,11 +25,17 @@ Helicone offers two primary integration methods:
   ```
 - **Async Integration**: <a href="https://docs.helicone.ai/getting-started/integration-method/openllmetry" target="_blank" rel="noopener">Direct logging</a> without modifying your API endpoints. 
 
-Helicone supports any provider and framework. For other integration methods, check out the <a href="https://docs.helicone.ai/getting-started/" target="_blank" rel="noopener">docs</a>.
+Helicone supports any provider and framework. 
+
+For other integration methods, check out the <a href="https://docs.helicone.ai/getting-started/" target="_blank" rel="noopener">docs</a>.
+
+With just this step, **a lot** of your LLM observability needs are covered, but if you'd like to take it to the next level, read on!
 
 ### Step 2: Add User and Session Tracking
 
-Enhance your data with <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">user</a> and <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">session tracking</a> for better segmentation. This allows you to get deeper analytics per user, or per conversation for debugging purposes. 
+Enhance your data with <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">user</a> and <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">session tracking</a> for better segmentation. 
+
+This allows you to get deeper analytics per user, or per conversation for debugging purposes. 
 
 ```js
 const sessionId = generateSessionId();
@@ -101,10 +51,11 @@ const response = await openai.chat.completions.create({
   }
 });
 ```
+Again, you can choose to stop here, but you probably want more so let's go!
 
 ### Step 3: Implement Custom Properties
 
-Add other specific metadata (aka. <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">custom properties</a>) to your requests for further data segmentation. For example, you can track feature flags, user roles, or source of the request.
+Add other specific metadata (aka. <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">custom properties</a>) to your requests for further data segmentation. For example, you can track feature flags, user roles, or the source of the request.
 
 ```js
 const response = await openai.chat.completions.create({
@@ -118,13 +69,106 @@ const response = await openai.chat.completions.create({
 });
 ```
 
-That's the basic setup! You can learn more about the different integration methods and features in Helicone in the <a href="https://docs.helicone.ai/getting-started/" target="_blank" rel="noopener">docs</a>.
+And that covers the basics! 
 
-## Effective LLM Observability Tools
+{/* You can learn more about the different integration methods and features in Helicone in the <a href="https://docs.helicone.ai/getting-started/" target="_blank" rel="noopener">docs</a>. */}
 
-As companies rush to integrate LLMs into their business functions, observability platforms have transitioned from basic logging to comprehensive platforms that support the entire LLM lifecycle. 
+<CallToAction
+  title="Transform your LLM observability with just one line of code ⚡️"
+  description="Stop flying blind with your AI applications. Get real-time insights into costs, performance, and user behavior instantly."
+  primaryButtonText="Start for free (no credit card)"
+  primaryButtonLink="https://www.helicone.ai/signup"
+  secondaryButtonText="View documentation"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started"
+/>
 
-Helicone is an open-source <a href="https://www.helicone.ai/blog/langsmith" target="_blank" rel="noopener">LangSmith alternative</a> with impressive 2.3 billion processed requests, 3.2 trillion logged tokens, and 18.3 million tracked users. Other popular tools include <a href="https://www.helicone.ai/blog/portkey-vs-helicone" target="_blank" rel="noopener">Portkey</a>, <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Langfuse</a>, and <a href="https://www.helicone.ai/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Traceloop</a>.
+## Best Practices for Improving LLM Performance in Production
+
+*Observability tools like Helicone are designed to help you identify which of these to focus on for the greatest ROI*
+
+### 1. Using Prompting Techniques to Reduce Hallucinations
+
+LLMs sometimes generate inaccurate outputs that sound plausible - also known as hallucination. Hallucinations can happen frequently and undermine your user's trust.
+
+The good news is, you can mitigate this by using the right prompting technique. 
+
+**For example**:
+
+- Use <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">chain-of-thought</a> to prompt the model to adopt step-by-step reasoning.
+- Ground the model responses in trusted external knowledge **using RAG**. 
+- **Structure the output format** to limit the model's freedom to hallucinate.
+- Give **few-shot examples** for the model to follow.
+
+Read about other <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompting techniques</a>. 
+
+With Helicone you can <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">experiment with your prompting techniques</a> (even on production data) to find the best ones.
+
+### 2. Preventing Prompt Injections
+
+![Types of Prompt Injection](/static/blog/preventing-prompt-injection/types-of-prompt-injection.webp)
+
+Malicious users can manipulate their inputs to trick your model into revealing sensitive information or taking risky actions. But there are ways to prevent this.
+
+**On a high level, you can:**
+
+- Sanitize inputs by removing special characters and injection patterns.
+- Implement strict validation of user inputs.
+- Block inappropriate or malicious responses.
+- Monitor inputs using observability tools like Helicone and flag suspicious activities.
+
+We dive deeper into this topic in this blog: <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">How to prevent prompt injections</a>.
+
+### 3. Caching to Improve Performance and Latency
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="https://www.youtube.com/watch?v=qIOq_NbeQ28"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
+
+In most use cases, latency has the most impact on the user experience. Helicone allows you to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">cache responses</a> on the edge, so that you can serve cached responses immediately without invoking the LLM API, reducing costs at the same time.
+
+### 4. Tracking API Usage and Costs
+
+![After using Helicone's tips to optimize LLM costs](/static/blog/slash-llm-cost/meme-2.webp)
+
+{/* Think this merged with the before Helicone picture would be a great fit here—but like cropped */}
+
+It's important to know exactly what is drilling a hole in your operational cost. 
+
+In Helicone, you can actively track the cost incurred for every LLM interaction. We help you answer questions like: 
+
+- Which model is driving your costs? 
+- Is the premium justified? 
+- Which users are generating the highest costs? Are power users subsidizing occasional users?
+- Which features have the highest LLM spend? Is the ROI worth it?
+
+**There are ways to optimize your LLM costs**:
+
+- Monitoring LLM costs by project or user.
+- Use cheaper models for simpler tasks, and thinking models where quality is more important than latency.
+- Set rate limits for certain users or features
+- Caching common responses (see #3 above)
+
+For more effective cost optimization strategies, check out <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">this blog</a>.
+
+### 5. Iterating on the Prompt
+
+As models evolve, it's important to continuously test and audit your prompts to ensure they're performing as expected.
+
+You should <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">experiment</a> with different variations of your prompt, switch models or set up different configurations to find the best-performing prompt. You should also evaluate against key metrics that are important to your business.
+
+## Best LLM Observability Tools
+
+As companies rush to integrate LLMs into their business functions, some observability platforms have transitioned from basic logging to comprehensive platforms that support the entire LLM lifecycle. 
+
+Helicone, one of such platforms, is an open-source <a href="https://www.helicone.ai/blog/langsmith" target="_blank" rel="noopener">LangSmith alternative</a> with an impressive 2.3 billion processed requests, 3.2 trillion logged tokens, and 18.3 million tracked users. 
+
+Other popular tools include <a href="https://www.helicone.ai/blog/portkey-vs-helicone" target="_blank" rel="noopener">Portkey</a>, <a href="https://www.helicone.ai/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Langfuse</a>, and <a href="https://www.helicone.ai/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Traceloop</a>.
 
 ## Comparison of Popular Observability Tools
 
@@ -144,9 +188,9 @@ These monitoring tools provide the visibility developers need to monitor, debug,
 
 ## Time to Take Action!
 
-Now that you have a good understanding of how to implement monitoring strategies, it's time to put them into practice! We recommend signing up with a platform mentioned above, start logging, and see how users are interacting with your LLM app.
+Now that you have a good understanding of how to implement monitoring strategies, it's time to put them into practice! We recommend signing up with any of the platforms mentioned above, logging, and seeing how users are interacting with your LLM app.
 
-We are here to help you every step of the way! If you have any questions, please reach out to us via email at [support@helicone.ai](mailto:support@helicone.ai) or through the chat feature in our platform. Happy monitoring!
+We are here to help you every step of the way! If you have any questions, please reach out to us via email at [support@helicone.ai](mailto:support@helicone.ai) or through the chat feature on our platform. Happy monitoring!
 
 ### You might find these useful: 
 
@@ -154,4 +198,32 @@ We are here to help you every step of the way! If you have any questions, please
 - <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">How to Reduce LLM Hallucinations</a>
 - <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
 
+<FAQ 
+  items={[
+    {
+      question: "What is LLM observability and how is it different from regular monitoring?",
+      answer: "LLM observability goes beyond basic monitoring by providing comprehensive visibility into how large language models operate in your applications. While traditional monitoring tracks metrics like uptime, LLM monitoring captures model-specific data like token usage, prompt effectiveness, hallucination rates, and response quality to help optimize both performance and costs."
+    },
+    {
+      question: "What are the must-have features in an LLM observability platform?",
+      answer: "An effective LLM observability tool should include most or all of: request logging with full context, cost tracking by user/feature, latency monitoring, caching capabilities, custom property segmentation, LLM security monitoring and testing, session tracking for multi-step workflows, and experiment management. Enterprise users should look for compliance certifications like SOC 2 and HIPAA."
+    },
+    {
+      question: "How much can proper LLM monitoring reduce API costs?",
+      answer: "Implementing comprehensive LLM cost monitoring with caching and optimization typically reduces API costs by 40-70%. Applications with many repetitive queries often see the highest savings through strategic caching. One Helicone customer reduced monthly costs from $15,000 to $4,200—a 72% reduction—just by implementing proper caching strategies."
+    },
+    {
+      question: "What metrics should I focus on first when implementing LLM performance monitoring?",
+      answer: "Depends on your goals. For example, a cost-conscious developer might initially focus on Cost per request & Cache hit/miss rates (to identify optimization opportunities), then latency and time-to-first-token (to improve user experience) and error rates."
+    },
+    {
+      question: "Are open-source LLM observability tools sufficient for enterprise data security needs?",
+      answer: "Open-source LLM observability tools like Helicone and Langfuse offer great flexibility and the ability to self-host for data sovereignty. They're often sufficient for many enterprise needs, especially when self-hosted."
+    },
+    {
+      question: "How do LLM tracing tools help with debugging complex workflows?",
+      answer: "LLM tracing captures the entire chain of model interactions, making it easier to diagnose issues in multi-step workflows. For AI agent observability, they record input prompts, output responses, tokens used, latency, and relationships between requests. This creates a complete audit trail that helps pinpoint where problems occur, whether in retrieval, context formatting, or model limitations."
+    }
+  ]}
+/>
 <Questions />
