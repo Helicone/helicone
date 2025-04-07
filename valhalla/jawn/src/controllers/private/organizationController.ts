@@ -217,7 +217,7 @@ export class OrganizationController extends Controller {
       return ok(null); // Silently succeed if member already exists
     }
 
-    if (org.data.tier === "enterprise" || "team-20250130") {
+    if (org.data.tier === "enterprise" || org.data.tier === "team-20250130") {
       // Enterprise tier: Proceed to add member without additional checks
     } else if (
       org.data.tier === "pro-20240913" ||
