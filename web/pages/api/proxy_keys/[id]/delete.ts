@@ -28,7 +28,7 @@ async function handler({
   );
 
   if (error) {
-    res.status(500).json({ error: error.message, data: null });
+    res.status(500).json({ error: error, data: null });
     return;
   }
 

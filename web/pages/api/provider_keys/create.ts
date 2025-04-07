@@ -46,7 +46,7 @@ async function handler({
   );
 
   if (error) {
-    console.error("Failed to insert provider key", error.message);
+    console.error("Failed to insert provider key", error);
     res.status(500).json({ error: error, data: null });
     return;
   }
