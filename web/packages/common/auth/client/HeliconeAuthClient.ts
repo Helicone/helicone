@@ -1,4 +1,4 @@
-import { HeliconeUser } from "../types";
+import { HeliconeOrg, HeliconeUser } from "../types";
 import { Result } from "../../result";
 export interface HeliconeAuthClient {
   signOut: () => Promise<void>;
@@ -13,6 +13,16 @@ export interface HeliconeAuthClient {
     password: string;
     options?: { emailRedirectTo?: string };
   }) => Promise<Result<HeliconeUser, string>>;
+
+  getOrg: () => Promise<
+    Result<
+      {
+        org: HeliconeOrg;
+        role: string;
+      },
+      string
+    >
+  >;
 
   resetPassword: ({
     email,
