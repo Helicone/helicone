@@ -1,12 +1,15 @@
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { HeliconeAuthClient } from "../../auth/server/HeliconeAuthClient";
-import { AuthParams, HeliconeAuth, OrgParams } from "../../auth/types";
+import { AuthParams, HeliconeAuth, JwtAuth, OrgParams } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 
 export class SupabaseAuthWrapper implements HeliconeAuthClient {
   constructor() {}
 
+  async getUser(auth: JwtAuth): Promise<Result<any, string>> {
+    throw new Error("not implemented");
+  }
   async getUserById(userId: string): Promise<Result<any, string>> {
     const supabaseServer = getSupabaseServer();
     const user = await supabaseServer.auth.admin.getUserById(userId);

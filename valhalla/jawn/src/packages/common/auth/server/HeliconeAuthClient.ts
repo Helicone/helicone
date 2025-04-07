@@ -3,12 +3,14 @@ import {
   AuthResult,
   HeliconeAuth,
   HeliconeUserResult,
+  JwtAuth,
   OrgResult,
 } from "../types";
 
 export interface HeliconeAuthClient {
   authenticate: (auth: HeliconeAuth) => AuthResult;
   getOrganization: (authParams: AuthParams) => OrgResult;
+  getUser(auth: JwtAuth): HeliconeUserResult;
   createUser: ({
     email,
     password,
