@@ -1376,8 +1376,8 @@ Json: JsonObject;
         completion_token: number;
       };
     };
-    "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array_": {
-      data: ({
+    "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
+      data: (({
           tier: string | null;
           subscription_status: string | null;
           stripe_subscription_item_id: string | null;
@@ -1408,11 +1408,13 @@ Json: JsonObject;
           domain: string | null;
           created_at: string | null;
           color: string;
+        }) & {
+          role: string;
         })[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
       data: {
         tier: string | null;
@@ -3775,7 +3777,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-Array.string_"];
+          "application/json": components["schemas"]["Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_"];
         };
       };
     };
