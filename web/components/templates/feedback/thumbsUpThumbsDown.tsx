@@ -3,7 +3,6 @@ import { LuThumbsDown, LuThumbsUp } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateRequestFeedback } from "../../../services/lib/requests";
-import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 
 const FeedbackButtons = ({
@@ -56,9 +55,9 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === true ? (
-          <LuThumbsUp className={clsx("h-4 w-4 text-foreground")} />
+          <LuThumbsUp className={"h-4 w-4 text-foreground"} />
         ) : (
-          <LuThumbsUp className="h-4 w-4 text-foreground fill-muted-foreground/40" />
+          <LuThumbsUp className="h-4 w-4 text-foreground/40" />
         )}
       </Button>
       <Button
@@ -72,9 +71,9 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === false ? (
-          <LuThumbsDown className={clsx("h-4 w-4 text-foreground")} />
+          <LuThumbsDown className={"h-4 w-4 text-foreground"} />
         ) : (
-          <LuThumbsDown className="h-4 w-4 text-foreground fill-muted-foreground/40" />
+          <LuThumbsDown className="h-4 w-4 text-foreground/40" />
         )}
       </Button>
     </div>

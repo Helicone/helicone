@@ -164,6 +164,7 @@ export default function ScrollableBadges({
                 key={`${item.key}-${item.value}-${i}`}
                 item={item}
                 isFirst={i === 0}
+                isProperty={title === "Properties"}
               />
             ))}
 
@@ -268,9 +269,11 @@ const ItemBadge = memo(
   ({
     item,
     isFirst,
+    isProperty,
   }: {
     item: { key: string; value: string | number };
     isFirst: boolean;
+    isProperty?: boolean;
   }) => {
     const isSpecial = SPECIAL_KEYS[item.key];
 
@@ -292,6 +295,28 @@ const ItemBadge = memo(
       );
     }
 
+    // If it's a property (and not special), wrap it in a Link
+    if (isProperty) {
+      return (
+        <Link href={`/properties/${encodeURIComponent(item.key)}`}>
+          <Badge
+            variant={"none"}
+            className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
+              isFirst ? "ml-4" : ""
+            } hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer`}
+          >
+            <span className="text-muted-foreground text-nowrap">
+              {item.key}
+            </span>{" "}
+            <span className="text-primary font-medium text-nowrap">
+              {item.value}
+            </span>
+          </Badge>
+        </Link>
+      );
+    }
+
+    // Otherwise (e.g., scores), render the badge without a link
     return (
       <Badge
         variant={"none"}

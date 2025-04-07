@@ -165,29 +165,29 @@ export const markdownComponents: Components = {
   },
   // Add styling for other markdown elements
   p({ children }) {
-    return <p className="mb-4 leading-6">{children}</p>;
+    return <p className="leading-6">{children}</p>;
   },
   ul({ children }) {
-    return <ul className="mb-4 ml-6 list-disc">{children}</ul>;
+    return <ul className="ml-6 list-disc">{children}</ul>;
   },
   ol({ children }) {
-    return <ol className="mb-4 ml-6 list-decimal">{children}</ol>;
+    return <ol className="ml-6 list-decimal">{children}</ol>;
   },
   li({ children }) {
-    return <li className="mb-2">{children}</li>;
+    return <li className="">{children}</li>;
   },
   h1({ children }) {
-    return <h1 className="mb-4 text-2xl font-semibold">{children}</h1>;
+    return <h1 className="text-2xl font-semibold">{children}</h1>;
   },
   h2({ children }) {
-    return <h2 className="mb-3 text-xl font-semibold">{children}</h2>;
+    return <h2 className="text-xl font-semibold">{children}</h2>;
   },
   h3({ children }) {
-    return <h3 className="mb-3 text-lg font-semibold">{children}</h3>;
+    return <h3 className="text-lg font-semibold">{children}</h3>;
   },
   blockquote({ children }) {
     return (
-      <blockquote className="mb-4 border-l-4 border-muted-foreground/30 pl-4 italic text-muted-foreground">
+      <blockquote className="border-l-4 border-muted-foreground/30 pl-4 italic text-muted-foreground">
         {children}
       </blockquote>
     );

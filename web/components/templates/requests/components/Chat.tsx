@@ -1,11 +1,11 @@
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
-import GlassHeader from "@/components/shared/universal/GlassHeader";
 import { Button } from "@/components/ui/button";
 import { XSmall } from "@/components/ui/typography";
 import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
+import { PiToolboxBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 
@@ -33,23 +33,21 @@ const getMessageType = (message: Message): MessageType => {
 const renderToolMessage = (content: string, message: Message) => {
   if (message.tool_call_id && message.content) {
     return (
-      <div className="flex flex-col gap-2 pb-4">
-        <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs">
-          <XSmall className="font-mono font-semibold">
-            {message.tool_call_id}
-          </XSmall>
-          <JsonRenderer data={JSON.parse(message.content)} />
-        </div>
+      <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs">
+        <XSmall className="font-mono font-semibold">
+          {message.tool_call_id}
+        </XSmall>
+        <JsonRenderer data={JSON.parse(message.content)} />
       </div>
     );
   }
   if (message.tool_calls) {
     return (
-      <div className="flex flex-col gap-4 pb-4">
+      <div className="flex flex-col gap-4">
         {message.content && (
           <ReactMarkdown
             components={markdownComponents}
-            className="w-full text-xs whitespace-pre-wrap break-words"
+            className="w-full text-xs whitespace-pre-wrap break-words p-2"
           >
             {message.content}
           </ReactMarkdown>
@@ -57,10 +55,13 @@ const renderToolMessage = (content: string, message: Message) => {
         {message.tool_calls.map((tool, index) => (
           <div
             key={index}
-            className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs"
+            className="flex flex-col gap-2 bg-muted rounded-lg text-sm p-2"
           >
-            <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
-            <JsonRenderer data={tool.arguments} />
+            <div className="flex flex-row items-center gap-2">
+              <PiToolboxBold className="text-muted-foreground" />
+              <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+            </div>
+            <JsonRenderer data={tool.arguments} showCopyButton={false} />
           </div>
         ))}
       </div>
@@ -69,7 +70,7 @@ const renderToolMessage = (content: string, message: Message) => {
   try {
     const parsedContent = JSON.parse(content);
     return (
-      <div className="p-4 bg-muted rounded-lg my-2">
+      <div className="p-4 bg-muted rounded-lg">
         <JsonRenderer data={parsedContent} />
       </div>
     );
@@ -130,13 +131,13 @@ export default function Chat({ mappedRequest }: ChatProps) {
             className="w-full flex flex-col border-b border-border"
           >
             {/* Message Role Header */}
-            <GlassHeader className="h-14 shrink-0 px-4">
-              <h2 className="text-secondary font-medium capitalize">
+            <div className="h-12 w-full flex flex-row items-center justify-between shrink-0 px-4 sticky top-0 bg-white dark:bg-black z-10 shadow-sm">
+              <h2 className="text-secondary font-medium capitalize text-sm">
                 {message.role}
               </h2>
-            </GlassHeader>
+            </div>
 
-            <div className="w-full flex flex-col relative px-4">
+            <div className="w-full flex flex-col relative p-4">
               {(() => {
                 switch (messageType) {
                   case "image":
@@ -157,7 +158,7 @@ export default function Chat({ mappedRequest }: ChatProps) {
                     return (
                       <ReactMarkdown
                         components={markdownComponents}
-                        className="w-full text-xs whitespace-pre-wrap break-words"
+                        className="w-full text-sm whitespace-pre-wrap break-words"
                       >
                         {displayContent}
                       </ReactMarkdown>

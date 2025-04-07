@@ -12,11 +12,11 @@ interface LivePillProps {
 export default function LivePill(props: LivePillProps) {
   const { isLive, setIsLive, isDataLoading, isRefetching, refetch } = props;
   return (
-    <div className="h-9 w-full flex flex-row items-center justify-between bg-slate-50 dark:bg-slate-950 rounded-full border border-border divide-x divide-border">
+    <div className="h-8 w-full flex flex-row items-center justify-between bg-slate-50 dark:bg-slate-950 rounded-lg border border-border divide-x divide-border">
       <Button
         variant="none"
         size="none"
-        className="h-full px-2.5 flex flex-row gap-2 items-center rounded-l-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
+        className="h-full px-2.5 flex flex-row gap-2 items-center rounded-l-lg rounded-r-none hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
         onClick={() => setIsLive(!isLive)}
       >
         <div
@@ -33,7 +33,7 @@ export default function LivePill(props: LivePillProps) {
       <Button
         variant="none"
         size="none"
-        className="h-full px-2.5 flex flex-row gap-1 items-center rounded-r-full hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
+        className="h-full px-2.5 flex flex-row gap-1 items-center rounded-l-none rounded-r-lg hover:bg-slate-100 dark:hover:bg-slate-900 active:bg-slate-200 active:dark:bg-slate-800"
         onClick={() => {
           refetch();
         }}
