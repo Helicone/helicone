@@ -1,35 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { Database } from "../../../../db/database.types";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { $JAWN_API } from "@/lib/clients/jawn";
 import { useOrg } from "../../../../components/layout/org/organizationContext";
 
 const usePortalPage = () => {
-  const supabase = useSupabaseClient();
   const org = useOrg();
 
-  const { data, isLoading, refetch } = useQuery<
-    Database["public"]["Tables"]["organization"]["Row"][]
-  >({
-    queryKey: ["orgs", org?.currentOrg?.id],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1];
-
-      const { data, error } = await supabase
-        .from("organization")
-        .select("*")
-        .eq("soft_delete", false)
-        .eq("reseller_id", orgId);
-
-      if (error) {
-        return [];
-      }
-
-      return data as Database["public"]["Tables"]["organization"]["Row"][];
+  return $JAWN_API.useQuery("get", "/v1/organization/reseller/{resellerId}", {
+    params: {
+      path: {
+        resellerId: org?.currentOrg?.id ?? "",
+      },
     },
-    initialData: [],
   });
-
-  return { data, isLoading, refetch };
 };
 
 export default usePortalPage;
