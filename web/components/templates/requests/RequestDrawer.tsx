@@ -354,14 +354,23 @@ export default function RequestDrawer(props: RequestDivProps) {
             <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
               {showCollapse && (
-                <Button
-                  variant={"none"}
-                  size={"square_icon"}
-                  className="w-fit text-muted-foreground hover:text-primary"
-                  onClick={onCollapse}
-                >
-                  <LuPanelRightClose className="w-4 h-4" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={"none"}
+                        size={"square_icon"}
+                        className="w-fit text-muted-foreground hover:text-primary"
+                        onClick={onCollapse}
+                      >
+                        <LuPanelRightClose className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      Collapse Drawer
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
               {/* Model Name */}
               <P className="font-medium text-secondary text-nowrap truncate">
@@ -372,13 +381,33 @@ export default function RequestDrawer(props: RequestDivProps) {
             {/* Right Side */}
             <div className="flex flex-row items-center gap-2">
               {/* Duration Badge */}
-              <Badge variant={"secondary"} asPill={false}>
-                {Number(request.heliconeMetadata.latency) / 1000}s
-              </Badge>
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Badge variant={"secondary"} asPill={false}>
+                      {Number(request.heliconeMetadata.latency) / 1000}s
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Latency
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               {/* Cost Badge */}
-              <Badge variant={"secondary"} asPill={false}>
-                ${formatNumber(request.heliconeMetadata.cost || 0)}
-              </Badge>
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Badge variant={"secondary"} asPill={false}>
+                      ${formatNumber(request.heliconeMetadata.cost || 0)}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Cost
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               {/* Status Badge */}
               <StatusBadge
                 statusType={request.heliconeMetadata.status.statusType}
@@ -403,7 +432,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs">
+                  <TooltipContent side="bottom" className="text-xs">
                     {showDetails ? "Hide Details" : "Show Details"}
                   </TooltipContent>
                 </Tooltip>
@@ -442,13 +471,15 @@ export default function RequestDrawer(props: RequestDivProps) {
                 >
                   {specialProperties.sessionName ||
                     (specialProperties.sessionId && (
-                      <XSmall>
-                        {specialProperties.sessionName ??
+                      <span className="text-xs">
+                        {specialProperties.sessionName ||
                           specialProperties.sessionId}
-                      </XSmall>
+                      </span>
                     ))}
                   {specialProperties.sessionPath && (
-                    <XSmall>{specialProperties.sessionPath}</XSmall>
+                    <span className="text-xs">
+                      {specialProperties.sessionPath}
+                    </span>
                   )}
                 </Link>
               )}
@@ -457,8 +488,8 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Expandable Details Section */}
           {showDetails && (
-            <div className="h-full w-full flex flex-col gap-4 p-4 border-b border-border">
-              <div className="w-full flex flex-row gap-8 justify-between">
+            <div className="h-full w-full flex flex-col gap-4 border-b border-border pb-4 pt-2">
+              <div className="w-full flex flex-row gap-8 justify-between px-4">
                 {/* Request Information */}
                 <div className="w-full flex flex-col gap-2">
                   {requestDetails.requestInfo.map((item) => (
@@ -469,9 +500,34 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <XSmall className="text-muted-foreground text-nowrap">
                         {item.label}
                       </XSmall>
-                      <XSmall className="truncate min-w-0 text-right">
-                        {item.value}
-                      </XSmall>
+
+                      {item.label === "Request ID" ? (
+                        <TooltipProvider>
+                          <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <p
+                                className="text-xs truncate min-w-0 text-right cursor-pointer"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(item.value);
+                                  setNotification(
+                                    "Request ID copied",
+                                    "success"
+                                  );
+                                }}
+                              >
+                                {item.value}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">
+                              Copy
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <p className="text-xs truncate min-w-0 text-right">
+                          {item.value}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -496,7 +552,7 @@ export default function RequestDrawer(props: RequestDivProps) {
 
               {/* Request Parameters */}
               {requestDetails.parameterInfo.length > 0 && (
-                <div className="w-full flex flex-col gap-2 pt-4 border-t border-border">
+                <div className="w-full flex flex-col gap-2 pt-4 border-t border-border px-4">
                   {requestDetails.parameterInfo.map((item) => (
                     <div
                       key={item.label}
