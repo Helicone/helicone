@@ -3,6 +3,7 @@ import { BaseManager } from "../BaseManager";
 import Stripe from "stripe";
 import { Result, err, ok } from "../../lib/shared/result";
 import { KVCache } from "../../lib/cache/kvCache";
+import pLimit from "p-limit";
 
 const adminKVCache = new KVCache(24 * 60 * 60 * 1000); // 1 day in milliseconds
 
@@ -121,7 +122,12 @@ export class AdminManager extends BaseManager {
               this.stripe.subscriptions.list({
                 ...params,
                 status: "all",
-                expand: ["data.customer", "data.items.data.price"],
+                expand: [
+                  "data.customer",
+                  "data.items.data.price",
+                  "data.discount",
+                  "data.discount.coupon",
+                ],
                 limit: 100,
               }),
             thisCursor ? { starting_after: thisCursor } : {}
@@ -333,9 +339,9 @@ export class AdminManager extends BaseManager {
   /**
    * Process discounts from subscriptions
    */
-  private processDiscounts(
+  private async processDiscounts(
     subscriptions: Stripe.Subscription[]
-  ): Record<string, Stripe.Discount> {
+  ): Promise<Record<string, Stripe.Discount>> {
     const discounts: Record<string, Stripe.Discount> = {};
 
     // Find subscriptions with discounts
@@ -346,10 +352,67 @@ export class AdminManager extends BaseManager {
       `[AdminManager] Found ${subsWithDiscounts.length} subscriptions with discounts`
     );
 
-    // Map each subscription discount to the subscription ID
+    // Extract unique coupon IDs
+    const couponIds = new Set<string>();
+    const subDiscountMap: Record<
+      string,
+      {
+        subId: string;
+        discount: Stripe.Discount;
+      }[]
+    > = {};
+
     subsWithDiscounts.forEach((sub) => {
-      if (sub.discount) {
-        discounts[sub.id] = sub.discount;
+      if (sub.discount?.coupon?.id) {
+        const couponId = sub.discount.coupon.id;
+        couponIds.add(couponId);
+
+        // Group subscriptions by coupon ID for easy mapping later
+        if (!subDiscountMap[couponId]) {
+          subDiscountMap[couponId] = [];
+        }
+        subDiscountMap[couponId].push({
+          subId: sub.id,
+          discount: sub.discount,
+        });
+      }
+    });
+
+    console.log(
+      `[AdminManager] Fetching ${couponIds.size} unique coupons in parallel`
+    );
+
+    // Fetch all unique coupons in parallel
+    const couponPromises = Array.from(couponIds).map(async (couponId) => {
+      try {
+        const fullCoupon = await this.stripe.coupons.retrieve(couponId);
+        return { couponId, fullCoupon, error: null };
+      } catch (error) {
+        console.error(
+          `[AdminManager] Error fetching coupon ${couponId}:`,
+          error
+        );
+        return { couponId, fullCoupon: null, error };
+      }
+    });
+
+    const couponResults = await Promise.all(couponPromises);
+
+    // Map results back to subscriptions
+    couponResults.forEach(({ couponId, fullCoupon }) => {
+      if (fullCoupon && subDiscountMap[couponId]) {
+        subDiscountMap[couponId].forEach(({ subId, discount }) => {
+          // Replace simplified coupon with full coupon data
+          discounts[subId] = {
+            ...discount,
+            coupon: fullCoupon,
+          };
+        });
+      } else if (subDiscountMap[couponId]) {
+        // Fall back to incomplete coupon if retrieval failed
+        subDiscountMap[couponId].forEach(({ subId, discount }) => {
+          discounts[subId] = discount;
+        });
       }
     });
 
@@ -357,7 +420,7 @@ export class AdminManager extends BaseManager {
   }
 
   /**
-   * Get all subscription data with parallel processing for subscriptions and invoices
+   * Get all subscription data with parallel processing for subscriptions, invoices, and upcoming invoices
    */
   public async getSubscriptionData(forceRefresh = false): Promise<
     Result<
@@ -365,6 +428,10 @@ export class AdminManager extends BaseManager {
         subscriptions: Stripe.Subscription[];
         invoices: Stripe.Invoice[];
         discounts: Record<string, Stripe.Discount>;
+        upcomingInvoices: Record<
+          string,
+          Stripe.Response<Stripe.UpcomingInvoice>
+        >;
       },
       string
     >
@@ -383,6 +450,10 @@ export class AdminManager extends BaseManager {
         `invoices-${this.authParams.organizationId}`,
         null
       );
+      await adminKVCache.set(
+        `upcoming-invoices-${this.authParams.organizationId}`,
+        null
+      );
       await adminKVCache.set(cacheKey, null);
     }
 
@@ -391,6 +462,7 @@ export class AdminManager extends BaseManager {
       subscriptions: Stripe.Subscription[];
       invoices: Stripe.Invoice[];
       discounts: Record<string, Stripe.Discount>;
+      upcomingInvoices: Record<string, Stripe.Response<Stripe.UpcomingInvoice>>;
     }>(cacheKey);
 
     if (cachedData && !forceRefresh) {
@@ -424,15 +496,26 @@ export class AdminManager extends BaseManager {
       );
 
       // Process discounts
-      const discounts = this.processDiscounts(subscriptions);
+      const discounts = await this.processDiscounts(subscriptions);
       console.log(
         `[AdminManager] Processed ${Object.keys(discounts).length} discounts`
+      );
+
+      // Fetch upcoming invoices for all active subscriptions
+      console.time("fetchUpcomingInvoices");
+      const upcomingInvoices = await this.fetchUpcomingInvoices();
+      console.timeEnd("fetchUpcomingInvoices");
+      console.log(
+        `[AdminManager] Fetched ${
+          Object.keys(upcomingInvoices).length
+        } upcoming invoices for active subscriptions`
       );
 
       const result = {
         subscriptions,
         invoices,
         discounts,
+        upcomingInvoices,
       };
 
       // Cache the combined result
@@ -445,5 +528,99 @@ export class AdminManager extends BaseManager {
       console.error("[AdminManager] Error in getSubscriptionData:", error);
       return err(`Failed to fetch subscription data: ${error}`);
     }
+  }
+
+  /**
+   * Fetch upcoming invoices for active subscriptions
+   */
+  private async fetchUpcomingInvoices(): Promise<
+    Record<string, Stripe.Response<Stripe.UpcomingInvoice>>
+  > {
+    const cacheKey = `upcoming-invoices-${this.authParams.organizationId}`;
+    const cachedData = await adminKVCache.get<
+      Record<string, Stripe.Response<Stripe.UpcomingInvoice>>
+    >(cacheKey);
+
+    if (cachedData) {
+      console.log("[AdminManager] Using cached upcoming invoices");
+      return cachedData;
+    }
+
+    const subscriptionsResult = await this.getSubscriptions();
+
+    if (subscriptionsResult.error || !subscriptionsResult.data) {
+      console.error(
+        "[AdminManager] Error getting subscriptions:",
+        subscriptionsResult.error
+      );
+      return {};
+    }
+
+    // Filter active and trialing subscriptions
+    const activeSubscriptions = subscriptionsResult.data.filter(
+      (s: Stripe.Subscription) =>
+        s.status === "active" || s.status === "trialing"
+    );
+
+    console.log(
+      `Fetching upcoming invoices for ${activeSubscriptions.length} active subscriptions`
+    );
+
+    // Create a concurrency limiter that allows exactly 95 simultaneous requests
+    const limit = pLimit(95);
+
+    type InvoiceResult = {
+      id: string;
+      invoice: Stripe.Response<Stripe.UpcomingInvoice>;
+    } | null;
+
+    // Process all subscriptions with controlled concurrency using map-reduce pattern
+    const results = await Promise.all(
+      activeSubscriptions.map(
+        (subscription: Stripe.Subscription, index: number) =>
+          limit(async () => {
+            // Log start and progress at fixed intervals
+            if (index === 0 || index % 200 === 0) {
+              console.log(
+                `Processing subscription ${index}/${activeSubscriptions.length}`
+              );
+            }
+
+            try {
+              const invoice = await this.stripe.invoices.retrieveUpcoming({
+                subscription: subscription.id,
+              });
+              return { id: subscription.id, invoice } as InvoiceResult;
+            } catch (error) {
+              console.error(
+                `Error fetching upcoming invoice for ${subscription.id}:`,
+                error
+              );
+              return null;
+            }
+          })
+      )
+    );
+
+    // Filter out failed requests and convert to record format
+    const upcomingInvoices = Object.fromEntries(
+      results
+        .filter(
+          (
+            result
+          ): result is {
+            id: string;
+            invoice: Stripe.Response<Stripe.UpcomingInvoice>;
+          } => result !== null
+        )
+        .map((result) => [result.id, result.invoice])
+    );
+
+    console.log(
+      `Fetched ${Object.keys(upcomingInvoices).length} upcoming invoices`
+    );
+
+    await adminKVCache.set(cacheKey, upcomingInvoices);
+    return upcomingInvoices;
   }
 }

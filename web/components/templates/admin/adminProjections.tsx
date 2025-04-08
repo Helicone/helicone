@@ -16,6 +16,7 @@ interface SubscriptionDataResponse {
     subscriptions: Stripe.Subscription[];
     invoices: Stripe.Invoice[];
     discounts: Record<string, Stripe.Discount>;
+    upcomingInvoices: Record<string, any>;
   };
   error?: string;
 }
@@ -27,6 +28,9 @@ const AdminProjections = () => {
   const [subscriptionData, setSubscriptionData] = useState(MOCK_SUBSCRIPTIONS);
   const [invoiceData, setInvoiceData] = useState(MOCK_INVOICES);
   const [discountData, setDiscountData] = useState(MOCK_DISCOUNTS);
+  const [upcomingInvoiceData, setUpcomingInvoiceData] = useState<
+    Record<string, any>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const [dataFetched, setDataFetched] = useState(false);
 
@@ -54,6 +58,7 @@ const AdminProjections = () => {
         );
         setInvoiceData(response.data.invoices as typeof MOCK_INVOICES);
         setDiscountData(response.data.discounts as typeof MOCK_DISCOUNTS);
+        setUpcomingInvoiceData(response.data.upcomingInvoices || {});
         setDataFetched(true);
       } catch (err) {
         console.error("Error fetching subscription data:", err);
@@ -63,6 +68,7 @@ const AdminProjections = () => {
         setSubscriptionData(MOCK_SUBSCRIPTIONS);
         setInvoiceData(MOCK_INVOICES);
         setDiscountData(MOCK_DISCOUNTS);
+        setUpcomingInvoiceData({});
       } finally {
         setIsLoading(false);
       }
@@ -78,8 +84,9 @@ const AdminProjections = () => {
         subscriptions: subscriptionData,
         invoices: invoiceData,
         discounts: discountData,
+        upcomingInvoices: upcomingInvoiceData,
       }),
-    [subscriptionData, invoiceData, discountData]
+    [subscriptionData, invoiceData, discountData, upcomingInvoiceData]
   );
 
   // Refresh function
@@ -124,10 +131,52 @@ const AdminProjections = () => {
         </button>
       </div>
 
-      <ProductRevenueTrendChart
-        productId="prod_QrcNwy2KPKiZJ5"
-        analytics={analytics}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <ProductRevenueTrendChart
+          productName="All Products"
+          productId={[
+            "prod_Rhx6vMVdGqih1E", // Team
+            "prod_QrcNwy2KPKiZJ5", // Users
+            "prod_PpPUGArb7KCAZT", // Usage
+            "prod_QrcOEoxIc76n6K", // Prompts
+            "prod_Rhx8ZQYhQOuunD", // Experiments
+            "prod_Rhx7VbaUg1d1zA", // Evals
+          ]}
+          analytics={analytics}
+        />
+        <ProductRevenueTrendChart
+          productName="Team"
+          productId="prod_Rhx6vMVdGqih1E"
+          analytics={analytics}
+        />
+
+        <ProductRevenueTrendChart
+          productName="Users"
+          productId="prod_QrcNwy2KPKiZJ5"
+          analytics={analytics}
+        />
+
+        <ProductRevenueTrendChart
+          productName="Usage"
+          productId="prod_PpPUGArb7KCAZT"
+          analytics={analytics}
+        />
+        <ProductRevenueTrendChart
+          productName="Prompts"
+          productId="prod_QrcOEoxIc76n6K"
+          analytics={analytics}
+        />
+        <ProductRevenueTrendChart
+          productName="Experiments"
+          productId="prod_Rhx8ZQYhQOuunD"
+          analytics={analytics}
+        />
+        <ProductRevenueTrendChart
+          productName="Evals"
+          productId="prod_Rhx7VbaUg1d1zA"
+          analytics={analytics}
+        />
+      </div>
 
       <SubscriptionTable
         subscriptions={subscriptionData}

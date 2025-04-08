@@ -40,49 +40,80 @@ export const calculateMRR = (
   subscription.items.data.forEach((item) => {
     if (!item.price?.recurring || !item.price.unit_amount) return;
 
-    const itemMRR = calculateItemMRR(item);
+    const itemMRR = calculateItemMRR(item, discount);
     mrr += itemMRR;
   });
-
-  // Apply discount if provided
-  if (discount) {
-    if (discount.coupon.percent_off) {
-      // Percentage discount
-      mrr = mrr * (1 - discount.coupon.percent_off / 100);
-    } else if (discount.coupon.amount_off) {
-      // Fixed amount discount
-      mrr = Math.max(0, mrr - discount.coupon.amount_off);
-    }
-  }
 
   return mrr;
 };
 
-/**
- * Calculate MRR for a specific subscription item
- */
-export const calculateItemMRR = (item: Stripe.SubscriptionItem): number => {
-  if (!item.price?.recurring || !item.price.unit_amount) return 0;
+export function calculateItemMRR(
+  item: Stripe.SubscriptionItem,
+  discount?: Stripe.Discount
+): number {
+  if (!item.price) return 0;
+  if (!item.price.recurring) return 0;
 
-  const unitAmount = item.price.unit_amount;
-  const quantity = item.quantity || 1;
+  const unitAmount = item.price.unit_amount || 0;
+  const quantity = item.quantity || 0;
 
-  // Convert to monthly amount
-  let monthlyAmount = unitAmount;
-  if (item.price.recurring.interval === "year") {
-    monthlyAmount = unitAmount / 12;
-  } else if (item.price.recurring.interval === "week") {
-    monthlyAmount = unitAmount * 4;
-  } else if (item.price.recurring.interval === "day") {
-    monthlyAmount = unitAmount * 30;
+  if (unitAmount === 0 || quantity === 0) return 0;
+
+  let mrr = unitAmount * quantity;
+
+  const interval = item.price.recurring.interval;
+  const intervalCount = item.price.recurring.interval_count || 1;
+
+  // Normalize to monthly revenue
+  if (interval === "year") {
+    mrr = mrr / (12 * intervalCount);
+  } else if (interval === "week") {
+    mrr = mrr * (4.33 / intervalCount);
+  } else if (interval === "day") {
+    mrr = mrr * (30 / intervalCount);
   }
 
-  // Adjust for interval count
-  monthlyAmount = monthlyAmount / (item.price.recurring.interval_count || 1);
+  // Apply discount if provided
+  if (discount && discount.coupon) {
+    const productId = getProductIdFromItem(item);
 
-  // Multiply by quantity
-  return monthlyAmount * quantity;
-};
+    // Check if this is a small discount without product restrictions
+    const isSmallDiscount =
+      discount.coupon.amount_off != null && discount.coupon.amount_off < 5000; // Less than $50
+    const hasNoProductRestrictions =
+      !discount.coupon.applies_to ||
+      !discount.coupon.applies_to.products ||
+      discount.coupon.applies_to.products.length === 0;
+
+    if (isSmallDiscount && hasNoProductRestrictions) {
+      return mrr;
+    }
+
+    // Default: discount applies to all products unless specifically restricted
+    let shouldApplyDiscount = true;
+
+    // Only check for restrictions if applies_to.products exists and isn't empty
+    if (
+      discount.coupon.applies_to &&
+      discount.coupon.applies_to.products &&
+      discount.coupon.applies_to.products.length > 0
+    ) {
+      // If product restrictions exist, check if this product is included
+      shouldApplyDiscount =
+        discount.coupon.applies_to.products.includes(productId);
+    }
+
+    if (shouldApplyDiscount) {
+      if (discount.coupon.percent_off) {
+        mrr = mrr * (1 - discount.coupon.percent_off / 100);
+      } else if (discount.coupon.amount_off) {
+        mrr = Math.max(0, mrr - discount.coupon.amount_off);
+      }
+    }
+  }
+
+  return mrr;
+}
 
 /**
  * Get product name from various product formats
@@ -271,3 +302,107 @@ export const getTierBadgeClasses = (tier: string): string => {
     return "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300 border-slate-200 dark:border-slate-700";
   }
 };
+
+/**
+ * Get subscription ID from an invoice, handling both string and object representations
+ */
+export const getSubscriptionId = (
+  invoice: Stripe.Invoice
+): string | undefined => {
+  return typeof invoice.subscription === "string"
+    ? invoice.subscription
+    : invoice.subscription?.id;
+};
+
+/**
+ * Check if quantity is valid for MRR calculation
+ */
+export const hasValidQuantity = (item: Stripe.SubscriptionItem): boolean => {
+  return (item.quantity || 0) > 0;
+};
+
+/**
+ * Get start of month date
+ */
+export const startOfMonth = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth(), 1);
+
+/**
+ * Get end of month date
+ */
+export const endOfMonth = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+/**
+ * Ensure object exists in a nested record structure
+ */
+export const ensureNestedRecord = <T>(
+  record: Record<string, Record<string, T[]>>,
+  outerKey: string,
+  innerKey: string
+): T[] => {
+  record[outerKey] = record[outerKey] || {};
+  record[outerKey][innerKey] = record[outerKey][innerKey] || [];
+  return record[outerKey][innerKey];
+};
+
+/**
+ * Calculate MRR for an upcoming invoice line, applying discounts consistently
+ * with the same logic as calculateItemMRR
+ */
+export function calculateUpcomingInvoiceLineMRR(
+  line: any, // Upcoming invoice line item
+  productId: string,
+  discount?: Stripe.Discount
+): number {
+  if (!line.amount) return 0;
+
+  // Skip negative amounts (credits for unused time)
+  if (line.amount < 0) return 0;
+
+  // Start with the line amount (already includes quantity)
+  let lineAmount = line.amount;
+
+  // Apply discount if provided, using the same logic as calculateItemMRR
+  // Note: Discounts apply to BOTH subscription and usage-based items
+  if (discount && discount.coupon) {
+    // Check if this is a small discount without product restrictions
+    const isSmallDiscount =
+      discount.coupon.amount_off != null && discount.coupon.amount_off < 5000; // Less than $50
+    const hasNoProductRestrictions =
+      !discount.coupon.applies_to ||
+      !discount.coupon.applies_to.products ||
+      discount.coupon.applies_to.products.length === 0;
+
+    if (isSmallDiscount && hasNoProductRestrictions) {
+      return lineAmount;
+    }
+
+    // Default: discount applies to all products unless specifically restricted
+    let shouldApplyDiscount = true;
+
+    // Only check for restrictions if applies_to.products exists and isn't empty
+    if (
+      discount.coupon.applies_to &&
+      discount.coupon.applies_to.products &&
+      discount.coupon.applies_to.products.length > 0
+    ) {
+      // If product restrictions exist, check if this product is included
+      shouldApplyDiscount =
+        discount.coupon.applies_to.products.includes(productId);
+    }
+
+    if (shouldApplyDiscount) {
+      // Apply discount regardless of whether it's a subscription or usage-based item
+      if (discount.coupon.percent_off) {
+        lineAmount = Math.round(
+          lineAmount * (1 - discount.coupon.percent_off / 100)
+        );
+      } else if (discount.coupon.amount_off) {
+        lineAmount = Math.max(0, lineAmount - discount.coupon.amount_off);
+      }
+    }
+  }
+
+  return lineAmount;
+}
