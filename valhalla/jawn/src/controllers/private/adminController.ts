@@ -22,7 +22,6 @@ import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
-  return;
   if (!userId) {
     throw new Error("Unauthorized");
   }
