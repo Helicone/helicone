@@ -8,6 +8,8 @@ import { LuChevronDown } from "react-icons/lu";
 import { PiToolboxBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
+import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
+import MarkdownEditor from "@/components/shared/markdownEditor";
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
@@ -87,6 +89,7 @@ export default function Chat({ mappedRequest }: ChatProps) {
   const [expandedMessages, setExpandedMessages] = useState<
     Record<number, boolean>
   >({});
+  const { mode } = useRequestRenderModeStore();
 
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
@@ -153,9 +156,33 @@ export default function Chat({ mappedRequest }: ChatProps) {
                       </div>
                     );
                   case "tool":
-                    return renderToolMessage(displayContent, message);
+                    return mode === "raw" ? (
+                      <MarkdownEditor
+                        language="json"
+                        setText={() => {}}
+                        text={
+                          typeof message === "string"
+                            ? message
+                            : JSON.stringify(message, null, 2)
+                        }
+                        disabled
+                      />
+                    ) : (
+                      renderToolMessage(displayContent, message)
+                    );
                   case "text":
-                    return (
+                    return mode === "raw" ? (
+                      <MarkdownEditor
+                        language="markdown"
+                        setText={() => {}}
+                        text={
+                          typeof displayContent === "string"
+                            ? displayContent
+                            : JSON.stringify(displayContent)
+                        }
+                        disabled
+                      />
+                    ) : (
                       <ReactMarkdown
                         components={markdownComponents}
                         className="w-full text-sm whitespace-pre-wrap break-words"

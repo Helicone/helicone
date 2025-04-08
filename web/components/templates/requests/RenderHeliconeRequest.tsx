@@ -5,7 +5,7 @@ import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
 import Chat from "./components/Chat";
@@ -16,6 +16,10 @@ import Json from "./components/Json";
 import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
+import {
+  MODE_LABELS,
+  useRequestRenderModeStore,
+} from "@/store/requestRenderModeStore";
 
 export default function RenderHeliconeRequest({
   heliconeRequest,
@@ -66,8 +70,7 @@ export function RenderMappedRequest({
     endIndex: number;
   };
 }) {
-  const [isJsonMode, setIsJsonMode] = useState(false);
-  const [isDebugMode, setIsDebugMode] = useState(false);
+  const { mode, toggleMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
 
   // Check if request had an error first
@@ -86,27 +89,21 @@ export function RenderMappedRequest({
         variant={"outline"}
         size={"sm"}
         className="flex felx-row gap-1 absolute top-2 right-4 z-20"
-        onClick={(e) => {
-          if (isShiftPressed) {
-            setIsDebugMode(!isDebugMode);
-          } else {
-            setIsJsonMode(!isJsonMode);
-          }
-        }}
+        onClick={() => toggleMode(isShiftPressed)}
       >
         <XSmall className="text-secondary font-medium">
-          {isDebugMode ? "Debug" : isJsonMode ? "JSON" : "Markdown"}
+          {MODE_LABELS[mode]}
         </XSmall>
         <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
       </Button>
 
-      {isDebugMode ? (
+      {mode === "debug" ? (
         <div className="p-4">
           <pre className="whitespace-pre-wrap text-sm">
             <JsonRenderer data={JSON.parse(JSON.stringify(mappedRequest))} />
           </pre>
         </div>
-      ) : isJsonMode ? (
+      ) : mode === "json" ? (
         <Json mapperContent={mappedRequest} />
       ) : hasError ? (
         <ErrorMessage mapperContent={mappedRequest} className="p-4" />
