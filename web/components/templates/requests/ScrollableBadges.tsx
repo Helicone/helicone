@@ -148,7 +148,7 @@ export default function ScrollableBadges({
       )}
 
       <div className="h-full w-full flex items-center relative overflow-x-auto">
-        <ScrollArea orientation="horizontal">
+        <ScrollArea orientation="horizontal" width="thin">
           <div
             ref={scrollAreaRef}
             className="h-full w-full flex flex-row items-center gap-2"
