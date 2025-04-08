@@ -1,8 +1,8 @@
 import { HeliconeHeaders } from "../../../../shared/proxy/heliconeHeaders";
 import { KafkaProducer } from "../lib/clients/KafkaProducer";
 import type { KafkaMessageContents } from "../lib/handlers/HandlerContext";
-import { AuthParams } from "../lib/shared/auth/HeliconeAuthClient";
 import { S3Client } from "../lib/shared/db/s3Client";
+import { AuthParams } from "../packages/common/auth/types";
 import { Provider } from "../packages/llm-mapper/types";
 
 export type AsyncLogModel = {

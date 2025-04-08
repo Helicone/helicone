@@ -1,24 +1,67 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Database } from "@/db/database.types";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
 import {
   SupabaseClient,
   useSupabaseClient,
   useUser,
 } from "@supabase/auth-helpers-react";
-import { useMemo } from "react";
-import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-import { HeliconeUser } from "../../auth/types";
+import {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
 import posthog from "posthog-js";
+import { useMemo } from "react";
+import { SSRContext } from "../../auth/client/AuthClientFactory";
+import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
+import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+
+export async function supabaseAuthClientFromSSRContext(
+  ctx: SSRContext<NextApiRequest, NextApiResponse, GetServerSidePropsContext>
+) {
+  const supabaseClient = new SupabaseServerWrapper(ctx);
+  const user = await supabaseClient.getClient().auth.getUser();
+
+  const userAndOrg = (await supabaseClient.getUserAndOrg()).data;
+
+  return new SupabaseAuthClient(
+    supabaseClient.client,
+    {
+      email: user.data.user?.email ?? "",
+      id: user.data.user?.id ?? "",
+    },
+    userAndOrg && userAndOrg.org
+      ? {
+          org: userAndOrg.org,
+          role: userAndOrg.role,
+        }
+      : undefined
+  );
+}
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   supabaseClient: SupabaseClient<Database>;
   user?: HeliconeUser;
-  constructor(supabaseClient?: SupabaseClient<Database>, user?: HeliconeUser) {
+  constructor(
+    supabaseClient?: SupabaseClient<Database>,
+    user?: HeliconeUser,
+    private org?: { org: HeliconeOrg; role: string }
+  ) {
     if (!supabaseClient) {
       throw new Error("Supabase client not found");
     }
     this.supabaseClient = supabaseClient;
     this.user = user;
+  }
+
+  async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
+    if (!this.org) {
+      return err("Org not found");
+    }
+    return ok(this.org);
   }
 
   async signOut(): Promise<void> {
@@ -145,10 +188,31 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
 export function useSupabaseAuthClient(): HeliconeAuthClient {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
+  const org = useOrg();
+
+  const allOrgs = $JAWN_API.useQuery("get", "/v1/organization", {});
   return useMemo(() => {
-    return new SupabaseAuthClient(supabaseClient, {
-      id: user?.id ?? "",
-      email: user?.email ?? "",
-    });
-  }, [supabaseClient, user]);
+    const orgWithRole = allOrgs.data?.data?.find(
+      (orgWithRole) => orgWithRole.id === org?.currentOrg?.id
+    );
+    return new SupabaseAuthClient(
+      supabaseClient,
+      {
+        id: user?.id ?? "",
+        email: user?.email ?? "",
+      },
+      orgWithRole
+        ? {
+            org: orgWithRole,
+            role: orgWithRole.role,
+          }
+        : undefined
+    );
+  }, [
+    allOrgs.data?.data,
+    supabaseClient,
+    user?.id,
+    user?.email,
+    org?.currentOrg?.id,
+  ]);
 }

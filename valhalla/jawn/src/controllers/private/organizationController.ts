@@ -28,16 +28,20 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Database } from "../../lib/db/database.types";
 import { RequestWrapper } from "../../lib/requestWrapper";
 import { Request as ExpressRequest } from "express";
-import { getHeliconeAuthClient } from "../../lib/shared/auth/AuthClientFactory";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
+
 @Route("v1/organization")
 @Tags("Organization")
 @Security("api_key")
 export class OrganizationController extends Controller {
   @Get("/")
-  public async getOrganizations(
-    @Request() req: ExpressRequest
-  ): Promise<
-    Result<Database["public"]["Tables"]["organization"]["Row"][], string>
+  public async getOrganizations(@Request() req: ExpressRequest): Promise<
+    Result<
+      (Database["public"]["Tables"]["organization"]["Row"] & {
+        role: string;
+      })[],
+      string
+    >
   > {
     const request = new RequestWrapper(req);
 
@@ -58,8 +62,12 @@ export class OrganizationController extends Controller {
       return err(authParams.error ?? "User not found");
     }
 
-    return await dbExecute<Database["public"]["Tables"]["organization"]["Row"]>(
-      `SELECT organization.* FROM organization 
+    return await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"] & {
+        role: string;
+      }
+    >(
+      `SELECT organization.*, organization_member.org_role FROM organization 
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
@@ -72,7 +80,9 @@ export class OrganizationController extends Controller {
   public async getOrganization(
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<
+    Result<Database["public"]["Tables"]["organization"]["Row"], string>
+  > {
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"]
     >(
@@ -84,7 +94,17 @@ export class OrganizationController extends Controller {
       [request.authParams.userId, organizationId]
     );
 
-    return ok(result);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organization");
+    }
+    const org = result.data?.at(0);
+    if (!org) {
+      this.setStatus(404);
+      return err("Organization not found");
+    }
+
+    return ok(org);
   }
 
   @Get("/reseller/{resellerId}")
@@ -217,7 +237,7 @@ export class OrganizationController extends Controller {
       return ok(null); // Silently succeed if member already exists
     }
 
-    if (org.data.tier === "enterprise" || "team-20250130") {
+    if (org.data.tier === "enterprise" || org.data.tier === "team-20250130") {
       // Enterprise tier: Proceed to add member without additional checks
     } else if (
       org.data.tier === "pro-20240913" ||
@@ -450,7 +470,8 @@ export class OrganizationController extends Controller {
     if (
       memberCount.data > 0 &&
       org.data.tier != "free" &&
-      org.data.tier != "team-20250130"
+      org.data.tier != "team-20250130" &&
+      org.data.tier != "enterprise"
     ) {
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data - 1
