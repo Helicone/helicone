@@ -351,7 +351,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           {/* Top Row */}
           <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
             {/* Left Side */}
-            <div className="flex flex-row items-center gap-3">
+            <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
               {showCollapse && (
                 <Button
@@ -364,7 +364,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                 </Button>
               )}
               {/* Model Name */}
-              <P className="font-medium text-secondary text-nowrap">
+              <P className="font-medium text-secondary text-nowrap truncate">
                 {request.model}
               </P>
             </div>
@@ -458,58 +458,56 @@ export default function RequestDrawer(props: RequestDivProps) {
           {/* Expandable Details Section */}
           {showDetails && (
             <div className="h-full w-full flex flex-col gap-4 p-4 border-b border-border">
-              <div className="flex flex-row gap-8 justify-between">
+              <div className="w-full flex flex-row gap-8 justify-between">
                 {/* Request Information */}
                 <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-2">
-                    {requestDetails.requestInfo.map((item) => (
-                      <div
-                        key={item.label}
-                        className="w-full flex flex-row gap-4 items-center justify-between"
-                      >
-                        <XSmall className="text-muted-foreground whitespace-nowrap">
-                          {item.label}
-                        </XSmall>
-                        <XSmall className="whitespace-nowrap">
-                          {item.value}
-                        </XSmall>
-                      </div>
-                    ))}
-                  </div>
+                  {requestDetails.requestInfo.map((item) => (
+                    <div
+                      key={item.label}
+                      className="grid grid-cols-[auto,1fr] gap-x-4 items-center"
+                    >
+                      <XSmall className="text-muted-foreground text-nowrap">
+                        {item.label}
+                      </XSmall>
+                      <XSmall className="truncate min-w-0 text-right">
+                        {item.value}
+                      </XSmall>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Token Information */}
                 <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-2">
-                    {requestDetails.tokenInfo.map((item) => (
-                      <div
-                        key={item.label}
-                        className="w-full flex flex-row gap-4 items-center justify-between"
-                      >
-                        <XSmall className="text-muted-foreground whitespace-nowrap">
-                          {item.label}
-                        </XSmall>
-                        <XSmall className="whitespace-nowrap">
-                          {item.value}
-                        </XSmall>
-                      </div>
-                    ))}
-                  </div>
+                  {requestDetails.tokenInfo.map((item) => (
+                    <div
+                      key={item.label}
+                      className="grid grid-cols-[auto,1fr] gap-x-4 items-center"
+                    >
+                      <XSmall className="text-muted-foreground text-nowrap">
+                        {item.label}
+                      </XSmall>
+                      <XSmall className="truncate min-w-0 text-right">
+                        {item.value}
+                      </XSmall>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* Request Parameters */}
               {requestDetails.parameterInfo.length > 0 && (
-                <div className="w-full flex flex-col gap-2">
+                <div className="w-full flex flex-col gap-2 pt-4 border-t border-border">
                   {requestDetails.parameterInfo.map((item) => (
                     <div
                       key={item.label}
-                      className="w-full flex flex-row gap-4 items-center justify-between"
+                      className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
                     >
-                      <XSmall className="text-muted-foreground">
+                      <XSmall className="text-muted-foreground text-nowrap">
                         {item.label}
                       </XSmall>
-                      <XSmall className="truncate">{item.value}</XSmall>
+                      <XSmall className="truncate min-w-0 text-right">
+                        {item.value}
+                      </XSmall>
                     </div>
                   ))}
                 </div>
@@ -601,8 +599,14 @@ export default function RequestDrawer(props: RequestDivProps) {
             <FeedbackButtons
               requestId={request.id}
               defaultValue={
-                request.heliconeMetadata.scores?.["helicone-score-feedback"] ===
-                1
+                request.heliconeMetadata.scores &&
+                request.heliconeMetadata.scores["helicone-score-feedback"]
+                  ? Number(
+                      request.heliconeMetadata.scores["helicone-score-feedback"]
+                    ) === 1
+                    ? true
+                    : false
+                  : null
               }
             />
           </div>
