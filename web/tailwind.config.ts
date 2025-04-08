@@ -33,46 +33,24 @@ export default {
       },
       keyframes: {
         popin: {
-          "0%": {
-            transform: "scale(0)",
-            opacity: "0",
-          },
-          "100%": {
-            transform: "scale(1)",
-            opacity: "1",
-          },
+          "0%": { transform: "scale(0)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
         blink: {
-          "0%, 100%": {
-            opacity: "1",
-          },
-          "50%": {
-            opacity: "0",
-          },
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
         },
         shine: {
-          "0%": {
-            backgroundPosition: "200% center",
-          },
-          "100%": {
-            backgroundPosition: "0% center",
-          },
+          "0%": { backgroundPosition: "200% center" },
+          "100%": { backgroundPosition: "0% center" },
         },
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       colors: {
@@ -84,6 +62,7 @@ export default {
             DEFAULT: "#18a4e9",
           },
         },
+        // Core UI Colors
         background: {
           DEFAULT: "hsl(var(--background))",
           foreground: "hsl(var(--foreground))",
@@ -97,45 +76,54 @@ export default {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
+        // Primary Colors
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
+        // Secondary Colors
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        // Muted Colors
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        // Accent Colors
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        // Destructive Colors
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        // Confirmative Colors
         confirmative: {
           DEFAULT: "hsl(var(--confirmative))",
           foreground: "hsl(var(--confirmative-foreground))",
         },
+        // Border Colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        // Chart Colors
         chart: {
-          "1": "oklch(var(--chart-1))",
-          "2": "oklch(var(--chart-2))",
-          "3": "oklch(var(--chart-3))",
-          "4": "oklch(var(--chart-4))",
-          "5": "oklch(var(--chart-5))",
-          "6": "oklch(var(--chart-6))",
-          "7": "oklch(var(--chart-7))",
-          "8": "oklch(var(--chart-8))",
-          "9": "oklch(var(--chart-9))",
-          "10": "oklch(var(--chart-10))",
+          1: "oklch(var(--chart-1))",
+          2: "oklch(var(--chart-2))",
+          3: "oklch(var(--chart-3))",
+          4: "oklch(var(--chart-4))",
+          5: "oklch(var(--chart-5))",
+          6: "oklch(var(--chart-6))",
+          7: "oklch(var(--chart-7))",
+          8: "oklch(var(--chart-8))",
+          9: "oklch(var(--chart-9))",
+          10: "oklch(var(--chart-10))",
         },
+        // Sidebar Colors
         sidebar: {
           background: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -145,64 +133,65 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
-          DEFAULT: "hsl(var(--sidebar-background))",
         },
+        // light mode
         tremor: {
           brand: {
-            faint: "#f0f9ff",
-            muted: "#bae6fd",
-            subtle: "#38bdf8",
-            DEFAULT: "#0284c7",
-            emphasis: "#0369a1",
-            inverted: "#ffffff",
+            faint: "#f0f9ff", // sky-50
+            muted: "#bae6fd", // sky-200
+            subtle: "#38bdf8", // sky-400
+            DEFAULT: "#0284c7", // sky-500: #0ea5e9 | sky-600: #0284c7
+            emphasis: "#0369a1", // sky-700
+            inverted: "#ffffff", // white
           },
           background: {
-            muted: "#f9fafb",
-            subtle: "#f3f4f6",
-            DEFAULT: "#ffffff",
-            emphasis: "#374151",
+            muted: "#f9fafb", // gray-50
+            subtle: "#f3f4f6", // gray-100
+            DEFAULT: "#ffffff", // white
+            emphasis: "#374151", // gray-700
           },
           border: {
-            DEFAULT: "#d1d5db",
+            DEFAULT: "#d1d5db", // gray-300
           },
           ring: {
-            DEFAULT: "#d1d5db",
+            DEFAULT: "#d1d5db", // gray-200
           },
           content: {
-            subtle: "#9ca3af",
-            DEFAULT: "#6b7280",
-            emphasis: "#374151",
-            strong: "#111827",
-            inverted: "#ffffff",
+            subtle: "#9ca3af", // gray-400
+            DEFAULT: "#6b7280", // gray-500
+            emphasis: "#374151", // gray-700
+            strong: "#111827", // gray-900
+            inverted: "#ffffff", // white
           },
         },
+        // // dark mode
         "dark-tremor": {
           brand: {
-            faint: "#ffffff",
-            muted: "#0369a1",
-            subtle: "#0ea5e9",
-            DEFAULT: "#0284c7",
-            emphasis: "#38bdf8",
-            inverted: "#f0f9ff",
+            faint: "#ffffff", // custom
+            muted: "#0369a1", // blue-950
+            subtle: "#0ea5e9", // blue-800
+            DEFAULT: "#0284c7", // blue-500
+            emphasis: "#38bdf8", // blue-400
+            inverted: "#f0f9ff", // gray-950
           },
           background: {
-            muted: "#131A2B",
-            subtle: "#1f2937",
-            DEFAULT: "#000000",
-            emphasis: "#d1d5db",
+            muted: "#131A2B", // custom
+            subtle: "#1f2937", // gray-800
+            DEFAULT: "#000000", // gray-900 -> black
+            emphasis: "#d1d5db", // gray-300
           },
           border: {
-            DEFAULT: "#1f2937",
+            DEFAULT: "#1f2937", // gray-800
           },
           ring: {
-            DEFAULT: "#1f2937",
+            DEFAULT: "#1f2937", // gray-800
           },
           content: {
-            subtle: "#4b5563",
-            DEFAULT: "#6b7280",
-            emphasis: "#e5e7eb",
-            strong: "#f9fafb",
-            inverted: "#000000",
+            subtle: "#4b5563", // gray-600
+            DEFAULT: "#6b7280", // gray-500
+            emphasis: "#e5e7eb", // gray-200
+            strong: "#f9fafb", // gray-50
+            inverted: "#000000", // black
           },
         },
       },
@@ -215,11 +204,13 @@ export default {
         "tremor-full": "9999px",
       },
       boxShadow: {
+        // light
         "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         "tremor-dropdown":
           "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        // dark
         "dark-tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "dark-tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
@@ -227,24 +218,9 @@ export default {
           "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
       },
       fontSize: {
-        "tremor-default": [
-          "0.875rem",
-          {
-            lineHeight: "1.25rem",
-          },
-        ],
-        "tremor-title": [
-          "1.125rem",
-          {
-            lineHeight: "1.75rem",
-          },
-        ],
-        "tremor-metric": [
-          "1.875rem",
-          {
-            lineHeight: "2.25rem",
-          },
-        ],
+        "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
+        "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
+        "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
       },
     },
   },
