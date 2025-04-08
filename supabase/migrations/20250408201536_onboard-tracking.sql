@@ -34,35 +34,6 @@ FROM http_post(
             'api_key',
             posthog_key,
             'event',
-            '$groupidentify',
-            'distinct_id',
-            NEW.owner,
-            'properties',
-            jsonb_build_object(
-                '$group_type',
-                'organization',
-                '$group_key',
-                NEW.id,
-                '$group_set',
-                jsonb_build_object(
-                    'name',
-                    COALESCE(NEW.name, ''),
-                    'has_onboarded',
-                    true,
-                    'onboarded_at',
-                    now()
-                )
-            )
-        )::text,
-        'application/json'
-    );
-SELECT * INTO response
-FROM http_post(
-        'https://app.posthog.com/capture/',
-        jsonb_build_object(
-            'api_key',
-            posthog_key,
-            'event',
             'organization_onboarded',
             'distinct_id',
             NEW.owner,
@@ -90,7 +61,6 @@ END IF;
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-END IF;
 END IF;
 RETURN NEW;
 END;
