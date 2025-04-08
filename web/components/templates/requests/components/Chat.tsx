@@ -1,15 +1,15 @@
+import MarkdownEditor from "@/components/shared/markdownEditor";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { Button } from "@/components/ui/button";
 import { XSmall } from "@/components/ui/typography";
 import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
 import { PiToolboxBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
-import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
-import MarkdownEditor from "@/components/shared/markdownEditor";
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
@@ -134,11 +134,11 @@ export default function Chat({ mappedRequest }: ChatProps) {
             className="w-full flex flex-col border-b border-border"
           >
             {/* Message Role Header */}
-            <div className="h-12 w-full flex flex-row items-center justify-between shrink-0 px-4 sticky top-0 bg-white dark:bg-black z-10 shadow-sm">
+            <header className="h-12 w-full flex flex-row items-center justify-between shrink-0 px-4 sticky top-0 bg-white dark:bg-black z-10 shadow-sm">
               <h2 className="text-secondary font-medium capitalize text-sm">
                 {message.role}
               </h2>
-            </div>
+            </header>
 
             <div className="w-full flex flex-col relative p-4">
               {(() => {
