@@ -78,9 +78,9 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
-                size="xs"
+                variant="none"
+                size="none"
+                className="h-9 w-9 shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800"
               >
                 <LuColumns3 className="h-4 w-4" />
               </Button>
