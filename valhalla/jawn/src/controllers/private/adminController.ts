@@ -1287,8 +1287,6 @@ export class AdminController extends Controller {
     invoices: Stripe.Invoice[];
     discounts: Record<string, Stripe.Discount>;
   }> {
-    console.time("getSubscriptionData");
-    console.log("[AdminController] Starting getSubscriptionData");
     await authCheckThrow(request.authParams.userId);
 
     // Use AdminManager to handle Stripe API calls with rate limiting and caching
@@ -1298,9 +1296,6 @@ export class AdminController extends Controller {
     if (result.error || !result.data) {
       throw new Error(result.error || "No subscription data returned");
     }
-
-    console.timeEnd("getSubscriptionData");
-    console.log(`[AdminController] Finished getSubscriptionData`);
 
     // Return the data
     return result.data;

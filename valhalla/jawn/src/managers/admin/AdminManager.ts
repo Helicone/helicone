@@ -82,12 +82,10 @@ export class AdminManager extends BaseManager {
     const cachedData = await adminKVCache.get<Stripe.Subscription[]>(cacheKey);
 
     if (cachedData) {
-      console.log("[AdminManager] Using cached subscriptions");
       return ok(cachedData);
     }
 
     console.time("fetchSubscriptions");
-    console.log("[AdminManager] Fetching subscriptions in parallel");
 
     try {
       // First get total count with a single request
@@ -100,9 +98,6 @@ export class AdminManager extends BaseManager {
 
       // Using Stripe has_more and a single item, we can estimate total pages
       const totalPages = Math.ceil(firstPage.hasMore ? 10000 : 1);
-      console.log(
-        `[AdminManager] Estimated ${totalPages} pages of subscriptions`
-      );
 
       // Use cursors to fetch pages in parallel
       const allSubscriptions: Stripe.Subscription[] = [];
@@ -158,10 +153,6 @@ export class AdminManager extends BaseManager {
           totalFetched += items.length;
         });
 
-        console.log(
-          `[AdminManager] Fetched ${totalFetched} subscriptions in parallel (total: ${allSubscriptions.length})`
-        );
-
         // Update cursor for next batch
         currentCursor = cursors[cursors.length - 1];
 
@@ -175,9 +166,6 @@ export class AdminManager extends BaseManager {
       }
 
       console.timeEnd("fetchSubscriptions");
-      console.log(
-        `[AdminManager] Completed fetching all subscriptions. Total: ${allSubscriptions.length}`
-      );
 
       // Cache the result
       await adminKVCache.set(cacheKey, allSubscriptions);
@@ -197,14 +185,10 @@ export class AdminManager extends BaseManager {
     const cachedData = await adminKVCache.get<Stripe.Invoice[]>(cacheKey);
 
     if (cachedData) {
-      console.log("[AdminManager] Using cached invoices");
       return ok(cachedData);
     }
 
     console.time("fetchInvoices");
-    console.log(
-      "[AdminManager] Fetching invoices by day for last 6 months (parallel)"
-    );
 
     try {
       // Last N months (configurable)
@@ -228,10 +212,6 @@ export class AdminManager extends BaseManager {
           label: new Date(dayStart * 1000).toISOString().split("T")[0],
         });
       }
-
-      console.log(
-        `[AdminManager] Created ${dateChunks.length} daily chunks for invoice fetching`
-      );
 
       // Process chunks in parallel batches
       const allInvoices: Stripe.Invoice[] = [];
@@ -263,10 +243,6 @@ export class AdminManager extends BaseManager {
           batchTotal += invoices.length;
         });
 
-        console.log(
-          `[AdminManager] Fetched ${batchTotal} invoices in parallel batch (total: ${allInvoices.length})`
-        );
-
         // Rate limiting between batches
         if (i + parallelChunks < dateChunks.length) {
           const elapsed = Date.now() - startTime;
@@ -277,11 +253,6 @@ export class AdminManager extends BaseManager {
           }
         }
       }
-
-      console.timeEnd("fetchInvoices");
-      console.log(
-        `[AdminManager] Completed fetching all invoices. Total: ${allInvoices.length}`
-      );
 
       // Cache the result
       await adminKVCache.set(cacheKey, allInvoices);
@@ -330,9 +301,6 @@ export class AdminManager extends BaseManager {
       lastId = newLastId;
     }
 
-    console.log(
-      `[AdminManager] Fetched ${dayInvoices.length} invoices for ${chunk.label}`
-    );
     return dayInvoices;
   }
 
@@ -347,9 +315,6 @@ export class AdminManager extends BaseManager {
     // Find subscriptions with discounts
     const subsWithDiscounts = subscriptions.filter(
       (sub) => sub.discount !== null
-    );
-    console.log(
-      `[AdminManager] Found ${subsWithDiscounts.length} subscriptions with discounts`
     );
 
     // Extract unique coupon IDs
@@ -377,10 +342,6 @@ export class AdminManager extends BaseManager {
         });
       }
     });
-
-    console.log(
-      `[AdminManager] Fetching ${couponIds.size} unique coupons in parallel`
-    );
 
     // Fetch all unique coupons in parallel
     const couponPromises = Array.from(couponIds).map(async (couponId) => {
@@ -441,7 +402,6 @@ export class AdminManager extends BaseManager {
 
     // If forced refresh, clear the caches
     if (forceRefresh) {
-      console.log("[AdminManager] Force refresh requested, clearing cache");
       await adminKVCache.set(
         `subscriptions-${this.authParams.organizationId}`,
         null
@@ -466,14 +426,10 @@ export class AdminManager extends BaseManager {
     }>(cacheKey);
 
     if (cachedData && !forceRefresh) {
-      console.log("[AdminManager] Using cached subscription data");
       return ok(cachedData);
     }
 
     try {
-      console.time("getSubscriptionData");
-      console.log("[AdminManager] Starting parallel getSubscriptionData");
-
       // Fetch subscriptions and invoices in parallel
       const [subscriptionsResult, invoicesResult] = await Promise.all([
         this.getSubscriptions(),
@@ -491,25 +447,11 @@ export class AdminManager extends BaseManager {
       const subscriptions = subscriptionsResult.data!;
       const invoices = invoicesResult.data!;
 
-      console.log(
-        `[AdminManager] Fetched ${subscriptions.length} subscriptions and ${invoices.length} invoices in parallel`
-      );
-
       // Process discounts
       const discounts = await this.processDiscounts(subscriptions);
-      console.log(
-        `[AdminManager] Processed ${Object.keys(discounts).length} discounts`
-      );
 
       // Fetch upcoming invoices for all active subscriptions
-      console.time("fetchUpcomingInvoices");
       const upcomingInvoices = await this.fetchUpcomingInvoices();
-      console.timeEnd("fetchUpcomingInvoices");
-      console.log(
-        `[AdminManager] Fetched ${
-          Object.keys(upcomingInvoices).length
-        } upcoming invoices for active subscriptions`
-      );
 
       const result = {
         subscriptions,
@@ -542,7 +484,6 @@ export class AdminManager extends BaseManager {
     >(cacheKey);
 
     if (cachedData) {
-      console.log("[AdminManager] Using cached upcoming invoices");
       return cachedData;
     }
 
@@ -562,10 +503,6 @@ export class AdminManager extends BaseManager {
         s.status === "active" || s.status === "trialing"
     );
 
-    console.log(
-      `Fetching upcoming invoices for ${activeSubscriptions.length} active subscriptions`
-    );
-
     // Create a concurrency limiter that allows exactly 95 simultaneous requests
     const limit = pLimit(95);
 
@@ -579,13 +516,6 @@ export class AdminManager extends BaseManager {
       activeSubscriptions.map(
         (subscription: Stripe.Subscription, index: number) =>
           limit(async () => {
-            // Log start and progress at fixed intervals
-            if (index === 0 || index % 200 === 0) {
-              console.log(
-                `Processing subscription ${index}/${activeSubscriptions.length}`
-              );
-            }
-
             try {
               const invoice = await this.stripe.invoices.retrieveUpcoming({
                 subscription: subscription.id,
@@ -614,10 +544,6 @@ export class AdminManager extends BaseManager {
           } => result !== null
         )
         .map((result) => [result.id, result.invoice])
-    );
-
-    console.log(
-      `Fetched ${Object.keys(upcomingInvoices).length} upcoming invoices`
     );
 
     await adminKVCache.set(cacheKey, upcomingInvoices);
