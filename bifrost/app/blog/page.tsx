@@ -193,7 +193,7 @@ export type BlogStructure =
     };
   };
 
-const blogContent: BlogStructure[] = [
+export const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "o1-pro-for-developers",
