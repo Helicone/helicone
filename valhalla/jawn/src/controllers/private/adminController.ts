@@ -978,15 +978,17 @@ export class AdminController extends Controller {
     await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
 
-    const { error } = await dbExecute(
-      `
+    for (const adminId of adminIds) {
+      const { error } = await dbExecute(
+        `
       INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)
       `,
-      [orgId, adminIds, "admin"]
-    );
+        [orgId, adminId, "admin"]
+      );
 
-    if (error) {
-      throw new Error(error);
+      if (error) {
+        throw new Error(error);
+      }
     }
   }
 
