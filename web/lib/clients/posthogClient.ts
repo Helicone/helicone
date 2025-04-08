@@ -1,5 +1,3 @@
-import posthog from "posthog-js";
-
 export class PosthogClient {
   private static instance: PosthogClient;
   private isEnabled: boolean;
