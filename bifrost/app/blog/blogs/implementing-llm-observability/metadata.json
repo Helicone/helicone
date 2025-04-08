@@ -1,12 +1,12 @@
 {
-  "title": "Why You Should Monitor Your AI Applications (Part 1)",
-  "title1": "Why You Should Monitor Your AI Applications (Part 1)",
-  "title2": "Why You Should Monitor Your AI Applications (Part 1)",
+  "title": "How to Implement LLM Observability for Production (Part 2)",
+  "title1": "How to Implement LLM Observability for Production (Part 2)",
+  "title2": "How to Implement LLM Observability for Production (Part 2)",
   "description": "Struggling with unreliable LLM applications? Let's talk about how to monitor, debug, and optimize your AI applications for production use, and the best tools out there for tracking LLM behaviors.",
   "images": "/static/blog/llm-observability-cover.webp",
   "time": "6 minute read",
   "author": "Lina Lam",
-  "date": "March 13, 2025",
+  "date": "March 28, 2025",
   "badge": "guide"
 }
  
