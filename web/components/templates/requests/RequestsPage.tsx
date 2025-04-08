@@ -729,42 +729,44 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 </Button>
               )}
 
-              {/* Columns Configuration Button */}
-              <ViewColumns
-                columns={tableRef.current?.getAllColumns() || []}
-                activeColumns={
-                  tableRef.current
-                    ?.getAllColumns()
-                    .filter((col: any) => col.id !== "select") // Exclude select column from management
-                    .map((col: any) => ({
-                      id: col.id,
-                      name: col.columnDef.header?.toString() || col.id,
-                      shown: col.getIsVisible(),
-                    })) || []
-                }
-                setActiveColumns={(columns) => {
-                  const table = tableRef.current;
-                  if (!table) return;
+              <div className="flex flex-row gpa-0">
+                {/* Columns Configuration Button */}
+                <ViewColumns
+                  columns={tableRef.current?.getAllColumns() || []}
+                  activeColumns={
+                    tableRef.current
+                      ?.getAllColumns()
+                      .filter((col: any) => col.id !== "select") // Exclude select column from management
+                      .map((col: any) => ({
+                        id: col.id,
+                        name: col.columnDef.header?.toString() || col.id,
+                        shown: col.getIsVisible(),
+                      })) || []
+                  }
+                  setActiveColumns={(columns) => {
+                    const table = tableRef.current;
+                    if (!table) return;
 
-                  // Update all column visibility states at once
-                  const visibilityState: Record<string, boolean> = {};
-                  columns.forEach((col) => {
-                    if (col.id !== "select") {
-                      // Don't modify select column visibility
-                      visibilityState[col.id] = col.shown;
-                    }
-                  });
-                  table.setColumnVisibility(visibilityState);
-                }}
-              />
+                    // Update all column visibility states at once
+                    const visibilityState: Record<string, boolean> = {};
+                    columns.forEach((col) => {
+                      if (col.id !== "select") {
+                        // Don't modify select column visibility
+                        visibilityState[col.id] = col.shown;
+                      }
+                    });
+                    table.setColumnVisibility(visibilityState);
+                  }}
+                />
 
-              {/* Export button */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ExportButton rows={requests} />
-                </TooltipTrigger>
-                <TooltipContent>Export data</TooltipContent>
-              </Tooltip>
+                {/* Export button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ExportButton rows={requests} />
+                  </TooltipTrigger>
+                  <TooltipContent>Export data</TooltipContent>
+                </Tooltip>
+              </div>
 
               {/* Live pill */}
               <LivePill

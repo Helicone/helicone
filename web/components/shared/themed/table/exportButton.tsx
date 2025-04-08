@@ -89,7 +89,12 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" onClick={() => setOpen(true)} size="xs">
+          <Button
+            variant="none"
+            size="none"
+            className="h-9 w-9 shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800"
+            onClick={() => setOpen(true)}
+          >
             <LuDownload className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
