@@ -57,15 +57,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-          name: author,
-          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-        }))
+            name: author,
+            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+          }))
         : [
-          {
-            name: metadata.author || "",
-            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-          },
-        ],
+            {
+              name: metadata.author || "",
+              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+            },
+          ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -76,11 +76,14 @@ function metaDataToBlogStructure(
   };
 }
 
-const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog, dynamicMetadata }) => {
+const RegularBlogPost: React.FC<BlogPostProps> = async ({
+  blog,
+  dynamicMetadata,
+}) => {
   if ("dynmaicEntry" in blog) {
-    const metadata = dynamicMetadata ?
-      dynamicMetadata.get(blog.dynmaicEntry.folderName) :
-      await getMetadata(blog.dynmaicEntry.folderName);
+    const metadata = dynamicMetadata
+      ? dynamicMetadata.get(blog.dynmaicEntry.folderName)
+      : await getMetadata(blog.dynmaicEntry.folderName);
     blog = metaDataToBlogStructure(blog.dynmaicEntry.folderName, metadata);
   }
 
@@ -102,10 +105,16 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog, dynamicMetadata 
       </div>
 
       <div className="w-full h-fit flex flex-col space-y-2 text-left px-1 md:px-0">
-        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">{blog.description}</p>
+        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">
+          {blog.description}
+        </p>
         <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -114,11 +123,14 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog, dynamicMetadata 
   );
 };
 
-const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog, dynamicMetadata }) => {
+const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
+  blog,
+  dynamicMetadata,
+}) => {
   if ("dynmaicEntry" in blog) {
-    const metadata = dynamicMetadata ?
-      dynamicMetadata.get(blog.dynmaicEntry.folderName) :
-      await getMetadata(blog.dynmaicEntry.folderName);
+    const metadata = dynamicMetadata
+      ? dynamicMetadata.get(blog.dynmaicEntry.folderName)
+      : await getMetadata(blog.dynmaicEntry.folderName);
     blog = metaDataToBlogStructure(blog.dynmaicEntry.folderName, metadata);
   }
 
@@ -146,11 +158,17 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog, dynamicMetadata
           </span>
         </div>
 
-        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">{blog.description}</p>
+        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">
+          {blog.description}
+        </p>
 
         <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -194,10 +212,10 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-    dynmaicEntry: {
-      folderName: string;
+      dynmaicEntry: {
+        folderName: string;
+      };
     };
-  };
 
 const blogContent: BlogStructure[] = [
   {
@@ -681,7 +699,15 @@ const blogContent: BlogStructure[] = [
   },
 ];
 
-const Blog = async () => {
+export default async function Blog({
+  searchParams,
+}: {
+  searchParams: { category?: string; q?: string };
+}) {
+  // Get filter values from URL
+  const activeFilter = (searchParams.category || "all").toLowerCase();
+  const searchTerm = (searchParams.q || "").toLowerCase();
+
   // Load metadata for all dynamic entries first
   const dynamicMetadata = new Map();
 
@@ -689,24 +715,47 @@ const Blog = async () => {
     if ("dynmaicEntry" in blog) {
       const metadata = await getMetadata(blog.dynmaicEntry.folderName);
       dynamicMetadata.set(blog.dynmaicEntry.folderName, metadata);
-      // Log the loaded badge for debugging
-      console.log(`Loaded badge for ${blog.dynmaicEntry.folderName}: ${metadata?.badge || "insight"}`);
     }
   }
 
   // Extract unique badge values from blog content
-  const allBadges = Array.from(new Set(blogContent.map(blog => {
-    if ("dynmaicEntry" in blog) {
-      // Get the actual badge from metadata instead of defaulting to "insight"
-      const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
-      const badge = (metadata?.badge || "insight").toLowerCase();
-      return badge;
-    }
-    return blog.badgeText.toLowerCase();
-  })));
+  const allBadges = Array.from(
+    new Set(
+      blogContent.map((blog) => {
+        if ("dynmaicEntry" in blog) {
+          const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
+          return (metadata?.badge || "insight").toLowerCase();
+        }
+        return blog.badgeText.toLowerCase();
+      })
+    )
+  );
 
-  // Log all collected badges for debugging
-  console.log("All collected badges:", allBadges);
+  // Always keep featured post visible
+  const featuredPost = blogContent[0];
+
+  // Filter the remaining posts based on URL parameters
+  const filteredPosts = blogContent.slice(1).filter((blog) => {
+    let badgeText = "";
+    let title = "";
+
+    if ("dynmaicEntry" in blog) {
+      const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
+      badgeText = (metadata?.badge || "insight").toLowerCase();
+      title = metadata?.title || "";
+    } else {
+      badgeText = blog.badgeText.toLowerCase();
+      title = blog.title;
+    }
+
+    // Apply filters
+    const matchesCategory =
+      activeFilter === "all" || badgeText === activeFilter;
+    const matchesSearch =
+      !searchTerm || title.toLowerCase().includes(searchTerm);
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
@@ -714,22 +763,35 @@ const Blog = async () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
           {/* Featured blog post */}
           <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full">
-            <FeaturedBlogPost blog={blogContent[0]} dynamicMetadata={dynamicMetadata} />
+            <FeaturedBlogPost
+              blog={featuredPost}
+              dynamicMetadata={dynamicMetadata}
+            />
           </div>
 
-          {/* Add filter component right after the featured blog */}
+          {/* Filter component */}
           <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full mb-4">
             <BlogFilter badges={allBadges} />
           </div>
 
-          {/* Rest of blog posts */}
-          {blogContent.slice(1).map((blog, i) => (
-            <RegularBlogPost blog={blog} dynamicMetadata={dynamicMetadata} key={i} />
-          ))}
+          {/* Filtered blog posts */}
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((blog, i) => (
+              <RegularBlogPost
+                blog={blog}
+                dynamicMetadata={dynamicMetadata}
+                key={i}
+              />
+            ))
+          ) : (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-8">
+              <p className="text-slate-500">
+                No matching blog posts found. Try adjusting your filters.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default Blog;
+}
