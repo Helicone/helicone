@@ -11,9 +11,6 @@ import {
   getProductIdFromItem,
   getProductNameFromItem,
   getSubscriptionId,
-  hasValidQuantity,
-  startOfMonth,
-  endOfMonth,
   ensureNestedRecord,
 } from "./stripeUtils";
 
