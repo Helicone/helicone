@@ -1,4 +1,4 @@
-import { LuThumbsDown, LuThumbsUp } from "react-icons/lu";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -55,9 +55,11 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === true ? (
-          <LuThumbsUp className={"h-4 w-4 text-foreground"} />
+          <ThumbsUp size={16} className={"text-foreground"} />
+        ) : requestFeedback.rating === null ? (
+          <ThumbsUp size={16} className="text-foreground/40" />
         ) : (
-          <LuThumbsUp className="h-4 w-4 text-foreground/40" />
+          <ThumbsUp size={16} className="text-foreground/40" />
         )}
       </Button>
       <Button
@@ -71,9 +73,11 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === false ? (
-          <LuThumbsDown className={"h-4 w-4 text-foreground"} />
+          <ThumbsDown size={16} className={"text-foreground"} />
+        ) : requestFeedback.rating === null ? (
+          <ThumbsDown size={16} className="text-foreground/40" />
         ) : (
-          <LuThumbsDown className="h-4 w-4 text-foreground/40" />
+          <ThumbsDown size={16} className="text-foreground/40" />
         )}
       </Button>
     </div>
