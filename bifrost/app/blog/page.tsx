@@ -196,6 +196,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "gemini-2.5-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "o1-pro-for-developers",
     },
   },
