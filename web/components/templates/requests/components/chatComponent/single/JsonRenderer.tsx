@@ -7,6 +7,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
+const DEFAULT_COLLAPSE_LENGTH = 10;
+
 type JsonValue =
   | string
   | number
@@ -29,7 +31,7 @@ interface StringRendererProps {
 
 const StringRenderer: React.FC<StringRendererProps> = ({
   data,
-  maxLength = 10000,
+  maxLength = 10_000,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const isTruncated = data.length > maxLength;
@@ -71,9 +73,12 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   isExpanded = true,
   showCopyButton = true,
 }) => {
-  const [expanded, setExpanded] = useState(isExpanded);
+  const shouldAutoCollapse =
+    Array.isArray(data) && data.length > DEFAULT_COLLAPSE_LENGTH;
+  const [expanded, setExpanded] = useState(
+    shouldAutoCollapse ? false : isExpanded
+  );
   const [copied, setCopied] = useState(false);
-  const indent = "  ".repeat(level);
 
   const handleCopy = () => {
     const jsonString = JSON.stringify(data, null, 2);
