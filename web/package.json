@@ -144,7 +144,7 @@
     "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
     "eslint": "8.47.0",
-    "eslint-config-next": "13.0.5",
+    "eslint-config-next": "^14.2.25",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unused-imports": "^3.0.0",
