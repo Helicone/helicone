@@ -132,9 +132,9 @@ export default function ToolPanel({ tools, onToolsChange }: ToolPanelProps) {
         title="New Tool"
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
-        width="max-w-5xl w-full"
+        width="max-w-5xl"
       >
-        <div className="flex flex-col gap-6 p-4">
+        <div className="h-full flex flex-col gap-6 p-4 justify-between">
           <div className="h-[500px]">
             <MarkdownEditor
               text={toolJson}

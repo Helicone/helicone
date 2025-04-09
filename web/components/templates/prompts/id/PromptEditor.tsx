@@ -92,6 +92,7 @@ type EditorMode =
   | "fromEditor"
   | "fromRequest"
   | "fromPlayground"
+  | "fromExperiment"
   | null;
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
@@ -103,7 +104,8 @@ interface PromptEditorProps {
       isProduction: boolean;
       inputs?: Record<string, string>;
     };
-  }; // Playground Mode
+    onFork?: () => void;
+  }; // Playground Mode or Experiment Mode
 }
 export default function PromptEditor({
   promptId,
@@ -203,7 +205,11 @@ export default function PromptEditor({
     if (requestId) {
       return "fromRequest";
     } else if (basePrompt) {
-      return "fromPlayground";
+      if (basePrompt.onFork) {
+        return "fromExperiment";
+      } else {
+        return "fromPlayground";
+      }
     } else if (promptId) {
       // Check if we have metadata to determine if it's from code or editor
       if (promptData?.metadata?.createdFromUi === true) {
@@ -998,6 +1004,7 @@ export default function PromptEditor({
           break;
 
         case "fromPlayground":
+        case "fromExperiment":
           if (basePrompt) {
             const provider = findClosestProvider(
               basePrompt.metadata.provider || "OPENAI"
@@ -1101,7 +1108,7 @@ export default function PromptEditor({
       <div className="flex h-screen items-center justify-center">
         <LoadingAnimation
           title={
-            promptId && editorMode === null
+            editorMode === null
               ? "Determining prompt source..."
               : "Loading prompt..."
           }
@@ -1111,150 +1118,184 @@ export default function PromptEditor({
   }
   // - Editor
   return (
-    <main className="relative flex flex-col h-screen">
+    <main className="relative flex flex-col h-full w-full">
       {/* Header */}
-      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
-        {/* Left Side: Navigation */}
-        <div className="flex flex-row items-center gap-2">
-          {/* Back Button */}
-          {promptId && (
-            <Link
-              className="text-base text-slate-500 hover:text-heliblue"
-              href="/prompts"
-            >
-              <PiCaretLeftBold />
-            </Link>
-          )}
-          {/* Version Selector */}
-          {promptId && (
-            <VersionSelector
-              id={promptData?.user_defined_id || ""}
-              currentVersion={state.version ?? 0}
-              masterVersion={state.masterVersion ?? 0}
-              versions={promptVersionsData || []}
-              isLoading={isVersionsLoading}
-              isDirty={state.isDirty}
-              onVersionSelect={loadVersionData}
-              onVersionPromote={handleVersionPromote}
-              onIdEdit={handleIdEdit}
-            />
-          )}
-
-          {/* From Request: ID Label */}
-          {requestId && (
-            <Link
-              className="text-sm text-secondary hover:underline"
-              href={`/requests?requestId=${requestId}`}
-            >
-              From Request: {requestId}
-            </Link>
-          )}
-
-          {/* Metrics Drawer */}
-          {promptId && (
-            <Drawer>
-              <DrawerTrigger>
-                <Button variant="link">
-                  <PiChartBarBold className="h-4 w-4 mr-2" />
-                  Metrics
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="w-full h-[75vh]">
-                <ScrollArea className="h-full">
-                  <PromptMetricsTab
-                    id={promptId}
-                    promptUserDefinedId={promptData?.user_defined_id || ""}
-                  />
-                </ScrollArea>
-              </DrawerContent>
-            </Drawer>
-          )}
-
-          {/* From Request or From Playground: Unsaved Changes Indicator */}
-          {(editorMode === "fromRequest" ||
-            editorMode === "fromPlayground" ||
-            editorMode === "fromCode") &&
-            state.isDirty && (
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <div className="flex flex-row items-center gap-2 cursor-default">
-                    <div
-                      className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
-                    />
-                    <span className="text-sm text-secondary font-semibold">
-                      Unsaved Changes
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="max-w-64 text-center">
-                    {editorMode === "fromCode"
-                      ? "This prompt cannot be managed by Helicone because it was imported from code. "
-                      : ""}
-                    <span className="font-semibold">
-                      {editorMode === "fromCode"
-                        ? "Save As Editor Prompt"
-                        : "Save As Prompt"}
-                    </span>{" "}
-                    to keep your progress.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
+      {editorMode !== "fromExperiment" && (
+        <header className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+          {/* Left Side: Navigation */}
+          <div className="flex flex-row items-center gap-2">
+            {/* Back Button */}
+            {promptId && (
+              <Link
+                className="text-base text-slate-500 hover:text-heliblue"
+                href="/prompts"
+              >
+                <PiCaretLeftBold />
+              </Link>
             )}
-        </div>
+            {/* Version Selector */}
+            {promptId && (
+              <VersionSelector
+                id={promptData?.user_defined_id || ""}
+                currentVersion={state.version ?? 0}
+                masterVersion={state.masterVersion ?? 0}
+                versions={promptVersionsData || []}
+                isLoading={isVersionsLoading}
+                isDirty={state.isDirty}
+                onVersionSelect={loadVersionData}
+                onVersionPromote={handleVersionPromote}
+                onIdEdit={handleIdEdit}
+              />
+            )}
 
-        {/* Right Side: Actions */}
-        <div className="flex flex-row items-center gap-2">
-          {/* Auto-Improve Button */}
-          {editorMode === "fromEditor" && (
-            <Button
-              variant="link"
-              onClick={() => setIsAutoImproveOpen(true)}
-              disabled={state.isDirty || !canRun}
-            >
-              <PiBrainBold className="h-4 w-4 mr-2" />
-              Auto-Improve
-            </Button>
-          )}
+            {/* From Request: ID Label */}
+            {requestId && (
+              <Link
+                className="text-sm text-secondary hover:underline"
+                href={`/requests?requestId=${requestId}`}
+              >
+                From Request: {requestId}
+              </Link>
+            )}
 
-          {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
-          {(editorMode === "fromRequest" ||
-            editorMode === "fromPlayground" ||
-            editorMode === "fromCode") && (
-            <Button
-              className="text-white"
-              variant="action"
-              size="sm"
-              onClick={handleSaveAsPrompt}
-              disabled={isCreatingPrompt || state.messages.length === 0}
-            >
-              {isCreatingPrompt ? (
-                <>
-                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : editorMode === "fromCode" ? (
-                "Save as Editor Prompt"
-              ) : (
-                "Save As Prompt"
+            {/* Metrics Drawer */}
+            {promptId && (
+              <Drawer>
+                <DrawerTrigger>
+                  <Button variant="link">
+                    <PiChartBarBold className="h-4 w-4 mr-2" />
+                    Metrics
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="w-full h-[75vh]">
+                  <ScrollArea className="h-full">
+                    <PromptMetricsTab
+                      id={promptId}
+                      promptUserDefinedId={promptData?.user_defined_id || ""}
+                    />
+                  </ScrollArea>
+                </DrawerContent>
+              </Drawer>
+            )}
+
+            {/* From Request or From Playground: Unsaved Changes Indicator */}
+            {(editorMode === "fromRequest" ||
+              editorMode === "fromPlayground" ||
+              editorMode === "fromCode") &&
+              state.isDirty && (
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <div className="flex flex-row items-center gap-2 cursor-default">
+                      <div
+                        className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                      />
+                      <span className="text-sm text-secondary font-semibold">
+                        Unsaved Changes
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="max-w-64 text-center">
+                      {editorMode === "fromCode"
+                        ? "This prompt cannot be managed by Helicone because it was imported from code. "
+                        : ""}
+                      <span className="font-semibold">
+                        {editorMode === "fromCode"
+                          ? "Save As Editor Prompt"
+                          : "Save As Prompt"}
+                      </span>{" "}
+                      to keep your progress.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               )}
-            </Button>
-          )}
+          </div>
 
-          {/* Run & Save Button */}
-          {editorMode === "fromEditor" && state.isDirty ? (
-            <FreeTierLimitWrapper
-              feature="prompts"
-              subfeature="versions"
-              itemCount={versionCount}
-            >
+          {/* Right Side: Actions */}
+          <div className="flex flex-row items-center gap-2">
+            {/* Auto-Improve Button */}
+            {editorMode === "fromEditor" && (
+              <Button
+                variant="link"
+                onClick={() => setIsAutoImproveOpen(true)}
+                disabled={state.isDirty || !canRun}
+              >
+                <PiBrainBold className="h-4 w-4 mr-2" />
+                Auto-Improve
+              </Button>
+            )}
+
+            {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
+            {(editorMode === "fromRequest" ||
+              editorMode === "fromPlayground" ||
+              editorMode === "fromCode") && (
+              <Button
+                className="text-white"
+                variant="action"
+                size="sm"
+                onClick={handleSaveAsPrompt}
+                disabled={isCreatingPrompt || state.messages.length === 0}
+              >
+                {isCreatingPrompt ? (
+                  <>
+                    <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : editorMode === "fromCode" ? (
+                  "Save as Editor Prompt"
+                ) : (
+                  "Save As Prompt"
+                )}
+              </Button>
+            )}
+
+            {/* Run & Save Button */}
+            {editorMode === "fromEditor" && state.isDirty ? (
+              <FreeTierLimitWrapper
+                feature="prompts"
+                subfeature="versions"
+                itemCount={versionCount}
+              >
+                <Button
+                  className={`${
+                    isStreaming
+                      ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                      : ""
+                  }`}
+                  variant="action"
+                  size="sm"
+                  disabled={!canRun}
+                  onClick={handleSaveAndRun}
+                >
+                  {isStreaming ? (
+                    <PiStopBold className="h-4 w-4 mr-2" />
+                  ) : (
+                    <PiPlayBold className="h-4 w-4 mr-2" />
+                  )}
+                  <span className="mr-2">
+                    {isStreaming
+                      ? "Stop"
+                      : state.isDirty && editorMode === "fromEditor"
+                      ? "Save & Run"
+                      : "Run"}
+                  </span>
+                  {isStreaming && (
+                    <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  <div className="flex items-center gap-0.5 text-sm opacity-60">
+                    <PiCommandBold className="h-4 w-4" />
+                    <MdKeyboardReturn className="h-4 w-4" />
+                  </div>
+                </Button>
+              </FreeTierLimitWrapper>
+            ) : (
               <Button
                 className={`${
                   isStreaming
                     ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                     : ""
                 }`}
-                variant="action"
+                variant={editorMode === "fromEditor" ? "action" : "outline"}
                 size="sm"
                 disabled={!canRun}
                 onClick={handleSaveAndRun}
@@ -1279,71 +1320,41 @@ export default function PromptEditor({
                   <MdKeyboardReturn className="h-4 w-4" />
                 </div>
               </Button>
-            </FreeTierLimitWrapper>
-          ) : (
-            <Button
-              className={`${
-                isStreaming
-                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                  : ""
-              }`}
-              variant={editorMode === "fromEditor" ? "action" : "outline"}
-              size="sm"
-              disabled={!canRun}
-              onClick={handleSaveAndRun}
-            >
-              {isStreaming ? (
-                <PiStopBold className="h-4 w-4 mr-2" />
-              ) : (
-                <PiPlayBold className="h-4 w-4 mr-2" />
-              )}
-              <span className="mr-2">
-                {isStreaming
-                  ? "Stop"
-                  : state.isDirty && editorMode === "fromEditor"
-                  ? "Save & Run"
-                  : "Run"}
-              </span>
-              {isStreaming && (
-                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-              )}
-              <div className="flex items-center gap-0.5 text-sm opacity-60">
-                <PiCommandBold className="h-4 w-4" />
-                <MdKeyboardReturn className="h-4 w-4" />
-              </div>
-            </Button>
-          )}
+            )}
 
-          {/* Experiment Button */}
-          {promptId && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={newFromPromptVersion.isPending}
-              onClick={async () => {
-                const result = await newFromPromptVersion.mutateAsync({
-                  name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
-                  originalPromptVersion: state.versionId ?? "",
-                });
-                router.push(`/experiments/${result.data?.data?.experimentId}`);
-              }}
-            >
-              <FlaskConicalIcon className="h-4 w-4 mr-2" />
-              <span>Experiment</span>
-            </Button>
-          )}
+            {/* Experiment Button */}
+            {promptId && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={newFromPromptVersion.isPending}
+                onClick={async () => {
+                  const result = await newFromPromptVersion.mutateAsync({
+                    name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
+                    originalPromptVersion: state.versionId ?? "",
+                  });
+                  router.push(
+                    `/experiments/${result.data?.data?.experimentId}`
+                  );
+                }}
+              >
+                <FlaskConicalIcon className="h-4 w-4 mr-2" />
+                <span>Experiment</span>
+              </Button>
+            )}
 
-          {/* Deploy Button */}
-          {promptId && (
-            <DeployDialog
-              promptId={promptId}
-              userDefinedId={promptData?.user_defined_id || "my-prompt-id"}
-              state={state}
-              isImportedFromCode={editorMode === "fromCode"}
-            />
-          )}
-        </div>
-      </div>
+            {/* Deploy Button */}
+            {promptId && (
+              <DeployDialog
+                promptId={promptId}
+                userDefinedId={promptData?.user_defined_id || "my-prompt-id"}
+                state={state}
+                isImportedFromCode={editorMode === "fromCode"}
+              />
+            )}
+          </div>
+        </header>
+      )}
 
       {/* Version limit warning banner */}
       {!withinVersionsLimit && editorMode === "fromEditor" && (
@@ -1384,7 +1395,10 @@ export default function PromptEditor({
       )}
 
       {/* Prompt Editor */}
-      <ResizablePanelGroup direction="horizontal" className="h-full">
+      <ResizablePanelGroup
+        direction={editorMode === "fromExperiment" ? "vertical" : "horizontal"}
+      >
+        {/* Left or Top */}
         <ResizablePanel defaultSize={50} minSize={25}>
           <CustomScrollbar
             ref={messagesScrollRef}
@@ -1407,34 +1421,41 @@ export default function PromptEditor({
             />
           </CustomScrollbar>
         </ResizablePanel>
+
         <ResizableHandle />
+
+        {/* Right or Bottom */}
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={50} minSize={25}>
-              <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
-                <ResponsePanel
-                  response={state.response}
-                  onAddToMessages={() =>
-                    handleAddMessages([
-                      {
-                        _type: "message",
-                        role: "assistant",
-                        content:
-                          typeof state.response === "string"
-                            ? state.response
-                            : (state.response as PromptState["response"])
-                                ?.content || "",
-                      },
-                      { _type: "message", role: "user", content: "" },
-                    ])
-                  }
-                  scrollToBottom={scrollToBottom}
-                />
-              </CustomScrollbar>
-            </ResizablePanel>
+            {/* Right Top */}
+            {editorMode !== "fromExperiment" && (
+              <ResizablePanel defaultSize={50} minSize={25}>
+                <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
+                  <ResponsePanel
+                    response={state.response}
+                    onAddToMessages={() =>
+                      handleAddMessages([
+                        {
+                          _type: "message",
+                          role: "assistant",
+                          content:
+                            typeof state.response === "string"
+                              ? state.response
+                              : (state.response as PromptState["response"])
+                                  ?.content || "",
+                        },
+                        { _type: "message", role: "user", content: "" },
+                      ])
+                    }
+                    scrollToBottom={scrollToBottom}
+                  />
+                </CustomScrollbar>
+              </ResizablePanel>
+            )}
 
-            <ResizableHandle />
+            {editorMode !== "fromExperiment" && <ResizableHandle />}
 
+            {/* Right Bottom */}
             <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
                 <VariablesPanel
@@ -1496,7 +1517,7 @@ export default function PromptEditor({
       {promptId && !!state.version && (
         <UniversalPopup
           title="Auto-Improve (Beta)"
-          width="w-full max-w-7xl"
+          width="max-w-7xl"
           isOpen={isAutoImproveOpen}
           onClose={() => {
             setIsAutoImproveOpen(false);

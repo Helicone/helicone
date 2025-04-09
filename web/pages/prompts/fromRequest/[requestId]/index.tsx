@@ -9,7 +9,11 @@ type PageParams = {
   requestId: string;
 };
 export default function Page(props: PageParams) {
-  return <PromptEditor requestId={props.requestId} />;
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <PromptEditor requestId={props.requestId} />
+    </div>
+  );
 }
 Page.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;

@@ -516,9 +516,7 @@ export const ParameterLabel: React.FC<{
   return (
     <div className="flex items-center gap-2 text-secondary">
       {icon}
-      <label className="text-sm font-medium whitespace-nowrap">
-        {children}
-      </label>
+      <label className="text-sm font-medium line-clamp-1">{children}</label>
     </div>
   );
 };

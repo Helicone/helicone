@@ -31,7 +31,11 @@ const defaultBasePrompt = {
 };
 
 export default function Page() {
-  return <PromptEditor basePrompt={defaultBasePrompt} />;
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <PromptEditor basePrompt={defaultBasePrompt} />
+    </div>
+  );
 }
 
 Page.getLayout = function getLayout(page: ReactElement) {

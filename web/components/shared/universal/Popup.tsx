@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ReactNode, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { PiXBold } from "react-icons/pi";
 
 interface UniversalPopupProps {
@@ -7,15 +8,16 @@ interface UniversalPopupProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
+  height?: string;
   width?: string;
   showCloseButton?: boolean;
 }
-
 export default function UniversalPopup({
   title,
   isOpen,
   onClose,
   children,
+  height = "h-[70vh]",
   width = "max-w-5xl",
   showCloseButton = true,
 }: UniversalPopupProps) {
@@ -39,6 +41,11 @@ export default function UniversalPopup({
 
   if (!isOpen) return null;
 
+  // Mount check for portal compatibility
+  if (typeof document === "undefined") {
+    return null; // Don't render server-side or before mount
+  }
+
   let isMouseDownOnOverlay = false;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -54,14 +61,14 @@ export default function UniversalPopup({
     isMouseDownOnOverlay = false;
   };
 
-  return (
-    <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center backdrop-blur-lg h-screen"
+  return createPortal(
+    <dialog
+      className="h-screen w-screen fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/30 backdrop-blur-md"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
       <div
-        className={`max-h-[90vh] ${width} -mt-16 md:-mt-8 rounded-xl bg-slate-50 dark:bg-slate-950 border border-border flex flex-col`}
+        className={`${width} ${height} w-full h-full bg-slate-50 dark:bg-slate-950 border border-border flex flex-col rounded-xl overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -86,6 +93,7 @@ export default function UniversalPopup({
         {/* Content */}
         {children}
       </div>
-    </div>
+    </dialog>,
+    document.body // Render directly into the body
   );
 }
