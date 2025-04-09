@@ -1,28 +1,28 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { useUser } from "@supabase/auth-helpers-react";
 import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
-import { TimeFilter } from "../../../services/lib/filters/filterDefs";
-import { Result, resultMap } from "../../../packages/common/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { Result, resultMap } from "../../../packages/common/result";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { useBackendMetricCall } from "../../../services/hooks/useBackendFunction";
+import { TimeFilter } from "../../../services/lib/filters/filterDefs";
+import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { Col } from "../../layout/common/col";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import RequestsPageV2 from "../requests/requestsPageV2";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -184,7 +184,7 @@ const RateLimitPage = (props: {}) => {
           )}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          <RequestsPageV2
+          <RequestsPage
             currentPage={1}
             pageSize={25}
             sort={{

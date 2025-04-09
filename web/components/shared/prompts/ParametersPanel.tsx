@@ -358,7 +358,7 @@ export default function ParametersPanel({
           </ParameterLabel>
           <div className="flex gap-2">
             <Select value={selectedCreator} onValueChange={handleCreatorChange}>
-              <SelectTrigger className="w-28 h-8">
+              <SelectTrigger variant="helicone" className="w-28 h-8">
                 <SelectValue placeholder="Creator" />
               </SelectTrigger>
               <SelectContent>
@@ -373,7 +373,7 @@ export default function ParametersPanel({
               value={currentModelName || ""}
               onValueChange={handleModelChange}
             >
-              <SelectTrigger className="w-44 h-8">
+              <SelectTrigger variant="helicone" className="w-36 h-8">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
@@ -388,7 +388,7 @@ export default function ParametersPanel({
               value={parameters.provider as string}
               onValueChange={handleProviderChange}
             >
-              <SelectTrigger className="w-32 h-8">
+              <SelectTrigger variant="helicone" className="w-28 h-8">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
@@ -463,7 +463,7 @@ export default function ParametersPanel({
                   })
                 }
               >
-                <SelectTrigger className="w-28 h-8">
+                <SelectTrigger variant="helicone" className="w-28 h-8">
                   <SelectValue placeholder="Effort" />
                 </SelectTrigger>
                 <SelectContent>

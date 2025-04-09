@@ -1,14 +1,14 @@
 import { User } from "@supabase/auth-helpers-react";
-import AuthLayout from "../components/layout/auth/authLayout";
-import RequestsPageV2 from "../components/templates/requests/requestsPageV2";
-import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement, useEffect } from "react";
+import AuthLayout from "../components/layout/auth/authLayout";
+import RequestsPage from "../components/templates/requests/RequestsPage";
+import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { getSupabaseServer } from "../lib/supabaseServer";
 import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { getSupabaseServer } from "../lib/supabaseServer";
+import { SortDirection } from "../services/lib/sorts/requests/sorts";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
 const jsToRun = `
@@ -80,7 +80,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   }, []);
 
   return (
-    <RequestsPageV2
+    <RequestsPage
       currentPage={currentPage}
       pageSize={pageSize}
       sort={sort}

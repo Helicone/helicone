@@ -1113,7 +1113,7 @@ export default function PromptEditor({
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 shrink-0 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}

@@ -38,7 +38,7 @@ const SidebarHelpDropdown = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   return (
-    <div className="flex flex-col items-start w-full gap-1.5">
+    <div className="w-full flex flex-col items-center gap-2">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -49,11 +49,11 @@ const SidebarHelpDropdown = ({
       >
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
+            variant="outline"
+            size="none"
             className={clsx(
-              "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
-              isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5"
+              "h-9  flex items-center text-xs text-muted-foreground hover:text-foreground",
+              isCollapsed ? "w-9" : "w-full gap-1"
             )}
           >
             <div className="relative flex items-center">
@@ -145,8 +145,8 @@ const SidebarHelpDropdown = ({
       </DropdownMenu>
 
       <Button
-        variant="ghost"
-        size="sm"
+        variant="outline"
+        size="none"
         onClick={() => {
           if (window.Pylon) {
             if (chatOpen) {
@@ -158,21 +158,19 @@ const SidebarHelpDropdown = ({
           }
         }}
         className={clsx(
-          "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
-          isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5",
+          "flex items-center text-xs text-muted-foreground hover:text-foreground",
+          isCollapsed ? "h-9 w-9" : "h-7 w-full gap-1",
           chatOpen && "text-primary"
         )}
       >
-        <div className="relative flex items-center">
-          <MessageCircleMore
-            size={12}
-            className={clsx(
-              chatOpen
-                ? "text-primary"
-                : "text-muted-foreground hover:text-primary"
-            )}
-          />
-        </div>
+        <MessageCircleMore
+          size={12}
+          className={clsx(
+            chatOpen
+              ? "text-primary"
+              : "text-muted-foreground hover:text-primary"
+          )}
+        />
         {!isCollapsed && <span>Message us</span>}
       </Button>
     </div>

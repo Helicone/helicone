@@ -24,6 +24,7 @@ const buttonVariants = cva(
           "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 border border-[hsl(var(--border))] interactive",
         glass:
           "glass border border-slate-200 dark:text-slate-300 dark:border-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
+        none: "",
       },
       size: {
         xs: "h-8 px-3 text-xs",
@@ -34,6 +35,7 @@ const buttonVariants = cva(
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-sm",
         square_icon: "h-7 w-7 p-0",
+        none: "",
       },
       asPill: {
         true: "rounded-full",

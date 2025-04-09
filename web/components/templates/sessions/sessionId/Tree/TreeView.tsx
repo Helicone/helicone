@@ -1,5 +1,5 @@
-import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
-import RequestDrawerV2 from "@/components/templates/requests/requestDrawerV2";
+import RenderHeliconeRequest from "@/components/templates/requests/RenderHeliconeRequest";
+import RequestDrawer from "@/components/templates/requests/RequestDrawer";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HeliconeRequest } from "@/lib/api/request/request";
+import { HeliconeRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { ChevronsDownUpIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -239,14 +239,6 @@ const TreeView: React.FC<TreeViewProps> = ({
                   <RequestWrapper>
                     <RenderHeliconeRequest
                       heliconeRequest={displayedRequest}
-                      hideTopBar={isRealtime}
-                      realtimeMessageFilter={
-                        isRealtime &&
-                        !highlighterRange.active &&
-                        selectedRequestId
-                          ? selectedRequestRole
-                          : undefined
-                      }
                       messageIndexFilter={messageIndexFilter}
                       key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
                     />
@@ -310,12 +302,6 @@ const TreeView: React.FC<TreeViewProps> = ({
               <RequestWrapper>
                 <RenderHeliconeRequest
                   heliconeRequest={displayedRequest}
-                  hideTopBar={isRealtime}
-                  realtimeMessageFilter={
-                    isRealtime && !highlighterRange.active && selectedRequestId
-                      ? selectedRequestRole
-                      : undefined
-                  }
                   messageIndexFilter={messageIndexFilter}
                   key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
                 />
@@ -326,11 +312,9 @@ const TreeView: React.FC<TreeViewProps> = ({
       )}
 
       {!isRealtime && showDrawer && requestIdToShow && displayedRequest && (
-        <RequestDrawerV2
-          open={showDrawer}
-          setOpen={setShowDrawer}
+        <RequestDrawer
           request={heliconeRequestToMappedContent(displayedRequest)}
-          properties={[]}
+          onCollapse={() => setShowDrawer(false)}
         />
       )}
     </Col>
