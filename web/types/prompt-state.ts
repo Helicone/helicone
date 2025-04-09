@@ -13,10 +13,10 @@ export interface PromptState {
   parameters: StateParameters;
   inputs?: StateInputs[];
   evals?: any[]; // TODO: Add evals to the state
-  structure?: any; // TODO: Real structure when feature is added
+  structure?: any; // TODO: Real zod structure when feature is added
 
   isDirty: boolean;
-  response?: string;
+  response?: { content: string; reasoning: string; calls: string };
   improvement?: { reasoning: string; content: string };
 }
 
@@ -27,6 +27,7 @@ export interface StateParameters {
   reasoning_effort?: "low" | "medium" | "high";
   max_tokens?: number;
   tools?: Tool[];
+  stop?: string[];
   // TODO: Add more parameters
 }
 

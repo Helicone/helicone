@@ -252,14 +252,17 @@ export class LogStore {
       new: heliconeTemplate.template,
     });
 
-    // Check if an update is necessary based on template comparison
     if (
       !isCreatedFromUi &&
       (!existingPromptVersion ||
-        (shouldBump.shouldBump &&
-          existingPromptVersion.created_at <= newPromptRecord.createdAt))
+        // ignore shouldUpdateNotBump and always bump to preserve data - Justin 04/08/2025
+        ((shouldBump.shouldBump || shouldBump.shouldUpdateNotBump) &&
+          existingPromptVersion.created_at <= newPromptRecord.createdAt)) &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
+      )
     ) {
-      // Insert new record with incremented version
       const newMajorVersion = existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
@@ -283,7 +286,6 @@ export class LogStore {
 
         versionId = insertResult.id;
 
-        // Update previous production version to not be production
         if (existingPromptVersion) {
           await t.none(
             `UPDATE prompts_versions 
@@ -294,30 +296,6 @@ export class LogStore {
         }
       } catch (error) {
         console.error("Error updating and inserting prompt version", error);
-        throw error;
-      }
-    } else if (
-      shouldBump.shouldUpdateNotBump &&
-      !(
-        "error" in heliconeTemplate.template &&
-        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
-      )
-    ) {
-      try {
-        const updateQuery = `
-        UPDATE prompts_versions
-        SET helicone_template = $1
-        WHERE id = $2
-        RETURNING id`;
-
-        const updateResult = await t.one(updateQuery, [
-          sanitizeObject(heliconeTemplate.template),
-          versionId,
-        ]);
-
-        versionId = updateResult.id;
-      } catch (error) {
-        console.error("Error updating prompt version", error);
         throw error;
       }
     }
