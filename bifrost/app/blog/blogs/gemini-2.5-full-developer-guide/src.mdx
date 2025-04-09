@@ -125,18 +125,15 @@ Gemini 2.5 Pro is accessible through multiple channels depending on your needs:
   secondaryButtonLink="https://docs.helicone.ai/integrations/gemini/api/javascript"
 >
 ```javascript
-const model = genAI.getGenerativeModel(
-  {
-    model: "gemini-2.5-pro-preview-03-25",
-  },
-  requestOptions = {
-    customHeaders: new Headers({
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
-    }),
-    baseUrl: "https://gateway.helicone.ai",
-  } as RequestOptions
-);
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-pro-preview-03-25",
+}, {
+  baseUrl: "https://gateway.helicone.ai",
+  customHeaders: {
+    'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+    'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+  }
+});
 ```
 </CallToAction>
 
