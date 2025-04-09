@@ -159,32 +159,54 @@ const useGetHeliconeDatasetRows = (
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
-  const urlQueries = useQueries({
-    queries: rowsWithSignedUrls.map((row, index: number) => ({
-      queryKey: ["row-content", row.signed_url],
-      queryFn: () =>
-        row.signed_url.error
-          ? Promise.resolve(row.signed_url.data)
-          : fetch(row.signed_url.data!).then((res) => res.json()),
-      enabled: !!row.signed_url,
-      onSuccess: (content: any) => {
-        setRows((prev) => {
-          const newRows = [...prev];
-          newRows[index] = {
-            ...newRows[index],
-            request_response_body: content,
-          };
-          return newRows;
-        });
-      },
-    })),
-  });
-
   useEffect(() => {
     if (rowsWithSignedUrls.length > 0) {
       setRows(rowsWithSignedUrls);
     }
   }, [rowsWithSignedUrls]);
+
+  const urlQueries = useQueries({
+    queries: rowsWithSignedUrls.map((row) => ({
+      queryKey: ["row-content", row.id],
+      queryFn: async () => {
+        if (row.signed_url?.error) {
+          return row.signed_url.data;
+        }
+        if (row.signed_url?.data) {
+          const response = await fetch(row.signed_url.data);
+          return response.json();
+        }
+        return null;
+      },
+      enabled: !!row.signed_url,
+      staleTime: Infinity,
+    })),
+  });
+
+  useEffect(() => {
+    if (rows.length === 0) return;
+
+    urlQueries.forEach((query, index) => {
+      if (query.isSuccess && query.data) {
+        const rowId = rowsWithSignedUrls[index]?.id;
+        if (!rowId) return;
+
+        setRows((currentRows) => {
+          const rowIndex = currentRows.findIndex((r) => r.id === rowId);
+          if (rowIndex === -1 || currentRows[rowIndex].request_response_body) {
+            return currentRows;
+          }
+
+          const newRows = [...currentRows];
+          newRows[rowIndex] = {
+            ...newRows[rowIndex],
+            request_response_body: query.data,
+          };
+          return newRows;
+        });
+      }
+    });
+  }, [urlQueries, rows, rowsWithSignedUrls]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
@@ -204,8 +226,8 @@ const useGetHeliconeDatasetRows = (
     isRefetching: isRefetching || isUrlsFetching,
     rows: rows.map((r) => ({
       ...r,
-      request_body: r.request_response_body?.request,
-      response_body: r.request_response_body?.response,
+      request_body: r.request_response_body?.request || "",
+      response_body: r.request_response_body?.response || "",
     })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
