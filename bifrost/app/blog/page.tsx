@@ -217,7 +217,7 @@ export type BlogStructure =
       };
     };
 
-const blogContent: BlogStructure[] = [
+export const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "gemini-2.5-full-developer-guide",
