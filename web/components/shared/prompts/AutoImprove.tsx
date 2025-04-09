@@ -1,5 +1,6 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "@/packages/llm-mapper/types";
 import { parseImprovedMessages } from "@/utils/messages";
 import { PiBrainBold } from "react-icons/pi";
@@ -36,7 +37,7 @@ export default function AutoImprove({
   updateState,
 }: AutoImproveProps) {
   return (
-    <div className="h-full min-h-[42rem] w-full flex flex-col gap-4 justify-between items-center">
+    <div className="h-full min-h-[42rem] w-full flex flex-col gap-4 justify-between items-center p-4">
       {/* Starting View */}
       {!improvement && (
         <div className="flex flex-col justify-center items-center gap-4">
@@ -68,7 +69,7 @@ export default function AutoImprove({
             improvement?.content ? "h-64" : "max-h-[42rem]"
           }`}
         >
-          <div className="w-full h-full overflow-y-auto text-center">
+          <ScrollArea className="w-full h-full text-center">
             {improvement?.reasoning !== "" ? (
               <ReactMarkdown className="prose prose-sm dark:prose-invert text-secondary">
                 {improvement?.reasoning || ""}
@@ -78,7 +79,7 @@ export default function AutoImprove({
                 Connecting you with our systems...
               </p>
             )}
-          </div>
+          </ScrollArea>
           {isImproving ? <LoadingAnimation /> : <div className="w-full"></div>}
         </div>
       </div>
@@ -91,15 +92,17 @@ export default function AutoImprove({
             <h3 className="font-semibold text-red-500">
               V{version} <span className="">(Current)</span>
             </h3>
-            <div className="h-96 flex flex-col gap-2 overflow-y-auto">
-              {messages.map((msg, index) => (
-                <MiniMessage
-                  key={index}
-                  role={msg.role || ""}
-                  content={msg.content || ""}
-                />
-              ))}
-            </div>
+            <ScrollArea className="h-96">
+              <div className="flex flex-col gap-2">
+                {messages.map((msg, index) => (
+                  <MiniMessage
+                    key={index}
+                    role={msg.role || ""}
+                    content={msg.content || ""}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           </div>
 
           {/* Suggested Version */}
@@ -107,15 +110,19 @@ export default function AutoImprove({
             <h3 className="font-semibold text-green-500">
               V{version + 1} <span className="">(Suggested)</span>
             </h3>
-            <div className="h-96 flex flex-col gap-2 overflow-y-auto">
-              {parseImprovedMessages(improvement.content).map((msg, index) => (
-                <MiniMessage
-                  key={index}
-                  role={msg.role || ""}
-                  content={msg.content || ""}
-                />
-              ))}
-            </div>
+            <ScrollArea className="h-96">
+              <div className="flex flex-col gap-2">
+                {parseImprovedMessages(improvement.content).map(
+                  (msg, index) => (
+                    <MiniMessage
+                      key={index}
+                      role={msg.role || ""}
+                      content={msg.content || ""}
+                    />
+                  )
+                )}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       )}

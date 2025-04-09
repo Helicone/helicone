@@ -29,9 +29,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
+import { processStream } from "@/lib/api/llm/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
+import { openaiChatMapper } from "@/packages/llm-mapper/mappers/openai/chat-v2";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
@@ -376,6 +377,7 @@ export default function PromptEditor({
           tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
+          stop: templateData.stop ?? undefined,
         },
         inputs,
         evals: metadata?.evals ?? [],
@@ -645,8 +647,9 @@ export default function PromptEditor({
 
     // 2. STREAMING STATE + CLEAR RESPONSE
     setIsStreaming(true);
-    updateState({ response: "" }, false);
+    updateState({ response: { content: "", reasoning: "", calls: "" } }, false);
 
+    // Increment run count for limit
     if (editorMode === "fromPlayground") {
       if (!hasPlaygroundAccess) {
         incrementPlaygroundRun();
@@ -662,8 +665,8 @@ export default function PromptEditor({
       variables.map((v) => [v.name, v.value || ""])
     );
 
-    // 3. SAVE: If in promptId mode, not imported from code, and dirty
-    if (promptId && editorMode === "fromEditor" && state.isDirty) {
+    // 3. SAVE: If from Editor, and state is dirty
+    if (editorMode === "fromEditor" && state.isDirty) {
       const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
@@ -684,6 +687,7 @@ export default function PromptEditor({
         isProduction: false,
         inputs: variableMap,
       };
+      console.log("Saving Template:", heliconeTemplate, metadata);
 
       try {
         let result = await jawnClient.POST(
@@ -712,16 +716,15 @@ export default function PromptEditor({
       }
     }
 
-    // 5. RUN: Use autoFillInputs to handle variable replacement
-    const runTemplate = {
+    // 5. RUN: Use toExternal mapper (going to OPENROUTER) + autoFillInputs to handle variable replacement
+    const runTemplate = openaiChatMapper.toExternal({
       ...state.parameters,
       messages: autoFillInputs({
         inputs: variableMap,
         autoInputs: [],
         template: state.messages,
       }),
-    };
-    console.log("Run template:", runTemplate);
+    });
 
     // 6. EXECUTE
     try {
@@ -733,16 +736,19 @@ export default function PromptEditor({
           signal: abortController.current.signal,
         } as any);
 
-        await readStream(
+        await processStream(
           stream,
-          (chunk: string) => {
-            setState((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                response: (prev.response || "") + chunk,
-              };
-            });
+          {
+            initialState: { content: "", reasoning: "", calls: "" },
+            onUpdate: (result) => {
+              setState((prev) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  response: result,
+                };
+              });
+            },
           },
           abortController.current.signal
         );
@@ -756,7 +762,6 @@ export default function PromptEditor({
         abortController.current = null;
       }
     } catch (error) {
-      console.error("Failed to save state:", error);
       setNotification("Failed to save prompt state", "error");
       setIsStreaming(false);
     }
@@ -807,50 +812,21 @@ export default function PromptEditor({
         stop: ["</improved_user>", "</response_format>"], // TODO: Make this dynamic
       });
 
-      await readStream(
+      await processStream(
         stream,
-        (chunk: string) => {
-          try {
-            const jsonResponse = JSON.parse(chunk);
-
-            // Handle different types of chunks
-            if (jsonResponse.type === "content") {
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content:
-                      (prev?.improvement?.content || "") + jsonResponse.chunk,
-                    reasoning: prev?.improvement?.reasoning || "",
-                  },
-                }),
-                false
-              );
-            } else if (jsonResponse.type === "reasoning") {
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content: prev?.improvement?.content || "",
-                    reasoning:
-                      (prev?.improvement?.reasoning || "") + jsonResponse.chunk,
-                  },
-                }),
-                false
-              );
-            } else if (jsonResponse.type === "final") {
-              // Final message just confirms the complete content and reasoning
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content: jsonResponse.content,
-                    reasoning: jsonResponse.reasoning,
-                  },
-                }),
-                false
-              );
-            }
-          } catch (error) {
-            console.error("Error parsing chunk:", error);
-          }
+        {
+          initialState: { content: "", reasoning: "", calls: "" },
+          onUpdate: (result) => {
+            updateState(
+              (prev) => ({
+                improvement: {
+                  content: result.content,
+                  reasoning: result.reasoning,
+                },
+              }),
+              false
+            );
+          },
         },
         abortController.current.signal
       );
@@ -876,8 +852,7 @@ export default function PromptEditor({
 
       // Build Helicone Template for Saving
       const heliconeTemplate = {
-        model: state.parameters.model,
-        temperature: state.parameters.temperature,
+        ...state.parameters,
         messages: improvedMessages.map((msg) => ({
           ...msg,
           content: templateToHeliconeTags(msg.content || ""), // Convert any template tags present to helicone tags
@@ -1370,30 +1345,6 @@ export default function PromptEditor({
         </div>
       </div>
 
-      {/* Auto-improve Popup */}
-      {promptId && !!state.version && (
-        <UniversalPopup
-          title="Auto-Improve (Beta)"
-          width="w-full max-w-7xl"
-          isOpen={isAutoImproveOpen}
-          onClose={() => {
-            setIsAutoImproveOpen(false);
-            updateState({ improvement: undefined }, false);
-          }}
-        >
-          <AutoImprove
-            isImproving={isImproving}
-            improvement={state.improvement}
-            version={state.version}
-            messages={state.messages}
-            onStartImprove={handleImprove}
-            onApplyImprovement={handleApplyImprovement}
-            onCancel={() => setIsAutoImproveOpen(false)}
-            updateState={(updates) => updateState(updates, false)}
-          />
-        </UniversalPopup>
-      )}
-
       {/* Version limit warning banner */}
       {!withinVersionsLimit && editorMode === "fromEditor" && (
         <FreeTierLimitBanner
@@ -1462,13 +1413,17 @@ export default function PromptEditor({
             <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
-                  response={state.response || ""}
+                  response={state.response}
                   onAddToMessages={() =>
                     handleAddMessages([
                       {
                         _type: "message",
                         role: "assistant",
-                        content: state.response || "",
+                        content:
+                          typeof state.response === "string"
+                            ? state.response
+                            : (state.response as PromptState["response"])
+                                ?.content || "",
                       },
                       { _type: "message", role: "user", content: "" },
                     ])
@@ -1503,7 +1458,20 @@ export default function PromptEditor({
                   }}
                 />
 
-                <ToolPanel tools={state.parameters.tools || []} />
+                <ToolPanel
+                  tools={state.parameters.tools || []}
+                  onToolsChange={(tools) => {
+                    updateState((prev) => {
+                      if (!prev) return {};
+                      return {
+                        parameters: {
+                          ...prev.parameters,
+                          tools,
+                        },
+                      };
+                    });
+                  }}
+                />
               </CustomScrollbar>
             </ResizablePanel>
           </ResizablePanelGroup>
@@ -1523,6 +1491,30 @@ export default function PromptEditor({
             : promptRunsUpgradeMessage
         }
       />
+
+      {/* Auto-improve Popup */}
+      {promptId && !!state.version && (
+        <UniversalPopup
+          title="Auto-Improve (Beta)"
+          width="w-full max-w-7xl"
+          isOpen={isAutoImproveOpen}
+          onClose={() => {
+            setIsAutoImproveOpen(false);
+            updateState({ improvement: undefined }, false);
+          }}
+        >
+          <AutoImprove
+            isImproving={isImproving}
+            improvement={state.improvement}
+            version={state.version}
+            messages={state.messages}
+            onStartImprove={handleImprove}
+            onApplyImprovement={handleApplyImprovement}
+            onCancel={() => setIsAutoImproveOpen(false)}
+            updateState={(updates) => updateState(updates, false)}
+          />
+        </UniversalPopup>
+      )}
     </main>
   );
 }

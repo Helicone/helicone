@@ -24,6 +24,7 @@ export async function generateStream(
           // For includeReasoning=true, chunk is a JSON string
           await writer.write(encoder.encode(chunk));
         } catch (error) {
+          console.error("[generateStream] Error writing chunk:", error);
           await writer.abort(error);
           throw error;
         }
@@ -34,12 +35,12 @@ export async function generateStream(
           await writer.close();
         } catch (error) {
           // If we can't close, the stream is probably already closed or errored
-          console.debug("Could not close stream:", error);
+          console.debug("[generateStream] Could not close stream:", error);
         }
       },
     },
   }).catch(async (error) => {
-    console.error("Streaming error:", error);
+    console.error("[generateStream] Streaming error:", error);
     await writer.abort(error);
   });
 
