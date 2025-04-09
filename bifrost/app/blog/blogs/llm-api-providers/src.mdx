@@ -17,17 +17,17 @@ To compare the performance of these leading LLM providers, we will evaluate the 
 | Provider | Cost per 1M tokens <br /> (input / output) | Output tokens <br /> (/second) | TTFT <br /> (seconds) | Context Window |
 |----------|-------------------------------------|------------------|------------------|----------------|
 | Deepseek | $0.55 / $2.19 🥇 | 25/s  | 4.25s | 64k |
-| Together AI | $3.00 / $7.00 | 134/s 🥈 | 0.47s 🥈 | 128k |
-| Fireworks (Fast) | $3.00 / $8.00 | 109/s 🥉 | 0.82s | 164k |
-| OpenRouter | _Varies by routing_  | _Depends on provider_ | _Depends on provider_ | _Depends on provider_ |
-| Hyperbolic | $2.00 / $2.00 🥉 | 23/s | - | 131k |
-| Replicate | $3.75 / $10.00 | - | - | 64k |
-| HuggingFace | _Self-hosted (compute cost)_ | _Depends on hardware_ | _Depends on hardware_ | 128k |
-| Groq (Distill-Llama-70B)| $0.75 / $0.99 | 275/s 🥇 | 0.14s 🥇 | 128k |
-| DeepInfra | $0.55 / $2.19 🥇 | 13/s | 0.54s 🥉 | 64k |
-| Perplexity (r1-1776)| $2.00 / $8.00 | -| - | 128k |
-| Anyscale | _Self-hosted (compute cost)_ | _Depends on hardware_	 | _Depends on hardware_ | 64k–128k |
-| Novita (Turbo) | $0.70 / $2.50 🥈 | 34/s | 0.76s | 64k |
+| [Together AI](#1-together-ai) | $3.00 / $7.00 | 134/s 🥈 | 0.47s 🥈 | 128k |
+| [Fireworks](#2-fireworks-ai) (Fast) | $3.00 / $8.00 | 109/s 🥉 | 0.82s | 164k |
+| [OpenRouter](#3-openrouter) | _Varies by routing_  | _Depends on provider_ | _Depends on provider_ | _Depends on provider_ |
+| [Hyperbolic](#4-hyperbolic) | $2.00 / $2.00 🥉 | 23/s | - | 131k |
+| [Replicate](#5-replicate) | $3.75 / $10.00 | - | - | 64k |
+| [HuggingFace](#6-huggingface) | _Self-hosted (compute cost)_ | _Depends on hardware_ | _Depends on hardware_ | 128k |
+| [Groq](#7-groq) (Distill-Llama-70B)| $0.75 / $0.99 | 275/s 🥇 | 0.14s 🥇 | 128k |
+| [DeepInfra](#8-deepinfra) | $0.55 / $2.19 🥇 | 13/s | 0.54s 🥉 | 64k |
+| [Perplexity](#9-perplexity-ai) (r1-1776)| $2.00 / $8.00 | -| - | 128k |
+| [Anyscale](#10-anyscale) | _Self-hosted (compute cost)_ | _Depends on hardware_	 | _Depends on hardware_ | 64k–128k |
+| [Novita](#11-novita-ai) (Turbo) | $0.70 / $2.50 🥈 | 34/s | 0.76s | 64k |
 
 Sources: <a href="https://artificialanalysis.ai/models/deepseek-r1/providers?endpoints=deepseek_deepseek-r1%2Cfireworks_deepseek-r1%2Cdeepinfra_deepseek-r1_turbo-fp4%2Cdeepinfra_deepseek-r1%2Cnovita_deepseek-r1_turbo%2Cnovita_deepseek-r1%2Ctogetherai_deepseek-r1" target="_blank" rel="noopener">Artificial Analysis</a>, <a href="https://replicate.com/deepseek-ai/deepseek-r1" target="_blank" rel="noopener">Replicate</a>, <a href="https://prompt.16x.engineer/blog/deepseek-r1-cost-pricing-speed" target="_blank" rel="noopener">16x Prompt</a>
 
