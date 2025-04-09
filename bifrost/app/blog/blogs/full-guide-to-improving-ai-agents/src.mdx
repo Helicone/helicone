@@ -8,6 +8,8 @@ Yet, there's no shortage of tutorials and pre-built agents that make it all seem
 
 Let's go beyond the hype and explore some real, practical strategies that work for building actually useful AI agents.
 
+## Table Of Contents
+
 ## Understanding Workflows vs. True Agents
 
 Most online tutorials use "AI agent" to describe any system that makes an API call to a large language model. That's not accurate as there's a clear distinction between workflows and agents:
@@ -83,7 +85,13 @@ In the evaluator-optimizer workflow, one LLM generates content while another eva
 
 ## Best Practices for Building Effective Agents
 
-### 1. Use the Right Tooling
+### 1. Don't Automate Until Value Is Established
+
+Before building an AI agent, ensure the process itself creates value. Many businesses want to automate processes that don't exist yet or haven't been validated manually.
+
+Start by **testing the process manually** to confirm it works and Calculating the potential ROI of automating said process—using a formula such as: `(Rate × Hours - Operational costs) ÷ Development costs`.
+
+### 2. Use the Right Tooling
 
 Many platforms have emerged to make building agents easier and faster and choosing the right one for your specific use case can significantly impact your success. 
 
@@ -102,7 +110,7 @@ Remember that the right tool isn't necessarily the most complex one. In fact, si
 
 Read more about choosing the best AI Agent for your project <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noreferrer">here</a>.
 
-### 2. Use Dedicated Agents
+### 3. Use Dedicated Agents
 
 When building AI agents, consider breaking complex workflows into multiple dedicated agents rather than overloading a single agent. 
 
@@ -119,22 +127,22 @@ Multi-agent architectures provide several advantages:
 
 Remember that the goal isn't complexity for its own sake. A thoughtfully designed multi-agent system should improve both reliability and scalability.
 
-### 3. Document Your Tools
+### 4. Document Your Tools and Processes
 
 > People spend lots of effort on their prompts but then give the model tools with parameters named 'a' and 'b' with no documentation.
 
 — Erik Schluntz, Anthropic
 
-Your tools are only as good to an LLM as their documentation. Treat tool documentation like you would a junior developer's onboarding:
+Your tools are only as good to an LLM as their documentation. Treat tool/process documentation like you would a junior developer's onboarding:
 
 - Include example usage
 - Document edge cases
 - List format requirements
 - Keep parameter names descriptive
 
-Think of the LLM as a new team member who needs to learn your API. The clearer your documentation, the more effectively it will use your tools.
+Think of the LLM as a new team member who needs to learn your API. The clearer your documentation, the more effectively it will work for you.
 
-### 4. Implement Proper Verification
+### 5. Implement Proper Verification
 
 The more you verify LLM outputs at each step of the way, the more you can rely on your system to get the job done. 
 
@@ -144,13 +152,15 @@ For coding agents, verification is easier because you can run tests. However, yo
 - Human approval for critical steps
 - Checkpoints with clear evaluation criteria
 - LLMs that review outputs for quality
+- Tools like Pydantic to aid with structured outputs
+- A human-in-the-loop component (for mission-critical processes), especially in early stages. Once the agent consistently performs well, you can gradually remove this step.
 
 <BottomLine
   title="💡 Use Helicone for Evaluating your LLM Agents"
   description="“Observability tools like Helicone were specifically designed to make evaluating LLM outputs while building agents very easy.“"
 />
 
-### 5. Start Simple and Scale Gradually
+### 6. Start Simple and Scale Gradually
 
 As with any attempt at automation, don't aim to do everything all at once. Instead:
 
@@ -158,7 +168,18 @@ As with any attempt at automation, don't aim to do everything all at once. Inste
 2. Perfect that workflow before adding complexity
 3. Use categorization to limit the scope of what your agent handles
 
-### 6. Measure Everything
+### 7. Develop Iteratively 
+
+Agent development is most efficient when it's iterative. The best approaches include:
+
+- Testing multiple agent architectures to find the optimal solution
+- Regular feedback loops with end users
+- Continual refinement of prompts and tools
+- Adding evaluation metrics (especially for enterprise applications)
+
+Remember that the first version is rarely the best—successful agents evolve through multiple iterations.
+
+### 8. Measure Everything
 
 Effective agent development hinges on measuring performance and iterating on implementations. Without comprehensive measurement, you're building blind. 
 
@@ -168,7 +189,7 @@ Establish clear metrics for success—task completion rate, accuracy, or user sa
 
 A good LLM observability platform like <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> can provide the measurement infrastructure you need to keep your agents in good shape.
 
-### 7. Add Guardrails
+### 9. Add Guardrails
 
 Guard rails are protective constraints that prevent the system from producing harmful, incorrect, or irrelevant outputs. You typically want to implement some or all of the following:
 
@@ -264,6 +285,10 @@ The most successful implementations follow this pragmatic approach, focusing on 
   {
     question: "How can I ensure my AI agent is reliable?",
     answer: "Add explicit verification steps after each significant action and use checkpoints with human approval for critical actions. Finally, implement guard rails for hallucination detection and content filtering."
+  },
+  {
+  question: "Should I build an agent or a workflow?",
+  answer: "Use workflows when you have clear, predictable steps with consistent behavior. Choose agents when tasks require dynamic decision-making with unpredictable steps. Many applications work better with workflows than true agents due to their reliability and simplicity."
   }
 ]} />
 
