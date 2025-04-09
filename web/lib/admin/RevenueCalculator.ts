@@ -1,0 +1,230 @@
+import Stripe from "stripe";
+import {
+  getProductIdsFromInvoice,
+  calculateDiscount,
+  getProductIdsFromUpcomingInvoice,
+} from "./calculatorUtil";
+
+export interface RawStripeData {
+  invoices: Stripe.Invoice[];
+  upcomingInvoices: Stripe.UpcomingInvoice[];
+  discounts: Record<string, Stripe.Discount>;
+}
+
+interface InvoiceData {
+  id: string;
+  amount: number;
+  discountedAmount: number;
+  customerEmail: string;
+  status: string;
+  created: Date;
+}
+
+interface ProductRevenueData {
+  current: number;
+  projected: number;
+  billedInvoices: InvoiceData[];
+  upcomingInvoices: InvoiceData[];
+}
+
+// New interface for revenue data grouped by month
+export interface MonthlyRevenueData {
+  [monthKey: string]: ProductRevenueData;
+}
+
+export class RevenueCalculator {
+  // Raw data
+  private invoices: Stripe.Invoice[];
+  private upcomingInvoices: Stripe.UpcomingInvoice[];
+  private discounts: Record<string, Stripe.Discount>;
+
+  // Just one index
+  private productToInvoices: Map<string, Stripe.Invoice[]> = new Map();
+  private productToUpcomingInvoices: Map<string, Stripe.UpcomingInvoice[]> =
+    new Map();
+
+  constructor(data: RawStripeData) {
+    // Store raw data
+    this.invoices = data.invoices || [];
+    this.upcomingInvoices = data.upcomingInvoices || [];
+    this.discounts = data.discounts || {};
+
+    // Build the product index
+    this.buildProductIndex();
+  }
+
+  private buildProductIndex(): void {
+    // Index current invoices by product
+    this.invoices.forEach((invoice) => {
+      const productIds = getProductIdsFromInvoice(invoice);
+
+      productIds.forEach((productId: string) => {
+        if (!this.productToInvoices.has(productId)) {
+          this.productToInvoices.set(productId, []);
+        }
+        this.productToInvoices.get(productId)!.push(invoice);
+      });
+    });
+
+    // Index upcoming invoices by product
+    this.upcomingInvoices.forEach((invoice) => {
+      const productIds = getProductIdsFromUpcomingInvoice(invoice);
+
+      productIds.forEach((productId: string) => {
+        if (!this.productToUpcomingInvoices.has(productId)) {
+          this.productToUpcomingInvoices.set(productId, []);
+        }
+        this.productToUpcomingInvoices.get(productId)!.push(invoice);
+      });
+    });
+  }
+
+  // Get monthly revenue data for a product
+  public getProductRevenue(productId: string, months = 6): MonthlyRevenueData {
+    // Get all invoices for this product
+    const invoices = this.productToInvoices.get(productId) || [];
+    const allUpcomingInvoices =
+      this.productToUpcomingInvoices.get(productId) || [];
+
+    const filteredInvoices = this.filterByMonths(invoices, months);
+    const upcomingInvoices =
+      this.filterUpcomingInvoicesForCurrentMonth(allUpcomingInvoices);
+
+    // Format all invoices
+    const billedInvoices = this.formatInvoices(filteredInvoices, productId);
+    const upcomingFormattedInvoices = this.formatInvoices(
+      upcomingInvoices,
+      productId
+    );
+
+    // Group billed invoices by month
+    const invoicesByMonth = this.groupInvoicesByMonth(billedInvoices);
+
+    // Create monthly revenue data
+    const monthlyData: MonthlyRevenueData = {};
+
+    // Process each month
+    for (const [monthKey, monthInvoices] of Object.entries(invoicesByMonth)) {
+      const isCurrentMonth = this.isCurrentMonth(monthKey);
+      const relevantUpcomingInvoices = isCurrentMonth
+        ? upcomingFormattedInvoices
+        : [];
+
+      // Calculate monthly totals
+      const current = monthInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+      const projected = relevantUpcomingInvoices.reduce(
+        (sum, inv) => sum + inv.amount,
+        0
+      );
+
+      // Store data for this month
+      monthlyData[monthKey] = {
+        current,
+        projected,
+        billedInvoices: monthInvoices,
+        upcomingInvoices: relevantUpcomingInvoices,
+      };
+    }
+
+    return monthlyData;
+  }
+
+  // Group invoices by month in YYYY-MM format
+  private groupInvoicesByMonth(
+    invoices: InvoiceData[]
+  ): Record<string, InvoiceData[]> {
+    const byMonth: Record<string, InvoiceData[]> = {};
+
+    invoices.forEach((invoice) => {
+      const date = invoice.created;
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+
+      if (!byMonth[monthKey]) {
+        byMonth[monthKey] = [];
+      }
+
+      byMonth[monthKey].push(invoice);
+    });
+
+    return byMonth;
+  }
+
+  // Check if a month key represents the current month
+  private isCurrentMonth(monthKey: string): boolean {
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}`;
+    return monthKey === currentMonthKey;
+  }
+
+  // Filter upcoming invoices to only include those due by the end of the current month
+  private filterUpcomingInvoicesForCurrentMonth(
+    invoices: Stripe.UpcomingInvoice[]
+  ): Stripe.UpcomingInvoice[] {
+    // Get the last day of the current month
+    const now = new Date();
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    lastDayOfMonth.setHours(23, 59, 59, 999);
+
+    const filteredInvoices = invoices.filter((invoice) => {
+      if (!invoice.created) return false;
+
+      const dueDate = new Date(invoice.created * 1000);
+
+      return dueDate <= lastDayOfMonth;
+    });
+
+    return filteredInvoices;
+  }
+
+  // Helper methods
+  private filterByMonths(
+    invoices: Stripe.Invoice[],
+    months: number
+  ): Stripe.Invoice[] {
+    if (months <= 0) return invoices; // No filtering
+
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+
+    return invoices.filter((inv) => new Date(inv.created * 1000) >= cutoffDate);
+  }
+
+  private formatInvoices(
+    invoices: Stripe.Invoice[] | Stripe.UpcomingInvoice[],
+    productId?: string
+  ): InvoiceData[] {
+    return invoices.map((inv) => {
+      const isRegularInvoice = "id" in inv;
+
+      let amount = 0;
+
+      const lines = inv.lines?.data || [];
+
+      if (productId) {
+        // Sum only line items matching this product
+        lines.forEach((line) => {
+          if (line.price?.product === productId) {
+            // Amount is in cents, divide by 100 to get dollars
+            amount += (line.amount || 0) / 100;
+          }
+        });
+      } else {
+        // If no productId specified, use the full invoice amount
+        amount = (isRegularInvoice ? inv.amount_paid : inv.amount_due) / 100;
+      }
+
+      return {
+        id: isRegularInvoice ? inv.id : crypto.randomUUID(),
+        amount,
+        discountedAmount: calculateDiscount(inv, this.discounts, productId),
+        customerEmail: inv.customer_email || "unknown",
+        status: inv.status || "unknown",
+        created: new Date(inv.created * 1000),
+      };
+    });
+  }
+}

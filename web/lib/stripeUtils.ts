@@ -123,10 +123,7 @@ export const getProductName = (
 ): string => {
   if (!product) return "Unknown";
   if (typeof product === "string") return product;
-
-  // Check if product is DeletedProduct
-  if (!("name" in product)) return "Deleted Product";
-
+  if (!("name" in product)) return "Deleted Product"; // Check if DeletedProduct
   return product.name;
 };
 
@@ -195,7 +192,6 @@ export const getProductNameFromItem = (
   item: Stripe.SubscriptionItem
 ): string => {
   if (!item.price?.product) return "Unknown";
-
   return getProductName(item.price.product);
 };
 
@@ -358,7 +354,7 @@ export function calculateUpcomingInvoiceLineMRR(
   if (!line.amount) return 0;
 
   // Skip negative amounts (credits for unused time)
-  if (line.amount < 0) return 0;
+  // if (line.amount < 0) return 0;
 
   // Start with the line amount (already includes quantity)
   let lineAmount = line.amount;
