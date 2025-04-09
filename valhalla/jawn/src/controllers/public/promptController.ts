@@ -537,7 +537,6 @@ export class PromptController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() user_defined_id: string
   ): Promise<Result<PromptVersionResultFilled, string>> {
-    console.log("requestBody", requestBody);
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPormptVersionsTemplates(
       {
