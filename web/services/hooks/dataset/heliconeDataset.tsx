@@ -179,7 +179,6 @@ const useGetHeliconeDatasetRows = (
         return null;
       },
       enabled: !!row.signed_url,
-      staleTime: Infinity,
     })),
   });
 
