@@ -358,7 +358,7 @@ export function calculateUpcomingInvoiceLineMRR(
   if (!line.amount) return 0;
 
   // Skip negative amounts (credits for unused time)
-  if (line.amount < 0) return 0;
+  // if (line.amount < 0) return 0;
 
   // Start with the line amount (already includes quantity)
   let lineAmount = line.amount;

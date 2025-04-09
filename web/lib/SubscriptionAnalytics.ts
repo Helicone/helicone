@@ -319,7 +319,7 @@ export class SubscriptionAnalytics {
           result[monthKey][productId] = { actual: 0, projected: 0 };
         }
 
-        const lineAmount = (line.quantity || 0) > 0 ? line.amount : 0;
+        const lineAmount = line.amount;
 
         // Store debug data for this invoice line
         const debugItems = ensureNestedRecord(
@@ -354,6 +354,18 @@ export class SubscriptionAnalytics {
     Object.values(this.upcomingInvoices).forEach((upcomingInvoice: any) => {
       // Skip if no lines data or not an upcoming invoice
       if (!upcomingInvoice?.lines?.data) return;
+
+      // Use period_start instead of period_end for determining the invoice month
+      // Many invoices are for the current month even if they're due next month
+      const invoiceStartDate = upcomingInvoice.period_start
+        ? new Date(upcomingInvoice.period_start * 1000)
+        : new Date(upcomingInvoice.created * 1000);
+
+      const invoiceMonth = formatDateByInterval(invoiceStartDate, "month");
+
+      // Only filter if the invoice is clearly for a future month (not current)
+      // We want to include all current month subscriptions in projected revenue
+      if (invoiceMonth > currentMonth) return;
 
       // Find subscription id and associated discount (if any)
       const subscriptionId = upcomingInvoice.subscription;

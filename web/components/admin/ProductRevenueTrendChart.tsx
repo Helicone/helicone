@@ -490,12 +490,36 @@ const ProductRevenueTrendChart: React.FC<ProductRevenueTrendChartProps> = ({
                         allItems.push(...items);
                       });
 
+                      // Filter to only show items from current month
+                      const currentDate = new Date();
+                      const currentMonth = `${currentDate.getFullYear()}-${String(
+                        currentDate.getMonth() + 1
+                      ).padStart(2, "0")}`;
+
+                      const currentMonthItems = allItems.filter((item) => {
+                        // If the item has period information, use that
+                        if (item.period && item.period.start) {
+                          const periodStart = new Date(item.period.start);
+                          const itemMonth = `${periodStart.getFullYear()}-${String(
+                            periodStart.getMonth() + 1
+                          ).padStart(2, "0")}`;
+                          return itemMonth === currentMonth;
+                        }
+
+                        // Fall back to the due date, but be inclusive of this month's charges
+                        const dueDate = new Date(item.date);
+                        const dueMonth = `${dueDate.getFullYear()}-${String(
+                          dueDate.getMonth() + 1
+                        ).padStart(2, "0")}`;
+                        return dueMonth <= currentMonth;
+                      });
+
                       // Group by subscription ID only
                       const groupedBySubscription: {
                         [key: string]: UpcomingInvoiceItem[];
                       } = {};
 
-                      allItems.forEach((item) => {
+                      currentMonthItems.forEach((item) => {
                         const subId = item.subscriptionId || "";
 
                         if (!groupedBySubscription[subId]) {
@@ -513,7 +537,7 @@ const ProductRevenueTrendChart: React.FC<ProductRevenueTrendChartProps> = ({
                         const originalAmount = items.reduce((sum, item) => {
                           const itemAmount =
                             typeof item.amount === "number" ? item.amount : 0;
-                          return sum + (itemAmount < 0 ? 0 : itemAmount);
+                          return sum + itemAmount;
                         }, 0);
 
                         // Get discounted amount (post-discount)
@@ -525,9 +549,7 @@ const ProductRevenueTrendChart: React.FC<ProductRevenueTrendChartProps> = ({
                               : typeof item.amount === "number"
                               ? item.amount
                               : 0;
-                          return (
-                            sum + (adjustedAmount < 0 ? 0 : adjustedAmount)
-                          );
+                          return sum + adjustedAmount;
                         }, 0);
 
                         // Customer info from the first item
