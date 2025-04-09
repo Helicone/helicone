@@ -18,6 +18,7 @@ import {
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 import clsx from "clsx";
 import { Small } from "@/components/ui/typography";
+import DateTimeInput from "./ui/DateTimeInput";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -357,6 +358,14 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       );
     }
 
+    if (filterDef?.type === "datetime") {
+      return (
+        <DateTimeInput
+          value={String(condition.value)}
+          onValueChange={handleValueChange}
+        />
+      );
+    }
     // For searchable fields with onSearch function
     if (filterDef?.type === "searchable" && filterDef.onSearch) {
       return (
