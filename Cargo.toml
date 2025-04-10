@@ -4,7 +4,7 @@ members = [
   "crates/openai-types",
   "crates/schema-filter",
   "llm-proxy",
-  "worker-test",
+  "test",
 ]
 resolver = "2"
 
@@ -35,6 +35,7 @@ derive_more = { version = "2.0.1", features = ['as_ref', 'constructor', 'debug',
 futures = "0.3.31"
 http = "1.1"
 http-body-util = "0.1.3"
+humantime-serde = "1.1.1"
 hyper = { version = "1.6.0", features = ['full'] }
 hyper-util = "0.1.11"
 indexmap = "2.8.0"

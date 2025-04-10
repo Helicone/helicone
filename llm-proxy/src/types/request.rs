@@ -5,7 +5,9 @@ use isocountry::CountryCode;
 use serde::Deserialize;
 use url::Url;
 
-use super::config::{router::RouterConfig, template::TemplateInputs};
+use crate::config::router::RouterConfig;
+
+use super::template::TemplateInputs;
 
 #[derive(Debug, Clone, Copy, Deserialize, Eq, Hash, PartialEq)]
 #[serde(rename_all = "kebab-case")]

@@ -2,17 +2,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 use url::Url;
 
-use super::request::Provider;
-
-pub mod rate_limit;
-pub mod retry;
-pub mod router;
-pub mod template;
-
-#[derive(Debug, Default, Clone, Deserialize)]
-pub struct WorkerConfig {
-    pub dispatcher: DispatcherConfig,
-}
+use crate::types::request::Provider;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DispatcherConfig {

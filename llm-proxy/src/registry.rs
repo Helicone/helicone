@@ -2,8 +2,8 @@ use reqwest::Client;
 use tower::{discover::ServiceList, util::BoxService};
 
 use crate::{
+    config::dispatcher::DispatcherConfig,
     dispatcher::{Dispatcher, DispatcherService},
-    types::config::DispatcherConfig,
 };
 
 pub struct Registry;

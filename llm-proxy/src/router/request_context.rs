@@ -70,8 +70,7 @@ where
     ) -> Result<RequestContext, Error> {
         // in a real implementation, we would fetch the router config from the
         // database
-        let router_config =
-            crate::types::config::router::test_router_config().await;
+        let router_config = crate::config::router::test_router_config().await;
         // let target_url =
         // url::Url::parse("https://api.openai.com/v1/chat/completions").unwrap();
         let target_url =

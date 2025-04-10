@@ -10,20 +10,20 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
     tracing_subscriber::registry()
-    .with(
-        tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-            // axum logs rejections from built-in extractors with the `axum::rejection`
-            // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
-            format!(
-                "{}=debug,tower_http=debug,axum::rejection=trace",
-                env!("CARGO_CRATE_NAME")
-            )
-            .into()
-        }),
-    )
-    .with(tracing_subscriber::fmt::layer())
-    .init();
-
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| {
+                    // axum logs rejections from built-in extractors with the `axum::rejection`
+                    // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+                    format!(
+                        "{}=debug,tower_http=debug,axum::rejection=trace",
+                        env!("CARGO_CRATE_NAME")
+                    )
+                    .into()
+                }),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     let server = hyper_util::server::conn::auto::Builder::new(
         hyper_util::rt::TokioExecutor::new(),
@@ -31,7 +31,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let graceful = hyper_util::server::graceful::GracefulShutdown::new();
     let mut ctrl_c = pin!(tokio::signal::ctrl_c());
     tracing::info!("server started");
-    
 
     loop {
         tokio::select! {
@@ -46,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
                 let conn = server.serve_connection_with_upgrades(stream, hyper::service::service_fn(|req| async move {
                         tracing::info!("got request");
-                        let config = llm_proxy::types::config::WorkerConfig::default();
+                        let config = llm_proxy::config::app::AppConfig::default();
                         let mut services = Vec::new();
                         for (provider, _url) in config.dispatcher.provider_urls.iter() {
                             let dispatcher = Dispatcher::new(Client::new(), provider.clone());

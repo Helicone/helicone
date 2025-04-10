@@ -28,8 +28,7 @@ pub async fn test() {
         .send()
         .await
         .unwrap();
-    let response_bytes =
-        response.json::<serde_json::Value>().await.unwrap();
+    let response_bytes = response.json::<serde_json::Value>().await.unwrap();
     println!("Anthropic response: {}", response_bytes);
 }
 
