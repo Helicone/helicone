@@ -1,0 +1,9 @@
+[package]
+name = "metrics"
+edition = { workspace = true }
+publish = false
+version = { workspace = true }
+
+[dependencies]
+heck.workspace = true
+prometheus.workspace = true

@@ -11,7 +11,7 @@ use isocountry::CountryCode;
 
 use crate::{
     dispatcher::ReqBody as Body,
-    error::Error,
+    error::api::Error,
     types::request::{Provider, RequestContext},
 };
 

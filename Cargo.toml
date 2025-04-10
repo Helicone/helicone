@@ -3,6 +3,8 @@ members = [
   "crates/anthropic-types",
   "crates/openai-types",
   "crates/schema-filter",
+  "crates/metrics",
+  "crates/telemetry",
   "llm-proxy",
   "test",
 ]
@@ -12,6 +14,8 @@ resolver = "2"
 edition = "2024"
 authors = ["Thomas Harmon <thomas.alan.harmon@gmail.com>"]
 license = "MIT"
+publish = false
+version = "0.1.0"
 
 [profile.release]
 opt-level = 3
@@ -24,15 +28,20 @@ strip = true
 [workspace.dependencies]
 openai-types = { path = "./crates/openai-types" }
 anthropic-types = { path = "./crates/anthropic-types" }
+telemetry = { path = "./crates/telemetry" }
+metrics = { path = "./crates/metrics" }
 llm-proxy = { path = "./llm-proxy" }
 
 anyhow = "1.0.97"
 base64 = "0.22.1"
 bytes = "1.10.1"
 clap = { version = "4.5.34", features = ["derive"] }
+console-subscriber = "0.1.8"
 derive_builder = "0.20.2"
 derive_more = { version = "2.0.1", features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
 futures = "0.3.31"
+governor = "0.8.0"
+heck = "0.5.0"
 http = "1.1"
 http-body-util = "0.1.3"
 humantime-serde = "1.1.1"
@@ -40,8 +49,17 @@ hyper = { version = "1.6.0", features = ['full'] }
 hyper-util = "0.1.11"
 indexmap = "2.8.0"
 isocountry = "0.3.2"
+log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+meltdown = "0.3.2"
+minio-rsc = "0.2.3"
 openapiv3 = "2.0"
+opentelemetry = { version = "0.24.0" }
+opentelemetry_sdk = { version = "0.24.1", features = ["rt-tokio"] }
+opentelemetry-appender-tracing = "0.5.0"
+opentelemetry-otlp = { version = "0.17.0" }
+opentelemetry-semantic-conventions = "0.16.0"
 pin-project-lite = "0.2.16"
+prometheus = { version = "0.13.4", default-features = false }
 reqwest = { version = "0.12.12", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }
 rust_decimal = "1.37.1"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
@@ -49,10 +67,16 @@ serde_json = "1.0.140"
 serde_repr = "0.1.20"
 serde_with = "3.12.0"
 serde_yaml = "0.9.33"
+strum = "0.27.1"
 thiserror = "2.0.11"
 tokio = { version = "1.44.2", features = ['full'] }
+tokio-postgres = "0.7.13"
 tower = "0.5.2"
+tower_governor = "0.7.0"
 tower-http = "0.6.2"
 tracing = "0.1.41"
+tracing-opentelemetry = "0.25.0"
 tracing-subscriber = "0.3.19"
 url = "2.5.4"
+utoipa = "5.3.1"
+uuid = { version = "1.10.0", features = ["serde", "v7"] }

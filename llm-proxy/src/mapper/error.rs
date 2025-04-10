@@ -1,9 +1,10 @@
+use displaydoc::Display;
 use thiserror::Error;
 
 /// Error types that can occur when mapping requests between providers.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Display)]
 pub enum MapperError {
-    #[error("Failed to convert chat completion request: {0}")]
+    /// Failed to convert chat completion request: {0}
     ChatConversion(ChatConversion),
 }
 

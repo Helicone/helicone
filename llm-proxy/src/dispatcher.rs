@@ -12,7 +12,7 @@ use reqwest::Client;
 use tower::{Service, util::BoxService};
 
 use crate::{
-    error::Error,
+    error::{api::Error, internal::InternalError},
     mapper::TryConvert,
     types::request::{Provider, RequestContext},
 };
@@ -78,7 +78,7 @@ impl Dispatcher {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
-            .ok_or(Error::RequestContextNotFound)?;
+            .ok_or(InternalError::RequestContextNotFound)?;
         let og_provider = req_ctx.proxy_context.original_provider.clone();
         let target_provider = req_ctx.proxy_context.target_provider.clone();
         let target_url = req_ctx.proxy_context.target_url.clone();
@@ -125,7 +125,7 @@ impl Dispatcher {
             .into_body()
             .collect()
             .await
-            .map_err(|e| Error::RequestBodyError(Box::new(e)))?
+            .map_err(|e| InternalError::RequestBodyError(Box::new(e)))?
             .to_bytes();
 
         let req_body_bytes = match (og_provider, target_provider) {
@@ -144,7 +144,8 @@ impl Dispatcher {
             .headers(headers)
             .body(req_body_bytes)
             .send()
-            .await?;
+            .await
+            .map_err(|e| InternalError::ReqwestError(e))?;
 
         convert_reqwest_to_http_response(response).await
     }
@@ -159,9 +160,14 @@ async fn convert_reqwest_to_http_response(
     for (key, value) in response.headers() {
         resp_builder = resp_builder.header(key, value);
     }
-    let body = response.bytes().await?;
+    let body = response
+        .bytes()
+        .await
+        .map_err(|e| InternalError::ReqwestError(e))?;
     let body = Full::new(body);
-    let http_resp = resp_builder.body(body)?;
+    let http_resp = resp_builder
+        .body(body)
+        .map_err(|e| InternalError::HttpError(e))?;
     Ok(http_resp)
 }
 
@@ -171,7 +177,8 @@ fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
     >(&req_body_bytes)
     .unwrap();
     let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
-        TryConvert::try_convert(openai_req)?;
+        TryConvert::try_convert(openai_req)
+            .map_err(|e| InternalError::MapperError(e))?;
     let anthropic_req_bytes = serde_json::to_vec(&anthropic_req).unwrap();
     Ok(Bytes::from(anthropic_req_bytes))
 }

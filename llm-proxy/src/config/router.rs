@@ -66,18 +66,7 @@ pub async fn test_router_config() -> RouterConfig {
     };
 
     // Create test values for RateLimitConfig
-    let rate_limit = RateLimitConfig {
-        unauthenticated: super::rate_limit::LimitConfig {
-            period: std::time::Duration::from_secs(60),
-            quota_size: 10,
-            enabled: false,
-        },
-        authenticated: super::rate_limit::LimitConfig {
-            period: std::time::Duration::from_secs(60),
-            quota_size: 50,
-            enabled: false,
-        },
-    };
+    let rate_limit = RateLimitConfig::default();
 
     RouterConfig {
         cache,

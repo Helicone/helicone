@@ -9,8 +9,11 @@ openai-types = { workspace = true }
 anthropic-types = { workspace = true }
 
 bytes = { workspace = true, features = ['serde'] }
+config = "0.15.11"
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
+displaydoc = "0.2.5"
 futures = { workspace = true }
+governor = { workspace = true }
 http = { workspace = true }
 http-body-util = { workspace = true }
 humantime-serde = { workspace = true }
@@ -18,15 +21,25 @@ hyper = { workspace = true }
 hyper-util = { workspace = true, features = ['server-auto', 'server-graceful', 'tokio'] }
 indexmap = { workspace = true, features = ['serde'] }
 isocountry = { workspace = true }
+json-patch = "4.0.0"
+meltdown = { workspace = true }
+minio-rsc = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
+serde_path_to_error = "0.1.17"
 serde_with = { workspace = true }
+strum = { workspace = true, features = ["derive"]  }
+telemetry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+tokio-postgres = { workspace = true }
 tower = { workspace = true, features = ['full']}
+tower_governor = { workspace = true }
 tower-http = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 url = { workspace = true, features = ['serde'] }
+utoipa = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v7"] }

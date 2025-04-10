@@ -1,6 +1,9 @@
 use std::{convert::Infallible, pin::pin, time::Duration};
 
-use llm_proxy::{dispatcher::Dispatcher, router::picker::RouterPicker};
+use llm_proxy::{
+    app::App, config::app::AppConfig, dispatcher::Dispatcher,
+    router::picker::RouterPicker,
+};
 use reqwest::Client;
 use tokio::net::TcpListener;
 use tower::{Service, ServiceBuilder, ServiceExt, steer::Steer};
@@ -8,13 +11,16 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let listener = TcpListener::bind("127.0.0.1:8080").await?;
+    let config = AppConfig::default();
+    let app = App::new(config);
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| {
-                    // axum logs rejections from built-in extractors with the `axum::rejection`
-                    // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+                    // axum logs rejections from built-in extractors with the
+                    // `axum::rejection` target, at `TRACE`
+                    // level. `axum::rejection=trace` enables showing those
+                    // events
                     format!(
                         "{}=debug,tower_http=debug,axum::rejection=trace",
                         env!("CARGO_CRATE_NAME")
@@ -25,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    let listener = TcpListener::bind("127.0.0.1:8080").await?;
     let server = hyper_util::server::conn::auto::Builder::new(
         hyper_util::rt::TokioExecutor::new(),
     );
