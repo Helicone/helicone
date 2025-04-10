@@ -457,8 +457,7 @@ export class OrganizationStore extends BaseStore {
         `UPDATE organization_member
          SET org_role = $1
          WHERE member = $2
-         AND organization = $3
-         RETURNING id`,
+         AND organization = $3`,
         [orgRole, memberId, organizationId]
       );
 
