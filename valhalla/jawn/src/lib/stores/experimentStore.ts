@@ -1920,6 +1920,8 @@ function modelCost(modelRow: {
       promptCacheReadTokens,
       completionTokens,
       provider: modelRow.provider,
+      promptAudioTokens: 0,
+      completionAudioTokens: 0,
     }) ?? 0
   );
 }
