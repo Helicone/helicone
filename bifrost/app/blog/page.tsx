@@ -57,15 +57,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-            name: author,
-            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-          }))
+          name: author,
+          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+        }))
         : [
-            {
-              name: metadata.author || "",
-              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-            },
-          ],
+          {
+            name: metadata.author || "",
+            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+          },
+        ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -212,12 +212,17 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-      dynmaicEntry: {
-        folderName: string;
-      };
+    dynmaicEntry: {
+      folderName: string;
     };
+  };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "buy-vs-build-llm-observability",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "gemini-2.5-full-developer-guide",
