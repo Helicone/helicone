@@ -36,8 +36,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
 
   const { count, isLoading: isCountLoading } = useGetRequestCountClickhouse(
     startOfMonthFormatted,
-    endOfMonthFormatted,
-    orgContext?.currentOrg?.id
+    endOfMonthFormatted
   );
 
   const currentIcon = ORGANIZATION_ICONS.find(

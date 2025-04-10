@@ -132,7 +132,11 @@ export function buildDynamicUpdateQuery(options: {
   // Add only defined fields to the query
   for (const [key, value] of Object.entries(set)) {
     if (value !== undefined) {
-      queryParts.push(`${key} = $${paramCounter++}`);
+      if (!/^[a-zA-Z0-9_]+$/.test(key)) {
+        throw new Error(`Invalid column name: ${key}`);
+      }
+
+      queryParts.push(`"${key}" = $${paramCounter++}`);
       params.push(value);
     }
   }

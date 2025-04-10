@@ -134,6 +134,7 @@ export class HeliconeLogBuilder {
       throw new Error("Cannot attach multiple streams");
     }
     this.attachedStream = stream;
+    await this.consumeStream();
   }
 
   /**
@@ -158,11 +159,7 @@ export class HeliconeLogBuilder {
     return;
   }
 
-  /**
-   * Sends the log to Helicone
-   * @returns A Promise that resolves when logging is complete
-   */
-  public async sendLog(): Promise<void> {
+  private async consumeStream(): Promise<void> {
     if (this.attachedStream && !this.streamState.isPolling) {
       const stream = this.toReadableStream(this.attachedStream);
       const reader = stream.getReader();
@@ -173,6 +170,12 @@ export class HeliconeLogBuilder {
         }
       }
     }
+  }
+  /**
+   * Sends the log to Helicone
+   * @returns A Promise that resolves when logging is complete
+   */
+  public async sendLog(): Promise<void> {
     await this.waitForStreamToFinish();
     if (this.endTime === 0) {
       this.endTime = performance.now();

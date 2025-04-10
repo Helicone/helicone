@@ -1212,9 +1212,9 @@
   integrity sha512-YZDGIsOe19+tADpM4ggOPsS3RmapjM8BHfaFBcpfOsNtedU/YGUmqK03wtVHjPZu0PHE9QHR/bXhiVlmTPCtvQ==
 
 "@helicone/prompts@^1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.11.tgz#f4fa6daa7a2b40fe6253bd8bc5d2ec0e39a291e7"
-  integrity sha512-cXBrSmWk6UQPkim94BrMY+jDv969r2ZLjXv8sYRizj97rzutLe4Q+CF53Ska7cYd81DUKJp99aYxc+N9NbFDgg==
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.12.tgz#0b255a0150874bb9672e2b0e40703f00de158578"
+  integrity sha512-Pe93rRIw5ZkZsrS+NxbMNmaDi7BNMwC/3bzmL9KV+dzk/VF8AHDy/g35DihIh+cRxqmnFw4kghz4jqaCtcc+TQ==
 
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
