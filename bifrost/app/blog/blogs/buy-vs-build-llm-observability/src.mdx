@@ -1,8 +1,8 @@
-Three weeks into building your own LLM logging system, you realize you need tracing. Two weeks after that, you need cost tracking. Then versioning. Then evaluation metrics. Suddenly your "simple logging solution" has become a part-time job for two engineers. Sound familiar?
+{/* Three weeks into building your own LLM logging system, you realize you need tracing. Two weeks after that, you need cost tracking. Then versioning. Then evaluation metrics. Suddenly your "simple logging solution" has become a part-time job for two engineers. Sound familiar? */}
 
-{/* 
+
 - **Building:** costs effort + salary, but it's totally custom to your needs.
-- **Buying:** costs cash + less customization, but 0 maintenance and often more polished. */}
+- **Buying:** costs cash + less customization, but 0 maintenance and often more polished.
 
 ![Build vs. Buy LLM Observability](/static/blog/buy-vs-build-llm-observability/buy-vs-build.webp)
 
@@ -17,7 +17,7 @@ As more teams ship LLM apps, observability has gone from a nice-to-have to a bas
 
 We've seen teams try both. Let's talk about what it actually takes to build from scratch - and when buying helps you move faster without burning cycles on infra. No sales pitches, we promise. Just what we've learned building LLM apps ourselves.
 
-## TL;DR: WHen to Build vs. Buy
+## TL;DR: Build vs. Buy
 
 ### ✅ Build If:
 - You have **very specific infra requirements** or custom needs.
@@ -58,7 +58,7 @@ Here's a peek into what that journey looks like:
 | Multi-Model Support | Normalize across OpenAI, Anthropic, Mistral, etc. |
 | Privacy & Security  | Handle redaction, encryption, audit logs | */}
 
-### An example of going the build route
+### Going the build route
 
 {/* Even teams that start building often end up cobbling together a system that kind of works — and quietly wish they'd started with a tool. */}
 
@@ -95,7 +95,7 @@ Some questions you might ask yourself:
 - "Why is this user triggering 10x more tokens than expected?"  
 - "Why does Claude hallucinate more in this workflow than GPT-4o?"
 
-We'll walk through a scenario to illustrate how you might go about building a LLM debugging tool from scratch.
+We'll walk through a scenario to illustrate how you might go about building an LLM debugging tool from scratch.
 
 ### Let's start with a scenario 🔍 
 
@@ -117,7 +117,7 @@ You dig deeper. Turns out, the prompt had been silently updated in production tw
 
 The assistant confidently gave the wrong answer. Debugging with the help of a visual trace tree is much easier than digging through logs from the CLI. If something fails in production, you can simply step through the trace tree to see what happened.
 
-## Real talk: When building actually makes sense
+## When building makes sense
 
 Let's be honest: for some teams, building is the right call. If you:
 
@@ -132,13 +132,13 @@ Then yes, building your own solution might be the best path. The companies that 
 
 Another important piece is that you need an easy way to test different models and prompts.
 
-Let's say you're trying to evaluate whether Claude 3.5 Sonnet vs GPT-4o is better for your use case. You run a few experiments with real user queries. 
+Let's say you're trying to evaluate whether Claude 3.5 Sonnet or GPT-4o is better for your use case. You run a few experiments with real user queries. 
 
 Below is a screenshot of the spreadsheet-like interface in Helicone. In this case, we're testing different prompts with the same model.
 
 ![LLM Prompts and Experiments](/static/blog/buy-vs-build-llm-observability/experiments-buy.webp)
 
-Spreadsheet-like interface works really well for testing, especially for comparing prompt and model variations: 
+Spreadsheet-like interfaces work really well for testing, especially for comparing prompt and model variations: 
 
 | Input                   | Claude 3.5 Output       | GPT-4o Output              | Cost    | Latency | Tokens | Eval Score |
 |------------------------|--------------------------|----------------------------|---------|---------|--------|-------------|
@@ -149,25 +149,25 @@ You want to see the full prompts, variable values, and real production inputs (e
 
 If you're curious, <a href="https://www.helicone.ai/blog/test-your-llm-prompts#:~:text=from%20your%20application.-,Step%2Dby%2DStep%20Guide%20to%20Test%20Your%20LLM%20Prompts,-Properly%20testing%20your" target="_blank" rel="noopener">here's how testing works in practice</a>. 
 
-## How to track LLM costs
+## What metrics should you track? 
 
 We think there are a few important aspects to LLM observability: 
-- **Monitor in real-time**: See how your LLM costs are changing over time. Make sure your tool can handle the volume of requests and track in real-time to be responsive.
-- **Add metadata for segmentation**: Add metadata to your requests to make it easier to filter and analyze.
-- **Track the basics (cost, usage, latency)**: See how your LLM costs change over time. What's the average cost per session? Does the new prompt version cost more?
-
-For example, in our Request page, you can see the cost, latency, model, and tokens for each request, as well as the detailed model response.
 
 ![LLM tracing of requests](/static/blog/buy-vs-build-llm-observability/request-buy.webp)
 
+- **Log your requests in real-time.** This helps you get most updated metrics on how your LLM app is performing, find errors and jump on issues as they happen.
+- **Add metadata for segmentation**: <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties#introduction" target="_blank" rel="noopener">Add metadata</a> to your requests to make it easier to filter and analyze.
+- **Track the basics (cost, usage, latency)**: See how your LLM costs change over time. What's the average cost per session? Does the new prompt version cost more?
 
-As your app grows, it's helpful to zoom in on specific users — especially your power users or edge cases. Tracking cost and usage at the individual level helps you answer questions like:
+## Get granular with user-level metrics
+
+As your app grows, it's helpful to <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">zoom in</a> on specific users — especially your power users or edge cases. 
+
+Getting user-level cost and usage helps you answer questions like:
 
 - How often is this user hitting the API?
 - Are they generating a disproportionate amount of cost or tokens?
 - Are they using the product as expected — or maybe pushing the limits?
-
-Here's how we built user tracking in Helicone, along with usage and cost graphs to see trends over time: 
 
 ![User Metrics](/static/blog/buy-vs-build-llm-observability/users-buy.webp)
 
@@ -185,22 +185,15 @@ Everything you've seen in this post — tracing, retries, prompt testing, evals,
 - **Spreadsheet-like testing**: Run prompt variations at scale
 - **Built-in evals**: Measure quality with out-of-the-box or custom metrics
 
-## How to decide
-
-If your team is spending >10% of engineering time maintaining observability infrastructure, it's time to consider buying. Conversely, if you're just starting out and aren't sure what you need:
-
-- Try building the minimum viable observability (request logs, basic cost tracking)
-- Use it for 2-3 weeks to identify your actual needs
-- Evaluate whether continuing to build makes sense based on what you've learned
-
 ## Key takeaways
 
 Phew! That was a lot. Whether you're a solo builder or part of a fast-moving team, LLM observability will eventually become unavoidable. It's not really about whether you need it, more about how much time you want to spend building vs. shipping.
 
-1. **Building gives you control, but eats up time.** It's not just logs — you'll need tracing, testing infrastructure, eval pipelines, retries, cost tracking, and more.
-2. **Buying lets you move faster.** You get debugging tools, prompt/version tracking, and cost visibility out of the box — so you can focus on your app, not infrastructure.
-3. **Most teams underestimate what "just logging" turns into.** It starts small, but grows into a full observability stack before you know it.
-4. **Build if observability is your product.** Buy if you want to ship faster and have observability that scales with your LLM stack.
+1. **If you aren't sure what you need, try an <a href="https://www.helicone.ai/blog/best-langsmith-alternatives" target="_blank" rel="noopener">existing observability tool</a>.** Helicone comes with a generous free tier of 10,000 requests/month and is easy to set up.
+2. **Building gives you control, but eats up time.** It's not just logs — you'll need tracing, testing infrastructure, eval pipelines, retries, cost tracking, and more.
+3. **Buying lets you move faster.** You get debugging tools, prompt/version tracking, and cost visibility out of the box — so you can focus on your app, not infrastructure.
+4. **Most teams underestimate what "just logging" turns into.** It starts small but grows into a full observability stack before you know it.
+5. **Build if observability is your product.** Buy if you want to ship faster and have observability that scales with your LLM stack.
 
 ## Is Helicone right for you?
 
