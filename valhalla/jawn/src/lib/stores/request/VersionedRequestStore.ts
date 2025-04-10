@@ -118,6 +118,8 @@ export class VersionedRequestStore {
         properties: newVersion.properties,
         prompt_cache_write_tokens: row.prompt_cache_write_tokens,
         prompt_cache_read_tokens: row.prompt_cache_read_tokens,
+        prompt_audio_tokens: row.prompt_audio_tokens,
+        completion_audio_tokens: row.completion_audio_tokens,
       },
     ]);
 
