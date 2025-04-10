@@ -13,6 +13,7 @@ import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 
 import Link from "next/link";
 import GlassHeader from "../universal/GlassHeader";
+import FunctionCallBox from "./FunctionCallBox";
 
 interface MessagesPanelProps {
   messages: Message[];
@@ -79,6 +80,7 @@ export default function MessagesPanel({
 
     return messagesToRemove.includes(index);
   };
+  console.log(messages);
 
   return (
     <div ref={containerRef} className="h-full flex flex-col gap-4">
@@ -104,26 +106,6 @@ export default function MessagesPanel({
                   <h2 className="text-tertiary"> - message_{msg.idx}</h2>
                 )}
               </h2>
-
-              {/* Suggest starting prompt */}
-              {/* {index === 0 && areFirstMessagesEmpty && (
-                <button
-                  onClick={() => {
-                    onMessageChange(
-                      0,
-                      "You are a helpful AI assistant that provides clear, accurate answers."
-                    );
-                    onMessageChange(
-                      1,
-                      "I need help writing a professional email."
-                    );
-                  }}
-                  className="flex flex-row items-center gap-2 text-tertiary hover:underline"
-                >
-                  <PiMagicWandBold />
-                  Suggest starting prompt
-                </button>
-              )} */}
 
               {/* Remove Message */}
               {isRemovable && (
@@ -153,7 +135,11 @@ export default function MessagesPanel({
             </GlassHeader>
 
             {/* Message Content */}
-            {msg._type === "image" || msg.image_url ? (
+            {msg._type === "contentArray" &&
+            (msg.contentArray?.[0]?._type === "function" ||
+              msg.contentArray?.[0]?._type === "functionCall") ? (
+              <FunctionCallBox message={msg} disabled={msg.idx !== undefined} />
+            ) : msg._type === "image" || msg.image_url ? (
               <ImageBox message={msg} disabled={msg.idx !== undefined} />
             ) : (
               <PromptBox
