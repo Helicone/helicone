@@ -8,14 +8,13 @@ import {
   Security,
   Tags,
 } from "tsoa";
+import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-
-import { KVCache } from "../../lib/cache/kvCache";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { clickhousePriceCalc } from "../../packages/cost";
 import { resultMap } from "../../packages/common/result";
+import { clickhousePriceCalc } from "../../packages/cost";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { quickCacheResultCustom } from "../../utils/cacheResult";
 
 export interface Property {
   property: string;
@@ -28,7 +27,7 @@ export interface TimeFilterRequest {
   };
 }
 
-const kvCache = new KVCache(60 * 1000); // 5 minutes
+const longCache = new KVCache(60 * 60 * 1000 * 7); // 1 week
 
 @Route("v1/property")
 @Tags("Property")
@@ -54,10 +53,10 @@ export class PropertyController extends Controller {
     )
   `;
 
-    return await cacheResultCustom(
+    return await quickCacheResultCustom(
       "v1/property/query" + request.authParams.organizationId,
       async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      kvCache
+      longCache
     );
   }
 

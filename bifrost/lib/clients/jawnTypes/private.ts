@@ -392,6 +392,9 @@ export interface paths {
      */
     get: operations["GetSubscriptionData"];
   };
+  "/v1/audio/convert-to-wav": {
+    post: operations["ConvertToWav"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -736,6 +739,7 @@ Json: JsonObject;
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
@@ -922,6 +926,10 @@ Json: JsonObject;
       prompt_cache_read_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
+      /** Format: double */
+      prompt_audio_tokens: number | null;
+      /** Format: double */
+      completion_audio_tokens: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -13996,6 +14004,13 @@ Json: JsonObject;
     "Record_string.stripe.Stripe.Discount_": {
       [key: string]: components["schemas"]["stripe.Stripe.Discount"];
     };
+    ConvertToWavResponse: {
+      data: string | null;
+      error: string | null;
+    };
+    ConvertToWavRequestBody: {
+      audioData: string;
+    };
   };
   responses: {
   };
@@ -16440,6 +16455,21 @@ export interface operations {
             invoices: components["schemas"]["stripe.Stripe.Invoice"][];
             subscriptions: components["schemas"]["stripe.Stripe.Subscription"][];
           };
+        };
+      };
+    };
+  };
+  ConvertToWav: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ConvertToWavRequestBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ConvertToWavResponse"];
         };
       };
     };
