@@ -67,7 +67,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       : session_id;
   return {
     props: {
-      user: options.userData.user,
       session_id: decodedSessionId,
     },
   };

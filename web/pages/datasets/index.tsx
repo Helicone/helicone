@@ -1,12 +1,10 @@
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
-import { User } from "@supabase/auth-helpers-react";
-import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
+import AuthLayout from "../../components/layout/auth/authLayout";
 import DatasetsPage from "../../components/templates/datasets/datasetsPage";
+import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
 interface DatasetsProps {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -46,7 +44,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     props: {
-      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {

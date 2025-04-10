@@ -1,4 +1,3 @@
-import { useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { generateAPIKeyHelper } from "../../../../utils/generateAPIKeyHelper";
 import { useOrg } from "../../../layout/org/organizationContext";
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DiffHighlight } from "../diffHighlight";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ArrowUpRightIcon } from "lucide-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 const ASYNC_CODE_CONVERTS = {
   "node.js": (key: string) => `
@@ -48,7 +48,7 @@ const GenerateAPIKey = ({
   selectedIntegrationMethod: "async" | "proxy";
   setCurrentStep: (step: number) => void;
 }) => {
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const { setNotification } = useNotification();
 

@@ -1,9 +1,8 @@
+import { Button } from "@/components/ui/button";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { RadioGroup } from "@headlessui/react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { Button } from "@/components/ui/button";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useCallback, useState } from "react";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { clsx } from "../../../../shared/clsx";
@@ -36,7 +35,6 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
   const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
 
   const [providerKey, setProviderKey] = useState(
     defaultProviderKey || orgProviderKey
@@ -56,29 +54,8 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
         setProviderKeyCallback(newProviderKey);
         return;
       }
-
-      if (orgId) {
-        // update the current orgs provider key if the orgId is set
-        const { error } = await supabaseClient
-          .from("organization")
-          .update({ org_provider_key: newProviderKey })
-          .eq("id", orgId);
-
-        if (error) {
-          setNotification("Error Updating Provider Key", "error");
-        } else {
-          setNotification("Provider Key Updated", "success");
-          setProviderKey(newProviderKey);
-        }
-      }
     },
-    [
-      setProviderKeyCallback,
-      orgId,
-      supabaseClient,
-      setNotification,
-      setProviderKey,
-    ]
+    [setProviderKeyCallback, orgId, setNotification, setProviderKey]
   );
 
   const deleteProviderKey = async (id: string) => {

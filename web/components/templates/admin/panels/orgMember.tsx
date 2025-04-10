@@ -1,12 +1,10 @@
+import { Button } from "@/components/ui/button";
+import { ClipboardIcon } from "@heroicons/react/24/outline";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { TextInput } from "@tremor/react";
 import { useState } from "react";
-
-import useNotification from "../../../shared/notification/useNotification";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../../../lib/clients/jawn";
-import { ClipboardIcon } from "@heroicons/react/24/outline";
-import { Button } from "@/components/ui/button";
+import useNotification from "../../../shared/notification/useNotification";
 
 interface OrgMemberProps {}
 
@@ -14,7 +12,6 @@ const OrgMember = (props: OrgMemberProps) => {
   const {} = props;
 
   const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
 
   const {
     mutate: findOrgs,

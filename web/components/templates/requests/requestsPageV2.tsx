@@ -1,5 +1,4 @@
-import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
-
+import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -10,27 +9,20 @@ import {
   UIFilterRowTree,
 } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
+import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
   isFilterRowNode,
   isUIFilterRow,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import {
-  OrganizationFilter,
-  OrganizationLayout,
-  transformFilter,
-  transformOrganizationLayoutFilters,
-} from "../../../services/lib/organization_layout/organization_layout";
 import {
   SortDirection,
   SortLeafRequest,
@@ -42,23 +34,22 @@ import { clsx } from "../../shared/clsx";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
-import RequestCard from "./requestCard";
-import RequestDiv from "./requestDiv";
-import StreamWarning from "./StreamWarning";
-import TableFooter from "./tableFooter";
-import UnauthorizedView from "./UnauthorizedView";
-import useRequestsPageV2 from "./useRequestsPageV2";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
-import { Row } from "@/components/layout/common";
-import RequestsEmptyState from "./RequestsEmptyState";
 import {
   getMockFilterMap,
   getMockProperties,
   getMockRequestCount,
   getMockRequests,
 } from "./mockRequestsData";
+import RequestCard from "./requestCard";
+import RequestDiv from "./requestDiv";
+import RequestsEmptyState from "./RequestsEmptyState";
+import StreamWarning from "./StreamWarning";
+import TableFooter from "./tableFooter";
+import UnauthorizedView from "./UnauthorizedView";
+import useRequestsPageV2 from "./useRequestsPageV2";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -73,8 +64,6 @@ interface RequestsPageV2Props {
   userId?: string;
   evaluatorId?: string;
   rateLimited?: boolean;
-  currentFilter: OrganizationFilter | null;
-  organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
 }
 
@@ -154,21 +143,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached = false,
     initialRequestId,
     userId,
-    evaluatorId,
     rateLimited = false,
-    currentFilter,
-    organizationLayout,
-    organizationLayoutAvailable,
   } = props;
   const initialLoadRef = useRef(true);
   const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
-  const jawn = useJawnClient();
   const orgContext = useOrg();
   const searchParams = useSearchParams();
-  const [currFilter, setCurrFilter] = useState(
-    searchParams.get("filter") ?? null
-  );
-
   // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
 
@@ -196,27 +176,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  const encodeFilters = (filters: UIFilterRowTree): string => {
-    const encode = (node: UIFilterRowTree): any => {
-      if (isFilterRowNode(node)) {
-        return {
-          type: "node",
-          operator: node.operator,
-          rows: node.rows.map(encode),
-        };
-      } else {
-        return {
-          type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
-        };
-      }
-    };
-
-    return JSON.stringify(encode(filters));
-  };
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -281,7 +240,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   };
 
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
-  const timeRange = useMemo(getTimeRange, []);
+  const timeRange = useMemo(getTimeRange, [searchParams]);
 
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
@@ -360,6 +319,30 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     }
   }, [initialRequest, selectedData]);
 
+  const encodeFilters = useCallback(
+    (filters: UIFilterRowTree): string => {
+      const encode = (node: UIFilterRowTree): any => {
+        if (isFilterRowNode(node)) {
+          return {
+            type: "node",
+            operator: node.operator,
+            rows: node.rows.map(encode),
+          };
+        } else {
+          return {
+            type: "leaf",
+            filter: `${filterMap[node.filterMapIdx].label}:${
+              filterMap[node.filterMapIdx].operators[node.operatorIdx].label
+            }:${encodeURIComponent(node.value)}`,
+          };
+        }
+      };
+
+      return JSON.stringify(encode(filters));
+    },
+    [filterMap]
+  );
+
   //convert this using useCallback
 
   // TODO fix this to return correct UIFilterRowTree instead of UIFilterRow[]
@@ -428,7 +411,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters]);
+  }, [filterMap, getAdvancedFilters, isDataLoading]);
 
   // TODO
   useEffect(() => {
@@ -650,49 +633,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
         searchParams.set("filters", currentAdvancedFilters);
       }
     },
-    [searchParams]
+    [encodeFilters, searchParams]
   );
-
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(
-    orgContext?.currentOrg?.id!,
-    "requests",
-    organizationLayout
-      ? {
-          data: organizationLayout,
-          error: null,
-        }
-      : undefined
-  );
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
-
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
 
   useEffect(() => {
-    orgContext?.refetchOrgs();
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
+    } else {
+      orgContext?.refetchOrgs();
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
 
   return (
     <>
@@ -798,22 +748,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                     searchPropertyFilters: searchPropertyFilters,
                     show: userId ? false : true,
                   }}
-                  savedFilters={
-                    organizationLayoutAvailable
-                      ? {
-                          currentFilter: currFilter ?? undefined,
-                          filters:
-                            transformedFilters && orgLayout?.data?.id
-                              ? transformedFilters
-                              : undefined,
-                          onFilterChange: onLayoutFilterChange,
-                          onSaveFilterCallback: async () => {
-                            await orgLayoutRefetch();
-                          },
-                          layoutPage: "requests",
-                        }
-                      : undefined
-                  }
+                  savedFilters={undefined}
                   exportData={requests.map((request) => {
                     const flattenedRequest: any = {};
                     Object.entries(request).forEach(([key, value]) => {

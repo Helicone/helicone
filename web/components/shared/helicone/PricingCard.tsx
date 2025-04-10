@@ -126,6 +126,7 @@ export const PricingCard = ({
         </div>
         {iconSrc ? (
           <div className="w-6 h-6 relative overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className="w-5 h-5 left-0 top-0 absolute"
               src={iconSrc}

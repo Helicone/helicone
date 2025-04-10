@@ -383,6 +383,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 flex items-center justify-center bg-muted rounded-md overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={provider.logoUrl}
                   alt={`${provider.name} logo`}
