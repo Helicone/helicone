@@ -12,6 +12,10 @@ VALUES (
         'Enable tracking of user signups'
     ) ON CONFLICT (key) DO NOTHING;
 ALTER TABLE public.system_config ENABLE ROW LEVEL SECURITY;
+REVOKE ALL PRIVILEGES ON TABLE public.system_config
+FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE public.system_config
+FROM authenticated;
 CREATE POLICY "Allow postgres access to system_config" ON public.system_config FOR ALL TO postgres USING (true);
 CREATE OR REPLACE FUNCTION public.track_user_signup_to_posthog() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public AS $$
