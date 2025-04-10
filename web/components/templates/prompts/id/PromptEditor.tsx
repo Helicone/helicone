@@ -104,7 +104,7 @@ interface PromptEditorProps {
       isProduction: boolean;
       inputs?: Record<string, string>;
     };
-    onFork?: () => void;
+    onUpdateState?: (state: PromptState | null) => void;
   }; // Playground Mode or Experiment Mode
 }
 export default function PromptEditor({
@@ -205,7 +205,7 @@ export default function PromptEditor({
     if (requestId) {
       return "fromRequest";
     } else if (basePrompt) {
-      if (basePrompt.onFork) {
+      if (basePrompt.onUpdateState) {
         return "fromExperiment";
       } else {
         return "fromPlayground";
@@ -416,6 +416,7 @@ export default function PromptEditor({
           isDirty: markDirty ? true : prev.isDirty,
         };
       });
+      if (basePrompt?.onUpdateState) basePrompt.onUpdateState(state);
     },
     []
   );

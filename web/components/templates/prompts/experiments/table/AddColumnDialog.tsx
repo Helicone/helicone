@@ -3,8 +3,11 @@ import UniversalPopup from "@/components/shared/universal/Popup";
 import PromptEditor from "@/components/templates/prompts/id/PromptEditor";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 import { LLMRequestBody } from "@/packages/llm-mapper/types";
-import { useQuery } from "@tanstack/react-query";
+import { PromptState } from "@/types/prompt-state";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 
 export default function AddColumnDialog({
   isOpen,
@@ -23,6 +26,9 @@ export default function AddColumnDialog({
 }) {
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
+  const jawn = useJawnClient();
+  const queryClient = useQueryClient();
+  const [promptState, setPromptState] = useState<PromptState | null>(null);
 
   const {
     data: promptVersionTemplateData,
@@ -48,33 +54,29 @@ export default function AddColumnDialog({
     enabled: !!selectedForkFromPromptVersionId && !!orgId,
   });
 
-  console.log(
-    "Query Data:",
-    promptVersionTemplateData,
-    "| selectedForkFromPromptVersionId:",
-    selectedForkFromPromptVersionId,
-    "| orgId:",
-    orgId,
-    "| status:",
-    status,
-    "| isFetching:",
-    isFetching
-  );
+  const basePromptForEditor = useMemo(() => {
+    return {
+      body: promptVersionTemplateData?.helicone_template as LLMRequestBody,
+      metadata: promptVersionTemplateData?.metadata as {
+        provider: string;
+        isProduction: boolean;
+        inputs?: Record<string, string>;
+      },
+      onUpdateState: (state: PromptState | null) => {
+        console.log("updating state", state);
+        setPromptState(state);
+      },
+    };
+  }, [promptVersionTemplateData]);
 
-  const basePromptForEditor = {
-    body: promptVersionTemplateData?.helicone_template as LLMRequestBody,
-    metadata: promptVersionTemplateData?.metadata as {
-      provider: string;
-      isProduction: boolean;
-      inputs?: Record<string, string>;
-    },
-    onFork: () => {
-      console.log("forking");
-    },
-  };
+  // TODO: PromptVersion Metadata is being overwritten inside Experiments at some point.
+  // This must be fixed so that existing values are only concatted to the metadata object.
+  console.log(basePromptForEditor);
+
   const label =
     (promptVersionTemplateData?.metadata?.label as string) ??
     `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`;
+
   return (
     <UniversalPopup
       title={`Add Prompt (from ${label})`}
@@ -82,7 +84,8 @@ export default function AddColumnDialog({
       width="max-w-5xl"
       onClose={() => onOpenChange(false)}
     >
-      <PromptEditor basePrompt={basePromptForEditor} />
+      {basePromptForEditor && <PromptEditor basePrompt={basePromptForEditor} />}
+
       <div className="flex flex-row gap-2 w-full p-4">
         <Button
           variant="outline"
@@ -91,7 +94,70 @@ export default function AddColumnDialog({
         >
           Cancel
         </Button>
-        <Button variant="action" className="w-full">
+        <Button
+          variant="action"
+          className="w-full"
+          disabled={!promptState}
+          onClick={async () => {
+            if (!promptState) {
+              return;
+            }
+
+            const newHeliconeTemplate: LLMRequestBody = {
+              model: promptState.parameters.model,
+              messages: promptState.messages,
+              tools: promptState.parameters.tools,
+              temperature: promptState.parameters.temperature,
+              max_tokens: promptState.parameters.max_tokens,
+              stop: promptState.parameters.stop,
+            };
+
+            const result = await jawn.POST(
+              "/v2/experiment/{experimentId}/prompt-version",
+              {
+                params: {
+                  path: {
+                    experimentId: experimentId,
+                  },
+                },
+                body: {
+                  newHeliconeTemplate: newHeliconeTemplate,
+                  isMajorVersion: false,
+                  experimentId: experimentId,
+                  parentPromptVersionId: selectedForkFromPromptVersionId ?? "",
+                  bumpForMajorPromptVersionId: originalColumnPromptVersionId,
+                  metadata: {
+                    label: `Prompt ${numberOfExistingPromptVersions + 1}`,
+                  },
+                },
+              }
+            );
+
+            // Explicitly type the result to help the linter
+            const typedResult = result as unknown as {
+              data: any;
+              error: string | null;
+            };
+
+            if (typedResult.error || !typedResult.data) {
+              console.error("Failed to add prompt version", typedResult.error);
+              // TODO: Add user-facing error handling
+              return;
+            }
+
+            queryClient.invalidateQueries({
+              queryKey: ["experimentPromptVersions", orgId, experimentId],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["experimentInputKeys", orgId, experimentId],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["experimentTable", experimentId],
+            });
+
+            onOpenChange(false);
+          }}
+        >
           Add Prompt to Column
         </Button>
       </div>
