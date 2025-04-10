@@ -12,21 +12,11 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  const { filter, organization_id } = req.body as {
+  const { filter } = req.body as {
     filter: FilterNode;
-    organization_id: string;
   };
 
-  const { data: org, error: orgError } = await dbExecute<{
-    id: string;
-  }>("SELECT id FROM organization WHERE id = $1", [organization_id || orgId]);
-
-  if (orgError !== null || !org || org.length === 0) {
-    res.status(400).json({ error: "Invalid org", data: null });
-    return;
-  }
-
-  const count = await getRequestCountClickhouse(org[0].id, filter);
+  const count = await getRequestCountClickhouse(orgId, filter);
   res.status(count.error === null ? 200 : 500).json(count);
 }
 
