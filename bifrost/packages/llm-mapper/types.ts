@@ -191,7 +191,7 @@ export type Response = {
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>; // JSON Schema type for both OpenAI parameters and Anthropic input_schema
+  parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
 }
 export interface FunctionCall {
   name: string;
