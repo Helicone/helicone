@@ -2,7 +2,7 @@
   "title": "Should You Build or Buy LLM Observability?",
   "title1": "Build vs. Buy LLM Observability",
   "title2": "Build vs. Buy LLM Observability",
-  "description": "Explore the top platforms for creating AI agents, including Dify, AutoGen, and LangChain. Compare features, pros and cons to find the ideal framework.",
+  "description": "Should you build your own LLM debugging system or invest in ready-made tools? We break down the real costs, engineering tradeoffs, and hidden complexity that comes with both approaches—based on what we've seen teams actually do in production.",
   "images": "/static/blog/buy-vs-build-llm-observability/buy-vs-build.webp",
   "time": "12 minute read",
   "author": "Lina Lam",
