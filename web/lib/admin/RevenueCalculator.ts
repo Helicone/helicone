@@ -3,6 +3,7 @@ import {
   getProductIdsFromInvoice,
   calculateDiscount,
   getProductIdsFromUpcomingInvoice,
+  calculateInvoiceAmounts,
 } from "./calculatorUtil";
 
 export interface RawStripeData {
@@ -14,10 +15,11 @@ export interface RawStripeData {
 interface InvoiceData {
   id: string;
   amount: number;
-  discountedAmount: number;
+  amountAfterDiscount: number;
   customerEmail: string;
   status: string;
   created: Date;
+  rawJSON: Stripe.Invoice | Stripe.UpcomingInvoice;
 }
 
 interface ProductRevenueData {
@@ -83,6 +85,7 @@ export class RevenueCalculator {
   public getProductRevenue(productId: string, months = 6): MonthlyRevenueData {
     // Get all invoices for this product
     const invoices = this.productToInvoices.get(productId) || [];
+
     const allUpcomingInvoices =
       this.productToUpcomingInvoices.get(productId) || [];
 
@@ -111,9 +114,12 @@ export class RevenueCalculator {
         : [];
 
       // Calculate monthly totals
-      const current = monthInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+      const current = monthInvoices.reduce(
+        (sum, inv) => sum + inv.amountAfterDiscount,
+        0
+      );
       const projected = relevantUpcomingInvoices.reduce(
-        (sum, inv) => sum + inv.amount,
+        (sum, inv) => sum + inv.amountAfterDiscount,
         0
       );
 
@@ -199,31 +205,20 @@ export class RevenueCalculator {
   ): InvoiceData[] {
     return invoices.map((inv) => {
       const isRegularInvoice = "id" in inv;
-
-      let amount = 0;
-
-      const lines = inv.lines?.data || [];
-
-      if (productId) {
-        // Sum only line items matching this product
-        lines.forEach((line) => {
-          if (line.price?.product === productId) {
-            // Amount is in cents, divide by 100 to get dollars
-            amount += (line.amount || 0) / 100;
-          }
-        });
-      } else {
-        // If no productId specified, use the full invoice amount
-        amount = (isRegularInvoice ? inv.amount_paid : inv.amount_due) / 100;
-      }
+      const { amount, amountAfterDiscount } = calculateInvoiceAmounts(
+        inv,
+        this.discounts,
+        productId
+      );
 
       return {
         id: isRegularInvoice ? inv.id : crypto.randomUUID(),
         amount,
-        discountedAmount: calculateDiscount(inv, this.discounts, productId),
+        amountAfterDiscount,
         customerEmail: inv.customer_email || "unknown",
         status: inv.status || "unknown",
         created: new Date(inv.created * 1000),
+        rawJSON: inv,
       };
     });
   }

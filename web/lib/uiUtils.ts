@@ -50,7 +50,7 @@ export const formatCurrency = (
     style: "currency",
     currency: currency.toUpperCase(),
     minimumFractionDigits: 2,
-  }).format(amount / 100);
+  }).format(amount);
 };
 
 // Format Unix timestamp to readable date

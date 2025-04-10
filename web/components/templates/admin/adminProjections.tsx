@@ -29,6 +29,40 @@ interface SubscriptionDataResponse {
   error?: string;
 }
 
+// Modal component for displaying raw invoice data
+const InvoiceModal = ({
+  isOpen,
+  invoice,
+  onClose,
+}: {
+  isOpen: boolean;
+  invoice: any;
+  onClose: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-background rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b border-border">
+          <h2 className="text-lg font-semibold">Raw Invoice Data</h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="overflow-auto p-4 flex-grow">
+          <pre className="text-xs whitespace-pre-wrap bg-slate-50 p-4 rounded">
+            {JSON.stringify(invoice, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminProjections = () => {
   const jawn = useJawnClient();
   const [refreshCounter, setRefreshCounter] = useState(0);
@@ -46,6 +80,8 @@ const AdminProjections = () => {
   const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>(
     {}
   );
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Toggle expanded state for a section
   const toggleSection = (sectionKey: string) => {
@@ -53,6 +89,18 @@ const AdminProjections = () => {
       ...prev,
       [sectionKey]: !prev[sectionKey],
     }));
+  };
+
+  // View raw invoice data
+  const viewRawInvoice = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setIsModalOpen(true);
+  };
+
+  // Close the modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedInvoice(null);
   };
 
   // Set selected month for a product
@@ -311,6 +359,9 @@ const AdminProjections = () => {
                                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Status
                                 </th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Actions
+                                </th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -327,7 +378,9 @@ const AdminProjections = () => {
                                     </a>
                                   </td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {formatCurrency(invoice.amount * 100)}
+                                    {formatCurrency(
+                                      invoice.amountAfterDiscount
+                                    )}
                                   </td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
                                     {invoice.customerEmail}
@@ -337,6 +390,16 @@ const AdminProjections = () => {
                                   </td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
                                     {invoice.status}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                    <button
+                                      onClick={() =>
+                                        viewRawInvoice(invoice.rawJSON)
+                                      }
+                                      className="text-blue-600 hover:text-blue-800"
+                                    >
+                                      View Raw
+                                    </button>
                                   </td>
                                 </tr>
                               ))}
@@ -354,7 +417,10 @@ const AdminProjections = () => {
                         {revenueData.billedInvoices.length} invoices (
                         {revenueData.billedInvoices.length > 0
                           ? `$${revenueData.billedInvoices
-                              .reduce((sum, inv) => sum + inv.amount, 0)
+                              .reduce(
+                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                0
+                              )
                               .toFixed(2)} total`
                           : "No revenue"}
                         )
@@ -399,39 +465,56 @@ const AdminProjections = () => {
                                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Status
                                 </th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Actions
+                                </th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                               {revenueData.upcomingInvoices.map(
                                 (invoice, idx) => (
-                                  <tr key={`${invoice.id}-${idx}`}>
-                                    <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                      {invoice.id !== "upcoming" ? (
-                                        <a
-                                          href={getInvoiceLink(invoice.id)}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                                  <React.Fragment key={`${invoice.id}-${idx}`}>
+                                    <tr>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        {invoice.id !== "upcoming" ? (
+                                          <a
+                                            href={getInvoiceLink(invoice.id)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                                          >
+                                            {truncateInvoiceId(invoice.id)}
+                                          </a>
+                                        ) : (
+                                          "Upcoming"
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        {formatCurrency(
+                                          invoice.amountAfterDiscount
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        {invoice.customerEmail}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        {invoice.created.toLocaleDateString()}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        {invoice.status}
+                                      </td>
+                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                        <button
+                                          onClick={() =>
+                                            viewRawInvoice(invoice.rawJSON)
+                                          }
+                                          className="text-blue-600 hover:text-blue-800"
                                         >
-                                          {truncateInvoiceId(invoice.id)}
-                                        </a>
-                                      ) : (
-                                        "Upcoming"
-                                      )}
-                                    </td>
-                                    <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                      {formatCurrency(invoice.amount * 100)}
-                                    </td>
-                                    <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                      {invoice.customerEmail}
-                                    </td>
-                                    <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                      {invoice.created.toLocaleDateString()}
-                                    </td>
-                                    <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                      {invoice.status}
-                                    </td>
-                                  </tr>
+                                          View Raw
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  </React.Fragment>
                                 )
                               )}
                             </tbody>
@@ -448,7 +531,10 @@ const AdminProjections = () => {
                         {revenueData.upcomingInvoices.length} invoices (
                         {revenueData.upcomingInvoices.length > 0
                           ? `$${revenueData.upcomingInvoices
-                              .reduce((sum, inv) => sum + inv.amount, 0)
+                              .reduce(
+                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                0
+                              )
                               .toFixed(2)} projected`
                           : "No projected revenue"}
                         )
@@ -497,6 +583,9 @@ const AdminProjections = () => {
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Line Items
                   </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -514,39 +603,49 @@ const AdminProjections = () => {
                       .filter(Boolean) || [];
 
                   return (
-                    <tr key={index}>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        {(invoice as any).id || "upcoming_" + index}
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        {invoice.customer_email ||
-                          (typeof invoice.customer === "string"
-                            ? invoice.customer
-                            : "Unknown Customer")}
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        {formatCurrency(invoice.amount_due)}
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        {invoice.created
-                          ? new Date(
-                              invoice.created * 1000
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="max-w-md">
-                          <div className="font-medium">
-                            Products: {products.length}
-                          </div>
-                          {products.map((p, i) => (
-                            <div key={i} className="text-xs text-gray-500">
-                              {p}
+                    <React.Fragment key={index}>
+                      <tr>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          {(invoice as any).id || "upcoming_" + index}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          {invoice.customer_email ||
+                            (typeof invoice.customer === "string"
+                              ? invoice.customer
+                              : "Unknown Customer")}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          {formatCurrency(invoice.amount_due)}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          {invoice.created
+                            ? new Date(
+                                invoice.created * 1000
+                              ).toLocaleDateString()
+                            : "N/A"}
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="max-w-md">
+                            <div className="font-medium">
+                              Products: {products.length}
                             </div>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
+                            {products.map((p, i) => (
+                              <div key={i} className="text-xs text-gray-500">
+                                {p}
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <button
+                            onClick={() => viewRawInvoice(invoice)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            View Raw
+                          </button>
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
@@ -559,6 +658,13 @@ const AdminProjections = () => {
           </div>
         )}
       </div>
+
+      {/* Invoice Modal */}
+      <InvoiceModal
+        isOpen={isModalOpen}
+        invoice={selectedInvoice}
+        onClose={closeModal}
+      />
     </div>
   );
 };
