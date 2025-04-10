@@ -245,13 +245,11 @@ const useGetRequests = (
 
 const useGetRequestCountClickhouse = (
   startDateISO: string,
-  endDateISO: string,
-  orgId?: string
+  endDateISO: string
 ) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, orgId, startDateISO, endDateISO],
+    queryKey: [`org-count`, startDateISO, endDateISO],
     queryFn: async (query) => {
-      const organizationId = query.queryKey[1];
       const startDate = query.queryKey[2];
       const endDate = query.queryKey[3];
 
@@ -275,7 +273,6 @@ const useGetRequestCountClickhouse = (
               },
             },
           },
-          organization_id: organizationId,
         }),
         headers: {
           "Content-Type": "application/json",

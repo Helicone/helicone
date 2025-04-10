@@ -1,10 +1,10 @@
-import { Result } from "../../../../packages/common/result";
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
+import { Result } from "../../../../packages/common/result";
 import { Permission } from "../../../../services/lib/user";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
 
 async function handler({
   req,
@@ -22,14 +22,13 @@ async function handler({
     return;
   }
 
-  const { error } = await getSupabaseServer()
-    .from("provider_keys")
-    .update({ soft_delete: true })
-    .eq("org_id", userData.orgId)
-    .eq("id", id);
+  const deleteProxyKeys = await dbExecute(
+    `UPDATE provider_keys SET soft_delete = true WHERE id = $1 and org_id = $2`,
+    [id, userData.orgId]
+  );
 
-  if (error) {
-    res.status(500).json({ error: error.message, data: null });
+  if (deleteProxyKeys.error) {
+    res.status(500).json({ error: deleteProxyKeys.error, data: null });
     return;
   }
 
