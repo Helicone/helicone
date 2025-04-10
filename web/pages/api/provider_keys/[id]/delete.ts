@@ -23,7 +23,7 @@ async function handler({
   }
 
   const deleteProxyKeys = await dbExecute(
-    `UPDATE helicone_proxy_keys SET soft_delete = true WHERE provider_key_id = $1 and org_id = $2`,
+    `UPDATE provider_keys SET soft_delete = true WHERE id = $1 and org_id = $2`,
     [id, userData.orgId]
   );
 
