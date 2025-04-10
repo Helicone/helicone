@@ -1,4 +1,6 @@
+import { useOrg } from "@/components/layout/org/organizationContext";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +27,6 @@ import { Button } from "../../../../../ui/button";
 import ArrayDiffViewer from "../../../id/arrayDiffViewer";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { useExperimentTable } from "../hooks/useExperimentTable";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export interface InputEntry {
   key: string;

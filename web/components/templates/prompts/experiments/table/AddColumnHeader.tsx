@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,8 +7,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 import AddColumnDialog from "./AddColumnDialog";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 
 interface AddColumnHeaderProps {
   promptVersionId: string;
@@ -50,11 +50,6 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
 
   const [selectedForkFromPromptVersionId, setSelectedForkFromPromptVersionId] =
     useState<string | null>(null);
-  useEffect(() => {
-    if (!isAddDialogOpen) {
-      setSelectedForkFromPromptVersionId(null);
-    }
-  }, [isAddDialogOpen]);
 
   const buttonElement = (
     <Button variant="ghost" className="text-slate-900 dark:text-slate-100">

@@ -1,9 +1,24 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
+import { IslandContainer } from "@/components/ui/islandContainer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -12,14 +27,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import HcBreadcrumb from "@/components/ui/hcBreadcrumb";
-import { Switch } from "@/components/ui/switch";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   createColumnHelper,
@@ -30,6 +39,7 @@ import {
 import clsx from "clsx";
 import { ListIcon, PlayIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ExperimentInputSelector from "../experimentInputSelector";
 import { ExperimentRandomInputSelector } from "../experimentRandomInputSelector";
 import AddColumnDialog from "./AddColumnDialog";
@@ -46,19 +56,9 @@ import {
 } from "./components/tableElementsRenderer";
 import EditInputsPanel from "./EditInputsPanel";
 import { useExperimentTable } from "./hooks/useExperimentTable";
+import ImportCSVDialog from "./ImportCSVDialog";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import ExperimentDatasetSelector from "../experimentDatasetSelector";
-import ImportCSVDialog from "./ImportCSVDialog";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 type TableDataType = {
   index: number;

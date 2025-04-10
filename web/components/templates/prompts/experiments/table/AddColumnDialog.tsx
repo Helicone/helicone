@@ -1,14 +1,12 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
+import UniversalPopup from "@/components/shared/universal/Popup";
+import PromptEditor from "@/components/templates/prompts/id/PromptEditor";
+import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { FlaskConicalIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import PromptPlayground, { PromptObject } from "../../id/promptPlayground";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { useQuery } from "@tanstack/react-query";
 
-const AddColumnDialog = ({
+export default function AddColumnDialog({
   isOpen,
   onOpenChange,
   selectedForkFromPromptVersionId,
@@ -22,14 +20,15 @@ const AddColumnDialog = ({
   experimentId: string;
   originalColumnPromptVersionId: string;
   numberOfExistingPromptVersions: number;
-}) => {
-  const jawn = useJawnClient();
-  const queryClient = useQueryClient();
-
+}) {
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
 
-  const { data: promptVersionTemplateData } = useQuery({
+  const {
+    data: promptVersionTemplateData,
+    status,
+    isFetching,
+  } = useQuery({
     queryKey: ["promptVersionTemplate", selectedForkFromPromptVersionId],
     queryFn: async () => {
       if (!selectedForkFromPromptVersionId || !orgId) {
@@ -49,110 +48,53 @@ const AddColumnDialog = ({
     enabled: !!selectedForkFromPromptVersionId && !!orgId,
   });
 
-  const [basePrompt, setBasePrompt] = useState<string | PromptObject | null>(
-    promptVersionTemplateData?.helicone_template ?? ""
+  console.log(
+    "Query Data:",
+    promptVersionTemplateData,
+    "| selectedForkFromPromptVersionId:",
+    selectedForkFromPromptVersionId,
+    "| orgId:",
+    orgId,
+    "| status:",
+    status,
+    "| isFetching:",
+    isFetching
   );
 
-  useEffect(() => {
-    setBasePrompt(promptVersionTemplateData?.helicone_template ?? "");
-  }, [promptVersionTemplateData]);
-
+  const basePromptForEditor = {
+    body: promptVersionTemplateData?.helicone_template as LLMRequestBody,
+    metadata: promptVersionTemplateData?.metadata as {
+      provider: string;
+      isProduction: boolean;
+      inputs?: Record<string, string>;
+    },
+    onFork: () => {
+      console.log("forking");
+    },
+  };
+  const label =
+    (promptVersionTemplateData?.metadata?.label as string) ??
+    `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`;
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-5xl gap-0 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center">
-            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
-            <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
-              Add Prompt
-            </h3>
-            <div className="flex gap-1 items-center">
-              <p className="text-slate-500 text-sm font-medium leading-4">
-                Forked from
-              </p>
-              <Badge variant="helicone" className="text-slate-500">
-                <FlaskConicalIcon className="w-3.5 h-3.5 mr-1" />
-                {(promptVersionTemplateData?.metadata?.label as string) ??
-                  `v${promptVersionTemplateData?.major_version}.${promptVersionTemplateData?.minor_version}`}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {promptVersionTemplateData && basePrompt && (
-          <PromptPlayground
-            defaultEditMode={true}
-            prompt={basePrompt}
-            selectedInput={undefined}
-            onExtractPromptVariables={() => {}}
-            className="border rounded-md border-slate-200 dark:border-slate-700"
-            onSubmit={async (history, model) => {
-              const promptData = {
-                model: model,
-                messages: history.map((msg) => {
-                  if (typeof msg === "string") {
-                    return msg;
-                  }
-                  return {
-                    role: msg.role,
-                    content: [
-                      {
-                        text: msg.content,
-                        type: "text",
-                      },
-                    ],
-                  };
-                }),
-              };
-
-              const result = await jawn.POST(
-                // "/v1/prompt/version/{promptVersionId}/subversion",
-                "/v2/experiment/{experimentId}/prompt-version",
-                {
-                  params: {
-                    path: {
-                      experimentId: experimentId,
-                    },
-                  },
-                  body: {
-                    newHeliconeTemplate: JSON.stringify(promptData),
-                    isMajorVersion: false,
-                    experimentId: experimentId,
-                    parentPromptVersionId:
-                      selectedForkFromPromptVersionId ?? "",
-                    bumpForMajorPromptVersionId: originalColumnPromptVersionId, // TODO: this will change based on other things later
-                    metadata: {
-                      label: `Prompt ${numberOfExistingPromptVersions + 1}`,
-                    },
-                  },
-                }
-              );
-
-              queryClient.invalidateQueries({
-                queryKey: ["experimentPromptVersions", orgId, experimentId],
-              });
-              queryClient.invalidateQueries({
-                queryKey: ["experimentInputKeys", orgId, experimentId],
-              });
-
-              if (result.error || !result.data) {
-                console.error(result);
-                return;
-              }
-
-              onOpenChange(false);
-            }}
-            onPromptChange={(prompt) => {
-              setBasePrompt(prompt);
-            }}
-            submitText="Create Prompt"
-            initialModel={promptVersionTemplateData?.model ?? "gpt-4o"}
-            editMode={false}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+    <UniversalPopup
+      title={`Add Prompt (from ${label})`}
+      isOpen={isOpen}
+      width="max-w-5xl"
+      onClose={() => onOpenChange(false)}
+    >
+      <PromptEditor basePrompt={basePromptForEditor} />
+      <div className="flex flex-row gap-2 w-full p-4">
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => onOpenChange(false)}
+        >
+          Cancel
+        </Button>
+        <Button variant="action" className="w-full">
+          Add Prompt to Column
+        </Button>
+      </div>
+    </UniversalPopup>
   );
-};
-
-export default AddColumnDialog;
+}

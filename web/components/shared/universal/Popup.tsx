@@ -63,12 +63,12 @@ export default function UniversalPopup({
 
   return createPortal(
     <dialog
-      className="h-screen w-screen fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/30 backdrop-blur-md"
+      className="h-screen w-screen fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
       <div
-        className={`${width} ${height} w-full h-full bg-slate-50 dark:bg-slate-950 border border-border flex flex-col rounded-xl overflow-hidden`}
+        className={`${width} ${height} w-full bg-slate-50 dark:bg-slate-950 border border-border flex flex-col rounded-xl overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

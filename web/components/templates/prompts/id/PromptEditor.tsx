@@ -1458,11 +1458,13 @@ export default function PromptEditor({
             {/* Right Bottom */}
             <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full flex flex-col gap-4 bg-white dark:bg-black">
-                <VariablesPanel
-                  variables={state.inputs || []}
-                  onVariableChange={handleVariableChange}
-                  promptVersionId={state.versionId}
-                />
+                {editorMode !== "fromExperiment" && (
+                  <VariablesPanel
+                    variables={state.inputs || []}
+                    onVariableChange={handleVariableChange}
+                    promptVersionId={state.versionId}
+                  />
+                )}
 
                 <ParametersPanel
                   parameters={state.parameters}
