@@ -30,33 +30,74 @@ Another difference is the non-deterministic nature of LLMs. Traditional systems 
 
 ## The Pillars of LLM Observability
 
-### 1. Request and Response Logging
+### 1. Traces & Spans
 
-At the core of LLM observability is the detailed logging of **requests** and their corresponding **responses**. Logging them allows you to analyze patterns and understand the context which influenced the outputs.
+At the core of LLM observability is the detailed logging and tracing of workflows through your application. This includes tracking both requests and responses, as well as the multi-step interactions that often characterize LLM applications.
 
-Monitoring tools typically captures other useful metrics like latency, costs, Time to First Token (TTFT), and more. Tracking conversation histories helps you understand the model's behavior over time.
+Comprehensive traces capture the journey of a user interaction from initial prompt to final response, helping you understand complex conversations and context over time. This is especially valuable for debugging and optimizing multi-step workflows.
 
-### 2. Online and Offline Evaluation
+**Key components include:**
 
-Assessing the quality of the model's outputs is vital for continuous improvement. Defining clear metrics—such as relevance, coherence, and correctness—enables monitoring of how well the model meets user expectations.
+- **Request and Response Logging**: Capturing raw requests to LLM services and their corresponding responses, along with metadata like latency, token counts, and costs.
+- **Multi-Step Workflow Tracing**: Using tools like Helicone's Sessions to track user journeys across multiple interactions, making it easier to debug complex agent-based systems.
+- **Anomaly Detection**: Identifying patterns of unusual behavior, potential failures, or hallucinations by analyzing traces across multiple user sessions.
 
-Collecting feedback directly from users offers valuable insights, while automated evaluation methods provide consistent assessments when human evaluation isn't practical.
+Monitoring tools typically capture other useful metrics like latency, costs, Time to First Token (TTFT), and more. All these traces create a comprehensive view of your application's behavior over time.
 
-### 3. Performance Monitoring and Tracing
+### 2. LLM Evaluation
 
-Once your model's output accuracy reaches an acceptable level, the next thing to focus on should be improving its performance.
+Assessing the quality of your model's outputs is vital for continuous improvement. This pillar focuses on measuring how well your LLM performs against specific criteria and expectations.
 
-For example, tracking latency helps identify any bottlenecks in response generation. Tracking errors such as API failures or exceptions tells you how reliable your AI application is.
+**Effective evaluation includes:**
 
-Tracing your multi-step workflows helps you debug faster and gives you a deeper understanding of your user's journey.
+- **Online and Offline Evaluation**: Testing model outputs both in real-time (online) and through batch processing of historical data (offline).
+- **Metrics Definition**: Establishing clear metrics for relevance, coherence, correctness, and other quality indicators.
+- **User Feedback Collection**: Gathering direct input from users to understand their experience with model responses.
+- **Automated Evaluation**: Using LLM-as-judge or other programmatic methods to consistently assess outputs when human evaluation isn't practical.
+- **Regression Prevention**: Identifying when changes to prompts or models result in decreased performance.
 
-### 4. Anomaly Detection and Feedback Loops
+Through robust evaluation practices, you can continuously improve accuracy and reduce unwanted behaviors like hallucinations.
 
-Detecting anomalies, like unusual model behaviors or outputs indicating hallucinations or biases, is essential for maintaining application integrity. Implementing mechanisms to scan for inappropriate or non-compliant content helps prevent ethical issues. Feedback loops, where users can provide input on responses, facilitate iterative improvement over time.
+### 3. Prompt Engineering
 
-### 5. Security and Compliance
+Crafting effective prompts is both an art and a science. This pillar focuses on systematically testing, refining, and managing the inputs you provide to LLMs.
 
-Ensuring the security of your LLM application involves implementing strict access controls to regulate who can interact with model inputs and outputs. Protecting sensitive data requires compliance with regulations like GDPR or HIPAA. Maintaining detailed audit trails promotes accountability and aids in meeting compliance requirements, building user trust.
+**Important aspects include:**
+
+- **Prompt Versioning**: Keeping track of prompt changes and their impact on model outputs.
+- **A/B Testing**: Comparing different prompt strategies to identify which produces better results.
+- **Prompt Templates**: Standardizing successful prompt patterns for consistent performance.
+- **Hallucination Reduction**: Refining prompts to minimize incorrect or fabricated information.
+- **Continuous Improvement**: Iteratively optimizing prompts based on evaluation results.
+
+Good prompt engineering practices lead to more reliable outputs, better user experiences, and often reduced costs through more efficient token usage.
+
+### 4. Search and Retrieval
+
+For knowledge-intensive applications, the quality of information provided to the LLM is crucial. This pillar focuses on optimizing how relevant content is retrieved and incorporated into the generation process.
+
+**Key components include:**
+
+- **Retrieval Augmented Generation (RAG)**: Enhancing LLM outputs with relevant external information.
+- **Tool Calls**: Integrating specialized functions that LLMs can leverage to perform specific tasks.
+- **Vector Database Management**: Optimizing how information is stored and retrieved for use in prompts.
+- **Retrieval Quality Metrics**: Measuring how well your system fetches relevant information to support LLM responses.
+
+Effective search and retrieval mechanisms help ground LLM responses in accurate information, reducing hallucinations and improving factuality.
+
+### 5. Security
+
+Ensuring the safety and integrity of your LLM application is non-negotiable. This pillar addresses potential vulnerabilities and abuse scenarios unique to language models.
+
+**Security considerations include:**
+
+- **LLM-Specific Protections**: Implementing safeguards against prompt injections and other LLM-specific attack vectors.
+- **Rate Limiting**: Preventing abuse through appropriate usage restrictions and monitoring.
+- **Access Controls**: Regulating who can interact with model inputs and outputs.
+- **Data Privacy**: Ensuring compliance with regulations like GDPR or HIPAA.
+- **Audit Trails**: Maintaining detailed records of system activity for accountability.
+
+Robust security measures protect both your application and its users, building trust and preventing potential misuse.
 
 ## Why do we need LLM Observability?
 
@@ -89,6 +130,8 @@ Malicious users can manipulate their inputs to trick your model into revealing s
 - Blocking inappropriate or malicious responses.
 - Using tools like Helicone or PromptArmor for detection.
 
+Helicone offers built-in security measures powered by Meta's state-of-the-art security models to protect your LLM applications. You can enable LLM security with just a header - `Helicone-LLM-Security-Enabled: true`.
+
 ### ⚡ Caching to Improve Performance and Latency
 
 Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
@@ -114,9 +157,9 @@ As models evolve, it's important to continuously test and audit your prompts to 
 You should experiment with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. You should also evaluate against key metrics that's important to your business.
 
 <CallToAction
-  title="Get Started with Helicone"
-  description="Start monitoring your LLM applications with Helicone with just 1 line of code."
-  buttonText="Get Started"
+  title="Debug LLM Issues in Minutes, Not Days"
+  description="Trace complex workflows, identify areas for optimization, and fix problems at their source with just one line of code."
+  primaryButtonText="Try Helicone Free"
   buttonLink="https://us.helicone.ai/signup?demo=true"
 >
 ```js
@@ -141,6 +184,17 @@ You can configure <a href="https://www.helicone.ai/changelog/20240910-slack-aler
 - **Detecting anomalies**: Train robust evaluators to identify unusual patterns of behavior.
 - **Sending notifications**: Use webhooks to send alerts to dedicated communication channels
 
+### Custom Rate Limiting
+
+To further protect your application from abuse or unexpected costs, Helicone provides custom rate limiting capabilities. You can control LLM usage by setting limits based on request count, cost, or custom properties.
+
+Simply add the `Helicone-RateLimit-Policy` header to your requests:
+
+```
+"Helicone-RateLimit-Policy": "100;w=3600;u=request;s=user"
+```
+
+This would limit each user to 100 requests per hour. You can also limit by cost using cents as the unit, helping you maintain predictable spending even as your application scales.
 
 ## Bottom Line
 
@@ -159,5 +213,27 @@ At Helicone, we're committed to supporting you on this journey. Our solutions ar
   }
 `}</style>
 
+<FAQ items={[
+  {
+    question: "What makes LLM observability different from traditional observability?",
+    answer: "LLM observability focuses on the non-deterministic behavior of language models, tracking prompts, completions, and contextual information rather than just system logs. It deals with measuring quality of outputs, not just system performance, and must handle complex multi-turn conversations rather than simple request-response patterns."
+  },
+  {
+    question: "How does Helicone handle LLM security?",
+    answer: "Helicone provides built-in security measures powered by Meta's state-of-the-art security models to detect prompt injections, malicious instructions, and other threats. It uses a two-tier approach with the lightweight Prompt Guard model for initial screening and the more comprehensive Llama Guard for advanced protection, with minimal latency impact."
+  },
+  {
+    question: "Can Helicone help reduce LLM costs?",
+    answer: "Yes, Helicone helps reduce costs through several mechanisms: caching frequently requested responses, providing detailed cost analytics by user/project, implementing custom rate limits to prevent unexpected usage spikes, and offering insights that help optimize prompt design for token efficiency."
+  },
+  {
+    question: "What are traces and spans in LLM observability?",
+    answer: "Traces and spans in LLM observability track the complete journey of user interactions with your application. A trace represents an entire workflow (like a user conversation), while spans are individual steps within that workflow (like specific LLM calls or RAG retrievals). This helps debug complex multi-step processes and identify where issues occur."
+  },
+  {
+    question: "How do I get started with Helicone for my LLM application?",
+    answer: "Getting started with Helicone is simple. You can integrate it with just one line of code by changing your API endpoint to use Helicone's proxy (e.g., 'https://oai.helicone.ai/v1'). This immediately gives you access to request logging, cost tracking, and basic analytics. From there, you can gradually adopt more advanced features like caching, security, and custom evaluations."
+  }
+]}/>
+
 <Questions />
-```
