@@ -6,7 +6,7 @@ import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { mapScores } from "../../managers/score/ScoreManager";
-import { sanitizeObject, safeJSONStringify } from "../../utils/sanitize";
+import { safeJSONStringify, sanitizeObject } from "../../utils/sanitize";
 
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
 
@@ -59,6 +59,8 @@ const responseColumns = new pgp.helpers.ColumnSet(
     { name: "time_to_first_token", def: null },
     { name: "prompt_cache_write_tokens", def: null },
     { name: "prompt_cache_read_tokens", def: null },
+    { name: "prompt_audio_tokens", def: null },
+    { name: "completion_audio_tokens", def: null },
   ],
   { table: "response" }
 );

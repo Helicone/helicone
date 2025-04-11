@@ -225,6 +225,16 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "agentic-rag-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-realtime-api-with-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "gemini-2.5-full-developer-guide",
     },
   },
@@ -490,7 +500,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "slash-llm-cost",
+      folderName: "monitor-and-optimize-llm-costs",
     },
   },
   {
@@ -613,7 +623,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "langsmith",
+      folderName: "langsmith-vs-helicone",
     },
   },
   {

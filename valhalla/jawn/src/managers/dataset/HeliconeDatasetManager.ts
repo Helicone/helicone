@@ -61,6 +61,7 @@ export class HeliconeDatasetManager extends BaseManager {
       WHERE 
         hd.organization = $1
         AND hd.dataset_type = 'helicone'
+        AND hd.deleted_at IS NULL
     `;
 
     const values: any[] = [this.authParams.organizationId];
@@ -103,8 +104,10 @@ export class HeliconeDatasetManager extends BaseManager {
         hdr.dataset_id,
         hdr.created_at
       FROM helicone_dataset_row hdr
+      JOIN helicone_dataset hd ON hd.id = hdr.dataset_id
       WHERE hdr.dataset_id = $1
       AND hdr.organization_id = $2
+      AND hd.deleted_at IS NULL
       ORDER BY hdr.created_at DESC
       LIMIT ${params.limit}
       OFFSET ${params.offset}
@@ -135,8 +138,10 @@ export class HeliconeDatasetManager extends BaseManager {
     const query = `
       SELECT COUNT(*)
       FROM helicone_dataset_row
+      JOIN helicone_dataset hd ON hd.id = helicone_dataset_row.dataset_id
       WHERE dataset_id = $1
       AND organization_id = $2
+      AND hd.deleted_at IS NULL
     `;
 
     const result = await dbExecute<{ count: number }>(query, [
@@ -292,6 +297,33 @@ export class HeliconeDatasetManager extends BaseManager {
       return ok(null);
     } catch (error) {
       return err(`Failed to remove requests from dataset: ${error}`);
+    }
+  }
+
+  async deleteDataset(datasetId: string): Promise<Result<null, string>> {
+    try {
+      const sql = `
+        UPDATE helicone_dataset
+        SET deleted_at = now()
+        WHERE id = $1
+        AND organization = $2
+        RETURNING id
+      `;
+
+      const result = await dbExecute<{ id: string }>(sql, [
+        datasetId,
+        this.authParams.organizationId,
+      ]);
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(
+          result.error ?? "Failed to delete dataset or dataset not found"
+        );
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(`Error deleting dataset: ${error}`);
     }
   }
 }

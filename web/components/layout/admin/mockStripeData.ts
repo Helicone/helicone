@@ -221,3 +221,37 @@ export const MOCK_DISCOUNTS: Record<string, Stripe.Discount> = {
     subscription: "sub_1234567890",
   } as Stripe.Discount,
 };
+
+/**
+ * Mock Stripe upcoming invoice data for development purposes
+ */
+export const MOCK_UPCOMING_INVOICES: Stripe.UpcomingInvoice[] = [
+  {
+    id: "in_12345",
+    object: "invoice",
+    subscription: "sub_1234567890",
+    status: "open",
+    total: 7900,
+    subtotal: 7900,
+    created: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+    due_date: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+    lines: {
+      object: "list",
+      data: [
+        {
+          id: "il_12345",
+          object: "line_item",
+          subscription_item: "si_12345",
+          amount: 4900,
+          description: "Pro Plan",
+          period: {
+            start: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+            end: Math.floor(Date.now() / 1000) + 60 * 24 * 60 * 60,
+          },
+        } as Stripe.InvoiceLineItem,
+      ],
+      has_more: false,
+      url: "/v1/invoice_items?invoice=in_12345",
+    } as Stripe.ApiList<Stripe.InvoiceLineItem>,
+  } as Stripe.Invoice,
+];

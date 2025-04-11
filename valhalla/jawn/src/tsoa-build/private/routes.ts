@@ -39,6 +39,8 @@ import { AlertController } from './../../controllers/private/alertController';
 import { AlertBannerController } from './../../controllers/private/alertBannerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AdminController } from './../../controllers/private/adminController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AudioController } from './../../controllers/private/AudioController';
 import { expressAuthentication } from './../../authentication';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -584,7 +586,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Message": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"deleted":{"dataType":"boolean"},"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Tool": {
@@ -702,6 +704,8 @@ const models: TsoaRoute.Models = {
             "prompt_cache_write_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "prompt_cache_read_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "completion_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "prompt_audio_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "completion_audio_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "prompt_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "feedback_created_at": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
             "feedback_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
@@ -12809,6 +12813,38 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"stripe.Stripe.Discount"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"number":{"dataType":"string","required":true},"object":{"dataType":"enum","enums":["invoice"],"required":true},"status":{"ref":"stripe.Stripe.Invoice.Status","required":true},"application":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Application"},{"ref":"stripe.Stripe.DeletedApplication"}],"required":true},"subscription":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Subscription"}],"required":true},"customer":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Customer"},{"ref":"stripe.Stripe.DeletedCustomer"}],"required":true},"deleted":{"dataType":"void"},"issuer":{"ref":"stripe.Stripe.Invoice.Issuer","required":true},"charge":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Charge"}],"required":true},"paid":{"dataType":"boolean","required":true},"account_country":{"dataType":"string","required":true},"account_name":{"dataType":"string","required":true},"account_tax_ids":{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TaxId"},{"ref":"stripe.Stripe.DeletedTaxId"}]},"required":true},"amount_due":{"dataType":"double","required":true},"amount_paid":{"dataType":"double","required":true},"amount_remaining":{"dataType":"double","required":true},"amount_shipping":{"dataType":"double","required":true},"application_fee_amount":{"dataType":"double","required":true},"attempt_count":{"dataType":"double","required":true},"attempted":{"dataType":"boolean","required":true},"auto_advance":{"dataType":"boolean"},"automatic_tax":{"ref":"stripe.Stripe.Invoice.AutomaticTax","required":true},"automatically_finalizes_at":{"dataType":"double","required":true},"billing_reason":{"ref":"stripe.Stripe.Invoice.BillingReason","required":true},"collection_method":{"ref":"stripe.Stripe.Invoice.CollectionMethod","required":true},"created":{"dataType":"double","required":true},"currency":{"dataType":"string","required":true},"custom_fields":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.CustomField"},"required":true},"customer_address":{"ref":"stripe.Stripe.Address","required":true},"customer_email":{"dataType":"string","required":true},"customer_name":{"dataType":"string","required":true},"customer_phone":{"dataType":"string","required":true},"customer_shipping":{"ref":"stripe.Stripe.Invoice.CustomerShipping","required":true},"customer_tax_exempt":{"ref":"stripe.Stripe.Invoice.CustomerTaxExempt","required":true},"customer_tax_ids":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.CustomerTaxId"}},"default_payment_method":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentMethod"}],"required":true},"default_source":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.CustomerSource"}],"required":true},"default_tax_rates":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.TaxRate"},"required":true},"description":{"dataType":"string","required":true},"discount":{"ref":"stripe.Stripe.Discount","required":true},"discounts":{"dataType":"array","array":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Discount"},{"ref":"stripe.Stripe.DeletedDiscount"}]},"required":true},"due_date":{"dataType":"double","required":true},"effective_at":{"dataType":"double","required":true},"ending_balance":{"dataType":"double","required":true},"footer":{"dataType":"string","required":true},"from_invoice":{"ref":"stripe.Stripe.Invoice.FromInvoice","required":true},"hosted_invoice_url":{"dataType":"string"},"invoice_pdf":{"dataType":"string"},"last_finalization_error":{"ref":"stripe.Stripe.Invoice.LastFinalizationError","required":true},"latest_revision":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Invoice"}],"required":true},"lines":{"ref":"stripe.Stripe.ApiList_stripe.Stripe.InvoiceLineItem_","required":true},"livemode":{"dataType":"boolean","required":true},"metadata":{"ref":"stripe.Stripe.Metadata","required":true},"next_payment_attempt":{"dataType":"double","required":true},"on_behalf_of":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Account"}],"required":true},"paid_out_of_band":{"dataType":"boolean","required":true},"payment_intent":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.PaymentIntent"}],"required":true},"payment_settings":{"ref":"stripe.Stripe.Invoice.PaymentSettings","required":true},"period_end":{"dataType":"double","required":true},"period_start":{"dataType":"double","required":true},"post_payment_credit_notes_amount":{"dataType":"double","required":true},"pre_payment_credit_notes_amount":{"dataType":"double","required":true},"quote":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.Quote"}],"required":true},"receipt_number":{"dataType":"string","required":true},"rendering":{"ref":"stripe.Stripe.Invoice.Rendering","required":true},"shipping_cost":{"ref":"stripe.Stripe.Invoice.ShippingCost","required":true},"shipping_details":{"ref":"stripe.Stripe.Invoice.ShippingDetails","required":true},"starting_balance":{"dataType":"double","required":true},"statement_descriptor":{"dataType":"string","required":true},"status_transitions":{"ref":"stripe.Stripe.Invoice.StatusTransitions","required":true},"subscription_details":{"ref":"stripe.Stripe.Invoice.SubscriptionDetails","required":true},"subscription_proration_date":{"dataType":"double"},"subtotal":{"dataType":"double","required":true},"subtotal_excluding_tax":{"dataType":"double","required":true},"tax":{"dataType":"double","required":true},"test_clock":{"dataType":"union","subSchemas":[{"dataType":"string"},{"ref":"stripe.Stripe.TestHelpers.TestClock"}],"required":true},"threshold_reason":{"ref":"stripe.Stripe.Invoice.ThresholdReason"},"total":{"dataType":"double","required":true},"total_discount_amounts":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.TotalDiscountAmount"},"required":true},"total_excluding_tax":{"dataType":"double","required":true},"total_tax_amounts":{"dataType":"array","array":{"dataType":"refObject","ref":"stripe.Stripe.Invoice.TotalTaxAmount"},"required":true},"transfer_data":{"ref":"stripe.Stripe.Invoice.TransferData","required":true},"webhooks_delivered_at":{"dataType":"double","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Omit_stripe.Stripe.Invoice.id_": {
+        "dataType": "refAlias",
+        "type": {"ref":"Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "stripe.Stripe.UpcomingInvoice": {
+        "dataType": "refAlias",
+        "type": {"ref":"Omit_stripe.Stripe.Invoice.id_","validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ConvertToWavResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "error": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ConvertToWavRequestBody": {
+        "dataType": "refObject",
+        "properties": {
+            "audioData": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new ExpressTemplateService(models, {"noImplicitAdditionalProperties":"throw-on-extras","bodyCoercion":true});
 
@@ -17154,6 +17190,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSubscriptionData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/v1/audio/convert-to-wav',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AudioController)),
+            ...(fetchMiddlewares<RequestHandler>(AudioController.prototype.convertToWav)),
+
+            async function AudioController_convertToWav(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    body: {"in":"body","name":"body","required":true,"ref":"ConvertToWavRequestBody"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new AudioController();
+
+              await templateService.apiHandler({
+                methodName: 'convertToWav',
                 controller,
                 response,
                 next,

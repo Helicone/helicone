@@ -1,7 +1,13 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueries,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { toast } from "sonner";
 
 const fetchHeliconeDatasetRows = async (
   orgId: string,
@@ -66,24 +72,29 @@ const useGetHeliconeDatasets = (datasetIds?: string[]) => {
 
   const hasValidDatasetIds = datasetIds && datasetIds.length > 0;
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["helicone-datasets", org?.currentOrg?.id, datasetIds],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
+  const { data, isLoading, refetch, isRefetching, status, isFetched } =
+    useQuery({
+      queryKey: ["helicone-datasets", org?.currentOrg?.id, datasetIds],
+      queryFn: async (query) => {
+        const orgId = query.queryKey[1] as string;
+        const jawn = getJawnClient(orgId);
 
-      return jawn.POST("/v1/helicone-dataset/query", {
-        body: hasValidDatasetIds ? { datasetIds } : {},
-      });
-    },
-    enabled: !!org?.currentOrg?.id,
-    refetchOnWindowFocus: false,
-  });
+        return jawn.POST("/v1/helicone-dataset/query", {
+          body: hasValidDatasetIds ? { datasetIds } : {},
+        });
+      },
+      enabled: !!org?.currentOrg?.id,
+      refetchOnWindowFocus: false,
+    });
 
   return {
     isLoading,
     refetch,
     isRefetching,
+    status,
+    isFetched,
+    // True when data has been fetched AND exists
+    hasData: isFetched && !!data?.data?.data?.length,
     datasets:
       data?.data?.data?.map((dataset) => ({
         ...dataset,
@@ -262,9 +273,48 @@ const useGetHeliconeDatasetCount = (id: string) => {
   };
 };
 
+const useDeleteHeliconeDataset = () => {
+  const org = useOrg();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (datasetId: string) => {
+      const orgId = org?.currentOrg?.id as string;
+      const jawn = getJawnClient(orgId);
+      const response = await jawn.POST(
+        `/v1/helicone-dataset/{datasetId}/delete`,
+        {
+          params: {
+            path: {
+              datasetId,
+            },
+          },
+        }
+      );
+
+      if (!response.data) {
+        throw new Error("Failed to delete dataset");
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["helicone-datasets"] });
+      toast.success("Dataset deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete dataset: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    },
+  });
+};
+
 export {
   useGetHeliconeDatasets,
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasetCount,
+  useDeleteHeliconeDataset,
   fetchHeliconeDatasetRows,
 };

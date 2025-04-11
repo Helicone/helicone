@@ -11,9 +11,8 @@ export class AlertBannerController extends Controller {
   public async getAlertBanners(@Request() request: JawnAuthenticatedRequest) {
     return await dbExecute<
       Database["public"]["Tables"]["alert_banners"]["Row"]
-    >(
-      "SELECT * FROM alert_banners WHERE org_id = $1 ORDER BY created_at DESC",
-      [request.authParams.organizationId]
-    );
+    >("SELECT * FROM alert_banners ORDER BY created_at DESC", [
+      request.authParams.organizationId,
+    ]);
   }
 }

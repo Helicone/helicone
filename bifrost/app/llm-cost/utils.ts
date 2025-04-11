@@ -32,6 +32,8 @@ export const getInitialCostData = (): CostData[] => {
         promptCacheWriteTokens: 0,
         promptCacheReadTokens: 0,
         completionTokens: outputTokensNum,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       });
 
       if (costDetails) {

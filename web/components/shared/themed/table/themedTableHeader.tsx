@@ -68,7 +68,6 @@ interface ThemedTableHeaderProps<T> {
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
   customButtons?: React.ReactNode[];
-  isDatasetsPage?: boolean;
   search?: {
     value: string;
     onChange: (value: string) => void;
@@ -92,7 +91,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
     activeColumns,
     setActiveColumns,
     customButtons,
-    isDatasetsPage,
     search,
     selectedRows,
     showFilters: showFiltersProp,
@@ -211,7 +209,6 @@ export default function ThemedTableHeader<T>(props: ThemedTableHeaderProps<T>) {
                       columns={columns}
                       activeColumns={activeColumns}
                       setActiveColumns={setActiveColumns}
-                      isDatasetsPage={isDatasetsPage}
                     />
                   </span>
                 </TooltipTrigger>

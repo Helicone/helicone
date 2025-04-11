@@ -272,6 +272,8 @@ export class EvaluatorManager extends BaseManager {
           assets: [],
           target_url: "",
           model: "gpt-3.5-turbo",
+          prompt_audio_tokens: null,
+          completion_audio_tokens: null,
         },
       });
       if (scoreResult.error) {
