@@ -1,8 +1,7 @@
 {/* Three weeks into building your own LLM logging system, you realize you need tracing. Two weeks after that, you need cost tracking. Then versioning. Then evaluation metrics. Suddenly your "simple logging solution" has become a part-time job for two engineers. Sound familiar? */}
 
-
-- **Building:** costs effort + salary, but it's totally custom to your needs.
-- **Buying:** costs cash + less customization, but 0 maintenance and often more polished.
+- **Buying:** Zero maintenance and often a more polished product that's up-to-date with industry standards. However, you have less customization and subscription costs.
+- **Building:** Totally customizable to your needs. But building it from scratch and maintaining it can take significant effort, bandwidth, and resources.
 
 ![Build vs. Buy LLM Observability](/static/blog/buy-vs-build-llm-observability/buy-vs-build.webp)
 
@@ -12,33 +11,29 @@ We hear the same story with nearly every team shipping LLM apps to production:
 - "We shipped a broken tool call chain to prod. It took us 3 hours to trace the root cause."
 - "We changed one prompt, and our cost per request doubled. No one noticed for a week."
 
-
 As more teams ship LLM apps, observability has gone from a nice-to-have to a baseline requirement. The real question becomes: **Should you build LLM observability yourself, or just buy it?**
 
-We've seen teams try both. Let's talk about what it actually takes to build from scratch - and when buying helps you move faster without burning cycles on infra. No sales pitches, we promise. Just what we've learned building LLM apps ourselves.
+After speaking with over 20 teams in the last 6 months, we've learned what it actually takes to build from scratch - and when buying helps you move faster without burning cycles on infra. Here's what we've learned from the conversations and building LLM apps ourselves.
 
 ## TL;DR: Build vs. Buy
 
-### ✅ Build If:
-- You have **very specific infra requirements** or custom needs.
-- You have **strict data privacy or compliance constraints**.
-- You already have **internal logging systems** you can extend.
-- You have **time and bandwidth** to maintain it.
-
-### ✅ Buy If:
-- You want to **ship faster** and not spend weeks on infra.
-- You need **production visibility now**, not next quarter.
-- You're looking for **built-in dashboards, tracing, and evals**.
-- You want to **compare models, track cost, debug prompts** without reinventing the wheel.
+| | **✅ Buy If** | **✅ Build If** |
+|------------ |------------|--------------|
+| **Infra** | You want to **ship faster** and not spend weeks on infra. | You have **very specific infra requirements** or custom needs. |
+| **Privacy** | You need **production visibility now**, not next quarter. | You have **strict data privacy or compliance constraints**. |
+| **Logging** | You're looking for **built-in dashboards, tracing, and evals**. | You already have **internal logging systems** you can extend. |
+| **Resources** | You want to **compare models, track cost, debug prompts** without reinventing the wheel. | You have **time and bandwidth** to maintain it. |
 
 ## What you need to build LLM observability from scratch
 
-Building your own LLM observability tooling is pretty straightforward. You log some requests, capture outputs, throw together a few dashboards. Once you get into it, add more features like retries, cost tracking, and evals. Simple, right?
+Building your own LLM observability tooling can be a straightforward process. 
+
+At a basic level, you'll want to log requests, capture outputs, and display them in a nice dashboard to serve your needs. As your product grows, features like retries, cost tracking, rate limits, caching, and evals start becoming more relevant.
 
 Here's a peek into what that journey looks like:
 
 1. **You start simple.** Start logging prompts, responses, cost and latency. 
-2. **You might add retries or rate limits.** As you build out more features in your app, it probably is far from a single LLM call. You need to track chains, tools, and multi-step agents. Now you need trace trees to understand the workflow.
+2. **You might add retries or rate limits.** As you build out more features in your app, it's probably far from a single LLM call. You need to track chains, tools, and multi-step agents. Now you need trace trees to understand the workflow.
 3. **You see that prompts change weekly.** So you start to build versioning. 
 4. **You should test <a href="https://www.helicone.ai/blog/prompt-management#:~:text=2.%20Iterating%20and%20choosing%20the%20best%20prompt" target="_blank" rel="noopener">which prompt is better</a>.** So you manually A/B test on a few examples, realize that doesn't scale, and build a test harness. 
 5. **Then you can add evals, scoring, dashboards, feedback, redaction...** and now you've got a small observability platform on your hands.
@@ -125,7 +120,9 @@ Building a debugging system for LLM workflows is particularly challenging becaus
 3. **Tool/retrieval integrations** - External systems add more complexity
 4. **Streaming responses** - Hard to correlate with specific prompt parts */}
 
-By building a tree view, you can visualize the complete flow with timestamps and durations. You can see every model response in the order it was called, along with **tool** and **vector database calls**. Here's a screenshot of the tree view in Helicone:
+By building a tree view, you can visualize the complete flow with timestamps and durations. You can see every model response in the order it was called, along with **tool** and **vector database calls**. 
+
+Here's a screenshot of what the visualized tree for an LLM workflow would look like in Helicone, an LLM observability platform:
 
 ![LLM trace tree](/static/blog/buy-vs-build-llm-observability/sessions-buy.webp)
 
@@ -137,7 +134,7 @@ In our scenario, the prompt looks fine, and the tool call also returns correct d
 
 You dig deeper. Turns out, the prompt was silently updated in production two days ago. The tool call triggered a fallback function due to a schema mismatch. The model retried twice, each time pulling from stale memory instead of live RAG context.
 
-Without <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">proper tracing</a>, finding this would require manually piecing together logs from multiple systems—potentially hours of work. With a visual trace tree, you can step through each component and identify the exact failure point in minutes.
+Without <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">proper tracing</a>, finding this would require manually piecing together logs from multiple systems—potentially hours of work. **With a visual trace tree, you can step through each component and identify the exact failure point in minutes instead of hours.**
 
 ## When does building make sense?
 
@@ -148,11 +145,11 @@ For some teams, building is the right call. If you:
 - Have a dedicated infrastructure team with bandwidth to spare
 - Work in a regulated industry with specific audit requirements
 
-Then yes, building your own solution might be the best path. The companies that succeed with this approach typically dedicate at least one engineer to maintaining their observability stack long-term.
+Then yes, building your own solution might be the best path. **The companies that succeed with this approach typically dedicate at least one engineer, if not more, to maintaining their observability stack long-term.**
 
 ## Building a system to test prompts and models
 
-Another important piece is that you need an easy way to test different models and prompts.
+Another solution teams building AI-powered features often need is an easy way to test different models and prompts.
 
 Let's say you're trying to evaluate whether Claude 3.5 Sonnet or GPT-4o is better for your use case. You run a few experiments with real user queries. 
 
@@ -169,11 +166,12 @@ Spreadsheet-like interfaces work really well for testing, especially for compari
 
 You want to see the full prompts, variable values, and real production inputs (e.g., user queries) to make sure your prompt works in the real world, and then see the outputs side-by-side. 
 
-If you're curious, here's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">how testing (we call it experiments) works in Helicone</a>. 
+If you're curious, here's <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">how testing works in Helicone</a>. 
 
 ## Building the "very basics" of LLM observability
 
-We think there are a few unavoidable aspects to LLM observability: 
+
+When building your own observability tool, there are some unavoidable aspects you must always take into consideration. 
 
 ![LLM tracing of requests](/static/blog/buy-vs-build-llm-observability/request-buy.webp)
 
@@ -183,7 +181,7 @@ We think there are a few unavoidable aspects to LLM observability:
 
 ## Get granular with user-level metrics
 
-As your app grows, it's helpful to <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">zoom in</a> on specific users - especially your power users or edge cases. Getting deep into user-level helps you answer questions like:
+As your app grows, it's helpful to <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">zoom in</a> on specific users - especially your power users or edge cases. Getting deep into user-level metrics helps you answer questions like:
 
 - How often is this user hitting the API?
 - Are they generating a disproportionate amount of cost or tokens?
@@ -193,7 +191,7 @@ As your app grows, it's helpful to <a href="https://docs.helicone.ai/features/ad
 
 ## What you get when you buy
 
-Everything you've seen in this post — tracing, retries, prompt testing, evals, model comparison — is built into Helicone out of the box.
+Everything you've seen in this post — tracing, retries, prompt testing, evals, model comparison — is built-in when you buy an observability tool like Helicone out of the box.
 
 **Also included:** 
 
@@ -205,10 +203,12 @@ Everything you've seen in this post — tracing, retries, prompt testing, evals,
 
 ## Key takeaways
 
-Phew! That was a lot. Whether you're a solo builder or part of a fast-moving team, LLM observability will eventually become unavoidable. It's not really about whether you need it, more about how much time you want to spend building vs. shipping.
+Phew! That was a lot. Whether you're a solo builder or part of a fast-moving team, LLM observability will become unavoidable. 
+
+> It's not really about whether you need it, more about how much time you want to spend building vs. shipping.
 
 Here are 5 main takeaways:
-1. **If you aren't sure what you need, try an existing observability tool like Helicone.** Our generous free tier comes with 10,000 requests/mo, and you can <a href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">get started right away</a>.
+1. **If you aren't sure what you need, try an existing observability tool like Helicone first.** Helicone's free tier comes with 10,000 requests/mo, and you can <a href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">get started right away</a>.
 2. **Building gives you control, but eats up time.** It's not just logging, you'll need tracing, testing infrastructure, eval pipelines, retries, cost tracking, and more.
 3. **Buying lets you move faster.** You get debugging tools, prompt/version tracking, and cost visibility out of the box — so you can focus on your app, not infrastructure.
 4. **Most teams underestimate what "just logging" turns into.** It starts small but grows into a full observability stack before you know it.
@@ -216,7 +216,7 @@ Here are 5 main takeaways:
 
 ## Is Helicone right for you?
 
-Here's our short elevator pitch. 
+**We built Helicone so you don't have to build your own observability tool from scratch and can focus on shipping amazing products.** It's <a href="https://github.com/helicone/helicone" target="_blank" rel="noopener">open-source</a>, production-ready, and designed to help you monitor, debug, and improve your app faster. 
 
 Helicone is a great fit if: 
 - You prefer "truly open-source tools" that integrate easily into your existing stack. 
@@ -225,7 +225,6 @@ Helicone is a great fit if:
 - You need to test LLMs <a href="https://www.helicone.ai/blog/test-your-llm-prompts#:~:text=Step%203%3A%20Run%20prompt%20variations%20on%20production%20data" target="_blank" rel="noopener">using real production data</a>
 - You have serious usage and traffic to monitor.
 
-We built Helicone so you don't have to build one from scratch. It's <a href="https://github.com/helicone/helicone" target="_blank" rel="noopener">open-source</a>, production-ready, and designed to help you monitor, debug, and improve your app faster. 
 
 ## You might also be interested in
 
