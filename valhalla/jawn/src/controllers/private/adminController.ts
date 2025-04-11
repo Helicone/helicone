@@ -1287,6 +1287,7 @@ export class AdminController extends Controller {
     subscriptions: Stripe.Subscription[];
     invoices: Stripe.Invoice[];
     discounts: Record<string, Stripe.Discount>;
+    upcomingInvoices: Stripe.UpcomingInvoice[];
   }> {
     await authCheckThrow(request.authParams.userId);
 
