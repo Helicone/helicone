@@ -1,0 +1,290 @@
+Traditional Retrieval-Augmented Generation (RAG) systems have drastically changed how we build AI applications, helping LLMs access external knowledge and reduce hallucination. However, as applications get more complex, regular RAG approaches often struggle with complicated queries and multi-step reasoning. 
+
+Meanwhile, agents continue to show a lot of promise as the main drivers of the next big wave of AI innovation. So, what if we could combine AI agents with RAG? 
+
+Enter **Agentic RAG**, a powerful evolution that combines the knowledge retrieval capabilities of RAG with the decision-making abilities of AI agents. 
+
+In this article, we introduce Agentic RAG, compare Agentic RAG vs RAG, and show you how to build and monitor a basic Agentic RAG system.
+
+## Table Of Contents
+
+## What is Agentic RAG?
+
+![Agentic RAG vs Traditional RAG](/static/blog/agentic-rag-full-developer-guide/agentic-rag-vs-traditional-rag.webp)
+
+_Image source: <a href="https://markovate.com/agentic-rag/" target="_blank" rel="noreferrer">Markovate</a>_
+
+Agentic RAG combines traditional RAG systems with AI agent capabilities to create more autonomous and powerful information retrieval and generation systems. 
+
+While traditional RAG follows a fixed process (query → retrieve → generate), Agentic RAG makes smart decisions at every step, leading to more accurate and efficient information retrieval.
+
+### Core Concepts
+
+At its foundation, Agentic RAG enhances traditional RAG with:
+
+1. **Autonomous agents**: AI systems that can look at information, reason about it, and take action toward specific goals
+
+2. **Dynamic retrieval paths**: The ability to choose different information sources based on query analysis
+
+3. **Reasoning-based verification**: Checking retrieved information before generation
+
+4. **Iterative refinement**: Self-correction through feedback loops
+
+Read this <a href="https://www.researchgate.net/publication/389719393_Agentic_RAG_Redefining_Retrieval-Augmented_Generation_for_Adaptive_Intelligence" target="_blank" rel="noreferrer">Agentic RAG paper</a> for more insights.
+
+## Agentic RAG Example
+
+Let's demonstrate the core idea behind Agentic RAG with a simple example.
+
+Consider the question:  
+
+> **Which rocket was launched first, the Saturn V or the Ariane 5?**
+
+While a human would obviously know that these are two different launch vehicles with distinct timelines and to research them separately, a simple RAG-based system might struggle with it since the answer isn't explicitly defined in the source documents.
+
+An Agentic RAG system, however, breaks the query into sub-questions:
+
+1. "When did the Saturn V first launch?"
+
+2. "When did the Ariane 5 first launch?"
+
+3. "Comparing these dates, which is earlier?"
+
+Using multiple retrieval calls, the agent collects the following data:
+
+- **Saturn V**: First launched on **November 9, 1967**.  
+- **Ariane 5**: First launched on **June 4, 1996**.
+
+It then compares these dates and concludes:
+
+> **Saturn V was launched first** because 1967 precedes 1996.
+
+---
+
+Traditional RAG works as a linear process: a user query leads to document retrieval from a vector database, and then an LLM generates a response using the retrieved context. 
+
+As shown above, this works well for straightforward questions but falls short with complex queries requiring multi-step reasoning. 
+
+In contrast, Agentic RAG:
+
+- Breaks complex queries into simpler sub-questions
+
+- Decides which knowledge sources to query
+
+- Picks the right retrieval strategies
+
+- Validates and combines information from multiple sources
+
+- Ask for more information when needed
+
+## Agentic RAG vs Traditional RAG
+
+| **Feature**              | **Traditional RAG**           | **Agentic RAG**                           |
+| ------------------------ | ----------------------------- | ----------------------------------------- |
+| **Query handling**       | Single-pass processing        | Breaks into sub-queries                   |
+| **Retrieval strategy**   | Fixed, pre-determined         | Dynamic, context-dependent                |
+| **Information sources**  | Usually one vector database   | Multiple databases, APIs, search engines  |
+| **Verification**         | None                          | Active checking of retrieved information  |
+| **Adaptability**         | Static workflow               | Adjusts strategy based on initial results |
+| **Reasoning capability** | Limited to context window     | Multi-step reasoning across documents     |
+| **Failure handling**     | Returns best available answer | Can seek additional information           |
+| **Complexity**           | Lower, easier to implement    | Higher, more components to manage         |
+
+## How to Implement Agentic RAG: A Step-by-step Guide
+
+Now, let's implement a simple Agentic RAG with CrewAI and Helicone for monitoring. 
+
+We'll be using a simple agent that chooses between a local lookup or web search as an example.
+
+### 1. Set Up Environment and API Keys
+
+First, gather any necessary API keys (such as Helicone) and install required packages:
+
+```python
+pip install crewai python-dotenv ...
+```
+
+Import the required libraries and load environment variables:
+
+```python
+import os
+from dotenv import load_dotenv
+from crewai import LLM
+...
+
+load_dotenv() 
+HELICONE_API_KEY=os.getenv('HELICONE_API_KEY')
+...
+```
+
+### 2. Initialize Language Models
+
+Set up the various LLMs needed in your workflow using CrewAI, integrating them with <a href="https://docs.helicone.ai/features/sessions#sessions" target="_blank" rel="noopener">Helicone's Sessions</a> for observability:
+
+```python
+# Initialize LLM
+llm = LLM(
+    model="gpt-4",
+    base_url="https://oai.helicone.ai/v1",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    extra_headers={
+        "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+        "Helicone-Session-Id": random(),
+        "Helicone-Session-Path": "/agentic_rag",
+        "Helicone-Session-Name": "Agentic RAG Workflow",
+    }
+)
+
+# Other LLMs
+...
+```
+
+### 3. Create the Decision Maker Function
+
+Implement a function that acts as the "brain" of the system. 
+
+The function below allows our Agent to determine whether to check local knowledge or browse the web to find the answer to a query:
+
+```python
+def check_local_knowledge(query, context):
+    """Router function to determine if we can answer from local knowledge"""
+    prompt = '''Role: Question-Answering Assistant
+Task: Determine whether the system can answer the user's question based on the provided text.
+Instructions:
+    - Analyze the text and identify if it contains the necessary information to answer the user's question.
+    - Provide a clear and concise response indicating whether the system can answer the question or not.
+    - Your response should include only a single word. Nothing else, no other text, information, header/footer. 
+Output Format:
+    - Answer: Yes/No
+    ...
+'''
+    formatted_prompt = prompt.format(text=context, query=query)
+    response = llm.invoke(formatted_prompt)
+    return response.content.strip().lower() == "yes"
+```
+
+### 4. Set Up Web Scraping and Vector Lookup Functionality
+
+Create agents and tools for web searching and content scraping:
+
+```python
+def setup_web_scraping_agent():
+    """Setup the web scraping agent and related components"""
+    search_tool = SerperDevTool()  # Tool for performing web searches
+    scrape_website = ScrapeWebsiteTool()  # Tool for extracting data from websites
+    
+    # Define CrewAI agents
+    ...
+    
+    return crew
+
+def get_web_content(query):
+    """Get content from web scraping"""
+    crew = setup_web_scraping_agent()
+    result = crew.kickoff(inputs={"topic": query})
+    return result.raw
+```
+
+Process documents and create a searchable vector database:
+
+```python
+def setup_vector_db(document_path):
+    """Setup vector database from PDF"""
+    # Setup vector DB
+    ...
+
+    return vector_db
+
+def get_local_content(vector_db, query):
+    """Get content from vector database"""
+    docs = vector_db.search(query)
+    return docs
+```
+
+### 5. Create the Main Query Processing Function
+
+Tie everything together with a function that orchestrates the entire process:
+
+```python
+def process_query(query, vector_db, local_context):
+    """Main function to process user query"""
+    print(f"Processing query: {query}")
+    
+    # Step 1: Check if we can answer from local knowledge
+    can_answer_locally = check_local_knowledge(query, local_context)
+    print(f"Can answer locally: {can_answer_locally}")
+    
+    # Step 2: Get context either from local DB or web
+    if can_answer_locally:
+        context = get_local_content(vector_db, query)
+        print("Retrieved context from local documents")
+    else:
+        context = get_web_content(query)
+        print("Retrieved context from web scraping")
+    
+    # Step 3: Generate final answer
+    answer = generate_final_answer(context, query)
+    return answer
+```
+
+This creates a complete Agentic RAG system that intelligently routes queries between local knowledge and web sources.
+
+With Helicone's Sessions integrated, you can view each step the Agent(s) decides to take, then resolve bugs or perform optimizations.
+
+For a more in-depth guide, read this <a href="https://www.datacamp.com/tutorial/agentic-rag-tutorial" target="_blank" rel="noopener">article</a>. 
+
+<CallToAction
+  title="Build Better AI Agents with Helicone ⚡️"
+  description="AI Agents are driving the next wave of AI innovation. See every decision your agents make and optimize performance with data-driven insights."
+  primaryButtonText="Improve Your Agents Today"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Explore Features"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
+
+## Pros and Cons of Agentic RAG
+
+| **Pros**                                                                                                              | **Cons**                                                                                                                 |
+|-----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| **Multi-step Retrieval**<br/>Breaks complex queries into smaller pieces, providing deeper coverage and better recall.  | **Increased Complexity**<br/>Coordinating agents and multiple retrieval steps adds overhead in design and maintenance.    |
+| **Higher Accuracy for Tough Questions**<br/>Iterative logic manages hidden relationships more effectively.             | **Higher Token Usage**<br/>Each additional retrieval or reasoning step consumes more tokens, potentially driving up costs.|
+| **Enhanced Problem-Solving**<br/>Excels with multi-domain or multi-source queries requiring synthesis of varied data.  | **Greater Demands on LLMs**<br/>Often requires more capable models, which can raise expenses and limit available options. |
+
+## Conclusion
+
+Agentic RAG represents a big step forward in building LLM-powered applications, combining traditional RAG knowledge access capabilities with AI agents' decision-making. 
+
+This powerful combination enables applications to handle more complex queries, reason across multiple sources of information, and provide more accurate, comprehensive responses.
+
+While still significantly more expensive than traditional RAG, the accuracy benefits are undeniable—<a href="https://milvus.io/blog/stop-use-outdated-rag-deepsearcher-agentic-rag-approaches-changes-everything.md" target="_blank" rel="noopener">at least</a> to an extent.
+
+As models become cheaper to run, these systems will inevitably grow to see more adoption.
+
+### You might also like
+
+- <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">How to Reduce LLM Hallucination in Production Apps</a>
+- <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging RAG Chatbots and AI Agents with Sessions</a>
+- <a href="https://www.helicone.ai/blog/rag-chunking-strategies" target="_blank" rel="noopener">Chunking Strategies For Production-Grade RAG Applications</a>
+- <a href="https://www.helicone.ai/blog/pdf-chatbot-tutorial" target="_blank" rel="noopener">Building a RAG-Powered PDF Chatbot with LLMs and Vector Search</a>
+
+<FAQ
+items={[
+    {
+        question: "What's the main difference between traditional RAG and Agentic RAG?",
+        answer: "Traditional RAG follows a linear process: query → retrieve → generate. Agentic RAG adds autonomous decision-making agents that can choose between multiple retrieval strategies, evaluate the quality of retrieved information, and dynamically adjust their approach based on initial results. This makes Agentic RAG more flexible and capable of handling complex queries requiring multi-step reasoning."
+    },
+    {
+        question: "Do I need specialized hardware to run Agentic RAG systems?",
+        answer: "Not necessarily. While Agentic RAG systems typically require more computation than traditional RAG due to multiple LLM calls, most implementations can run on standard cloud infrastructure. The primary cost factor is increased token usage rather than hardware requirements. For production systems with high throughput, you may want to optimize by caching intermediate results and using Helicone's caching feature."
+    },
+    {
+        question: "Which frameworks are best for implementing Agentic RAG?",
+        answer: "Popular frameworks for Agentic RAG include LangChain with its robust agent workflow tools, AutoGen which excels at multi-agent systems, CrewAI that specializes in role-based agents, and LlamaIndex offering advanced data connectors. Your choice depends on your specific use case, existing infrastructure, and familiarity with the framework."
+    },
+    {
+        question: "What metrics should I track when monitoring Agentic RAG?",
+        answer: "Key metrics to monitor include token usage per agent and action type, latency across different workflow stages, success rates for various retrieval strategies, user satisfaction with responses, hallucination frequency, and cost per query type. Helicone automatically tracks many of these metrics and allows you to define custom properties for deeper analysis of your agent's performance."
+    },
+]}
+/>
+
