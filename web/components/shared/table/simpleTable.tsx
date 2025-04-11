@@ -10,7 +10,7 @@ import { clsx } from "../clsx";
 import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-type ColumnConfig<T> = {
+export type ColumnConfig<T> = {
   key: keyof T | undefined;
   header: string;
   render: (item: T) => React.ReactNode;

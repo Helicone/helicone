@@ -254,7 +254,6 @@ export default function ThemedTable<T extends { id?: string }>(
           <ThemedTableHeader
             search={search}
             onDataSet={onDataSet}
-            isDatasetsPage={isDatasetsPage}
             advancedFilters={
               advancedFilters
                 ? {
