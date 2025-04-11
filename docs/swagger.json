@@ -1764,6 +1764,9 @@
 			},
 			"Message": {
 				"properties": {
+					"deleted": {
+						"type": "boolean"
+					},
 					"contentArray": {
 						"items": {
 							"$ref": "#/components/schemas/Message"
@@ -2445,6 +2448,16 @@
 						"format": "double",
 						"nullable": true
 					},
+					"prompt_audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"completion_audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_id": {
 						"type": "string",
 						"nullable": true
@@ -2543,6 +2556,8 @@
 					"prompt_cache_write_tokens",
 					"prompt_cache_read_tokens",
 					"completion_tokens",
+					"prompt_audio_tokens",
+					"completion_audio_tokens",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
@@ -14975,6 +14990,41 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/helicone-dataset/{datasetId}/delete": {
+			"post": {
+				"operationId": "DeleteHeliconeDataset",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dataset"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/evals/query": {

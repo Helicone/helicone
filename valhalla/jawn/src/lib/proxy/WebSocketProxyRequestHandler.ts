@@ -113,15 +113,14 @@ export async function handleSocketSession(
 
 /**
  * Calculates the total token usage from all "response.done" messages in a WebSocket session.
- * Aggregates token counts across multiple messages, including text and audio modalities.
  *
  * @param messages - Array of SocketMessages from the WebSocket session
  * @returns An object containing:
- *   - promptTokens: Sum of all input/prompt tokens
- *   - completionTokens: Sum of all output/completion tokens
+ *   - promptTokens: Sum of all input text tokens
+ *   - completionTokens: Sum of all output text tokens
  *   - totalTokens: Sum of all tokens used
- *   - promptTokenDetails: Detailed breakdown of prompt tokens (text, audio)
- *   - completionTokenDetails: Detailed breakdown of completion tokens (text, audio)
+ *   - promptAudioTokens: Sum of all input audio tokens
+ *   - completionAudioTokens: Sum of all output audio tokens
  */
 function calculateTokenUsage(messages: SocketMessage[]) {
   const doneMessages = messages.filter(
@@ -134,40 +133,27 @@ function calculateTokenUsage(messages: SocketMessage[]) {
       if (!usage) return acc;
 
       return {
-        promptTokens: (acc.promptTokens || 0) + (usage.input_tokens || 0),
+        promptTokens:
+          (acc.promptTokens || 0) +
+          (usage.input_token_details?.text_tokens || 0),
         completionTokens:
-          (acc.completionTokens || 0) + (usage.output_tokens || 0),
+          (acc.completionTokens || 0) +
+          (usage.output_token_details?.text_tokens || 0),
         totalTokens: (acc.totalTokens || 0) + (usage.total_tokens || 0),
-        promptTokenDetails: {
-          textTokens:
-            (acc.promptTokenDetails?.textTokens || 0) +
-            (usage.input_token_details?.text_tokens || 0),
-          audioTokens:
-            (acc.promptTokenDetails?.audioTokens || 0) +
-            (usage.input_token_details?.audio_tokens || 0),
-        },
-        completionTokenDetails: {
-          textTokens:
-            (acc.completionTokenDetails?.textTokens || 0) +
-            (usage.output_token_details?.text_tokens || 0),
-          audioTokens:
-            (acc.completionTokenDetails?.audioTokens || 0) +
-            (usage.output_token_details?.audio_tokens || 0),
-        },
+        promptAudioTokens:
+          (acc.promptAudioTokens || 0) +
+          (usage.input_token_details?.audio_tokens || 0),
+        completionAudioTokens:
+          (acc.completionAudioTokens || 0) +
+          (usage.output_token_details?.audio_tokens || 0),
       };
     },
     {
       promptTokens: 0,
       completionTokens: 0,
       totalTokens: 0,
-      promptTokenDetails: {
-        textTokens: 0,
-        audioTokens: 0,
-      },
-      completionTokenDetails: {
-        textTokens: 0,
-        audioTokens: 0,
-      },
+      promptAudioTokens: 0,
+      completionAudioTokens: 0,
     }
   );
 }

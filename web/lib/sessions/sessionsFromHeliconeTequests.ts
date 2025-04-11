@@ -41,6 +41,8 @@ export function sessionFromHeliconeRequests(
           prompt_cache_write_tokens: r.prompt_cache_write_tokens ?? 0,
           prompt_cache_read_tokens: r.prompt_cache_read_tokens ?? 0,
           sum_tokens: r.completion_tokens ?? 0 + (r.prompt_tokens ?? 0),
+          prompt_audio_tokens: r.prompt_audio_tokens ?? 0,
+          completion_audio_tokens: r.completion_audio_tokens ?? 0,
         })
       )
       .reduce((a, b) => a + b, 0),

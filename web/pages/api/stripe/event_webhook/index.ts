@@ -1,19 +1,18 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import Stripe from "stripe";
-import { buffer } from "micro";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
-import { Database } from "../../../../db/database.types";
 import {
   getEvaluatorUsage,
   getExperimentUsage,
 } from "@/lib/api/stripe/llmUsage";
+import { getHeliconeAuthClient } from "@/packages/common/auth/server/AuthClientFactory";
 import { costOf } from "@/packages/cost";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
-import { hashAuth } from "../../../../lib/hashClient";
-import generateApiKey from "generate-api-key";
 import { WebClient } from "@slack/web-api";
-import { dbExecute } from "@/lib/api/db/dbExecute";
-
+import { buildDynamicUpdateQuery, dbExecute } from "@/lib/api/db/dbExecute";
+import { PosthogClient } from "@/lib/clients/posthogClient";
+import generateApiKey from "generate-api-key";
+import { buffer } from "micro";
+import { NextApiRequest, NextApiResponse } from "next";
+import Stripe from "stripe";
+import { hashAuth } from "../../../../lib/hashClient";
 const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
 
 async function getUserIdFromEmail(email: string): Promise<string | null> {
@@ -36,47 +35,6 @@ async function getUserIdFromEmail(email: string): Promise<string | null> {
   } catch (error) {
     console.error(`Error getting userId from email: ${email}`, error);
     return null;
-  }
-}
-
-async function sendPosthogEvent(
-  event: string,
-  properties: Record<string, any>,
-  userId: string,
-  orgId?: string
-) {
-  try {
-    if (!userId) {
-      console.error(
-        `Cannot send PostHog event: missing userId for event ${event}`
-      );
-      return;
-    }
-
-    const posthogPayload = {
-      api_key: process.env.NEXT_PUBLIC_POSTHOG_API_KEY,
-      event: event,
-      distinct_id: userId,
-      properties: {
-        ...properties,
-        ...(orgId ? { $groups: { organization: orgId } } : {}),
-      },
-    };
-
-    const response = await fetch(POSTHOG_EVENT_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(posthogPayload),
-    });
-
-    console.log(`PostHog: Event response for ${event}: ${response.status}`);
-
-    if (!response.ok) {
-      const responseText = await response.text();
-      console.error(`PostHog error: ${responseText}`);
-    }
-  } catch (error) {
-    console.error(`Error sending event to PostHog:`, error);
   }
 }
 
@@ -134,12 +92,11 @@ async function sendSubscriptionEvent(
 
     let orgData = undefined;
     if (additionalProperties.includeOrgData) {
-      const { data } = await getSupabaseServer()
-        .from("organization")
-        .select("name, owner")
-        .eq("id", orgId)
-        .single();
-      orgData = data;
+      const { data } = await dbExecute<{ name: string; owner: string }>(
+        `select name, owner from organization where id = $1`,
+        [orgId]
+      );
+      orgData = data?.[0];
       delete additionalProperties.includeOrgData;
     }
 
@@ -168,8 +125,8 @@ async function sendSubscriptionEvent(
         : "immediate";
     }
 
-    // Send the event
-    await sendPosthogEvent(
+    const analytics = PosthogClient.getInstance();
+    await analytics.captureEvent(
       eventType,
       {
         ...baseProperties,
@@ -253,18 +210,16 @@ const PricingVersionOld = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    const { data, error } = await getSupabaseServer()
-      .from("organization")
-      .update({
-        subscription_status: "active",
-        stripe_subscription_id: subscriptionId,
-        stripe_subscription_item_id: subscriptionItemId,
-        tier: "growth",
-        stripe_metadata: {},
-      })
-      .eq("id", orgId || "");
+    const { data: org, error: orgError } = await dbExecute(
+      `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, stripe_subscription_item_id = $2, tier = 'growth', stripe_metadata = $3 WHERE id = $4`,
+      [subscriptionId, subscriptionItemId, {}, orgId]
+    );
 
-    await sendSubscriptionEvent("subscription_created", subscription);
+    if (orgError) {
+      console.error("Failed to update organization:", JSON.stringify(orgError));
+    } else {
+      console.log("Organization updated successfully: ", JSON.stringify(org));
+    }
   },
 
   async handleUpdate(event: Stripe.Event) {
@@ -290,7 +245,13 @@ const PricingVersionOld = {
       }
     }
 
-    let updateFields: Database["public"]["Tables"]["organization"]["Update"] = {
+    type UpdateFields = {
+      subscription_status?: "active" | "inactive";
+      tier?: "growth" | "pro";
+      stripe_subscription_item_id?: string;
+    };
+
+    let updateFields: UpdateFields = {
       subscription_status: isSubscriptionActive ? "active" : "inactive",
     };
 
@@ -301,15 +262,34 @@ const PricingVersionOld = {
       updateFields.tier = "pro";
     }
 
-    const { data, error } = await getSupabaseServer()
-      .from("organization")
-      .update(updateFields)
-      .eq("stripe_customer_id", subscriptionUpdated.customer);
+    // Use the helper function to build the dynamic query
+    const { query, params } = buildDynamicUpdateQuery({
+      from: "organization",
+      set: updateFields,
+      where: {
+        field: "stripe_customer_id",
+        equals: subscriptionUpdated.customer,
+      },
+    });
 
-    if (error) {
-      console.error("Failed to update organization:", JSON.stringify(error));
+    // Only proceed with update if there are fields to update
+    if (params.length > 1) {
+      // At least one update field + where condition
+      const { data: org, error: orgError } = await dbExecute(query, params);
+
+      if (orgError) {
+        console.error(
+          "Failed to update organization:",
+          JSON.stringify(orgError)
+        );
+      } else {
+        console.log("Organization updated successfully: ", JSON.stringify(org));
+      }
     } else {
-      console.log("Organization updated successfully: ", JSON.stringify(data));
+      console.log(
+        "No fields to update for organization with customer ID:",
+        subscriptionUpdated.customer
+      );
     }
 
     await sendSubscriptionCanceledEvent(subscriptionUpdated);
@@ -318,17 +298,10 @@ const PricingVersionOld = {
   async handleDelete(event: Stripe.Event) {
     // Subscription has been deleted, either due to non-payment or being manually canceled.
     const subscriptionDeleted = event.data.object as Stripe.Subscription;
-
-    await getSupabaseServer()
-      .from("organization")
-      .update({
-        tier: "free",
-        subscription_status: "inactive",
-        stripe_metadata: {
-          addons: {},
-        },
-      })
-      .eq("stripe_subscription_id", subscriptionDeleted.id);
+    await dbExecute(
+      `UPDATE organization SET subscription_status = 'inactive', tier = 'free', stripe_metadata = $1 WHERE stripe_subscription_id = $2`,
+      [{ addons: {} }, subscriptionDeleted.id]
+    );
   },
 
   async handleCheckoutSessionCompleted(event: Stripe.Event) {
@@ -336,14 +309,16 @@ const PricingVersionOld = {
     const orgId = checkoutCompleted.metadata?.orgId;
     const tier = checkoutCompleted.metadata?.tier;
 
-    const { data, error } = await getSupabaseServer()
-      .from("organization")
-      .update({
-        subscription_status: "active",
-        stripe_subscription_id: checkoutCompleted.subscription?.toString(), // this is the ID of the subscription created by the checkout
-        tier: tier,
-      })
-      .eq("id", orgId || "");
+    const { data: org, error: orgError } = await dbExecute(
+      `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, tier = $2 WHERE id = $3`,
+      [checkoutCompleted.subscription?.toString(), tier, orgId]
+    );
+
+    if (orgError) {
+      console.error("Failed to update organization:", JSON.stringify(orgError));
+    } else {
+      console.log("Organization updated successfully: ", JSON.stringify(org));
+    }
   },
 };
 
@@ -363,12 +338,10 @@ class TempAPIKey {
   // Clean up the key by soft-deleting it
   private async cleanup() {
     try {
-      await getSupabaseServer()
-        .from("helicone_api_keys")
-        .update({
-          soft_delete: true,
-        })
-        .eq("id", this.keyId);
+      await dbExecute(
+        `UPDATE helicone_api_keys SET soft_delete = true WHERE id = $1`,
+        [this.keyId]
+      );
     } catch (error) {
       console.error("Failed to cleanup temporary API key:", error);
     }
@@ -386,30 +359,41 @@ async function generateTempAPIKey(
     dashes: true,
   }).toString()}`.toLowerCase();
 
-  const organization = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("id", organizationId)
-    .single();
+  // Define a type for the organization data
+  type OrgData = {
+    owner: string;
+  };
 
-  const res = await getSupabaseServer()
-    .from("helicone_api_keys")
-    .insert({
-      api_key_hash: await hashAuth(apiKey),
-      user_id: organization.data?.owner ?? "",
-      api_key_name: keyName,
-      organization_id: organizationId,
-      key_permissions: keyPermissions,
-      temp_key: true,
-    })
-    .select("*")
-    .single();
+  const { data: orgData, error: orgError } = await dbExecute<OrgData>(
+    `SELECT owner FROM organization WHERE id = $1 LIMIT 1`,
+    [organizationId]
+  );
 
-  if (res?.error || !res.data?.id) {
+  if (orgError || !orgData || orgData.length === 0) {
+    throw new Error(`Failed to find organization: ${orgError}`);
+  }
+
+  const owner = orgData[0].owner;
+
+  const { data: keyData, error: keyError } = await dbExecute<{ id: number }>(
+    `INSERT INTO helicone_api_keys (api_key_hash, user_id, api_key_name, organization_id, key_permissions, temp_key) 
+     VALUES ($1, $2, $3, $4, $5, $6) 
+     RETURNING id`,
+    [
+      await hashAuth(apiKey),
+      owner ?? "",
+      keyName,
+      organizationId,
+      keyPermissions,
+      true,
+    ]
+  );
+
+  if (keyError || !keyData || keyData.length === 0) {
     throw new Error("Failed to create API key");
   }
 
-  return new TempAPIKey(apiKey, res.data.id);
+  return new TempAPIKey(apiKey, keyData[0].id);
 }
 
 // Helper function to get the Jawn service URL, replacing localhost with 127.0.0.1 in serverless environments
@@ -432,12 +416,23 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
     return;
   }
 
-  const { data: orgData } = await getSupabaseServer()
-    .from("organization")
-    .select("onboarding_status")
-    .eq("id", orgId)
-    .single();
+  // Define type for the result
+  type OnboardingData = {
+    onboarding_status: OnboardingState | null;
+  };
 
+  const { data: orgDataArr, error: orgDataError } =
+    await dbExecute<OnboardingData>(
+      `SELECT onboarding_status FROM organization WHERE id = $1 LIMIT 1`,
+      [orgId]
+    );
+
+  if (orgDataError || !orgDataArr || orgDataArr.length === 0) {
+    console.log("Failed to fetch onboarding status:", orgDataError);
+    return;
+  }
+
+  const orgData = orgDataArr[0];
   const onboardingStatus =
     orgData?.onboarding_status as unknown as OnboardingState | null;
 
@@ -519,10 +514,19 @@ async function createSlackChannelAndInviteMembers(
   });
 
   // Get the organization members' emails for welcome message
-  const { data: orgMembers } = await getSupabaseServer()
-    .from("organization_member")
-    .select("member")
-    .eq("organization", orgId);
+  type OrgMember = {
+    member: string;
+  };
+
+  const { data: orgMembers, error: orgMembersError } =
+    await dbExecute<OrgMember>(
+      `SELECT member FROM organization_member WHERE organization = $1`,
+      [orgId]
+    );
+
+  if (orgMembersError) {
+    console.log("Failed to fetch organization members:", orgMembersError);
+  }
 
   const emails = await Promise.all(
     orgMembers?.map((member) => getUserEmail(member.member)) || []
@@ -650,9 +654,8 @@ async function getUserEmail(
   if (!userId) return null;
 
   try {
-    const { data } = await getSupabaseServer().auth.admin.getUserById(userId);
-
-    return data?.user?.email || null;
+    const user = await getHeliconeAuthClient().getUserById(userId);
+    return user.data?.email || null;
   } catch (error) {
     console.error("Error fetching owner email:", error);
     return null;
@@ -668,14 +671,31 @@ const TeamVersion20250130 = {
     const orgId = subscription.metadata?.orgId;
 
     // Get the existing subscription from the organization
-    const { data: orgData } = await getSupabaseServer()
-      .from("organization")
-      .select("stripe_subscription_id, name, owner")
-      .eq("id", orgId || "")
-      .single();
+    type OrgSubscriptionData = {
+      stripe_subscription_id: string | null;
+      name: string | null;
+      owner: string | null;
+    };
+
+    const { data: orgDataArray, error: orgDataError } =
+      await dbExecute<OrgSubscriptionData>(
+        `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
+        [orgId || ""]
+      );
+
+    if (orgDataError) {
+      console.error("Failed to fetch organization data:", orgDataError);
+    }
+
+    const orgData =
+      orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
 
     // Cancel old subscription if it exists
-    if (orgData?.stripe_subscription_id) {
+    if (
+      orgData &&
+      orgData.stripe_subscription_id &&
+      typeof orgData.stripe_subscription_id === "string"
+    ) {
       try {
         console.log("Cancelling old subscription");
         await stripe.subscriptions.cancel(orgData.stripe_subscription_id, {
@@ -688,28 +708,28 @@ const TeamVersion20250130 = {
     }
 
     // Update to new subscription
-    const { error } = await getSupabaseServer()
-      .from("organization")
-      .update({
-        subscription_status: "active",
-        stripe_subscription_id: subscriptionId,
-        stripe_subscription_item_id: subscriptionItemId, // Required for usage based pricing
-        tier: "team-20250130",
-        stripe_metadata: {
-          addons: {},
-        },
-      })
-      .eq("id", orgId || "");
+    const { data: updateData, error: updateError } = await dbExecute(
+      `UPDATE organization 
+       SET subscription_status = 'active', 
+           stripe_subscription_id = $1, 
+           stripe_subscription_item_id = $2, 
+           tier = 'team-20250130', 
+           stripe_metadata = $3
+       WHERE id = $4`,
+      [subscriptionId, subscriptionItemId, { addons: {} }, orgId || ""]
+    );
 
-    if (error) {
-      console.error("Failed to update organization:", error);
+    if (updateError) {
+      console.error("Failed to update organization:", updateError);
     }
 
     // Invite members after org is updated
     await inviteOnboardingMembers(orgId);
 
     // Create Slack channel and invite team members
-    await createSlackChannelAndInviteMembers(orgId, orgData?.name);
+    if (orgData?.name) {
+      await createSlackChannelAndInviteMembers(orgId, orgData.name);
+    }
 
     // Send PostHog event
     await sendSubscriptionEvent("subscription_created", subscription, {
@@ -745,18 +765,20 @@ const PricingVersion20240913 = {
       }
     });
 
-    const { data, error } = await getSupabaseServer()
-      .from("organization")
-      .update({
-        subscription_status: "active",
-        stripe_subscription_id: subscriptionId,
-        stripe_subscription_item_id: subscriptionItemId,
-        tier: "pro-20250202",
-        stripe_metadata: {
-          addons: addons,
-        },
-      })
-      .eq("id", orgId || "");
+    const { data: updateData, error: updateError } = await dbExecute(
+      `UPDATE organization 
+       SET subscription_status = 'active', 
+           stripe_subscription_id = $1, 
+           stripe_subscription_item_id = $2, 
+           tier = 'pro-20250202', 
+           stripe_metadata = $3
+       WHERE id = $4`,
+      [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""]
+    );
+
+    if (updateError) {
+      console.error("Failed to update organization:", updateError);
+    }
 
     // Invite members after org is updated
     await inviteOnboardingMembers(orgId);

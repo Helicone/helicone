@@ -444,6 +444,9 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
   };
+  "/v1/helicone-dataset/{datasetId}/delete": {
+    post: operations["DeleteHeliconeDataset"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -985,6 +988,7 @@ export interface components {
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
       idx?: number;
@@ -1171,6 +1175,10 @@ export interface components {
       prompt_cache_read_tokens: number | null;
       /** Format: double */
       completion_tokens: number | null;
+      /** Format: double */
+      prompt_audio_tokens: number | null;
+      /** Format: double */
+      completion_audio_tokens: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -5227,6 +5235,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+        };
+      };
+    };
+  };
+  DeleteHeliconeDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

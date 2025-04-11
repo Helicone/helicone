@@ -1,10 +1,9 @@
+import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import { clsx } from "../clsx";
-import useNotification from "../notification/useNotification";
-import useSearchParams from "../utils/useSearchParams";
-import { TimeFilter } from "@/types/timeFilter";
 import { ProFeatureWrapper } from "../ProBlockerComponents/ProFeatureWrapper";
+import useSearchParams from "../utils/useSearchParams";
 import { ThemedTimeFilterShadCN } from "./themedTimeFilterShadCN";
 
 interface ThemedTimeFilterProps {
@@ -38,7 +37,6 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     currentTimeFilter,
     custom = false,
   } = props;
-  const { setNotification } = useNotification();
   const searchParams = useSearchParams();
   const [active, setActive] = useState<string>(defaultValue);
 
