@@ -66,8 +66,9 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
-        reasoning_effort: params.reasoningEffort,
+        reasoning_effort: params.reasoning_effort,
         include_reasoning: params.includeReasoning,
+        tools: params.tools,
         ...(params.schema && {
           response_format: zodResponseFormat(params.schema, "result"),
         }),
@@ -83,8 +84,6 @@ export default async function handler(
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      let fullResponse = "";
-      let fullReasoning = "";
       const stream =
         response as unknown as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
@@ -93,71 +92,55 @@ export default async function handler(
           // Check if request was cancelled
           if (req.headers["x-cancel"] === "1") {
             abortController.abort();
-            res.end();
-            return;
+            return; // Exit the loop and function
           }
 
-          const content = (chunk as any)?.choices?.[0]?.delta?.content;
-          const reasoning = (chunk as any)?.choices?.[0]?.delta?.reasoning;
+          // Format as Server-Sent Event (SSE)
+          const chunkString = JSON.stringify(chunk);
+          const sseFormattedChunk = `data: ${chunkString}\n\n`;
+          res.write(sseFormattedChunk);
 
-          if (params.includeReasoning) {
-            if (reasoning) {
-              fullReasoning += reasoning;
-              res.write(
-                JSON.stringify({ type: "reasoning", chunk: reasoning })
-              );
-            }
-            if (content) {
-              fullResponse += content;
-              res.write(JSON.stringify({ type: "content", chunk: content }));
-            }
-          } else if (content) {
-            fullResponse += content;
-            res.write(content); // Direct string for non-reasoning case
-          }
           // @ts-ignore - flush exists on NodeJS.ServerResponse
-          res.flush?.();
+          res.flush?.(); // Ensure chunk is sent immediately
         }
-
-        if (params.includeReasoning) {
-          res.write(
-            JSON.stringify({
-              type: "final",
-              content: fullResponse,
-              reasoning: fullReasoning,
-            })
-          );
-        }
-        res.end();
-        return;
       } catch (error) {
         // Handle stream interruption gracefully
+        console.error("[API Stream] Stream error:", error); // Log the error
         if (
           error instanceof Error &&
           (error.name === "ResponseAborted" || error.name === "AbortError")
         ) {
-          res.end();
-          return;
+          // Client likely disconnected or aborted, no need to throw further
+        } else {
+          // Rethrow other errors to be caught by the outer try-catch
+          throw error;
         }
-        throw error;
+      } finally {
+        // Ensure the response is always ended when the stream finishes or aborts/errors
+        if (!res.writableEnded) {
+          res.end();
+        }
       }
+      return; // Ensure we don't fall through to non-streaming logic
     }
 
     const resp = response as any;
-    const content = resp.choices?.[0]?.message?.content;
-    const reasoning = resp.choices?.[0]?.message?.reasoning;
+    const content = resp.choices?.[0]?.message?.content || ""; // Default to empty string
+    const reasoning = resp.choices?.[0]?.message?.reasoning || ""; // Default to empty string
+    const calls = resp.choices?.[0]?.message?.tool_calls || ""; // Default to empty string (or handle actual calls)
 
-    if (!content) {
-      throw new Error("Failed to generate response");
+    if (!content && !calls) {
+      // Check if both content and calls are missing
+      // Consider if an empty response should be an error or just empty strings
+      console.warn(
+        "[API] LLM call resulted in empty content and no tool calls."
+      );
+      // Returning empty object might be fine depending on requirements
+      // throw new Error("Failed to generate response content or tool calls");
     }
 
-    if (params.schema) {
-      const parsed = params.schema.parse(JSON.parse(content));
-      return res.json(parsed);
-    }
-
-    // For non-streaming responses, return just the content string if not including reasoning
-    return res.json(params.includeReasoning ? { content, reasoning } : content);
+    // For non-streaming, always return the full object
+    return res.json({ content, reasoning, calls });
   } catch (error) {
     if (
       error instanceof Error &&

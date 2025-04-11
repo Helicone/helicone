@@ -1,47 +1,32 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../db/database.types";
-import { PromiseGenericResult, err, ok } from "../shared/result";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../cache/kvCache";
-const kvCache = new KVCache(5 * 60 * 1000); // 5 minutes
+import { dbExecute } from "../shared/db/dbExecute";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 export class WebhookStore {
-  private supabaseClient: SupabaseClient<Database>;
-  constructor(supabaseClient: SupabaseClient<Database>) {
-    this.supabaseClient = supabaseClient;
-  }
+  constructor() {}
 
   async getWebhooksByOrgId(
     orgId: string
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
-    const webhooks = await this.supabaseClient
-      .from("webhooks")
-      .select("*")
-      .eq("org_id", orgId);
+    try {
+      const result = await dbExecute<
+        Database["public"]["Tables"]["webhooks"]["Row"]
+      >(
+        `SELECT *
+         FROM webhooks
+         WHERE org_id = $1`,
+        [orgId]
+      );
 
-    if (webhooks.data) {
-      return ok(webhooks.data);
+      if (result.error) {
+        return err(`Failed to get webhooks for org ${orgId}: ${result.error}`);
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      console.error("Error fetching webhooks:", error);
+      return err(`Failed to get webhooks for org ${orgId}: ${String(error)}`);
     }
-
-    return err(`Failed to get webhooks for org ${orgId}: ${webhooks.error}`);
-    // return await cacheResultCustom(
-    //   "getWebhooksByOrgId-" + orgId,
-    //   async () => {
-    //     const webhooks = await this.supabaseClient
-    //       .from("webhooks")
-    //       .select("*")
-    //       .eq("org_id", orgId);
-
-    //     if (webhooks.data) {
-    //       return ok(webhooks.data);
-    //     }
-
-    //     return err(
-    //       `Failed to get webhooks for org ${orgId}: ${webhooks.error}`
-    //     );
-    //   },
-    //   kvCache
-    // );
   }
 
   async getWebhookSubscriptionByWebhookId(
@@ -49,17 +34,30 @@ export class WebhookStore {
   ): PromiseGenericResult<
     Database["public"]["Tables"]["webhook_subscriptions"]["Row"][]
   > {
-    const subscriptions = await this.supabaseClient
-      .from("webhook_subscriptions")
-      .select("*")
-      .eq("webhook_id", webhookId);
+    try {
+      const result = await dbExecute<
+        Database["public"]["Tables"]["webhook_subscriptions"]["Row"]
+      >(
+        `SELECT *
+         FROM webhook_subscriptions
+         WHERE webhook_id = $1`,
+        [webhookId]
+      );
 
-    if (subscriptions.error) {
-      err(
-        `Failed to get webhook subscriptions for webhook ${webhookId}: ${subscriptions.error.message}`
+      if (result.error) {
+        return err(
+          `Failed to get webhook subscriptions for webhook ${webhookId}: ${result.error}`
+        );
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      console.error("Error fetching webhook subscriptions:", error);
+      return err(
+        `Failed to get webhook subscriptions for webhook ${webhookId}: ${String(
+          error
+        )}`
       );
     }
-
-    return ok(subscriptions.data ?? []);
   }
 }

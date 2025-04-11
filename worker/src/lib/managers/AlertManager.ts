@@ -1,6 +1,7 @@
 import { Env } from "../..";
 import { Result, err, ok } from "../util/results";
 import { Alert, AlertState, AlertStore } from "../db/AlertStore";
+import { safePut } from "../safePut";
 
 type AlertStateUpdate = {
   alert: Alert;
@@ -313,11 +314,12 @@ export class AlertManager {
   }
 
   async setCooldownStart(alertId: string, timestamp: number): Promise<void> {
-    await this.utilityKv.put(
-      this.getCooldownStartTimestamp(alertId),
-      timestamp.toString(),
-      { expirationTtl: 600 }
-    );
+    await safePut({
+      key: this.utilityKv,
+      keyName: this.getCooldownStartTimestamp(alertId),
+      value: timestamp.toString(),
+      options: { expirationTtl: 600 },
+    });
   }
 
   private getCooldownStartTimestamp = (alertId: string) =>

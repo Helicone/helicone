@@ -31,7 +31,7 @@ export function costOf({
   }
 
   // We need to concat allCosts because we need to check the provider costs first and if it is not founder then fall back to make the best guess.
-  // This is because we did not backfill the provider on supabase yet, and we do not plan to
+  // This is because we did not backfill the provider on db yet, and we do not plan to
   // This is really for legacy
   // TODO: after 07/2024 we can probably remove this
   const costs = providerCost.costs.concat(allCosts);
@@ -56,7 +56,9 @@ export function costOfPrompt({
   promptTokens,
   promptCacheWriteTokens,
   promptCacheReadTokens,
+  promptAudioTokens,
   completionTokens,
+  completionAudioTokens,
   images = 1,
   perCall = 1,
 }: {
@@ -65,7 +67,9 @@ export function costOfPrompt({
   promptTokens: number;
   promptCacheWriteTokens: number;
   promptCacheReadTokens: number;
+  promptAudioTokens: number;
   completionTokens: number;
+  completionAudioTokens: number;
   images?: number;
   perCall?: number;
 }) {
@@ -93,8 +97,22 @@ export function costOfPrompt({
     totalCost += promptCacheReadTokens * cost.prompt_token;
   }
 
+  // Add cost for prompt audio tokens if applicable
+  if (cost.prompt_audio_token && promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_audio_token;
+  } else if (promptAudioTokens > 0) {
+    totalCost += promptAudioTokens * cost.prompt_token;
+  }
+
   // Add cost for completion tokens
   totalCost += completionTokens * cost.completion_token;
+
+  // Add cost for completion audio tokens if applicable
+  if (cost.completion_audio_token && completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_audio_token;
+  } else if (completionAudioTokens > 0) {
+    totalCost += completionAudioTokens * cost.completion_token;
+  }
 
   // Add cost for images and per-call fees
   const imageCost = images * (cost.per_image ?? 0);
@@ -112,28 +130,63 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       const costPerMultiple = {
         prompt: Math.round(cost.cost.prompt_token * multiple),
         completion: Math.round(cost.cost.completion_token * multiple),
+        prompt_audio: Math.round(
+          (cost.cost.prompt_audio_token ?? cost.cost.prompt_token) * multiple
+        ),
+        completion_audio: Math.round(
+          (cost.cost.completion_audio_token ?? cost.cost.completion_token) *
+            multiple
+        ),
+        prompt_cache_write: Math.round(
+          (cost.cost.prompt_cache_write_token ?? cost.cost.prompt_token) *
+            multiple
+        ),
+        prompt_cache_read: Math.round(
+          (cost.cost.prompt_cache_read_token ?? cost.cost.prompt_token) *
+            multiple
+        ),
         image: Math.round((cost.cost.per_image ?? 0) * multiple),
         per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
       };
 
-      const costs = [];
+      const costParts = [];
       if (costPerMultiple.prompt > 0) {
-        costs.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
+        costParts.push(`${costPerMultiple.prompt} * ${table}.prompt_tokens`);
       }
       if (costPerMultiple.completion > 0) {
-        costs.push(
+        costParts.push(
           `${costPerMultiple.completion} * ${table}.completion_tokens`
         );
       }
+      if (costPerMultiple.prompt_audio > 0) {
+        costParts.push(
+          `${costPerMultiple.prompt_audio} * ${table}.prompt_audio_tokens`
+        );
+      }
+      if (costPerMultiple.completion_audio > 0) {
+        costParts.push(
+          `${costPerMultiple.completion_audio} * ${table}.completion_audio_tokens`
+        );
+      }
+      if (costPerMultiple.prompt_cache_write > 0) {
+        costParts.push(
+          `${costPerMultiple.prompt_cache_write} * ${table}.prompt_cache_write_tokens`
+        );
+      }
+      if (costPerMultiple.prompt_cache_read > 0) {
+        costParts.push(
+          `${costPerMultiple.prompt_cache_read} * ${table}.prompt_cache_read_tokens`
+        );
+      }
       if (costPerMultiple.image > 0) {
-        costs.push(`${costPerMultiple.image}`);
+        costParts.push(`${costPerMultiple.image}`); // Assuming image cost is per image, not per token
       }
       if (costPerMultiple.per_call > 0) {
-        costs.push(`${costPerMultiple.per_call}`);
+        costParts.push(`${costPerMultiple.per_call}`); // Assuming per_call cost is per call
       }
 
-      if (costs.length > 0) {
-        const costString = costs.join(" + ");
+      if (costParts.length > 0) {
+        const costString = costParts.join(" + ");
         if (cost.model.operator === "equals") {
           return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costString}`;
         } else if (cost.model.operator === "startsWith") {
@@ -144,7 +197,7 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
           throw new Error("Unknown operator");
         }
       } else {
-        return ``;
+        return ``; // Return empty string if no costs apply for this model
       }
     })
     .join("\n")}

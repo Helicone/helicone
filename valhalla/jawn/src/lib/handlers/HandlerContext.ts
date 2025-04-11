@@ -1,7 +1,8 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { HeliconeRequest, Provider } from "../../packages/llm-mapper/types";
 import { SetOnce } from "../../utils/setOnce";
-import { AuthParams, OrgParams } from "../db/supabase";
+import { AuthParams } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -58,7 +59,9 @@ export type Usage = {
   promptTokens?: number;
   promptCacheWriteTokens?: number;
   promptCacheReadTokens?: number;
+  promptAudioTokens?: number;
   completionTokens?: number;
+  completionAudioTokens?: number;
   totalTokens?: number;
   heliconeCalculated?: boolean;
   cost?: number;
@@ -160,6 +163,8 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     completion_tokens: context.usage.completionTokens ?? null,
     prompt_cache_write_tokens: context.usage.promptCacheWriteTokens ?? null,
     prompt_cache_read_tokens: context.usage.promptCacheReadTokens ?? null,
+    prompt_audio_tokens: context.usage.promptAudioTokens ?? null,
+    completion_audio_tokens: context.usage.completionAudioTokens ?? null,
     prompt_id: context.message.log.request.promptId ?? null,
     llmSchema: null,
     country_code: context.message.log.request.countryCode ?? null,

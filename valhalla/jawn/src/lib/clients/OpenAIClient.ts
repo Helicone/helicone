@@ -1,6 +1,6 @@
 // Remove the import statement for "fs"
 import { OpenAI } from "openai";
-import { Result, ok } from "../shared/result";
+import { Result, ok } from "../../packages/common/result";
 import { FileObject } from "openai/resources";
 import { FineTuningJob } from "openai/resources/fine-tuning/jobs";
 import fs from "fs";

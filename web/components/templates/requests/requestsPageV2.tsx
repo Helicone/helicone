@@ -1,6 +1,5 @@
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -36,7 +35,6 @@ import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import { Row } from "../../layout/common";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
@@ -45,7 +43,6 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import NewDataset from "../datasets/NewDataset";
-import DatasetButton from "./buttons/datasetButton";
 import { getInitialColumns } from "./initialColumns";
 import RequestCard from "./requestCard";
 import RequestDiv from "./requestDiv";
@@ -54,6 +51,14 @@ import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
+import { Row } from "@/components/layout/common";
+import RequestsEmptyState from "./RequestsEmptyState";
+import {
+  getMockFilterMap,
+  getMockProperties,
+  getMockRequestCount,
+  getMockRequests,
+} from "./mockRequestsData";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -164,6 +169,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     searchParams.get("filter") ?? null
   );
 
+  // Track whether we should show mock data (for users who haven't onboarded)
+  const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
+
+  // Create mock data with useMemo to avoid recreating on every render
+  const mockRequests = useMemo(() => getMockRequests(pageSize), [pageSize]);
+  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
+  const mockProperties = useMemo(() => getMockProperties(), []);
+  const mockCount = useMemo(() => getMockRequestCount(), []);
+
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [open, setOpen] = useState(false);
@@ -174,6 +188,14 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   >(undefined);
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const encodeFilters = (filters: UIFilterRowTree): string => {
     const encode = (node: UIFilterRowTree): any => {
@@ -279,16 +301,16 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   );
 
   const {
-    count,
-    isDataLoading,
-    isBodyLoading,
-    isCountLoading,
-    isRefetching,
-    requests,
-    properties,
-    refetch,
-    filterMap,
-    searchPropertyFilters,
+    count: realCount,
+    isDataLoading: realIsDataLoading,
+    isBodyLoading: realIsBodyLoading,
+    isCountLoading: realIsCountLoading,
+    isRefetching: realIsRefetching,
+    requests: realRequests,
+    properties: realProperties,
+    refetch: realRefetch,
+    filterMap: realFilterMap,
+    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -302,6 +324,20 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     isCached,
     isLive
   );
+
+  const count = shouldShowMockData ? mockCount : realCount;
+  const isDataLoading = shouldShowMockData ? false : realIsDataLoading;
+  const isBodyLoading = shouldShowMockData ? false : realIsBodyLoading;
+  const isCountLoading = shouldShowMockData ? false : realIsCountLoading;
+  const isRefetching = shouldShowMockData ? false : realIsRefetching;
+  const requests = shouldShowMockData ? mockRequests : realRequests;
+  const properties = shouldShowMockData ? mockProperties : realProperties;
+  const refetch = shouldShowMockData ? () => {} : realRefetch;
+  const filterMap = shouldShowMockData ? (mockFilterMap as any) : realFilterMap;
+  const searchPropertyFilters = shouldShowMockData
+    ? (_property: string, _search: string) =>
+        Promise.resolve({ data: null, error: "" })
+    : realSearchPropertyFilters;
 
   const requestWithoutStream = requests.find((r) => {
     return (
@@ -337,11 +373,12 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       } else {
         const [filterLabel, operator, value] = encoded.filter.split(":");
         const filterMapIdx = filterMap.findIndex(
-          (f) =>
+          (f: any) =>
             f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
         );
         const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
-          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
+          (o: any) =>
+            o.label.trim().toLowerCase() === operator.trim().toLowerCase()
         );
 
         if (
@@ -401,7 +438,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     ) {
       if (userId) {
         const userFilterMapIndex = filterMap.findIndex(
-          (filter) => filter.label === "User"
+          (filter: any) => filter.label === "User"
         );
 
         if (userFilterMapIndex !== -1) {
@@ -421,7 +458,7 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [advancedFilters, filterMap, userId]);
 
   const userFilterMapIndex = filterMap.findIndex(
-    (filter) => filter.label === "Helicone-Rate-Limit-Status"
+    (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
   );
 
   // TODO
@@ -555,8 +592,8 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   }, [properties, isCached]);
 
   const {
-    selectMode,
-    toggleSelectMode,
+    selectMode: _selectMode,
+    toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
@@ -567,9 +604,23 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
       request.heliconeMetadata.requestId,
   });
 
-  const onRowSelectHandler = (row: MappedLLMRequest, index: number) => {
-    if (selectMode) {
+  // if shift is pressed, we select the rows in the highlighted range
+  // if metakey is pressed, we add the row to the selection
+  // if click was on a checkbox, we add the row to the selection
+  // else we open the side-tray with details on the request.
+  const onRowSelectHandler = (
+    row: MappedLLMRequest,
+    index: number,
+    event?: React.MouseEvent
+  ) => {
+    // bit of a hack since pre-existing table behavior is noop
+    let isCheckboxClick =
+      event?.target instanceof HTMLElement &&
+      (event.target.tagName.toLowerCase() === "button" ||
+        event.target.closest("button") !== null);
+    if (isShiftPressed || event?.metaKey || isCheckboxClick) {
       toggleSelection(row);
+      return;
     } else {
       setSelectedDataIndex(index);
       setSelectedData(row);
@@ -646,12 +697,19 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
   return (
     <>
       <div className="h-screen flex flex-col">
-        <div className="mx-10">
-          <StreamWarning
-            requestWithStreamUsage={requestWithoutStream !== undefined}
-          />
-        </div>
-        {!isCached && userId === undefined && (
+        {/* Page header */}
+        {!userId && !shouldShowMockData && (
+          <div
+            className={
+              "flex flex-col items-center justify-center align-center text-center"
+            }
+          >
+            <StreamWarning
+              requestWithStreamUsage={requestWithoutStream !== undefined}
+            />
+          </div>
+        )}
+        {!userId && !shouldShowMockData && (
           <AuthHeader
             title={isCached ? "Cached Requests" : "Requests"}
             headerActions={
@@ -692,7 +750,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
             }
           />
         )}
-        {/* Add this wrapper */}
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
@@ -703,153 +760,171 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                 "flex-grow overflow-auto"
               )}
             >
-              <ThemedTable
-                id="requests-table"
-                highlightedIds={
-                  selectedData && open ? [selectedData.id] : selectedIds
-                }
-                showCheckboxes={selectMode}
-                defaultData={requests}
-                defaultColumns={columnsWithProperties}
-                skeletonLoading={isDataLoading}
-                dataLoading={isBodyLoading}
-                sortable={sort}
-                advancedFilters={{
-                  filterMap: filterMap,
-                  filters: advancedFilters,
-                  setAdvancedFilters: onSetAdvancedFiltersHandler,
-                  searchPropertyFilters: searchPropertyFilters,
-                  show: userId ? false : true,
-                }}
-                savedFilters={
-                  organizationLayoutAvailable
-                    ? {
-                        currentFilter: currFilter ?? undefined,
-                        filters:
-                          transformedFilters && orgLayout?.data?.id
-                            ? transformedFilters
-                            : undefined,
-                        onFilterChange: onLayoutFilterChange,
-                        onSaveFilterCallback: async () => {
-                          await orgLayoutRefetch();
-                        },
-                        layoutPage: "requests",
-                      }
-                    : undefined
-                }
-                exportData={requests.map((request) => {
-                  const flattenedRequest: any = {};
-                  Object.entries(request).forEach(([key, value]) => {
-                    // key is properties and value is not null
-                    if (
-                      key === "customProperties" &&
-                      value !== null &&
-                      value !== undefined
-                    ) {
-                      Object.entries(value).forEach(([key, value]) => {
-                        if (value !== null) {
-                          flattenedRequest[key] = value;
+              {shouldShowMockData ? (
+                // Simple version for mock data with minimal props
+                <div
+                  className={`transition-opacity duration-500 ease-in-out ${
+                    isVisible ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <ThemedTable
+                    id="requests-table"
+                    defaultData={requests}
+                    defaultColumns={columnsWithProperties}
+                    skeletonLoading={false}
+                    dataLoading={false}
+                    hideView={true}
+                    hideHeader={true}
+                    checkboxMode={"never"}
+                  />
+                </div>
+              ) : (
+                // Full featured version for real data
+                <ThemedTable
+                  id="requests-table"
+                  highlightedIds={
+                    selectedData && open ? [selectedData.id] : selectedIds
+                  }
+                  checkboxMode={"on_hover"}
+                  defaultData={requests}
+                  defaultColumns={columnsWithProperties}
+                  skeletonLoading={isDataLoading}
+                  dataLoading={isBodyLoading}
+                  sortable={sort}
+                  advancedFilters={{
+                    filterMap: filterMap,
+                    filters: advancedFilters,
+                    setAdvancedFilters: onSetAdvancedFiltersHandler,
+                    searchPropertyFilters: searchPropertyFilters,
+                    show: userId ? false : true,
+                  }}
+                  savedFilters={
+                    organizationLayoutAvailable
+                      ? {
+                          currentFilter: currFilter ?? undefined,
+                          filters:
+                            transformedFilters && orgLayout?.data?.id
+                              ? transformedFilters
+                              : undefined,
+                          onFilterChange: onLayoutFilterChange,
+                          onSaveFilterCallback: async () => {
+                            await orgLayoutRefetch();
+                          },
+                          layoutPage: "requests",
                         }
-                      });
-                    } else {
-                      flattenedRequest[key] = value;
-                    }
-                  });
-                  return flattenedRequest;
-                })}
-                timeFilter={{
-                  currentTimeFilter: timeRange,
-                  defaultValue: "1m",
-                  onTimeSelectHandler: onTimeSelectHandler,
-                }}
-                onRowSelect={(row, index) => {
-                  onRowSelectHandler(row, index);
-                }}
-                makeCard={
-                  userId
-                    ? undefined
-                    : (row) => {
-                        return (
-                          <RequestCard request={row} properties={properties} />
-                        );
+                      : undefined
+                  }
+                  exportData={requests.map((request) => {
+                    const flattenedRequest: any = {};
+                    Object.entries(request).forEach(([key, value]) => {
+                      // key is properties and value is not null
+                      if (
+                        key === "customProperties" &&
+                        value !== null &&
+                        value !== undefined
+                      ) {
+                        Object.entries(value).forEach(([key, value]) => {
+                          if (value !== null) {
+                            flattenedRequest[key] = value;
+                          }
+                        });
+                      } else {
+                        flattenedRequest[key] = value;
                       }
-                }
-                makeRow={
-                  userId
-                    ? undefined
-                    : {
-                        properties: properties,
-                      }
-                }
-                customButtons={[
-                  <div key={"dataset-button"}>
-                    <DatasetButton
-                      datasetMode={selectMode}
-                      setDatasetMode={toggleSelectMode}
-                      items={[]}
-                      onAddToDataset={() => {}}
-                      renderModal={undefined}
-                    />
-                  </div>,
-                ]}
-                onSelectAll={selectAll}
-                selectedIds={selectedIds}
-                rightPanel={
-                  open ? (
-                    <RequestDiv
-                      open={open}
-                      setOpen={setOpen}
-                      request={selectedData}
-                      properties={properties}
-                      hasPrevious={
-                        selectedDataIndex !== undefined && selectedDataIndex > 0
-                      }
-                      hasNext={
-                        selectedDataIndex !== undefined &&
-                        selectedDataIndex < requests.length - 1
-                      }
-                      onPrevHandler={() => {
-                        if (
+                    });
+                    return flattenedRequest;
+                  })}
+                  timeFilter={{
+                    currentTimeFilter: timeRange,
+                    defaultValue: "1m",
+                    onTimeSelectHandler: onTimeSelectHandler,
+                  }}
+                  onRowSelect={onRowSelectHandler}
+                  makeCard={(row: MappedLLMRequest) => {
+                    return (
+                      <RequestCard request={row} properties={properties} />
+                    );
+                  }}
+                  makeRow={{
+                    properties: properties,
+                  }}
+                  onSelectAll={selectAll}
+                  selectedIds={selectedIds}
+                  selectedRows={
+                    selectedIds.length > 0
+                      ? {
+                          showSelectedCount: true,
+                          children: (
+                            <GenericButton
+                              onClick={() => {
+                                setModalOpen(true);
+                              }}
+                              icon={
+                                <PlusIcon className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                              }
+                              text="Add to dataset"
+                              className="h-8 py-0"
+                            />
+                          ),
+                        }
+                      : undefined
+                  }
+                  rightPanel={
+                    open ? (
+                      <RequestDiv
+                        open={open}
+                        setOpen={setOpen}
+                        request={selectedData}
+                        properties={properties}
+                        hasPrevious={
                           selectedDataIndex !== undefined &&
                           selectedDataIndex > 0
-                        ) {
-                          setSelectedDataIndex(selectedDataIndex - 1);
-                          setSelectedData(requests[selectedDataIndex - 1]);
-                          searchParams.set(
-                            "requestId",
-                            requests[selectedDataIndex - 1].id
-                          );
                         }
-                      }}
-                      onNextHandler={() => {
-                        if (
+                        hasNext={
                           selectedDataIndex !== undefined &&
                           selectedDataIndex < requests.length - 1
-                        ) {
-                          setSelectedDataIndex(selectedDataIndex + 1);
-                          setSelectedData(requests[selectedDataIndex + 1]);
-                          searchParams.set(
-                            "requestId",
-                            requests[selectedDataIndex + 1].id
-                          );
                         }
-                      }}
-                    />
-                  ) : undefined
-                }
-              >
-                {selectMode && (
-                  <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-                    <div className="flex flex-row gap-2 items-center">
-                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                        Request Selection:
-                      </span>
-                      <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
-                        {selectedIds.length} selected
-                      </span>
-                    </div>
-                    {selectedIds.length > 0 && (
-                      <ProFeatureWrapper featureName="Datasets">
+                        onPrevHandler={() => {
+                          if (
+                            selectedDataIndex !== undefined &&
+                            selectedDataIndex > 0
+                          ) {
+                            setSelectedDataIndex(selectedDataIndex - 1);
+                            setSelectedData(requests[selectedDataIndex - 1]);
+                            searchParams.set(
+                              "requestId",
+                              requests[selectedDataIndex - 1].id
+                            );
+                          }
+                        }}
+                        onNextHandler={() => {
+                          if (
+                            selectedDataIndex !== undefined &&
+                            selectedDataIndex < requests.length - 1
+                          ) {
+                            setSelectedDataIndex(selectedDataIndex + 1);
+                            setSelectedData(requests[selectedDataIndex + 1]);
+                            searchParams.set(
+                              "requestId",
+                              requests[selectedDataIndex + 1].id
+                            );
+                          }
+                        }}
+                      />
+                    ) : undefined
+                  }
+                >
+                  {_selectMode && (
+                    <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
+                      <div className="flex flex-row gap-2 items-center">
+                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                          Request Selection:
+                        </span>
+                        <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                          {selectedIds.length} selected
+                        </span>
+                      </div>
+                      {selectedIds.length > 0 && (
                         <GenericButton
                           onClick={() => {
                             setModalOpen(true);
@@ -859,11 +934,11 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
                           }
                           text="Add to dataset"
                         />
-                      </ProFeatureWrapper>
-                    )}
-                  </Row>
-                )}
-              </ThemedTable>
+                      )}
+                    </Row>
+                  )}
+                </ThemedTable>
+              )}
             </div>
 
             <div className="bg-slate-50 dark:bg-black border-t border-slate-200 dark:border-slate-700 py-2 flex-shrink-0 w-full">
@@ -880,17 +955,15 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
           </div>
         )}
       </div>
-
+      <RequestsEmptyState isVisible={shouldShowMockData} />
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
           request_ids={selectedIds}
           onComplete={() => {
             setModalOpen(false);
-            toggleSelectMode(false);
           }}
         />
       </ThemedModal>
-
       <OnboardingFloatingPrompt
         open={showOnboardingPopUp}
         setOpen={setShowOnboardingPopUp}

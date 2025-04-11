@@ -37,7 +37,9 @@ const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
         {...props}
       >
         <Icon
-          className={`h-5 w-5 ${variant === "info" ? "text-blue-500" : ""}`}
+          className={`h-5 w-5 flex-shrink-0 ${
+            variant === "info" ? "text-blue-500" : ""
+          }`}
         />
         <div className="text-sm font-medium">{children}</div>
       </div>

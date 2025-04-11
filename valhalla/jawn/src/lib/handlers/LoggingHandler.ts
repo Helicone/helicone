@@ -2,7 +2,12 @@ import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
-import { err, ok, PromiseGenericResult, Result } from "../shared/result";
+import {
+  err,
+  ok,
+  PromiseGenericResult,
+  Result,
+} from "../../packages/common/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
@@ -21,14 +26,6 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
-type SearchRecord = {
-  requestId: string;
-  organizationId: string;
-  requestBody: string;
-  responseBody: string;
-  model: string;
-};
-
 export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
@@ -36,7 +33,6 @@ export type BatchPayload = {
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
-  searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
   experimentCellValues: ExperimentCellValue[];
   scores: {
     organizationId: string;
@@ -75,7 +71,7 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: [],
       s3Records: [],
       requestResponseVersionedCH: [],
-      searchRecords: [],
+
       experimentCellValues: [],
       scores: [],
       orgsToMarkAsOnboarded: new Set<string>(),
@@ -90,7 +86,7 @@ export class LoggingHandler extends AbstractLogHandler {
       const assetsMapped = this.mapAssets(context).slice(0, 100);
 
       const s3RecordMapped = this.mapS3Records(context);
-      const searchRecordsMapped = this.mapSearchRecords(context);
+
       const promptMapped =
         context.message.log.request.promptId &&
         context.processedLog.request.heliconeTemplate
@@ -124,7 +120,7 @@ export class LoggingHandler extends AbstractLogHandler {
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
-      this.batchPayload.searchRecords.push(...searchRecordsMapped);
+
       if (
         context.processedLog.request.scores &&
         Object.keys(context.processedLog.request.scores).length > 0
@@ -373,34 +369,6 @@ export class LoggingHandler extends AbstractLogHandler {
     return s3Record;
   }
 
-  mapSearchRecords(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["request_response_search"]["Insert"][] {
-    const request = context.message.log.request;
-    const orgParams = context.orgParams;
-
-    if (
-      !orgParams?.id ||
-      !this.vectorizeModel(context.processedLog.model ?? "")
-    ) {
-      return [];
-    }
-
-    const searchRecord: Database["public"]["Tables"]["request_response_search"]["Insert"] =
-      {
-        request_id: request.id,
-        organization_id: orgParams.id,
-        request_body_vector: this.extractRequestBodyMessage(
-          context.processedLog.request.body
-        ),
-        response_body_vector: this.extractResponseBodyMessage(
-          context.processedLog.response.body
-        ),
-      };
-
-    return [searchRecord];
-  }
-
   mapAssets(
     context: HandlerContext
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
@@ -446,6 +414,12 @@ export class LoggingHandler extends AbstractLogHandler {
       !context.processedLog.request.heliconeTemplate
     ) {
       return null;
+    }
+    if (Array.isArray(context.processedLog.request.heliconeTemplate.template)) {
+      context.processedLog.request.heliconeTemplate.template = {
+        error: "Invalid helicone template",
+        message: "Helicone template is an array",
+      };
     }
 
     const promptRecord: PromptRecord = {
@@ -493,7 +467,10 @@ export class LoggingHandler extends AbstractLogHandler {
     }
 
     const requestResponseLog: RequestResponseRMT = {
-      user_id: request.userId,
+      user_id:
+        typeof request.userId === "string"
+          ? request.userId
+          : String(request.userId),
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
@@ -501,6 +478,8 @@ export class LoggingHandler extends AbstractLogHandler {
       prompt_tokens: usage.promptTokens ?? 0,
       prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
       prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+      prompt_audio_tokens: usage.promptAudioTokens ?? 0,
+      completion_audio_tokens: usage.completionAudioTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -609,7 +588,6 @@ export class LoggingHandler extends AbstractLogHandler {
       id: response.id,
       request: context.message.log.request.id,
       helicone_org_id: orgParams?.id ?? null,
-      body: "{}",
       status: response.status,
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
@@ -636,7 +614,6 @@ export class LoggingHandler extends AbstractLogHandler {
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
       path: request.path,
-      body: "{}",
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -655,79 +632,6 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return requestInsert;
-  }
-
-  private extractRequestBodyMessage(requestBody: any): string {
-    try {
-      let systemPrompt = "";
-      let messagesArray = requestBody?.messages;
-
-      // Handle Anthropic-style system prompt
-      if (requestBody?.system && typeof requestBody.system === "string") {
-        systemPrompt = requestBody.system;
-      }
-
-      if (!Array.isArray(messagesArray)) {
-        if (requestBody?.role && requestBody?.content) {
-          messagesArray = [requestBody];
-        } else {
-          return systemPrompt;
-        }
-      }
-
-      const allMessages = messagesArray
-        .map((message: any) => {
-          if (typeof message === "object" && message !== null) {
-            const role = message.role;
-            const content = message.content;
-
-            let processedContent = "";
-            if (Array.isArray(content)) {
-              processedContent = content
-                .map((part) => {
-                  if (part.type === "text") {
-                    return part.text;
-                  }
-                  return "";
-                })
-                .join(" ");
-            } else if (typeof content === "string") {
-              processedContent = content;
-            }
-
-            return processedContent;
-          }
-          return "";
-        })
-        .join(" ");
-
-      const fullMessage = `${systemPrompt} ${allMessages}`;
-      return this.ensureMaxVectorLength(this.cleanBody(fullMessage.trim()));
-    } catch (error) {
-      console.error("Error pulling request body messages:", error);
-      return "";
-    }
-  }
-
-  private extractResponseBodyMessage(responseBody: any): string {
-    try {
-      const choicesArray = responseBody?.choices;
-
-      if (!Array.isArray(choicesArray)) {
-        return "";
-      }
-
-      const allMessages = choicesArray
-        .map((choice) => {
-          return choice?.message?.content || "";
-        })
-        .join(" ");
-
-      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
-    } catch (error) {
-      console.error("Error pulling response body messages:", error);
-      return "";
-    }
   }
 
   private ensureMaxVectorLength = (text: string): string => {

@@ -4,7 +4,7 @@ import {
   PostHogEvent,
   PosthogUserClient,
 } from "../clients/PosthogUserClient";
-import { PromiseGenericResult, ok } from "../shared/result";
+import { PromiseGenericResult, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import crypto from "crypto";
@@ -130,6 +130,8 @@ export class PostHogHandler extends AbstractLogHandler {
         provider: modelRow.provider,
         promptCacheWriteTokens: 0,
         promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

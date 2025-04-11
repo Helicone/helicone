@@ -1,21 +1,19 @@
-import { FormEvent, useEffect, useState } from "react";
-import ThemedModal from "../../shared/themed/themedModal";
-import {
-  DecryptedProviderKey,
-  DecryptedProviderKeyMapping,
-} from "../../../services/lib/keys";
-import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/result";
-import { clsx } from "../../shared/clsx";
 import {
   ArrowPathIcon,
   ClipboardDocumentListIcon,
   PlusCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Database } from "../../../supabase/database.types";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useOrg } from "../../layout/org/organizationContext";
+import { FormEvent, useEffect, useState } from "react";
+import { Database } from "../../../db/database.types";
+import { Result } from "../../../packages/common/result";
+import {
+  DecryptedProviderKey,
+  DecryptedProviderKeyMapping,
+} from "../../../services/lib/keys";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface CreateProxyKeyModalProps {
   providerKeys: DecryptedProviderKey[];
@@ -154,14 +152,8 @@ const LimitsInput = (props: {
     limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Insert"][]
   ) => void;
 }) => {
-  const org = useOrg();
-  const { hasFlag } = useFeatureFlags(
-    "proxy_key_limits",
-    org?.currentOrg?.id || ""
-  );
-
   const [limits, setLimits] = useState<LimitRow[]>([]);
-  if (!hasFlag) return null;
+
   return (
     <div className="flex flex-col space-y-1.5 text-sm">
       <label htmlFor="provider-key-name">Limits</label>

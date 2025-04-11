@@ -152,7 +152,7 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-20" />
             </>
-          ) : (
+          ) : hasRealData ? (
             <>
               <span className="font-medium flex items-center gap-1">
                 Avg Score: {displayStats.averageScore.toFixed(1)}%
@@ -161,6 +161,11 @@ export const EvaluatorCard: React.FC<EvaluatorCardProps> = ({
               <span className="text-slate-500">
                 Uses: {displayStats.totalUses}
               </span>
+            </>
+          ) : (
+            <>
+              <span className="text-muted-foreground">No data available</span>
+              <span className="text-slate-500">Uses: 0</span>
             </>
           )}
         </div>

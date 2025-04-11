@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Database } from "@/supabase/database.types";
+import { Database } from "@/db/database.types";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { LogOutIcon } from "lucide-react";

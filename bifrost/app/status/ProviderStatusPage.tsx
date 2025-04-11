@@ -8,6 +8,10 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { StatusFAQ } from "./StatusFAQ";
+import {
+  ProviderStatusInfoSkeleton,
+  ProvidersTableSkeleton,
+} from "./SkeletonLoaders";
 
 export const getProviderStatus = (errorRate: number) => {
   if (errorRate <= 2) {
@@ -58,7 +62,10 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
   const [allProviderStatus, setAllProviderStatus] = useState<
     components["schemas"]["ProviderMetrics"][]
   >([]);
-  const [isLoading, setIsLoading] = useState({ all: true, detailed: false });
+  const [isLoading, setIsLoading] = useState({
+    all: true,
+    detailed: provider !== "all",
+  });
   const [error, setError] = useState<{ all?: string; detailed?: string }>({});
   const [selectedProvider, setSelectedProvider] = useState<
     components["schemas"]["ProviderMetrics"] | null
@@ -101,6 +108,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
   useEffect(() => {
     if (provider === "all") {
       setSelectedProvider(null);
+      setIsLoading((prev) => ({ ...prev, detailed: false }));
       return;
     }
 
@@ -129,14 +137,27 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
     fetchDetailedStatus();
   }, [provider, timeFrame]);
 
+  // Render a consistent structure to avoid layout shifts
   return (
     <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
-      <ProviderStatusInfo
-        provider={selectedProvider}
-        timeFrame={timeFrame}
-        onTimeFrameChange={handleTimeFrameChange}
-      />
+      {/* Provider Status Info Section - Only for provider-specific pages */}
+      {provider !== "all" && (
+        <>
+          {isLoading.detailed ? (
+            <ProviderStatusInfoSkeleton />
+          ) : error.detailed ? (
+            <div className="text-red-500">{error.detailed}</div>
+          ) : (
+            <ProviderStatusInfo
+              provider={selectedProvider}
+              timeFrame={timeFrame}
+              onTimeFrameChange={handleTimeFrameChange}
+            />
+          )}
+        </>
+      )}
 
+      {/* Pro Tip Banner - Always Visible */}
       <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 border border-blue-200/40">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -156,16 +177,19 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
         </div>
       </div>
 
+      {/* All Providers Table Section */}
       <div className="container mx-auto py-8">
         <h2 className="text-2xl font-bold mb-4">All Providers</h2>
         {isLoading.all ? (
-          <div>Loading...</div>
+          <ProvidersTableSkeleton />
         ) : error.all ? (
           <div className="text-red-500">{error.all}</div>
         ) : (
           <AllProvidersTable providers={allProviderStatus} />
         )}
       </div>
+
+      {/* Footer Section */}
       <i className="text-sm text-gray-500">
         Lightning speeds powered by{" "}
         <a

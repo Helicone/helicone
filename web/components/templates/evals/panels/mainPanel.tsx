@@ -1,18 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PiPlusBold } from "react-icons/pi";
-import { ChartLineIcon } from "lucide-react";
 import { EvaluatorCard } from "../cards";
-import { Col } from "@/components/layout/common";
 import AuthHeader from "@/components/shared/authHeader";
 import { useEvaluators } from "../EvaluatorHook";
 import { useEvalPanelStore } from "../store/evalPanelStore";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 import { getEvaluatorScoreName } from "../EvaluatorDetailsSheet";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import clsx from "clsx";
 import { useTestDataStore } from "../testing/testingStore";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
+import { LineChart, SquareArrowOutUpRight } from "lucide-react";
+import Link from "next/link";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -52,6 +55,11 @@ export const MainPanel = () => {
     );
   }, [evaluators.data?.data?.data]);
 
+  // Free tier limit checks
+  const evaluatorCount = simpleEvaluators.length || 0;
+  const { canCreate: canCreateEvaluator, freeLimit: MAX_EVALUATORS } =
+    useFeatureLimit("evals", evaluatorCount);
+
   const handleTestEvaluator = (evaluator: any) => {
     // Set test data based on evaluator type
     if (evaluator.evaluator_llm_template) {
@@ -87,16 +95,43 @@ export const MainPanel = () => {
     return null;
   }
 
-  if (org?.currentOrg?.tier === "free") {
+  if (!evaluators.isLoading && simpleEvaluators.length === 0) {
     return (
-      <div className="flex flex-col space-y-2 w-full h-screen items-center justify-center">
-        <FeatureUpgradeCard
-          title="Unlock Evaluators"
-          featureName="Evaluators"
-          headerTagline="Evaluate your prompts and models to drive improvements."
-          icon={<ChartLineIcon className="h-4 w-4" />}
-          highlightedFeature="Evaluators"
-        />
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <GenericEmptyState
+            title="Create Your First Evaluator"
+            description="Create an evaluator to score your LLM outputs and measure their quality."
+            icon={<LineChart size={28} className="text-accent-foreground" />}
+            className="w-full"
+            actions={
+              <>
+                <FreeTierLimitWrapper
+                  feature="evals"
+                  itemCount={evaluatorCount}
+                >
+                  <Button
+                    onClick={openCreatePanel}
+                    variant="default"
+                    disabled={!canCreateEvaluator}
+                  >
+                    Create Evaluator
+                    <PiPlusBold className="h-4 w-4 ml-2" />
+                  </Button>
+                </FreeTierLimitWrapper>
+                <Link
+                  href="https://docs.helicone.ai/features/evaluation"
+                  target="_blank"
+                >
+                  <Button variant="outline" className="gap-2">
+                    View Docs
+                    <SquareArrowOutUpRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </>
+            }
+          />
+        </div>
       </div>
     );
   }
@@ -106,19 +141,31 @@ export const MainPanel = () => {
       <AuthHeader
         title="Evaluators"
         actions={[
-          <Button
-            key="create-evaluator"
-            onClick={() => openCreatePanel()}
-            variant="outline"
-            size="sm"
-            className="gap-1 items-center"
+          <FreeTierLimitWrapper
+            key="create-evaluator-wrapper"
+            feature="evals"
+            itemCount={evaluatorCount}
           >
-            <PiPlusBold className="h-3.5 w-3.5" />
-            Create Evaluator
-          </Button>,
+            <Button
+              key="create-evaluator"
+              onClick={() => openCreatePanel()}
+              variant="action"
+              size="sm"
+              className="gap-1 items-center"
+            >
+              <PiPlusBold className="h-3.5 w-3.5" />
+              Create Evaluator
+            </Button>
+          </FreeTierLimitWrapper>,
         ]}
       />
-
+      {!canCreateEvaluator && (
+        <FreeTierLimitBanner
+          feature="evals"
+          itemCount={evaluatorCount}
+          freeLimit={MAX_EVALUATORS}
+        />
+      )}
       {evaluators.isLoading ? (
         // Loading state
         <div className="flex flex-col w-full gap-6 p-6">
@@ -141,27 +188,6 @@ export const MainPanel = () => {
               </Card>
             ))}
           </div>
-        </div>
-      ) : simpleEvaluators.length === 0 ? (
-        // Empty state
-        <div className="flex flex-col w-full justify-center items-center h-full">
-          <Col className="items-center justify-center gap-4 max-w-md text-center py-12">
-            <div className="bg-muted rounded-full p-3">
-              <PiPlusBold className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-medium">No evaluators yet</h3>
-            <p className="text-muted-foreground text-sm">
-              Create an evaluator to score your LLM outputs
-            </p>
-            <Button
-              onClick={openCreatePanel}
-              className="mt-2"
-              variant="default"
-              size="sm"
-            >
-              Create Evaluator
-            </Button>
-          </Col>
         </div>
       ) : (
         // Card grid view

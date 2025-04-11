@@ -46,12 +46,14 @@ export interface BASE_Env {
     | "HELICONE_API"
     | "GATEWAY_API"
     | "CUSTOMER_GATEWAY"
-    | "GENERATE_API";
+    | "GENERATE_API"
+    | "VAPI_PROXY";
   TOKEN_CALC_URL: string;
   VAULT_ENABLED: string;
   STORAGE_URL: string;
   FALLBACK_QUEUE: Queue<unknown>;
   LOOPS_API_KEY: string;
+  POSTHOG_API_KEY: string;
   REQUEST_CACHE_KEY: string;
   SECURE_CACHE: KVNamespace;
   RATE_LIMITER: DurableObjectNamespace;

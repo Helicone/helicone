@@ -20,9 +20,13 @@ import { mapTool } from "../mappers/tool";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapOpenAIResponse } from "../mappers/openai/responses";
+
+const MAX_PREVIEW_LENGTH = 1_000;
 
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
+  "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,
   "black-forest-labs-image": mapBlackForestLabsImage,
@@ -68,6 +72,9 @@ const metaDataFromHeliconeRequest = (
       sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
       prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
       prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
+
+      prompt_audio_tokens: heliconeRequest.prompt_audio_tokens || 0,
+      completion_audio_tokens: heliconeRequest.completion_audio_tokens || 0,
 
       sum_completion_tokens: heliconeRequest.completion_tokens || 0,
 
@@ -234,14 +241,24 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request?.slice(0, 30),
-      response: mappedContent.preview.response?.slice(0, 30),
+      request: mappedContent.preview.request
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
+      response: mappedContent.preview.response
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
-      fullRequestText: () => {
+      fullRequestText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.request;
+        }
         return messagesToText(mappedContent.schema.request.messages ?? []);
       },
-      fullResponseText: () => {
+      fullResponseText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.response;
+        }
         return messagesToText(mappedContent.schema.response?.messages ?? []);
       },
     },
@@ -262,6 +279,7 @@ export const getMappedContent = ({
     mapperType,
     heliconeRequest,
   });
+
   return sanitizeMappedContent(unsanitized);
 };
 

@@ -1,7 +1,6 @@
 import { uuid } from "uuidv4";
-import { Result, err, ok } from "../shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 
-import { supabaseServer } from "../db/supabase";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
 import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { runHypothesis } from "./hypothesisRunner";
@@ -16,6 +15,7 @@ import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requ
 import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
+import { dbExecute } from "../shared/db/dbExecute";
 
 export const IS_ON_PREM =
   process.env.AZURE_BASE_URL &&
@@ -51,6 +51,20 @@ async function prepareRequest(
   }
 }
 
+interface PromptVersion {
+  id: string;
+  helicone_template: any;
+  model: string | null;
+  [key: string]: any;
+}
+
+interface PromptInputRecord {
+  id: string;
+  inputs: Record<string, string> | null;
+  auto_prompt_inputs: Record<string, any>[] | null;
+  [key: string]: any;
+}
+
 export async function runOriginalExperiment(
   experiment: Experiment,
   datasetRows: ExperimentDatasetRow[]
@@ -76,14 +90,20 @@ export async function runOriginalExperiment(
 
       const promptVersionId = experiment.meta?.["prompt_version"];
 
-      const promptVersion = await supabaseServer.client
-        .from("prompts_versions")
-        .select("*")
-        .eq("id", promptVersionId)
-        .single();
+      const promptVersionResult = await dbExecute<PromptVersion>(
+        `SELECT * 
+         FROM prompts_versions 
+         WHERE id = $1 
+         LIMIT 1`,
+        [promptVersionId]
+      );
 
-      if (promptVersion.error || !promptVersion.data) {
-        return err(promptVersion.error.message);
+      if (
+        promptVersionResult.error ||
+        !promptVersionResult.data ||
+        promptVersionResult.data.length === 0
+      ) {
+        return err(promptVersionResult.error || "Prompt version not found");
       }
     }
     return ok("success");
@@ -105,32 +125,49 @@ export async function run(
     return err(tempKey.error);
   }
 
-  const promptVersion = await supabaseServer.client
-    .from("prompts_versions")
-    .select("*")
-    .eq("id", promptVersionId)
-    .single();
+  const promptVersionResult = await dbExecute<PromptVersion>(
+    `SELECT * 
+     FROM prompts_versions 
+     WHERE id = $1 
+     LIMIT 1`,
+    [promptVersionId]
+  );
 
-  if (promptVersion.error || !promptVersion.data) {
-    return err(promptVersion.error.message);
+  if (
+    promptVersionResult.error ||
+    !promptVersionResult.data ||
+    promptVersionResult.data.length === 0
+  ) {
+    return err(promptVersionResult.error || "Prompt version not found");
   }
+  const promptVersion = promptVersionResult.data[0];
 
-  const promptInputRecord = await supabaseServer.client
-    .from("prompt_input_record")
-    .select("*")
-    .eq("id", inputRecordId)
-    .single();
+  const promptInputRecordResult = await dbExecute<PromptInputRecord>(
+    `SELECT * 
+     FROM prompt_input_record 
+     WHERE id = $1 
+     LIMIT 1`,
+    [inputRecordId]
+  );
 
-  if (promptInputRecord.error || !promptInputRecord.data) {
-    return err(promptInputRecord.error.message);
+  if (
+    promptInputRecordResult.error ||
+    !promptInputRecordResult.data ||
+    promptInputRecordResult.data.length === 0
+  ) {
+    return err(
+      promptInputRecordResult.error || "Prompt input record not found"
+    );
   }
+  const promptInputRecord = promptInputRecordResult.data[0];
 
   return tempKey.data.with<Result<string, string>>(async (secretKey) => {
     const requestId = uuid();
 
-    if (promptInputRecord.data.inputs) {
-      promptInputRecord.data.inputs = await getAllSignedURLsFromInputs(
-        promptInputRecord.data.inputs as Record<string, string>,
+    let inputs: Record<string, string> = {};
+    if (promptInputRecord.inputs) {
+      inputs = await getAllSignedURLsFromInputs(
+        promptInputRecord.inputs,
         organizationId,
         requestId,
         true
@@ -139,20 +176,18 @@ export async function run(
 
     const preparedRequest = await prepareRequest(
       {
-        template: promptVersion.data.helicone_template,
+        template: promptVersion.helicone_template,
         providerKey: OPENROUTER_KEY,
         secretKey,
-        inputs: promptInputRecord.data.inputs as Record<string, string>,
-        autoInputs: promptInputRecord.data.auto_prompt_inputs as Record<
-          string,
-          any
-        >[],
+        inputs: inputs,
+        autoInputs:
+          (promptInputRecord.auto_prompt_inputs as Record<string, any>[]) || [],
         requestPath: `${OPENROUTER_WORKER_URL}/api/v1/chat/completions`,
         requestId,
         experimentId,
-        model: promptVersion.data.model ?? "",
+        model: promptVersion.model ?? "",
       },
-      providerByModelName(promptVersion.data.model ?? "")
+      providerByModelName(promptVersion.model ?? "")
     );
 
     await runHypothesis({

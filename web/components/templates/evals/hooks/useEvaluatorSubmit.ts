@@ -6,7 +6,7 @@ import { LLMEvaluatorConfigFormPreset } from "../CreateNewEvaluator/LLMEvaluator
 import { useEvalFormStore } from "../store/evalFormStore";
 
 // LLM Evaluator Submit Hook
-export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
+export const useLLMEvaluatorSubmit = (onSuccess: (data?: any) => void) => {
   const jawn = useJawnClient();
   const notification = useNotification();
   const invalidateEvaluators = useInvalidateEvaluators();
@@ -72,9 +72,9 @@ export const useLLMEvaluatorSubmit = (onSuccess: () => void) => {
         setIsSubmitting(false);
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       invalidateEvaluators.invalidate();
-      onSuccess();
+      onSuccess(data);
     },
   });
 };

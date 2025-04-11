@@ -1,5 +1,5 @@
-import { createClient, ClickHouseClient } from "@clickhouse/client";
-import { Result } from "../shared/result";
+import { ClickHouseClient, createClient } from "@clickhouse/client";
+import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -176,6 +176,8 @@ export interface InsertRequestResponseVersioned {
   prompt_tokens: Nullable<number>;
   prompt_cache_write_tokens: Nullable<number>;
   prompt_cache_read_tokens: Nullable<number>;
+  prompt_audio_tokens: Nullable<number>;
+  completion_audio_tokens: Nullable<number>;
   model: string;
   request_id: string;
   request_created_at: string;
@@ -209,6 +211,8 @@ export interface RequestResponseRMT {
   prompt_tokens: number;
   prompt_cache_write_tokens: number;
   prompt_cache_read_tokens: number;
+  prompt_audio_tokens: number;
+  completion_audio_tokens: number;
   model: string;
   request_id: string;
   request_created_at: string;

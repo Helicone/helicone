@@ -5,7 +5,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { ModelMetric, modelMetrics } from "../../../lib/api/models/models";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 async function handler(

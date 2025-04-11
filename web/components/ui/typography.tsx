@@ -7,7 +7,7 @@ export const typography = {
   h1: "scroll-m-20 font-sans text-3xl leading-10 font-semibold tracking-tight lg:text-4xl text-[hsl(var(--foreground))]",
   "h1-large":
     "scroll-m-20 font-sans text-5xl leading-10 font-extrabold tracking-tight text-[hsl(var(--foreground))]",
-  h2: "scroll-m-20 font-sans text-3xl leading-9 font-semibold tracking-tight text-[hsl(var(--foreground))]",
+  h2: "scroll-m-20 font-sans text-2xl md:text-3xl leading-9 font-semibold tracking-tight text-[hsl(var(--foreground))]",
   h3: "scroll-m-20 font-sans text-2xl leading-8 font-semibold tracking-tight text-[hsl(var(--foreground))]",
   h4: "scroll-m-20 font-sans text-xl leading-7 font-semibold tracking-tight text-[hsl(var(--foreground))]",
 
@@ -15,9 +15,11 @@ export const typography = {
   p: "font-sans text-base leading-7 font-normal text-[hsl(var(--foreground))]",
   lead: "font-sans text-xl leading-7 font-normal text-[hsl(var(--muted-foreground))]",
   large:
-    "font-sans text-lg leading-7 font-semibold text-[hsl(var(--foreground))]",
+    "font-sans text-lg leading-7 font-normal text-[hsl(var(--foreground))]",
   small:
-    "font-sans text-sm leading-4 font-medium text-[hsl(var(--foreground))]",
+    "font-sans text-sm leading-4 font-normal text-[hsl(var(--foreground))]",
+  xsmall:
+    "font-sans text-xs leading-4 font-normal text-[hsl(var(--foreground))]",
   muted: "font-sans text-sm font-normal text-[hsl(var(--muted-foreground))]",
 
   // Special elements
@@ -78,6 +80,10 @@ export function Large({ className, ...props }: TypographyProps) {
 
 export function Small({ className, ...props }: TypographyProps) {
   return <small className={cn(typography.small, className)} {...props} />;
+}
+
+export function XSmall({ className, ...props }: TypographyProps) {
+  return <small className={cn(typography.xsmall, className)} {...props} />;
 }
 
 export function Muted({ className, ...props }: TypographyProps) {

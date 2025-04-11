@@ -3,8 +3,9 @@
   "title1": "Why Observability is the key to ethical and safe Artificial Intelligence",
   "title2": "Why Observability is the key to ethical and safe Artificial Intelligence",
   "description": "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge. AI, Artificial Intelligence, Safety, Ethics.",
-  "images": "/static/blog/ai-best-practices/cover.webp",
+  "images": "/static/blog/AI.webp",
   "time": "5 minute read",
   "author": "Scott Nguyen",
-  "date": "Sep 19, 2023"
+  "date": "Sep 19, 2023",
+  "badge": "Product"
 }

@@ -3,7 +3,7 @@ interface ChoiceScore {
   description: string;
 }
 
-interface OpenAIFunctionParams {
+export interface OpenAIFunctionParams {
   name: string;
   description: string;
   expectedValueType: "boolean" | "choice" | "range";
@@ -18,7 +18,7 @@ interface OpenAIFunctionParams {
   };
 }
 
-function generateOpenAIFunction({
+export function generateOpenAIFunction({
   name,
   description,
   expectedValueType,
@@ -63,7 +63,7 @@ function generateOpenAIFunction({
   return JSON.stringify(baseFunction, null, 2);
 }
 
-function OpenAIFunctionToFunctionParams(
+export function OpenAIFunctionToFunctionParams(
   expectedValueType: "LLM-BOOLEAN" | "LLM-CHOICE" | "LLM-RANGE",
   template:
     | {

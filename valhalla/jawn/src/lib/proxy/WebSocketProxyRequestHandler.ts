@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { Headers, Response } from "node-fetch";
 import { SocketMessage } from "../../types/realtime";
+import { safeJSONStringify } from "../../utils/sanitize";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { DBLoggable } from "./DBLoggable";
 
@@ -28,23 +29,32 @@ export async function handleSocketSession(
   const clientMessages = messages.filter((msg) => msg.from === "client");
   const targetMessages = messages.filter((msg) => msg.from === "target");
 
-  const startingSession = targetMessages[0]?.content?.session;
+  let requestBody;
+  const startingSession = targetMessages.find((msg) => msg.content?.session)
+    ?.content?.session;
+  if (startingSession) {
+    requestBody = {
+      model: startingSession.model,
+      temperature: startingSession.temperature,
+      modalities: startingSession.modalities,
+      instructions: startingSession.instructions,
+      voice: startingSession.voice,
+      turn_detection: startingSession.turn_detection,
+      input_audio_format: startingSession.input_audio_format,
+      output_audio_format: startingSession.output_audio_format,
+      tool_choice: startingSession.tool_choice,
+      max_response_output_tokens: startingSession.max_response_output_tokens,
+      tools: startingSession.tools,
 
-  const requestBody = {
-    model: startingSession.model,
-    temperature: startingSession.temperature,
-    modalities: startingSession.modalities,
-    instructions: startingSession.instructions,
-    voice: startingSession.voice,
-    turn_detection: startingSession.turn_detection,
-    input_audio_format: startingSession.input_audio_format,
-    output_audio_format: startingSession.output_audio_format,
-    tool_choice: startingSession.tool_choice,
-    max_response_output_tokens: startingSession.max_response_output_tokens,
-    tools: startingSession.tools,
+      messages: clientMessages,
+    };
+  } else {
+    requestBody = {
+      error: "No Realtime Starting Session Found.",
 
-    messages: clientMessages,
-  };
+      messages: clientMessages,
+    };
+  }
 
   const responseBody = {
     id: startingSession.id,
@@ -75,12 +85,12 @@ export async function handleSocketSession(
         country_code: null,
         experimentColumnId: null,
         experimentRowIndex: null,
-        bodyText: JSON.stringify(requestBody),
+        bodyText: safeJSONStringify(requestBody),
       },
       response: {
         responseId,
         getResponseBody: async () => ({
-          body: JSON.stringify(responseBody),
+          body: safeJSONStringify(responseBody),
           endTime,
         }),
         status: async () => 200,
@@ -103,15 +113,14 @@ export async function handleSocketSession(
 
 /**
  * Calculates the total token usage from all "response.done" messages in a WebSocket session.
- * Aggregates token counts across multiple messages, including text and audio modalities.
  *
  * @param messages - Array of SocketMessages from the WebSocket session
  * @returns An object containing:
- *   - promptTokens: Sum of all input/prompt tokens
- *   - completionTokens: Sum of all output/completion tokens
+ *   - promptTokens: Sum of all input text tokens
+ *   - completionTokens: Sum of all output text tokens
  *   - totalTokens: Sum of all tokens used
- *   - promptTokenDetails: Detailed breakdown of prompt tokens (text, audio)
- *   - completionTokenDetails: Detailed breakdown of completion tokens (text, audio)
+ *   - promptAudioTokens: Sum of all input audio tokens
+ *   - completionAudioTokens: Sum of all output audio tokens
  */
 function calculateTokenUsage(messages: SocketMessage[]) {
   const doneMessages = messages.filter(
@@ -124,40 +133,27 @@ function calculateTokenUsage(messages: SocketMessage[]) {
       if (!usage) return acc;
 
       return {
-        promptTokens: (acc.promptTokens || 0) + (usage.input_tokens || 0),
+        promptTokens:
+          (acc.promptTokens || 0) +
+          (usage.input_token_details?.text_tokens || 0),
         completionTokens:
-          (acc.completionTokens || 0) + (usage.output_tokens || 0),
+          (acc.completionTokens || 0) +
+          (usage.output_token_details?.text_tokens || 0),
         totalTokens: (acc.totalTokens || 0) + (usage.total_tokens || 0),
-        promptTokenDetails: {
-          textTokens:
-            (acc.promptTokenDetails?.textTokens || 0) +
-            (usage.input_token_details?.text_tokens || 0),
-          audioTokens:
-            (acc.promptTokenDetails?.audioTokens || 0) +
-            (usage.input_token_details?.audio_tokens || 0),
-        },
-        completionTokenDetails: {
-          textTokens:
-            (acc.completionTokenDetails?.textTokens || 0) +
-            (usage.output_token_details?.text_tokens || 0),
-          audioTokens:
-            (acc.completionTokenDetails?.audioTokens || 0) +
-            (usage.output_token_details?.audio_tokens || 0),
-        },
+        promptAudioTokens:
+          (acc.promptAudioTokens || 0) +
+          (usage.input_token_details?.audio_tokens || 0),
+        completionAudioTokens:
+          (acc.completionAudioTokens || 0) +
+          (usage.output_token_details?.audio_tokens || 0),
       };
     },
     {
       promptTokens: 0,
       completionTokens: 0,
       totalTokens: 0,
-      promptTokenDetails: {
-        textTokens: 0,
-        audioTokens: 0,
-      },
-      completionTokenDetails: {
-        textTokens: 0,
-        audioTokens: 0,
-      },
+      promptAudioTokens: 0,
+      completionAudioTokens: 0,
     }
   );
 }

@@ -15,6 +15,8 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 const useRequestsPageV2 = (
   currentPage: number,
@@ -25,6 +27,7 @@ const useRequestsPageV2 = (
   isCached: boolean,
   isLive: boolean
 ) => {
+  const filterStore = useFilterAST();
   const [timeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("all"),
     end: new Date(),
@@ -40,7 +43,7 @@ const useRequestsPageV2 = (
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-    propertyFilters
+    Array.isArray(propertyFilters) ? propertyFilters : []
   );
 
   // replace the model filter inside of the filterMap with the text suggestion model
@@ -72,7 +75,13 @@ const useRequestsPageV2 = (
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
   const filter: FilterNode = {
-    left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
+    left: {
+      right: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
+      left: filterStore.store.filter
+        ? toFilterNode(filterStore.store.filter)
+        : "all",
+      operator: "and",
+    },
     right: advancedFilter,
     operator: "and",
   };
@@ -89,7 +98,7 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    requests: requests.requests.map(heliconeRequestToMappedContent),
+    requests: requests.requests?.map(heliconeRequestToMappedContent) ?? [],
     count: count.data?.data,
     isDataLoading,
     isBodyLoading: requests.isLoading,

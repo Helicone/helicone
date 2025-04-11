@@ -3,7 +3,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 
 interface SuggestionModalProps {

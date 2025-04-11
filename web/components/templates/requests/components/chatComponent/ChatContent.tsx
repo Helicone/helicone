@@ -59,6 +59,7 @@ export const ChatContent: React.FC<ChatContentProps> = ({
     return (
       <MessageRenderer
         messages={messagesToRender}
+        mappedRequest={mappedRequest}
         showAllMessages={showAllMessages}
         expandedChildren={expandedChildren}
         setExpandedChildren={setExpandedChildren}

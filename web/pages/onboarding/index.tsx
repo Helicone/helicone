@@ -47,9 +47,6 @@ export default function OnboardingPage() {
     enabled: !!org?.currentOrg?.id,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    onError: (error) => {
-      console.error("Subscription query error:", error);
-    },
   });
 
   const isSubscribed =

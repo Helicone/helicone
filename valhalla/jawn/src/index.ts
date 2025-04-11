@@ -77,6 +77,7 @@ const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 
 if (KAFKA_ENABLED) {
+  console.log("Starting Kafka consumers");
   startConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
@@ -215,21 +216,16 @@ const server = app.listen(port, "0.0.0.0", () => {
 });
 
 server.on("upgrade", async (req, socket, head) => {
-  // Only handle websocket upgrades for /v1/gateway/oai
-  if (!req.url?.startsWith("/v1/gateway/oai")) {
+  // Only handle websocket upgrades for /v1/gateway/oai/realtime
+  if (!req.url?.startsWith("/v1/gateway/oai/realtime")) {
     socket.destroy();
     return;
   }
 
-  // Strip /v1/gateway/oai from the URL
-  const strippedUrl = req.url.replace("/v1/gateway/oai", "");
-
   const expressRequest: ExpressRequest = {
-    url: strippedUrl,
     method: req.method!,
     headers: req.headers!,
     body: "{}",
-    // Express Request interface implementation
     get: function (this: { headers: any }, name: string) {
       return this.headers[name];
     },
@@ -253,7 +249,7 @@ server.on("upgrade", async (req, socket, head) => {
     signedCookies: {},
     query: {},
     route: {},
-    originalUrl: strippedUrl,
+    originalUrl: req.url,
     baseUrl: "",
     next: function () {},
   } as unknown as ExpressRequest;

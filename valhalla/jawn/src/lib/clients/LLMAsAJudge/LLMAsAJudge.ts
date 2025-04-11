@@ -1,16 +1,22 @@
-import { ExperimentDatasetRow } from "../../stores/experimentStore";
 import { autoFillInputs } from "@helicone/prompts";
 import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
 import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
 import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
-import { err, ok, Result } from "../../shared/result";
+import { err, ok, Result } from "../../../packages/common/result";
 
 type EvaluatorScore = {
   score: number | boolean;
 };
 export type EvaluatorScoreResult = Result<EvaluatorScore, string>;
 
-const TIERS = ["pro-20240913", "pro-20250202", "enterprise", "demo"];
+const TIERS = [
+  "pro-20240913",
+  "pro-20250202",
+  "enterprise",
+  "demo",
+  "team-20250130",
+  "free",
+];
 
 export class LLMAsAJudge {
   constructor(

@@ -6,7 +6,13 @@
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
 import { supabaseServer } from "../db/supabase";
-import { Result, err, map, mapPostgrestErr, ok } from "../shared/result";
+import {
+  Result,
+  err,
+  map,
+  mapPostgrestErr,
+  ok,
+} from "../../packages/common/result";
 
 import { Request } from "express";
 import { usageLimitManager } from "../../managers/UsageLimitManager";
@@ -16,6 +22,8 @@ import { Headers } from "node-fetch";
 import { Readable as ReadableStream } from "stream";
 import { getAndStoreInCache } from "../cache/staticMemCache";
 import { hashAuth } from "../db/hash";
+import { dbExecute } from "../shared/db/dbExecute";
+import { Database } from "../db/database.types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -449,33 +457,44 @@ export interface ProxyKeyRow {
 export async function getProviderKeyFromPortalKey(
   authKey: string
 ): Promise<Result<CustomerPortalValues, string>> {
-  const supabaseClient = supabaseServer.client;
-  const apiKey = await supabaseClient
-    .from("helicone_api_keys")
-    .select("*")
-    .eq("api_key_hash", await hashAuth(authKey))
-    .single();
-  console.log("apiKey", apiKey.error);
+  const apiKey = await dbExecute<{ organization_id: string }>(
+    `SELECT organization_id FROM helicone_api_keys WHERE api_key_hash = $1 LIMIT 1`,
+    [await hashAuth(authKey)]
+  );
 
-  const organization = await supabaseClient
-    .from("organization")
-    .select("*")
-    .eq("id", apiKey.data?.organization_id ?? "")
-    .single();
+  if (apiKey.error) {
+    return err(apiKey.error);
+  }
 
-  const providerKeyId = await supabaseClient
-    .from("provider_keys")
-    .select("*")
-    .eq("id", organization.data?.org_provider_key ?? "")
-    .single();
+  const organization = await dbExecute<{
+    org_provider_key: string;
+    limits: any;
+  }>(
+    `SELECT org_provider_key, limits FROM organization WHERE id = $1 LIMIT 1`,
+    [apiKey.data?.[0]?.organization_id ?? ""]
+  );
+
+  if (organization.error) {
+    return err(organization.error);
+  }
+
+  const providerKeyId = await dbExecute<
+    Database["public"]["Tables"]["provider_keys"]["Row"]
+  >(`SELECT * FROM provider_keys WHERE id = $1 LIMIT 1`, [
+    organization.data?.[0]?.org_provider_key ?? "",
+  ]);
+
+  if (providerKeyId.error) {
+    return err(providerKeyId.error);
+  }
 
   const check = await usageLimitManager.checkLimitsSingle(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["cost"],
+    (organization.data?.[0]?.limits as any)["cost"],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)["requests"],
+    (organization.data?.[0]?.limits as any)["requests"],
     "month",
-    apiKey.data?.organization_id ?? ""
+    apiKey.data?.[0]?.organization_id ?? ""
   );
 
   if (check.error) {
@@ -484,16 +503,19 @@ export async function getProviderKeyFromPortalKey(
     console.log("check.data", check.data);
   }
 
-  const providerKey = await supabaseClient
-    .from("decrypted_provider_keys")
-    .select("decrypted_provider_key")
-    .eq("id", providerKeyId.data?.id ?? "")
-    .eq("soft_delete", "false")
-    .single();
-  console.log("providerKey data", providerKey.data);
-  return map(mapPostgrestErr(providerKey), (x) => ({
-    providerKey: x.decrypted_provider_key ?? "",
-  }));
+  const providerKey = await dbExecute<{
+    decrypted_provider_key: string;
+  }>(
+    `SELECT decrypted_provider_key FROM decrypted_provider_keys WHERE id = $1 LIMIT 1`,
+    [providerKeyId.data?.[0]?.id ?? ""]
+  );
+
+  if (providerKey.error) {
+    return err(providerKey.error);
+  }
+  return ok({
+    providerKey: providerKey.data?.[0]?.decrypted_provider_key ?? "",
+  });
 }
 
 export async function getProviderKeyFromProxy(
@@ -514,18 +536,16 @@ export async function getProviderKeyFromProxy(
 
   //TODO figure out how to make this into one query with this syntax
   // https://supabase.com/docs/guides/api/joins-and-nesting
-  const supabaseClient = supabaseServer.client;
+
   const [storedProxyKey, limits] = await Promise.all([
-    supabaseClient
-      .from("helicone_proxy_keys")
-      .select("*")
-      .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
-      .single(),
-    supabaseClient
-      .from("helicone_proxy_key_limits")
-      .select("*")
-      .eq("helicone_proxy_key", proxyKeyId),
+    dbExecute<Database["public"]["Tables"]["helicone_proxy_keys"]["Row"]>(
+      `SELECT * FROM helicone_proxy_keys WHERE id = $1 AND soft_delete = false LIMIT 1`,
+      [proxyKeyId]
+    ),
+    dbExecute<Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"]>(
+      `SELECT * FROM helicone_proxy_key_limits WHERE helicone_proxy_key = $1`,
+      [proxyKeyId]
+    ),
   ]);
 
   if (storedProxyKey.error || !storedProxyKey.data) {
@@ -539,29 +559,29 @@ export async function getProviderKeyFromProxy(
     }
   }
 
-  const verified = await supabaseClient.rpc("verify_helicone_proxy_key", {
-    api_key: proxyKey,
-    stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
-  });
+  const verified = await dbExecute<{ result: boolean }>(
+    `SELECT verify_helicone_proxy_key($1, $2) as result`,
+    [proxyKey, storedProxyKey.data?.[0]?.helicone_proxy_key ?? ""]
+  );
 
   if (verified.error || !verified.data) {
     return err("Proxy key not verified");
   }
 
-  const providerKey = await supabaseClient
-    .from("decrypted_provider_keys")
-    .select("decrypted_provider_key")
-    .eq("id", storedProxyKey.data.provider_key_id)
-    .eq("soft_delete", "false")
-    .single();
+  const providerKey = await dbExecute<{
+    decrypted_provider_key: string;
+  }>(
+    `SELECT decrypted_provider_key FROM decrypted_provider_keys WHERE id = $1 AND soft_delete = false LIMIT 1`,
+    [storedProxyKey.data?.[0]?.provider_key_id ?? ""]
+  );
 
-  if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
+  if (providerKey.error || !providerKey.data?.[0]?.decrypted_provider_key) {
     return err("Provider key not found");
   }
 
   return ok({
-    providerKey: providerKey.data.decrypted_provider_key,
-    proxyKeyId: storedProxyKey.data.id,
-    organizationId: storedProxyKey.data.org_id,
+    providerKey: providerKey.data?.[0]?.decrypted_provider_key ?? "",
+    proxyKeyId: storedProxyKey.data?.[0]?.id ?? "",
+    organizationId: storedProxyKey.data?.[0]?.org_id ?? "",
   });
 }

@@ -1,169 +1,113 @@
 ---
 title: "Generate API"
-sidebarTitle: "Generate API"
-description: "Generate content using predefined prompts through a dedicated API endpoint."
+sidebarTitle: "Generate"
+description: "Deploy your [Editor](/features/prompts/editor) prompts effortlessly with a light and modern package."
 "twitter:title": "Generate API | Helicone OSS LLM Observability"
 ---
 
-## Overview
+## Installation
 
-The Generate API allows you to use predefined prompts to generate content through a unified endpoint. This feature simplifies the process of using prompts across different LLM providers while maintaining Helicone's observability features.
+```bash
+npm install @helicone/generate
+```
 
-## Prerequisites
+## Usage
 
-- A Helicone account and API key
-- At least one predefined prompt in Helicone
-- API keys for the LLM providers you want to use
+### Simple usage with just a prompt ID
 
-## API Endpoint
+```typescript
+import { generate } from "@helicone/generate";
 
-## Request Format
+// model, temperature, messages inferred from id
+const response = await generate("prompt-id");
 
-The request body should include:
+console.log(response);
+```
 
-Required headers:
+### With variables
 
-Provider API keys (at least one required):
+```typescript
+const response = await generate({
+  promptId: "prompt-id",
+  inputs: {
+    location: "Portugal",
+    time: "2:43",
+  },
+});
 
-## Example Usage
+console.log(response);
+```
 
-<Tabs>
-  <Tab title="JavaScript">
-    ```javascript
-    const generateUrl = "https://generate.helicone.ai";
+### With Helicone properties
 
-    const payload = {
-        // Prompt Info
-        promptId: "new-prompt",
-        version: "production", // defaults to "production" or provide specific version number
-        inputs: {
-            num: "10",
-        },
-        // Helicone Properties
-        userId: "test-user",
-        sessionId: "session-123",
-    };
+```typescript
+const response = await generate({
+  promptId: "prompt-id",
+  userId: "ajwt2kcoe",
+  sessionId: "21",
+  cache: true,
+});
 
-    const headers = {
-        // Helicone Auth
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        // Provider Keys
-        "OPENAI_API_KEY": process.env.OPENAI_API_KEY,
-        "ANTHROPIC_API_KEY": process.env.ANTHROPIC_API_KEY,
-        "GOOGLE_API_KEY": process.env.GOOGLE_GENERATIVE_API_KEY,
-        "COHERE_API_KEY": process.env.COHERE_API_KEY,
-        "MISTRAL_API_KEY": process.env.MISTRAL_API_KEY,
-    };
+console.log(response);
+```
 
-    const response = await fetch(generateUrl, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(payload),
-    });
+### In a chat
 
-    const data = await response.json();
-    console.log(data);
-    bash
-    curl -X POST https://generate.helicone.ai/v1/generate \
-      -H "Content-Type: application/json" \
-      -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
-      -H "OPENAI_API_KEY: $OPENAI_API_KEY" \
-      -H "ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY" \
-      -H "GOOGLE_API_KEY: $GOOGLE_GENERATIVE_API_KEY" \
-      -H "COHERE_API_KEY: $COHERE_API_KEY" \
-      -H "MISTRAL_API_KEY: $MISTRAL_API_KEY" \
-      -d '{
-        "promptId": "new-prompt",
-        "version": "production",
-        "inputs": {
-          "num": "10"
-        },
-        "userId": "test-user",
-        "sessionId": "session-123"
-      }'
-    ```
+```typescript
+const promptId = "homework-helper";
+const chat = [];
 
-  </Tab>
-  <Tab title="Python">
-    ```python
-    import requests
-    import os
+// User
+chat.push("can you help me with my homework?");
 
-    generate_url = "https://generate.helicone.ai"
+// Assistant
+chat.push(await generate({ promptId, chat }));
+console.log(chat[chat.length - 1]);
 
-    payload = {
-        # Prompt Info
-        "promptId": "new-prompt",
-        "version": "production", # defaults to "production" or provide specific version number
-        "inputs": {
-            "num": "10",
-        },
-        # Helicone Properties
-        "userId": "test-user",
-        "sessionId": "session-123",
-    }
+// User
+chat.push("thanks, the first question is what is 2+2?");
 
-    headers = {
-        # Helicone Auth
-        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",
-        # Provider Keys
-        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY"),
-        "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY"),
-        "GOOGLE_API_KEY": os.environ.get("GOOGLE_GENERATIVE_API_KEY"),
-        "COHERE_API_KEY": os.environ.get("COHERE_API_KEY"),
-        "MISTRAL_API_KEY": os.environ.get("MISTRAL_API_KEY"),
-    }
+// Assistant
+chat.push(await generate({ promptId, chat }));
+console.log(chat[chat.length - 1]);
+```
 
-    response = requests.post(generate_url, headers=headers, json=payload)
-    data = response.json()
-    print(data)
-    ```
+## Supported Providers and Required Environment Variables
 
-  </Tab>
+<Warning>
+  Ensure all required environment variables are correctly defined in your `.env`
+  file before making a request.
+</Warning>
 
-</Tabs>
+Always required: `HELICONE_API_KEY`
 
-## Response Format
+| Provider         | Required Environment Variables                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| OpenAI           | `OPENAI_API_KEY`                                                                                           |
+| Azure OpenAI     | `AZURE_API_KEY`, `AZURE_ENDPOINT`, `AZURE_DEPLOYMENT`                                                      |
+| Anthropic        | `ANTHROPIC_API_KEY`                                                                                        |
+| AWS Bedrock      | `BEDROCK_API_KEY`, `BEDROCK_REGION`                                                                        |
+| Google Gemini    | `GOOGLE_GEMINI_API_KEY`                                                                                    |
+| Google Vertex AI | `GOOGLE_VERTEXAI_API_KEY`, `GOOGLE_VERTEXAI_REGION`, `GOOGLE_VERTEXAI_PROJECT`, `GOOGLE_VERTEXAI_LOCATION` |
+| OpenRouter       | `OPENROUTER_API_KEY`                                                                                       |
 
-The response format will match the standard format of the underlying LLM provider being used. All responses will be logged in Helicone and can be viewed in your dashboard.
+## API Reference
 
-## Features
+### `generate(input)`
 
-- **Unified Endpoint**: Use a single endpoint for multiple LLM providers
-- **Version Control**: Specify prompt versions for testing and production
-- **Input Variables**: Pass dynamic inputs to your prompts
-- **User Tracking**: Include user and session IDs for request tracking
-- **Full Observability**: All requests are logged in Helicone's dashboard
+Generates a response using a Helicone prompt.
 
-## Upcoming Features
+#### Parameters
 
-- Reverse mapper for Anthropic and other API paths
-- Support for additional LLM providers
-- Enhanced prompt template key-value store
+- `input` (string | object): Either a prompt ID string or a parameters object:
+  - `promptId` (string): The ID of the prompt to use, created in the [Prompt Editor](/features/prompts/editor)
+  - `version` (number | "production", optional): The version of the prompt to use. Defaults to "production"
+  - `inputs` (object, optional): Variable inputs to use in the prompt, if any
+  - `chat` (string[], optional): Chat history for chat-based prompts
+  - `userId` (string, optional): User ID for tracking in Helicone
+  - `sessionId` (string, optional): Session ID for tracking in [Helicone Sessions](/features/sessions)
+  - `cache` (boolean, optional): Whether to use Helicone's [LLM Caching](/features/advanced-usage/caching)
 
-## FAQ
+#### Returns
 
-<AccordionGroup>
-  <Accordion title="Which LLM providers are supported?">
-    The Generate API currently supports:
-    - OpenAI
-    - OpenRouter
-
-    Additional providers will be added in future updates.
-
-  </Accordion>
-  <Accordion title="Can I use this with streaming responses?">
-    Yes, the Generate API supports streaming responses. The response format will match the streaming format of the underlying provider being used.
-  </Accordion>
-  <Accordion title="How do I handle errors?">
-    The API will return standard HTTP error codes along with detailed error messages in the response body. Common error scenarios include:
-    - 400: Invalid request format
-    - 401: Authentication error
-    - 404: Prompt not found
-    - 500: Server error
-  </Accordion>
-</AccordionGroup>
-
-import QuestionsSection from "/snippets/questions-section.mdx";
-
-<QuestionsSection />
+- `Promise<object>`: The raw response from the LLM provider

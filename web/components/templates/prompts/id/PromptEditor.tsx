@@ -1,3 +1,5 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
@@ -11,14 +13,8 @@ import CustomScrollbar, {
   CustomScrollbarRef,
 } from "@/components/shared/universal/Scrollbar";
 import VersionSelector from "@/components/shared/universal/VersionSelector";
+import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   ResizableHandle,
@@ -31,9 +27,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { readStream } from "@/lib/api/llm/read-stream";
+import { processStream } from "@/lib/api/llm/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
+import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
+import { openaiChatMapper } from "@/packages/llm-mapper/mappers/openai/chat-v2";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
@@ -46,7 +45,6 @@ import {
   $user,
   findClosestModel,
   findClosestProvider,
-  PROVIDER_MODELS,
 } from "@/utils/generate";
 import {
   isLastMessageUser,
@@ -75,20 +73,26 @@ import {
   PiChartBarBold,
   PiCommandBold,
   PiPlayBold,
-  PiRocketLaunchBold,
   PiSpinnerGapBold,
   PiStopBold,
 } from "react-icons/pi";
 import {
   useCreatePrompt,
   usePrompt,
+  usePrompts,
   usePromptVersions,
 } from "../../../../services/hooks/prompts/prompts";
 import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
-import { DiffHighlight } from "../../welcome/diffHighlight";
+import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 
+type EditorMode =
+  | "fromCode"
+  | "fromEditor"
+  | "fromRequest"
+  | "fromPlayground"
+  | null;
 interface PromptEditorProps {
   promptId?: string; // Prompt Id Mode
   requestId?: string; // Request Id Mode
@@ -106,7 +110,9 @@ export default function PromptEditor({
   requestId,
   basePrompt,
 }: PromptEditorProps) {
-  // STATE
+  /* -------------------------------------------------------------------------- */
+  /*                                    State                                   */
+  /* -------------------------------------------------------------------------- */
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
@@ -114,12 +120,14 @@ export default function PromptEditor({
   const [isStreaming, setIsStreaming] = useState(false);
   const abortController = useRef<AbortController | null>(null);
 
-  // HOOKS
+  /* -------------------------------------------------------------------------- */
+  /*                                    Hooks                                   */
+  /* -------------------------------------------------------------------------- */
   // - Router
   const router = useRouter();
   // - Jawn Client
   const jawnClient = useJawnClient();
-  // - Request Data (if loading from request)
+  // - Request Data
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
   // - Prompt Table
@@ -141,29 +149,89 @@ export default function PromptEditor({
   // - Create Prompt
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
 
-  // VALIDATION
-  // - Is Imported From Code
-  const isImportedFromCode = useMemo(() => {
-    // Case 1: If we're in playground mode (basePrompt exists), it's not imported from code
-    if (basePrompt) return false;
+  // FREE TIER LIMITS
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const {
+    playgroundRunCount,
+    promptRunCount,
+    incrementPlaygroundRun,
+    incrementPromptRun,
+  } = usePromptRunsStore();
+  // - Prompts Count
+  const { prompts: promptsData } = usePrompts();
+  const promptCount = promptsData?.length || 0;
+  const {
+    canCreate: withinPromptsLimit,
+    upgradeMessage: promptsLimitUpgradeMessage,
+  } = useFeatureLimit("prompts", promptCount);
+  // - Prompt Versions Count
+  const versionCount = promptVersionsData?.length ?? 0;
+  const { canCreate: withinVersionsLimit } = useFeatureLimit(
+    "prompts",
+    versionCount,
+    "versions"
+  );
+  // - Prompt Runs
+  const {
+    canCreate: withinPrompRunsLimit,
+    freeLimit: maxPromptRuns,
+    upgradeMessage: promptRunsUpgradeMessage,
+    hasAccess: hasPromptAccess,
+  } = useFeatureLimit("prompts", promptRunCount, "runs");
+  // - Playground Runs
+  const {
+    canCreate: withinPlaygroundRunsLimit,
+    freeLimit: maxPlaygroundRuns,
+    upgradeMessage: playgroundRunsUpgradeMessage,
+    hasAccess: hasPlaygroundAccess,
+  } = useFeatureLimit("prompts", playgroundRunCount, "playground_runs");
 
-    // Case 2: If we're in request mode, it's not imported from code
-    if (requestId) return false;
+  /* -------------------------------------------------------------------------- */
+  /*                                 Validation                                 */
+  /* -------------------------------------------------------------------------- */
+  // - Centralized prompt mode validation
+  const editorMode = useMemo<EditorMode>(() => {
+    // If we're still loading data, return null
+    if (
+      (promptId && (isPromptLoading || isVersionsLoading)) ||
+      (requestId && isRequestLoading)
+    ) {
+      return null;
+    }
 
-    // Case 3: If prompt data is still loading or not available, we don't know yet
-    if (isPromptLoading || !promptData) return null;
+    // Check for each mode in priority order
+    if (requestId) {
+      return "fromRequest";
+    } else if (basePrompt) {
+      return "fromPlayground";
+    } else if (promptId) {
+      // Check if we have metadata to determine if it's from code or editor
+      if (promptData?.metadata?.createdFromUi === true) {
+        return "fromEditor";
+      } else {
+        return "fromCode";
+      }
+    }
 
-    // Case 4: If we have metadata, check the createdFromUi flag
-    // Explicitly imported from code if createdFromUi is NOT true
-    return promptData.metadata?.createdFromUi !== true;
-  }, [promptData, isPromptLoading, basePrompt, requestId]);
+    // Fallback (should never happen with proper props)
+    return null;
+  }, [
+    promptId,
+    requestId,
+    basePrompt,
+    promptData,
+    isPromptLoading,
+    isVersionsLoading,
+    isRequestLoading,
+  ]);
   // - Can Run
   const canRun = useMemo(() => {
     // For OPENAI, ANTHROPIC, and GOOGLE provider, just check if any message has non-empty content
     if (
       state?.parameters?.provider === "OPENAI" ||
       state?.parameters?.provider === "ANTHROPIC" ||
-      state?.parameters?.provider === "GOOGLE"
+      state?.parameters?.provider === "GOOGLE_GEMINI" ||
+      state?.parameters?.provider === "GOOGLE_VERTEXAI"
     ) {
       return (
         state?.messages.some(
@@ -186,30 +254,15 @@ export default function PromptEditor({
       );
   }, [state?.messages, state?.parameters?.provider]);
 
-  // CALLBACKS
-  // - Load Version Data into State
+  /* -------------------------------------------------------------------------- */
+  /*                                 Callbacks                                  */
+  /* -------------------------------------------------------------------------- */
+  // - Loads Version Data for modes fromCode and fromEditor
   const loadVersionData = useCallback(
     (ver: any) => {
-      if (!ver && !requestId) return;
+      if (!ver) return;
 
-      // Ensure we have full knowledge of isImportedFromCode before proceeding
-      if (promptId && isImportedFromCode === null) {
-        console.log(
-          "Cannot load version data: isImportedFromCode is not yet determined"
-        );
-        return;
-      }
-
-      console.log(
-        `Loading ${
-          isImportedFromCode === true
-            ? "imported"
-            : isImportedFromCode === false
-            ? "created"
-            : "unknown"
-        } version row:`,
-        ver
-      );
+      console.log(`Loading version data:`, ver);
 
       let templateData: any = {};
       let metadata: {
@@ -224,122 +277,107 @@ export default function PromptEditor({
       let inputs: StateInputs[] = [];
       let masterVersion: number | undefined;
 
-      // 1. Load prompt either from:
-      // A. Request data
-      if (requestId && requestData?.data) {
-        const mappedContent = heliconeRequestToMappedContent(requestData.data);
+      // Get version template and metadata
+      const versionTemplate = ver.helicone_template;
+      const versionMetadata = ver.metadata;
 
-        templateData = mappedContent.schema.request;
-        // TODO: Use findClosestProvider and findClosestModel here instead?
-        metadata = {
-          provider: undefined,
-          isProduction: true,
-          inputs: undefined,
-        };
-      }
-      // B. Prompt data
-      else if (promptId && promptData && promptVersionsData) {
-        const versionTemplate = ver.helicone_template;
-        const versionMetadata = ver.metadata;
-
-        // I. Imported from Code
-        if (isImportedFromCode === true) {
-          const mapperType = getMapperType({
+      // Process based on editor mode
+      if (editorMode === "fromCode") {
+        // For imported from code: use mapper to transform the template
+        const mapperType = getMapperType({
+          model: versionTemplate.model,
+          provider: versionMetadata.provider || "OPENAI",
+        });
+        const mapper = MAPPERS[mapperType];
+        const mappedResult = mapper({
+          request: versionTemplate,
+          response: {
+            choices: [],
             model: versionTemplate.model,
-            provider: versionMetadata.provider || "OPENAI",
-          });
-          const mapper = MAPPERS[mapperType];
-          const mappedResult = mapper({
-            request: versionTemplate,
-            response: {
-              choices: [],
-              model: versionTemplate.model,
-            }, // This information is not available
-            statusCode: 200,
-            model: versionTemplate.model,
-          });
-
-          templateData = mappedResult.schema.request;
-          metadata = versionMetadata;
-        } else {
-          // II. Created from UI
-          templateData =
-            typeof versionTemplate === "string"
-              ? JSON.parse(versionTemplate)
-              : versionTemplate || {};
-          metadata =
-            typeof versionMetadata === "string"
-              ? JSON.parse(versionMetadata)
-              : versionMetadata || {};
-        }
-
-        // 2. Derive "masterVersion" if needed
-        masterVersion =
-          metadata?.isProduction === true
-            ? ver.major_version
-            : promptVersionsData?.find(
-                (v) => (v.metadata as { isProduction?: boolean })?.isProduction
-              )?.major_version ?? ver.major_version;
-
-        // 3.A. First collect all variables and their default values from the metadata inputs
-        inputs = Object.entries(metadata?.inputs || {}).map(
-          ([name, value]) => ({
-            name,
-            value: value as string,
-            isValid: isValidVariableName(name),
-          })
-        );
-
-        // 3.B. Extract additional variables contained in message content
-        stateMessages.forEach((msg) => {
-          const vars = extractVariables(msg.content || "", "helicone");
-          vars.forEach((v) => {
-            inputs.push({
-              name: v.name,
-              value: metadata?.inputs?.[v.name] ?? v.value ?? "",
-              isValid: v.isValid ?? true,
-            });
-          });
+          },
+          statusCode: 200,
+          model: versionTemplate.model,
         });
 
-        // 3.C. Add message auto-inputs to the list
-        stateMessages.forEach((msg) => {
-          msg.idx !== undefined &&
-            inputs.push({
-              name: `message_${msg.idx}`,
-              value: "",
-              isValid: true,
-              idx: msg.idx,
-            });
-        });
-
-        // 3.D. Deduplicate variables
-        inputs = deduplicateVariables(inputs);
+        templateData = mappedResult.schema.request;
+        metadata = versionMetadata;
+      } else {
+        // For UI-created prompts: parse template and metadata
+        templateData =
+          typeof versionTemplate === "string"
+            ? JSON.parse(versionTemplate)
+            : versionTemplate || {};
+        metadata =
+          typeof versionMetadata === "string"
+            ? JSON.parse(versionMetadata)
+            : versionMetadata || {};
       }
 
-      // 4. Typeguard and cast templateData to Message[]
+      // Determine master version (production version)
+      masterVersion =
+        metadata?.isProduction === true
+          ? ver.major_version
+          : promptVersionsData?.find(
+              (v) => (v.metadata as { isProduction?: boolean })?.isProduction
+            )?.major_version ?? ver.major_version;
+
+      // Process variables and inputs
+      // 1. First collect all variables from metadata inputs
+      inputs = Object.entries(metadata?.inputs || {}).map(([name, value]) => ({
+        name,
+        value: value as string,
+        isValid: isValidVariableName(name),
+      }));
+
+      // 2. Extract messages and variables from content
       stateMessages = (templateData.messages ?? []) as Message[];
+      stateMessages.forEach((msg) => {
+        const vars = extractVariables(msg.content || "", "helicone");
+        vars.forEach((v) => {
+          inputs.push({
+            name: v.name,
+            value: metadata?.inputs?.[v.name] ?? v.value ?? "",
+            isValid: v.isValid ?? true,
+          });
+        });
+      });
 
-      // 5. Validate model-provider or closest match or default
+      // 3. Add message auto-inputs
+      stateMessages.forEach((msg) => {
+        msg.idx !== undefined &&
+          inputs.push({
+            name: `message_${msg.idx}`,
+            value: "",
+            isValid: true,
+            idx: msg.idx,
+          });
+      });
+
+      // 4. Deduplicate variables
+      inputs = deduplicateVariables(inputs);
+
+      // Find closest provider and model
       const provider = findClosestProvider(
         templateData.provider || metadata?.provider || "OPENAI"
       );
       const model = findClosestModel(provider, templateData.model || "gpt-4");
 
-      // 6. Update state with the processed data
+      // Update state with processed data
       setState({
         promptId: promptId,
         masterVersion,
-        version: ver?.major_version,
-        versionId: ver?.id,
+        version: ver.major_version,
+        versionId: ver.id,
 
         messages: stateMessages,
         parameters: {
-          provider: provider as keyof typeof PROVIDER_MODELS,
+          provider: provider,
           model: model,
-          temperature: templateData.temperature ?? 1,
-          tools: templateData.tools ?? [],
+          temperature: templateData.temperature ?? undefined,
+          tools: templateData.tools ?? undefined,
+          max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
+          stop: templateData.stop ?? undefined,
         },
         inputs,
         evals: metadata?.evals ?? [],
@@ -348,14 +386,7 @@ export default function PromptEditor({
         isDirty: false,
       });
     },
-    [
-      promptId,
-      promptData,
-      promptVersionsData,
-      requestId,
-      requestData,
-      isImportedFromCode,
-    ]
+    [promptId, promptVersionsData, editorMode]
   );
   // - Update State
   const updateState = useCallback(
@@ -367,8 +398,12 @@ export default function PromptEditor({
     ) => {
       setState((prev) => {
         if (!prev) return null;
+
+        // Handle function or direct updates
         const newUpdates =
           typeof updates === "function" ? updates(prev) : updates;
+
+        // Return updated state with isDirty flag set appropriately
         return {
           ...prev,
           ...newUpdates,
@@ -597,23 +632,51 @@ export default function PromptEditor({
       return;
     }
 
+    // Check limits based on mode
+    if (editorMode === "fromPlayground") {
+      if (!withinPlaygroundRunsLimit) {
+        setUpgradeDialogOpen(true);
+        return;
+      }
+    } else {
+      if (!withinPrompRunsLimit) {
+        setUpgradeDialogOpen(true);
+        return;
+      }
+    }
+
     // 2. STREAMING STATE + CLEAR RESPONSE
     setIsStreaming(true);
-    updateState({ response: "" }, false);
+    updateState({ response: { content: "", reasoning: "", calls: "" } }, false);
+
+    // Increment run count for limit
+    if (editorMode === "fromPlayground") {
+      if (!hasPlaygroundAccess) {
+        incrementPlaygroundRun();
+      }
+    } else if (promptId) {
+      if (!hasPromptAccess) {
+        incrementPromptRun();
+      }
+    }
 
     const variables = state.inputs || [];
     const variableMap = Object.fromEntries(
       variables.map((v) => [v.name, v.value || ""])
     );
 
-    // 3. SAVE: If in promptId mode, not imported from code, and dirty
-    if (promptId && isImportedFromCode === false && state.isDirty) {
+    // 3. SAVE: If from Editor, and state is dirty
+    if (editorMode === "fromEditor" && state.isDirty) {
       const latestVersionId = promptVersionsData?.[0]?.id;
       if (!latestVersionId) return;
 
       // A. Build Helicone Template for Saving
       const heliconeTemplate = {
         ...state.parameters,
+        tools:
+          state.parameters.tools?.length === 0
+            ? undefined
+            : state.parameters.tools, // TODO: Only here for backwards compatibility
         provider: undefined, // TODO: Move provider to the prompt?
         messages: state.messages,
       };
@@ -624,6 +687,7 @@ export default function PromptEditor({
         isProduction: false,
         inputs: variableMap,
       };
+      console.log("Saving Template:", heliconeTemplate, metadata);
 
       try {
         let result = await jawnClient.POST(
@@ -652,16 +716,15 @@ export default function PromptEditor({
       }
     }
 
-    // 5. RUN: Use autoFillInputs to handle variable replacement
-    const runTemplate = {
+    // 5. RUN: Use toExternal mapper (going to OPENROUTER) + autoFillInputs to handle variable replacement
+    const runTemplate = openaiChatMapper.toExternal({
       ...state.parameters,
       messages: autoFillInputs({
         inputs: variableMap,
         autoInputs: [],
         template: state.messages,
       }),
-    };
-    console.log("Run template:", runTemplate);
+    });
 
     // 6. EXECUTE
     try {
@@ -673,16 +736,19 @@ export default function PromptEditor({
           signal: abortController.current.signal,
         } as any);
 
-        await readStream(
+        await processStream(
           stream,
-          (chunk: string) => {
-            setState((prev) => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                response: (prev.response || "") + chunk,
-              };
-            });
+          {
+            initialState: { content: "", reasoning: "", calls: "" },
+            onUpdate: (result) => {
+              setState((prev) => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  response: result,
+                };
+              });
+            },
           },
           abortController.current.signal
         );
@@ -696,7 +762,6 @@ export default function PromptEditor({
         abortController.current = null;
       }
     } catch (error) {
-      console.error("Failed to save state:", error);
       setNotification("Failed to save prompt state", "error");
       setIsStreaming(false);
     }
@@ -705,13 +770,19 @@ export default function PromptEditor({
     state,
     isStreaming,
     canRun,
+    withinPlaygroundRunsLimit,
+    withinPrompRunsLimit,
+    hasPlaygroundAccess,
+    hasPromptAccess,
+    incrementPlaygroundRun,
+    incrementPromptRun,
     jawnClient,
     setNotification,
     refetchPromptVersions,
     loadVersionData,
     updateState,
     promptVersionsData,
-    isImportedFromCode,
+    editorMode,
   ]);
   // - Scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -732,8 +803,8 @@ export default function PromptEditor({
       abortController.current = new AbortController();
 
       const stream = await generateStream({
-        provider: "DEEPSEEK",
-        model: "deepseek-r1",
+        provider: "OPENROUTER",
+        model: "anthropic/claude-3.7-sonnet:thinking",
         messages: [$system(prompt.system), $user(prompt.user)],
         temperature: 1,
         includeReasoning: true,
@@ -741,50 +812,21 @@ export default function PromptEditor({
         stop: ["</improved_user>", "</response_format>"], // TODO: Make this dynamic
       });
 
-      await readStream(
+      await processStream(
         stream,
-        (chunk: string) => {
-          try {
-            const jsonResponse = JSON.parse(chunk);
-
-            // Handle different types of chunks
-            if (jsonResponse.type === "content") {
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content:
-                      (prev?.improvement?.content || "") + jsonResponse.chunk,
-                    reasoning: prev?.improvement?.reasoning || "",
-                  },
-                }),
-                false
-              );
-            } else if (jsonResponse.type === "reasoning") {
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content: prev?.improvement?.content || "",
-                    reasoning:
-                      (prev?.improvement?.reasoning || "") + jsonResponse.chunk,
-                  },
-                }),
-                false
-              );
-            } else if (jsonResponse.type === "final") {
-              // Final message just confirms the complete content and reasoning
-              updateState(
-                (prev) => ({
-                  improvement: {
-                    content: jsonResponse.content,
-                    reasoning: jsonResponse.reasoning,
-                  },
-                }),
-                false
-              );
-            }
-          } catch (error) {
-            console.error("Error parsing chunk:", error);
-          }
+        {
+          initialState: { content: "", reasoning: "", calls: "" },
+          onUpdate: (result) => {
+            updateState(
+              (prev) => ({
+                improvement: {
+                  content: result.content,
+                  reasoning: result.reasoning,
+                },
+              }),
+              false
+            );
+          },
         },
         abortController.current.signal
       );
@@ -810,8 +852,7 @@ export default function PromptEditor({
 
       // Build Helicone Template for Saving
       const heliconeTemplate = {
-        model: state.parameters.model,
-        temperature: state.parameters.temperature,
+        ...state.parameters,
         messages: improvedMessages.map((msg) => ({
           ...msg,
           content: templateToHeliconeTags(msg.content || ""), // Convert any template tags present to helicone tags
@@ -866,6 +907,11 @@ export default function PromptEditor({
   const handleSaveAsPrompt = useCallback(async () => {
     if (!state) return;
 
+    if (!withinPromptsLimit) {
+      setUpgradeDialogOpen(true);
+      return;
+    }
+
     try {
       // Create a prompt from the current state
       const prompt = {
@@ -895,66 +941,103 @@ export default function PromptEditor({
       console.error("Error creating prompt:", error);
       setNotification("Failed to create prompt", "error");
     }
-  }, [state, createPrompt, router, setNotification]);
+  }, [state, withinPromptsLimit, createPrompt, router, setNotification]);
 
-  // EFFECTS
+  /* -------------------------------------------------------------------------- */
+  /*                                   Effects                                  */
+  /* -------------------------------------------------------------------------- */
   // - Load Initial State
   useEffect(() => {
     // Don't proceed with loading if we don't know whether the prompt is imported from code yet
-    if (promptId && isImportedFromCode === null) {
-      return;
-    }
+    if (editorMode === null) return;
 
+    // Initialize state only if it hasn't been set yet
     if (!state) {
-      if (requestId && requestData?.data) {
-        loadVersionData(null);
-      } else if (
-        promptVersionsData &&
-        promptVersionsData.length > 0 &&
-        !isVersionsLoading
-      ) {
-        // Load from prompt version data
-        loadVersionData(promptVersionsData[0]);
-      } else if (basePrompt) {
-        // Load directly from basePrompt
-        const provider = findClosestProvider(
-          basePrompt.metadata.provider || "OPENAI"
-        );
-        const model = findClosestModel(
-          provider,
-          basePrompt.body.model || "gpt-4o-mini"
-        );
+      switch (editorMode) {
+        case "fromRequest":
+          if (requestData?.data) {
+            const mappedContent = heliconeRequestToMappedContent(
+              requestData.data
+            );
+            const provider = findClosestProvider(
+              mappedContent.schema.request.provider || "OPENAI"
+            );
+            const model = findClosestModel(
+              provider,
+              mappedContent.schema.request.model || "gpt-4"
+            );
 
-        setState({
-          messages: basePrompt.body.messages || [],
-          parameters: {
-            provider: provider as keyof typeof PROVIDER_MODELS,
-            model: model,
-            temperature: basePrompt.body.temperature ?? 1,
-            tools: basePrompt.body.tools ?? [],
-            reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
-          },
-          inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
-            ([name, value]) => ({
-              name,
-              value: value as string,
-              isValid: isValidVariableName(name),
-            })
-          ),
-          isDirty: false,
-        });
+            setState({
+              messages: mappedContent.schema.request.messages || [],
+              parameters: {
+                provider: provider,
+                model: model,
+                temperature:
+                  mappedContent.schema.request.temperature ?? undefined,
+                max_tokens:
+                  mappedContent.schema.request.max_tokens ?? undefined,
+                tools: mappedContent.schema.request.tools ?? undefined,
+                reasoning_effort:
+                  mappedContent.schema.request.reasoning_effort ?? undefined,
+              },
+              inputs: [],
+              isDirty: false,
+            });
+          }
+          break;
+
+        case "fromEditor":
+        case "fromCode":
+          if (
+            promptVersionsData &&
+            promptVersionsData.length > 0 &&
+            !isVersionsLoading
+          ) {
+            loadVersionData(promptVersionsData[0]);
+          }
+          break;
+
+        case "fromPlayground":
+          if (basePrompt) {
+            const provider = findClosestProvider(
+              basePrompt.metadata.provider || "OPENAI"
+            );
+            const model = findClosestModel(
+              provider,
+              basePrompt.body.model || "gpt-4o-mini"
+            );
+
+            setState({
+              messages: basePrompt.body.messages || [],
+              parameters: {
+                provider: provider,
+                model: model,
+                temperature: basePrompt.body.temperature ?? undefined,
+                max_tokens: basePrompt.body.max_tokens ?? undefined,
+                tools: basePrompt.body.tools ?? undefined,
+                reasoning_effort: basePrompt.body.reasoning_effort ?? undefined,
+              },
+              inputs: Object.entries(basePrompt.metadata.inputs || {}).map(
+                ([name, value]) => ({
+                  name,
+                  value: value as string,
+                  isValid: isValidVariableName(name),
+                })
+              ),
+              isDirty: false,
+            });
+          }
+          break;
       }
     }
   }, [
-    isVersionsLoading,
-    loadVersionData,
-    promptVersionsData,
+    editorMode,
     state,
-    requestId,
     requestData,
+    promptVersionsData,
+    isVersionsLoading,
     basePrompt,
-    promptId,
-    isImportedFromCode,
+    loadVersionData,
   ]);
   // - Handle Keyboard Shortcuts
   useEffect(() => {
@@ -962,7 +1045,7 @@ export default function PromptEditor({
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key === "Enter" &&
-        isImportedFromCode === false
+        editorMode === "fromEditor"
       ) {
         event.preventDefault();
         handleSaveAndRun();
@@ -971,9 +1054,11 @@ export default function PromptEditor({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveAndRun, isImportedFromCode]);
+  }, [handleSaveAndRun, editorMode]);
 
-  // HELPERS
+  /* -------------------------------------------------------------------------- */
+  /*                                   Helpers                                  */
+  /* -------------------------------------------------------------------------- */
   // - Add Messages
   const handleAddMessages = (messages?: Message[]) => {
     updateState((prev) => {
@@ -1006,20 +1091,17 @@ export default function PromptEditor({
     });
   };
 
-  // RENDER
-  // TODO: Prompt or request not found page (use mutations I think)
-  // - Loading Page
-  if (
-    (promptId && (isPromptLoading || isVersionsLoading)) ||
-    (requestId && isRequestLoading) ||
-    (promptId && isImportedFromCode === null) ||
-    !state
-  ) {
+  /* -------------------------------------------------------------------------- */
+  /*                                   Render                                   */
+  /* -------------------------------------------------------------------------- */
+  // TODO: Prompt or request not found page with more info (use mutations I think)
+  // - Loading
+  if (editorMode === null || !state) {
     return (
       <div className="flex h-screen items-center justify-center">
         <LoadingAnimation
           title={
-            promptId && isImportedFromCode === null
+            promptId && editorMode === null
               ? "Determining prompt source..."
               : "Loading prompt..."
           }
@@ -1027,7 +1109,7 @@ export default function PromptEditor({
       </div>
     );
   }
-  // - Page
+  // - Editor
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
@@ -1057,6 +1139,7 @@ export default function PromptEditor({
               onIdEdit={handleIdEdit}
             />
           )}
+
           {/* From Request: ID Label */}
           {requestId && (
             <Link
@@ -1065,28 +1148,6 @@ export default function PromptEditor({
             >
               From Request: {requestId}
             </Link>
-          )}
-
-          {/* From Request or From Playground: Unsaved Changes Indicator */}
-          {(requestId || basePrompt) && state.isDirty && (
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <div className="flex flex-row items-center gap-2 cursor-default">
-                  <div
-                    className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
-                  />
-                  <span className="text-sm text-secondary font-semibold">
-                    Unsaved Changes
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>
-                  <span className="font-semibold">Save As Prompt</span> to keep
-                  your progress
-                </p>
-              </TooltipContent>
-            </Tooltip>
           )}
 
           {/* Metrics Drawer */}
@@ -1108,12 +1169,44 @@ export default function PromptEditor({
               </DrawerContent>
             </Drawer>
           )}
+
+          {/* From Request or From Playground: Unsaved Changes Indicator */}
+          {(editorMode === "fromRequest" ||
+            editorMode === "fromPlayground" ||
+            editorMode === "fromCode") &&
+            state.isDirty && (
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-row items-center gap-2 cursor-default">
+                    <div
+                      className={`h-2 w-2 rounded-full bg-amber-500 animate-pulse`}
+                    />
+                    <span className="text-sm text-secondary font-semibold">
+                      Unsaved Changes
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="max-w-64 text-center">
+                    {editorMode === "fromCode"
+                      ? "This prompt cannot be managed by Helicone because it was imported from code. "
+                      : ""}
+                    <span className="font-semibold">
+                      {editorMode === "fromCode"
+                        ? "Save As Editor Prompt"
+                        : "Save As Prompt"}
+                    </span>{" "}
+                    to keep your progress.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
         </div>
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* Auto-Improve Button */}
-          {promptId && isImportedFromCode === false && (
+          {editorMode === "fromEditor" && (
             <Button
               variant="link"
               onClick={() => setIsAutoImproveOpen(true)}
@@ -1125,8 +1218,11 @@ export default function PromptEditor({
           )}
 
           {/* From Request, Playground, or Imported From Code: Save As Prompt Button */}
-          {(requestId || basePrompt || isImportedFromCode === true) && (
+          {(editorMode === "fromRequest" ||
+            editorMode === "fromPlayground" ||
+            editorMode === "fromCode") && (
             <Button
+              className="text-white"
               variant="action"
               size="sm"
               onClick={handleSaveAsPrompt}
@@ -1137,6 +1233,8 @@ export default function PromptEditor({
                   <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
+              ) : editorMode === "fromCode" ? (
+                "Save as Editor Prompt"
               ) : (
                 "Save As Prompt"
               )}
@@ -1144,53 +1242,84 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          <Button
-            className={`${
-              isStreaming
-                ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                : ""
-            }`}
-            variant={
-              promptId && isImportedFromCode === false ? "action" : "outline"
-            }
-            size="sm"
-            disabled={!canRun}
-            onClick={handleSaveAndRun}
-          >
-            {isStreaming ? (
-              <PiStopBold className="h-4 w-4 mr-2" />
-            ) : (
-              <PiPlayBold className="h-4 w-4 mr-2" />
-            )}
-            <span className="mr-2">
-              {isStreaming
-                ? "Stop"
-                : state.isDirty && promptId
-                ? "Save & Run"
-                : "Run"}
-            </span>
-            {isStreaming && (
-              <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-            )}
-            <div
-              className={`flex items-center gap-0.5 text-sm ${
-                (requestId || basePrompt || isImportedFromCode === true) &&
-                !isStreaming
-                  ? "text-black opacity-60"
-                  : "text-white opacity-60"
-              }`}
+          {editorMode === "fromEditor" && state.isDirty ? (
+            <FreeTierLimitWrapper
+              feature="prompts"
+              subfeature="versions"
+              itemCount={versionCount}
             >
-              <PiCommandBold className="h-4 w-4" />
-              <MdKeyboardReturn className="h-4 w-4" />
-            </div>
-          </Button>
+              <Button
+                className={`${
+                  isStreaming
+                    ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                    : ""
+                }`}
+                variant="action"
+                size="sm"
+                disabled={!canRun}
+                onClick={handleSaveAndRun}
+              >
+                {isStreaming ? (
+                  <PiStopBold className="h-4 w-4 mr-2" />
+                ) : (
+                  <PiPlayBold className="h-4 w-4 mr-2" />
+                )}
+                <span className="mr-2">
+                  {isStreaming
+                    ? "Stop"
+                    : state.isDirty && editorMode === "fromEditor"
+                    ? "Save & Run"
+                    : "Run"}
+                </span>
+                {isStreaming && (
+                  <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                <div className="flex items-center gap-0.5 text-sm opacity-60">
+                  <PiCommandBold className="h-4 w-4" />
+                  <MdKeyboardReturn className="h-4 w-4" />
+                </div>
+              </Button>
+            </FreeTierLimitWrapper>
+          ) : (
+            <Button
+              className={`${
+                isStreaming
+                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
+                  : ""
+              }`}
+              variant={editorMode === "fromEditor" ? "action" : "outline"}
+              size="sm"
+              disabled={!canRun}
+              onClick={handleSaveAndRun}
+            >
+              {isStreaming ? (
+                <PiStopBold className="h-4 w-4 mr-2" />
+              ) : (
+                <PiPlayBold className="h-4 w-4 mr-2" />
+              )}
+              <span className="mr-2">
+                {isStreaming
+                  ? "Stop"
+                  : state.isDirty && editorMode === "fromEditor"
+                  ? "Save & Run"
+                  : "Run"}
+              </span>
+              {isStreaming && (
+                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              <div className="flex items-center gap-0.5 text-sm opacity-60">
+                <PiCommandBold className="h-4 w-4" />
+                <MdKeyboardReturn className="h-4 w-4" />
+              </div>
+            </Button>
+          )}
 
           {/* Experiment Button */}
           {promptId && (
             <Button
               variant="outline"
               size="sm"
-              disabled={newFromPromptVersion.isLoading}
+              disabled={newFromPromptVersion.isPending}
               onClick={async () => {
                 const result = await newFromPromptVersion.mutateAsync({
                   name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
@@ -1206,87 +1335,53 @@ export default function PromptEditor({
 
           {/* Deploy Button */}
           {promptId && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isImportedFromCode === true}
-                  onClick={() => {}}
-                >
-                  <PiRocketLaunchBold className="h-4 w-4 mr-2" />
-                  <span>Deploy</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="h-[40rem] w-full max-w-4xl flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>Deploy Prompt</DialogTitle>
-                </DialogHeader>
-
-                {/* Code example */}
-                <DiffHighlight
-                  maxHeight={false}
-                  className="h-full"
-                  code={`
-export async function getPrompt(
-  id: string,
-  variables: Record<string, any>
-): Promise<any> {
-  const getHeliconePrompt = async (id: string) => {
-    const res = await fetch(
-      \`https://api.helicone.ai/v1/prompt/\${id}/template\`,
-      {
-        headers: {
-          Authorization: \`Bearer \${YOUR_HELICONE_API_KEY}\`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
-          inputs: variables,
-        }),
-      }
-    );
-
-    return (await res.json()) as Result<PromptVersionCompiled, any>;
-  };
-
-  const heliconePrompt = await getHeliconePrompt(id);
-  if (heliconePrompt.error) {
-    throw new Error(heliconePrompt.error);
-  }
-  return heliconePrompt.data?.filled_helicone_template;
-}
-
-async function pullPromptAndRunCompletion() {
-  const prompt = await getPrompt("${
-    promptData?.user_defined_id || "my-prompt-id"
-  }", {
-    ${
-      state?.inputs
-        ?.map((v) => `${v.name}: "${v.value || "value"}"`)
-        .join(",\n    ") || 'color: "red"'
-    }
-  });
-  console.log(prompt);
-
-  const openai = new OpenAI({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    baseURL: \`https://oai.helicone.ai/v1/\${YOUR_HELICONE_API_KEY}\`,
-  });
-  const response = await openai.chat.completions.create(
-    prompt satisfies OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming
-  );
-  console.log(response);
-}`}
-                  language="tsx"
-                  newLines={[]}
-                  oldLines={[]}
-                />
-              </DialogContent>
-            </Dialog>
+            <DeployDialog
+              promptId={promptId}
+              userDefinedId={promptData?.user_defined_id || "my-prompt-id"}
+              state={state}
+              isImportedFromCode={editorMode === "fromCode"}
+            />
           )}
         </div>
       </div>
+
+      {/* Version limit warning banner */}
+      {!withinVersionsLimit && editorMode === "fromEditor" && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="versions"
+          itemCount={versionCount}
+          freeLimit={3}
+        />
+      )}
+
+      {/* Playground run limit warning banner */}
+      {editorMode === "fromPlayground" &&
+        !withinPlaygroundRunsLimit &&
+        playgroundRunCount > 0 && (
+          <FreeTierLimitBanner
+            feature="prompts"
+            subfeature="playground_runs"
+            itemCount={playgroundRunCount}
+            freeLimit={maxPlaygroundRuns}
+            message={`You've used ${playgroundRunCount}/${maxPlaygroundRuns} playground runs. Upgrade to Pro Tier for unlimited access.`}
+            buttonText="Upgrade"
+            buttonSize="sm"
+          />
+        )}
+
+      {/* Prompt run limit warning banner */}
+      {promptId && !withinPrompRunsLimit && promptRunCount > 0 && (
+        <FreeTierLimitBanner
+          feature="prompts"
+          subfeature="runs"
+          itemCount={promptRunCount}
+          freeLimit={maxPromptRuns}
+          message={`You've used ${promptRunCount}/${maxPromptRuns} prompt runs. Upgrade to Prompts Tier for unlimited access.`}
+          buttonText="Upgrade"
+          buttonSize="sm"
+        />
+      )}
 
       {/* Prompt Editor */}
       <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -1312,21 +1407,23 @@ async function pullPromptAndRunCompletion() {
             />
           </CustomScrollbar>
         </ResizablePanel>
-
         <ResizableHandle />
-
         <ResizablePanel defaultSize={50} minSize={30}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={50} minSize={25}>
               <CustomScrollbar className="h-full flex flex-col gap-4 bg-slate-50 dark:bg-slate-950">
                 <ResponsePanel
-                  response={state.response || ""}
+                  response={state.response}
                   onAddToMessages={() =>
                     handleAddMessages([
                       {
                         _type: "message",
                         role: "assistant",
-                        content: state.response || "",
+                        content:
+                          typeof state.response === "string"
+                            ? state.response
+                            : (state.response as PromptState["response"])
+                                ?.content || "",
                       },
                       { _type: "message", role: "user", content: "" },
                     ])
@@ -1361,15 +1458,42 @@ async function pullPromptAndRunCompletion() {
                   }}
                 />
 
-                <ToolPanel tools={state.parameters.tools || []} />
+                <ToolPanel
+                  tools={state.parameters.tools || []}
+                  onToolsChange={(tools) => {
+                    updateState((prev) => {
+                      if (!prev) return {};
+                      return {
+                        parameters: {
+                          ...prev.parameters,
+                          tools,
+                        },
+                      };
+                    });
+                  }}
+                />
               </CustomScrollbar>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
 
+      {/* Helicone Upgrade Dialog */}
+      <UpgradeProDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        featureName={editorMode === "fromPlayground" ? "Playground" : "Prompts"}
+        limitMessage={
+          !withinPromptsLimit
+            ? promptsLimitUpgradeMessage
+            : editorMode === "fromPlayground" && !withinPlaygroundRunsLimit
+            ? playgroundRunsUpgradeMessage
+            : promptRunsUpgradeMessage
+        }
+      />
+
       {/* Auto-improve Popup */}
-      {promptId && state.version && (
+      {promptId && !!state.version && (
         <UniversalPopup
           title="Auto-Improve (Beta)"
           width="w-full max-w-7xl"

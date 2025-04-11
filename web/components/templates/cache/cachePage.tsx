@@ -4,7 +4,6 @@ import {
   CircleStackIcon,
   ClockIcon,
   TableCellsIcon,
-  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { ElementType, useMemo, useState } from "react";
 import { BarChart } from "@tremor/react";
@@ -21,13 +20,14 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import AuthHeader from "../../shared/authHeader";
 import { formatNumber } from "../users/initialColumns";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { DiffHighlight } from "../welcome/diffHighlight";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Archive } from "lucide-react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useGetUnauthorized } from "../../../services/hooks/dashboard";
+import UnauthorizedView from "../requests/UnauthorizedView";
+import { useUser } from "@supabase/auth-helpers-react";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface CachePageProps {
   currentPage: number;
@@ -86,13 +86,47 @@ const CachePage = (props: CachePageProps) => {
   }>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
+  const user = useUser();
+  const org = useOrg();
+  const {
+    unauthorized,
+    currentTier,
+    isLoading: isLoadingUnauthorized,
+  } = useGetUnauthorized(user?.id || "");
 
   const hasCache = useMemo(() => {
-    return chMetrics.totalCacheHits.data?.data !== undefined &&
-      chMetrics.totalCacheHits.data?.data !== null
-      ? +chMetrics.totalCacheHits.data?.data > 0
-      : true;
+    const cacheHits = chMetrics.totalCacheHits.data?.data;
+    if (cacheHits === undefined || cacheHits === null) {
+      return false;
+    }
+    return +cacheHits > 0;
   }, [chMetrics.totalCacheHits.data?.data]);
+
+  const shouldShowUnauthorized = hasCache && unauthorized;
+
+  const isLoading = isAnyLoading || isLoadingUnauthorized;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <LoadingAnimation title="Loading cache data..." />
+      </div>
+    );
+  }
+
+  if (!org?.currentOrg?.tier) {
+    return null;
+  }
+
+  if (!hasCache && !isLoading) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard feature="cache" />
+        </div>
+      </div>
+    );
+  }
 
   const metrics = [
     {
@@ -133,31 +167,6 @@ const CachePage = (props: CachePageProps) => {
 
   cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-  const org = useOrg();
-  const isPro = org?.currentOrg?.tier !== "free";
-
-  if (isAnyLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation />
-      </div>
-    );
-  }
-
-  if (!isPro) {
-    return (
-      <div className="flex justify-center items-center bg-white">
-        <FeatureUpgradeCard
-          title="Cache"
-          featureName="cache"
-          headerTagline="Cache responses to reduce API costs"
-          icon={<Archive className="h-4 w-4 text-sky-500" />}
-          highlightedFeature="cache"
-        />
-      </div>
-    );
-  }
-
   return (
     <IslandContainer>
       <AuthHeader
@@ -175,29 +184,31 @@ const CachePage = (props: CachePageProps) => {
         }
       />
       <div className="flex flex-col">
-        <Tabs defaultValue={defaultIndex} className="w-full">
-          <TabsList className="font-semibold">
-            {tabs.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id.toString()}
-                onClick={() => {
-                  router.push(
-                    {
-                      query: { ...router.query, tab: tab.id },
-                    },
-                    undefined,
-                    { shallow: true }
-                  );
-                }}
-              >
-                <tab.icon className="h-5 w-5 mr-2" />
-                {tab.title}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value="0">
-            {hasCache ? (
+        {shouldShowUnauthorized ? (
+          <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
+        ) : (
+          <Tabs defaultValue={defaultIndex} className="w-full">
+            <TabsList className="font-semibold">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id.toString()}
+                  onClick={() => {
+                    router.push(
+                      {
+                        query: { ...router.query, tab: tab.id },
+                      },
+                      undefined,
+                      { shallow: true }
+                    );
+                  }}
+                >
+                  <tab.icon className="h-5 w-5 mr-2" />
+                  {tab.title}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsContent value="0">
               <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
                 <div className="flex flex-col space-y-4 w-full xl:w-1/2">
                   <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
@@ -278,61 +289,29 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
                   </ul>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-6 px-4 text-center">
-                <div className="flex flex-col items-center gap-4 max-w-3xl">
-                  <CircleStackIcon className="h-16 w-16 text-gray-400" />
-                  <h3 className="text-2xl font-semibold">
-                    No Cache Activity Detected
-                  </h3>
-                  <p className="text-gray-500 text-lg">
-                    Enable caching to reduce API costs and improve response
-                    times. Choose from these parameters to control cache
-                    behavior:
-                  </p>
-
-                  <DiffHighlight
-                    code={`"Helicone-Cache-Enabled": "true",         // Required to enable caching
-"Cache-Control": "max-age=3600",          // Optional: Cache duration in seconds
-"Helicone-Cache-Bucket-Max-Size": "1000", // Optional: Max entries per cache bucket
-"Helicone-Cache-Seed": "user-123"         // Optional: Isolate cache by seed value`}
-                    language="javascript"
-                    newLines={[]}
-                    oldLines={[]}
-                    textSize="md"
-                    className="rounded-lg text-left"
-                    marginTop={false}
-                    minHeight={false}
-                    maxHeight={false}
+            </TabsContent>
+            <TabsContent value="1">
+              <div className="py-4">
+                {hasCache && unauthorized ? (
+                  <UnauthorizedView
+                    currentTier={currentTier || ""}
+                    pageType="cache"
                   />
-
-                  <Link
-                    href="https://docs.helicone.ai/features/advanced-usage/caching"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 flex items-center gap-2 text-sky-600 hover:text-sky-700 font-medium"
-                  >
-                    View caching documentation
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                  </Link>
-                </div>
+                ) : (
+                  <RequestsPageV2
+                    currentPage={currentPage}
+                    pageSize={pageSize}
+                    sort={sort}
+                    isCached={true}
+                    currentFilter={null}
+                    organizationLayout={null}
+                    organizationLayoutAvailable={false}
+                  />
+                )}
               </div>
-            )}
-          </TabsContent>
-          <TabsContent value="1">
-            <div className="py-4">
-              <RequestsPageV2
-                currentPage={currentPage}
-                pageSize={pageSize}
-                sort={sort}
-                isCached={true}
-                currentFilter={null}
-                organizationLayout={null}
-                organizationLayoutAvailable={false}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
 
       <ThemedDrawer open={open} setOpen={setOpen}>

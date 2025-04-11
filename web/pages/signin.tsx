@@ -5,7 +5,7 @@ import AuthForm from "../components/templates/auth/authForm";
 import { GetServerSidePropsContext } from "next";
 import { isCustomerDomain } from "../lib/customerPortalHelpers";
 import { getSupabaseServer } from "../lib/supabaseServer";
-import { Result, err, ok } from "../lib/result";
+import { Result, err, ok } from "../packages/common/result";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { useEffect } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";

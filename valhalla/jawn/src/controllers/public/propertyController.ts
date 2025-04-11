@@ -8,14 +8,13 @@ import {
   Security,
   Tags,
 } from "tsoa";
+import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-
-import { KVCache } from "../../lib/cache/kvCache";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { cacheResultCustom } from "../../utils/cacheResult";
+import { resultMap } from "../../packages/common/result";
 import { clickhousePriceCalc } from "../../packages/cost";
-import { resultMap } from "../../lib/shared/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
+import { quickCacheResultCustom } from "../../utils/cacheResult";
 
 export interface Property {
   property: string;
@@ -28,7 +27,7 @@ export interface TimeFilterRequest {
   };
 }
 
-const kvCache = new KVCache(60 * 1000); // 5 minutes
+const longCache = new KVCache(60 * 60 * 1000 * 7); // 1 week
 
 @Route("v1/property")
 @Tags("Property")
@@ -54,11 +53,53 @@ export class PropertyController extends Controller {
     )
   `;
 
-    return await cacheResultCustom(
+    return await quickCacheResultCustom(
       "v1/property/query" + request.authParams.organizationId,
       async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      kvCache
+      longCache
     );
+  }
+
+  // Gets all possible values for a property
+  @Post("{propertyKey}/search")
+  public async searchProperties(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() propertyKey: string,
+    @Body()
+    requestBody: {
+      searchTerm: string;
+    }
+  ) {
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: request.authParams.organizationId,
+      argsAcc: [propertyKey],
+      filter: {
+        request_response_rmt: {
+          properties: {
+            [propertyKey]: {
+              ilike: `%${requestBody.searchTerm}%`,
+            },
+          },
+        },
+      },
+    });
+
+    const query = `
+    SELECT DISTINCT value AS property
+    FROM request_response_rmt
+    ARRAY JOIN mapKeys(properties) AS key, mapValues(properties) AS value
+    WHERE (
+      ${builtFilter.filter} AND key = {val_0: String}
+    )
+    LIMIT 25
+  `;
+
+    const res = await dbQueryClickhouse<{ property: string }>(
+      query,
+      builtFilter.argsAcc
+    );
+
+    return resultMap(res, (data) => data.map((r) => r.property));
   }
 
   @Post("{propertyKey}/top-costs/query")

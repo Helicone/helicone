@@ -226,11 +226,11 @@ const ScoresEvaluatorsConfig = memo(
               size="sm"
               variant={"outline"}
               onClick={() => runEvaluators.mutate()}
-              disabled={runEvaluators.isLoading}
+              disabled={runEvaluators.isPending}
               className="text-xs"
             >
-              {runEvaluators.isLoading ? "Running..." : "Run Evaluators"}
-              {runEvaluators.isLoading && (
+              {runEvaluators.isPending ? "Running..." : "Run Evaluators"}
+              {runEvaluators.isPending && (
                 <Loader2 className="w-4 h-4 animate-spin" />
               )}
             </Button>
