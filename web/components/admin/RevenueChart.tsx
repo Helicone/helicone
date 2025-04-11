@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/chart";
 import { formatCurrency } from "@/lib/uiUtils";
 import { InvoiceData } from "@/lib/admin/RevenueCalculator";
-import { H3, P, Small, Muted } from "@/components/ui/typography";
+import { H3, Small, Muted } from "@/components/ui/typography";
 
 interface RevenueChartProps {
   billedInvoices: InvoiceData[];

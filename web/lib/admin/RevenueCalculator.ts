@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import {
   getProductIdsFromInvoice,
-  calculateDiscount,
   getProductIdsFromUpcomingInvoice,
   calculateInvoiceAmounts,
 } from "./calculatorUtil";

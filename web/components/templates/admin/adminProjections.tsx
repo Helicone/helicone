@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import {
-  MOCK_SUBSCRIPTIONS,
   MOCK_INVOICES,
   MOCK_DISCOUNTS,
   MOCK_UPCOMING_INVOICES,
