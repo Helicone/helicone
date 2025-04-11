@@ -444,6 +444,9 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/request/{requestId}": {
     post: operations["UpdateHeliconeDatasetRequest"];
   };
+  "/v1/helicone-dataset/{datasetId}/delete": {
+    post: operations["DeleteHeliconeDataset"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -5232,6 +5235,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+        };
+      };
+    };
+  };
+  DeleteHeliconeDataset: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
