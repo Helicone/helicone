@@ -63,6 +63,11 @@ const nextConfig = {
         destination: "/blog/monitor-and-optimize-llm-costs",
         permanent: true,
       },
+      {
+        source: "/blog/langsmith",
+        destination: "/blog/langsmith-vs-helicone",
+        permanent: true,
+      },
     ];
   },
   async headers() {
