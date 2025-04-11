@@ -1,10 +1,8 @@
 ---
-
 title: "Open WebUI Integration"
 sidebarTitle: "Open WebUI"
 description: "Integrate Helicone with Open WebUI, an extensible, offline-capable interface for various LLM runners. Monitor interactions across Ollama, OpenAI-compatible APIs, and custom LLM setups."
 "twitter:title": "Open WebUI Integration - Helicone OSS LLM Observability"
-
 ---
 
 ## Introduction
@@ -27,36 +25,37 @@ Integrating Helicone with Open WebUI enables comprehensive observability across 
     <Note>
       Make sure to generate a [write only API key](helicone-headers/helicone-auth). This ensures you only allow logging data to Helicone without read access to your private data.
     </Note>
+
   </Step>
 
-  <Step title="Create an OpenAI account + Generate an API Key>
-    Create an OpenAI account and log into [OpenAI's Developer Portal](https://platform.openai.com/account/api-keys) to generate an API key.
-  </Step>
+<Step title="Create an OpenAI account + Generate an API Key">
+  Create an OpenAI account and log into [OpenAI's Developer
+  Portal](https://platform.openai.com/account/api-keys) to generate an API key.
+</Step>
 
   <Step title="Run your Open WebUI application using Helicone\'s base URL">
     Update the OpenAI API base URL of your Docker command when launching your Web OpenUI Docker container. By using this base URL, you will be able to both perform queries and monitor them automatically.
 
-    <CodeGroup>
-    ```bash
-    # Set your environment variables
-    export HELICONE_API_KEY=pk-<YOUR_API_KEY>
-    export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+```bash
+# Set your environment variables
+export HELICONE_API_KEY=pk-<YOUR_API_KEY>
+export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
 
-    # Run Open WebUI with Helicone integration
-    docker run -d -p 3000:8080 \
-      -e OPENAI_API_BASE_URL="https://oai.helicone.ai/v1/$HELICONE_API_KEY" \
-      -e OPENAI_API_KEY="$OPENAI_API_KEY" \
-      --name open-webui \
-      ghcr.io/open-webui/open-webui
-    ```
-    </CodeGroup>
+# Run Open WebUI with Helicone integration
+docker run -d -p 3000:8080 \
+  -e OPENAI_API_BASE_URL="https://oai.helicone.ai/v1/$HELICONE_API_KEY" \
+  -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+  --name open-webui \
+  ghcr.io/open-webui/open-webui
+```
 
     <Note>
-      If you already have a Open WebUI application deployed, go to the Admin Panel > Settings > Connections and click on the `+` sign for "Managing OpenAI API Connections". Your `API Base URL` would be "https://oai.helicone.ai/v1/<YOUR_HELICONE_API_KEY>" and the `API KEY` would be your OpenAI API key.
+      If you already have a Open WebUI application deployed, go to the Admin Panel > Settings > Connections and click on the `+` sign for "Managing OpenAI API Connections". Your `API Base URL` would be `https://oai.helicone.ai/v1/YOUR_HELICONE_API_KEY` and the `API KEY` would be your OpenAI API key.
     </Note>
+
   </Step>
 
-  <Step title=”Make sure monitoring is working”>
+  <Step title="Make sure monitoring is working">
     To make sure your requests are being tracked, log into your Helicone dashboard and review the "Requests" tab.
     You should see the requests you have made through your Open WebUI interface already logged in.
   </Step>
