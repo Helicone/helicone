@@ -1721,6 +1721,7 @@ version = "0.1.0"
 dependencies = [
  "anthropic-types",
  "bytes",
+ "clap",
  "config",
  "derive_more",
  "displaydoc",
@@ -1737,6 +1738,9 @@ dependencies = [
  "meltdown",
  "minio-rsc",
  "openai-types",
+ "opentelemetry",
+ "opentelemetry_sdk",
+ "pin-project-lite",
  "reqwest",
  "rust_decimal",
  "serde",

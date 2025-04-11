@@ -1,108 +1,82 @@
-use std::{convert::Infallible, pin::pin, time::Duration};
+use std::path::PathBuf;
 
+use clap::Parser;
 use llm_proxy::{
-    app::App, config::app::AppConfig, dispatcher::Dispatcher,
-    router::picker::RouterPicker,
+    app::App, config::Config, middleware, utils::meltdown::TaggedService,
 };
-use reqwest::Client;
-use tokio::net::TcpListener;
-use tower::{Service, ServiceBuilder, ServiceExt, steer::Steer};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use meltdown::Meltdown;
+use tracing::info;
+
+#[derive(Debug, Parser)]
+pub struct Args {
+    /// Path to the default config file.
+    /// Configs in this file can be overridden by environment variables.
+    #[arg(short, long)]
+    config: Option<PathBuf>,
+}
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = AppConfig::default();
-    let app = App::new(config);
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| {
-                    // axum logs rejections from built-in extractors with the
-                    // `axum::rejection` target, at `TRACE`
-                    // level. `axum::rejection=trace` enables showing those
-                    // events
-                    format!(
-                        "{}=debug,tower_http=debug,axum::rejection=trace",
-                        env!("CARGO_CRATE_NAME")
-                    )
-                    .into()
-                }),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
+    let args = Args::parse();
+    let config = match Config::try_read(args.config) {
+        Ok(config) => config,
+        Err(error) => {
+            eprintln!("failed to read config: {}", error);
+            std::process::exit(1);
+        }
+    };
+    // Initialize telemetry
+    let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
+        telemetry::init_telemetry(&config.telemetry)
+            .map_err(llm_proxy::error::init::Error::Telemetry)
+            .map_err(llm_proxy::error::runtime::Error::Init)?;
 
-    let listener = TcpListener::bind("127.0.0.1:8080").await?;
-    let server = hyper_util::server::conn::auto::Builder::new(
-        hyper_util::rt::TokioExecutor::new(),
-    );
-    let graceful = hyper_util::server::graceful::GracefulShutdown::new();
-    let mut ctrl_c = pin!(tokio::signal::ctrl_c());
-    tracing::info!("server started");
+    info!("telemetry initialized");
+    info!(config = ?config.clone(), "config loaded");
 
-    loop {
-        tokio::select! {
-            conn = listener.accept() => {
-                let (stream, peer_addr) = match conn {
-                    Ok(conn) => conn,
-                    Err(e) => {
-                        tracing::error!("accept error: {}", e);
-                        continue;
-                    }
-                };
-                let stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
-                let conn = server.serve_connection_with_upgrades(stream, hyper::service::service_fn(|req| async move {
-                        tracing::info!("got request");
-                        let config = llm_proxy::config::app::AppConfig::default();
-                        let mut services = Vec::new();
-                        for (provider, _url) in config.dispatcher.provider_urls.iter() {
-                            let dispatcher = Dispatcher::new(Client::new(), provider.clone());
-                            services.push(dispatcher);
-                        }
-                        let service = Steer::new(services, RouterPicker);
+    let mut shutting_down = false;
+    let app = App::new(config.clone())?;
 
-                        let mut service_stack = ServiceBuilder::new()
-                            .layer(llm_proxy::router::request_context::Layer)
-                            // other middleware: rate limiting, logging, etc, etc
-                            .service(service);
+    let rate_limiting_cleanup_service =
+        middleware::rate_limit::service::Service::new(
+            app.authed_rate_limit.clone(),
+            app.unauthed_rate_limit.clone(),
+            config.rate_limit.cleanup_interval,
+        );
 
-                        let response = service_stack
-                            .ready()
-                            .await
-                            .unwrap()
-                            .call(req)
-                            .await
-                            .unwrap();
+    let mut meltdown = Meltdown::new()
+        .register(TaggedService::new(
+            "shutdown-signals",
+            llm_proxy::utils::meltdown::wait_for_shutdown_signals,
+        ))
+        .register(TaggedService::new("proxy", app))
+        // .register(TaggedService::new("proxy-metrics", metrics_server))
+        .register(TaggedService::new(
+            "rate-limit-cleanup",
+            rate_limiting_cleanup_service,
+        ));
 
-                        tracing::info!("sending response");
-                        Ok::<_, Infallible>(response)
-                    }));
+    while let Some((service, result)) = meltdown.next().await {
+        match result {
+            Ok(()) => info!(%service, "service stopped"),
+            Err(error) => tracing::error!(%service, %error, "service crashed"),
+        }
 
-                let conn = graceful.watch(conn.into_owned());
-
-                tokio::spawn(async move {
-                    if let Err(err) = conn.await {
-                        tracing::error!("connection error: {}", err);
-                    }
-                    tracing::info!("connection dropped: {}", peer_addr);
-                });
-            },
-
-            _ = ctrl_c.as_mut() => {
-                drop(listener);
-                tracing::info!("Ctrl-C received, starting shutdown");
-                    break;
-            }
+        if !shutting_down {
+            info!("shutting down");
+            meltdown.trigger();
+            shutting_down = true;
         }
     }
 
-    tokio::select! {
-        _ = graceful.shutdown() => {
-            tracing::info!("Gracefully shutdown!");
-        },
-        _ = tokio::time::sleep(Duration::from_secs(10)) => {
-            tracing::info!("Waited 10 seconds for graceful shutdown, aborting...");
-        }
-    }
+    // TODO: why does this hang?
+    // logger_provider
+    //     .shutdown()
+    //     .map_err(TelemetryError::Logs)
+    //     .map_err(llm_proxy::error::runtime::Error::Telemetry)?;
+    opentelemetry::global::shutdown_tracer_provider();
+
+    info!("shut down");
 
     Ok(())
 }

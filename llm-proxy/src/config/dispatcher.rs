@@ -1,10 +1,10 @@
 use indexmap::IndexMap;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::types::request::Provider;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DispatcherConfig {
     pub provider_urls: IndexMap<Provider, Url>,
 }

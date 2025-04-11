@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     net::{IpAddr, Ipv6Addr},
     path::PathBuf,
     time::Duration,
@@ -17,6 +18,8 @@ pub struct ServerConfig {
     pub tls: TlsConfig,
     #[serde(with = "humantime_serde", default = "default_request_timeout")]
     pub request_timeout: Duration,
+    #[serde(with = "humantime_serde", default = "default_shutdown_timeout")]
+    pub shutdown_timeout: Duration,
 }
 
 impl Default for ServerConfig {
@@ -26,6 +29,7 @@ impl Default for ServerConfig {
             port: default_port(),
             tls: Default::default(),
             request_timeout: default_request_timeout(),
+            shutdown_timeout: default_shutdown_timeout(),
         }
     }
 }
@@ -51,6 +55,19 @@ impl Default for TlsConfig {
     }
 }
 
+impl Display for TlsConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Enabled { .. } => write!(f, "Enabled"),
+            Self::Disabled => write!(f, "Disabled"),
+        }
+    }
+}
+
 fn default_request_timeout() -> Duration {
     Duration::from_secs(20)
+}
+
+fn default_shutdown_timeout() -> Duration {
+    Duration::from_secs(30)
 }

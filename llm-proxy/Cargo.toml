@@ -3,15 +3,17 @@ name = "llm-proxy"
 version = "0.1.0"
 edition = "2024"
 authors = [ "Thomas Harmon <thomas.alan.harmon@gmail.com>" ]
+default-run = "llm-proxy"
 
 [dependencies]
 openai-types = { workspace = true }
 anthropic-types = { workspace = true }
 
 bytes = { workspace = true, features = ['serde'] }
-config = "0.15.11"
+clap = { workspace = true }
+config = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
-displaydoc = "0.2.5"
+displaydoc = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
 http = { workspace = true }
@@ -21,14 +23,17 @@ hyper = { workspace = true }
 hyper-util = { workspace = true, features = ['server-auto', 'server-graceful', 'tokio'] }
 indexmap = { workspace = true, features = ['serde'] }
 isocountry = { workspace = true }
-json-patch = "4.0.0"
+json-patch = { workspace = true }
 meltdown = { workspace = true }
 minio-rsc = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+pin-project-lite = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
-serde_path_to_error = "0.1.17"
+serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
 strum = { workspace = true, features = ["derive"]  }
 telemetry = { workspace = true }

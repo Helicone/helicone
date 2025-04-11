@@ -1,4 +1,3 @@
-pub mod app;
 pub mod database;
 pub mod dispatcher;
 pub mod metrics;
@@ -29,21 +28,15 @@ pub enum Error {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+#[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
-    #[serde(default)]
+    pub dispatcher: self::dispatcher::DispatcherConfig,
     pub telemetry: telemetry::Config,
-    #[serde(default)]
     pub server: self::server::ServerConfig,
-    #[serde(default)]
     pub metrics_server: self::metrics::Config,
-    #[serde(default)]
     pub database: self::database::Config,
-    #[serde(default)]
     pub minio: self::minio::Config,
-    #[serde(default)]
     pub rate_limit: self::rate_limit::RateLimitConfig,
-    #[serde(default)]
     pub is_production: bool,
 }
 
@@ -58,7 +51,7 @@ impl Config {
             builder = builder.add_source(config::File::from(path));
         }
         builder = builder.add_source(
-            config::Environment::with_prefix("ROCKSTAR")
+            config::Environment::with_prefix("PROXY")
                 .try_parsing(true)
                 .separator("__")
                 .convert_case(config::Case::Kebab),
@@ -80,7 +73,7 @@ impl Config {
     pub fn telemetry() -> telemetry::Config {
         config::Config::builder()
             .add_source(
-                config::Environment::with_prefix("ROCKSTAR__TELEMETRY")
+                config::Environment::with_prefix("PROXY__TELEMETRY")
                     .separator("__"),
             )
             .build()
@@ -92,6 +85,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
+            dispatcher: dispatcher::DispatcherConfig::default(),
             telemetry: telemetry::Config::default(),
             server: server::ServerConfig::default(),
             metrics_server: metrics::Config::default(),

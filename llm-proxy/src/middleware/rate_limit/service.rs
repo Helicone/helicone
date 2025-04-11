@@ -56,6 +56,10 @@ impl meltdown::Service for Service {
             .inspect_err(|e| error!(error = %e, "error running rate limiting cleanup task"))?
             .await;
 
+            info!(
+                name = "rate-limiting-cleanup-task",
+                "task shutdown successfully"
+            );
             Ok(())
         })
     }

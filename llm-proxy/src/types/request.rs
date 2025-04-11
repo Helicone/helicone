@@ -2,13 +2,13 @@ use std::time::Instant;
 
 use indexmap::IndexMap;
 use isocountry::CountryCode;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use super::template::TemplateInputs;
 use crate::config::router::RouterConfig;
 
-#[derive(Debug, Clone, Copy, Deserialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Copy, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Provider {
     OpenAI,
