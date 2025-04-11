@@ -14004,6 +14004,258 @@ Json: JsonObject;
     "Record_string.stripe.Stripe.Discount_": {
       [key: string]: components["schemas"]["stripe.Stripe.Discount"];
     };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__": {
+      /** @description A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer's unique invoice_prefix if it is specified. */
+      number: string;
+      /**
+       * @description String representing the object's type. Objects of the same type share the same value.
+       * @enum {string}
+       */
+      object: "invoice";
+      /** @description The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview) */
+      status: components["schemas"]["stripe.Stripe.Invoice.Status"];
+      /** @description ID of the Connect Application that created the invoice. */
+      application: string | components["schemas"]["stripe.Stripe.Application"] | components["schemas"]["stripe.Stripe.DeletedApplication"];
+      /** @description The subscription that this invoice was prepared for, if any. */
+      subscription: string | components["schemas"]["stripe.Stripe.Subscription"];
+      /** @description The ID of the customer who will be billed. */
+      customer: string | components["schemas"]["stripe.Stripe.Customer"] | components["schemas"]["stripe.Stripe.DeletedCustomer"];
+      /** @description Always true for a deleted object */
+      deleted?: unknown;
+      issuer: components["schemas"]["stripe.Stripe.Invoice.Issuer"];
+      /** @description ID of the latest charge generated for this invoice, if any. */
+      charge: string | components["schemas"]["stripe.Stripe.Charge"];
+      /** @description Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance. */
+      paid: boolean;
+      /** @description The country of the business associated with this invoice, most often the business creating the invoice. */
+      account_country: string;
+      /** @description The public name of the business associated with this invoice, most often the business creating the invoice. */
+      account_name: string;
+      /** @description The account tax IDs associated with the invoice. Only editable when the invoice is a draft. */
+      account_tax_ids: (string | components["schemas"]["stripe.Stripe.TaxId"] | components["schemas"]["stripe.Stripe.DeletedTaxId"])[];
+      /**
+       * Format: double
+       * @description Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the `amount_due` may be 0. If there is a positive `starting_balance` for the invoice (the customer owes money), the `amount_due` will also take that into account. The charge that gets generated for the invoice will be for the amount specified in `amount_due`.
+       */
+      amount_due: number;
+      /**
+       * Format: double
+       * @description The amount, in cents (or local equivalent), that was paid.
+       */
+      amount_paid: number;
+      /**
+       * Format: double
+       * @description The difference between amount_due and amount_paid, in cents (or local equivalent).
+       */
+      amount_remaining: number;
+      /**
+       * Format: double
+       * @description This is the sum of all the shipping amounts.
+       */
+      amount_shipping: number;
+      /**
+       * Format: double
+       * @description The fee in cents (or local equivalent) that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.
+       */
+      application_fee_amount: number;
+      /**
+       * Format: double
+       * @description Number of payment attempts made for this invoice, from the perspective of the payment retry schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries increment the attempt count. In other words, manual payment attempts after the first attempt do not affect the retry schedule. If a failure is returned with a non-retryable return code, the invoice can no longer be retried unless a new payment method is obtained. Retries will continue to be scheduled, and attempt_count will continue to increment, but retries will only be executed if a new payment method is obtained.
+       */
+      attempt_count: number;
+      /** @description Whether an attempt has been made to pay the invoice. An invoice is not attempted until 1 hour after the `invoice.created` webhook, for example, so you might not want to display that invoice as unpaid to your users. */
+      attempted: boolean;
+      /** @description Controls whether Stripe performs [automatic collection](https://stripe.com/docs/invoicing/integration/automatic-advancement-collection) of the invoice. If `false`, the invoice's state doesn't automatically advance without an explicit action. */
+      auto_advance?: boolean;
+      automatic_tax: components["schemas"]["stripe.Stripe.Invoice.AutomaticTax"];
+      /**
+       * Format: double
+       * @description The time when this invoice is currently scheduled to be automatically finalized. The field will be `null` if the invoice is not scheduled to finalize in the future. If the invoice is not in the draft state, this field will always be `null` - see `finalized_at` for the time when an already-finalized invoice was finalized.
+       */
+      automatically_finalizes_at: number;
+      /**
+       * @description Indicates the reason why the invoice was created.
+       *
+       * * `manual`: Unrelated to a subscription, for example, created via the invoice editor.
+       * * `subscription`: No longer in use. Applies to subscriptions from before May 2018 where no distinction was made between updates, cycles, and thresholds.
+       * * `subscription_create`: A new subscription was created.
+       * * `subscription_cycle`: A subscription advanced into a new period.
+       * * `subscription_threshold`: A subscription reached a billing threshold.
+       * * `subscription_update`: A subscription was updated.
+       * * `upcoming`: Reserved for simulated invoices, per the upcoming invoice endpoint.
+       */
+      billing_reason: components["schemas"]["stripe.Stripe.Invoice.BillingReason"];
+      /** @description Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay this invoice using the default source attached to the customer. When sending an invoice, Stripe will email this invoice to the customer with payment instructions. */
+      collection_method: components["schemas"]["stripe.Stripe.Invoice.CollectionMethod"];
+      /**
+       * Format: double
+       * @description Time at which the object was created. Measured in seconds since the Unix epoch.
+       */
+      created: number;
+      /** @description Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). */
+      currency: string;
+      /** @description Custom fields displayed on the invoice. */
+      custom_fields: components["schemas"]["stripe.Stripe.Invoice.CustomField"][];
+      /** @description The customer's address. Until the invoice is finalized, this field will equal `customer.address`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_address: components["schemas"]["stripe.Stripe.Address"];
+      /** @description The customer's email. Until the invoice is finalized, this field will equal `customer.email`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_email: string;
+      /** @description The customer's name. Until the invoice is finalized, this field will equal `customer.name`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_name: string;
+      /** @description The customer's phone number. Until the invoice is finalized, this field will equal `customer.phone`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_phone: string;
+      /** @description The customer's shipping information. Until the invoice is finalized, this field will equal `customer.shipping`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_shipping: components["schemas"]["stripe.Stripe.Invoice.CustomerShipping"];
+      /** @description The customer's tax exempt status. Until the invoice is finalized, this field will equal `customer.tax_exempt`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_tax_exempt: components["schemas"]["stripe.Stripe.Invoice.CustomerTaxExempt"];
+      /** @description The customer's tax IDs. Until the invoice is finalized, this field will contain the same tax IDs as `customer.tax_ids`. Once the invoice is finalized, this field will no longer be updated. */
+      customer_tax_ids?: components["schemas"]["stripe.Stripe.Invoice.CustomerTaxId"][];
+      /** @description ID of the default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings. */
+      default_payment_method: string | components["schemas"]["stripe.Stripe.PaymentMethod"];
+      /** @description ID of the default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription's default source, if any, or to the customer's default source. */
+      default_source: string | components["schemas"]["stripe.Stripe.CustomerSource"];
+      /** @description The tax rates applied to this invoice, if any. */
+      default_tax_rates: components["schemas"]["stripe.Stripe.TaxRate"][];
+      /** @description An arbitrary string attached to the object. Often useful for displaying to users. Referenced as 'memo' in the Dashboard. */
+      description: string;
+      /** @description Describes the current discount applied to this invoice, if there is one. Not populated if there are multiple discounts. */
+      discount: components["schemas"]["stripe.Stripe.Discount"];
+      /** @description The discounts applied to the invoice. Line item discounts are applied before invoice discounts. Use `expand[]=discounts` to expand each discount. */
+      discounts: (string | components["schemas"]["stripe.Stripe.Discount"] | components["schemas"]["stripe.Stripe.DeletedDiscount"])[];
+      /**
+       * Format: double
+       * @description The date on which payment for this invoice is due. This value will be `null` for invoices where `collection_method=charge_automatically`.
+       */
+      due_date: number;
+      /**
+       * Format: double
+       * @description The date when this invoice is in effect. Same as `finalized_at` unless overwritten. When defined, this value replaces the system-generated 'Date of issue' printed on the invoice PDF and receipt.
+       */
+      effective_at: number;
+      /**
+       * Format: double
+       * @description Ending customer balance after the invoice is finalized. Invoices are finalized approximately an hour after successful webhook delivery or when payment collection is attempted for the invoice. If the invoice has not been finalized yet, this will be null.
+       */
+      ending_balance: number;
+      /** @description Footer displayed on the invoice. */
+      footer: string;
+      /** @description Details of the invoice that was cloned. See the [revision documentation](https://stripe.com/docs/invoicing/invoice-revisions) for more details. */
+      from_invoice: components["schemas"]["stripe.Stripe.Invoice.FromInvoice"];
+      /** @description The URL for the hosted invoice page, which allows customers to view and pay an invoice. If the invoice has not been finalized yet, this will be null. */
+      hosted_invoice_url?: string;
+      /** @description The link to download the PDF for the invoice. If the invoice has not been finalized yet, this will be null. */
+      invoice_pdf?: string;
+      /** @description The error encountered during the previous attempt to finalize the invoice. This field is cleared when the invoice is successfully finalized. */
+      last_finalization_error: components["schemas"]["stripe.Stripe.Invoice.LastFinalizationError"];
+      /** @description The ID of the most recent non-draft revision of this invoice */
+      latest_revision: string | components["schemas"]["stripe.Stripe.Invoice"];
+      /** @description The individual line items that make up the invoice. `lines` is sorted as follows: (1) pending invoice items (including prorations) in reverse chronological order, (2) subscription items in reverse chronological order, and (3) invoice items added after invoice creation in chronological order. */
+      lines: components["schemas"]["stripe.Stripe.ApiList_stripe.Stripe.InvoiceLineItem_"];
+      /** @description Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+      livemode: boolean;
+      /** @description Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. */
+      metadata: components["schemas"]["stripe.Stripe.Metadata"];
+      /**
+       * Format: double
+       * @description The time at which payment will next be attempted. This value will be `null` for invoices where `collection_method=send_invoice`.
+       */
+      next_payment_attempt: number;
+      /** @description The account (if any) for which the funds of the invoice payment are intended. If set, the invoice will be presented with the branding and support information of the specified account. See the [Invoices with Connect](https://stripe.com/docs/billing/invoices/connect) documentation for details. */
+      on_behalf_of: string | components["schemas"]["stripe.Stripe.Account"];
+      /** @description Returns true if the invoice was manually marked paid, returns false if the invoice hasn't been paid yet or was paid on Stripe. */
+      paid_out_of_band: boolean;
+      /** @description The PaymentIntent associated with this invoice. The PaymentIntent is generated when the invoice is finalized, and can then be used to pay the invoice. Note that voiding an invoice will cancel the PaymentIntent. */
+      payment_intent: string | components["schemas"]["stripe.Stripe.PaymentIntent"];
+      payment_settings: components["schemas"]["stripe.Stripe.Invoice.PaymentSettings"];
+      /**
+       * Format: double
+       * @description End of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
+       */
+      period_end: number;
+      /**
+       * Format: double
+       * @description Start of the usage period during which invoice items were added to this invoice. This looks back one period for a subscription invoice. Use the [line item period](https://stripe.com/api/invoices/line_item#invoice_line_item_object-period) to get the service period for each price.
+       */
+      period_start: number;
+      /**
+       * Format: double
+       * @description Total amount of all post-payment credit notes issued for this invoice.
+       */
+      post_payment_credit_notes_amount: number;
+      /**
+       * Format: double
+       * @description Total amount of all pre-payment credit notes issued for this invoice.
+       */
+      pre_payment_credit_notes_amount: number;
+      /** @description The quote this invoice was generated from. */
+      quote: string | components["schemas"]["stripe.Stripe.Quote"];
+      /** @description This is the transaction number that appears on email receipts sent for this invoice. */
+      receipt_number: string;
+      /** @description The rendering-related settings that control how the invoice is displayed on customer-facing surfaces such as PDF and Hosted Invoice Page. */
+      rendering: components["schemas"]["stripe.Stripe.Invoice.Rendering"];
+      /** @description The details of the cost of shipping, including the ShippingRate applied on the invoice. */
+      shipping_cost: components["schemas"]["stripe.Stripe.Invoice.ShippingCost"];
+      /** @description Shipping details for the invoice. The Invoice PDF will use the `shipping_details` value if it is set, otherwise the PDF will render the shipping address from the customer. */
+      shipping_details: components["schemas"]["stripe.Stripe.Invoice.ShippingDetails"];
+      /**
+       * Format: double
+       * @description Starting customer balance before the invoice is finalized. If the invoice has not been finalized yet, this will be the current customer balance. For revision invoices, this also includes any customer balance that was applied to the original invoice.
+       */
+      starting_balance: number;
+      /** @description Extra information about an invoice for the customer's credit card statement. */
+      statement_descriptor: string;
+      status_transitions: components["schemas"]["stripe.Stripe.Invoice.StatusTransitions"];
+      /** @description Details about the subscription that created this invoice. */
+      subscription_details: components["schemas"]["stripe.Stripe.Invoice.SubscriptionDetails"];
+      /**
+       * Format: double
+       * @description Only set for upcoming invoices that preview prorations. The time used to calculate prorations.
+       */
+      subscription_proration_date?: number;
+      /**
+       * Format: double
+       * @description Total of all subscriptions, invoice items, and prorations on the invoice before any invoice level discount or exclusive tax is applied. Item discounts are already incorporated
+       */
+      subtotal: number;
+      /**
+       * Format: double
+       * @description The integer amount in cents (or local equivalent) representing the subtotal of the invoice before any invoice level discount or tax is applied. Item discounts are already incorporated
+       */
+      subtotal_excluding_tax: number;
+      /**
+       * Format: double
+       * @description The amount of tax on this invoice. This is the sum of all the tax amounts on this invoice.
+       */
+      tax: number;
+      /** @description ID of the test clock this invoice belongs to. */
+      test_clock: string | components["schemas"]["stripe.Stripe.TestHelpers.TestClock"];
+      threshold_reason?: components["schemas"]["stripe.Stripe.Invoice.ThresholdReason"];
+      /**
+       * Format: double
+       * @description Total after discounts and taxes.
+       */
+      total: number;
+      /** @description The aggregate amounts calculated per discount across all line items. */
+      total_discount_amounts: components["schemas"]["stripe.Stripe.Invoice.TotalDiscountAmount"][];
+      /**
+       * Format: double
+       * @description The integer amount in cents (or local equivalent) representing the total amount of the invoice including all discounts but excluding all tax.
+       */
+      total_excluding_tax: number;
+      /** @description The aggregate amounts calculated per tax rate for all line items. */
+      total_tax_amounts: components["schemas"]["stripe.Stripe.Invoice.TotalTaxAmount"][];
+      /** @description The account (if any) the payment will be attributed to for tax reporting, and where funds from the payment will be transferred to for the invoice. */
+      transfer_data: components["schemas"]["stripe.Stripe.Invoice.TransferData"];
+      /**
+       * Format: double
+       * @description Invoices are automatically paid or sent 1 hour after webhooks are delivered, or until all webhook delivery attempts have [been exhausted](https://stripe.com/docs/billing/webhooks#understand). This field tracks the time when webhooks for this invoice were successfully delivered. If the invoice had no webhooks to deliver, this will be set while the invoice is being created.
+       */
+      webhooks_delivered_at: number;
+    };
+    /** @description Construct a type with the properties of T except for those in type K. */
+    "Omit_stripe.Stripe.Invoice.id_": components["schemas"]["Pick_stripe.Stripe.Invoice.Exclude_keyofstripe.Stripe.Invoice.id__"];
+    "stripe.Stripe.UpcomingInvoice": components["schemas"]["Omit_stripe.Stripe.Invoice.id_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16451,6 +16703,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
+            upcomingInvoices: components["schemas"]["stripe.Stripe.UpcomingInvoice"][];
             discounts: components["schemas"]["Record_string.stripe.Stripe.Discount_"];
             invoices: components["schemas"]["stripe.Stripe.Invoice"][];
             subscriptions: components["schemas"]["stripe.Stripe.Subscription"][];
