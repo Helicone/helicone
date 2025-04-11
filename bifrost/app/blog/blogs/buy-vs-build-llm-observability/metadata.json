@@ -1,0 +1,11 @@
+{
+  "title": "Should You Build or Buy LLM Observability?",
+  "title1": "Build vs. Buy LLM Observability",
+  "title2": "Build vs. Buy LLM Observability",
+  "description": "Let's break down the costs, engineering tradeoffs, and hidden complexity in both approaches. Here's what we've seen teams actually do in production.",
+  "images": "/static/blog/buy-vs-build-llm-observability/buy-vs-build.webp",
+  "time": "12 minute read",
+  "author": "Lina Lam",
+  "date": "April 10, 2025", 
+  "badge": "Comparisons"
+}
