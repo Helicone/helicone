@@ -220,6 +220,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "agentic-rag-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "openai-realtime-api-with-helicone",
     },
   },
