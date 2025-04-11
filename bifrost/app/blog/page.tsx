@@ -225,6 +225,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openai-realtime-api-with-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "gemini-2.5-full-developer-guide",
     },
   },

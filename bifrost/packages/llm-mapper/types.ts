@@ -156,6 +156,7 @@ export type Message = {
   detail?: string; // Image input
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
+  deleted?: boolean; // For realtime API (conversation.item.delete)
 };
 
 export type Response = {
@@ -190,7 +191,7 @@ export type Response = {
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>; // JSON Schema type for both OpenAI parameters and Anthropic input_schema
+  parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
 }
 export interface FunctionCall {
   name: string;
@@ -312,6 +313,8 @@ export interface HeliconeRequest {
   prompt_cache_write_tokens: number | null;
   prompt_cache_read_tokens: number | null;
   completion_tokens: number | null;
+  prompt_audio_tokens: number | null;
+  completion_audio_tokens: number | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;

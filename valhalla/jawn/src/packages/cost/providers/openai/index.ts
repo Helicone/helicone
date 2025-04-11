@@ -282,7 +282,6 @@ const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
-
   {
     model: {
       operator: "equals",
@@ -561,6 +560,31 @@ const costs: ModelRow[] = [
       completion_token: 0.0000044,
     },
     showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gpt-4o-realtime",
+    },
+    cost: {
+      prompt_token: 0.000005,
+      completion_token: 0.00002,
+      prompt_audio_token: 0.00004,
+      completion_audio_token: 0.00008,
+      prompt_cache_read_token: 0.0000025,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gpt-4o-mini-realtime",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+      prompt_audio_token: 0.00001,
+      completion_audio_token: 0.00002,
+    },
   },
 ];
 
