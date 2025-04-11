@@ -1,7 +1,5 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { InMemoryCache } from "../lib/cache/staticMemCache";
-import { Database } from "../lib/db/database.types";
-import { supabaseServer } from "../lib/db/supabase";
+import { dbExecute } from "../lib/shared/db/dbExecute";
 
 export interface KafkaSettings {
   miniBatchSize: number;
@@ -63,19 +61,20 @@ const settingsCache = SettingsCache.getInstance();
 
 export class SettingsManager {
   private settingsCache: SettingsCache;
-  private client: SupabaseClient<Database>;
 
   constructor() {
     this.settingsCache = settingsCache;
-    this.client = supabaseServer.client;
   }
 
   private async loadSettings(): Promise<void> {
-    const { data: settings, error: settingsErr } = await this.client
-      .from("helicone_settings")
-      .select("*");
+    const { data: settings, error: settingsErr } = await dbExecute<{
+      created_at: string;
+      id: string;
+      name: string;
+      settings: any;
+    }>("SELECT * FROM helicone_settings", []);
 
-    if (settingsErr) {
+    if (settingsErr !== null) {
       console.error("Failed to load settings", settingsErr);
       return;
     }

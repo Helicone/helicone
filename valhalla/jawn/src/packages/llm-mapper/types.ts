@@ -2,6 +2,7 @@ import { ProviderName } from "../cost/providers/mappings";
 
 export type MapperType =
   | "openai-chat"
+  | "openai-response"
   | "anthropic-chat"
   | "gemini-chat"
   | "black-forest-labs-image"
@@ -9,7 +10,7 @@ export type MapperType =
   | "openai-image"
   | "openai-moderation"
   | "openai-embedding"
-  | "openai-instruct"
+  | "openai-instruct" // Might be close to this one, maybe...
   | "openai-realtime"
   | "vector-db"
   | "tool"
@@ -56,7 +57,7 @@ export interface LLMRequestBody {
   // Messages
   messages?: Message[] | null;
   prompt?: string | null;
-
+  instructions?: string | null;
   // Parameters
   max_tokens?: number | null; // max_completion_tokens for OpenAI
   temperature?: number | null;
@@ -95,6 +96,8 @@ export interface LLMRequestBody {
 /* -------------------------------------------------------------------------- */
 type LLMResponseBody = {
   messages?: Message[] | null;
+  responses?: Response[] | null;
+  instructions?: string | null;
   model?: string | null;
   error?: {
     heliconeMessage: any;
@@ -131,12 +134,14 @@ export type Message = {
     | "functionCall" // The request for a function call: function (openai) or tool_use (anthropic)
     | "function" // The result of a function call to give: tool (openai) or tool_result (anthropic)
     | "image"
-    | "message"
+    | "file"
+    | "message" // same as text
     | "autoInput"
     | "contentArray"
     | "audio";
   id?: string;
-  role?: string;
+  role?: string | "user" | "assistant" | "system" | "developer";
+  instruction?: string;
   name?: string;
   content?: string;
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
@@ -144,8 +149,40 @@ export type Message = {
   timestamp?: string; // For realtime API
   image_url?: string;
   audio_data?: string; // Base64 encoded audio data
+  type?: "input_image" | "input_text" | "input_file";
+  file_data?: string; // File..
+  file_id?: string;
+  filename?: string;
+  detail?: string; // Image input
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
+  deleted?: boolean; // For realtime API (conversation.item.delete)
+};
+
+export type Response = {
+  _type:
+    | "functionCall" // The request for a function call: function (openai) or tool_use (anthropic)
+    | "function" // The result of a function call to give: tool (openai) or tool_result (anthropic)
+    | "image"
+    | "text"
+    | "file"
+    | "contentArray";
+  id?: string;
+  role: "user" | "assistant" | "system" | "developer";
+  name?: string;
+  type: "input_image" | "input_text" | "input_file";
+  text?: string | undefined;
+  tool_calls?: FunctionCall[]; // only used if _type is functionCall
+  tool_call_id?: string;
+  timestamp?: string; // For realtime API
+  image_url?: string;
+  audio_data?: string; // Base64 encoded audio data
+  idx?: number; // Index of an auto prompt input message
+  file_data?: string; // File..
+  file_id?: string;
+  filename?: string;
+  detail?: string; // Image input
+  contentArray?: Response[];
 };
 
 /* -------------------------------------------------------------------------- */
@@ -154,7 +191,7 @@ export type Message = {
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>; // Used for both OpenAI parameters and Anthropic input_schema
+  parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
 }
 export interface FunctionCall {
   name: string;
@@ -276,6 +313,8 @@ export interface HeliconeRequest {
   prompt_cache_write_tokens: number | null;
   prompt_cache_read_tokens: number | null;
   completion_tokens: number | null;
+  prompt_audio_tokens: number | null;
+  completion_audio_tokens: number | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;

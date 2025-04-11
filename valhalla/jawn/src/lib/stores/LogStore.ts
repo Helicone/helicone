@@ -2,11 +2,11 @@ import pgPromise from "pg-promise";
 import { Database } from "../db/database.types";
 import { PromptRecord } from "../handlers/HandlerContext";
 import { BatchPayload } from "../handlers/LoggingHandler";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 
 import { shouldBumpVersion } from "@helicone/prompts";
 import { mapScores } from "../../managers/score/ScoreManager";
-import { sanitizeObject, safeJSONStringify } from "../../utils/sanitize";
+import { safeJSONStringify, sanitizeObject } from "../../utils/sanitize";
 
 import { HELICONE_DB as db, HELICONE_PGP as pgp } from "../shared/db/pgpClient";
 
@@ -18,7 +18,6 @@ const requestColumns = new pgp.helpers.ColumnSet(
   [
     "id",
     "auth_hash",
-    "body",
     "path",
     "provider",
     "created_at",
@@ -48,7 +47,6 @@ const onConflictRequest =
 const responseColumns = new pgp.helpers.ColumnSet(
   [
     "id",
-    "body",
     "request",
     "created_at",
     { name: "helicone_org_id", def: null },
@@ -61,6 +59,8 @@ const responseColumns = new pgp.helpers.ColumnSet(
     { name: "time_to_first_token", def: null },
     { name: "prompt_cache_write_tokens", def: null },
     { name: "prompt_cache_read_tokens", def: null },
+    { name: "prompt_audio_tokens", def: null },
+    { name: "completion_audio_tokens", def: null },
   ],
   { table: "response" }
 );
@@ -75,20 +75,6 @@ const assetColumns = new pgp.helpers.ColumnSet(
 );
 
 const onConflictAsset = " ON CONFLICT (id, request_id) DO NOTHING";
-
-const requestResponseSearchColumns = new pgp.helpers.ColumnSet(
-  [
-    "request_id",
-    { name: "request_body_vector", mod: ":raw" },
-    { name: "response_body_vector", mod: ":raw" },
-    "organization_id",
-  ],
-  { table: "request_response_search" }
-);
-
-const onConflictRequestResponseSearch = `ON CONFLICT (request_id, organization_id) DO UPDATE SET
-request_body_vector = EXCLUDED.request_body_vector,
-response_body_vector = EXCLUDED.response_body_vector`;
 
 export class LogStore {
   constructor() {}
@@ -189,32 +175,6 @@ export class LogStore {
             });
           }
         }
-
-        try {
-          const searchRecords = this.filterDuplicateSearchRecords(
-            payload.searchRecords
-          ).map((record) => ({
-            request_id: record.request_id,
-            request_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.request_body_vector
-            )})`,
-            response_body_vector: `to_tsvector('helicone_search_config', ${pgp.as.text(
-              record.response_body_vector
-            )})`,
-            organization_id: record.organization_id,
-          }));
-
-          if (searchRecords && searchRecords.length > 0) {
-            const insertSearchQuery =
-              pgp.helpers.insert(searchRecords, requestResponseSearchColumns) +
-              onConflictRequestResponseSearch;
-
-            await t.none(insertSearchQuery);
-          }
-        } catch (error: any) {
-          console.error("Error inserting search records", error);
-          throw error;
-        }
       });
 
       return ok("Successfully inserted log batch");
@@ -294,14 +254,17 @@ export class LogStore {
       new: heliconeTemplate.template,
     });
 
-    // Check if an update is necessary based on template comparison
     if (
       !isCreatedFromUi &&
       (!existingPromptVersion ||
-        (shouldBump.shouldBump &&
-          existingPromptVersion.created_at <= newPromptRecord.createdAt))
+        // ignore shouldUpdateNotBump and always bump to preserve data - Justin 04/08/2025
+        ((shouldBump.shouldBump || shouldBump.shouldUpdateNotBump) &&
+          existingPromptVersion.created_at <= newPromptRecord.createdAt)) &&
+      !(
+        "error" in heliconeTemplate.template &&
+        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
+      )
     ) {
-      // Insert new record with incremented version
       const newMajorVersion = existingPromptVersion
         ? existingPromptVersion.major_version + 1
         : 0;
@@ -325,7 +288,6 @@ export class LogStore {
 
         versionId = insertResult.id;
 
-        // Update previous production version to not be production
         if (existingPromptVersion) {
           await t.none(
             `UPDATE prompts_versions 
@@ -336,30 +298,6 @@ export class LogStore {
         }
       } catch (error) {
         console.error("Error updating and inserting prompt version", error);
-        throw error;
-      }
-    } else if (
-      shouldBump.shouldUpdateNotBump &&
-      !(
-        "error" in heliconeTemplate.template &&
-        heliconeTemplate.template.error === INVALID_TEMPLATE_ERROR
-      )
-    ) {
-      try {
-        const updateQuery = `
-        UPDATE prompts_versions
-        SET helicone_template = $1
-        WHERE id = $2
-        RETURNING id`;
-
-        const updateResult = await t.one(updateQuery, [
-          sanitizeObject(heliconeTemplate.template),
-          versionId,
-        ]);
-
-        versionId = updateResult.id;
-      } catch (error) {
-        console.error("Error updating prompt version", error);
         throw error;
       }
     }
@@ -518,42 +456,6 @@ export class LogStore {
         new Date(entry.created_at) < new Date(existingEntry.created_at)
       ) {
         entryMap.set(entry.request, entry);
-      }
-    });
-
-    return Array.from(entryMap.values());
-  }
-
-  filterDuplicateSearchRecords(
-    entries: Database["public"]["Tables"]["request_response_search"]["Insert"][]
-  ) {
-    const entryMap = new Map<
-      string,
-      Database["public"]["Tables"]["request_response_search"]["Insert"]
-    >();
-
-    entries.forEach((entry) => {
-      if (!entry.request_id) {
-        return;
-      }
-
-      const existingEntry = entryMap.get(entry.request_id);
-
-      // No existing entry, add it
-      if (!existingEntry || !existingEntry.created_at) {
-        entryMap.set(entry.request_id, entry);
-        return;
-      }
-
-      const newEntryIsMoreRecent =
-        entry.created_at &&
-        new Date(entry.created_at) < new Date(existingEntry.created_at);
-      const newEntryHasVectors =
-        (entry.request_body_vector && !existingEntry.request_body_vector) ||
-        (entry.response_body_vector && !existingEntry.response_body_vector);
-
-      if (newEntryIsMoreRecent || newEntryHasVectors) {
-        entryMap.set(entry.request_id, entry);
       }
     });
 

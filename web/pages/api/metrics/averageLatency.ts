@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getAverageLatency } from "../../../lib/api/metrics/averageLatency";
-import { Result, resultsAll } from "../../../lib/result";
+import { Result, resultsAll } from "../../../packages/common/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const { req, res, userData } = options;

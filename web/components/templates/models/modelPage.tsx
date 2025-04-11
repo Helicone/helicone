@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ModelMetric } from "../../../lib/api/models/models";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import AuthHeader from "../../shared/authHeader";
 import {
   TimeInterval,

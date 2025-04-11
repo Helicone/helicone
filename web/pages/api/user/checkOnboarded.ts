@@ -1,19 +1,18 @@
-import { getRequestCountClickhouse } from "../../../lib/api/request/request";
-
-import { getSupabaseServer } from "../../../lib/supabaseServer";
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { getRequestCountClickhouse } from "../../../lib/api/request/request";
+import { Result } from "../../../packages/common/result";
 
 async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;
   if (count > 0) {
-    const { error } = await getSupabaseServer()
-      .from("organization")
-      .update({ has_onboarded: true })
-      .eq("id", orgId);
+    const { error } = await dbExecute(
+      `UPDATE organization SET has_onboarded = true WHERE id = $1`,
+      [orgId]
+    );
     if (error) {
       console.error("Error updating org", error);
       return false;

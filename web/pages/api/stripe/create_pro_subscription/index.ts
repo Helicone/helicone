@@ -2,9 +2,8 @@
 
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { getSupabaseServer } from "../../../../lib/supabaseServer";
-import { resultMap } from "../../../../lib/result";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
+import { resultMap } from "../../../../packages/common/result";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
@@ -52,11 +51,16 @@ export default async function handler(
 
       customerId = customer.id;
 
-      // Save the Stripe customer ID in Supabase
-      await getSupabaseServer()
-        .from("organization")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", orgId);
+      const { error: updateError } = await dbExecute(
+        "UPDATE organization SET stripe_customer_id = $1 WHERE id = $2",
+        [customerId, orgId]
+      );
+
+      if (updateError !== null) {
+        console.error(updateError);
+        res.status(400).send(`Unable to update org: ${updateError}`);
+        return;
+      }
     }
     const protocol = req.headers["x-forwarded-proto"] || "http";
     const host = req.headers.host;

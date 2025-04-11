@@ -9,8 +9,8 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { supabaseServer } from "../../lib/db/supabase";
-import { err, ok } from "../../lib/shared/result";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { err, ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/gov-organization")
@@ -27,43 +27,68 @@ export class GovOrganizationController extends Controller {
       days: number;
     }
   ) {
-    const isAdmin = await supabaseServer.client
-      .from("organization_member")
-      .select("*")
-      .or("org_role.eq.admin,org_role.eq.owner")
-      .eq("organization", request.authParams.organizationId)
-      .eq("member", request.authParams.userId!)
-      .single();
+    const isAdminResult = await dbExecute<{
+      id: string;
+      organization: string;
+      member: string;
+      org_role: string;
+    }>(
+      `SELECT *
+       FROM organization_member
+       WHERE organization = $1
+       AND member = $2
+       AND (org_role = 'admin' OR org_role = 'owner')`,
+      [request.authParams.organizationId, request.authParams.userId!]
+    );
 
-    if (!isAdmin.data) {
+    if (
+      isAdminResult.error ||
+      !isAdminResult.data ||
+      isAdminResult.data.length === 0
+    ) {
       return err("User is not an admin");
     }
 
-    const res = await supabaseServer.client
-      .from("organization_member")
-      .update({
-        governance_limits: {
-          limitUSD: body.limitUSD,
-          days: body.days,
-        },
-      })
-      .eq("member", memberId)
-      .eq("organization", request.authParams.organizationId);
-    if (res.error) {
-      return err(res.error.message);
+    const { error } = await dbExecute(
+      `UPDATE organization_member
+       SET governance_limits = $1
+       WHERE member = $2
+       AND organization = $3`,
+      [
+        { limitUSD: body.limitUSD, days: body.days },
+        memberId,
+        request.authParams.organizationId,
+      ]
+    );
+
+    if (error) {
+      return err(error);
     }
 
-    return ok(res.data);
+    return ok(null);
   }
 
   @Get("/my-limits")
   public async getMyLimits(@Request() request: JawnAuthenticatedRequest) {
-    return supabaseServer.client
-      .from("organization_member")
-      .select("*")
-      .eq("member", request.authParams.userId!)
-      .eq("organization", request.authParams.organizationId)
-      .single();
+    const result = await dbExecute<{
+      id: string;
+      organization: string;
+      member: string;
+      org_role: string;
+      governance_limits: any;
+    }>(
+      `SELECT *
+       FROM organization_member
+       WHERE member = $1
+       AND organization = $2`,
+      [request.authParams.userId!, request.authParams.organizationId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err("Failed to get member limits");
+    }
+
+    return ok(result.data[0]);
   }
 
   @Get("/limits/member/{memberId}")
@@ -71,21 +96,43 @@ export class GovOrganizationController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() memberId: string
   ) {
-    return supabaseServer.client
-      .from("organization_member")
-      .select("*")
-      .eq("member", memberId)
-      .eq("organization", request.authParams.organizationId)
-      .single();
+    const result = await dbExecute<{
+      id: string;
+      organization: string;
+      member: string;
+      org_role: string;
+      governance_limits: any;
+    }>(
+      `SELECT *
+       FROM organization_member
+       WHERE member = $1
+       AND organization = $2`,
+      [memberId, request.authParams.organizationId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err("Failed to get member limits");
+    }
+
+    return ok(result.data[0]);
   }
 
   @Get("is-governance-org")
   public async isGovernanceOrg(@Request() request: JawnAuthenticatedRequest) {
-    return await supabaseServer.client
-      .from("organization")
-      .select("governance_settings")
-      .eq("id", request.authParams.organizationId)
-      .not("governance_settings", "is", null)
-      .single();
+    const result = await dbExecute<{
+      governance_settings: any;
+    }>(
+      `SELECT governance_settings
+       FROM organization
+       WHERE id = $1
+       AND governance_settings IS NOT NULL`,
+      [request.authParams.organizationId]
+    );
+
+    if (result.error || !result.data || result.data.length === 0) {
+      return err("Not a governance org");
+    }
+
+    return ok(result.data[0]);
   }
 }

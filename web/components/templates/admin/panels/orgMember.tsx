@@ -18,7 +18,7 @@ const OrgMember = (props: OrgMemberProps) => {
 
   const {
     mutate: findOrgs,
-    isLoading: isFindingOrgs,
+    isPending: isFindingOrgs,
     data: orgs,
   } = useMutation({
     mutationKey: ["searchOrgId"],
@@ -43,7 +43,7 @@ const OrgMember = (props: OrgMemberProps) => {
     refetchOnWindowFocus: false,
   });
 
-  const { mutate: addAdminToOrg, isLoading: isAddingAdminToOrg } = useMutation({
+  const { mutate: addAdminToOrg, isPending: isAddingAdminToOrg } = useMutation({
     mutationKey: ["addAdminToOrg"],
     mutationFn: async ({
       orgId,

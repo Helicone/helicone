@@ -12,12 +12,12 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { Result, err, ok } from "../../lib/shared/result";
+import { AuthParams } from "../../packages/common/auth/types";
+import { Result, err, ok } from "../../packages/common/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
+import { resultMap } from "../../packages/common/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";
 import { Database, Json } from "../../lib/db/database.types";
@@ -63,66 +63,83 @@ export class DatasetManager extends BaseManager {
   }
 
   async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
-    const dataset = await supabaseServer.client
-      .from("helicone_dataset")
-      .insert({
-        name: params.datasetName,
-        organization: this.authParams.organizationId,
-        meta: (params.meta ?? null) as Json,
-        dataset_type: params.datasetType,
-      })
-      .select("*")
-      .single();
+    try {
+      const dataset = await dbExecute<{ id: string }>(
+        `INSERT INTO helicone_dataset (name, organization, meta, dataset_type)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          params.datasetName,
+          this.authParams.organizationId,
+          params.meta ?? null,
+          params.datasetType,
+        ]
+      );
 
-    if (dataset.error) {
-      return err(dataset.error.message);
+      if (dataset.error || !dataset.data || dataset.data.length === 0) {
+        return err(dataset.error ?? "Failed to create dataset");
+      }
+
+      const datasetId = dataset.data[0].id;
+
+      const res = await dbExecute(
+        `INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
+         SELECT $1, id
+         FROM prompt_input_record
+         WHERE source_request = ANY($2)`,
+        [datasetId, params.requestIds]
+      );
+
+      if (res.error) {
+        return err(res.error);
+      }
+
+      return ok(datasetId);
+    } catch (error) {
+      console.error("Error creating dataset:", error);
+      return err(String(error));
     }
-
-    const res = await dbExecute(
-      `
-      INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
-      SELECT $1, id
-      FROM prompt_input_record
-      WHERE source_request = ANY($2)
-      `,
-      [dataset.data.id, params.requestIds]
-    );
-
-    if (res.error) {
-      return err(res.error);
-    }
-
-    return ok(dataset.data.id);
   }
 
   async addDatasetRow(
     datasetId: string,
     inputRecordId: string
   ): Promise<Result<string, string>> {
-    const existingDataset = await supabaseServer.client
-      .from("helicone_dataset")
-      .select("*")
-      .eq("organization", this.authParams.organizationId)
-      .eq("id", datasetId)
-      .single();
+    try {
+      // First verify the dataset exists and belongs to this organization
+      const existingDataset = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM helicone_dataset
+         WHERE organization = $1
+         AND id = $2
+         LIMIT 1`,
+        [this.authParams.organizationId, datasetId]
+      );
 
-    if (existingDataset.error || !existingDataset.data) {
-      return err(existingDataset.error?.message ?? "Dataset not found");
+      if (
+        existingDataset.error ||
+        !existingDataset.data ||
+        existingDataset.data.length === 0
+      ) {
+        return err("Dataset not found");
+      }
+
+      const dataset = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
+         VALUES ($1, $2)
+         RETURNING id`,
+        [datasetId, inputRecordId]
+      );
+
+      if (dataset.error || !dataset.data || dataset.data.length === 0) {
+        return err(dataset.error ?? "Failed to add dataset row");
+      }
+
+      return ok(dataset.data[0].id);
+    } catch (error) {
+      console.error("Error adding dataset row:", error);
+      return err(String(error));
     }
-    const dataset = await supabaseServer.client
-      .from("experiment_dataset_v2_row")
-      .insert({
-        dataset_id: datasetId,
-        input_record: inputRecordId,
-      })
-      .select("*")
-      .single();
-
-    if (dataset.error || !dataset.data) {
-      return err(dataset.error?.message ?? "Failed to add dataset row");
-    }
-
-    return ok(dataset.data.id);
   }
 
   async getDatasetRowInputRecord(
@@ -130,19 +147,26 @@ export class DatasetManager extends BaseManager {
   ): Promise<
     Result<Database["public"]["Tables"]["prompt_input_record"]["Row"], string>
   > {
-    const inputRecord = await supabaseServer.client
-      .from("prompt_input_record")
-      .select("*")
-      .eq("id", datasetRowId)
-      .single();
-
-    if (inputRecord.error || !inputRecord.data) {
-      return err(
-        inputRecord.error?.message ?? "Failed to get dataset row input record"
+    try {
+      const result = await dbExecute<
+        Database["public"]["Tables"]["prompt_input_record"]["Row"]
+      >(
+        `SELECT *
+         FROM prompt_input_record
+         WHERE id = $1
+         LIMIT 1`,
+        [datasetRowId]
       );
-    }
 
-    return ok(inputRecord.data);
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Failed to get dataset row input record");
+      }
+
+      return ok(result.data[0]);
+    } catch (error) {
+      console.error("Error getting dataset row input record:", error);
+      return err(String(error));
+    }
   }
 
   async addRandomDataset(params: RandomDatasetParams): Promise<
@@ -153,44 +177,54 @@ export class DatasetManager extends BaseManager {
       string
     >
   > {
-    const dataset = await supabaseServer.client
-      .from("helicone_dataset")
-      .insert({
-        name: params.datasetName,
-        organization: this.authParams.organizationId,
-      })
-      .select("*")
-      .single();
+    try {
+      // Create dataset
+      const dataset = await dbExecute<{
+        id: string;
+        name: string;
+        organization: string;
+      }>(
+        `INSERT INTO helicone_dataset (name, organization)
+         VALUES ($1, $2)
+         RETURNING id, name, organization`,
+        [params.datasetName, this.authParams.organizationId]
+      );
 
-    if (dataset.error) {
-      return err(dataset.error.message);
+      if (dataset.error || !dataset.data || dataset.data.length === 0) {
+        return err(dataset.error ?? "Failed to create dataset");
+      }
+
+      const datasetId = dataset.data[0].id;
+
+      const filterWithAuth = buildFilterPostgres({
+        filter: params.filter,
+        argsAcc: [datasetId],
+      });
+
+      const res = await dbExecute(
+        `
+        INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
+        SELECT $1, prompt_input_record.id
+        FROM prompt_input_record
+        left join request on request.id = prompt_input_record.source_request
+        left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version
+        WHERE (${filterWithAuth.filter})
+        ORDER BY random()
+        `,
+        filterWithAuth.argsAcc
+      );
+
+      if (res.error) {
+        return err(res.error);
+      }
+
+      return ok({
+        datasetId: datasetId,
+      });
+    } catch (error) {
+      console.error("Error creating random dataset:", error);
+      return err(String(error));
     }
-
-    const filterWithAuth = buildFilterPostgres({
-      filter: params.filter,
-      argsAcc: [dataset.data.id],
-    });
-
-    const res = await dbExecute(
-      `
-      INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
-      SELECT $1, prompt_input_record.id
-      FROM prompt_input_record
-      left join request on request.id = prompt_input_record.source_request
-      left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version
-      WHERE (${filterWithAuth.filter})
-      ORDER BY random()
-      `,
-      filterWithAuth.argsAcc
-    );
-
-    if (res.error) {
-      return err(res.error);
-    }
-
-    return ok({
-      datasetId: dataset.data.id,
-    });
   }
 
   async getPromptVersions(

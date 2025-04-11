@@ -2,7 +2,7 @@
 import OpenAI from "openai";
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ok, Result } from "../../lib/shared/result";
+import { ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ChatCompletionTool,

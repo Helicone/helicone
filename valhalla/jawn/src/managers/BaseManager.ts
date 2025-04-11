@@ -1,5 +1,5 @@
 import { DBQueryTimer } from "../lib/db/DBQueryTimer";
-import { AuthParams } from "../lib/db/supabase";
+import { AuthParams } from "../packages/common/auth/types";
 
 export class BaseManager {
   protected queryTimer: DBQueryTimer;

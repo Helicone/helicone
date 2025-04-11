@@ -27,7 +27,7 @@ import {
   Loader,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "@/lib/result";
+import { Result } from "@/packages/common/result";
 import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { H1, Small, Muted } from "@/components/ui/typography";
@@ -86,9 +86,9 @@ export function CodeIntegrationPage({
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Add the event listening query
-  const { data: hasEvent } = useQuery<Result<boolean, string>, Error>(
-    ["hasOnboarded"],
-    async () => {
+  const { data: hasEvent } = useQuery<Result<boolean, string>, Error>({
+    queryKey: ["hasOnboarded"],
+    queryFn: async () => {
       const response = await fetch("/api/user/checkOnboarded", {
         method: "POST",
         headers: {
@@ -102,12 +102,10 @@ export function CodeIntegrationPage({
       }
       return jsonData;
     },
-    {
-      refetchOnWindowFocus: false,
-      refetchInterval: 3000,
-      enabled: true,
-    }
-  );
+    refetchOnWindowFocus: false,
+    refetchInterval: 3000,
+    enabled: true,
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

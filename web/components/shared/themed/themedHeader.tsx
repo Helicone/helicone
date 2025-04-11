@@ -5,7 +5,7 @@ import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
 import {

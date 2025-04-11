@@ -405,7 +405,7 @@ const EvaluatorDetail = () => {
             initialValues={evaluatorFormValues}
             isCreating={false}
             onSubmit={handleSubmit}
-            isSubmitting={updateEvaluator.isLoading}
+            isSubmitting={updateEvaluator.isPending}
             onCancel={() => router.push("/evaluators")}
           />
         )}

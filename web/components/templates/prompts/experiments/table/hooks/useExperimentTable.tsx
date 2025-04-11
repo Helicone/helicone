@@ -161,9 +161,9 @@ export const useExperimentTable = (experimentTableId: string) => {
   const {
     data: promptVersionTemplateData,
     isLoading: isPromptVersionTemplateLoading,
-  } = useQuery(
-    ["promptVersionTemplate", promptSubversionId],
-    async () => {
+  } = useQuery({
+    queryKey: ["promptVersionTemplate", promptSubversionId],
+    queryFn: async () => {
       if (!orgId || !promptSubversionId) {
         return null;
       }
@@ -177,10 +177,8 @@ export const useExperimentTable = (experimentTableId: string) => {
       });
       return res.data?.data;
     },
-    {
-      enabled: !!promptSubversionId,
-    }
-  );
+    enabled: !!promptSubversionId,
+  });
 
   const addManualRow = useMutation({
     mutationFn: async ({ inputs }: { inputs: Record<string, string> }) => {

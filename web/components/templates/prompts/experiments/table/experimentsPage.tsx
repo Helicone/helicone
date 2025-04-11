@@ -217,9 +217,9 @@ const ExperimentsPage = () => {
             </Button>
             <Button
               onClick={handleDeleteExperiment}
-              disabled={deleteExperiment.isLoading}
+              disabled={deleteExperiment.isPending}
             >
-              {deleteExperiment.isLoading ? "Deleting..." : "Yes, delete"}
+              {deleteExperiment.isPending ? "Deleting..." : "Yes, delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

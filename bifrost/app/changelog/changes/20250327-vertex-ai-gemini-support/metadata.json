@@ -1,0 +1,4 @@
+{
+  "title": "Vertex AI Gemini Support",
+  "description": "Added support for Vertex AI Gemini integration with Helicone logging framework, including stream handling and logging capabilities for both Python and TypeScript SDKs."
+} 

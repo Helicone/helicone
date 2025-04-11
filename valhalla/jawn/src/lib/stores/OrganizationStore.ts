@@ -7,44 +7,68 @@ import {
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
-import { hashAuth } from "../../utils/hash";
-import { supabaseServer } from "../db/supabase";
 import { BaseTempKey } from "../experiment/tempKeys/baseTempKey";
 import { generateTempHeliconeAPIKey } from "../experiment/tempKeys/tempAPIKey";
 import { setupDemoOrganizationRequests } from "../onboarding";
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, ok, Result } from "../shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export class OrganizationStore extends BaseStore {
   async createNewOrganization(
     createOrgParams: NewOrganizationParams
   ): Promise<Result<NewOrganizationParams, string>> {
-    const { data: insert, error } = await supabaseServer.client
-      .from("organization")
-      .insert([createOrgParams])
-      .select("*")
-      .single();
+    try {
+      // Insert the organization and return the inserted record
+      const orgResult = await dbExecute<NewOrganizationParams>(
+        `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete, 
+          organization_type, limits, color, icon, stripe_customer_id, 
+          reseller_id, org_provider_key)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+         RETURNING *`,
+        [
+          createOrgParams.name,
+          createOrgParams.owner,
+          createOrgParams.tier,
+          createOrgParams.is_personal ?? false,
+          createOrgParams.has_onboarded ?? false,
+          createOrgParams.soft_delete ?? false,
+          createOrgParams.organization_type ?? "user",
+          createOrgParams.limits ?? {},
+          createOrgParams.color,
+          createOrgParams.icon,
+          createOrgParams.stripe_customer_id,
+          createOrgParams.reseller_id,
+          createOrgParams.org_provider_key,
+        ]
+      );
 
-    if (error || !insert) {
-      return err(error.message ?? "Failed to create organization");
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
+        return err(orgResult.error || "Failed to create organization");
+      }
+
+      const insert = orgResult.data[0];
+
+      // Insert the organization member
+      const memberResult = await dbExecute(
+        `INSERT INTO organization_member 
+         (created_at, member, organization, org_role)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [new Date().toISOString(), createOrgParams.owner, insert.id, "owner"]
+      );
+
+      if (memberResult.error) {
+        return err(
+          memberResult.error || "Failed to create organization member"
+        );
+      }
+
+      return ok(insert);
+    } catch (error) {
+      console.error("Failed to create organization:", error);
+      return err(String(error));
     }
-
-    const { data: memberInsert, error: memberError } =
-      await supabaseServer.client
-        .from("organization_member")
-        .insert({
-          created_at: new Date().toISOString(),
-          member: createOrgParams.owner,
-          organization: insert.id,
-          org_role: "owner",
-        })
-        .select("*");
-
-    if (memberError || !memberInsert) {
-      return err(memberError?.message ?? "Failed to create organization");
-    }
-    return ok(insert);
   }
 
   async createStarterOrg(userId: string): Promise<Result<string, string>> {
@@ -101,27 +125,53 @@ export class OrganizationStore extends BaseStore {
     updateOrgParams: UpdateOrganizationParams,
     organizationId: string
   ): Promise<Result<string, string>> {
-    const { data, error } = await supabaseServer.client
-      .from("organization")
-      .update({
-        name: updateOrgParams.name,
-        color: updateOrgParams.color,
-        icon: updateOrgParams.icon,
-        ...(updateOrgParams.variant === "reseller" && {
-          org_provider_key: updateOrgParams.org_provider_key,
-          limits: updateOrgParams.limits,
-          reseller_id: updateOrgParams.reseller_id,
-          organization_type: "customer",
-        }),
-      })
-      .eq("id", organizationId)
-      .select("id");
+    try {
+      // Prepare the SQL and parameters based on update type
+      let sql = `
+        UPDATE organization 
+        SET name = $1, 
+            color = $2, 
+            icon = $3`;
 
-    if (error || !data || data.length === 0) {
+      const params = [
+        updateOrgParams.name,
+        updateOrgParams.color || null,
+        updateOrgParams.icon || null,
+      ];
+
+      // Add reseller fields if variant is reseller
+      if (updateOrgParams.variant === "reseller") {
+        sql += `, 
+          org_provider_key = $4, 
+          limits = $5::jsonb, 
+          reseller_id = $6, 
+          organization_type = $7`;
+
+        params.push(
+          updateOrgParams.org_provider_key || null,
+          JSON.stringify(updateOrgParams.limits || {}),
+          updateOrgParams.reseller_id || null,
+          "customer"
+        );
+      }
+
+      // Add WHERE clause and RETURNING
+      sql += ` WHERE id = $${params.length + 1} RETURNING id`;
+      params.push(organizationId);
+
+      // Execute the query
+      const result = await dbExecute<{ id: string }>(sql, params);
+
+      if (result.error || !result.data || result.data.length === 0) {
+        console.error(`Failed to update organization: ${result.error}`);
+        return err(`Failed to update organization: ${result.error}`);
+      }
+
+      return ok(result.data[0].id);
+    } catch (error) {
       console.error(`Failed to update organization: ${error}`);
       return err(`Failed to update organization: ${error}`);
     }
-    return ok(data[0].id);
   }
 
   async getUserByEmail(email: string): Promise<Result<string | null, string>> {
@@ -148,18 +198,31 @@ export class OrganizationStore extends BaseStore {
     userId: string,
     organizationId: string
   ): Promise<Result<string, string>> {
-    const { error: insertError } = await supabaseServer.client
-      .from("organization_member")
-      .insert([{ organization: organizationId, member: userId! }]);
+    try {
+      const result = await dbExecute<{ member: string }>(
+        `INSERT INTO organization_member (organization, member)
+         VALUES ($1, $2)
+         ON CONFLICT (organization, member) DO NOTHING
+         RETURNING member`,
+        [organizationId, userId]
+      );
 
-    if (insertError && insertError !== null) {
-      if (insertError.code === "23505") {
-        return ok(userId!); // User already added
+      if (result.error) {
+        return err(result.error);
       }
-      return err(insertError.message);
-    }
 
-    return ok(userId!);
+      // If nothing was inserted (due to conflict), still return success
+      return ok(userId);
+    } catch (error) {
+      const errorMessage = String(error);
+      // If error is a unique constraint violation, user is already added
+      if (
+        errorMessage.includes("duplicate key value violates unique constraint")
+      ) {
+        return ok(userId); // User already added
+      }
+      return err(errorMessage);
+    }
   }
 
   async createOrganizationFilter(insertRequest: {
@@ -167,54 +230,78 @@ export class OrganizationStore extends BaseStore {
     type: "dashboard" | "requests";
     filters: OrganizationFilter[];
   }): Promise<Result<string, string>> {
-    const insert = await supabaseServer.client
-      .from("organization_layout")
-      .insert([insertRequest as any])
-      .select("*")
-      .single();
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `INSERT INTO organization_layout
+         (organization_id, type, filters)
+         VALUES ($1, $2, $3)
+         RETURNING id`,
+        [
+          insertRequest.organization_id,
+          insertRequest.type,
+          JSON.stringify(insertRequest.filters),
+        ]
+      );
 
-    if (insert.error || !insert.data) {
-      console.error(`Failed to create filter: ${insert.error}`);
-      return err(`Failed to create filter: ${insert.error}`);
+      if (result.error || !result.data || result.data.length === 0) {
+        console.error(`Failed to create filter: ${result.error}`);
+        return err(`Failed to create filter: ${result.error}`);
+      }
+
+      return ok(result.data[0].id);
+    } catch (error) {
+      console.error(`Failed to create filter: ${error}`);
+      return err(`Failed to create filter: ${error}`);
     }
-    return ok(insert.data.id);
   }
 
   async deleteOrganization(): Promise<Result<string, string>> {
-    const deleteRes = await supabaseServer.client
-      .from("organization")
-      .update({
-        soft_delete: true,
-      })
-      .eq("id", this.organizationId);
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `UPDATE organization
+         SET soft_delete = true
+         WHERE id = $1
+         RETURNING id`,
+        [this.organizationId]
+      );
 
-    if (deleteRes.error) {
-      return err("internal error" + deleteRes.error);
+      if (result.error) {
+        return err("internal error: " + result.error);
+      }
+      return ok("success");
+    } catch (error) {
+      return err("internal error: " + error);
     }
-    return ok("success");
   }
 
   async getOrganizationLayout(
     organizationId: string,
     filterType: string
   ): Promise<Result<OrganizationLayout, string>> {
-    const { data: layout, error } = await supabaseServer.client
-      .from("organization_layout")
-      .select("*")
-      .eq("organization_id", organizationId)
-      .eq("type", filterType)
-      .single();
+    try {
+      const result = await dbExecute<OrganizationLayout>(
+        `SELECT id, type, filters, organization_id
+         FROM organization_layout
+         WHERE organization_id = $1
+         AND type = $2
+         LIMIT 1`,
+        [organizationId, filterType]
+      );
 
-    if (error !== null) {
-      return err(error.message);
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Organization layout not found");
+      }
+
+      const layout = result.data[0];
+      return ok({
+        id: layout.id,
+        type: layout.type,
+        filters: layout.filters as OrganizationFilter[],
+        organization_id: layout.organization_id,
+      });
+    } catch (error) {
+      return err(String(error));
     }
-
-    return ok({
-      id: layout.id,
-      type: layout.type,
-      filters: layout.filters as OrganizationFilter[],
-      organization_id: layout.organization_id,
-    });
   }
 
   async updateOrganizationFilter(
@@ -222,18 +309,23 @@ export class OrganizationStore extends BaseStore {
     type: string,
     filters: OrganizationFilter[]
   ): Promise<Result<string, string>> {
-    const updateRes = await supabaseServer.client
-      .from("organization_layout")
-      .update({
-        filters: filters as any,
-      })
-      .eq("organization_id", organizationId)
-      .eq("type", type);
+    try {
+      const result = await dbExecute(
+        `UPDATE organization_layout
+         SET filters = $1
+         WHERE organization_id = $2
+         AND type = $3
+         RETURNING id`,
+        [JSON.stringify(filters), organizationId, type]
+      );
 
-    if (updateRes.error) {
-      return err("internal error" + updateRes.error);
+      if (result.error) {
+        return err("internal error: " + result.error);
+      }
+      return ok("success");
+    } catch (error) {
+      return err("internal error: " + error);
     }
-    return ok("success");
   }
 
   async getOrganizationMembers(
@@ -297,16 +389,23 @@ export class OrganizationStore extends BaseStore {
     if (!memberId) {
       return err("Invalid MemberId");
     }
-    const { error: deleteError } = await supabaseServer.client
-      .from("organization_member")
-      .delete()
-      .eq("member", memberId)
-      .eq("organization", organizationId);
 
-    if (deleteError !== null) {
-      return err(deleteError.message);
+    try {
+      const result = await dbExecute(
+        `DELETE FROM organization_member
+         WHERE member = $1
+         AND organization = $2`,
+        [memberId, organizationId]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(String(error));
     }
-    return ok(null);
   }
 
   async updateOrganizationMember(
@@ -315,71 +414,101 @@ export class OrganizationStore extends BaseStore {
     orgRole: string,
     memberId: string
   ): Promise<Result<null, string>> {
-    const orgAccess = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("id", organizationId)
-      .single();
+    try {
+      // Check if organization exists and user has access
+      const orgResult = await dbExecute<{ id: string; owner: string }>(
+        `SELECT id, owner
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [organizationId]
+      );
 
-    if (orgAccess.error !== null || orgAccess.data === null) {
-      return err(orgAccess.error.message);
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      const org = orgResult.data[0];
+
+      // Check if user is a member of the organization
+      const orgMemberResult = await dbExecute<{ org_role: string }>(
+        `SELECT org_role
+         FROM organization_member
+         WHERE member = $1
+         AND organization = $2
+         LIMIT 1`,
+        [userId, organizationId]
+      );
+
+      if (!orgMemberResult.data || orgMemberResult.data.length === 0) {
+        return err("User is not a member of this organization");
+      }
+
+      const orgMember = orgMemberResult.data[0];
+      const isAdmin = orgMember.org_role === "admin";
+      const isOwner = org.owner === userId;
+
+      if (!isAdmin && !isOwner) {
+        return err("Unauthorized");
+      }
+
+      // Update the organization member's role
+      const updateResult = await dbExecute(
+        `UPDATE organization_member
+         SET org_role = $1
+         WHERE member = $2
+         AND organization = $3`,
+        [orgRole, memberId, organizationId]
+      );
+
+      if (updateResult.error) {
+        return err(updateResult.error);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(String(error));
     }
-
-    const orgMember = await supabaseServer.client
-      .from("organization_member")
-      .select("*")
-      .eq("member", userId)
-      .eq("organization", organizationId)
-      .single();
-
-    if (!orgMember.data) {
-      return err("User is not a member of this organization");
-    }
-
-    const isAdmin = orgMember !== null && orgMember.data.org_role === "admin";
-    const isOwner = orgAccess.data.owner === userId;
-
-    if (!isAdmin && !isOwner) {
-      return err("Unauthorized");
-    }
-
-    const { error } = await supabaseServer.client
-      .from("organization_member")
-      .update({
-        org_role: orgRole,
-      })
-      .match({ member: memberId, organization: organizationId });
-
-    if (error) {
-      return err(error.message);
-    }
-    return ok(null);
   }
 
   async checkAccessToMutateOrg(
     orgId: string,
     userId: string
   ): Promise<boolean> {
-    const orgToCheck = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("id", orgId)
-      .single();
+    try {
+      // Check if organization exists
+      const orgResult = await dbExecute<{
+        id: string;
+        reseller_id: string | null;
+      }>(
+        `SELECT id, reseller_id
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [orgId]
+      );
 
-    if (!orgToCheck.data || orgToCheck.error !== null) {
-      return false;
-    }
-    if (await this._checkAccessToOrg(orgId as string, userId)) {
-      return true;
-    } else if (
-      orgToCheck.data.reseller_id &&
-      (await this._checkAccessToOrg(
-        orgToCheck.data.reseller_id as string,
-        userId
-      ))
-    ) {
-      return true;
-    } else {
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
+        return false;
+      }
+
+      const org = orgResult.data[0];
+
+      // Check if user has access to the organization
+      if (await this._checkAccessToOrg(orgId, userId)) {
+        return true;
+      }
+      // Check if user has access to the reseller organization
+      else if (
+        org.reseller_id &&
+        (await this._checkAccessToOrg(org.reseller_id, userId))
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking access to mutate org:", error);
       return false;
     }
   }

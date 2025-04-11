@@ -170,7 +170,7 @@ export class ApiKeyController extends Controller {
   @Delete("/{apiKeyId}")
   public async deleteAPIKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() apiKeyId: string
+    @Path() apiKeyId: number
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteAPIKey(apiKeyId);
@@ -186,7 +186,7 @@ export class ApiKeyController extends Controller {
   @Patch("/{apiKeyId}")
   public async updateAPIKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() apiKeyId: string,
+    @Path() apiKeyId: number,
     @Body() body: { api_key_name: string }
   ) {
     const keyManager = new KeyManager(request.authParams);

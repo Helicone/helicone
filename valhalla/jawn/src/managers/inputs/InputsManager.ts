@@ -1,24 +1,16 @@
 // src/users/usersService.ts
-import {
-  PromptCreateSubversionParams,
-  PromptInputRecord,
-  PromptQueryParams,
-  PromptResult,
-  PromptVersionResult,
-  PromptsQueryParams,
-  PromptsResult,
-} from "../../controllers/public/promptController";
-import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { resultMap } from "../../lib/shared/result";
-import { User } from "../../models/user";
-import { BaseManager } from "../BaseManager";
-import { S3Client } from "../../lib/shared/db/s3Client";
-import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import { randomUUID } from "crypto";
-import { supabaseServer } from "../../lib/db/supabase";
+import { PromptInputRecord } from "../../controllers/public/promptController";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { S3Client } from "../../lib/shared/db/s3Client";
+import {
+  Result,
+  err,
+  ok,
+  promiseResultMap,
+} from "../../packages/common/result";
+import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
+import { BaseManager } from "../BaseManager";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
   try {
@@ -95,35 +87,46 @@ export class InputsManager extends BaseManager {
     experimentId?: string
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
-    const existingPrompt = await supabaseServer.client
-      .from("prompts_versions")
-      .select("*")
-      .eq("id", promptVersionId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
 
-    if (existingPrompt.error || !existingPrompt.data) {
-      return err(existingPrompt.error?.message ?? "Prompt version not found");
+    try {
+      const existingPromptResult = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM prompts_versions
+         WHERE id = $1 
+         AND organization = $2
+         LIMIT 1`,
+        [promptVersionId, this.authParams.organizationId]
+      );
+
+      if (
+        existingPromptResult.error ||
+        !existingPromptResult.data ||
+        existingPromptResult.data.length === 0
+      ) {
+        return err("Prompt version not found");
+      }
+
+      const insertQuery = `
+        INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
+
+      const result = await dbExecute<PromptInputRecord>(insertQuery, [
+        inputRecordId,
+        JSON.stringify(inputs),
+        sourceRequest,
+        promptVersionId,
+        experimentId,
+      ]);
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(inputRecordId);
+    } catch (error) {
+      return err(`Failed to create input record: ${error}`);
     }
-
-    const insertQuery = `
-      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
-      VALUES ($1, $2, $3, $4, $5)
-    `;
-
-    const result = await dbExecute<PromptInputRecord>(insertQuery, [
-      inputRecordId,
-      JSON.stringify(inputs),
-      sourceRequest,
-      promptVersionId,
-      experimentId,
-    ]);
-
-    if (result.error) {
-      return err(result.error);
-    }
-
-    return ok(inputRecordId);
   }
 
   async createInputRecords(
@@ -132,53 +135,63 @@ export class InputsManager extends BaseManager {
     sourceRequest?: string,
     experimentId?: string
   ): Promise<Result<string[], string>> {
-    const existingPrompt = await supabaseServer.client
-      .from("prompts_versions")
-      .select("*")
-      .eq("id", promptVersionId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
+    try {
+      const existingPromptResult = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM prompts_versions
+         WHERE id = $1 
+         AND organization = $2
+         LIMIT 1`,
+        [promptVersionId, this.authParams.organizationId]
+      );
 
-    if (existingPrompt.error || !existingPrompt.data) {
-      return err(existingPrompt.error?.message ?? "Prompt version not found");
+      if (
+        existingPromptResult.error ||
+        !existingPromptResult.data ||
+        existingPromptResult.data.length === 0
+      ) {
+        return err("Prompt version not found");
+      }
+
+      // Generate UUIDs for each input record
+      const inputRecordIds = inputs.map(() => randomUUID());
+
+      // Create the VALUES part of the query dynamically
+      const values = inputs
+        .map(
+          (_, index) =>
+            `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${
+              index * 5 + 4
+            }, $${index * 5 + 5})`
+        )
+        .join(",");
+
+      // Flatten parameters array
+      const params = inputs.flatMap((input, index) => [
+        inputRecordIds[index],
+        JSON.stringify(input),
+        sourceRequest,
+        promptVersionId,
+        experimentId,
+      ]);
+
+      const result = await dbExecute<PromptInputRecord>(
+        `
+        INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
+        VALUES ${values}
+        RETURNING id
+        `,
+        params
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(inputRecordIds);
+    } catch (error) {
+      return err(`Failed to create input records: ${error}`);
     }
-
-    // Generate UUIDs for each input record
-    const inputRecordIds = inputs.map(() => randomUUID());
-
-    // Create the VALUES part of the query dynamically
-    const values = inputs
-      .map(
-        (_, index) =>
-          `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${
-            index * 5 + 4
-          }, $${index * 5 + 5})`
-      )
-      .join(",");
-
-    // Flatten parameters array
-    const params = inputs.flatMap((input, index) => [
-      inputRecordIds[index],
-      JSON.stringify(input),
-      sourceRequest,
-      promptVersionId,
-      experimentId,
-    ]);
-
-    const result = await dbExecute<PromptInputRecord>(
-      `
-      INSERT INTO prompt_input_record (id, inputs, source_request, prompt_version, experiment_id)
-      VALUES ${values}
-      RETURNING id
-      `,
-      params
-    );
-
-    if (result.error) {
-      return err(result.error);
-    }
-
-    return ok(inputRecordIds);
   }
 
   async updateInputRecord(

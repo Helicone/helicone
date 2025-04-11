@@ -5,7 +5,7 @@ import {
 } from "../../utils/modelMapper";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getRequestImageModelParser } from "../shared/imageParsers/parserMapper";
-import { PromiseGenericResult, err } from "../shared/result";
+import { PromiseGenericResult, err } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 

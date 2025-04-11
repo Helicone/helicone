@@ -7,7 +7,7 @@ import {
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { RabbitIcon, TurtleIcon } from "lucide-react";
-import { Database } from "@/supabase/database.types";
+import { Database } from "@/db/database.types";
 import { useCallback } from "react";
 import { signOut } from "@/components/shared/utils/utils";
 import { useRouter } from "next/navigation";

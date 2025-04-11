@@ -64,7 +64,7 @@ const CreateEvaluator = () => {
           initialValues={defaultValues}
           isCreating={true}
           onSubmit={handleSubmit}
-          isSubmitting={createEvaluator.isLoading}
+          isSubmitting={createEvaluator.isPending}
           onCancel={() => router.push("/evaluators")}
         />
       </div>

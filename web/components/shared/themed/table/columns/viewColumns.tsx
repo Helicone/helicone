@@ -26,11 +26,10 @@ interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
-  isDatasetsPage?: boolean;
 }
 
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
-  const { columns, activeColumns, setActiveColumns, isDatasetsPage } = props;
+  const { columns, activeColumns, setActiveColumns } = props;
 
   const categories = columns.reduce(
     (acc, column) => {

@@ -222,24 +222,30 @@ function useStats(
     provider: provider === "all" ? undefined : provider,
   };
 
-  const modelUsageOverTimeQuery = useQuery(["modelUsageOverTime", body], () =>
-    fetchModelUsageOverTime(body)
-  );
-  const modelPercentageQuery = useQuery(["modelPercentage", body], () =>
-    fetchModelPercentage(body)
-  );
-  const providerPercentageQuery = useQuery(["providerPercentage", body], () =>
-    fetchProviderPercentage(body)
-  );
-  const modelCostQuery = useQuery(["modelCost", body], () =>
-    fetchModelCost(body)
-  );
-  const ttftVsPromptLengthQuery = useQuery(["ttftVsPromptLength", body], () =>
-    fetchTtftVsPromptLength(body)
-  );
-  const totalCountQuery = useQuery(["totalCount", body], () =>
-    fetchTotalCount(body)
-  );
+  const modelUsageOverTimeQuery = useQuery({
+    queryKey: ["modelUsageOverTime", body],
+    queryFn: () => fetchModelUsageOverTime(body),
+  });
+  const modelPercentageQuery = useQuery({
+    queryKey: ["modelPercentage", body],
+    queryFn: () => fetchModelPercentage(body),
+  });
+  const providerPercentageQuery = useQuery({
+    queryKey: ["providerPercentage", body],
+    queryFn: () => fetchProviderPercentage(body),
+  });
+  const modelCostQuery = useQuery({
+    queryKey: ["modelCost", body],
+    queryFn: () => fetchModelCost(body),
+  });
+  const ttftVsPromptLengthQuery = useQuery({
+    queryKey: ["ttftVsPromptLength", body],
+    queryFn: () => fetchTtftVsPromptLength(body),
+  });
+  const totalCountQuery = useQuery({
+    queryKey: ["totalCount", body],
+    queryFn: () => fetchTotalCount(body),
+  });
 
   return {
     modelUsageOverTimeQuery,

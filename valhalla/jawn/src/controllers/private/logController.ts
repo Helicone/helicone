@@ -11,7 +11,7 @@ export class LogController extends Controller {
    * @param logMessage Log message to log
    */
   @Post("/request")
-  public async getRequests(
+  public async logRequests(
     @Body()
     logMessage: KafkaMessageContents,
     @Request() request: JawnAuthenticatedRequest

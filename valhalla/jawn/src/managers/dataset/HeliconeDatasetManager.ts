@@ -1,8 +1,13 @@
 import { Json } from "../../lib/db/database.types";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
+import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { Result, err, ok, promiseResultMap } from "../../lib/shared/result";
+import {
+  Result,
+  err,
+  ok,
+  promiseResultMap,
+} from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 
 export interface MutateParams {
@@ -56,6 +61,7 @@ export class HeliconeDatasetManager extends BaseManager {
       WHERE 
         hd.organization = $1
         AND hd.dataset_type = 'helicone'
+        AND hd.deleted_at IS NULL
     `;
 
     const values: any[] = [this.authParams.organizationId];
@@ -98,8 +104,10 @@ export class HeliconeDatasetManager extends BaseManager {
         hdr.dataset_id,
         hdr.created_at
       FROM helicone_dataset_row hdr
+      JOIN helicone_dataset hd ON hd.id = hdr.dataset_id
       WHERE hdr.dataset_id = $1
       AND hdr.organization_id = $2
+      AND hd.deleted_at IS NULL
       ORDER BY hdr.created_at DESC
       LIMIT ${params.limit}
       OFFSET ${params.offset}
@@ -130,8 +138,10 @@ export class HeliconeDatasetManager extends BaseManager {
     const query = `
       SELECT COUNT(*)
       FROM helicone_dataset_row
+      JOIN helicone_dataset hd ON hd.id = helicone_dataset_row.dataset_id
       WHERE dataset_id = $1
       AND organization_id = $2
+      AND hd.deleted_at IS NULL
     `;
 
     const result = await dbExecute<{ count: number }>(query, [
@@ -195,69 +205,125 @@ export class HeliconeDatasetManager extends BaseManager {
     datasetId: string,
     addRequests: string[]
   ): Promise<Result<null, string>> {
-    const { data, error } = await supabaseServer.client
-      .from("helicone_dataset_row")
-      .insert(
-        addRequests.map((request) => ({
-          organization_id: this.authParams.organizationId,
-          origin_request_id: request,
-          dataset_id: datasetId,
-        }))
-      )
-      .select("*");
+    try {
+      // Build the VALUES part of the query dynamically
+      const values = addRequests
+        .map((_, index) => `($1, $${index + 2}, $${addRequests.length + 2})`)
+        .join(",");
 
-    if (error) return err(error.message);
+      // Prepare parameters array with organization_id, request IDs, and dataset_id
+      const params = [
+        this.authParams.organizationId,
+        ...addRequests,
+        datasetId,
+      ];
 
-    const results = await Promise.all(
-      data.map(async (row) => {
-        const key = this.s3Client.getRequestResponseKey(
-          row.origin_request_id,
-          this.authParams.organizationId
-        );
-        const newKey = this.s3Client.getDatasetKey(
-          datasetId,
-          row.id,
-          this.authParams.organizationId
-        );
-        return await this.s3Client.copyObject(key, newKey);
-      })
-    );
+      const result = await dbExecute<{
+        id: string;
+        origin_request_id: string;
+      }>(
+        `INSERT INTO helicone_dataset_row (organization_id, origin_request_id, dataset_id)
+         VALUES ${values}
+         RETURNING id, origin_request_id`,
+        params
+      );
 
-    if (results.some((result) => result.error)) {
-      return err(results.find((result) => result.error)?.error!);
+      if (result.error || !result.data) {
+        return err(result.error ?? "Failed to add requests to dataset");
+      }
+
+      const results = await Promise.all(
+        result.data.map(async (row) => {
+          const key = this.s3Client.getRequestResponseKey(
+            row.origin_request_id,
+            this.authParams.organizationId
+          );
+          const newKey = this.s3Client.getDatasetKey(
+            datasetId,
+            row.id,
+            this.authParams.organizationId
+          );
+          return await this.s3Client.copyObject(key, newKey);
+        })
+      );
+
+      if (results.some((result) => result.error)) {
+        return err(results.find((result) => result.error)?.error!);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to add requests to dataset: ${error}`);
     }
-
-    return ok(null);
   }
 
   private async removeRequests(
     datasetId: string,
     removeRequests: string[]
   ): Promise<Result<null, string>> {
-    const { error } = await supabaseServer.client
-      .from("helicone_dataset_row")
-      .delete()
-      .eq("dataset_id", datasetId)
-      .eq("organization_id", this.authParams.organizationId)
-      .in("id", removeRequests);
+    try {
+      // Build the placeholders for the IN clause
+      const placeholders = removeRequests
+        .map((_, index) => `$${index + 3}`)
+        .join(",");
 
-    if (error) return err(error.message);
+      const result = await dbExecute(
+        `DELETE FROM helicone_dataset_row
+         WHERE dataset_id = $1
+         AND organization_id = $2
+         AND id IN (${placeholders})`,
+        [datasetId, this.authParams.organizationId, ...removeRequests]
+      );
 
-    const removeResults = await Promise.all(
-      removeRequests.map(async (request) => {
-        const key = this.s3Client.getDatasetKey(
-          datasetId,
-          request,
-          this.authParams.organizationId
-        );
-        return await this.s3Client.remove(key);
-      })
-    );
+      if (result.error) {
+        return err(result.error);
+      }
 
-    if (removeResults.some((result) => result.error)) {
-      return err(removeResults.find((result) => result.error)?.error!);
+      const removeResults = await Promise.all(
+        removeRequests.map(async (request) => {
+          const key = this.s3Client.getDatasetKey(
+            datasetId,
+            request,
+            this.authParams.organizationId
+          );
+          return await this.s3Client.remove(key);
+        })
+      );
+
+      if (removeResults.some((result) => result.error)) {
+        return err(removeResults.find((result) => result.error)?.error!);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to remove requests from dataset: ${error}`);
     }
+  }
 
-    return ok(null);
+  async deleteDataset(datasetId: string): Promise<Result<null, string>> {
+    try {
+      const sql = `
+        UPDATE helicone_dataset
+        SET deleted_at = now()
+        WHERE id = $1
+        AND organization = $2
+        RETURNING id
+      `;
+
+      const result = await dbExecute<{ id: string }>(sql, [
+        datasetId,
+        this.authParams.organizationId,
+      ]);
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(
+          result.error ?? "Failed to delete dataset or dataset not found"
+        );
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(`Error deleting dataset: ${error}`);
+    }
   }
 }
