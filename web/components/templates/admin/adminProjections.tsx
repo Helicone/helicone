@@ -12,9 +12,10 @@ import {
   MonthlyRevenueData,
 } from "@/lib/admin/RevenueCalculator";
 import {
-  getInvoiceLink,
-  truncateInvoiceId,
+  getStripeLink,
+  truncateID,
   formatCurrency,
+  formatMonthKey,
 } from "@/lib/uiUtils";
 import { RevenueChart } from "@/components/admin/RevenueChart";
 
@@ -226,16 +227,6 @@ const AdminProjections = () => {
     setRefreshCounter((prev) => prev + 1);
   };
 
-  // Format month key for display
-  const formatMonthKey = (monthKey: string): string => {
-    const [year, month] = monthKey.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString(undefined, {
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   return (
     <div className="flex flex-col gap-8">
       {error && (
@@ -430,7 +421,7 @@ const AdminProjections = () => {
                                         invoice.subscriptionId &&
                                         !invoice.id.includes("in_")
                                           ? `https://dashboard.stripe.com/subscriptions/${invoice.subscriptionId}`
-                                          : getInvoiceLink(invoice.id)
+                                          : getStripeLink(invoice.id)
                                       }
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -438,10 +429,10 @@ const AdminProjections = () => {
                                     >
                                       {invoice.subscriptionId &&
                                       !invoice.id.includes("in_")
-                                        ? `sub_${truncateInvoiceId(
+                                        ? `sub_${truncateID(
                                             invoice.subscriptionId
                                           )}`
-                                        : truncateInvoiceId(invoice.id)}
+                                        : truncateID(invoice.id)}
                                     </a>
                                   </td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
@@ -545,7 +536,7 @@ const AdminProjections = () => {
                                       <td className="px-3 py-2 whitespace-nowrap text-sm">
                                         {invoice.id !== "upcoming" ? (
                                           <a
-                                            href={getInvoiceLink(
+                                            href={getStripeLink(
                                               invoice.id,
                                               invoice.subscriptionId
                                             )}
@@ -555,10 +546,10 @@ const AdminProjections = () => {
                                           >
                                             {invoice.subscriptionId &&
                                             !invoice.id.includes("in_")
-                                              ? `sub_${truncateInvoiceId(
+                                              ? `sub_${truncateID(
                                                   invoice.subscriptionId
                                                 )}`
-                                              : truncateInvoiceId(invoice.id)}
+                                              : truncateID(invoice.id)}
                                           </a>
                                         ) : (
                                           "Upcoming"
