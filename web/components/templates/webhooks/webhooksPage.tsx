@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { Database } from "../../../db/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { getUSDateFromString, getUSDate } from "../../shared/utils/utils";
+import { getUSDateFromString } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
@@ -18,6 +18,7 @@ import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 // Import ShadcnUI components
+import AuthHeader from "@/components/shared/authHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,15 +30,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getJawnClient } from "@/lib/clients/jawn";
-import AuthHeader from "@/components/shared/authHeader";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
 import { getJawnClient } from "@/lib/clients/jawn";
 import { ExternalLinkIcon } from "lucide-react";
 
@@ -231,7 +229,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           isWithinIsland={true}
           title={<div className="flex items-center gap-2 ml-8">Webhooks</div>}
         />
-
 
         {!canCreate && (
           <FreeTierLimitBanner
