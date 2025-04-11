@@ -35,11 +35,18 @@ export const getSubscriptionLink = (subscriptionId: string): string => {
   return `https://dashboard.stripe.com/subscriptions/${subscriptionId}`;
 };
 
-// Create invoice link
-export const getInvoiceLink = (invoiceId: string): string => {
+export function getInvoiceLink(
+  invoiceId: string,
+  subscriptionId?: string
+): string {
+  if (
+    subscriptionId &&
+    (invoiceId.startsWith("upcoming") || !invoiceId.includes("in_"))
+  ) {
+    return `https://dashboard.stripe.com/subscriptions/${subscriptionId}`;
+  }
   return `https://dashboard.stripe.com/invoices/${invoiceId}`;
-};
-
+}
 // Format currency values
 export const formatCurrency = (
   amount: number | null | undefined,

@@ -12,8 +12,9 @@ export interface RawStripeData {
   discounts: Record<string, Stripe.Discount>;
 }
 
-interface InvoiceData {
+export interface InvoiceData {
   id: string;
+  subscriptionId?: string;
   amount: number;
   amountAfterDiscount: number;
   customerEmail: string;
@@ -82,12 +83,46 @@ export class RevenueCalculator {
   }
 
   // Get monthly revenue data for a product
-  public getProductRevenue(productId: string, months = 6): MonthlyRevenueData {
-    // Get all invoices for this product
-    const invoices = this.productToInvoices.get(productId) || [];
+  public getProductRevenue(
+    productId: string | string[],
+    months = 6
+  ): MonthlyRevenueData {
+    // Get all invoices for this product/products
+    let invoices: Stripe.Invoice[] = [];
+    let allUpcomingInvoices: Stripe.UpcomingInvoice[] = [];
 
-    const allUpcomingInvoices =
-      this.productToUpcomingInvoices.get(productId) || [];
+    if (Array.isArray(productId)) {
+      // Handle multiple product IDs
+      const uniqueInvoices = new Map<string, Stripe.Invoice>();
+      const uniqueUpcomingInvoices = new Map<string, Stripe.UpcomingInvoice>();
+
+      // Collect invoices from all product IDs, avoiding duplicates
+      productId.forEach((id) => {
+        const productInvoices = this.productToInvoices.get(id) || [];
+        const productUpcomingInvoices =
+          this.productToUpcomingInvoices.get(id) || [];
+
+        productInvoices.forEach((invoice) => {
+          uniqueInvoices.set(invoice.id, invoice);
+        });
+
+        productUpcomingInvoices.forEach((invoice) => {
+          // For upcoming invoices, use subscription ID as the key since they might not have unique IDs
+          const key =
+            typeof invoice.subscription === "string"
+              ? invoice.subscription
+              : (invoice.subscription as any)?.id || crypto.randomUUID();
+          uniqueUpcomingInvoices.set(key, invoice);
+        });
+      });
+
+      invoices = Array.from(uniqueInvoices.values());
+      allUpcomingInvoices = Array.from(uniqueUpcomingInvoices.values());
+    } else {
+      // Original code for single product ID
+      invoices = this.productToInvoices.get(productId) || [];
+      allUpcomingInvoices = this.productToUpcomingInvoices.get(productId) || [];
+    }
 
     const filteredInvoices = this.filterByMonths(invoices, months);
     const upcomingInvoices =
@@ -201,25 +236,36 @@ export class RevenueCalculator {
 
   private formatInvoices(
     invoices: Stripe.Invoice[] | Stripe.UpcomingInvoice[],
-    productId?: string
+    productId?: string | string[]
   ): InvoiceData[] {
-    return invoices.map((inv) => {
-      const isRegularInvoice = "id" in inv;
-      const { amount, amountAfterDiscount } = calculateInvoiceAmounts(
-        inv,
-        this.discounts,
-        productId
-      );
+    return invoices
+      .map((inv) => {
+        const isRegularInvoice = "id" in inv;
+        const { amount, amountAfterDiscount } = calculateInvoiceAmounts(
+          inv,
+          this.discounts,
+          typeof productId === "string" ? productId : undefined // Only pass single productId
+        );
 
-      return {
-        id: isRegularInvoice ? inv.id : crypto.randomUUID(),
-        amount,
-        amountAfterDiscount,
-        customerEmail: inv.customer_email || "unknown",
-        status: inv.status || "unknown",
-        created: new Date(inv.created * 1000),
-        rawJSON: inv,
-      };
-    });
+        if (amountAfterDiscount <= 0) return null;
+
+        // Extract subscription ID from the invoice
+        const subscriptionId =
+          typeof inv.subscription === "string"
+            ? inv.subscription
+            : (inv.subscription as any)?.id;
+
+        return {
+          id: isRegularInvoice ? inv.id : crypto.randomUUID(),
+          subscriptionId,
+          amount,
+          amountAfterDiscount,
+          customerEmail: inv.customer_email || "unknown",
+          status: inv.status || "unknown",
+          created: new Date(inv.created * 1000),
+          rawJSON: inv,
+        };
+      })
+      .filter(Boolean) as InvoiceData[];
   }
 }

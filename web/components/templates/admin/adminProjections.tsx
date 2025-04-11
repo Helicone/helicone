@@ -17,6 +17,7 @@ import {
   truncateInvoiceId,
   formatCurrency,
 } from "@/lib/uiUtils";
+import { RevenueChart } from "@/components/admin/RevenueChart";
 
 // Type for the API response
 interface SubscriptionDataResponse {
@@ -82,6 +83,27 @@ const AdminProjections = () => {
   );
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Product configuration
+  const productConfigs = [
+    {
+      productName: "All Products",
+      productIds: [
+        "prod_Rhx6vMVdGqih1E", // Team
+        "prod_QrcNwy2KPKiZJ5", // Users
+        "prod_PpPUGArb7KCAZT", // Usage
+        "prod_QrcOEoxIc76n6K", // Prompts
+        "prod_Rhx8ZQYhQOuunD", // Experiments
+        "prod_Rhx7VbaUg1d1zA", // Evals
+      ],
+    },
+    { productName: "Team", productIds: ["prod_Rhx6vMVdGqih1E"] },
+    { productName: "Users", productIds: ["prod_QrcNwy2KPKiZJ5"] },
+    { productName: "Usage", productIds: ["prod_PpPUGArb7KCAZT"] },
+    { productName: "Prompts", productIds: ["prod_QrcOEoxIc76n6K"] },
+    { productName: "Experiments", productIds: ["prod_Rhx8ZQYhQOuunD"] },
+    { productName: "Evals", productIds: ["prod_Rhx7VbaUg1d1zA"] },
+  ];
 
   // Toggle expanded state for a section
   const toggleSection = (sectionKey: string) => {
@@ -160,6 +182,46 @@ const AdminProjections = () => {
     return new RevenueCalculator(rawData);
   }, [rawData]);
 
+  // Compute monthly revenue data for each product once
+  const productRevenueData = useMemo(() => {
+    if (!revenueCalculator) return {};
+
+    return productConfigs.reduce((acc, config) => {
+      const productId =
+        config.productName === "All Products"
+          ? config.productIds
+          : config.productIds[0] || "";
+
+      acc[config.productName] = revenueCalculator.getProductRevenue(
+        productId,
+        6
+      );
+      return acc;
+    }, {} as Record<string, MonthlyRevenueData>);
+  }, [revenueCalculator, productConfigs]);
+
+  // Prepare chart data from the memoized revenue data
+  const productChartData = useMemo(() => {
+    return productConfigs.map((config) => {
+      const monthlyData = productRevenueData[config.productName] || {};
+
+      // Collect all invoices across all months for the chart
+      const allBilledInvoices = Object.values(monthlyData).flatMap(
+        (data) => data.billedInvoices || []
+      );
+
+      const allUpcomingInvoices = Object.values(monthlyData).flatMap(
+        (data) => data.upcomingInvoices || []
+      );
+
+      return {
+        productName: config.productName,
+        billedInvoices: allBilledInvoices,
+        upcomingInvoices: allUpcomingInvoices,
+      };
+    });
+  }, [productRevenueData, productConfigs]);
+
   // Refresh function
   const handleRefresh = () => {
     setRefreshCounter((prev) => prev + 1);
@@ -174,26 +236,6 @@ const AdminProjections = () => {
       year: "numeric",
     });
   };
-
-  const productConfigs = [
-    {
-      productName: "All Products",
-      productIds: [
-        "prod_Rhx6vMVdGqih1E", // Team
-        "prod_QrcNwy2KPKiZJ5", // Users
-        "prod_PpPUGArb7KCAZT", // Usage
-        "prod_QrcOEoxIc76n6K", // Prompts
-        "prod_Rhx8ZQYhQOuunD", // Experiments
-        "prod_Rhx7VbaUg1d1zA", // Evals
-      ],
-    },
-    { productName: "Team", productIds: ["prod_Rhx6vMVdGqih1E"] },
-    { productName: "Users", productIds: ["prod_QrcNwy2KPKiZJ5"] },
-    { productName: "Usage", productIds: ["prod_PpPUGArb7KCAZT"] },
-    { productName: "Prompts", productIds: ["prod_QrcOEoxIc76n6K"] },
-    { productName: "Experiments", productIds: ["prod_Rhx8ZQYhQOuunD"] },
-    { productName: "Evals", productIds: ["prod_Rhx7VbaUg1d1zA"] },
-  ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -232,14 +274,30 @@ const AdminProjections = () => {
         </button>
       </div>
 
-      {/* Product revenue cards */}
+      {/* Revenue Charts Grid */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Revenue Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {productChartData.map(
+            ({ productName, billedInvoices, upcomingInvoices }) => (
+              <RevenueChart
+                key={`chart-${productName}`}
+                billedInvoices={billedInvoices}
+                upcomingInvoices={upcomingInvoices}
+                title={productName}
+                months={6}
+              />
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Product Details */}
       <div className="grid grid-cols-1 gap-8">
         {productConfigs.map((config) => {
-          // Get monthly revenue data
-          const monthlyRevenueData = revenueCalculator.getProductRevenue(
-            config.productIds[0] || "",
-            6
-          );
+          // Get monthly revenue data from memoized results
+          const monthlyRevenueData =
+            productRevenueData[config.productName] || {};
 
           // Get available months
           const availableMonths = Object.keys(monthlyRevenueData)
@@ -269,7 +327,7 @@ const AdminProjections = () => {
           return (
             <div key={config.productName} className="border rounded-lg p-4">
               <h2 className="text-xl font-semibold mb-4">
-                {config.productName}
+                {config.productName} Details
               </h2>
 
               {/* Month selector */}
@@ -369,12 +427,22 @@ const AdminProjections = () => {
                                 <tr key={invoice.id}>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
                                     <a
-                                      href={getInvoiceLink(invoice.id)}
+                                      href={
+                                        invoice.subscriptionId &&
+                                        !invoice.id.includes("in_")
+                                          ? `https://dashboard.stripe.com/subscriptions/${invoice.subscriptionId}`
+                                          : getInvoiceLink(invoice.id)
+                                      }
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-blue-600 hover:text-blue-800 hover:underline"
                                     >
-                                      {truncateInvoiceId(invoice.id)}
+                                      {invoice.subscriptionId &&
+                                      !invoice.id.includes("in_")
+                                        ? `sub_${truncateInvoiceId(
+                                            invoice.subscriptionId
+                                          )}`
+                                        : truncateInvoiceId(invoice.id)}
                                     </a>
                                   </td>
                                   <td className="px-3 py-2 whitespace-nowrap text-sm">
@@ -478,12 +546,20 @@ const AdminProjections = () => {
                                       <td className="px-3 py-2 whitespace-nowrap text-sm">
                                         {invoice.id !== "upcoming" ? (
                                           <a
-                                            href={getInvoiceLink(invoice.id)}
+                                            href={getInvoiceLink(
+                                              invoice.id,
+                                              invoice.subscriptionId
+                                            )}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-600 hover:text-blue-800 hover:underline"
                                           >
-                                            {truncateInvoiceId(invoice.id)}
+                                            {invoice.subscriptionId &&
+                                            !invoice.id.includes("in_")
+                                              ? `sub_${truncateInvoiceId(
+                                                  invoice.subscriptionId
+                                                )}`
+                                              : truncateInvoiceId(invoice.id)}
                                           </a>
                                         ) : (
                                           "Upcoming"
@@ -550,113 +626,6 @@ const AdminProjections = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* Debug section for raw upcoming invoices */}
-      <div className="mt-10 border-t pt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
-            Debug: Raw Upcoming Invoices ({rawData.upcomingInvoices.length})
-          </h2>
-          <div className="text-sm text-gray-500">
-            {dataFetched ? "Using API data" : "Using mock data"}
-          </div>
-        </div>
-
-        {rawData.upcomingInvoices.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Line Items
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {rawData.upcomingInvoices.map((invoice, index) => {
-                  // Extract products in this invoice
-                  const products =
-                    invoice.lines?.data
-                      ?.map((line) => {
-                        const productId =
-                          typeof line.price?.product === "string"
-                            ? line.price.product
-                            : (line.price?.product as any)?.id;
-                        return productId;
-                      })
-                      .filter(Boolean) || [];
-
-                  return (
-                    <React.Fragment key={index}>
-                      <tr>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          {(invoice as any).id || "upcoming_" + index}
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          {invoice.customer_email ||
-                            (typeof invoice.customer === "string"
-                              ? invoice.customer
-                              : "Unknown Customer")}
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          {formatCurrency(invoice.amount_due)}
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          {invoice.created
-                            ? new Date(
-                                invoice.created * 1000
-                              ).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="max-w-md">
-                            <div className="font-medium">
-                              Products: {products.length}
-                            </div>
-                            {products.map((p, i) => (
-                              <div key={i} className="text-xs text-gray-500">
-                                {p}
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <button
-                            onClick={() => viewRawInvoice(invoice)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            View Raw
-                          </button>
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-yellow-700">
-            No upcoming invoices found in raw data. This could indicate an issue
-            with the API response.
-          </div>
-        )}
       </div>
 
       {/* Invoice Modal */}
