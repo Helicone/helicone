@@ -613,7 +613,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "langsmith",
+      folderName: "langsmith-vs-helicone",
     },
   },
   {
