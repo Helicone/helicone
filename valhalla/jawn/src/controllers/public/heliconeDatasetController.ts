@@ -187,4 +187,21 @@ export class HeliconeDatasetController extends Controller {
     this.setStatus(200);
     return ok(null);
   }
+
+  @Post("/{datasetId}/delete")
+  public async deleteHeliconeDataset(
+    @Path()
+    datasetId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const datasetManager = new DatasetManager(request.authParams);
+    const result = await datasetManager.helicone.deleteDataset(datasetId);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    } else {
+      this.setStatus(200);
+      return ok(null);
+    }
+  }
 }

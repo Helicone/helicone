@@ -510,7 +510,7 @@ export class PromptManager extends BaseManager {
     );
 
     if (result.error || !result.data || result.data.length === 0) {
-      return err("Failed to get compiled prompt versions");
+      return err(result.error || "Failed to get compiled prompt versions");
     }
 
     const lastVersion = result.data[result.data.length - 1];
@@ -575,7 +575,7 @@ export class PromptManager extends BaseManager {
     const lastVersion = result.data[result.data.length - 1];
     const filledTemplate = autoFillInputs({
       inputs: inputs,
-      autoInputs: lastVersion.auto_prompt_inputs,
+      autoInputs: lastVersion.auto_prompt_inputs ?? [],
       template: lastVersion.helicone_template,
     });
 
