@@ -1,4 +1,10 @@
-CREATE OR REPLACE FUNCTION public.track_organization_onboarding() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Create the tracking function only if HTTP extension exists
+DO $$ BEGIN IF EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'http'
+) THEN -- Create tracking function since HTTP extension is available
+CREATE OR REPLACE FUNCTION public.track_organization_onboarding() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $function$
 DECLARE posthog_key TEXT;
 tracking_enabled TEXT;
 org_owner_email TEXT;
@@ -65,7 +71,12 @@ END IF;
 END IF;
 RETURN NEW;
 END;
-$$;
+$function$;
+-- Create the trigger only if HTTP extension exists
 CREATE TRIGGER track_organization_onboarding_trigger
 AFTER
 UPDATE ON public.organization FOR EACH ROW EXECUTE FUNCTION public.track_organization_onboarding();
+RAISE NOTICE 'Organization onboarding tracking enabled with HTTP extension';
+ELSE RAISE NOTICE 'HTTP extension not available. Organization onboarding tracking disabled.';
+END IF;
+END $$;
